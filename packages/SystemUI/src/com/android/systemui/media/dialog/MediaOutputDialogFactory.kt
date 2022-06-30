@@ -17,14 +17,18 @@
 package com.android.systemui.media.dialog
 
 import android.content.Context
+import android.media.AudioManager
 import android.media.session.MediaSessionManager
+import android.os.PowerExemptionManager
 import android.view.View
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.media.nearby.NearbyMediaDevicesManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
-import com.android.systemui.statusbar.phone.ShadeController
+import java.util.Optional
 import javax.inject.Inject
 
 /**
@@ -34,11 +38,14 @@ class MediaOutputDialogFactory @Inject constructor(
     private val context: Context,
     private val mediaSessionManager: MediaSessionManager,
     private val lbm: LocalBluetoothManager?,
-    private val shadeController: ShadeController,
     private val starter: ActivityStarter,
+    private val broadcastSender: BroadcastSender,
     private val notifCollection: CommonNotifCollection,
     private val uiEventLogger: UiEventLogger,
-    private val dialogLaunchAnimator: DialogLaunchAnimator
+    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val nearbyMediaDevicesManagerOptional: Optional<NearbyMediaDevicesManager>,
+    private val audioManager: AudioManager,
+    private val powerExemptionManager: PowerExemptionManager
 ) {
     companion object {
         var mediaOutputDialog: MediaOutputDialog? = null
@@ -49,10 +56,13 @@ class MediaOutputDialogFactory @Inject constructor(
         // Dismiss the previous dialog, if any.
         mediaOutputDialog?.dismiss()
 
-        val controller = MediaOutputController(context, packageName, aboveStatusBar,
-            mediaSessionManager, lbm, shadeController, starter, notifCollection,
-            uiEventLogger, dialogLaunchAnimator)
-        val dialog = MediaOutputDialog(context, aboveStatusBar, controller, uiEventLogger)
+        val controller = MediaOutputController(
+            context, packageName,
+            mediaSessionManager, lbm, starter, notifCollection,
+            dialogLaunchAnimator, nearbyMediaDevicesManagerOptional, audioManager,
+            powerExemptionManager)
+        val dialog =
+            MediaOutputDialog(context, aboveStatusBar, broadcastSender, controller, uiEventLogger)
         mediaOutputDialog = dialog
 
         // Show the dialog.

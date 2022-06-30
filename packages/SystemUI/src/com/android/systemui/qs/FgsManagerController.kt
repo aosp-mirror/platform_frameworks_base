@@ -18,12 +18,17 @@ package com.android.systemui.qs
 
 import android.app.IActivityManager
 import android.app.IForegroundServiceObserver
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.pm.UserInfo
 import android.graphics.drawable.Drawable
 import android.os.IBinder
 import android.os.PowerExemptionManager
 import android.os.RemoteException
+import android.os.UserHandle
 import android.provider.DeviceConfig.NAMESPACE_SYSTEMUI
 import android.text.format.DateUtils
 import android.util.ArrayMap
@@ -39,18 +44,21 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_FOOTER_DOT
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.shared.system.SysUiStatsLog
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.indentIfPossible
 import com.android.systemui.util.time.SystemClock
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.Objects
 import java.util.concurrent.Executor
@@ -65,24 +73,37 @@ class FgsManagerController @Inject constructor(
     private val systemClock: SystemClock,
     private val activityManager: IActivityManager,
     private val packageManager: PackageManager,
+    private val userTracker: UserTracker,
     private val deviceConfigProxy: DeviceConfigProxy,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val broadcastDispatcher: BroadcastDispatcher,
     private val dumpManager: DumpManager
 ) : IForegroundServiceObserver.Stub(), Dumpable {
 
     companion object {
         private val LOG_TAG = FgsManagerController::class.java.simpleName
+        private const val DEFAULT_TASK_MANAGER_ENABLED = true
+        private const val DEFAULT_TASK_MANAGER_SHOW_FOOTER_DOT = false
     }
 
     var changesSinceDialog = false
         private set
 
-    private var isAvailable = false
+    var isAvailable = false
+        private set
+    var showFooterDot = false
+        private set
 
     private val lock = Any()
 
     @GuardedBy("lock")
     var initialized = false
+
+    @GuardedBy("lock")
+    private var lastNumberOfVisiblePackages = 0
+
+    @GuardedBy("lock")
+    private var currentProfileIds = mutableSetOf<Int>()
 
     @GuardedBy("lock")
     private val runningServiceTokens = mutableMapOf<UserPackage, StartTimeAndTokens>()
@@ -95,6 +116,19 @@ class FgsManagerController @Inject constructor(
 
     @GuardedBy("lock")
     private var runningApps: ArrayMap<UserPackage, RunningApp> = ArrayMap()
+
+    private val userTrackerCallback = object : UserTracker.Callback {
+        override fun onUserChanged(newUser: Int, userContext: Context) {}
+
+        override fun onProfilesChanged(profiles: List<UserInfo>) {
+            synchronized(lock) {
+                currentProfileIds.clear()
+                currentProfileIds.addAll(profiles.map { it.id })
+                lastNumberOfVisiblePackages = 0
+                updateNumberOfVisibleRunningPackagesLocked()
+            }
+        }
+    }
 
     interface OnNumberOfPackagesChangedListener {
         fun onNumberOfPackagesChanged(numPackages: Int)
@@ -115,15 +149,35 @@ class FgsManagerController @Inject constructor(
                 e.rethrowFromSystemServer()
             }
 
+            userTracker.addCallback(userTrackerCallback, backgroundExecutor)
+
+            currentProfileIds.addAll(userTracker.userProfiles.map { it.id })
+
             deviceConfigProxy.addOnPropertiesChangedListener(NAMESPACE_SYSTEMUI,
                     backgroundExecutor) {
                 isAvailable = it.getBoolean(TASK_MANAGER_ENABLED, isAvailable)
+                showFooterDot =
+                        it.getBoolean(TASK_MANAGER_SHOW_FOOTER_DOT, showFooterDot)
             }
 
-            isAvailable = deviceConfigProxy
-                    .getBoolean(NAMESPACE_SYSTEMUI, TASK_MANAGER_ENABLED, true)
+            isAvailable = deviceConfigProxy.getBoolean(NAMESPACE_SYSTEMUI,
+                    TASK_MANAGER_ENABLED, DEFAULT_TASK_MANAGER_ENABLED)
+            showFooterDot = deviceConfigProxy.getBoolean(NAMESPACE_SYSTEMUI,
+                    TASK_MANAGER_SHOW_FOOTER_DOT, DEFAULT_TASK_MANAGER_SHOW_FOOTER_DOT)
 
             dumpManager.registerDumpable(this)
+
+            broadcastDispatcher.registerReceiver(
+                    object : BroadcastReceiver() {
+                        override fun onReceive(context: Context, intent: Intent) {
+                            if (intent.action == Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER) {
+                                showDialog(null)
+                            }
+                        }
+                    },
+                    IntentFilter(Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER),
+                    executor = mainExecutor,
+                    flags = Context.RECEIVER_NOT_EXPORTED)
 
             initialized = true
         }
@@ -136,10 +190,9 @@ class FgsManagerController @Inject constructor(
         isForeground: Boolean
     ) {
         synchronized(lock) {
-            val numPackagesBefore = getNumRunningPackagesLocked()
             val userPackageKey = UserPackage(userId, packageName)
             if (isForeground) {
-                runningServiceTokens.getOrPut(userPackageKey, { StartTimeAndTokens(systemClock) })
+                runningServiceTokens.getOrPut(userPackageKey) { StartTimeAndTokens(systemClock) }
                         .addToken(token)
             } else {
                 if (runningServiceTokens[userPackageKey]?.also {
@@ -148,14 +201,7 @@ class FgsManagerController @Inject constructor(
                 }
             }
 
-            val numPackagesAfter = getNumRunningPackagesLocked()
-
-            if (numPackagesAfter != numPackagesBefore) {
-                changesSinceDialog = true
-                onNumberOfPackagesChangedListeners.forEach {
-                    backgroundExecutor.execute { it.onNumberOfPackagesChanged(numPackagesAfter) }
-                }
-            }
+            updateNumberOfVisibleRunningPackagesLocked()
 
             updateAppItemsLocked()
         }
@@ -192,18 +238,30 @@ class FgsManagerController @Inject constructor(
         }
     }
 
-    fun isAvailable(): Boolean {
-        return isAvailable
-    }
-
     fun getNumRunningPackages(): Int {
         synchronized(lock) {
-            return getNumRunningPackagesLocked()
+            return getNumVisiblePackagesLocked()
         }
     }
 
-    private fun getNumRunningPackagesLocked() =
-            runningServiceTokens.keys.count { it.uiControl != UIControl.HIDE_ENTRY }
+    private fun getNumVisiblePackagesLocked(): Int {
+        return runningServiceTokens.keys.count {
+            it.uiControl != UIControl.HIDE_ENTRY && currentProfileIds.contains(it.userId)
+        }
+    }
+
+    private fun updateNumberOfVisibleRunningPackagesLocked() {
+        val num = getNumVisiblePackagesLocked()
+        if (num != lastNumberOfVisiblePackages) {
+            lastNumberOfVisiblePackages = num
+            changesSinceDialog = true
+            onNumberOfPackagesChangedListeners.forEach {
+                backgroundExecutor.execute {
+                    it.onNumberOfPackagesChanged(num)
+                }
+            }
+        }
+    }
 
     fun shouldUpdateFooterVisibility() = dialog == null
 
@@ -211,8 +269,13 @@ class FgsManagerController @Inject constructor(
         synchronized(lock) {
             if (dialog == null) {
 
+                runningServiceTokens.keys.forEach {
+                    it.updateUiControl()
+                }
+
                 val dialog = SystemUIDialog(context)
                 dialog.setTitle(R.string.fgs_manager_dialog_title)
+                dialog.setMessage(R.string.fgs_manager_dialog_message)
 
                 val dialogContext = dialog.context
 
@@ -220,7 +283,9 @@ class FgsManagerController @Inject constructor(
                 recyclerView.layoutManager = LinearLayoutManager(dialogContext)
                 recyclerView.adapter = appListAdapter
 
-                dialog.setView(recyclerView)
+                val topSpacing = dialogContext.resources
+                        .getDimensionPixelSize(R.dimen.fgs_manager_list_top_spacing)
+                dialog.setView(recyclerView, 0, topSpacing, 0, 0)
 
                 this.dialog = dialog
 
@@ -257,7 +322,8 @@ class FgsManagerController @Inject constructor(
         }
 
         val addedPackages = runningServiceTokens.keys.filter {
-            it.uiControl != UIControl.HIDE_ENTRY && runningApps[it]?.stopped != true
+            currentProfileIds.contains(it.userId) &&
+                    it.uiControl != UIControl.HIDE_ENTRY && runningApps[it]?.stopped != true
         }
         val removedPackages = runningApps.keys.filter { !runningServiceTokens.containsKey(it) }
 
@@ -265,7 +331,10 @@ class FgsManagerController @Inject constructor(
             val ai = packageManager.getApplicationInfoAsUser(it.packageName, 0, it.userId)
             runningApps[it] = RunningApp(it.userId, it.packageName,
                     runningServiceTokens[it]!!.startTime, it.uiControl,
-                    ai.loadLabel(packageManager), ai.loadIcon(packageManager))
+                    packageManager.getApplicationLabel(ai),
+                    packageManager.getUserBadgedIcon(
+                            packageManager.getApplicationIcon(ai), UserHandle.of(it.userId)))
+            logEvent(stopped = false, it.packageName, it.userId, runningApps[it]!!.timeStarted)
         }
 
         removedPackages.forEach { pkg ->
@@ -284,8 +353,23 @@ class FgsManagerController @Inject constructor(
         }
     }
 
-    private fun stopPackage(userId: Int, packageName: String) {
+    private fun stopPackage(userId: Int, packageName: String, timeStarted: Long) {
+        logEvent(stopped = true, packageName, userId, timeStarted)
         activityManager.stopAppForUser(packageName, userId)
+    }
+
+    private fun logEvent(stopped: Boolean, packageName: String, userId: Int, timeStarted: Long) {
+        val timeLogged = systemClock.elapsedRealtime()
+        val event = if (stopped) {
+            SysUiStatsLog.TASK_MANAGER_EVENT_REPORTED__EVENT__STOPPED
+        } else {
+            SysUiStatsLog.TASK_MANAGER_EVENT_REPORTED__EVENT__VIEWED
+        }
+        backgroundExecutor.execute {
+            val uid = packageManager.getPackageUidAsUser(packageName, userId)
+            SysUiStatsLog.write(SysUiStatsLog.TASK_MANAGER_EVENT_REPORTED, uid, event,
+                    timeLogged - timeStarted)
+        }
     }
 
     private inner class AppListAdapter : RecyclerView.Adapter<AppItemViewHolder>() {
@@ -312,7 +396,7 @@ class FgsManagerController @Inject constructor(
                         DateUtils.LENGTH_MEDIUM)
                 stopButton.setOnClickListener {
                     stopButton.setText(R.string.fgs_manager_app_item_stop_button_stopped_label)
-                    stopPackage(runningApp.userId, runningApp.packageName)
+                    stopPackage(runningApp.userId, runningApp.packageName, runningApp.timeStarted)
                 }
                 if (runningApp.uiControl == UIControl.HIDE_BUTTON) {
                     stopButton.visibility = View.INVISIBLE
@@ -363,21 +447,39 @@ class FgsManagerController @Inject constructor(
         val userId: Int,
         val packageName: String
     ) {
-        val uiControl: UIControl by lazy {
-            val uid = packageManager.getPackageUidAsUser(packageName, userId)
+        val uid by lazy { packageManager.getPackageUidAsUser(packageName, userId) }
+        var backgroundRestrictionExemptionReason = PowerExemptionManager.REASON_DENIED
 
-            when (activityManager.getBackgroundRestrictionExemptionReason(uid)) {
+        private var uiControlInitialized = false
+        var uiControl: UIControl = UIControl.NORMAL
+            get() {
+                if (!uiControlInitialized) {
+                    updateUiControl()
+                }
+                return field
+            }
+            private set
+
+        fun updateUiControl() {
+            backgroundRestrictionExemptionReason =
+                    activityManager.getBackgroundRestrictionExemptionReason(uid)
+            uiControl = when (backgroundRestrictionExemptionReason) {
                 PowerExemptionManager.REASON_SYSTEM_UID,
                 PowerExemptionManager.REASON_DEVICE_DEMO_MODE -> UIControl.HIDE_ENTRY
 
+                PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED,
                 PowerExemptionManager.REASON_DEVICE_OWNER,
+                PowerExemptionManager.REASON_DISALLOW_APPS_CONTROL,
+                PowerExemptionManager.REASON_DPO_PROTECTED_APP,
                 PowerExemptionManager.REASON_PROFILE_OWNER,
+                PowerExemptionManager.REASON_ACTIVE_DEVICE_ADMIN,
                 PowerExemptionManager.REASON_PROC_STATE_PERSISTENT,
                 PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI,
                 PowerExemptionManager.REASON_ROLE_DIALER,
                 PowerExemptionManager.REASON_SYSTEM_MODULE -> UIControl.HIDE_BUTTON
                 else -> UIControl.NORMAL
             }
+            uiControlInitialized = true
         }
 
         override fun equals(other: Any?): Boolean {
@@ -394,7 +496,7 @@ class FgsManagerController @Inject constructor(
             pw.indentIfPossible {
                 pw.println("userId=$userId")
                 pw.println("packageName=$packageName")
-                pw.println("uiControl=$uiControl")
+                pw.println("uiControl=$uiControl (reason=$backgroundRestrictionExemptionReason)")
             }
             pw.println("]")
         }
@@ -471,7 +573,7 @@ class FgsManagerController @Inject constructor(
                 pw.println("userId=$userId")
                 pw.println("packageName=$packageName")
                 pw.println("timeStarted=$timeStarted (time since start =" +
-                        " ${systemClock.elapsedRealtime() - timeStarted}ms)\"")
+                        " ${systemClock.elapsedRealtime() - timeStarted}ms)")
                 pw.println("uiControl=$uiControl")
                 pw.println("appLabel=$appLabel")
                 pw.println("icon=$icon")
@@ -485,9 +587,10 @@ class FgsManagerController @Inject constructor(
         NORMAL, HIDE_BUTTON, HIDE_ENTRY
     }
 
-    override fun dump(fd: FileDescriptor, printwriter: PrintWriter, args: Array<out String>) {
+    override fun dump(printwriter: PrintWriter, args: Array<out String>) {
         val pw = IndentingPrintWriter(printwriter)
         synchronized(lock) {
+            pw.println("current user profiles = $currentProfileIds")
             pw.println("changesSinceDialog=$changesSinceDialog")
             pw.println("Running service tokens: [")
             pw.indentIfPossible {
@@ -506,8 +609,10 @@ class FgsManagerController @Inject constructor(
             pw.indentIfPossible {
                 runningApps.forEach { (userPackage, runningApp) ->
                     pw.println("{")
-                    userPackage.dump(pw)
-                    runningApp.dump(pw, systemClock)
+                    pw.indentIfPossible {
+                        userPackage.dump(pw)
+                        runningApp.dump(pw, systemClock)
+                    }
                     pw.println("}")
                 }
             }

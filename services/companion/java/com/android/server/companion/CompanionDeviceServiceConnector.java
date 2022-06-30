@@ -16,7 +16,8 @@
 
 package com.android.server.companion;
 
-import static android.content.Context.BIND_IMPORTANT;
+import static android.content.Context.BIND_ALMOST_PERCEPTIBLE;
+import static android.content.Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE;
 import static android.os.Process.THREAD_PRIORITY_DEFAULT;
 
 import android.annotation.NonNull;
@@ -44,7 +45,6 @@ import com.android.server.ServiceThread;
 class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDeviceService> {
     private static final String TAG = "CompanionDevice_ServiceConnector";
     private static final boolean DEBUG = false;
-    private static final int BINDING_FLAGS = BIND_IMPORTANT;
 
     /** Listener for changes to the state of the {@link CompanionDeviceServiceConnector}  */
     interface Listener {
@@ -53,11 +53,36 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
 
     private final @UserIdInt int mUserId;
     private final @NonNull ComponentName mComponentName;
+    // IMPORTANT: this can (and will!) be null (at the moment, CompanionApplicationController only
+    // installs a listener to the primary ServiceConnector), hence we should always null-check the
+    // reference before calling on it.
     private @Nullable Listener mListener;
 
-    CompanionDeviceServiceConnector(@NonNull Context context, @UserIdInt int userId,
-            @NonNull ComponentName componentName) {
-        super(context, buildIntent(componentName), BINDING_FLAGS, userId, null);
+    /**
+     * Create a CompanionDeviceServiceConnector instance.
+     *
+     * For self-managed apps, the binding flag will be BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE
+     * (oom_score_adj = VISIBLE_APP_ADJ = 100).
+     *
+     * For non self-managed apps, the binding flag will be BIND_ALMOST_PERCEPTIBLE
+     * (oom_score_adj = PERCEPTIBLE_MEDIUM_APP = 225). The target service will be treated
+     * as important as a perceptible app (IMPORTANCE_VISIBLE = 200), and will be unbound when
+     * the app is removed from task manager.
+     *
+     * One time permission's importance level to keep session alive is
+     * IMPORTANCE_FOREGROUND_SERVICE = 125. In order to kill the one time permission session, the
+     * service importance level should be higher than 125.
+     */
+    static CompanionDeviceServiceConnector newInstance(@NonNull Context context,
+            @UserIdInt int userId, @NonNull ComponentName componentName, boolean isSelfManaged) {
+        final int bindingFlags = isSelfManaged ? BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE
+                : BIND_ALMOST_PERCEPTIBLE;
+        return new CompanionDeviceServiceConnector(context, userId, componentName, bindingFlags);
+    }
+
+    private CompanionDeviceServiceConnector(@NonNull Context context, @UserIdInt int userId,
+            @NonNull ComponentName componentName, int bindingFlags) {
+        super(context, buildIntent(componentName), bindingFlags, userId, null);
         mUserId = userId;
         mComponentName = componentName;
     }
@@ -94,14 +119,26 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
         }
     }
 
+    // This method is only called when app is force-closed via settings,
+    // but does not handle crashes. Binder death should be handled in #binderDied()
     @Override
     public void onBindingDied(@NonNull ComponentName name) {
-        // IMPORTANT: call super!
+        // IMPORTANT: call super! this will also invoke binderDied()
         super.onBindingDied(name);
 
         if (DEBUG) Log.d(TAG, "onBindingDied() " + mComponentName.toShortString());
+    }
 
-        mListener.onBindingDied(mUserId, mComponentName.getPackageName());
+    @Override
+    public void binderDied() {
+        super.binderDied();
+
+        if (DEBUG) Log.d(TAG, "binderDied() " + mComponentName.toShortString());
+
+        // Handle primary process being killed
+        if (mListener != null) {
+            mListener.onBindingDied(mUserId, mComponentName.getPackageName());
+        }
     }
 
     @Override

@@ -19,6 +19,7 @@ import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Path;
@@ -173,8 +174,8 @@ public class BadgedImageView extends ConstraintLayout {
     }
 
     @Override
-    public void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    public void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
 
         if (!shouldDrawDot()) {
             return;
@@ -182,7 +183,7 @@ public class BadgedImageView extends ConstraintLayout {
 
         getDrawingRect(mTempBounds);
 
-        mDrawParams.color = mDotColor;
+        mDrawParams.dotColor = mDotColor;
         mDrawParams.iconBounds = mTempBounds;
         mDrawParams.leftAlign = mOnLeft;
         mDrawParams.scale = mDotScale;
@@ -350,16 +351,19 @@ public class BadgedImageView extends ConstraintLayout {
     }
 
     void showBadge() {
-        if (mBubble.getAppBadge() == null) {
+        Bitmap appBadgeBitmap = mBubble.getAppBadge();
+        if (appBadgeBitmap == null) {
             mAppIcon.setVisibility(GONE);
             return;
         }
+
         int translationX;
         if (mOnLeft) {
-            translationX = -(mBubbleIcon.getWidth() - mAppIcon.getWidth());
+            translationX = -(mBubble.getBubbleIcon().getWidth() - appBadgeBitmap.getWidth());
         } else {
             translationX = 0;
         }
+
         mAppIcon.setTranslationX(translationX);
         mAppIcon.setVisibility(VISIBLE);
     }

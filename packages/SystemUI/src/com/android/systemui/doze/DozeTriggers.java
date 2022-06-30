@@ -17,12 +17,10 @@
 package com.android.systemui.doze;
 
 import android.annotation.Nullable;
-import android.app.UiModeManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -41,7 +39,6 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeMachine.State;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Assert;
@@ -88,7 +85,6 @@ public class DozeTriggers implements DozeMachine.Part {
     private final AsyncSensorManager mSensorManager;
     private final WakeLock mWakeLock;
     private final boolean mAllowPulseTriggers;
-    private final UiModeManager mUiModeManager;
     private final TriggerReceiver mBroadcastReceiver = new TriggerReceiver();
     private final DockEventListener mDockEventListener = new DockEventListener();
     private final DockManager mDockManager;
@@ -97,7 +93,6 @@ public class DozeTriggers implements DozeMachine.Part {
     private final AuthController mAuthController;
     private final DelayableExecutor mMainExecutor;
     private final KeyguardStateController mKeyguardStateController;
-    private final BatteryController mBatteryController;
     private final UiEventLogger mUiEventLogger;
     private final DevicePostureController mDevicePostureController;
 
@@ -189,8 +184,7 @@ public class DozeTriggers implements DozeMachine.Part {
             @Main DelayableExecutor mainExecutor,
             UiEventLogger uiEventLogger,
             KeyguardStateController keyguardStateController,
-            DevicePostureController devicePostureController,
-            BatteryController batteryController) {
+            DevicePostureController devicePostureController) {
         mContext = context;
         mDozeHost = dozeHost;
         mConfig = config;
@@ -203,8 +197,6 @@ public class DozeTriggers implements DozeMachine.Part {
         mDozeSensors = new DozeSensors(context, mSensorManager, dozeParameters,
                 config, wakeLock, this::onSensor, this::onProximityFar, dozeLog, proximitySensor,
                 secureSettings, authController, devicePostureController);
-
-        mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mDockManager = dockManager;
         mProxCheck = proxCheck;
         mDozeLog = dozeLog;
@@ -213,7 +205,6 @@ public class DozeTriggers implements DozeMachine.Part {
         mMainExecutor = mainExecutor;
         mUiEventLogger = uiEventLogger;
         mKeyguardStateController = keyguardStateController;
-        mBatteryController = batteryController;
     }
     private final DevicePostureController.Callback mDevicePostureCallback =
             posture -> {
@@ -247,7 +238,7 @@ public class DozeTriggers implements DozeMachine.Part {
             mDozeLog.tracePulseDropped("pulseOnNotificationsDisabled");
             return;
         }
-        if (mDozeHost.isDozeSuppressed()) {
+        if (mDozeHost.isAlwaysOnSuppressed()) {
             runIfNotNull(onPulseSuppressedListener);
             mDozeLog.tracePulseDropped("dozeSuppressed");
             return;
@@ -325,12 +316,7 @@ public class DozeTriggers implements DozeMachine.Part {
                     gentleWakeUp(pulseReason);
                 } else if (isPickup) {
                     if (shouldDropPickupEvent())  {
-                        mDozeLog.traceSensorEventDropped(
-                                pulseReason,
-                                "keyguardOccluded="
-                                        + mKeyguardStateController.isOccluded()
-                                        + " pluggedInWireless="
-                                        + mBatteryController.isPluggedInWireless());
+                        mDozeLog.traceSensorEventDropped(pulseReason, "keyguard occluded");
                         return;
                     }
                     gentleWakeUp(pulseReason);
@@ -361,7 +347,7 @@ public class DozeTriggers implements DozeMachine.Part {
     }
 
     private boolean shouldDropPickupEvent() {
-        return mKeyguardStateController.isOccluded() || mBatteryController.isPluggedInWireless();
+        return mKeyguardStateController.isOccluded();
     }
 
     private void gentleWakeUp(int reason) {
@@ -456,10 +442,9 @@ public class DozeTriggers implements DozeMachine.Part {
                 mAodInterruptRunnable = null;
                 sWakeDisplaySensorState = true;
                 mBroadcastReceiver.register(mBroadcastDispatcher);
-                mDozeHost.addCallback(mHostCallback);
                 mDockManager.addListener(mDockEventListener);
                 mDozeSensors.requestTemporaryDisable();
-                checkTriggersAtInit();
+                mDozeHost.addCallback(mHostCallback);
                 break;
             case DOZE:
             case DOZE_AOD:
@@ -513,15 +498,6 @@ public class DozeTriggers implements DozeMachine.Part {
         if (mAodInterruptRunnable != null && state == Display.STATE_ON) {
             mAodInterruptRunnable.run();
             mAodInterruptRunnable = null;
-        }
-    }
-
-
-    private void checkTriggersAtInit() {
-        if (mUiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR
-                || mDozeHost.isBlockingDoze()
-                || !mDozeHost.isProvisioned()) {
-            mMachine.requestState(DozeMachine.State.FINISH);
         }
     }
 
@@ -608,9 +584,6 @@ public class DozeTriggers implements DozeMachine.Part {
                 requestPulse(DozeLog.PULSE_REASON_INTENT, false, /* performedProxCheck */
                         null /* onPulseSuppressedListener */);
             }
-            if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
-                mMachine.requestState(DozeMachine.State.FINISH);
-            }
             if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
                 mDozeSensors.onUserSwitched();
             }
@@ -621,7 +594,6 @@ public class DozeTriggers implements DozeMachine.Part {
                 return;
             }
             IntentFilter filter = new IntentFilter(PULSE_ACTION);
-            filter.addAction(UiModeManager.ACTION_ENTER_CAR_MODE);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
             broadcastDispatcher.registerReceiver(this, filter);
             mRegistered = true;
@@ -658,27 +630,6 @@ public class DozeTriggers implements DozeMachine.Part {
         @Override
         public void onNotificationAlerted(Runnable onPulseSuppressedListener) {
             onNotification(onPulseSuppressedListener);
-        }
-
-        @Override
-        public void onPowerSaveChanged(boolean active) {
-            if (mDozeHost.isPowerSaveActive()) {
-                mMachine.requestState(DozeMachine.State.DOZE);
-            } else if (mMachine.getState() == DozeMachine.State.DOZE
-                    && mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)) {
-                mMachine.requestState(DozeMachine.State.DOZE_AOD);
-            }
-        }
-
-        @Override
-        public void onDozeSuppressedChanged(boolean suppressed) {
-            final DozeMachine.State nextState;
-            if (mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT) && !suppressed) {
-                nextState = DozeMachine.State.DOZE_AOD;
-            } else {
-                nextState = DozeMachine.State.DOZE;
-            }
-            mMachine.requestState(nextState);
         }
     };
 }

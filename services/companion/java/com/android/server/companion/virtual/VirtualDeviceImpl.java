@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.StringRes;
 import android.app.Activity;
@@ -32,9 +33,11 @@ import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
+import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
-import android.companion.virtual.audio.IAudioSessionCallback;
+import android.companion.virtual.audio.IAudioConfigChangedCallback;
+import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -59,24 +62,32 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.WindowManager;
 import android.widget.Toast;
-import android.window.DisplayWindowPolicyController;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.BlockedAppStreamingActivity;
+import com.android.server.companion.virtual.GenericWindowPolicyController.RunningAppsChangedListener;
 import com.android.server.companion.virtual.audio.VirtualAudioController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 
 final class VirtualDeviceImpl extends IVirtualDevice.Stub
-        implements IBinder.DeathRecipient {
+        implements IBinder.DeathRecipient, RunningAppsChangedListener {
 
     private static final String TAG = "VirtualDeviceImpl";
+
+    /**
+     * Timeout until {@link #launchPendingIntent} stops waiting for an activity to be launched.
+     */
+    private static final long PENDING_TRAMPOLINE_TIMEOUT_MS = 5000;
+
     private final Object mVirtualDeviceLock = new Object();
 
     private final Context mContext;
@@ -92,15 +103,17 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final VirtualDeviceParams mParams;
     private final Map<Integer, PowerManager.WakeLock> mPerDisplayWakelocks = new ArrayMap<>();
     private final IVirtualDeviceActivityListener mActivityListener;
+    @NonNull
+    private Consumer<ArraySet<Integer>> mRunningAppsChangedCallback;
     // The default setting for showing the pointer on new displays.
     @GuardedBy("mVirtualDeviceLock")
     private boolean mDefaultShowPointerIcon = true;
 
-    private ActivityListener createListenerAdapter(int displayId) {
+    private ActivityListener createListenerAdapter() {
         return new ActivityListener() {
 
             @Override
-            public void onTopActivityChanged(int unusedDisplayId, ComponentName topActivity) {
+            public void onTopActivityChanged(int displayId, ComponentName topActivity) {
                 try {
                     mActivityListener.onTopActivityChanged(displayId, topActivity);
                 } catch (RemoteException e) {
@@ -109,7 +122,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             }
 
             @Override
-            public void onDisplayEmpty(int unusedDisplayId) {
+            public void onDisplayEmpty(int displayId) {
                 try {
                     mActivityListener.onDisplayEmpty(displayId);
                 } catch (RemoteException e) {
@@ -130,25 +143,33 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             IBinder token, int ownerUid, OnDeviceCloseListener listener,
             PendingTrampolineCallback pendingTrampolineCallback,
             IVirtualDeviceActivityListener activityListener,
+            Consumer<ArraySet<Integer>> runningAppsChangedCallback,
             VirtualDeviceParams params) {
         this(context, associationInfo, token, ownerUid, /* inputController= */ null, listener,
-                pendingTrampolineCallback, activityListener, params);
+                pendingTrampolineCallback, activityListener, runningAppsChangedCallback, params);
     }
 
     @VisibleForTesting
     VirtualDeviceImpl(Context context, AssociationInfo associationInfo, IBinder token,
             int ownerUid, InputController inputController, OnDeviceCloseListener listener,
             PendingTrampolineCallback pendingTrampolineCallback,
-            IVirtualDeviceActivityListener activityListener, VirtualDeviceParams params) {
-        mContext = context;
+            IVirtualDeviceActivityListener activityListener,
+            Consumer<ArraySet<Integer>> runningAppsChangedCallback,
+            VirtualDeviceParams params) {
+        UserHandle ownerUserHandle = UserHandle.getUserHandleForUid(ownerUid);
+        mContext = context.createContextAsUser(ownerUserHandle, 0);
         mAssociationInfo = associationInfo;
         mPendingTrampolineCallback = pendingTrampolineCallback;
         mActivityListener = activityListener;
+        mRunningAppsChangedCallback = runningAppsChangedCallback;
         mOwnerUid = ownerUid;
         mAppToken = token;
         mParams = params;
         if (inputController == null) {
-            mInputController = new InputController(mVirtualDeviceLock);
+            mInputController = new InputController(
+                    mVirtualDeviceLock,
+                    context.getMainThreadHandler(),
+                    context.getSystemService(WindowManager.class));
         } else {
             mInputController = inputController;
         }
@@ -172,6 +193,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return flags;
     }
 
+    /** Returns the device display name. */
+    CharSequence getDisplayName() {
+        return mAssociationInfo.getDisplayName();
+    }
+
     @Override // Binder call
     public int getAssociationId() {
         return mAssociationInfo.getId();
@@ -187,20 +213,27 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         if (pendingIntent.isActivity()) {
             try {
                 sendPendingIntent(displayId, pendingIntent);
-                resultReceiver.send(Activity.RESULT_OK, null);
+                resultReceiver.send(VirtualDeviceManager.LAUNCH_SUCCESS, null);
             } catch (PendingIntent.CanceledException e) {
                 Slog.w(TAG, "Pending intent canceled", e);
-                resultReceiver.send(Activity.RESULT_CANCELED, null);
+                resultReceiver.send(
+                        VirtualDeviceManager.LAUNCH_FAILURE_PENDING_INTENT_CANCELED, null);
             }
         } else {
             PendingTrampoline pendingTrampoline = new PendingTrampoline(pendingIntent,
                     resultReceiver, displayId);
             mPendingTrampolineCallback.startWaitingForPendingTrampoline(pendingTrampoline);
+            mContext.getMainThreadHandler().postDelayed(() -> {
+                pendingTrampoline.mResultReceiver.send(
+                        VirtualDeviceManager.LAUNCH_FAILURE_NO_ACTIVITY, null);
+                mPendingTrampolineCallback.stopWaitingForPendingTrampoline(pendingTrampoline);
+            }, PENDING_TRAMPOLINE_TIMEOUT_MS);
             try {
                 sendPendingIntent(displayId, pendingIntent);
             } catch (PendingIntent.CanceledException e) {
                 Slog.w(TAG, "Pending intent canceled", e);
-                resultReceiver.send(Activity.RESULT_CANCELED, null);
+                resultReceiver.send(
+                        VirtualDeviceManager.LAUNCH_FAILURE_PENDING_INTENT_CANCELED, null);
                 mPendingTrampolineCallback.stopWaitingForPendingTrampoline(pendingTrampoline);
             }
         }
@@ -208,6 +241,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     private void sendPendingIntent(int displayId, PendingIntent pendingIntent)
             throws PendingIntent.CanceledException {
+        final ActivityOptions options = ActivityOptions.makeBasic().setLaunchDisplayId(displayId);
+        options.setPendingIntentBackgroundActivityLaunchAllowed(true);
+        options.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
         pendingIntent.send(
                 mContext,
                 /* code= */ 0,
@@ -215,9 +251,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 /* onFinished= */ null,
                 /* handler= */ null,
                 /* requiredPermission= */ null,
-                ActivityOptions.makeBasic()
-                        .setLaunchDisplayId(displayId)
-                        .toBundle());
+                options.toBundle());
     }
 
     @Override // Binder call
@@ -256,14 +290,26 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         close();
     }
 
+    @Override
+    public void onRunningAppsChanged(ArraySet<Integer> runningUids) {
+        mRunningAppsChangedCallback.accept(runningUids);
+    }
+
     @VisibleForTesting
     VirtualAudioController getVirtualAudioControllerForTesting() {
         return mVirtualAudioController;
     }
 
+    @VisibleForTesting
+    SparseArray<GenericWindowPolicyController> getWindowPolicyControllersForTesting() {
+        return mWindowPolicyControllers;
+    }
+
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override // Binder call
-    public void onAudioSessionStarting(int displayId, IAudioSessionCallback callback) {
+    public void onAudioSessionStarting(int displayId,
+            @NonNull IAudioRoutingCallback routingCallback,
+            @Nullable IAudioConfigChangedCallback configChangedCallback) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                 "Permission required to start audio session");
@@ -277,7 +323,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             if (mVirtualAudioController == null) {
                 mVirtualAudioController = new VirtualAudioController(mContext);
                 GenericWindowPolicyController gwpc = mWindowPolicyControllers.get(displayId);
-                mVirtualAudioController.startListening(gwpc, callback);
+                mVirtualAudioController.startListening(gwpc, routingCallback,
+                        configChangedCallback);
             }
         }
     }
@@ -482,50 +529,56 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mInputController.dump(fout);
     }
 
-    DisplayWindowPolicyController onVirtualDisplayCreatedLocked(int displayId) {
+    GenericWindowPolicyController createWindowPolicyController() {
         synchronized (mVirtualDeviceLock) {
+            final GenericWindowPolicyController gwpc =
+                    new GenericWindowPolicyController(FLAG_SECURE,
+                            SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                            getAllowedUserHandles(),
+                            mParams.getAllowedCrossTaskNavigations(),
+                            mParams.getBlockedCrossTaskNavigations(),
+                            mParams.getAllowedActivities(),
+                            mParams.getBlockedActivities(),
+                            mParams.getDefaultActivityPolicy(),
+                            createListenerAdapter(),
+                            this::onActivityBlocked,
+                            mAssociationInfo.getDeviceProfile());
+            gwpc.registerRunningAppsChangedListener(/* listener= */ this);
+            return gwpc;
+        }
+    }
+
+    void onVirtualDisplayCreatedLocked(GenericWindowPolicyController gwpc, int displayId) {
+        synchronized (mVirtualDeviceLock) {
+            if (displayId == Display.INVALID_DISPLAY) {
+                return;
+            }
             if (mVirtualDisplayIds.contains(displayId)) {
                 throw new IllegalStateException(
-                        "Virtual device already have a virtual display with ID " + displayId);
+                        "Virtual device already has a virtual display with ID " + displayId);
             }
             mVirtualDisplayIds.add(displayId);
+
+            gwpc.setDisplayId(displayId);
+            mWindowPolicyControllers.put(displayId, gwpc);
+
             mInputController.setShowPointerIcon(mDefaultShowPointerIcon, displayId);
             mInputController.setPointerAcceleration(1f, displayId);
             mInputController.setDisplayEligibilityForPointerCapture(/* isEligible= */ false,
                     displayId);
+            mInputController.setLocalIme(displayId);
 
-            // Since we're being called in the middle of the display being created, we post a
-            // task to grab the wakelock instead of doing it synchronously here, to avoid
-            // reentrancy  problems.
-            mContext.getMainThreadHandler().post(() -> addWakeLockForDisplay(displayId));
 
-            final GenericWindowPolicyController dwpc =
-                    new GenericWindowPolicyController(FLAG_SECURE,
-                            SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
-                            getAllowedUserHandles(),
-                            mParams.getAllowedActivities(),
-                            mParams.getBlockedActivities(),
-                            createListenerAdapter(displayId),
-                            activityInfo -> onActivityBlocked(displayId, activityInfo));
-            mWindowPolicyControllers.put(displayId, dwpc);
-            return dwpc;
-        }
-    }
-
-    void addWakeLockForDisplay(int displayId) {
-        synchronized (mVirtualDeviceLock) {
-            if (!mVirtualDisplayIds.contains(displayId)
-                    || mPerDisplayWakelocks.containsKey(displayId)) {
+            if (mPerDisplayWakelocks.containsKey(displayId)) {
                 Slog.e(TAG, "Not creating wakelock for displayId " + displayId);
                 return;
             }
             PowerManager powerManager = mContext.getSystemService(PowerManager.class);
             PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
-                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK
-                            | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
                     TAG + ":" + displayId, displayId);
-            wakeLock.acquire();
             mPerDisplayWakelocks.put(displayId, wakeLock);
+            wakeLock.acquire();
         }
     }
 
@@ -567,6 +620,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 wakeLock.release();
                 mPerDisplayWakelocks.remove(displayId);
             }
+            GenericWindowPolicyController gwpc = mWindowPolicyControllers.get(displayId);
+            if (gwpc != null) {
+                gwpc.unregisterRunningAppsChangedListener(/* listener= */ this);
+            }
             mVirtualDisplayIds.remove(displayId);
             mWindowPolicyControllers.remove(displayId);
         }
@@ -594,6 +651,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
      * Shows a toast on virtual displays owned by this device which have a given uid running.
      */
     void showToastWhereUidIsRunning(int uid, @StringRes int resId, @Toast.Duration int duration) {
+        showToastWhereUidIsRunning(uid, mContext.getString(resId), duration);
+    }
+
+    /**
+     * Shows a toast on virtual displays owned by this device which have a given uid running.
+     */
+    void showToastWhereUidIsRunning(int uid, String text, @Toast.Duration int duration) {
         synchronized (mVirtualDeviceLock) {
             DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
             final int size = mWindowPolicyControllers.size();
@@ -602,7 +666,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     int displayId = mWindowPolicyControllers.keyAt(i);
                     Display display = displayManager.getDisplay(displayId);
                     if (display != null && display.isValid()) {
-                        Toast.makeText(mContext.createDisplayContext(display), resId,
+                        Toast.makeText(mContext.createDisplayContext(display), text,
                                 duration).show();
                     }
                 }

@@ -33,6 +33,9 @@ import android.view.WindowManager
 import android.widget.ImageView
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.R
+import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.wm.shell.TaskView
 
 /**
@@ -42,9 +45,12 @@ import com.android.wm.shell.TaskView
  */
 class DetailDialog(
     val activityContext: Context,
+    val broadcastSender: BroadcastSender,
     val taskView: TaskView,
     val pendingIntent: PendingIntent,
-    val cvh: ControlViewHolder
+    val cvh: ControlViewHolder,
+    val keyguardStateController: KeyguardStateController,
+    val activityStarter: ActivityStarter
 ) : Dialog(
     activityContext,
     R.style.Theme_SystemUI_Dialog_Control_DetailPanel
@@ -143,12 +149,25 @@ class DetailDialog(
 
         requireViewById<ImageView>(R.id.control_detail_open_in_app).apply {
             setOnClickListener { v: View ->
-                // Remove the task explicitly, since onRelease() callback will be executed after
-                // startActivity() below is called.
                 removeDetailTask()
                 dismiss()
-                context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
-                pendingIntent.send()
+
+                val action = ActivityStarter.OnDismissAction {
+                    // Remove the task explicitly, since onRelease() callback will be executed after
+                    // startActivity() below is called.
+                    broadcastSender.closeSystemDialogs()
+                    pendingIntent.send()
+                    false
+                }
+                if (keyguardStateController.isUnlocked()) {
+                    action.onDismiss()
+                } else {
+                    activityStarter.dismissKeyguardThenExecute(
+                        action,
+                        null /* cancel */,
+                        true /* afterKeyguardGone */
+                    )
+                }
             }
         }
 

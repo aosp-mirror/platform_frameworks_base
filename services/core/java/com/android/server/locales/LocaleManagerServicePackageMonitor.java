@@ -23,13 +23,22 @@ import com.android.internal.content.PackageMonitor;
  *
  * <p> These listeners forward the call to different aspects of locale service that
  * handle the business logic.
- * <p> We're interested in package added, package data cleared and package removed events.
+ * <p> We're interested in the following events:
+ * <ul>
+ * <li> Package added
+ * <li> Package data cleared
+ * <li> Package removed
+ * <li> Package Updated
+ * </ul>
  */
 final class LocaleManagerServicePackageMonitor extends PackageMonitor {
     private LocaleManagerBackupHelper mBackupHelper;
+    private SystemAppUpdateTracker mSystemAppUpdateTracker;
 
-    LocaleManagerServicePackageMonitor(LocaleManagerBackupHelper localeManagerBackupHelper) {
+    LocaleManagerServicePackageMonitor(LocaleManagerBackupHelper localeManagerBackupHelper,
+            SystemAppUpdateTracker systemAppUpdateTracker) {
         mBackupHelper = localeManagerBackupHelper;
+        mSystemAppUpdateTracker = systemAppUpdateTracker;
     }
 
     @Override
@@ -45,5 +54,10 @@ final class LocaleManagerServicePackageMonitor extends PackageMonitor {
     @Override
     public void onPackageRemoved(String packageName, int uid) {
         mBackupHelper.onPackageRemoved();
+    }
+
+    @Override
+    public void onPackageUpdateFinished(String packageName, int uid) {
+        mSystemAppUpdateTracker.onPackageUpdateFinished(packageName, uid);
     }
 }

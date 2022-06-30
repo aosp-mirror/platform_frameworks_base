@@ -480,10 +480,15 @@ class TaskSnapshotController {
         }
         final HardwareBuffer buffer = screenshotBuffer == null ? null
                 : screenshotBuffer.getHardwareBuffer();
-        if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
+        if (isInvalidHardwareBuffer(buffer)) {
             return null;
         }
         return screenshotBuffer;
+    }
+
+    static boolean isInvalidHardwareBuffer(HardwareBuffer buffer) {
+        return buffer == null || buffer.isClosed() // This must be checked before getting size.
+                || buffer.getWidth() <= 1 || buffer.getHeight() <= 1;
     }
 
     @Nullable
@@ -534,7 +539,7 @@ class TaskSnapshotController {
             // Since RecentsAnimation will handle task snapshot while switching apps with the
             // best capture timing (e.g. IME window capture),
             // No need additional task capture while task is controlled by RecentsAnimation.
-            if (task.isAnimatingByRecents()) {
+            if (isAnimatingByRecents(task)) {
                 mSkipClosingAppSnapshotTasks.add(task);
             }
             // If the task of the app is not visible anymore, it means no other app in that task
@@ -686,7 +691,7 @@ class TaskSnapshotController {
             // Since RecentsAnimation will handle task snapshot while switching apps with the best
             // capture timing (e.g. IME window capture), No need additional task capture while task
             // is controlled by RecentsAnimation.
-            if (task.isVisible() && !task.isAnimatingByRecents()) {
+            if (task.isVisible() && !isAnimatingByRecents(task)) {
                 mTmpTasks.add(task);
             }
         });
@@ -715,6 +720,11 @@ class TaskSnapshotController {
     static Rect getSystemBarInsets(Rect frame, InsetsState state) {
         return state.calculateInsets(
                 frame, Type.systemBars(), false /* ignoreVisibility */).toRect();
+    }
+
+    private boolean isAnimatingByRecents(@NonNull Task task) {
+        return task.isAnimatingByRecents()
+                || mService.mAtmService.getTransitionController().inRecentsTransition(task);
     }
 
     void dump(PrintWriter pw, String prefix) {

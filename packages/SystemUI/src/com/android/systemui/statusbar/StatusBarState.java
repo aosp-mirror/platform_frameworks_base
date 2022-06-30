@@ -37,16 +37,19 @@ public class StatusBarState {
      */
     public static final int SHADE_LOCKED = 2;
 
-    public static String toShortString(int x) {
-        switch (x) {
+    /**
+     * Returns the textual representation of the status bar state.
+     */
+    public static String toString(int state) {
+        switch (state) {
             case SHADE:
-                return "SHD";
+                return "SHADE";
             case SHADE_LOCKED:
-                return "SHD_LCK";
+                return "SHADE_LOCKED";
             case KEYGUARD:
-                return "KGRD";
+                return "KEYGUARD";
             default:
-                return "bad_value_" + x;
+                return "UNKNOWN: " + state;
         }
     }
 }

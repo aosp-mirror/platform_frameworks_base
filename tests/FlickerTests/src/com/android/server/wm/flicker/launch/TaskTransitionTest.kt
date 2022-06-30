@@ -63,8 +63,12 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
 class TaskTransitionTest(val testSpec: FlickerTestParameter) {
-    val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val mTestApp: NewTasksAppHelper = NewTasksAppHelper(instrumentation)
+    private val mWallpaper by lazy {
+        getWallpaperPackage(InstrumentationRegistry.getInstrumentation())
+            ?: error("Unable to obtain wallpaper")
+    }
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
@@ -97,7 +101,7 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     @Test
     fun wallpaperWindowIsNeverVisible() {
         testSpec.assertWm {
-            this.isNonAppWindowInvisible(WALLPAPER)
+            this.isNonAppWindowInvisible(mWallpaper)
         }
     }
 
@@ -109,7 +113,7 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     @Test
     fun wallpaperLayerIsNeverVisible() {
         testSpec.assertLayers {
-            this.isInvisible(WALLPAPER)
+            this.isInvisible(mWallpaper)
             this.isInvisible(WALLPAPER_BBQ_WRAPPER)
         }
     }
@@ -229,15 +233,14 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
     companion object {
-        private val WALLPAPER = getWallpaperPackage(InstrumentationRegistry.getInstrumentation())
         private val LAUNCH_NEW_TASK_ACTIVITY =
                 LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME.toFlickerComponent()
         private val SIMPLE_ACTIVITY = SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME.toFlickerComponent()
 
-        private fun getWallpaperPackage(instrumentation: Instrumentation): FlickerComponentName {
+        private fun getWallpaperPackage(instrumentation: Instrumentation): FlickerComponentName? {
             val wallpaperManager = WallpaperManager.getInstance(instrumentation.targetContext)
 
-            return wallpaperManager.wallpaperInfo.component.toFlickerComponent()
+            return wallpaperManager.wallpaperInfo?.component?.toFlickerComponent()
         }
 
         @Parameterized.Parameters(name = "{0}")

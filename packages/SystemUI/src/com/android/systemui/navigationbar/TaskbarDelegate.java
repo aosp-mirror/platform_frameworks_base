@@ -55,8 +55,8 @@ import android.view.WindowInsetsController.Behavior;
 import androidx.annotation.NonNull;
 
 import com.android.internal.view.AppearanceRegion;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
@@ -73,22 +73,21 @@ import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-@Singleton
+/** */
+@SysUISingleton
 public class TaskbarDelegate implements CommandQueue.Callbacks,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
         ComponentCallbacks, Dumpable {
     private static final String TAG = TaskbarDelegate.class.getSimpleName();
 
     private final EdgeBackGestureHandler mEdgeBackGestureHandler;
-    private final NavigationBarOverlayController mNavBarOverlayController;
+    private final LightBarTransitionsController.Factory mLightBarTransitionsControllerFactory;
     private boolean mInitialized;
     private CommandQueue mCommandQueue;
     private OverviewProxyService mOverviewProxyService;
@@ -155,14 +154,14 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private BackAnimation mBackAnimation;
 
     @Inject
-    public TaskbarDelegate(Context context) {
-        mEdgeBackGestureHandler = Dependency.get(EdgeBackGestureHandler.Factory.class)
-                .create(context);
-        mNavBarOverlayController = Dependency.get(NavigationBarOverlayController.class);
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
-            mNavBarOverlayController.init(mNavbarOverlayVisibilityChangeCallback,
-                    mEdgeBackGestureHandler::updateNavigationBarOverlayExcludeRegion);
-        }
+    public TaskbarDelegate(
+            Context context,
+            EdgeBackGestureHandler.Factory edgeBackGestureHandlerFactory,
+            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory
+    ) {
+        mLightBarTransitionsControllerFactory = lightBarTransitionsControllerFactory;
+        mEdgeBackGestureHandler = edgeBackGestureHandlerFactory.create(context);
+
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mPipListener = mEdgeBackGestureHandler::setPipStashExclusionBounds;
@@ -186,14 +185,15 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         dumpManager.registerDumpable(this);
         mAutoHideController = autoHideController;
         mLightBarController = lightBarController;
-        mLightBarTransitionsController = createLightBarTransitionsController();
         mPipOptional = pipOptional;
         mBackAnimation = backAnimation;
+        mLightBarTransitionsController = createLightBarTransitionsController();
     }
 
     // Separated into a method to keep setDependencies() clean/readable.
     private LightBarTransitionsController createLightBarTransitionsController() {
-        return new LightBarTransitionsController(mContext,
+
+        LightBarTransitionsController controller =  mLightBarTransitionsControllerFactory.create(
                 new LightBarTransitionsController.DarkIntensityApplier() {
                     @Override
                     public void applyDarkIntensity(float darkIntensity) {
@@ -204,13 +204,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                     public int getTintAnimationDuration() {
                         return LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION;
                     }
-                }, mCommandQueue) {
-            @Override
-            public boolean supportsIconTintForNavMode(int navigationMode) {
-                // Always tint taskbar nav buttons (region sampling handles gesture bar separately).
-                return true;
-            }
-        };
+                });
+        controller.overrideIconTintForNavMode(true);
+
+        return controller;
     }
 
     public void init(int displayId) {
@@ -224,9 +221,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 mNavigationModeController.addListener(this));
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mNavBarHelper.init();
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
-            mNavBarOverlayController.registerListeners();
-        }
         mEdgeBackGestureHandler.onNavBarAttached();
         // Initialize component callback
         Display display = mDisplayManager.getDisplay(displayId);
@@ -251,9 +245,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mNavigationModeController.removeListener(this);
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mNavBarHelper.destroy();
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
-            mNavBarOverlayController.unregisterListeners();
-        }
         mEdgeBackGestureHandler.onNavBarDetached();
         mScreenPinningNotify = null;
         if (mWindowContext != null) {
@@ -261,7 +252,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             mWindowContext = null;
         }
         mAutoHideController.setNavigationBar(null);
-        mLightBarTransitionsController.destroy(mContext);
+        mLightBarTransitionsController.destroy();
         mLightBarController.setNavigationBar(null);
         mPipOptional.ifPresent(this::removePipExclusionBoundsChangeListener);
         mInitialized = false;
@@ -307,6 +298,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                         ActivityManagerWrapper.getInstance().isScreenPinningActive())
                 .setFlag(SYSUI_STATE_IMMERSIVE_MODE, isImmersiveMode())
                 .commitUpdate(mDisplayId);
+    }
+
+    boolean isOverviewEnabled() {
+        return (mSysUiState.getFlags() & View.STATUS_BAR_DISABLE_RECENT) == 0;
     }
 
     private void updateAssistantAvailability(boolean assistantAvailable) {
@@ -418,19 +413,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     private void onTransientStateChanged() {
         mEdgeBackGestureHandler.onNavBarTransientStateChanged(mTaskbarTransientShowing);
-
-        // The visibility of the navigation bar buttons is dependent on the transient state of
-        // the navigation bar.
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
-            mNavBarOverlayController.setButtonState(mTaskbarTransientShowing, /* force */ false);
-        }
     }
 
     @Override
     public void onRecentsAnimationStateChanged(boolean running) {
-        if (running) {
-            mNavBarOverlayController.setButtonState(/* visible */false, /* force */true);
-        }
     }
 
     @Override
@@ -483,7 +469,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("TaskbarDelegate (displayId=" + mDisplayId + "):");
         pw.println("  mNavigationIconHints=" + mNavigationIconHints);
         pw.println("  mNavigationMode=" + mNavigationMode);

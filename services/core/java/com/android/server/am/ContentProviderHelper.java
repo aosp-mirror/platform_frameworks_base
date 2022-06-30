@@ -24,6 +24,7 @@ import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerService.TAG_MU;
+import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_PROVIDER;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -112,6 +113,13 @@ public class ContentProviderHelper {
     ContentProviderHolder getContentProvider(IApplicationThread caller, String callingPackage,
             String name, int userId, boolean stable) {
         mService.enforceNotIsolatedCaller("getContentProvider");
+        if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
+            // TODO(b/226318628): for sdk sandbox processes only allow accessing CPs registered by
+            //  the WebView apk.
+            Slog.w(TAG, "Sdk sandbox process " + Binder.getCallingUid()
+                    + " is accessing content provider " + name
+                    + ". This access will most likely be blocked in the future");
+        }
         if (caller == null) {
             String msg = "null IApplicationThread when getting content provider " + name;
             Slog.w(TAG, msg);
@@ -475,7 +483,7 @@ public class ContentProviderHelper {
                             checkTime(startTime, "getContentProviderImpl: before start process");
                             proc = mService.startProcessLocked(
                                     cpi.processName, cpr.appInfo, false, 0,
-                                    new HostingRecord("content provider",
+                                    new HostingRecord(HostingRecord.HOSTING_TYPE_CONTENT_PROVIDER,
                                         new ComponentName(
                                                 cpi.applicationInfo.packageName, cpi.name)),
                                     Process.ZYGOTE_POLICY_FLAG_EMPTY, false, false);
@@ -630,7 +638,7 @@ public class ContentProviderHelper {
             return;
         }
 
-        mService.enforceNotIsolatedCaller("publishContentProviders");
+        mService.enforceNotIsolatedOrSdkSandboxCaller("publishContentProviders");
         synchronized (mService) {
             final ProcessRecord r = mService.getRecordForAppLOSP(caller);
             if (DEBUG_MU) {
@@ -694,6 +702,9 @@ public class ContentProviderHelper {
                     dst.onProviderPublishStatusLocked(true);
                 }
                 dst.mRestartCount = 0;
+                if (hasProviderConnectionLocked(r)) {
+                    r.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_PROVIDER);
+                }
             }
 
             // update the app's oom adj value and each provider's usage stats
@@ -717,7 +728,7 @@ public class ContentProviderHelper {
      * Drop a content provider from a ProcessRecord's bookkeeping
      */
     void removeContentProvider(IBinder connection, boolean stable) {
-        mService.enforceNotIsolatedCaller("removeContentProvider");
+        mService.enforceNotIsolatedOrSdkSandboxCaller("removeContentProvider");
         final long ident = Binder.clearCallingIdentity();
         try {
             ContentProviderConnection conn;
@@ -1368,6 +1379,9 @@ public class ContentProviderHelper {
         conn.startAssociationIfNeeded();
         conn.initializeCount(stable);
         cpr.connections.add(conn);
+        if (cpr.proc != null) {
+            cpr.proc.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_PROVIDER);
+        }
         pr.addProviderConnection(conn);
         mService.startAssociationLocked(r.uid, r.processName, r.mState.getCurProcState(),
                 cpr.uid, cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
@@ -1411,6 +1425,16 @@ public class ContentProviderHelper {
         return true;
     }
 
+    @GuardedBy("mService")
+    private boolean hasProviderConnectionLocked(ProcessRecord proc) {
+        for (int i = proc.mProviders.numberOfProviders() - 1; i >= 0; i--) {
+            if (!proc.mProviders.getProviderAt(i).connections.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void handleProviderRemoval(ContentProviderConnection conn, boolean stable,
             boolean updateOomAdj) {
         synchronized (mService) {
@@ -1422,6 +1446,9 @@ public class ContentProviderHelper {
             final ContentProviderRecord cpr = conn.provider;
             conn.stopAssociation();
             cpr.connections.remove(conn);
+            if (cpr.proc != null && !hasProviderConnectionLocked(cpr.proc)) {
+                cpr.proc.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_PROVIDER);
+            }
             conn.client.mProviders.removeProviderConnection(conn);
             if (conn.client.mState.getSetProcState()
                     < ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
@@ -1730,6 +1757,9 @@ public class ContentProviderHelper {
                 // In the protocol here, we don't expect the client to correctly
                 // clean up this connection, we'll just remove it.
                 cpr.connections.remove(i);
+                if (cpr.proc != null && !hasProviderConnectionLocked(cpr.proc)) {
+                    cpr.proc.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_PROVIDER);
+                }
                 if (conn.client.mProviders.removeProviderConnection(conn)) {
                     mService.stopAssociationLocked(capp.uid, capp.processName,
                             cpr.uid, cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);

@@ -222,9 +222,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     })
     public @interface WindowConfig {}
 
-    /** @hide */
-    public static final int PINNED_WINDOWING_MODE_ELEVATION_IN_DIP = 5;
-
     @UnsupportedAppUsage
     public WindowConfiguration() {
         unset();
@@ -346,6 +343,14 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      */
     public void setAlwaysOnTop(boolean alwaysOnTop) {
         mAlwaysOnTop = alwaysOnTop ? ALWAYS_ON_TOP_ON : ALWAYS_ON_TOP_OFF;
+    }
+
+    /**
+     * Unsets always-on-top to undefined.
+     * @hide
+     */
+    public void unsetAlwaysOnTop() {
+        mAlwaysOnTop = ALWAYS_ON_TOP_UNDEFINED;
     }
 
     private void setAlwaysOnTop(@AlwaysOnTop int alwaysOnTop) {
@@ -822,11 +827,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return isFloating(mWindowingMode);
     }
 
-    /**
-     * Returns true if the windowingMode represents a floating window.
-     * @hide
-     */
-    public static boolean isFloating(int windowingMode) {
+    /** Returns true if the windowingMode represents a floating window. */
+    public static boolean isFloating(@WindowingMode int windowingMode) {
         return windowingMode == WINDOWING_MODE_FREEFORM || windowingMode == WINDOWING_MODE_PINNED;
     }
 
@@ -838,15 +840,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     public static boolean inMultiWindowMode(int windowingMode) {
         return windowingMode != WINDOWING_MODE_FULLSCREEN
                 && windowingMode != WINDOWING_MODE_UNDEFINED;
-    }
-
-    /**
-     * Returns true if the windowingMode represents a split window.
-     * @hide
-     */
-    public static boolean isSplitScreenWindowingMode(int windowingMode) {
-        return windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
     }
 
     /**

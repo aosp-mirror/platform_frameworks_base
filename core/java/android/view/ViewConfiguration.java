@@ -347,6 +347,7 @@ public class ViewConfiguration {
     private final long mScreenshotChordKeyTimeout;
     private final int mSmartSelectionInitializedTimeout;
     private final int mSmartSelectionInitializingTimeout;
+    private final boolean mPreferKeepClearForFocusEnabled;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768915)
     private boolean sHasPermanentMenuKey;
@@ -392,6 +393,7 @@ public class ViewConfiguration {
         mMinScalingSpan = 0;
         mSmartSelectionInitializedTimeout = SMART_SELECTION_INITIALIZED_TIMEOUT_IN_MILLISECOND;
         mSmartSelectionInitializingTimeout = SMART_SELECTION_INITIALIZING_TIMEOUT_IN_MILLISECOND;
+        mPreferKeepClearForFocusEnabled = false;
     }
 
     /**
@@ -506,6 +508,8 @@ public class ViewConfiguration {
                 com.android.internal.R.integer.config_smartSelectionInitializedTimeoutMillis);
         mSmartSelectionInitializingTimeout = res.getInteger(
                 com.android.internal.R.integer.config_smartSelectionInitializingTimeoutMillis);
+        mPreferKeepClearForFocusEnabled = res.getBoolean(
+                com.android.internal.R.bool.config_preferKeepClearForFocus);
     }
 
     /**
@@ -1093,6 +1097,16 @@ public class ViewConfiguration {
      */
     public int getSmartSelectionInitializingTimeout() {
         return mSmartSelectionInitializingTimeout;
+    }
+
+    /**
+     * @return {@code true} if Views should set themselves as preferred to keep clear when focused,
+     * {@code false} otherwise.
+     * @hide
+     */
+    @TestApi
+    public boolean isPreferKeepClearForFocusEnabled() {
+        return mPreferKeepClearForFocusEnabled;
     }
 
     /**

@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -26,8 +27,13 @@ import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
+import android.content.ComponentName;
+import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.face.ISession;
+import android.hardware.face.Face;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -52,6 +58,9 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Presubmit
 @SmallTest
@@ -82,6 +91,10 @@ public class FaceAuthenticationClientTest {
     private ClientMonitorCallback mCallback;
     @Mock
     private Sensor.HalSessionCallback mHalSessionCallback;
+    @Mock
+    private ActivityTaskManager mActivityTaskManager;
+    @Mock
+    private ICancellationSignal mCancellationSignal;
     @Captor
     private ArgumentCaptor<OperationContext> mOperationContextCaptor;
 
@@ -116,6 +129,25 @@ public class FaceAuthenticationClientTest {
         verify(mHal, never()).authenticate(anyLong());
     }
 
+    @Test
+    public void cancelsAuthWhenNotInForeground() throws Exception {
+        final ActivityManager.RunningTaskInfo topTask = new ActivityManager.RunningTaskInfo();
+        topTask.topActivity = new ComponentName("other", "thing");
+        when(mActivityTaskManager.getTasks(anyInt())).thenReturn(List.of(topTask));
+        when(mHal.authenticateWithContext(anyLong(), any())).thenReturn(mCancellationSignal);
+
+        final FaceAuthenticationClient client = createClient();
+        client.start(mCallback);
+        client.onAuthenticated(new Face("friendly", 1 /* faceId */, 2 /* deviceId */),
+                true /* authenticated */, new ArrayList<>());
+
+        verify(mCancellationSignal).cancel();
+    }
+
+    private FaceAuthenticationClient createClient() throws RemoteException {
+        return createClient(2 /* version */);
+    }
+
     private FaceAuthenticationClient createClient(int version) throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
@@ -126,6 +158,11 @@ public class FaceAuthenticationClientTest {
                 false /* requireConfirmation */, 9 /* sensorId */,
                 mBiometricLogger, mBiometricContext, true /* isStrongBiometric */,
                 mUsageStats, mLockoutCache, false /* allowBackgroundAuthentication */,
-                false /* isKeyguardBypassEnabled */, null /* sensorPrivacyManager */);
+                false /* isKeyguardBypassEnabled */, null /* sensorPrivacyManager */) {
+            @Override
+            protected ActivityTaskManager getActivityTaskManager() {
+                return mActivityTaskManager;
+            }
+        };
     }
 }

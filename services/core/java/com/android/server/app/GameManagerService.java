@@ -121,7 +121,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
     static final int REMOVE_SETTINGS = 2;
     static final int POPULATE_GAME_MODE_SETTINGS = 3;
     static final int SET_GAME_STATE = 4;
+    static final int CANCEL_GAME_LOADING_MODE = 5;
     static final int WRITE_SETTINGS_DELAY = 10 * 1000;  // 10 seconds
+    static final int LOADING_BOOST_MAX_DURATION = 5 * 1000;  // 5 seconds
+
     static final PackageOverride COMPAT_ENABLED = new PackageOverride.Builder().setEnabled(true)
             .build();
     static final PackageOverride COMPAT_DISABLED = new PackageOverride.Builder().setEnabled(false)
@@ -299,6 +302,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     }
                     break;
                 }
+                case CANCEL_GAME_LOADING_MODE: {
+                    mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, false);
+                    break;
+                }
             }
         }
     }
@@ -359,6 +366,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     public enum FrameRate {
         FPS_DEFAULT(0),
         FPS_30(30),
+        FPS_40(40),
         FPS_45(45),
         FPS_60(60),
         FPS_90(90),
@@ -378,6 +386,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
         switch (raw) {
             case "30":
                 return FrameRate.FPS_30.fps;
+            case "40":
+                return FrameRate.FPS_40.fps;
             case "45":
                 return FrameRate.FPS_45.fps;
             case "60":
@@ -569,11 +579,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
             public static final String DEFAULT_SCALING = "1.0";
             public static final String DEFAULT_FPS = "";
             public static final String ANGLE_KEY = "useAngle";
+            public static final String LOADING_BOOST_KEY = "loadingBoost";
 
             private final @GameMode int mGameMode;
             private String mScaling;
             private String mFps;
             private final boolean mUseAngle;
+            private final int mLoadingBoostDuration;
 
             GameModeConfiguration(KeyValueListParser parser) {
                 mGameMode = parser.getInt(MODE_KEY, GameManager.GAME_MODE_UNSUPPORTED);
@@ -592,6 +604,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 // - The Phenotype config has enabled it.
                 mUseAngle = mAllowAngle && !willGamePerformOptimizations(mGameMode)
                         && parser.getBoolean(ANGLE_KEY, false);
+
+                mLoadingBoostDuration = willGamePerformOptimizations(mGameMode) ? -1
+                        : parser.getInt(LOADING_BOOST_KEY, -1);
             }
 
             public int getGameMode() {
@@ -608,6 +623,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
             public boolean getUseAngle() {
                 return mUseAngle;
+            }
+
+            public int getLoadingBoostDuration() {
+                return mLoadingBoostDuration;
             }
 
             public void setScaling(String scaling) {
@@ -630,7 +649,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
              */
             public String toString() {
                 return "[Game Mode:" + mGameMode + ",Scaling:" + mScaling + ",Use Angle:"
-                        + mUseAngle + ",Fps:" + mFps + "]";
+                        + mUseAngle + ",Fps:" + mFps + ",Loading Boost Duration:"
+                        + mLoadingBoostDuration + "]";
             }
 
             /**
@@ -961,6 +981,76 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 return false;
             }
             return gameModeConfiguration.getUseAngle();
+        }
+    }
+
+    /**
+     * If loading boost is applicable for the package for the currently enabled game mode, return
+     * the boost duration. If no configuration is available for the selected package or mode, the
+     * default is returned.
+     */
+    @VisibleForTesting
+    public int getLoadingBoostDuration(String packageName, int userId)
+            throws SecurityException {
+        final int gameMode = getGameMode(packageName, userId);
+        if (gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
+            return -1;
+        }
+
+        synchronized (mDeviceConfigLock) {
+            final GamePackageConfiguration config = mConfigs.get(packageName);
+            if (config == null) {
+                return -1;
+            }
+            GamePackageConfiguration.GameModeConfiguration gameModeConfiguration =
+                    config.getGameModeConfiguration(gameMode);
+            if (gameModeConfiguration == null) {
+                return -1;
+            }
+            return gameModeConfiguration.getLoadingBoostDuration();
+        }
+    }
+
+    /**
+     * If loading boost is enabled, invoke it.
+     */
+    @Override
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    @GameMode public void notifyGraphicsEnvironmentSetup(String packageName, int userId)
+            throws SecurityException {
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, true, "notifyGraphicsEnvironmentSetup",
+                "com.android.server.app.GameManagerService");
+
+        // Restrict to games only.
+        if (!isPackageGame(packageName, userId)) {
+            return;
+        }
+
+        if (!isValidPackageName(packageName, userId)) {
+            return;
+        }
+
+        final int gameMode = getGameMode(packageName, userId);
+        if (gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
+            return;
+        }
+        int loadingBoostDuration = getLoadingBoostDuration(packageName, userId);
+        if (loadingBoostDuration != -1) {
+            if (loadingBoostDuration == 0 || loadingBoostDuration > LOADING_BOOST_MAX_DURATION) {
+                loadingBoostDuration = LOADING_BOOST_MAX_DURATION;
+            }
+            if (mHandler.hasMessages(CANCEL_GAME_LOADING_MODE)) {
+                // The loading mode has already been set and is waiting to be unset. It is not
+                // required to set the mode again and we should replace the queued cancel
+                // instruction.
+                mHandler.removeMessages(CANCEL_GAME_LOADING_MODE);
+            } else {
+                mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, true);
+            }
+
+            mHandler.sendMessageDelayed(
+                    mHandler.obtainMessage(CANCEL_GAME_LOADING_MODE), loadingBoostDuration);
         }
     }
 
@@ -1320,15 +1410,26 @@ public final class GameManagerService extends IGameManagerService.Stub {
         // Make sure after resetting the game mode is still supported.
         // If not, set the game mode to standard
         int gameMode = getGameMode(packageName, userId);
-        int newGameMode = gameMode;
 
         GamePackageConfiguration config = null;
         synchronized (mOverrideConfigLock) {
             config = mOverrideConfigs.get(packageName);
         }
-        synchronized (mDeviceConfigLock) {
-            config = mConfigs.get(packageName);
+        if (config == null) {
+            synchronized (mDeviceConfigLock) {
+                config = mConfigs.get(packageName);
+            }
         }
+        final int newGameMode = getNewGameMode(gameMode, config);
+        if (gameMode != newGameMode) {
+            setGameMode(packageName, GameManager.GAME_MODE_STANDARD, userId);
+            return;
+        }
+        setGameMode(packageName, gameMode, userId);
+    }
+
+    private int getNewGameMode(int gameMode, GamePackageConfiguration config) {
+        int newGameMode = gameMode;
         if (config != null) {
             int modesBitfield = config.getAvailableGameModesBitfield();
             // Remove UNSUPPORTED to simplify the logic here, since we really just
@@ -1350,11 +1451,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             // UNSUPPORTED, then set to UNSUPPORTED
             newGameMode = GameManager.GAME_MODE_UNSUPPORTED;
         }
-        if (gameMode != newGameMode) {
-            setGameMode(packageName, GameManager.GAME_MODE_STANDARD, userId);
-            return;
-        }
-        setGameMode(packageName, gameMode, userId);
+        return newGameMode;
     }
 
     /**
@@ -1412,7 +1509,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
             for (final String packageName : packageNames) {
                 int gameMode = getGameMode(packageName, userId);
-                int newGameMode = gameMode;
                 // Make sure the user settings and package configs don't conflict.
                 // I.e. the user setting is set to a mode that no longer available due to
                 // config/manifest changes.
@@ -1421,27 +1517,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 synchronized (mDeviceConfigLock) {
                     config = mConfigs.get(packageName);
                 }
-                if (config != null) {
-                    int modesBitfield = config.getAvailableGameModesBitfield();
-                    // Remove UNSUPPORTED to simplify the logic here, since we really just
-                    // want to check if we support selectable game modes
-                    modesBitfield &= ~modeToBitmask(GameManager.GAME_MODE_UNSUPPORTED);
-                    if (!bitFieldContainsModeBitmask(modesBitfield, gameMode)) {
-                        if (bitFieldContainsModeBitmask(modesBitfield,
-                                GameManager.GAME_MODE_STANDARD)) {
-                            // If the current set mode isn't supported,
-                            // but we support STANDARD, then set the mode to STANDARD.
-                            newGameMode = GameManager.GAME_MODE_STANDARD;
-                        } else {
-                            // If we don't support any game modes, then set to UNSUPPORTED
-                            newGameMode = GameManager.GAME_MODE_UNSUPPORTED;
-                        }
-                    }
-                } else if (gameMode != GameManager.GAME_MODE_UNSUPPORTED) {
-                    // If we have no config for the package, but the configured mode is not
-                    // UNSUPPORTED, then set to UNSUPPORTED
-                    newGameMode = GameManager.GAME_MODE_UNSUPPORTED;
-                }
+                final int newGameMode = getNewGameMode(gameMode, config);
                 if (newGameMode != gameMode) {
                     setGameMode(packageName, newGameMode, userId);
                 }

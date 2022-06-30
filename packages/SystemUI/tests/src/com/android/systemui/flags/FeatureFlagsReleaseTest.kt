@@ -21,7 +21,6 @@ import android.test.suitebuilder.annotation.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Assert.assertThrows
@@ -31,8 +30,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
-import java.io.PrintWriter
-import java.io.StringWriter
 import org.mockito.Mockito.`when` as whenever
 
 /**
@@ -96,44 +93,5 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
         val flag = SysPropBooleanFlag(flagId, flagName, flagDefault)
         whenever(mSystemProperties.getBoolean(flagName, flagDefault)).thenReturn(flagDefault)
         assertThat(mFeatureFlagsRelease.isEnabled(flag)).isEqualTo(flagDefault)
-    }
-
-    @Test
-    fun testDump() {
-        val flag1 = BooleanFlag(1, true)
-        val flag2 = ResourceBooleanFlag(2, 1002)
-        val flag3 = BooleanFlag(3, false)
-        val flag4 = StringFlag(4, "")
-        val flag5 = StringFlag(5, "flag5default")
-        val flag6 = ResourceStringFlag(6, 1006)
-
-        whenever(mResources.getBoolean(1002)).thenReturn(true)
-        whenever(mResources.getString(1006)).thenReturn("resource1006")
-        whenever(mResources.getString(1007)).thenReturn("resource1007")
-
-        // WHEN the flags have been accessed
-        assertThat(mFeatureFlagsRelease.isEnabled(flag1)).isTrue()
-        assertThat(mFeatureFlagsRelease.isEnabled(flag2)).isTrue()
-        assertThat(mFeatureFlagsRelease.isEnabled(flag3)).isFalse()
-        assertThat(mFeatureFlagsRelease.getString(flag4)).isEmpty()
-        assertThat(mFeatureFlagsRelease.getString(flag5)).isEqualTo("flag5default")
-        assertThat(mFeatureFlagsRelease.getString(flag6)).isEqualTo("resource1006")
-
-        // THEN the dump contains the flags and the default values
-        val dump = dumpToString()
-        assertThat(dump).contains(" sysui_flag_1: true\n")
-        assertThat(dump).contains(" sysui_flag_2: true\n")
-        assertThat(dump).contains(" sysui_flag_3: false\n")
-        assertThat(dump).contains(" sysui_flag_4: [length=0] \"\"\n")
-        assertThat(dump).contains(" sysui_flag_5: [length=12] \"flag5default\"\n")
-        assertThat(dump).contains(" sysui_flag_6: [length=12] \"resource1006\"\n")
-    }
-
-    private fun dumpToString(): String {
-        val sw = StringWriter()
-        val pw = PrintWriter(sw)
-        mFeatureFlagsRelease.dump(mock(), pw, emptyArray())
-        pw.flush()
-        return sw.toString()
     }
 }

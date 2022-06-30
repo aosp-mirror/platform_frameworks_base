@@ -320,8 +320,12 @@ public class LauncherAppsService extends SystemService {
 
         private PackageInstallerService getPackageInstallerService() {
             if (mPackageInstallerService == null) {
-                mPackageInstallerService = ((PackageInstallerService) ((PackageManagerService)
-                        ServiceManager.getService("package")).getPackageInstaller());
+                try {
+                    mPackageInstallerService = ((PackageInstallerService) ((IPackageManager)
+                            ServiceManager.getService("package")).getPackageInstaller());
+                } catch (RemoteException e) {
+                    Slog.wtf(TAG, "Error gettig IPackageInstaller", e);
+                }
             }
             return mPackageInstallerService;
         }
@@ -1109,13 +1113,11 @@ public class LauncherAppsService extends SystemService {
             // Note the target activity doesn't have to be exported.
 
             // Flag for bubble
-            if (startActivityOptions != null) {
-                ActivityOptions options = ActivityOptions.fromBundle(startActivityOptions);
-                if (options.isApplyActivityFlagsForBubbles()) {
-                    // Flag for bubble to make behaviour match documentLaunchMode=always.
-                    intents[0].addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
-                    intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
-                }
+            ActivityOptions options = ActivityOptions.fromBundle(startActivityOptions);
+            if (options != null && options.isApplyActivityFlagsForBubbles()) {
+                // Flag for bubble to make behaviour match documentLaunchMode=always.
+                intents[0].addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
+                intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
             }
 
             intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

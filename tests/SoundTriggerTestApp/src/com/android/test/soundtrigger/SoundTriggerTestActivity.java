@@ -97,13 +97,8 @@ public class SoundTriggerTestActivity extends Activity implements SoundTriggerTe
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        // Make sure that the service is started, so even if our activity goes down, we'll still
-        // have a request for it to run.
-        startService(new Intent(getBaseContext(), SoundTriggerTestService.class));
-
-        // Bind to SoundTriggerTestService.
-        Intent intent = new Intent(this, SoundTriggerTestService.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO},
+                AUDIO_PERMISSIONS_REQUEST);
     }
 
     @Override
@@ -267,12 +262,16 @@ public class SoundTriggerTestActivity extends Activity implements SoundTriggerTe
 
     public synchronized void onCaptureAudioCheckboxClicked(View v) {
         // See if we have the right permissions
-        if (!mService.hasMicrophonePermission()) {
-            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO},
-                    AUDIO_PERMISSIONS_REQUEST);
-            return;
+        if (mService == null) {
+            Log.e(TAG, "Can't set capture audio: not bound to SoundTriggerTestService");
         } else {
-            mService.setCaptureAudio(mSelectedModelUuid, mCaptureAudioCheckBox.isChecked());
+            if (!mService.hasMicrophonePermission()) {
+                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO},
+                        AUDIO_PERMISSIONS_REQUEST);
+                return;
+            } else {
+                mService.setCaptureAudio(mSelectedModelUuid, mCaptureAudioCheckBox.isChecked());
+            }
         }
     }
 
@@ -283,8 +282,15 @@ public class SoundTriggerTestActivity extends Activity implements SoundTriggerTe
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 // Make sure that the check box is set to false.
                 mCaptureAudioCheckBox.setChecked(false);
+            } else {
+                // After granted Record_Audio permission, start and bind the service.
+                // so we can run that sound trigger capability,
+                // even if our activity goes down, we'll still have a request for it to run.
+                startService(new Intent(getBaseContext(), SoundTriggerTestService.class));
+                // Bind to SoundTriggerTestService.
+                Intent intent = new Intent(this, SoundTriggerTestService.class);
+                bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
             }
-            mService.setCaptureAudio(mSelectedModelUuid, mCaptureAudioCheckBox.isChecked());
         }
     }
 

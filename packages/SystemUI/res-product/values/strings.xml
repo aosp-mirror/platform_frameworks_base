@@ -130,4 +130,8 @@
     <!-- Text shown when viewing global actions while phone is locked and additional controls are hidden [CHAR LIMIT=NONE] -->
     <string name="global_action_lock_message" product="device">Unlock your device for more options</string>
 
+    <!-- Text informing the user that their media is now playing on this device. [CHAR LIMIT=50] -->
+    <string name="media_transfer_playing_this_device" product="default">Playing on this phone</string>
+    <!-- Text informing the user that their media is now playing on this tablet device. [CHAR LIMIT=50] -->
+    <string name="media_transfer_playing_this_device" product="tablet">Playing on this tablet</string>
 </resources>

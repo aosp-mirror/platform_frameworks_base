@@ -62,8 +62,9 @@
   <!-- View id for the action of text editor inside of an extracted text
         {@link InputMethodService#onCreateExtractTextView IME extract view}. -->
   <item type="id" name="inputExtractAction" />
-  <!-- View id for the accessories of text editor inside of an extracted text
-        {@link InputMethodService#onCreateExtractTextView IME extract view}. -->
+  <!-- View id for the accessories (such as the extracted input action button) of text editor
+       inside of an extracted text {@link InputMethodService#onCreateExtractTextView IME extract
+       view}. This layout must contain the {@link #inputExtractAction}. -->
   <item type="id" name="inputExtractAccessories" />
   <item type="id" name="selectAll" />
   <item type="id" name="cut" />
@@ -269,20 +270,8 @@
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_DRAG_CANCEL}. -->
   <item type="id" name="accessibilityActionDragCancel" />
 
-  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SWIPE_LEFT}. -->
-  <item type="id" name="accessibilityActionSwipeLeft" />
-
-  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SWIPE_RIGHT}. -->
-  <item type="id" name="accessibilityActionSwipeRight" />
-
-  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SWIPE_UP}. -->
-  <item type="id" name="accessibilityActionSwipeUp" />
-
-  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SWIPE_DOWN}. -->
-  <item type="id" name="accessibilityActionSwipeDown" />
-
-  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_SUGGESTIONS}. -->
-  <item type="id" name="accessibilityActionShowSuggestions" />
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_TEXT_SUGGESTIONS}. -->
+  <item type="id" name="accessibilityActionShowTextSuggestions" />
 
   <!-- View tag for remote views to store the index of the next child when adding nested remote views dynamically. -->
   <item type="id" name="remote_views_next_child" />

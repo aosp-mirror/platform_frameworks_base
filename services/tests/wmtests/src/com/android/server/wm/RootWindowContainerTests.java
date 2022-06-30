@@ -20,6 +20,7 @@ import static android.app.KeyguardManager.ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -297,6 +298,81 @@ public class RootWindowContainerTests extends WindowTestsBase {
                 null /* launchIntoPipHostActivity */, "initialMove");
 
         assertTrue(firstActivity.mRequestForceTransition);
+    }
+
+    /**
+     * When there is only one activity in the Task, and the activity is requesting to enter PIP, the
+     * whole Task should enter PIP.
+     */
+    @Test
+    public void testSingleActivityTaskEnterPip() {
+        final Task fullscreenTask = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(fullscreenTask)
+                .build();
+        final Task task = activity.getTask();
+
+        // Move activity to pinned root task.
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity,
+                null /* launchIntoPipHostActivity */, "test");
+
+        // Ensure a task has moved over.
+        ensureTaskPlacement(task, activity);
+        assertTrue(task.inPinnedWindowingMode());
+    }
+
+    /**
+     * When there is only one activity in the Task, and the activity is requesting to enter PIP, the
+     * whole Task should enter PIP even if the activity is in a TaskFragment.
+     */
+    @Test
+    public void testSingleActivityInTaskFragmentEnterPip() {
+        final Task fullscreenTask = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(fullscreenTask)
+                .createActivityCount(1)
+                .build();
+        final ActivityRecord activity = taskFragment.getTopMostActivity();
+        final Task task = activity.getTask();
+
+        // Move activity to pinned root task.
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity,
+                null /* launchIntoPipHostActivity */, "test");
+
+        // Ensure a task has moved over.
+        ensureTaskPlacement(task, activity);
+        assertTrue(task.inPinnedWindowingMode());
+    }
+
+    /**
+     * When there is one TaskFragment with two activities in the Task, the activity requests to
+     * enter PIP, that activity will be move to PIP root task.
+     */
+    @Test
+    public void testMultipleActivitiesInTaskFragmentEnterPip() {
+        final Task fullscreenTask = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(fullscreenTask)
+                .createActivityCount(2)
+                .build();
+        final ActivityRecord firstActivity = taskFragment.getTopMostActivity();
+        final ActivityRecord secondActivity = taskFragment.getBottomMostActivity();
+
+        // Move first activity to pinned root task.
+        mRootWindowContainer.moveActivityToPinnedRootTask(firstActivity,
+                null /* launchIntoPipHostActivity */, "test");
+
+        final TaskDisplayArea taskDisplayArea = fullscreenTask.getDisplayArea();
+        final Task pinnedRootTask = taskDisplayArea.getRootPinnedTask();
+
+        // Ensure a task has moved over.
+        ensureTaskPlacement(pinnedRootTask, firstActivity);
+        ensureTaskPlacement(fullscreenTask, secondActivity);
+        assertTrue(pinnedRootTask.inPinnedWindowingMode());
+        assertEquals(WINDOWING_MODE_FULLSCREEN, fullscreenTask.getWindowingMode());
     }
 
     private static void ensureTaskPlacement(Task task, ActivityRecord... activities) {
@@ -945,22 +1021,25 @@ public class RootWindowContainerTests extends WindowTestsBase {
                 mWm, "TDA", FEATURE_VENDOR_FIRST);
         display.addChild(taskDisplayArea, POSITION_BOTTOM);
 
-        // Making sure getting the root task from the preferred TDA
+        // Making sure getting the root task from the preferred TDA and the preferred windowing mode
         LaunchParamsController.LaunchParams launchParams =
                 new LaunchParamsController.LaunchParams();
         launchParams.mPreferredTaskDisplayArea = taskDisplayArea;
-        Task root = mRootWindowContainer.getLaunchRootTask(null /* r */, null /* options */,
+        launchParams.mWindowingMode = WINDOWING_MODE_FREEFORM;
+        Task root = mRootWindowContainer.getOrCreateRootTask(null /* r */, null /* options */,
                 null /* candidateTask */, null /* sourceTask */, true /* onTop */, launchParams,
                 0 /* launchParams */);
         assertEquals(taskDisplayArea, root.getTaskDisplayArea());
+        assertEquals(WINDOWING_MODE_FREEFORM, root.getWindowingMode());
 
         // Making sure still getting the root task from the preferred TDA when passing in a
         // launching activity.
         ActivityRecord r = new ActivityBuilder(mAtm).build();
-        root = mRootWindowContainer.getLaunchRootTask(r, null /* options */,
+        root = mRootWindowContainer.getOrCreateRootTask(r, null /* options */,
                 null /* candidateTask */, null /* sourceTask */, true /* onTop */, launchParams,
                 0 /* launchParams */);
         assertEquals(taskDisplayArea, root.getTaskDisplayArea());
+        assertEquals(WINDOWING_MODE_FREEFORM, root.getWindowingMode());
     }
 
     @Test
@@ -1018,7 +1097,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         TaskChangeNotificationController controller = mAtm.getTaskChangeNotificationController();
         spyOn(controller);
         mWm.mRoot.lockAllProfileTasks(profileUserId);
-        verify(controller).notifyTaskProfileLocked(eq(task.mTaskId), eq(profileUserId));
+        verify(controller).notifyTaskProfileLocked(any());
 
         // Create the work lock activity on top of the task
         final ActivityRecord workLockActivity = new ActivityBuilder(mAtm).setTask(task).build();
@@ -1028,7 +1107,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Make sure the listener won't be notified again.
         clearInvocations(controller);
         mWm.mRoot.lockAllProfileTasks(profileUserId);
-        verify(controller, never()).notifyTaskProfileLocked(anyInt(), anyInt());
+        verify(controller, never()).notifyTaskProfileLocked(any());
     }
 
     /**

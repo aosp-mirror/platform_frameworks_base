@@ -36,6 +36,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -216,22 +217,10 @@ public class DreamService extends Service implements Window.Callback {
             "android.service.dreams.SHOW_COMPLICATIONS";
 
     /**
-     * Extra containing a boolean for whether we are showing this dream in preview mode.
-     * @hide
-     */
-    public static final String EXTRA_IS_PREVIEW = "android.service.dreams.IS_PREVIEW";
-
-    /**
-     * The user-facing label of the current dream service.
-     * @hide
-     */
-    public static final String EXTRA_DREAM_LABEL = "android.service.dreams.DREAM_LABEL";
-
-    /**
      * The default value for whether to show complications on the overlay.
      * @hide
      */
-    public static final boolean DEFAULT_SHOW_COMPLICATIONS = true;
+    public static final boolean DEFAULT_SHOW_COMPLICATIONS = false;
 
     private final IDreamManager mDreamManager;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -270,7 +259,7 @@ public class DreamService extends Service implements Window.Callback {
         }
 
         public void bind(Context context, @Nullable ComponentName overlayService,
-                ComponentName dreamService, boolean isPreviewMode) {
+                ComponentName dreamService) {
             if (overlayService == null) {
                 return;
             }
@@ -281,8 +270,6 @@ public class DreamService extends Service implements Window.Callback {
             overlayIntent.setComponent(overlayService);
             overlayIntent.putExtra(EXTRA_SHOW_COMPLICATIONS,
                     fetchShouldShowComplications(context, serviceInfo));
-            overlayIntent.putExtra(EXTRA_DREAM_LABEL, fetchDreamLabel(context, serviceInfo));
-            overlayIntent.putExtra(EXTRA_IS_PREVIEW, isPreviewMode);
 
             context.bindService(overlayIntent,
                     this, Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE);
@@ -1007,11 +994,18 @@ public class DreamService extends Service implements Window.Callback {
             mOverlayConnection.bind(
                     /* context= */ this,
                     intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT),
-                    new ComponentName(this, getClass()),
-                    intent.getBooleanExtra(EXTRA_IS_PREVIEW, /* defaultValue= */ false));
+                    new ComponentName(this, getClass()));
         }
 
         return mDreamServiceWrapper;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        // We must unbind from any overlay connection if we are unbound before finishing.
+        mOverlayConnection.unbind(this);
+
+        return super.onUnbind(intent);
     }
 
     /**
@@ -1038,13 +1032,13 @@ public class DreamService extends Service implements Window.Callback {
         }
         mFinished = true;
 
+        mOverlayConnection.unbind(this);
+
         if (mDreamToken == null) {
             Slog.w(mTag, "Finish was called before the dream was attached.");
             stopSelf();
             return;
         }
-
-        mOverlayConnection.unbind(this);
 
         try {
             // finishSelf will unbind the dream controller from the dream service. This will
@@ -1136,18 +1130,16 @@ public class DreamService extends Service implements Window.Callback {
 
         final PackageManager pm = context.getPackageManager();
 
-        final TypedArray rawMetadata = readMetadata(pm, serviceInfo);
-        if (rawMetadata == null) return null;
-
-        final DreamMetadata metadata = new DreamMetadata(
-                convertToComponentName(rawMetadata.getString(
-                        com.android.internal.R.styleable.Dream_settingsActivity), serviceInfo),
-                rawMetadata.getDrawable(
-                        com.android.internal.R.styleable.Dream_previewImage),
-                rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
-                        DEFAULT_SHOW_COMPLICATIONS));
-        rawMetadata.recycle();
-        return metadata;
+        try (TypedArray rawMetadata = readMetadata(pm, serviceInfo)) {
+            if (rawMetadata == null) return null;
+            return new DreamMetadata(
+                    convertToComponentName(rawMetadata.getString(
+                            com.android.internal.R.styleable.Dream_settingsActivity), serviceInfo),
+                    rawMetadata.getDrawable(
+                            com.android.internal.R.styleable.Dream_previewImage),
+                    rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
+                            DEFAULT_SHOW_COMPLICATIONS));
+        }
     }
 
     /**
@@ -1279,7 +1271,10 @@ public class DreamService extends Service implements Window.Callback {
             Intent i = new Intent(this, DreamActivity.class);
             i.setPackage(getApplicationContext().getPackageName());
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            i.putExtra(DreamActivity.EXTRA_CALLBACK, mDreamServiceWrapper);
+            i.putExtra(DreamActivity.EXTRA_CALLBACK, new DreamActivityCallback(mDreamToken));
+            final ServiceInfo serviceInfo = fetchServiceInfo(this,
+                    new ComponentName(this, getClass()));
+            i.putExtra(DreamActivity.EXTRA_DREAM_TITLE, fetchDreamLabel(this, serviceInfo));
 
             try {
                 if (!ActivityTaskManager.getService().startDreamActivity(i)) {
@@ -1341,7 +1336,9 @@ public class DreamService extends Service implements Window.Callback {
                     public void onViewDetachedFromWindow(View v) {
                         if (mActivity == null || !mActivity.isChangingConfigurations()) {
                             // Only stop the dream if the view is not detached by relaunching
-                            // activity for configuration changes.
+                            // activity for configuration changes. It is important to also clear
+                            // the window reference in order to fully release the DreamActivity.
+                            mWindow = null;
                             mActivity = null;
                             finish();
                         }
@@ -1454,11 +1451,36 @@ public class DreamService extends Service implements Window.Callback {
         public void wakeUp() {
             mHandler.post(() -> DreamService.this.wakeUp(true /*fromSystem*/));
         }
+    }
 
-        /** @hide */
-        void onActivityCreated(DreamActivity a) {
-            mActivity = a;
-            onWindowCreated(a.getWindow());
+    /** @hide */
+    final class DreamActivityCallback extends Binder {
+        private final IBinder mActivityDreamToken;
+
+        DreamActivityCallback(IBinder token) {
+            mActivityDreamToken = token;
+        }
+
+        void onActivityCreated(DreamActivity activity) {
+            if (mActivityDreamToken != mDreamToken || mFinished) {
+                Slog.d(TAG, "DreamActivity was created after the dream was finished or "
+                        + "a new dream started, finishing DreamActivity");
+                if (!activity.isFinishing()) {
+                    activity.finishAndRemoveTask();
+                }
+                return;
+            }
+            if (mActivity != null) {
+                Slog.w(TAG, "A DreamActivity has already been started, "
+                        + "finishing latest DreamActivity");
+                if (!activity.isFinishing()) {
+                    activity.finishAndRemoveTask();
+                }
+                return;
+            }
+
+            mActivity = activity;
+            onWindowCreated(activity.getWindow());
         }
     }
 

@@ -70,9 +70,16 @@ class UserDataPreparer {
     void prepareUserData(int userId, int userSerial, int flags) {
         synchronized (mInstallLock) {
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
+            /*
+             * Internal storage must be prepared before adoptable storage, since the user's volume
+             * keys are stored in their internal storage.
+             */
+            prepareUserDataLI(null /* internal storage */, userId, userSerial, flags, true);
             for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
                 final String volumeUuid = vol.getFsUuid();
-                prepareUserDataLI(volumeUuid, userId, userSerial, flags, true);
+                if (volumeUuid != null) {
+                    prepareUserDataLI(volumeUuid, userId, userSerial, flags, true);
+                }
             }
         }
     }
@@ -118,8 +125,11 @@ class UserDataPreparer {
                     flags | StorageManager.FLAG_STORAGE_DE, false);
             } else {
                 try {
-                    Log.e(TAG, "prepareUserData failed", e);
-                    RecoverySystem.rebootPromptAndWipeUserData(mContext, "prepareUserData failed");
+                    Log.wtf(TAG, "prepareUserData failed for user " + userId, e);
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        RecoverySystem.rebootPromptAndWipeUserData(mContext,
+                                "prepareUserData failed for system user");
+                    }
                 } catch (IOException e2) {
                     throw new RuntimeException("error rebooting into recovery", e2);
                 }
@@ -133,10 +143,17 @@ class UserDataPreparer {
     void destroyUserData(int userId, int flags) {
         synchronized (mInstallLock) {
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
+            /*
+             * Volume destruction order isn't really important, but to avoid any weird issues we
+             * process internal storage last, the opposite of prepareUserData.
+             */
             for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
                 final String volumeUuid = vol.getFsUuid();
-                destroyUserDataLI(volumeUuid, userId, flags);
+                if (volumeUuid != null) {
+                    destroyUserDataLI(volumeUuid, userId, flags);
+                }
             }
+            destroyUserDataLI(null /* internal storage */, userId, flags);
         }
     }
 

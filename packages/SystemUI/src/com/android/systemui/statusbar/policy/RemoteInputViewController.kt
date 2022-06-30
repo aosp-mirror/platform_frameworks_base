@@ -33,13 +33,17 @@ import com.android.systemui.R
 import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.RemoteInputController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo
 import com.android.systemui.statusbar.policy.RemoteInputView.NotificationRemoteInputEvent
+import com.android.systemui.statusbar.policy.RemoteInputView.RevealParams
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewScope
 import javax.inject.Inject
 
 interface RemoteInputViewController {
     fun bind()
     fun unbind()
+
+    val isActive: Boolean
 
     /**
      * A [NotificationRemoteInputManager.BouncerChecker] that will be used to determine if the
@@ -55,6 +59,14 @@ interface RemoteInputViewController {
     /** Other [RemoteInput]s from the notification associated with this Controller. */
     var remoteInputs: Array<RemoteInput>?
 
+    var revealParams: RevealParams?
+
+    /**
+     * Sets the smart reply that should be inserted in the remote input, or `null` if the user is
+     * not editing a smart reply.
+     */
+    fun setEditedSuggestionInfo(info: EditedSuggestionInfo?)
+
     /**
      * Tries to find an action in {@param actions} that matches the current pending intent
      * of this view and updates its state to that of the found action
@@ -68,6 +80,19 @@ interface RemoteInputViewController {
 
     /** Unregisters a listener previously registered via [addOnSendRemoteInputListener] */
     fun removeOnSendRemoteInputListener(listener: OnSendRemoteInputListener)
+
+    fun close()
+
+    fun focus()
+
+    fun stealFocusFrom(other: RemoteInputViewController) {
+        other.close()
+        remoteInput = other.remoteInput
+        remoteInputs = other.remoteInputs
+        revealParams = other.revealParams
+        pendingIntent = other.pendingIntent
+        focus()
+    }
 }
 
 /** Listener for send events  */
@@ -100,14 +125,40 @@ class RemoteInputViewControllerImpl @Inject constructor(
 
     private var isBound = false
 
-    override var pendingIntent: PendingIntent? = null
     override var bouncerChecker: NotificationRemoteInputManager.BouncerChecker? = null
+
     override var remoteInput: RemoteInput? = null
+        set(value) {
+            field = value
+            value?.takeIf { isBound }?.let {
+                view.setHintText(it.label)
+                view.setSupportedMimeTypes(it.allowedDataTypes)
+            }
+        }
+
+    override var pendingIntent: PendingIntent? = null
     override var remoteInputs: Array<RemoteInput>? = null
+
+    override var revealParams: RevealParams? = null
+        set(value) {
+            field = value
+            if (isBound) {
+                view.setRevealParameters(value)
+            }
+        }
+
+    override val isActive: Boolean get() = view.isActive
 
     override fun bind() {
         if (isBound) return
         isBound = true
+
+        // TODO: refreshUI method?
+        remoteInput?.let {
+            view.setHintText(it.label)
+            view.setSupportedMimeTypes(it.allowedDataTypes)
+        }
+        view.setRevealParameters(revealParams)
 
         view.addOnEditTextFocusChangedListener(onFocusChangeListener)
         view.addOnSendRemoteInputListener(onSendRemoteInputListener)
@@ -121,6 +172,14 @@ class RemoteInputViewControllerImpl @Inject constructor(
         view.removeOnSendRemoteInputListener(onSendRemoteInputListener)
     }
 
+    override fun setEditedSuggestionInfo(info: EditedSuggestionInfo?) {
+        entry.editedSuggestionInfo = info
+        if (info != null) {
+            entry.remoteInputText = info.originalText
+            entry.remoteInputAttachment = null
+        }
+    }
+
     override fun updatePendingIntentFromActions(actions: Array<Notification.Action>?): Boolean {
         actions ?: return false
         val current: Intent = pendingIntent?.intent ?: return false
@@ -132,8 +191,7 @@ class RemoteInputViewControllerImpl @Inject constructor(
             pendingIntent = actionIntent
             remoteInput = input
             remoteInputs = inputs
-            view.pendingIntent = actionIntent
-            view.setRemoteInput(inputs, input, null /* editedSuggestionInfo */)
+            setEditedSuggestionInfo(null)
             return true
         }
         return false
@@ -146,6 +204,14 @@ class RemoteInputViewControllerImpl @Inject constructor(
     /** Removes a previously-added listener for send events on this RemoteInputView  */
     override fun removeOnSendRemoteInputListener(listener: OnSendRemoteInputListener) {
         onSendListeners.remove(listener)
+    }
+
+    override fun close() {
+        view.close()
+    }
+
+    override fun focus() {
+        view.focus()
     }
 
     private val onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
@@ -217,11 +283,12 @@ class RemoteInputViewControllerImpl @Inject constructor(
      * @return returns intent with granted URI permissions that should be used immediately
      */
     private fun prepareRemoteInput(remoteInput: RemoteInput): Intent =
-            if (entry.remoteInputAttachment == null) prepareRemoteInputFromText(remoteInput)
-            else prepareRemoteInputFromData(
-                    remoteInput,
-                    entry.remoteInputMimeType,
-                    entry.remoteInputUri)
+        if (entry.remoteInputAttachment == null)
+            prepareRemoteInputFromText(remoteInput)
+        else prepareRemoteInputFromData(
+                remoteInput,
+                entry.remoteInputMimeType,
+                entry.remoteInputUri)
 
     private fun prepareRemoteInputFromText(remoteInput: RemoteInput): Intent {
         val results = Bundle()
@@ -232,11 +299,7 @@ class RemoteInputViewControllerImpl @Inject constructor(
         view.clearAttachment()
         entry.remoteInputUri = null
         entry.remoteInputMimeType = null
-        if (entry.editedSuggestionInfo == null) {
-            RemoteInput.setResultsSource(fillInIntent, RemoteInput.SOURCE_FREE_FORM_INPUT)
-        } else {
-            RemoteInput.setResultsSource(fillInIntent, RemoteInput.SOURCE_CHOICE)
-        }
+        RemoteInput.setResultsSource(fillInIntent, remoteInputResultsSource)
         return fillInIntent
     }
 
@@ -266,11 +329,12 @@ class RemoteInputViewControllerImpl @Inject constructor(
         entry.remoteInputText = fullText
 
         // mirror prepareRemoteInputFromText for text input
-        if (entry.editedSuggestionInfo == null) {
-            RemoteInput.setResultsSource(fillInIntent, RemoteInput.SOURCE_FREE_FORM_INPUT)
-        } else if (entry.remoteInputAttachment == null) {
-            RemoteInput.setResultsSource(fillInIntent, RemoteInput.SOURCE_CHOICE)
-        }
+        RemoteInput.setResultsSource(fillInIntent, remoteInputResultsSource)
         return fillInIntent
     }
+
+    private val remoteInputResultsSource
+        get() = entry.editedSuggestionInfo
+                ?.let { RemoteInput.SOURCE_CHOICE }
+                ?: RemoteInput.SOURCE_FREE_FORM_INPUT
 }

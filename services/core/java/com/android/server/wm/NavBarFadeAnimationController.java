@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFORM;
 
 import android.annotation.NonNull;
 import android.view.SurfaceControl;
@@ -83,7 +83,7 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
         final AsyncRotationController controller =
                 mDisplayContent.getAsyncRotationController();
         final Runnable fadeAnim = () -> fadeWindowToken(show, mNavigationBar.mToken,
-                ANIMATION_TYPE_APP_TRANSITION);
+                ANIMATION_TYPE_TOKEN_TRANSFORM);
         if (controller == null) {
             fadeAnim.run();
         } else if (!controller.isTargetToken(mNavigationBar.mToken)) {

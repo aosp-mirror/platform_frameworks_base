@@ -160,8 +160,7 @@ class ChannelEditorDialogController @Inject constructor(
         val channels = groupList
                 .flatMap { group ->
                     group.channels.asSequence().filterNot { channel ->
-                        channel.isImportanceLockedByOEM ||
-                                channel.importance == IMPORTANCE_NONE ||
+                        channel.importance == IMPORTANCE_NONE ||
                                 channel.isImportanceLockedByCriticalDeviceFunction
                     }
                 }

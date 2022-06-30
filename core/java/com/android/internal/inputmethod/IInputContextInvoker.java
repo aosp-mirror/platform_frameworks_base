@@ -603,6 +603,30 @@ public final class IInputContextInvoker {
     }
 
     /**
+     * Invokes {@link IInputContext#requestCursorUpdatesWithFilter(InputConnectionCommandHeader,
+     * int, int, int, AndroidFuture)}.
+     *
+     * @param cursorUpdateMode {@code cursorUpdateMode} parameter to be passed.
+     * @param cursorUpdateFilter {@code cursorUpdateFilter} parameter to be passed.
+     * @param imeDisplayId the display ID that is associated with the IME.
+     * @return {@link AndroidFuture<Boolean>} that can be used to retrieve the invocation
+     *         result. {@link RemoteException} will be treated as an error.
+     */
+    @AnyThread
+    @NonNull
+    public AndroidFuture<Boolean> requestCursorUpdates(int cursorUpdateMode, int cursorUpdateFilter,
+            int imeDisplayId) {
+        final AndroidFuture<Boolean> future = new AndroidFuture<>();
+        try {
+            mIInputContext.requestCursorUpdatesWithFilter(createHeader(), cursorUpdateMode,
+                    cursorUpdateFilter, imeDisplayId, future);
+        } catch (RemoteException e) {
+            future.completeExceptionally(e);
+        }
+        return future;
+    }
+
+    /**
      * Invokes {@link IInputContext#commitContent(InputConnectionCommandHeader, InputContentInfo,
      * int, Bundle, AndroidFuture)}.
      *

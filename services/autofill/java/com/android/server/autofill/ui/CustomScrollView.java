@@ -18,7 +18,9 @@ package com.android.server.autofill.ui;
 import static com.android.server.autofill.Helper.sDebug;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Point;
+import android.provider.DeviceConfig;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.util.TypedValue;
@@ -34,24 +36,61 @@ public class CustomScrollView extends ScrollView {
 
     private static final String TAG = "CustomScrollView";
 
+    /**
+     * Sets the max percent of screen that the autofill save dialog can take up in height
+     * when the device is in portrait orientation.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_SAVE_DIALOG_PORTRAIT_BODY_HEIGHT_MAX_PERCENT =
+            "autofill_save_dialog_portrait_body_height_max_percent";
+
+    /**
+     * Sets the max percent of screen that the autofill save dialog can take up in height
+     * when the device is in landscape orientation.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_SAVE_DIALOG_LANDSCAPE_BODY_HEIGHT_MAX_PERCENT =
+            "autofill_save_dialog_landscape_body_height_max_percent";
+
     private int mWidth = -1;
     private int mHeight = -1;
+    private int mMaxPortraitBodyHeightPercent;
+    private int mMaxLandscapeBodyHeightPercent;
+    private int mAttrBasedMaxHeightPercent;
 
     public CustomScrollView(Context context) {
         super(context);
+        setMaxBodyHeightPercent(context);
     }
 
     public CustomScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setMaxBodyHeightPercent(context);
     }
 
     public CustomScrollView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        setMaxBodyHeightPercent(context);
     }
 
     public CustomScrollView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        setMaxBodyHeightPercent(context);
+    }
+
+    private void setMaxBodyHeightPercent(Context context) {
+        mAttrBasedMaxHeightPercent = getAttrBasedMaxHeightPercent(context);
+        mMaxPortraitBodyHeightPercent = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_SAVE_DIALOG_PORTRAIT_BODY_HEIGHT_MAX_PERCENT,
+                mAttrBasedMaxHeightPercent);
+        mMaxLandscapeBodyHeightPercent = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_SAVE_DIALOG_LANDSCAPE_BODY_HEIGHT_MAX_PERCENT,
+                mAttrBasedMaxHeightPercent);
     }
 
     @Override
@@ -72,20 +111,35 @@ public class CustomScrollView extends ScrollView {
     private void calculateDimensions() {
         if (mHeight != -1) return;
 
-        final TypedValue typedValue = new TypedValue();
         final Point point = new Point();
         final Context context = getContext();
         context.getDisplayNoVerify().getSize(point);
-        context.getTheme().resolveAttribute(R.attr.autofillSaveCustomSubtitleMaxHeight,
-                typedValue, true);
-        final View child = getChildAt(0);
-        final int childHeight = child.getMeasuredHeight();
-        final int maxHeight = (int) typedValue.getFraction(point.y, point.y);
 
-        mHeight = Math.min(childHeight, maxHeight);
+        final View content = getChildAt(0);
+        final int contentHeight = content.getMeasuredHeight();
+        int displayHeight = point.y;
+
+        int maxHeight = (getResources().getConfiguration().orientation
+                    == Configuration.ORIENTATION_LANDSCAPE)
+                ? (int) (mMaxLandscapeBodyHeightPercent * displayHeight / 100)
+                : (int) (mMaxPortraitBodyHeightPercent * displayHeight / 100);
+        mHeight = Math.min(contentHeight, maxHeight);
+
         if (sDebug) {
-            Slog.d(TAG, "calculateDimensions(): maxHeight=" + maxHeight
-                    + ", childHeight=" + childHeight + ", w=" + mWidth + ", h=" + mHeight);
+            Slog.d(TAG, "calculateDimensions():"
+                    + " mMaxPortraitBodyHeightPercent=" + mMaxPortraitBodyHeightPercent
+                    + ", mMaxLandscapeBodyHeightPercent=" + mMaxLandscapeBodyHeightPercent
+                    + ", mAttrBasedMaxHeightPercent=" + mAttrBasedMaxHeightPercent
+                    + ", maxHeight=" + maxHeight
+                    + ", contentHeight=" + contentHeight
+                    + ", w=" + mWidth + ", h=" + mHeight);
         }
+    }
+
+    private int getAttrBasedMaxHeightPercent(Context context) {
+        final TypedValue maxHeightAttrTypedValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.autofillSaveCustomSubtitleMaxHeight,
+                maxHeightAttrTypedValue, true);
+        return (int) maxHeightAttrTypedValue.getFraction(100, 100);
     }
 }

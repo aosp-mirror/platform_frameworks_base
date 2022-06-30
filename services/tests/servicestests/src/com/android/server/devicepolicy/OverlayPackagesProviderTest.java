@@ -309,7 +309,7 @@ public class OverlayPackagesProviderTest {
 
     @Test
     public void testGetNonRequiredApps_managedProfile_roleHolder_works() {
-        when(mInjector.getDeviceManagerRoleHolderPackageName(any()))
+        when(mInjector.getDevicePolicyManagementRoleHolderPackageName(any()))
                 .thenReturn(ROLE_HOLDER_PACKAGE_NAME);
         setSystemAppsWithLauncher("package1", "package2", ROLE_HOLDER_PACKAGE_NAME);
 
@@ -319,7 +319,7 @@ public class OverlayPackagesProviderTest {
 
     @Test
     public void testGetNonRequiredApps_managedDevice_roleHolder_works() {
-        when(mInjector.getDeviceManagerRoleHolderPackageName(any()))
+        when(mInjector.getDevicePolicyManagementRoleHolderPackageName(any()))
                 .thenReturn(ROLE_HOLDER_PACKAGE_NAME);
         setSystemAppsWithLauncher("package1", "package2", ROLE_HOLDER_PACKAGE_NAME);
 

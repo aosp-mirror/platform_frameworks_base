@@ -18,8 +18,13 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.ImageView;
+
+import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.android.systemui.R;
 
@@ -27,6 +32,7 @@ import com.android.systemui.R;
  * Displays a PIN pad for unlocking.
  */
 public class KeyguardSimPinView extends KeyguardPinBasedInputView {
+    private ImageView mSimImageView;
     public static final String TAG = "KeyguardSimPinView";
 
     public KeyguardSimPinView(Context context) {
@@ -62,6 +68,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
 
     @Override
     protected void onFinishInflate() {
+        mSimImageView = findViewById(R.id.keyguard_sim);
         super.onFinishInflate();
 
         if (mEcaView instanceof EmergencyCarrierArea) {
@@ -78,6 +85,18 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     public CharSequence getTitle() {
         return getContext().getString(
                 com.android.internal.R.string.keyguard_accessibility_sim_pin_unlock);
+    }
+
+    @Override
+    public void reloadColors() {
+        super.reloadColors();
+
+        int[] customAttrs = {android.R.attr.textColorSecondary};
+        TypedArray a = getContext().obtainStyledAttributes(customAttrs);
+        int imageColor = a.getColor(0, 0);
+        a.recycle();
+        Drawable wrappedDrawable = DrawableCompat.wrap(mSimImageView.getDrawable());
+        DrawableCompat.setTint(wrappedDrawable, imageColor);
     }
 }
 

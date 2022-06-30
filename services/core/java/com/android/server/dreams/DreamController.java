@@ -140,7 +140,6 @@ final class DreamController {
             intent.setComponent(name);
             intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
             intent.putExtra(DreamService.EXTRA_DREAM_OVERLAY_COMPONENT, overlayComponentName);
-            intent.putExtra(DreamService.EXTRA_IS_PREVIEW, isPreviewMode);
             try {
                 if (!mContext.bindServiceAsUser(intent, mCurrentDream,
                         Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,

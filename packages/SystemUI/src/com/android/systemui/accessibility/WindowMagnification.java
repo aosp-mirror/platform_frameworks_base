@@ -41,7 +41,6 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
@@ -172,6 +171,17 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     }
 
     @MainThread
+    void moveWindowMagnifierToPositionInternal(int displayId, float positionX, float positionY,
+            IRemoteMagnificationAnimationCallback callback) {
+        final WindowMagnificationController windowMagnificationController =
+                mMagnificationControllerSupplier.get(displayId);
+        if (windowMagnificationController != null) {
+            windowMagnificationController.moveWindowMagnifierToPosition(positionX, positionY,
+                    callback);
+        }
+    }
+
+    @MainThread
     void disableWindowMagnification(int displayId,
             @Nullable IRemoteMagnificationAnimationCallback callback) {
         final WindowMagnificationController windowMagnificationController =
@@ -210,9 +220,9 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     }
 
     @Override
-    public void onDrag(int displayId) {
+    public void onMove(int displayId) {
         if (mWindowMagnificationConnectionImpl != null) {
-            mWindowMagnificationConnectionImpl.onDrag(displayId);
+            mWindowMagnificationConnectionImpl.onMove(displayId);
         }
     }
 
@@ -226,7 +236,7 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG);
         mMagnificationControllerSupplier.forEach(
                 magnificationController -> magnificationController.dump(pw));

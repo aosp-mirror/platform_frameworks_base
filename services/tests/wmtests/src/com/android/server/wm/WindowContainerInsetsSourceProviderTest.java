@@ -64,6 +64,7 @@ public class WindowContainerInsetsSourceProviderTest extends WindowTestsBase {
         statusBar.getFrame().set(0, 0, 500, 100);
         statusBar.mHasSurface = true;
         mProvider.setWindowContainer(statusBar, null, null);
+        mProvider.updateSourceFrame(statusBar.getFrame());
         mProvider.onPostLayout();
         assertEquals(new Rect(0, 0, 500, 100), mProvider.getSource().getFrame());
         assertEquals(Insets.of(0, 100, 0, 0),
@@ -81,6 +82,7 @@ public class WindowContainerInsetsSourceProviderTest extends WindowTestsBase {
         ime.mGivenVisibleInsets.set(0, 0, 0, 75);
         ime.mHasSurface = true;
         mProvider.setWindowContainer(ime, null, null);
+        mProvider.updateSourceFrame(ime.getFrame());
         mProvider.onPostLayout();
         assertEquals(new Rect(0, 0, 500, 40), mProvider.getSource().getFrame());
         assertEquals(new Rect(0, 0, 500, 25), mProvider.getSource().getVisibleFrame());
@@ -96,6 +98,7 @@ public class WindowContainerInsetsSourceProviderTest extends WindowTestsBase {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindowContainer(statusBar, null, null);
+        mProvider.updateSourceFrame(statusBar.getFrame());
         mProvider.onPostLayout();
         assertEquals(Insets.NONE, mProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
                 false /* ignoreVisibility */));
@@ -110,6 +113,7 @@ public class WindowContainerInsetsSourceProviderTest extends WindowTestsBase {
                 (displayFrames, windowState, rect) -> {
                     rect.set(10, 10, 20, 20);
                 }, null);
+        mProvider.updateSourceFrame(statusBar.getFrame());
         mProvider.onPostLayout();
         assertEquals(new Rect(10, 10, 20, 20), mProvider.getSource().getFrame());
     }
@@ -181,7 +185,7 @@ public class WindowContainerInsetsSourceProviderTest extends WindowTestsBase {
         mImeProvider.setWindowContainer(inputMethod, null, null);
         mImeProvider.setServerVisible(false);
         mImeSource.setVisible(true);
-        mImeProvider.updateSourceFrame();
+        mImeProvider.updateSourceFrame(inputMethod.getFrame());
         assertEquals(new Rect(0, 0, 0, 0), mImeSource.getFrame());
         Insets insets = mImeSource.calculateInsets(new Rect(0, 0, 500, 500),
                 false /* ignoreVisibility */);
@@ -189,7 +193,7 @@ public class WindowContainerInsetsSourceProviderTest extends WindowTestsBase {
 
         mImeProvider.setServerVisible(true);
         mImeSource.setVisible(true);
-        mImeProvider.updateSourceFrame();
+        mImeProvider.updateSourceFrame(inputMethod.getFrame());
         assertEquals(inputMethod.getFrame(), mImeSource.getFrame());
         insets = mImeSource.calculateInsets(new Rect(0, 0, 500, 500),
                 false /* ignoreVisibility */);
@@ -229,6 +233,7 @@ public class WindowContainerInsetsSourceProviderTest extends WindowTestsBase {
         statusBar.getFrame().set(0, 0, 500, 100);
         statusBar.mHasSurface = true;
         mProvider.setWindowContainer(statusBar, null, null);
+        mProvider.updateSourceFrame(statusBar.getFrame());
         mProvider.onPostLayout();
         assertEquals(new Rect(0, 0, 500, 100), mProvider.getSource().getFrame());
         // Still apply top insets if window overlaps even if it's top doesn't exactly match

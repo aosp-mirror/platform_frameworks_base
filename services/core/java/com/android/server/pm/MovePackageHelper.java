@@ -57,6 +57,8 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageStateUtils;
 
 import java.io.File;
 import java.util.Objects;
@@ -77,81 +79,74 @@ public final class MovePackageHelper {
         final StorageManager storage = mPm.mInjector.getSystemService(StorageManager.class);
         final PackageManager pm = mPm.mContext.getPackageManager();
 
-        final String currentVolumeUuid;
-        final File codeFile;
-        final InstallSource installSource;
-        final String packageAbiOverride;
-        final int appId;
-        final String seinfo;
-        final String label;
-        final int targetSdkVersion;
-        final PackageFreezer freezer;
-        final int[] installedUserIds;
-        final boolean isCurrentLocationExternal;
+        Computer snapshot = mPm.snapshotComputer();
+        final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
+        if (packageState == null
+                || packageState.getPkg() == null
+                || snapshot.shouldFilterApplication(packageState, callingUid, user.getIdentifier())) {
+            throw new PackageManagerException(MOVE_FAILED_DOESNT_EXIST, "Missing package");
+        }
+        final AndroidPackage pkg = packageState.getPkg();
+        if (pkg.isSystem()) {
+            throw new PackageManagerException(MOVE_FAILED_SYSTEM_PACKAGE,
+                    "Cannot move system application");
+        }
+
+        final boolean isInternalStorage = VolumeInfo.ID_PRIVATE_INTERNAL.equals(volumeUuid);
+        final boolean allow3rdPartyOnInternal = mPm.mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_allow3rdPartyAppOnInternal);
+        if (isInternalStorage && !allow3rdPartyOnInternal) {
+            throw new PackageManagerException(MOVE_FAILED_3RD_PARTY_NOT_ALLOWED_ON_INTERNAL,
+                    "3rd party apps are not allowed on internal storage");
+        }
+
+
+        final String currentVolumeUuid = packageState.getVolumeUuid();
+
+        final File probe = new File(pkg.getPath());
+        final File probeOat = new File(probe, "oat");
+        if (!probe.isDirectory() || !probeOat.isDirectory()) {
+            throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
+                    "Move only supported for modern cluster style installs");
+        }
+
+        if (Objects.equals(currentVolumeUuid, volumeUuid)) {
+            throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
+                    "Package already moved to " + volumeUuid);
+        }
+        if (!pkg.isExternalStorage()
+                && mPm.isPackageDeviceAdminOnAnyUser(snapshot, packageName)) {
+            throw new PackageManagerException(MOVE_FAILED_DEVICE_ADMIN,
+                    "Device admin cannot be moved");
+        }
+
+        if (snapshot.getFrozenPackages().containsKey(packageName)) {
+            throw new PackageManagerException(MOVE_FAILED_OPERATION_PENDING,
+                    "Failed to move already frozen package");
+        }
+
+        final boolean isCurrentLocationExternal = pkg.isExternalStorage();
+        final File codeFile = new File(pkg.getPath());
+        final InstallSource installSource = packageState.getInstallSource();
+        final String packageAbiOverride = packageState.getCpuAbiOverride();
+        final int appId = UserHandle.getAppId(pkg.getUid());
+        final String seinfo = AndroidPackageUtils.getSeInfo(pkg, packageState);
+        final String label = String.valueOf(pm.getApplicationLabel(
+                AndroidPackageUtils.generateAppInfoWithoutState(pkg)));
+        final int targetSdkVersion = pkg.getTargetSdkVersion();
+        final int[] installedUserIds = PackageStateUtils.queryInstalledUsers(packageState,
+                mPm.mUserManager.getUserIds(), true);
         final String fromCodePath;
+        if (codeFile.getParentFile().getName().startsWith(
+                PackageManagerService.RANDOM_DIR_PREFIX)) {
+            fromCodePath = codeFile.getParentFile().getAbsolutePath();
+        } else {
+            fromCodePath = codeFile.getAbsolutePath();
+        }
 
-        // reader
+        final PackageFreezer freezer;
         synchronized (mPm.mLock) {
-            final AndroidPackage pkg = mPm.mPackages.get(packageName);
-            final PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
-            if (pkg == null
-                    || ps == null
-                    || mPm.shouldFilterApplication(ps, callingUid, user.getIdentifier())) {
-                throw new PackageManagerException(MOVE_FAILED_DOESNT_EXIST, "Missing package");
-            }
-            if (pkg.isSystem()) {
-                throw new PackageManagerException(MOVE_FAILED_SYSTEM_PACKAGE,
-                        "Cannot move system application");
-            }
-
-            final boolean isInternalStorage = VolumeInfo.ID_PRIVATE_INTERNAL.equals(volumeUuid);
-            final boolean allow3rdPartyOnInternal = mPm.mContext.getResources().getBoolean(
-                    com.android.internal.R.bool.config_allow3rdPartyAppOnInternal);
-            if (isInternalStorage && !allow3rdPartyOnInternal) {
-                throw new PackageManagerException(MOVE_FAILED_3RD_PARTY_NOT_ALLOWED_ON_INTERNAL,
-                        "3rd party apps are not allowed on internal storage");
-            }
-
-            currentVolumeUuid = ps.getVolumeUuid();
-
-            final File probe = new File(pkg.getPath());
-            final File probeOat = new File(probe, "oat");
-            if (!probe.isDirectory() || !probeOat.isDirectory()) {
-                throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
-                        "Move only supported for modern cluster style installs");
-            }
-
-            if (Objects.equals(currentVolumeUuid, volumeUuid)) {
-                throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
-                        "Package already moved to " + volumeUuid);
-            }
-            if (!pkg.isExternalStorage() && mPm.isPackageDeviceAdminOnAnyUser(packageName)) {
-                throw new PackageManagerException(MOVE_FAILED_DEVICE_ADMIN,
-                        "Device admin cannot be moved");
-            }
-
-            if (mPm.mFrozenPackages.containsKey(packageName)) {
-                throw new PackageManagerException(MOVE_FAILED_OPERATION_PENDING,
-                        "Failed to move already frozen package");
-            }
-
-            isCurrentLocationExternal = pkg.isExternalStorage();
-            codeFile = new File(pkg.getPath());
-            installSource = ps.getInstallSource();
-            packageAbiOverride = ps.getCpuAbiOverride();
-            appId = UserHandle.getAppId(pkg.getUid());
-            seinfo = AndroidPackageUtils.getSeInfo(pkg, ps);
-            label = String.valueOf(pm.getApplicationLabel(
-                    AndroidPackageUtils.generateAppInfoWithoutState(pkg)));
-            targetSdkVersion = pkg.getTargetSdkVersion();
             freezer = mPm.freezePackage(packageName, "movePackageInternal");
-            installedUserIds = ps.queryInstalledUsers(mPm.mUserManager.getUserIds(), true);
-            if (codeFile.getParentFile().getName().startsWith(
-                    PackageManagerService.RANDOM_DIR_PREFIX)) {
-                fromCodePath = codeFile.getParentFile().getAbsolutePath();
-            } else {
-                fromCodePath = codeFile.getAbsolutePath();
-            }
         }
 
         final Bundle extras = new Bundle();

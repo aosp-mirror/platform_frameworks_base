@@ -33,6 +33,12 @@ import java.util.List;
  * and amplitude to simulate waveforms represented by a sequence of {@link StepSegment}.
  */
 final class SetAmplitudeVibratorStep extends AbstractVibratorStep {
+    /**
+     * The repeating waveform keeps the vibrator ON all the time. Use a minimum duration to
+     * prevent short patterns from turning the vibrator ON too frequently.
+     */
+    private static final int REPEATING_EFFECT_ON_DURATION = 5000; // 5s
+
     private long mNextOffTime;
 
     SetAmplitudeVibratorStep(VibrationStepConductor conductor, long startTime,
@@ -170,10 +176,7 @@ final class SetAmplitudeVibratorStep extends AbstractVibratorStep {
                 repeatIndex = -1;
             }
             if (i == startIndex) {
-                // The repeating waveform keeps the vibrator ON all the time. Use a minimum
-                // of 1s duration to prevent short patterns from turning the vibrator ON too
-                // frequently.
-                return Math.max(timing, 1000);
+                return Math.max(timing, REPEATING_EFFECT_ON_DURATION);
             }
         }
         if (i == segmentCount && effect.getRepeatIndex() < 0) {

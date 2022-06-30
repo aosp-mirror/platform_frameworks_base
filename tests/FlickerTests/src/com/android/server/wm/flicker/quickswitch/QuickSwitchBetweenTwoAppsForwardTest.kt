@@ -51,7 +51,7 @@ import org.junit.runners.Parameterized
 /**
  * Test quick switching back to previous app from last opened app
  *
- * To run this test: `atest FlickerTests:QuickSwitchBetweenTwoAppsBackTest`
+ * To run this test: `atest FlickerTests:QuickSwitchBetweenTwoAppsForwardTest`
  *
  * Actions:
  *     Launch an app [testApp1]
@@ -70,6 +70,11 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
 
     private val testApp1 = SimpleAppHelper(instrumentation)
     private val testApp2 = NonResizeableAppHelper(instrumentation)
+
+    @Before
+    open fun before() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+    }
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
@@ -112,12 +117,6 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
                 }
             }
         }
-    }
-
-    @Before
-    open fun setup() {
-        // This test doesn't work in shell transitions because of b/213867585
-        Assume.assumeFalse(isShellTransitionsEnabled)
     }
 
     /**

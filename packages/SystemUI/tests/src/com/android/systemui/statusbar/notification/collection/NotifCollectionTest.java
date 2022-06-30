@@ -32,6 +32,8 @@ import static com.android.systemui.statusbar.notification.collection.Notificatio
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.NOT_DISMISSED;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.PARENT_DISMISSED;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -47,6 +49,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import static java.util.Collections.singletonList;
@@ -180,13 +183,14 @@ public class NotifCollectionTest extends SysuiTestCase {
 
     @Test
     public void testGetGroupSummary() {
-        assertEquals(null, mCollection.getGroupSummary("group"));
-        NotifEvent summary = mNoMan.postNotif(
-                buildNotif(TEST_PACKAGE, 0)
-                        .setGroup(mContext, "group")
-                        .setGroupSummary(mContext, true));
+        final NotificationEntryBuilder entryBuilder = buildNotif(TEST_PACKAGE, 0)
+                .setGroup(mContext, "group")
+                .setGroupSummary(mContext, true);
+        final String groupKey = entryBuilder.build().getSbn().getGroupKey();
+        assertEquals(null, mCollection.getGroupSummary(groupKey));
+        NotifEvent summary = mNoMan.postNotif(entryBuilder);
 
-        final NotificationEntry entry = mCollection.getGroupSummary("group");
+        final NotificationEntry entry = mCollection.getGroupSummary(groupKey);
         assertEquals(summary.key, entry.getKey());
         assertEquals(summary.sbn, entry.getSbn());
         assertEquals(summary.ranking, entry.getRanking());
@@ -194,9 +198,9 @@ public class NotifCollectionTest extends SysuiTestCase {
 
     @Test
     public void testIsOnlyChildInGroup() {
-        NotifEvent notif1 = mNoMan.postNotif(
-                buildNotif(TEST_PACKAGE, 1)
-                        .setGroup(mContext, "group"));
+        final NotificationEntryBuilder entryBuilder = buildNotif(TEST_PACKAGE, 1)
+                .setGroup(mContext, "group");
+        NotifEvent notif1 = mNoMan.postNotif(entryBuilder);
         final NotificationEntry entry = mCollection.getEntry(notif1.key);
         assertTrue(mCollection.isOnlyChildInGroup(entry));
 
@@ -1485,6 +1489,55 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mCollectionListener, never()).onRankingApplied();
         verify(mCollectionListener, never()).onEntryUpdated(any());
         verify(mCollectionListener, never()).onEntryUpdated(any(), anyBoolean());
+    }
+
+    @Test
+    public void testRegisterFutureDismissal() throws RemoteException {
+        // GIVEN a pipeline with one notification
+        NotifEvent notifEvent = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotificationEntry entry = requireNonNull(mCollection.getEntry(notifEvent.key));
+        clearInvocations(mCollectionListener);
+
+        // WHEN registering a future dismissal, nothing happens right away
+        final Runnable onDismiss = mCollection.registerFutureDismissal(entry, REASON_CLICK,
+                NotifCollectionTest::defaultStats);
+        verifyNoMoreInteractions(mCollectionListener);
+
+        // WHEN finally dismissing
+        onDismiss.run();
+        verify(mStatusBarService).onNotificationClear(any(), anyInt(), eq(notifEvent.key),
+                anyInt(), anyInt(), any());
+        verifyNoMoreInteractions(mStatusBarService);
+        verifyNoMoreInteractions(mCollectionListener);
+    }
+
+    @Test
+    public void testRegisterFutureDismissalWithRetractionAndRepost() {
+        // GIVEN a pipeline with one notification
+        NotifEvent notifEvent = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotificationEntry entry = requireNonNull(mCollection.getEntry(notifEvent.key));
+        clearInvocations(mCollectionListener);
+
+        // WHEN registering a future dismissal, nothing happens right away
+        final Runnable onDismiss = mCollection.registerFutureDismissal(entry, REASON_CLICK,
+                NotifCollectionTest::defaultStats);
+        verifyNoMoreInteractions(mCollectionListener);
+
+        // WHEN retracting the notification, and then reposting
+        mNoMan.retractNotif(notifEvent.sbn, REASON_CLICK);
+        mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        clearInvocations(mCollectionListener);
+
+        // KNOWING that the entry in the collection is different now
+        assertThat(mCollection.getEntry(notifEvent.key)).isNotSameInstanceAs(entry);
+
+        // WHEN finally dismissing
+        onDismiss.run();
+
+        // VERIFY that nothing happens; the notification should not be removed
+        verifyNoMoreInteractions(mCollectionListener);
+        assertThat(mCollection.getEntry(notifEvent.key)).isNotNull();
+        verifyNoMoreInteractions(mStatusBarService);
     }
 
     @Test

@@ -154,7 +154,7 @@
     <!-- Needed for WallpaperManager.clear in ImageWallpaper.updateWallpaperLocked -->
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
 
-    <!-- Needed for WallpaperManager.getWallpaperDimAmount in StatusBar.updateTheme -->
+    <!-- Needed for WallpaperManager.getWallpaperDimAmount in CentralSurfaces.updateTheme -->
     <uses-permission android:name="android.permission.SET_WALLPAPER_DIM_AMOUNT"/>
 
     <!-- Wifi Display -->
@@ -224,6 +224,7 @@
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.GET_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
 
     <!-- It's like, reality, but, you know, virtual -->
     <uses-permission android:name="android.permission.ACCESS_VR_MANAGER" />
@@ -314,6 +315,16 @@
     <!-- To change system captions state -->
     <uses-permission android:name="android.permission.SET_SYSTEM_AUDIO_CAPTION" />
 
+    <!-- Compat framework -->
+    <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE" />
+    <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
+    <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
+
+    <!-- To read safety center status -->
+    <uses-permission android:name="android.permission.READ_SAFETY_CENTER_STATUS" />
+
+    <uses-permission android:name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
@@ -380,6 +391,7 @@
                   android:theme="@style/LongScreenshotActivity"
                   android:process=":screenshot"
                   android:exported="false"
+                  android:label="@string/screenshot_scroll_label"
                   android:finishOnTaskLaunch="true" />
 
         <service android:name=".screenrecord.RecordingService" />
@@ -513,7 +525,8 @@
                   android:launchMode="singleTop"
                   android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
                   android:theme="@style/Theme.SystemUI.Dialog.Alert"
-                  android:finishOnCloseSystemDialogs="true">
+                  android:finishOnCloseSystemDialogs="true"
+                  android:showForAllUsers="true">
         </activity>
 
         <!-- started from SensoryPrivacyService -->
@@ -522,7 +535,8 @@
                   android:launchMode="singleTop"
                   android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
                   android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true">
+                  android:finishOnCloseSystemDialogs="true"
+                  android:showForAllUsers="true">
         </activity>
 
 
@@ -774,6 +788,7 @@
                   android:theme="@style/EditTextActivity"
                   android:exported="false"
                   android:excludeFromRecents="true"
+                  android:label="@string/clipboard_editor"
                   />
 
         <activity android:name=".controls.management.ControlsProviderSelectorActivity"
@@ -794,7 +809,7 @@
                   android:noHistory="true"
                   android:showForAllUsers="true"
                   android:finishOnTaskLaunch="true"
-                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
                   android:visibleToInstantApps="true">
         </activity>
 
@@ -805,7 +820,7 @@
                   android:showForAllUsers="true"
                   android:finishOnTaskLaunch="true"
                   android:launchMode="singleInstance"
-                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
                   android:visibleToInstantApps="true">
         </activity>
 
@@ -919,6 +934,7 @@
                   android:exported="true">
             <intent-filter>
                 <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG" />
+                <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG" />
                 <action android:name="com.android.systemui.action.DISMISS_MEDIA_OUTPUT_DIALOG" />
             </intent-filter>
         </receiver>

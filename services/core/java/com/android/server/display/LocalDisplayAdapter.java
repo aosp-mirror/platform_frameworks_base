@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.Mode.INVALID_MODE_ID;
 
 import android.app.ActivityThread;
@@ -29,6 +30,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.util.DisplayUtils;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -73,6 +75,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private final SurfaceControlProxy mSurfaceControlProxy;
 
+    private final boolean mIsBootDisplayModeSupported;
+
+    private Context mOverlayContext;
+
     // Called with SyncRoot lock held.
     public LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener) {
@@ -85,6 +91,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         super(syncRoot, context, handler, listener, TAG);
         mInjector = injector;
         mSurfaceControlProxy = mInjector.getSurfaceControlProxy();
+        mIsBootDisplayModeSupported = mSurfaceControlProxy.getBootDisplayModeSupport();
     }
 
     @Override
@@ -138,9 +145,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             LocalDisplayDevice device = mDevices.get(physicalDisplayId);
             if (device == null) {
                 // Display was added.
-                final boolean isDefaultDisplay = mDevices.size() == 0;
+                final boolean isFirstDisplay = mDevices.size() == 0;
                 device = new LocalDisplayDevice(displayToken, physicalDisplayId, staticInfo,
-                        dynamicInfo, modeSpecs, isDefaultDisplay);
+                        dynamicInfo, modeSpecs, isFirstDisplay);
                 mDevices.put(physicalDisplayId, device);
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
             } else if (device.updateDisplayPropertiesLocked(staticInfo, dynamicInfo,
@@ -184,7 +191,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private final ArrayList<Integer> mSupportedColorModes = new ArrayList<>();
         private final DisplayModeDirector.DesiredDisplayModeSpecs mDisplayModeSpecs =
                 new DisplayModeDirector.DesiredDisplayModeSpecs();
-        private final boolean mIsDefaultDisplay;
+        private final boolean mIsFirstDisplay;
         private final BacklightAdapter mBacklightAdapter;
         private final SidekickInternal mSidekickInternal;
 
@@ -223,14 +230,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         LocalDisplayDevice(IBinder displayToken, long physicalDisplayId,
                 SurfaceControl.StaticDisplayInfo staticDisplayInfo,
                 SurfaceControl.DynamicDisplayInfo dynamicInfo,
-                SurfaceControl.DesiredDisplayModeSpecs modeSpecs, boolean isDefaultDisplay) {
+                SurfaceControl.DesiredDisplayModeSpecs modeSpecs, boolean isFirstDisplay) {
             super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + physicalDisplayId,
                     getContext());
             mPhysicalDisplayId = physicalDisplayId;
-            mIsDefaultDisplay = isDefaultDisplay;
+            mIsFirstDisplay = isFirstDisplay;
             updateDisplayPropertiesLocked(staticDisplayInfo, dynamicInfo, modeSpecs);
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
-            mBacklightAdapter = new BacklightAdapter(displayToken, isDefaultDisplay,
+            mBacklightAdapter = new BacklightAdapter(displayToken, isFirstDisplay,
                     mSurfaceControlProxy);
             mActiveDisplayModeAtStartId = dynamicInfo.activeDisplayModeId;
         }
@@ -349,8 +356,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                 if (preferredRecord != null) {
                     int preferredModeId = preferredRecord.mMode.getModeId();
-                    if (mSurfaceControlProxy.getBootDisplayModeSupport()
-                            && mSystemPreferredModeId != preferredModeId) {
+                    if (mIsBootDisplayModeSupported && mSystemPreferredModeId != preferredModeId) {
                         mSystemPreferredModeId = preferredModeId;
                         preferredModeChanged = true;
                     }
@@ -466,19 +472,19 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         private int getLogicalDensity() {
-            DensityMap densityMap = getDisplayDeviceConfig().getDensityMap();
-            if (densityMap == null) {
+            DensityMapping densityMapping = getDisplayDeviceConfig().getDensityMapping();
+            if (densityMapping == null) {
                 return (int) (mStaticDisplayInfo.density * 160 + 0.5);
             }
 
-            return densityMap.getDensityForResolution(mInfo.width, mInfo.height);
+            return densityMapping.getDensityForResolution(mInfo.width, mInfo.height);
         }
 
         private void loadDisplayDeviceConfig() {
             // Load display device config
             final Context context = getOverlayContext();
             mDisplayDeviceConfig = DisplayDeviceConfig.create(context, mPhysicalDisplayId,
-                    mIsDefaultDisplay);
+                    mIsFirstDisplay);
 
             // Load brightness HWC quirk
             mBacklightAdapter.setForceSurfaceControl(mDisplayDeviceConfig.hasQuirk(
@@ -650,9 +656,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                 final Resources res = getOverlayContext().getResources();
 
-                if (mIsDefaultDisplay) {
-                    mInfo.flags |= DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY;
+                mInfo.flags |= DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY;
 
+                if (mIsFirstDisplay) {
                     if (res.getBoolean(com.android.internal.R.bool.config_mainBuiltInDisplayIsRound)
                             || (Build.IS_EMULATOR
                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
@@ -672,11 +678,18 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 if (DisplayCutout.getMaskBuiltInDisplayCutout(res, mInfo.uniqueId)) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_MASK_DISPLAY_CUTOUT;
                 }
+
+                final Display.Mode maxDisplayMode =
+                        DisplayUtils.getMaximumResolutionDisplayMode(mInfo.supportedModes);
+                final int maxWidth =
+                        maxDisplayMode == null ? mInfo.width : maxDisplayMode.getPhysicalWidth();
+                final int maxHeight =
+                        maxDisplayMode == null ? mInfo.height : maxDisplayMode.getPhysicalHeight();
                 mInfo.displayCutout = DisplayCutout.fromResourcesRectApproximation(res,
-                        mInfo.uniqueId, mInfo.width, mInfo.height);
+                        mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
 
                 mInfo.roundedCorners = RoundedCorners.fromResources(
-                        res, mInfo.uniqueId, mInfo.width, mInfo.height);
+                        res, mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
                 mInfo.installOrientation = mStaticDisplayInfo.installOrientation;
 
                 if (mStaticDisplayInfo.isInternal) {
@@ -900,7 +913,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
             updateDeviceInfoLocked();
 
-            if (!mSurfaceControlProxy.getBootDisplayModeSupport()) {
+            if (!mIsBootDisplayModeSupported) {
                 return;
             }
             if (mUserPreferredModeId == INVALID_MODE_ID) {
@@ -1219,7 +1232,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     /** Supplies a context whose Resources apply runtime-overlays */
     Context getOverlayContext() {
-        return ActivityThread.currentActivityThread().getSystemUiContext();
+        if (mOverlayContext == null) {
+            mOverlayContext = ActivityThread.currentActivityThread().getSystemUiContext();
+        }
+        return mOverlayContext;
     }
 
     /**
@@ -1391,7 +1407,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         public boolean getBootDisplayModeSupport() {
-            return SurfaceControl.getBootDisplayModeSupport();
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "getBootDisplayModeSupport");
+            try {
+                return SurfaceControl.getBootDisplayModeSupport();
+            } finally {
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            }
         }
 
         public void setBootDisplayMode(IBinder displayToken, int modeId) {
@@ -1436,9 +1457,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         /**
          * @param displayToken Token for display associated with this backlight.
-         * @param isDefaultDisplay {@code true} if it is the default display.
+         * @param isFirstDisplay {@code true} if it is the first display.
          */
-        BacklightAdapter(IBinder displayToken, boolean isDefaultDisplay,
+        BacklightAdapter(IBinder displayToken, boolean isFirstDisplay,
                 SurfaceControlProxy surfaceControlProxy) {
             mDisplayToken = displayToken;
             mSurfaceControlProxy = surfaceControlProxy;
@@ -1446,7 +1467,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mUseSurfaceControlBrightness = mSurfaceControlProxy
                     .getDisplayBrightnessSupport(mDisplayToken);
 
-            if (!mUseSurfaceControlBrightness && isDefaultDisplay) {
+            if (!mUseSurfaceControlBrightness && isFirstDisplay) {
                 LightsManager lights = LocalServices.getService(LightsManager.class);
                 mBacklight = lights.getLight(LightsManager.LIGHT_ID_BACKLIGHT);
             } else {

@@ -81,6 +81,7 @@ final class DialogFillUi {
     interface UiCallback {
         void onResponsePicked(@NonNull FillResponse response);
         void onDatasetPicked(@NonNull Dataset dataset);
+        void onDismissed();
         void onCanceled();
         void startIntentSender(IntentSender intentSender);
     }
@@ -144,6 +145,7 @@ final class DialogFillUi {
         mDialog = new Dialog(mContext, mThemeId);
         mDialog.setContentView(decor);
         setDialogParamsAsBottomSheet();
+        mDialog.setOnCancelListener((d) -> mCallback.onCanceled());
 
         show();
     }
@@ -165,8 +167,8 @@ final class DialogFillUi {
         final Window window = mDialog.getWindow();
         window.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
+                | WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        window.setDimAmount(0.6f);
         window.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         window.setGravity(Gravity.BOTTOM | Gravity.CENTER);
@@ -216,7 +218,9 @@ final class DialogFillUi {
 
     private void setDismissButton(View decor) {
         final TextView noButton = decor.findViewById(R.id.autofill_dialog_no);
-        noButton.setOnClickListener((v) -> mCallback.onCanceled());
+        // set "No thinks" by default
+        noButton.setText(R.string.autofill_save_no);
+        noButton.setOnClickListener((v) -> mCallback.onDismissed());
     }
 
     private void setContinueButton(View decor, View.OnClickListener listener) {
@@ -224,6 +228,7 @@ final class DialogFillUi {
         // set "Continue" by default
         yesButton.setText(R.string.autofill_continue_yes);
         yesButton.setOnClickListener(listener);
+        yesButton.setVisibility(View.VISIBLE);
     }
 
     private void initialAuthenticationLayout(View decor, FillResponse response) {

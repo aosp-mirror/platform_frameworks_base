@@ -21,6 +21,9 @@ import android.content.pm.PackageManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.telephony.util.TelephonyUtils;
+import com.android.telephony.Rlog;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -159,7 +162,8 @@ public final class UiccCardInfo implements Parcelable {
     @Deprecated
     public String getIccId() {
         if (mIccIdAccessRestricted) {
-            throw new UnsupportedOperationException("getIccId from UiccPortInfo");
+            throw new UnsupportedOperationException("getIccId() is not supported by UiccCardInfo."
+                + " Please Use UiccPortInfo API instead");
         }
         //always return ICCID from first port.
         return getPorts().stream().findFirst().get().getIccId();
@@ -227,7 +231,6 @@ public final class UiccCardInfo implements Parcelable {
         this.mIccIdAccessRestricted = iccIdAccessRestricted;
     }
 
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -261,7 +264,7 @@ public final class UiccCardInfo implements Parcelable {
                 + ", mCardId="
                 + mCardId
                 + ", mEid="
-                + mEid
+                + Rlog.pii(TelephonyUtils.IS_DEBUGGABLE, mEid)
                 + ", mPhysicalSlotIndex="
                 + mPhysicalSlotIndex
                 + ", mIsRemovable="

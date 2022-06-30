@@ -341,7 +341,8 @@ public class MagnificationProcessor {
                 ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN)) {
             return MAGNIFICATION_MODE_FULLSCREEN;
         } else {
-            return (mController.getLastActivatedMode() == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW)
+            return (mController.getLastMagnificationActivatedMode(displayId)
+                    == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW)
                     ? MAGNIFICATION_MODE_WINDOW
                     : MAGNIFICATION_MODE_FULLSCREEN;
         }
@@ -396,6 +397,10 @@ public class MagnificationProcessor {
 
             dumpTrackingTypingFocusEnabledState(pw, displayId, config.getMode());
         }
+        pw.append("    SupportWindowMagnification="
+                + mController.supportWindowMagnification()).println();
+        pw.append("    WindowMagnificationConnectionState="
+                + mController.getWindowMagnificationMgr().getConnectionState()).println();
     }
 
     private int getIdOfLastServiceToMagnify(int mode, int displayId) {

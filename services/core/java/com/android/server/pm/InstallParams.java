@@ -289,8 +289,8 @@ final class InstallParams extends HandlerParams {
      */
     private int fixUpInstallReason(String installerPackageName, int installerUid,
             int installReason) {
-        if (mPm.checkUidPermission(android.Manifest.permission.INSTALL_PACKAGES, installerUid)
-                == PERMISSION_GRANTED) {
+        if (mPm.snapshotComputer().checkUidPermission(android.Manifest.permission.INSTALL_PACKAGES,
+                installerUid) == PERMISSION_GRANTED) {
             // If the install is being performed by a system app, we trust that app to have set the
             // install reason correctly.
             return installReason;

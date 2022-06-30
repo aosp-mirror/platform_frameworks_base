@@ -35,6 +35,7 @@ import java.io.File;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@SuppressWarnings("GuardedBy")
 public class BatteryStatsHistoryIteratorTest {
     private static final int APP_UID = Process.FIRST_APPLICATION_UID + 42;
 
@@ -124,7 +125,10 @@ public class BatteryStatsHistoryIteratorTest {
         // More than 32k strings
         final int eventCount = 0x7FFF + 100;
         for (int i = 0; i < eventCount; i++) {
-            mBatteryStats.noteAlarmStartLocked("a" + i, null, APP_UID, 3_000_000, 2_000_000);
+            // Names repeat in order to verify de-duping of identical history tags.
+            String name = "a" + (i % 10);
+            mBatteryStats.noteAlarmStartLocked(name, null, APP_UID, 3_000_000, 2_000_000);
+            mBatteryStats.noteAlarmFinishLocked(name, null, APP_UID, 3_500_000, 2_500_000);
         }
 
         final BatteryStatsHistoryIterator iterator =
@@ -149,10 +153,25 @@ public class BatteryStatsHistoryIteratorTest {
         assertThat(item.time).isEqualTo(2_000_000);
 
         for (int i = 0; i < eventCount; i++) {
-            assertThat(iterator.next(item)).isTrue();
+            String name = "a" + (i % 10);
+            do {
+                assertThat(iterator.next(item)).isTrue();
+                // Skip a blank event inserted at the start of every buffer
+            } while (item.cmd != BatteryStats.HistoryItem.CMD_UPDATE
+                    || item.eventCode == BatteryStats.HistoryItem.EVENT_NONE);
+
             assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_ALARM
                     | BatteryStats.HistoryItem.EVENT_FLAG_START);
-            assertThat(item.eventTag.string).isEqualTo("a" + i);
+            assertThat(item.eventTag.string).isEqualTo(name);
+
+            do {
+                assertThat(iterator.next(item)).isTrue();
+            } while (item.cmd != BatteryStats.HistoryItem.CMD_UPDATE
+                    || item.eventCode == BatteryStats.HistoryItem.EVENT_NONE);
+
+            assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_ALARM
+                    | BatteryStats.HistoryItem.EVENT_FLAG_FINISH);
+            assertThat(item.eventTag.string).isEqualTo(name);
         }
 
         assertThat(iterator.next(item)).isFalse();

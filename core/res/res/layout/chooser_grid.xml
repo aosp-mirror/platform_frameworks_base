@@ -41,7 +41,7 @@
             android:src="@drawable/ic_drag_handle"
             android:layout_marginTop="@dimen/chooser_edge_margin_thin"
             android:layout_marginBottom="@dimen/chooser_edge_margin_thin"
-            android:tint="@color/lighter_gray"
+            android:tint="?attr/colorSurfaceVariant"
             android:layout_centerHorizontal="true"
             android:layout_alignParentTop="true" />
 
@@ -81,14 +81,6 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone">
             </TabWidget>
-            <View
-                android:id="@+id/resolver_tab_divider"
-                android:visibility="gone"
-                android:layout_alwaysShow="true"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?attr/colorBackground"
-                android:foreground="?attr/dividerVertical" />
             <FrameLayout
                 android:id="@android:id/tabcontent"
                 android:layout_width="match_parent"

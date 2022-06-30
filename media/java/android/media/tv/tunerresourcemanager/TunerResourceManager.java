@@ -401,6 +401,43 @@ public class TunerResourceManager {
     }
 
     /**
+     * Sets the maximum usable frontends number of a given frontend type. It is used to enable or
+     * disable frontends when cable connection status is changed by user.
+     *
+     * @param frontendType the frontendType which the maximum usable number will be set for.
+     * @param maxNum the new maximum usable number.
+     *
+     * @return true if  successful and false otherwise.
+     */
+    public boolean setMaxNumberOfFrontends(int frontendType, int maxNum) {
+        boolean result = false;
+        try {
+            result = mService.setMaxNumberOfFrontends(frontendType, maxNum);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return result;
+    }
+
+    /**
+     * Get the maximum usable frontends number of a given frontend type.
+     *
+     * @param frontendType the frontendType which the maximum usable number will be queried for.
+     *
+     * @return the maximum usable number of the queried frontend type. Returns -1 when the
+     *         frontendType is invalid
+     */
+    public int getMaxNumberOfFrontends(int frontendType) {
+        int result = -1;
+        try {
+            result = mService.getMaxNumberOfFrontends(frontendType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return result;
+    }
+
+    /**
      * Requests from the client to share frontend with an existing client.
      *
      * <p><strong>Note:</strong> {@link #setFrontendInfoList(TunerFrontendInfo[])} must be called

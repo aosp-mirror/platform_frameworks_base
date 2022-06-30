@@ -28,13 +28,10 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.testapp.Components
 import com.android.wm.shell.flicker.testapp.Components.FixedActivity.EXTRA_FIXED_ORIENTATION
-import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,17 +47,11 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-@FlakyTest(bugId = 218604389)
 open class SetRequestedOrientationWhilePinnedTest(
     testSpec: FlickerTestParameter
 ) : PipTransition(testSpec) {
     private val startingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
     private val endingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_90)
-
-    @Before
-    open fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
 
     override val transition: FlickerBuilder.() -> Unit
         get() = {

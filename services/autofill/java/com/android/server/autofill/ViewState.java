@@ -43,7 +43,7 @@ final class ViewState {
          * Called when the fill UI is ready to be shown for this view.
          */
         void onFillReady(@NonNull FillResponse fillResponse, @NonNull AutofillId focusedId,
-                @Nullable AutofillValue value);
+                @Nullable AutofillValue value, int flags);
     }
 
     private static final String TAG = "ViewState";
@@ -202,7 +202,7 @@ final class ViewState {
 
     /**
      * Calls {@link
-     * Listener#onFillReady(FillResponse, AutofillId, AutofillValue)} if the
+     * Listener#onFillReady(FillResponse, AutofillId, AutofillValue, int)} if the
      * fill UI is ready to be displayed (i.e. when response and bounds are set).
      */
     void maybeCallOnFillReady(int flags) {
@@ -213,7 +213,7 @@ final class ViewState {
         // First try the current response associated with this View.
         if (mResponse != null) {
             if (mResponse.getDatasets() != null || mResponse.getAuthentication() != null) {
-                mListener.onFillReady(mResponse, this.id, mCurrentValue);
+                mListener.onFillReady(mResponse, this.id, mCurrentValue, flags);
             }
         }
     }

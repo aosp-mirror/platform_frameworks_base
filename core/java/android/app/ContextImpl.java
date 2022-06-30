@@ -77,6 +77,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -216,6 +217,12 @@ class ContextImpl extends Context {
     @UnsupportedAppUsage
     private @Nullable ClassLoader mClassLoader;
 
+    /**
+     * The {@link com.android.server.wm.WindowToken} representing this instance if it is
+     * {@link #CONTEXT_TYPE_WINDOW_CONTEXT} or {@link #CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI}.
+     * If the type is {@link #CONTEXT_TYPE_ACTIVITY}, then represents the
+     * {@link android.window.WindowContainerToken} of the activity.
+     */
     private final @Nullable IBinder mToken;
 
     private final @NonNull UserHandle mUser;
@@ -1186,7 +1193,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, null, null /*excludedPermissions=*/,
-                    AppOpsManager.OP_NONE, null, false, false, getUserId());
+                    null, AppOpsManager.OP_NONE, null, false, false, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1203,7 +1210,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions,
-                    null /*excludedPermissions=*/, AppOpsManager.OP_NONE, null, false, false,
+                    null /*excludedPermissions=*/, null, AppOpsManager.OP_NONE, null, false, false,
                     getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1219,7 +1226,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions,
-                    null /*excludedPermissions=*/, AppOpsManager.OP_NONE, null, false, false,
+                    null /*excludedPermissions=*/, null, AppOpsManager.OP_NONE, null, false, false,
                     getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1236,8 +1243,8 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions,
-                    null /*excludedPermissions=*/, AppOpsManager.OP_NONE, options, false, false,
-                    getUserId());
+                    null /*excludedPermissions=*/, null /*excludedPackages*/,
+                    AppOpsManager.OP_NONE, options, false, false, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1252,7 +1259,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions,
-                    null /*excludedPermissions=*/, AppOpsManager.OP_NONE, null, false, false,
+                    null /*excludedPermissions=*/, null, AppOpsManager.OP_NONE, null, false, false,
                     user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1261,7 +1268,7 @@ class ContextImpl extends Context {
 
     @Override
     public void sendBroadcastMultiplePermissions(Intent intent, String[] receiverPermissions,
-            String[] excludedPermissions) {
+            String[] excludedPermissions, String[] excludedPackages) {
         warnIfCallingFromSystemProcess();
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
@@ -1269,7 +1276,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions, excludedPermissions,
-                    AppOpsManager.OP_NONE, null, false, false, getUserId());
+                    excludedPackages, AppOpsManager.OP_NONE, null, false, false, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1296,7 +1303,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions,
-                    excludedPermissions, AppOpsManager.OP_NONE, options, false, false,
+                    excludedPermissions, null, AppOpsManager.OP_NONE, options, false, false,
                     getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1314,7 +1321,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions,
-                    null /*excludedPermissions=*/, appOp, null, false, false, getUserId());
+                    null /*excludedPermissions=*/, null, appOp, null, false, false, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1331,7 +1338,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions,
-                    null /*excludedPermissions=*/, AppOpsManager.OP_NONE, null, true, false,
+                    null /*excludedPermissions=*/, null, AppOpsManager.OP_NONE, null, true, false,
                     getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1395,7 +1402,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     rd, initialCode, initialData, initialExtras, receiverPermissions,
-                    null /*excludedPermissions=*/, appOp, options, true, false, getUserId());
+                    null /*excludedPermissions=*/, null, appOp, options, true, false, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1409,7 +1416,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, null, null /*excludedPermissions=*/,
-                    AppOpsManager.OP_NONE, null, false, false, user.getIdentifier());
+                    null, AppOpsManager.OP_NONE, null, false, false, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1432,8 +1439,8 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions,
-                    null /*excludedPermissions=*/, AppOpsManager.OP_NONE, options, false, false,
-                    user.getIdentifier());
+                    null /*excludedPermissions=*/, null, AppOpsManager.OP_NONE, options, false,
+                    false, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1450,7 +1457,8 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions,
-                    null /*excludedPermissions=*/, appOp, null, false, false, user.getIdentifier());
+                    null /*excludedPermissions=*/, null, appOp, null, false, false,
+                    user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1501,7 +1509,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     rd, initialCode, initialData, initialExtras, receiverPermissions,
-                    null /*excludedPermissions=*/, appOp, options, true, false,
+                    null /*excludedPermissions=*/, null, appOp, options, true, false,
                     user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1543,7 +1551,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, null, null /*excludedPermissions=*/,
-                    AppOpsManager.OP_NONE, null, false, true, getUserId());
+                    null, AppOpsManager.OP_NONE, null, false, true, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1582,7 +1590,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, null, null /*excludedPermissions=*/,
-                    AppOpsManager.OP_NONE, options, false, true, getUserId());
+                    null, AppOpsManager.OP_NONE, options, false, true, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1618,7 +1626,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     rd, initialCode, initialData, initialExtras, null,
-                    null /*excludedPermissions=*/, AppOpsManager.OP_NONE, null, true, true,
+                    null /*excludedPermissions=*/, null, AppOpsManager.OP_NONE, null, true, true,
                     getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1651,7 +1659,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, null, null /*excludedPermissions=*/,
-                    AppOpsManager.OP_NONE, null, false, true, user.getIdentifier());
+                    null, AppOpsManager.OP_NONE, null, false, true, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1666,7 +1674,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, null, null /*excludedPermissions=*/,
-                    AppOpsManager.OP_NONE, options, false, true, user.getIdentifier());
+                    null, AppOpsManager.OP_NONE, options, false, true, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1701,7 +1709,7 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     rd, initialCode, initialData, initialExtras, null,
-                    null /*excludedPermissions=*/, AppOpsManager.OP_NONE, null, true, true,
+                    null /*excludedPermissions=*/, null, AppOpsManager.OP_NONE, null, true, true,
                     user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1998,7 +2006,7 @@ class ContextImpl extends Context {
     private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags,
             String instanceName, Handler handler, Executor executor, UserHandle user) {
         // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser and
-        // ActivityManagerLocal.bindSupplementalProcessService
+        // ActivityManagerLocal.bindSdkSandboxService
         IServiceConnection sd;
         if (conn == null) {
             throw new IllegalArgumentException("connection is null");
@@ -2180,8 +2188,9 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public void revokeOwnPermissionsOnKill(@NonNull Collection<String> permissions) {
-        getSystemService(PermissionManager.class).revokeOwnPermissionsOnKill(permissions);
+    public void revokeSelfPermissionsOnKill(@NonNull Collection<String> permissions) {
+        getSystemService(PermissionControllerManager.class).revokeSelfPermissionsOnKill(
+                getPackageName(), new ArrayList<String>(permissions));
     }
 
     @Override

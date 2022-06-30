@@ -17,8 +17,10 @@
 package com.android.server.pm;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.dex.ArtStatsLogUtils.BackgroundDexoptJobStatsLogger;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -76,43 +78,46 @@ public final class BackgroundDexOptService {
 
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    @VisibleForTesting
-    static final int JOB_IDLE_OPTIMIZE = 800;
-    @VisibleForTesting
-    static final int JOB_POST_BOOT_UPDATE = 801;
+    @VisibleForTesting static final int JOB_IDLE_OPTIMIZE = 800;
+    @VisibleForTesting static final int JOB_POST_BOOT_UPDATE = 801;
 
     private static final long IDLE_OPTIMIZATION_PERIOD = TimeUnit.DAYS.toMillis(1);
 
     private static final long CANCELLATION_WAIT_CHECK_INTERVAL_MS = 200;
 
-    private static ComponentName sDexoptServiceName = new ComponentName("android",
-            BackgroundDexOptJobService.class.getName());
+    private static ComponentName sDexoptServiceName =
+            new ComponentName("android", BackgroundDexOptJobService.class.getName());
 
     // Possible return codes of individual optimization steps.
     /** Ok status: Optimizations finished, All packages were processed, can continue */
-    private static final int STATUS_OK = 0;
+    public static final int STATUS_OK = 0;
     /** Optimizations should be aborted. Job scheduler requested it. */
-    private static final int STATUS_ABORT_BY_CANCELLATION = 1;
+    public static final int STATUS_ABORT_BY_CANCELLATION = 1;
     /** Optimizations should be aborted. No space left on device. */
-    private static final int STATUS_ABORT_NO_SPACE_LEFT = 2;
+    public static final int STATUS_ABORT_NO_SPACE_LEFT = 2;
     /** Optimizations should be aborted. Thermal throttling level too high. */
-    private static final int STATUS_ABORT_THERMAL = 3;
+    public static final int STATUS_ABORT_THERMAL = 3;
     /** Battery level too low */
-    private static final int STATUS_ABORT_BATTERY = 4;
-    /** {@link PackageDexOptimizer#DEX_OPT_FAILED} case */
-    private static final int STATUS_DEX_OPT_FAILED = 5;
+    public static final int STATUS_ABORT_BATTERY = 4;
+    /**
+     * {@link PackageDexOptimizer#DEX_OPT_FAILED} case. This state means some packages have failed
+     * compilation during the job. Note that the failure will not be permanent as the next dexopt
+     * job will exclude those failed packages.
+     */
+    public static final int STATUS_DEX_OPT_FAILED = 5;
 
-    @IntDef(prefix = {"STATUS_"}, value = {
-            STATUS_OK,
-            STATUS_ABORT_BY_CANCELLATION,
-            STATUS_ABORT_NO_SPACE_LEFT,
-            STATUS_ABORT_THERMAL,
-            STATUS_ABORT_BATTERY,
-            STATUS_DEX_OPT_FAILED,
-    })
+    @IntDef(prefix = {"STATUS_"},
+            value =
+                    {
+                            STATUS_OK,
+                            STATUS_ABORT_BY_CANCELLATION,
+                            STATUS_ABORT_NO_SPACE_LEFT,
+                            STATUS_ABORT_THERMAL,
+                            STATUS_ABORT_BATTERY,
+                            STATUS_DEX_OPT_FAILED,
+                    })
     @Retention(RetentionPolicy.SOURCE)
-    private @interface Status {
-    }
+    public @interface Status {}
 
     // Used for calculating space threshold for downgrading unused apps.
     private static final int LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE = 2;
@@ -124,33 +129,30 @@ public final class BackgroundDexOptService {
 
     private final DexOptHelper mDexOptHelper;
 
+    private final BackgroundDexoptJobStatsLogger mStatsLogger =
+            new BackgroundDexoptJobStatsLogger();
+
     private final Object mLock = new Object();
 
     // Thread currently running dexopt. This will be null if dexopt is not running.
     // The thread running dexopt make sure to set this into null when the pending dexopt is
     // completed.
-    @GuardedBy("mLock")
-    @Nullable
-    private Thread mDexOptThread;
+    @GuardedBy("mLock") @Nullable private Thread mDexOptThread;
 
     // Thread currently cancelling dexopt. This thread is in blocked wait state until
     // cancellation is done. Only this thread can change states for control. The other threads, if
     // need to wait for cancellation, should just wait without doing any control.
-    @GuardedBy("mLock")
-    @Nullable
-    private Thread mDexOptCancellingThread;
+    @GuardedBy("mLock") @Nullable private Thread mDexOptCancellingThread;
 
     // Tells whether post boot update is completed or not.
-    @GuardedBy("mLock")
-    private boolean mFinishedPostBootUpdate;
+    @GuardedBy("mLock") private boolean mFinishedPostBootUpdate;
 
-    @GuardedBy("mLock")
-    @Status private int mLastExecutionStatus = STATUS_OK;
+    @GuardedBy("mLock") @Status private int mLastExecutionStatus = STATUS_OK;
 
-    @GuardedBy("mLock")
-    private long mLastExecutionStartTimeMs;
-    @GuardedBy("mLock")
-    private long mLastExecutionDurationMs;
+    @GuardedBy("mLock") private long mLastExecutionStartTimeMs;
+    @GuardedBy("mLock") private long mLastExecutionDurationIncludingSleepMs;
+    @GuardedBy("mLock") private long mLastExecutionStartUptimeMs;
+    @GuardedBy("mLock") private long mLastExecutionDurationMs;
 
     // Keeps packages cancelled from PDO for last session. This is for debugging.
     @GuardedBy("mLock")
@@ -176,8 +178,8 @@ public final class BackgroundDexOptService {
         void onPackagesUpdated(ArraySet<String> updatedPackages);
     }
 
-    public BackgroundDexOptService(Context context, DexManager dexManager,
-            PackageManagerService pm) {
+    public BackgroundDexOptService(
+            Context context, DexManager dexManager, PackageManagerService pm) {
         this(new Injector(context, dexManager, pm));
     }
 
@@ -229,6 +231,10 @@ public final class BackgroundDexOptService {
             writer.println(mLastExecutionStatus);
             writer.print("mLastExecutionStartTimeMs:");
             writer.println(mLastExecutionStartTimeMs);
+            writer.print("mLastExecutionDurationIncludingSleepMs:");
+            writer.println(mLastExecutionDurationIncludingSleepMs);
+            writer.print("mLastExecutionStartUptimeMs:");
+            writer.println(mLastExecutionStartUptimeMs);
             writer.print("mLastExecutionDurationMs:");
             writer.println(mLastExecutionDurationMs);
             writer.print("now:");
@@ -252,7 +258,8 @@ public final class BackgroundDexOptService {
      *
      * <p>This is only for shell command and only root or shell user can use this.
      *
-     * @param packageNames dex optimize the passed packages or all packages if null
+     * @param packageNames dex optimize the passed packages in the given order, or all packages in
+     *         the default order if null
      *
      * @return true if dex optimization is complete. false if the task is cancelled or if there was
      *         an error.
@@ -267,11 +274,11 @@ public final class BackgroundDexOptService {
                 resetStatesForNewDexOptRunLocked(Thread.currentThread());
             }
             PackageManagerService pm = mInjector.getPackageManagerService();
-            ArraySet<String> packagesToOptimize;
+            List<String> packagesToOptimize;
             if (packageNames == null) {
-                packagesToOptimize = mDexOptHelper.getOptimizablePackages();
+                packagesToOptimize = mDexOptHelper.getOptimizablePackages(pm.snapshotComputer());
             } else {
-                packagesToOptimize = new ArraySet<>(packageNames);
+                packagesToOptimize = packageNames;
             }
             return runIdleOptimization(pm, packagesToOptimize, /* isPostBootUpdate= */ false);
         } finally {
@@ -334,7 +341,7 @@ public final class BackgroundDexOptService {
             return false;
         }
 
-        ArraySet<String> pkgs = mDexOptHelper.getOptimizablePackages();
+        List<String> pkgs = mDexOptHelper.getOptimizablePackages(pm.snapshotComputer());
         if (pkgs.isEmpty()) {
             Slog.i(TAG, "No packages to optimize");
             markPostBootUpdateCompleted(params);
@@ -355,17 +362,20 @@ public final class BackgroundDexOptService {
             resetStatesForNewDexOptRunLocked(mInjector.createAndStartThread(
                     "BackgroundDexOptService_" + (isPostBootUpdateJob ? "PostBoot" : "Idle"),
                     () -> {
-                        TimingsTraceAndSlog tr = new TimingsTraceAndSlog(TAG,
-                                Trace.TRACE_TAG_PACKAGE_MANAGER);
+                        TimingsTraceAndSlog tr =
+                                new TimingsTraceAndSlog(TAG, Trace.TRACE_TAG_PACKAGE_MANAGER);
                         tr.traceBegin("jobExecution");
                         boolean completed = false;
                         try {
-                            completed = runIdleOptimization(pm, pkgs,
-                                    params.getJobId() == JOB_POST_BOOT_UPDATE);
+                            completed = runIdleOptimization(
+                                    pm, pkgs, params.getJobId() == JOB_POST_BOOT_UPDATE);
                         } finally { // Those cleanup should be done always.
                             tr.traceEnd();
-                            Slog.i(TAG, "dexopt finishing. jobid:" + params.getJobId()
-                                    + " completed:" + completed);
+                            Slog.i(TAG,
+                                    "dexopt finishing. jobid:" + params.getJobId()
+                                            + " completed:" + completed);
+
+                            writeStatsLog(params);
 
                             if (params.getJobId() == JOB_POST_BOOT_UPDATE) {
                                 if (completed) {
@@ -449,7 +459,7 @@ public final class BackgroundDexOptService {
             if (mDexOptThread != Thread.currentThread()) {
                 throw new IllegalStateException(
                         "Only mDexOptThread can mark completion, mDexOptThread:" + mDexOptThread
-                                + " current:" + Thread.currentThread());
+                        + " current:" + Thread.currentThread());
             }
             mDexOptThread = null;
             // Other threads may be waiting for completion.
@@ -479,11 +489,10 @@ public final class BackgroundDexOptService {
 
     private void scheduleAJob(int jobId) {
         JobScheduler js = mInjector.getJobScheduler();
-        JobInfo.Builder builder = new JobInfo.Builder(jobId, sDexoptServiceName)
-                .setRequiresDeviceIdle(true);
+        JobInfo.Builder builder =
+                new JobInfo.Builder(jobId, sDexoptServiceName).setRequiresDeviceIdle(true);
         if (jobId == JOB_IDLE_OPTIMIZE) {
-            builder.setRequiresCharging(true)
-                    .setPeriodic(IDLE_OPTIMIZATION_PERIOD);
+            builder.setRequiresCharging(true).setPeriodic(IDLE_OPTIMIZATION_PERIOD);
         }
         js.schedule(builder.build());
     }
@@ -523,30 +532,36 @@ public final class BackgroundDexOptService {
         }
     }
 
-    /** Returns true if completed */
-    private boolean runIdleOptimization(PackageManagerService pm, ArraySet<String> pkgs,
-            boolean isPostBootUpdate) {
+    /**
+     * Returns whether we've successfully run the job. Note that it will return true even if some
+     * packages may have failed compiling.
+     */
+    private boolean runIdleOptimization(
+            PackageManagerService pm, List<String> pkgs, boolean isPostBootUpdate) {
         synchronized (mLock) {
             mLastExecutionStartTimeMs = SystemClock.elapsedRealtime();
+            mLastExecutionDurationIncludingSleepMs = -1;
+            mLastExecutionStartUptimeMs = SystemClock.uptimeMillis();
             mLastExecutionDurationMs = -1;
         }
         long lowStorageThreshold = getLowStorageThreshold();
-        int status = idleOptimizePackages(pm, pkgs, lowStorageThreshold,
-                isPostBootUpdate);
+        int status = idleOptimizePackages(pm, pkgs, lowStorageThreshold, isPostBootUpdate);
         logStatus(status);
         synchronized (mLock) {
             mLastExecutionStatus = status;
-            mLastExecutionDurationMs = SystemClock.elapsedRealtime() - mLastExecutionStartTimeMs;
+            mLastExecutionDurationIncludingSleepMs =
+                    SystemClock.elapsedRealtime() - mLastExecutionStartTimeMs;
+            mLastExecutionDurationMs = SystemClock.uptimeMillis() - mLastExecutionStartUptimeMs;
         }
 
-        return status == STATUS_OK;
+        return status == STATUS_OK || status == STATUS_DEX_OPT_FAILED;
     }
 
     /** Gets the size of the directory. It uses recursion to go over all files. */
     private long getDirectorySize(File f) {
         long size = 0;
         if (f.isDirectory()) {
-            for (File file: f.listFiles()) {
+            for (File file : f.listFiles()) {
                 size += getDirectorySize(file);
             }
         } else {
@@ -556,8 +571,8 @@ public final class BackgroundDexOptService {
     }
 
     /** Gets the size of a package. */
-    private long getPackageSize(PackageManagerService pm, String pkg) {
-        PackageInfo info = pm.getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
+    private long getPackageSize(@NonNull Computer snapshot, String pkg) {
+        PackageInfo info = snapshot.getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
         long size = 0;
         if (info != null && info.applicationInfo != null) {
             File path = Paths.get(info.applicationInfo.sourceDir).toFile();
@@ -580,10 +595,9 @@ public final class BackgroundDexOptService {
     }
 
     @Status
-    private int idleOptimizePackages(PackageManagerService pm, ArraySet<String> pkgs,
+    private int idleOptimizePackages(PackageManagerService pm, List<String> pkgs,
             long lowStorageThreshold, boolean isPostBootUpdate) {
         ArraySet<String> updatedPackages = new ArraySet<>();
-        ArraySet<String> updatedPackagesDueToSecondaryDex = new ArraySet<>();
 
         try {
             boolean supportSecondaryDex = mInjector.supportSecondaryDex();
@@ -598,15 +612,16 @@ public final class BackgroundDexOptService {
             // Only downgrade apps when space is low on device.
             // Threshold is selected above the lowStorageThreshold so that we can pro-actively clean
             // up disk before user hits the actual lowStorageThreshold.
-            long lowStorageThresholdForDowngrade = LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE
-                    * lowStorageThreshold;
+            long lowStorageThresholdForDowngrade =
+                    LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE * lowStorageThreshold;
             boolean shouldDowngrade = shouldDowngrade(lowStorageThresholdForDowngrade);
             if (DEBUG) {
                 Slog.d(TAG, "Should Downgrade " + shouldDowngrade);
             }
             if (shouldDowngrade) {
+                final Computer snapshot = pm.snapshotComputer();
                 Set<String> unusedPackages =
-                        pm.getUnusedPackages(mDowngradeUnusedAppsThresholdInMillis);
+                        snapshot.getUnusedPackages(mDowngradeUnusedAppsThresholdInMillis);
                 if (DEBUG) {
                     Slog.d(TAG, "Unsused Packages " + String.join(",", unusedPackages));
                 }
@@ -618,19 +633,20 @@ public final class BackgroundDexOptService {
                             // Should be aborted by the scheduler.
                             return abortCode;
                         }
-                        @DexOptResult int downgradeResult = downgradePackage(pm, pkg,
+                        @DexOptResult
+                        int downgradeResult = downgradePackage(snapshot, pm, pkg,
                                 /* isForPrimaryDex= */ true, isPostBootUpdate);
                         if (downgradeResult == PackageDexOptimizer.DEX_OPT_PERFORMED) {
                             updatedPackages.add(pkg);
                         }
-                        @Status int status = convertPackageDexOptimizerStatusToInternal(
-                                downgradeResult);
+                        @Status
+                        int status = convertPackageDexOptimizerStatusToInternal(downgradeResult);
                         if (status != STATUS_OK) {
                             return status;
                         }
                         if (supportSecondaryDex) {
-                            downgradeResult = downgradePackage(pm, pkg,
-                                    /* isForPrimaryDex= */false, isPostBootUpdate);
+                            downgradeResult = downgradePackage(snapshot, pm, pkg,
+                                    /* isForPrimaryDex= */ false, isPostBootUpdate);
                             status = convertPackageDexOptimizerStatusToInternal(downgradeResult);
                             if (status != STATUS_OK) {
                                 return status;
@@ -638,25 +654,12 @@ public final class BackgroundDexOptService {
                         }
                     }
 
-                    pkgs = new ArraySet<>(pkgs);
+                    pkgs = new ArrayList<>(pkgs);
                     pkgs.removeAll(unusedPackages);
                 }
             }
 
-            @Status int primaryResult = optimizePackages(pkgs, lowStorageThreshold,
-                    /*isForPrimaryDex=*/ true, updatedPackages, isPostBootUpdate);
-            if (primaryResult != STATUS_OK) {
-                return primaryResult;
-            }
-
-            if (!supportSecondaryDex) {
-                return STATUS_OK;
-            }
-
-            @Status int secondaryResult = optimizePackages(pkgs, lowStorageThreshold,
-                    /*isForPrimaryDex*/ false, updatedPackagesDueToSecondaryDex,
-                    isPostBootUpdate);
-            return secondaryResult;
+            return optimizePackages(pkgs, lowStorageThreshold, updatedPackages, isPostBootUpdate);
         } finally {
             // Always let the pinner service know about changes.
             notifyPinService(updatedPackages);
@@ -668,8 +671,15 @@ public final class BackgroundDexOptService {
     }
 
     @Status
-    private int optimizePackages(ArraySet<String> pkgs, long lowStorageThreshold,
-            boolean isForPrimaryDex, ArraySet<String> updatedPackages, boolean isPostBootUpdate) {
+    private int optimizePackages(List<String> pkgs, long lowStorageThreshold,
+            ArraySet<String> updatedPackages, boolean isPostBootUpdate) {
+        boolean supportSecondaryDex = mInjector.supportSecondaryDex();
+
+        // Keep the error if there is any error from any package.
+        @Status int status = STATUS_OK;
+
+        // Other than cancellation, all packages will be processed even if an error happens
+        // in a package.
         for (String pkg : pkgs) {
             int abortCode = abortIdleOptimizations(lowStorageThreshold);
             if (abortCode != STATUS_OK) {
@@ -677,14 +687,32 @@ public final class BackgroundDexOptService {
                 return abortCode;
             }
 
-            @DexOptResult int result = optimizePackage(pkg, isForPrimaryDex, isPostBootUpdate);
-            if (result == PackageDexOptimizer.DEX_OPT_PERFORMED) {
+            @DexOptResult
+            int primaryResult = optimizePackage(pkg, true /* isForPrimaryDex */, isPostBootUpdate);
+            if (primaryResult == PackageDexOptimizer.DEX_OPT_CANCELLED) {
+                return STATUS_ABORT_BY_CANCELLATION;
+            }
+            if (primaryResult == PackageDexOptimizer.DEX_OPT_PERFORMED) {
                 updatedPackages.add(pkg);
-            } else if (result != PackageDexOptimizer.DEX_OPT_SKIPPED) {
-                return convertPackageDexOptimizerStatusToInternal(result);
+            } else if (primaryResult == PackageDexOptimizer.DEX_OPT_FAILED) {
+                status = convertPackageDexOptimizerStatusToInternal(primaryResult);
+            }
+
+            if (!supportSecondaryDex) {
+                continue;
+            }
+
+            @DexOptResult
+            int secondaryResult =
+                    optimizePackage(pkg, false /* isForPrimaryDex */, isPostBootUpdate);
+            if (secondaryResult == PackageDexOptimizer.DEX_OPT_CANCELLED) {
+                return STATUS_ABORT_BY_CANCELLATION;
+            }
+            if (secondaryResult == PackageDexOptimizer.DEX_OPT_FAILED) {
+                status = convertPackageDexOptimizerStatusToInternal(secondaryResult);
             }
         }
-        return STATUS_OK;
+        return status;
     }
 
     /**
@@ -696,8 +724,8 @@ public final class BackgroundDexOptService {
      * @return PackageDexOptimizer.DEX_*
      */
     @DexOptResult
-    private int downgradePackage(PackageManagerService pm, String pkg, boolean isForPrimaryDex,
-            boolean isPostBootUpdate) {
+    private int downgradePackage(@NonNull Computer snapshot, PackageManagerService pm, String pkg,
+            boolean isForPrimaryDex, boolean isPostBootUpdate) {
         if (DEBUG) {
             Slog.d(TAG, "Downgrading " + pkg);
         }
@@ -709,15 +737,15 @@ public final class BackgroundDexOptService {
         if (!isPostBootUpdate) {
             dexoptFlags |= DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB;
         }
-        long package_size_before = getPackageSize(pm, pkg);
+        long package_size_before = getPackageSize(snapshot, pkg);
         int result = PackageDexOptimizer.DEX_OPT_SKIPPED;
         if (isForPrimaryDex || PLATFORM_PACKAGE_NAME.equals(pkg)) {
             // This applies for system apps or if packages location is not a directory, i.e.
             // monolithic install.
-            if (!pm.canHaveOatDir(pkg)) {
+            if (!pm.canHaveOatDir(snapshot, pkg)) {
                 // For apps that don't have the oat directory, instead of downgrading,
                 // remove their compiler artifacts from dalvik cache.
-                pm.deleteOatArtifactsOfPackage(pkg);
+                pm.deleteOatArtifactsOfPackage(snapshot, pkg);
             } else {
                 result = performDexOptPrimary(pkg, reason, dexoptFlags);
             }
@@ -726,8 +754,9 @@ public final class BackgroundDexOptService {
         }
 
         if (result == PackageDexOptimizer.DEX_OPT_PERFORMED) {
+            final Computer newSnapshot = pm.snapshotComputer();
             FrameworkStatsLog.write(FrameworkStatsLog.APP_DOWNGRADED, pkg, package_size_before,
-                    getPackageSize(pm, pkg), /*aggressive=*/ false);
+                    getPackageSize(newSnapshot, pkg), /*aggressive=*/false);
         }
         return result;
     }
@@ -756,7 +785,7 @@ public final class BackgroundDexOptService {
     @DexOptResult
     private int optimizePackage(String pkg, boolean isForPrimaryDex, boolean isPostBootUpdate) {
         int reason = isPostBootUpdate ? PackageManagerService.REASON_POST_BOOT
-                : PackageManagerService.REASON_BACKGROUND_DEXOPT;
+                                      : PackageManagerService.REASON_BACKGROUND_DEXOPT;
         int dexoptFlags = DexoptOptions.DEXOPT_BOOT_COMPLETE;
         if (!isPostBootUpdate) {
             dexoptFlags |= DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES
@@ -773,22 +802,21 @@ public final class BackgroundDexOptService {
     }
 
     @DexOptResult
-    private int performDexOptPrimary(String pkg, int reason,
-            int dexoptFlags) {
-        return trackPerformDexOpt(pkg, /*isForPrimaryDex=*/ true,
-                () -> mDexOptHelper.performDexOptWithStatus(
-                        new DexoptOptions(pkg, reason, dexoptFlags)));
+    private int performDexOptPrimary(String pkg, int reason, int dexoptFlags) {
+        DexoptOptions dexoptOptions = new DexoptOptions(pkg, reason, dexoptFlags);
+        return trackPerformDexOpt(pkg, /*isForPrimaryDex=*/true,
+                () -> mDexOptHelper.performDexOptWithStatus(dexoptOptions));
     }
 
     @DexOptResult
-    private int performDexOptSecondary(String pkg, int reason,
-            int dexoptFlags) {
-        DexoptOptions dexoptOptions = new DexoptOptions(pkg, reason,
-                dexoptFlags | DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX);
-        return trackPerformDexOpt(pkg, /*isForPrimaryDex=*/ false,
-                () -> mDexOptHelper.performDexOpt(dexoptOptions)
-                    ? PackageDexOptimizer.DEX_OPT_PERFORMED : PackageDexOptimizer.DEX_OPT_FAILED
-        );
+    private int performDexOptSecondary(String pkg, int reason, int dexoptFlags) {
+        DexoptOptions dexoptOptions = new DexoptOptions(
+                pkg, reason, dexoptFlags | DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX);
+        return trackPerformDexOpt(pkg, /*isForPrimaryDex=*/false,
+                ()
+                        -> mDexOptHelper.performDexOpt(dexoptOptions)
+                        ? PackageDexOptimizer.DEX_OPT_PERFORMED
+                        : PackageDexOptimizer.DEX_OPT_FAILED);
     }
 
     /**
@@ -801,8 +829,8 @@ public final class BackgroundDexOptService {
      *  {@link PackageDexOptimizer#DEX_OPT_FAILED}
      */
     @DexOptResult
-    private int trackPerformDexOpt(String pkg, boolean isForPrimaryDex,
-            Supplier<Integer> performDexOptWrapper) {
+    private int trackPerformDexOpt(
+            String pkg, boolean isForPrimaryDex, Supplier<Integer> performDexOptWrapper) {
         ArraySet<String> failedPackageNames;
         synchronized (mLock) {
             failedPackageNames =
@@ -919,6 +947,19 @@ public final class BackgroundDexOptService {
         }
     }
 
+    private void writeStatsLog(JobParameters params) {
+        @Status int status;
+        long durationMs;
+        long durationIncludingSleepMs;
+        synchronized (mLock) {
+            status = mLastExecutionStatus;
+            durationMs = mLastExecutionDurationMs;
+            durationIncludingSleepMs = mLastExecutionDurationIncludingSleepMs;
+        }
+
+        mStatsLogger.write(status, params.getStopReason(), durationMs, durationIncludingSleepMs);
+    }
+
     /** Injector pattern for testing purpose */
     @VisibleForTesting
     static final class Injector {
@@ -958,8 +999,8 @@ public final class BackgroundDexOptService {
         }
 
         boolean isBackgroundDexOptDisabled() {
-            return SystemProperties.getBoolean("pm.dexopt.disable_bg_dexopt" /* key */,
-                    false /* default */);
+            return SystemProperties.getBoolean(
+                    "pm.dexopt.disable_bg_dexopt" /* key */, false /* default */);
         }
 
         boolean isBatteryLevelLow() {
@@ -989,8 +1030,8 @@ public final class BackgroundDexOptService {
         }
 
         int getCurrentThermalStatus() {
-            IThermalService thermalService = IThermalService.Stub
-                    .asInterface(ServiceManager.getService(Context.THERMAL_SERVICE));
+            IThermalService thermalService = IThermalService.Stub.asInterface(
+                    ServiceManager.getService(Context.THERMAL_SERVICE));
             try {
                 return thermalService.getCurrentThermalStatus();
             } catch (RemoteException e) {
@@ -999,8 +1040,8 @@ public final class BackgroundDexOptService {
         }
 
         int getDexOptThermalCutoff() {
-            return SystemProperties.getInt("dalvik.vm.dexopt.thermal-cutoff",
-                    THERMAL_CUTOFF_DEFAULT);
+            return SystemProperties.getInt(
+                    "dalvik.vm.dexopt.thermal-cutoff", THERMAL_CUTOFF_DEFAULT);
         }
 
         Thread createAndStartThread(String name, Runnable target) {

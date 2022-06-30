@@ -15,9 +15,15 @@ android_library {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.core_core",
-        "windowExtLib",
+        "androidx.window_window",
         "SettingsLibUtils",
     ],
     sdk_version: "system_current",
     min_sdk_version: "21",
+    // TODO(b/228508619) Remove the optional uses after fixing upstream
+    optional_uses_libs: [
+        "org.apache.http.legacy",
+        "androidx.window.extensions",
+        "androidx.window.sidecar",
+    ],
 }

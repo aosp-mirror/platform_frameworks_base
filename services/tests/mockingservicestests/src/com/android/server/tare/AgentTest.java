@@ -21,7 +21,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
 import android.content.Context;
@@ -47,6 +46,8 @@ public class AgentTest {
     @Mock
     private CompleteEconomicPolicy mEconomicPolicy;
     @Mock
+    private Analyst mAnalyst;
+    @Mock
     private Context mContext;
     @Mock
     private InternalResourceService mIrs;
@@ -54,8 +55,8 @@ public class AgentTest {
     private Scribe mScribe;
 
     private static class MockScribe extends Scribe {
-        MockScribe(InternalResourceService irs) {
-            super(irs);
+        MockScribe(InternalResourceService irs, Analyst analyst) {
+            super(irs, analyst);
         }
 
         @Override
@@ -71,11 +72,11 @@ public class AgentTest {
                 .strictness(Strictness.LENIENT)
                 .mockStatic(LocalServices.class)
                 .startMocking();
-        when(mIrs.getContext()).thenReturn(mContext);
-        when(mIrs.getCompleteEconomicPolicyLocked()).thenReturn(mEconomicPolicy);
-        when(mIrs.getLock()).thenReturn(mIrs);
-        when(mContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mock(AlarmManager.class));
-        mScribe = new MockScribe(mIrs);
+        doReturn(mContext).when(mIrs).getContext();
+        doReturn(mEconomicPolicy).when(mIrs).getCompleteEconomicPolicyLocked();
+        doReturn(mIrs).when(mIrs).getLock();
+        doReturn(mock(AlarmManager.class)).when(mContext).getSystemService(Context.ALARM_SERVICE);
+        mScribe = new MockScribe(mIrs, mAnalyst);
     }
 
     @After
@@ -87,7 +88,7 @@ public class AgentTest {
 
     @Test
     public void testRecordTransaction_UnderMax() {
-        Agent agent = new Agent(mIrs, mScribe);
+        Agent agent = new Agent(mIrs, mScribe, mAnalyst);
         Ledger ledger = new Ledger();
 
         doReturn(1_000_000L).when(mIrs).getConsumptionLimitLocked();
@@ -116,7 +117,7 @@ public class AgentTest {
 
     @Test
     public void testRecordTransaction_MaxConsumptionLimit() {
-        Agent agent = new Agent(mIrs, mScribe);
+        Agent agent = new Agent(mIrs, mScribe, mAnalyst);
         Ledger ledger = new Ledger();
 
         doReturn(1000L).when(mIrs).getConsumptionLimitLocked();
@@ -163,7 +164,7 @@ public class AgentTest {
 
     @Test
     public void testRecordTransaction_MaxSatiatedBalance() {
-        Agent agent = new Agent(mIrs, mScribe);
+        Agent agent = new Agent(mIrs, mScribe, mAnalyst);
         Ledger ledger = new Ledger();
 
         doReturn(1_000_000L).when(mIrs).getConsumptionLimitLocked();

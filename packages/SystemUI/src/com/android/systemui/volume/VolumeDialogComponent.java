@@ -38,7 +38,6 @@ import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.tuner.TunerService;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -153,7 +152,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
 
     private void applyConfiguration() {
         mController.setVolumePolicy(mVolumePolicy);
-        mController.showDndTile(true);
+        mController.showDndTile();
     }
 
     @Override
@@ -187,7 +186,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
     }
 
     private void startSettings(Intent intent) {

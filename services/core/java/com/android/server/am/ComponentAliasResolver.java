@@ -41,6 +41,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
@@ -53,17 +54,23 @@ import java.util.function.Supplier;
 /**
  * Manages and handles component aliases, which is an experimental feature.
  *
- * For now, this is an experimental feature to evaluate feasibility, so the implementation is
+ * NOTE: THIS CLASS IS PURELY EXPERIMENTAL AND WILL BE REMOVED IN FUTURE ANDROID VERSIONS.
+ * DO NOT USE IT.
+ *
+ * "Component alias" allows an android manifest component (for now only broadcasts and services)
+ * to be defined in one android package while having the implementation in a different package.
+ *
+ * When/if this becomes a real feature, it will be most likely implemented very differently,
+ * which is why this shouldn't be used.
+ *
+ * For now, because this is an experimental feature to evaluate feasibility, the implementation is
  * "quick & dirty". For example, to define aliases, we use a regular intent filter and meta-data
  * in the manifest, instead of adding proper tags/attributes to AndroidManifest.xml.
  *
- * Because it's an experimental feature, it can't be enabled on a user build.
+ * This feature is disabled by default.
  *
- * Also, for now, aliases can be defined across any packages, but in the final version, there'll
- * be restrictions:
- * - We probably should only allow either privileged or preinstalled apps.
- * - Aliases can only be defined across packages that are atomically installed, and signed with the
- *   same key.
+ * Also, for now, aliases can be defined across packages with different certificates, but
+ * in a final version this will most likely be tightened.
  */
 public class ComponentAliasResolver {
     private static final String TAG = "ComponentAliasResolver";
@@ -97,7 +104,10 @@ public class ComponentAliasResolver {
 
     private static final String OPT_IN_PROPERTY = "com.android.EXPERIMENTAL_COMPONENT_ALIAS_OPT_IN";
 
-    private static final String ALIAS_FILTER_ACTION = "android.intent.action.EXPERIMENTAL_IS_ALIAS";
+    private static final String ALIAS_FILTER_ACTION =
+            "com.android.intent.action.EXPERIMENTAL_IS_ALIAS";
+    private static final String ALIAS_FILTER_ACTION_ALT =
+            "android.intent.action.EXPERIMENTAL_IS_ALIAS";
     private static final String META_DATA_ALIAS_TARGET = "alias_target";
 
     private static final int PACKAGE_QUERY_FLAGS =
@@ -172,12 +182,17 @@ public class ComponentAliasResolver {
                         USE_EXPERIMENTAL_COMPONENT_ALIAS, "android", UserHandle.USER_SYSTEM));
             if (enabled != mEnabled) {
                 Slog.i(TAG, (enabled ? "Enabling" : "Disabling") + " component aliases...");
-                if (enabled) {
-                    mPackageMonitor.register(mAm.mContext, UserHandle.ALL,
-                            /* externalStorage= */ false, BackgroundThread.getHandler());
-                } else {
-                    mPackageMonitor.unregister();
-                }
+                FgThread.getHandler().post(() -> {
+                    // Registering/unregistering a receiver internally takes the AM lock, but AM
+                    // calls into this class while holding the AM lock. So do it on a handler to
+                    // avoid deadlocks.
+                    if (enabled) {
+                        mPackageMonitor.register(mAm.mContext, UserHandle.ALL,
+                                /* externalStorage= */ false, BackgroundThread.getHandler());
+                    } else {
+                        mPackageMonitor.unregister();
+                    }
+                });
             }
             mEnabled = enabled;
             mEnabledByDeviceConfig = enabledByDeviceConfig;
@@ -211,8 +226,16 @@ public class ComponentAliasResolver {
     @GuardedBy("mLock")
     private void loadFromMetadataLocked() {
         if (DEBUG) Slog.d(TAG, "Scanning service aliases...");
-        Intent i = new Intent(ALIAS_FILTER_ACTION);
 
+        // PM.queryInetntXxx() doesn't support "OR" queries, so we search for
+        // both the com.android... action and android... action on by one.
+        // It's okay if a single component handles both actions because the resulting aliases
+        // will be stored in a map and duplicates will naturally be removed.
+        loadFromMetadataLockedInner(new Intent(ALIAS_FILTER_ACTION_ALT));
+        loadFromMetadataLockedInner(new Intent(ALIAS_FILTER_ACTION));
+    }
+
+    private void loadFromMetadataLockedInner(Intent i) {
         final List<ResolveInfo> services = mContext.getPackageManager().queryIntentServicesAsUser(
                 i, PACKAGE_QUERY_FLAGS, UserHandle.USER_SYSTEM);
 
@@ -460,7 +483,7 @@ public class ComponentAliasResolver {
     @Nullable
     public Resolution<ResolveInfo> resolveReceiver(@NonNull Intent intent,
             @NonNull ResolveInfo receiver, @Nullable String resolvedType,
-            int packageFlags, int userId, int callingUid) {
+            int packageFlags, int userId, int callingUid, boolean forSend) {
         // Resolve this alias.
         final Resolution<ComponentName> resolution = resolveComponentAlias(() ->
                 receiver.activityInfo.getComponentName());
@@ -483,8 +506,8 @@ public class ComponentAliasResolver {
         i.setPackage(null);
         i.setComponent(resolution.getTarget());
 
-        List<ResolveInfo> resolved = pmi.queryIntentReceivers(i,
-                resolvedType, packageFlags, callingUid, userId);
+        List<ResolveInfo> resolved = pmi.queryIntentReceivers(
+                i, resolvedType, packageFlags, callingUid, userId, forSend);
         if (resolved == null || resolved.size() == 0) {
             // Target component not found.
             Slog.w(TAG, "Alias target " + target.flattenToShortString() + " not found");

@@ -22,6 +22,8 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.RippleDrawable
 import android.os.UserManager
 import android.util.AttributeSet
+import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -29,7 +31,6 @@ import com.android.settingslib.Utils
 import com.android.settingslib.drawable.UserIconDrawable
 import com.android.systemui.R
 import com.android.systemui.statusbar.phone.MultiUserSwitch
-import com.android.systemui.statusbar.phone.SettingsButton
 
 /**
  * Quick Settings bottom buttons placed in footer (aka utility bar) - always visible in expanded QS,
@@ -38,7 +39,6 @@ import com.android.systemui.statusbar.phone.SettingsButton
  */
 class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
     private lateinit var settingsContainer: View
-    private lateinit var settingsButton: SettingsButton
     private lateinit var multiUserSwitch: MultiUserSwitch
     private lateinit var multiUserAvatar: ImageView
 
@@ -47,15 +47,14 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        settingsButton = findViewById(R.id.settings_button)
         settingsContainer = findViewById(R.id.settings_button_container)
         multiUserSwitch = findViewById(R.id.multi_user_switch)
         multiUserAvatar = multiUserSwitch.findViewById(R.id.multi_user_avatar)
 
         // RenderThread is doing more harm than good when touching the header (to expand quick
         // settings), so disable it for this view
-        if (settingsButton.background is RippleDrawable) {
-            (settingsButton.background as RippleDrawable).setForceSoftware(true)
+        if (settingsContainer.background is RippleDrawable) {
+            (settingsContainer.background as RippleDrawable).setForceSoftware(true)
         }
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
     }
@@ -82,7 +81,7 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
 
     private fun updateClickabilities() {
         multiUserSwitch.isClickable = multiUserSwitch.visibility == VISIBLE
-        settingsButton.isClickable = settingsButton.visibility == VISIBLE
+        settingsContainer.isClickable = settingsContainer.visibility == VISIBLE
     }
 
     private fun updateVisibilities(
@@ -91,7 +90,7 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
         settingsContainer.visibility = if (qsDisabled) GONE else VISIBLE
         multiUserSwitch.visibility = if (multiUserEnabled) VISIBLE else GONE
         val isDemo = UserManager.isDeviceInDemoMode(context)
-        settingsButton.visibility = if (isDemo) INVISIBLE else VISIBLE
+        settingsContainer.visibility = if (isDemo) INVISIBLE else VISIBLE
     }
 
     fun onUserInfoChanged(picture: Drawable?, isGuestUser: Boolean) {
@@ -104,4 +103,18 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
         }
         multiUserAvatar.setImageDrawable(pictureToSet)
     }
+
+    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+        if (VERBOSE) Log.d(TAG, "FooterActionsView onInterceptTouchEvent ${ev?.string}")
+        return super.onInterceptTouchEvent(ev)
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        if (VERBOSE) Log.d(TAG, "FooterActionsView onTouchEvent ${event?.string}")
+        return super.onTouchEvent(event)
+    }
 }
+private const val TAG = "FooterActionsView"
+private val VERBOSE = Log.isLoggable(TAG, Log.VERBOSE)
+private val MotionEvent.string
+    get() = "($id): ($x,$y)"

@@ -440,18 +440,8 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         }
 
         @Override
-        public void onExit() {
-            clear();
-        }
-
-        @Override
         public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
             mGesturesObserver.onMotionEvent(event, rawEvent, policyFlags);
-        }
-
-        @Override
-        public void clear() {
-            mGesturesObserver.clear();
         }
 
         @Override

@@ -33,6 +33,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
@@ -49,10 +50,8 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,13 +72,14 @@ import dagger.Lazy;
  */
 @SysUISingleton
 public final class NavBarHelper implements
+        AccessibilityManager.AccessibilityServicesStateChangeListener,
         AccessibilityButtonModeObserver.ModeChangedListener,
         AccessibilityButtonTargetsObserver.TargetsChangedListener,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
         Dumpable {
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final UserTracker mUserTracker;
     private final SystemActions mSystemActions;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
@@ -113,7 +113,7 @@ public final class NavBarHelper implements
             SystemActions systemActions,
             OverviewProxyService overviewProxyService,
             Lazy<AssistManager> assistManagerLazy,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             NavigationModeController navigationModeController,
             UserTracker userTracker,
             DumpManager dumpManager) {
@@ -121,11 +121,10 @@ public final class NavBarHelper implements
         mContentResolver = mContext.getContentResolver();
         mAccessibilityManager = accessibilityManager;
         mAssistManagerLazy = assistManagerLazy;
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mUserTracker = userTracker;
         mSystemActions = systemActions;
-        accessibilityManager.addAccessibilityServicesStateChangeListener(
-                accessibilityManager1 -> NavBarHelper.this.dispatchA11yEventUpdate());
+        accessibilityManager.addAccessibilityServicesStateChangeListener(this);
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
 
@@ -147,6 +146,7 @@ public final class NavBarHelper implements
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
         updateAssistantAvailability();
+        updateA11yState();
     }
 
     public void destroy() {
@@ -179,6 +179,12 @@ public final class NavBarHelper implements
     }
 
     @Override
+    public void onAccessibilityServicesStateChanged(AccessibilityManager manager) {
+        dispatchA11yEventUpdate();
+        updateA11yState();
+    }
+
+    @Override
     public void onAccessibilityButtonModeChanged(int mode) {
         updateA11yState();
         dispatchA11yEventUpdate();
@@ -191,7 +197,9 @@ public final class NavBarHelper implements
     }
 
     /**
-     * Updates the current accessibility button state.
+     * Updates the current accessibility button state. The accessibility button state is only
+     * used for {@link Secure#ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR} and
+     * {@link Secure#ACCESSIBILITY_BUTTON_MODE_GESTURE}, otherwise it is reset to 0.
      */
     private void updateA11yState() {
         final int prevState = mA11yButtonState;
@@ -214,6 +222,9 @@ public final class NavBarHelper implements
             final int requestingServices = a11yButtonTargets.size();
 
             clickable = requestingServices >= 1;
+
+            // `longClickable` is used to determine whether to pop up the accessibility chooser
+            // dialog or not, and it’s also only for multiple services.
             longClickable = requestingServices >= 2;
             mA11yButtonState = (clickable ? SYSUI_STATE_A11Y_BUTTON_CLICKABLE : 0)
                     | (longClickable ? SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE : 0);
@@ -238,11 +249,13 @@ public final class NavBarHelper implements
     }
 
     /**
-     * See {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_CLICKABLE} and
-     * {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE}
+     * Gets the accessibility button state based on the {@link Secure#ACCESSIBILITY_BUTTON_MODE}.
      *
-     * @return the a11y button clickable and long_clickable states, or 0 if there is no
-     *         a11y button in the navbar
+     * @return the accessibility button state:
+     * 0 = disable state
+     * 16 = {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_CLICKABLE}
+     * 48 = the combination of {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_CLICKABLE} and
+     * {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE}
      */
     public int getA11yButtonState() {
         return mA11yButtonState;
@@ -295,8 +308,8 @@ public final class NavBarHelper implements
      * {@link InputMethodService} and the keyguard states.
      */
     public boolean isImeShown(int vis) {
-        View shadeWindowView = mStatusBarOptionalLazy.get().get().getNotificationShadeWindowView();
-        boolean isKeyguardShowing = mStatusBarOptionalLazy.get().get().isKeyguardShowing();
+        View shadeWindowView = mCentralSurfacesOptionalLazy.get().get().getNotificationShadeWindowView();
+        boolean isKeyguardShowing = mCentralSurfacesOptionalLazy.get().get().isKeyguardShowing();
         boolean imeVisibleOnShade = shadeWindowView != null && shadeWindowView.isAttachedToWindow()
                 && shadeWindowView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
         return imeVisibleOnShade
@@ -313,7 +326,7 @@ public final class NavBarHelper implements
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("NavbarTaskbarFriendster");
         pw.println("  longPressHomeEnabled=" + mLongPressHomeEnabled);
         pw.println("  mAssistantTouchGestureEnabled=" + mAssistantTouchGestureEnabled);

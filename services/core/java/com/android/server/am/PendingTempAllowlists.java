@@ -16,8 +16,6 @@
 
 package com.android.server.am;
 
-import static android.os.Process.INVALID_UID;
-
 import android.util.SparseArray;
 
 /** Allowlists of uids to temporarily bypass Power Save mode. */
@@ -36,16 +34,12 @@ final class PendingTempAllowlists {
         synchronized (mPendingTempAllowlist) {
             mPendingTempAllowlist.put(uid, value);
         }
-        mService.mAtmInternal.onUidAddedToPendingTempAllowlist(uid, value.tag);
     }
 
     void removeAt(int index) {
-        int uid = INVALID_UID;
         synchronized (mPendingTempAllowlist) {
-            uid = mPendingTempAllowlist.keyAt(index);
             mPendingTempAllowlist.removeAt(index);
         }
-        mService.mAtmInternal.onUidRemovedFromPendingTempAllowlist(uid);
     }
 
     ActivityManagerService.PendingTempAllowlist get(int uid) {

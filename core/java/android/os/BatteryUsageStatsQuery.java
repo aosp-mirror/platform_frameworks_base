@@ -42,6 +42,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
             FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL,
             FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY,
             FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA,
+            FLAG_BATTERY_USAGE_STATS_INCLUDE_VIRTUAL_UIDS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BatteryUsageStatsFlags {}
@@ -68,6 +69,8 @@ public final class BatteryUsageStatsQuery implements Parcelable {
     public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS = 0x0004;
 
     public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA = 0x0008;
+
+    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_VIRTUAL_UIDS = 0x0010;
 
     private static final long DEFAULT_MAX_STATS_AGE_MS = 5 * 60 * 1000;
 
@@ -267,6 +270,15 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         public Builder includePowerComponents(
                 @BatteryConsumer.PowerComponent int[] powerComponents) {
             mPowerComponents = powerComponents;
+            return this;
+        }
+
+        /**
+         * Requests to return attribution data for virtual UIDs such as
+         * {@link Process#SDK_SANDBOX_VIRTUAL_UID}.
+         */
+        public Builder includeVirtualUids() {
+            mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_VIRTUAL_UIDS;
             return this;
         }
 

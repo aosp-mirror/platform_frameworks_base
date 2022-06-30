@@ -36,6 +36,7 @@ import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.modules.utils.build.UnboundedSdkLevel;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -57,6 +58,7 @@ public class FrameworkParsingPackageUtils {
     private static final int MAX_FILE_NAME_SIZE = 223;
 
     public static final int PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY = 1 << 7;
+    public static final int PARSE_APK_IN_APEX = 1 << 9;
 
     /**
      * Check if the given name is valid.
@@ -334,8 +336,9 @@ public class FrameworkParsingPackageUtils {
      * If {@code targetCode} is not specified, e.g. the value is {@code null}, then the {@code
      * targetVers} will be returned unmodified.
      * <p>
-     * Otherwise, the behavior varies based on whether the current platform is a pre-release
-     * version, e.g. the {@code platformSdkCodenames} array has length > 0:
+     * When {@code allowUnknownCodenames} is false, the behavior varies based on whether the
+     * current platform is a pre-release version, e.g. the {@code platformSdkCodenames} array has
+     * length > 0:
      * <ul>
      * <li>If this is a pre-release platform and the value specified by
      * {@code targetCode} is contained within the array of allowed pre-release
@@ -343,20 +346,35 @@ public class FrameworkParsingPackageUtils {
      * <li>If this is a released platform, this method will return -1 to
      * indicate that the package is not compatible with this platform.
      * </ul>
+     * <p>
+     * When {@code allowUnknownCodenames} is true, any codename that is not known (presumed to be
+     * a codename announced after the build of the current device) is allowed and this method will
+     * return {@link Build.VERSION_CODES#CUR_DEVELOPMENT}.
      *
-     * @param targetVers           targetSdkVersion number, if specified in the application
-     *                             manifest, or 0 otherwise
-     * @param targetCode           targetSdkVersion code, if specified in the application manifest,
-     *                             or {@code null} otherwise
-     * @param platformSdkCodenames array of allowed pre-release SDK codenames for this platform
+     * @param targetVers            targetSdkVersion number, if specified in the application
+     *                              manifest, or 0 otherwise
+     * @param targetCode            targetSdkVersion code, if specified in the application manifest,
+     *                              or {@code null} otherwise
+     * @param platformSdkCodenames  array of allowed pre-release SDK codenames for this platform
+     * @param allowUnknownCodenames allow unknown codenames, if true this method will accept unknown
+     *                              (presumed to be future) codenames
      * @return the targetSdkVersion to use at runtime if successful
      */
     public static ParseResult<Integer> computeTargetSdkVersion(@IntRange(from = 0) int targetVers,
             @Nullable String targetCode, @NonNull String[] platformSdkCodenames,
-            @NonNull ParseInput input) {
+            @NonNull ParseInput input, boolean allowUnknownCodenames) {
         // If it's a release SDK, return the version number unmodified.
         if (targetCode == null) {
             return input.success(targetVers);
+        }
+
+        try {
+            if (allowUnknownCodenames && UnboundedSdkLevel.isAtMost(targetCode)) {
+                return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
+            }
+        } catch (IllegalArgumentException e) {
+            // isAtMost() throws it when encountering an older SDK codename
+            return input.error(PackageManager.INSTALL_FAILED_OLDER_SDK, e.getMessage());
         }
 
         // If it's a pre-release SDK and the codename matches this platform, it
@@ -375,6 +393,30 @@ public class FrameworkParsingPackageUtils {
             return input.error(PackageManager.INSTALL_FAILED_OLDER_SDK,
                     "Requires development platform " + targetCode
                             + " but this is a release platform.");
+        }
+    }
+
+    /**
+     * Computes the maxSdkVersion. If the package is not compatible with this platform, populates
+     * {@code outError[0]} with an error message.
+     * <p>
+     * {@code maxVers} is compared against {@code platformSdkVersion}. If {@code maxVers} is less
+     * than the {@code platformSdkVersion} then populates {@code outError[0]} with an error message.
+     * Otherwise, it returns {@code maxVers} unmodified.
+     *
+     * @param maxVers maxSdkVersion number, if specified in the application manifest, or {@code
+     *                Integer.MAX_VALUE} otherwise
+     * @param platformSdkVersion   platform SDK version number, typically Build.VERSION.SDK_INT
+     * @return the maxSdkVersion that was recognised or an error if the condition is not satisfied
+     */
+    public static ParseResult<Integer> computeMaxSdkVersion(@IntRange(from = 0) int maxVers,
+            @IntRange(from = 1) int platformSdkVersion, @NonNull ParseInput input) {
+        if (platformSdkVersion > maxVers) {
+            return input.error(PackageManager.INSTALL_FAILED_NEWER_SDK,
+                    "Requires max SDK version " + maxVers + " but is "
+                            + platformSdkVersion);
+        } else {
+            return input.success(maxVers);
         }
     }
 

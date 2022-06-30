@@ -202,7 +202,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
                         mActivityStarter
                                 .postStartActivityDismissingKeyguard(getLongClickIntent(), 0,
                                         controller);
-                    }, R.style.Theme_SystemUI_Dialog, false /* showProgressBarWhenEmpty */);
+                    }, R.style.Theme_SystemUI_Dialog_Cast, false /* showProgressBarWhenEmpty */);
             holder.init(dialog);
             SystemUIDialog.setShowForAllUsers(dialog, true);
             SystemUIDialog.registerDismissListener(dialog);

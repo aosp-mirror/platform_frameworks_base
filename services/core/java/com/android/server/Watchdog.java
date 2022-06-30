@@ -19,6 +19,8 @@ package com.android.server;
 import static com.android.server.Watchdog.HandlerCheckerAndTimeout.withCustomTimeout;
 import static com.android.server.Watchdog.HandlerCheckerAndTimeout.withDefaultTimeout;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.IActivityController;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -43,6 +45,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.sysprop.WatchdogProperties;
+import android.util.Dumpable;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -63,6 +66,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,7 +80,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * This class calls its monitor every minute. Killing this process if they don't return
  **/
-public class Watchdog {
+public class Watchdog implements Dumpable {
     static final String TAG = "Watchdog";
 
     /** Debug flag. */
@@ -143,10 +147,12 @@ public class Watchdog {
             "android.hardware.media.omx@1.0::IOmx",
             "android.hardware.media.omx@1.0::IOmxStore",
             "android.hardware.neuralnetworks@1.0::IDevice",
+            "android.hardware.power@1.0::IPower",
             "android.hardware.power.stats@1.0::IPowerStats",
             "android.hardware.sensors@1.0::ISensors",
             "android.hardware.sensors@2.0::ISensors",
             "android.hardware.sensors@2.1::ISensors",
+            "android.hardware.vibrator@1.0::IVibrator",
             "android.hardware.vr@1.0::IVr",
             "android.system.suspend@1.0::ISystemSuspend"
     );
@@ -155,7 +161,10 @@ public class Watchdog {
             "android.hardware.biometrics.face.IFace/",
             "android.hardware.biometrics.fingerprint.IFingerprint/",
             "android.hardware.light.ILights/",
+            "android.hardware.power.IPower/",
             "android.hardware.power.stats.IPowerStats/",
+            "android.hardware.vibrator.IVibrator/",
+            "android.hardware.vibrator.IVibratorManager/"
     };
 
     private static Watchdog sWatchdog;
@@ -1022,5 +1031,11 @@ public class Watchdog {
             Slog.w(TAG, "Failed to append to kmsg", e);
         }
         doSysRq('c');
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @Nullable String[] args) {
+        pw.print("WatchdogTimeoutMillis=");
+        pw.println(mWatchdogTimeoutMillis);
     }
 }

@@ -174,5 +174,9 @@ class LocalAnimationAdapter implements AnimationAdapter {
         }
 
         void dumpDebugInner(ProtoOutputStream proto);
+
+        default WindowAnimationSpec asWindowAnimationSpec() {
+            return null;
+        }
     }
 }

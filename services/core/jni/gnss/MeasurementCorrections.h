@@ -43,7 +43,7 @@ extern jmethodID method_correctionsHasEnvironmentBearing;
 extern jmethodID method_correctionsGetEnvironmentBearingDegrees;
 extern jmethodID method_correctionsGetEnvironmentBearingUncertaintyDegrees;
 extern jmethodID method_listSize;
-extern jmethodID method_correctionListGet;
+extern jmethodID method_listGet;
 extern jmethodID method_correctionSatFlags;
 extern jmethodID method_correctionSatConstType;
 extern jmethodID method_correctionSatId;
@@ -52,6 +52,7 @@ extern jmethodID method_correctionSatIsLosProb;
 extern jmethodID method_correctionSatEpl;
 extern jmethodID method_correctionSatEplUnc;
 extern jmethodID method_correctionSatRefPlane;
+extern jmethodID method_correctionSatExcessPathInfos;
 extern jmethodID method_correctionPlaneLatDeg;
 extern jmethodID method_correctionPlaneLngDeg;
 extern jmethodID method_correctionPlaneAltDeg;
@@ -130,14 +131,20 @@ struct MeasurementCorrectionsUtil {
     static bool translateMeasurementCorrections(JNIEnv* env, jobject correctionsObj,
                                                 T& corrections);
     template <class T>
-    static void getReflectingPlane(JNIEnv* env, jobject singleSatCorrectionObj, T& reflectingPlane);
+    static void setReflectingPlane(JNIEnv* env, jobject reflectingPlaneObj, T& reflectingPlane);
+    template <class T>
+    static void setReflectingPlaneAzimuthDegrees(T& reflectingPlane, double azimuthDegreeRefPlane);
+
+    static std::vector<
+            android::hardware::gnss::measurement_corrections::SingleSatCorrection::ExcessPathInfo>
+    getExcessPathInfoList(JNIEnv* env, jobject correctionsObj);
+    static android::hardware::gnss::measurement_corrections::SingleSatCorrection::ExcessPathInfo
+    getExcessPathInfo(JNIEnv* env, jobject correctionsObj);
 };
 
 template <class T>
-void MeasurementCorrectionsUtil::getReflectingPlane(JNIEnv* env, jobject singleSatCorrectionObj,
+void MeasurementCorrectionsUtil::setReflectingPlane(JNIEnv* env, jobject reflectingPlaneObj,
                                                     T& reflectingPlane) {
-    jobject reflectingPlaneObj =
-            env->CallObjectMethod(singleSatCorrectionObj, method_correctionSatRefPlane);
     jdouble latitudeDegreesRefPlane =
             env->CallDoubleMethod(reflectingPlaneObj, method_correctionPlaneLatDeg);
     jdouble longitudeDegreesRefPlane =
@@ -149,8 +156,7 @@ void MeasurementCorrectionsUtil::getReflectingPlane(JNIEnv* env, jobject singleS
     reflectingPlane.latitudeDegrees = latitudeDegreesRefPlane;
     reflectingPlane.longitudeDegrees = longitudeDegreesRefPlane;
     reflectingPlane.altitudeMeters = altitudeDegreesRefPlane;
-    reflectingPlane.azimuthDegrees = azimuthDegreeRefPlane;
-    env->DeleteLocalRef(reflectingPlaneObj);
+    setReflectingPlaneAzimuthDegrees<T>(reflectingPlane, azimuthDegreeRefPlane);
 }
 
 } // namespace android::gnss

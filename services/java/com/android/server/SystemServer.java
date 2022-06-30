@@ -41,6 +41,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -163,6 +164,7 @@ import com.android.server.pm.OtaDexoptService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
+import com.android.server.pm.dex.OdsignStatsLogger;
 import com.android.server.pm.dex.SystemServerDexLoadReporter;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.policy.AppOpsPolicy;
@@ -213,8 +215,6 @@ import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
-
-import com.google.android.startop.iorap.IorapForwardingService;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -294,8 +294,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.wifi.p2p.WifiP2pService";
     private static final String LOWPAN_SERVICE_CLASS =
             "com.android.server.lowpan.LowpanService";
-    private static final String ETHERNET_SERVICE_CLASS =
-            "com.android.server.ethernet.EthernetService";
     private static final String JOB_SCHEDULER_SERVICE_CLASS =
             "com.android.server.job.JobSchedulerService";
     private static final String LOCK_SETTINGS_SERVICE_CLASS =
@@ -340,8 +338,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.contentcapture.ContentCaptureManagerService";
     private static final String TRANSLATION_MANAGER_SERVICE_CLASS =
             "com.android.server.translation.TranslationManagerService";
-    private static final String SELECTION_TOOLBAR_MANAGER_SERVICE_CLASS =
-            "com.android.server.selectiontoolbar.SelectionToolbarManagerService";
     private static final String MUSIC_RECOGNITION_MANAGER_SERVICE_CLASS =
             "com.android.server.musicrecognition.MusicRecognitionManagerService";
     private static final String SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS =
@@ -416,14 +412,16 @@ public final class SystemServer implements Dumpable {
             "/apex/com.android.uwb/javalib/service-uwb.jar";
     private static final String UWB_SERVICE_CLASS = "com.android.server.uwb.UwbService";
     private static final String BLUETOOTH_APEX_SERVICE_JAR_PATH =
-            "/apex/com.android.bluetooth/javalib/service-bluetooth.jar";
+            "/apex/com.android.btservices/javalib/service-bluetooth.jar";
     private static final String BLUETOOTH_SERVICE_CLASS =
             "com.android.server.bluetooth.BluetoothService";
     private static final String SAFETY_CENTER_SERVICE_CLASS =
             "com.android.safetycenter.SafetyCenterService";
 
-    private static final String SUPPLEMENTALPROCESS_SERVICE_CLASS =
-            "com.android.server.supplementalprocess.SupplementalProcessManagerService$Lifecycle";
+    private static final String SDK_SANDBOX_MANAGER_SERVICE_CLASS =
+            "com.android.server.sdksandbox.SdkSandboxManagerService$Lifecycle";
+    private static final String AD_SERVICES_MANAGER_SERVICE_CLASS =
+            "com.android.server.adservices.AdServicesManagerService$Lifecycle";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -1059,6 +1057,7 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("StartWatchdog");
         final Watchdog watchdog = Watchdog.getInstance();
         watchdog.start();
+        mDumper.addDumpable(watchdog);
         t.traceEnd();
 
         Slog.i(TAG, "Reading configuration...");
@@ -1227,12 +1226,15 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(domainVerificationService);
         t.traceEnd();
 
+        IPackageManager iPackageManager;
         t.traceBegin("StartPackageManagerService");
         try {
             Watchdog.getInstance().pauseWatchingCurrentThread("packagemanagermain");
-            mPackageManagerService = PackageManagerService.main(mSystemContext, installer,
-                    domainVerificationService, mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF,
-                    mOnlyCore);
+            Pair<PackageManagerService, IPackageManager> pmsPair = PackageManagerService.main(
+                    mSystemContext, installer, domainVerificationService,
+                    mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, mOnlyCore);
+            mPackageManagerService = pmsPair.first;
+            iPackageManager = pmsPair.second;
         } finally {
             Watchdog.getInstance().resumeWatchingCurrentThread("packagemanagermain");
         }
@@ -1240,7 +1242,7 @@ public final class SystemServer implements Dumpable {
         // Now that the package manager has started, register the dex load reporter to capture any
         // dex files loaded by system server.
         // These dex files will be optimized by the BackgroundDexOptService.
-        SystemServerDexLoadReporter.configureSystemServerDexReporter(mPackageManagerService);
+        SystemServerDexLoadReporter.configureSystemServerDexReporter(iPackageManager);
 
         mFirstBoot = mPackageManagerService.isFirstBoot();
         mPackageManager = mSystemContext.getPackageManager();
@@ -1456,8 +1458,9 @@ public final class SystemServer implements Dumpable {
                     Slog.i(TAG, SECONDARY_ZYGOTE_PRELOAD);
                     TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
                     traceLog.traceBegin(SECONDARY_ZYGOTE_PRELOAD);
-                    if (!Process.ZYGOTE_PROCESS.preloadDefault(Build.SUPPORTED_32_BIT_ABIS[0])) {
-                        Slog.e(TAG, "Unable to preload default resources");
+                    String[] abis32 = Build.SUPPORTED_32_BIT_ABIS;
+                    if (abis32.length > 0 && !Process.ZYGOTE_PROCESS.preloadDefault(abis32[0])) {
+                        Slog.e(TAG, "Unable to preload default resources for secondary");
                     }
                     traceLog.traceEnd();
                 } catch (Exception ex) {
@@ -1484,8 +1487,9 @@ public final class SystemServer implements Dumpable {
 
             // TelecomLoader hooks into classes with defined HFP logic,
             // so check for either telephony or microphone.
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE) ||
-                    mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)
+                    || mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM)
+                    || mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
                 t.traceBegin("StartTelecomLoaderService");
                 mSystemServiceManager.startService(TelecomLoaderService.class);
                 t.traceEnd();
@@ -1643,10 +1647,6 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("PinnerService");
             mSystemServiceManager.startService(PinnerService.class);
-            t.traceEnd();
-
-            t.traceBegin("IorapForwardingService");
-            mSystemServiceManager.startService(IorapForwardingService.class);
             t.traceEnd();
 
             if (Build.IS_DEBUGGABLE && ProfcollectForwardingService.enabled()) {
@@ -1992,13 +1992,6 @@ public final class SystemServer implements Dumpable {
                     PackageManager.FEATURE_LOWPAN)) {
                 t.traceBegin("StartLowpan");
                 mSystemServiceManager.startService(LOWPAN_SERVICE_CLASS);
-                t.traceEnd();
-            }
-
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_ETHERNET) ||
-                    mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)) {
-                t.traceBegin("StartEthernet");
-                mSystemServiceManager.startService(ETHERNET_SERVICE_CLASS);
                 t.traceEnd();
             }
 
@@ -2605,9 +2598,14 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(IncidentCompanionService.class);
         t.traceEnd();
 
-        // Supplemental Process
-        t.traceBegin("StartSupplementalProcessManagerService");
-        mSystemServiceManager.startService(SUPPLEMENTALPROCESS_SERVICE_CLASS);
+        // SdkSandboxManagerService
+        t.traceBegin("StarSdkSandboxManagerService");
+        mSystemServiceManager.startService(SDK_SANDBOX_MANAGER_SERVICE_CLASS);
+        t.traceEnd();
+
+        // AdServicesManagerService (PP API service)
+        t.traceBegin("StartAdServicesManagerService");
+        mSystemServiceManager.startService(AD_SERVICES_MANAGER_SERVICE_CLASS);
         t.traceEnd();
 
         if (safeMode) {
@@ -2635,11 +2633,6 @@ public final class SystemServer implements Dumpable {
         } else {
             Slog.d(TAG, "TranslationService not defined by OEM");
         }
-
-        // Selection toolbar service
-        t.traceBegin("StartSelectionToolbarManagerService");
-        mSystemServiceManager.startService(SELECTION_TOOLBAR_MANAGER_SERVICE_CLASS);
-        t.traceEnd();
 
         // NOTE: ClipboardService depends on ContentCapture and Autofill
         t.traceBegin("StartClipboardService");
@@ -3045,6 +3038,14 @@ public final class SystemServer implements Dumpable {
                 setIncrementalServiceSystemReady(mIncrementalServiceHandle);
                 t.traceEnd();
             }
+
+            t.traceBegin("OdsignStatsLogger");
+            try {
+                OdsignStatsLogger.triggerStatsWrite();
+            } catch (Throwable e) {
+                reportWtf("Triggering OdsignStatsLogger", e);
+            }
+            t.traceEnd();
         }, t);
 
         t.traceBegin("StartSystemUI");

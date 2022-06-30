@@ -19,20 +19,46 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 
-import android.util.ArraySet;
+import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
 import android.view.Display;
 import android.view.Display.Mode;
 import android.view.DisplayInfo;
+
+import java.util.HashMap;
 
 /**
  * Policy to select a lower refresh rate for the display if applicable.
  */
 class RefreshRatePolicy {
 
+    class PackageRefreshRate {
+        private final HashMap<String, RefreshRateRange> mPackages = new HashMap<>();
+
+        public void add(String s, float minRefreshRate, float maxRefreshRate) {
+            float minSupportedRefreshRate =
+                    Math.max(RefreshRatePolicy.this.mMinSupportedRefreshRate, minRefreshRate);
+            float maxSupportedRefreshRate =
+                    Math.min(RefreshRatePolicy.this.mMaxSupportedRefreshRate, maxRefreshRate);
+
+            mPackages.put(s,
+                    new RefreshRateRange(minSupportedRefreshRate, maxSupportedRefreshRate));
+        }
+
+        public RefreshRateRange get(String s) {
+            return mPackages.get(s);
+        }
+
+        public void remove(String s) {
+            mPackages.remove(s);
+        }
+    }
+
     private final Mode mLowRefreshRateMode;
-    private final ArraySet<String> mNonHighRefreshRatePackages = new ArraySet<>();
+    private final PackageRefreshRate mNonHighRefreshRatePackages = new PackageRefreshRate();
     private final HighRefreshRateDenylist mHighRefreshRateDenylist;
     private final WindowManagerService mWmService;
+    private float mMinSupportedRefreshRate;
+    private float mMaxSupportedRefreshRate;
 
     /**
      * The following constants represent priority of the window. SF uses this information when
@@ -70,7 +96,12 @@ class RefreshRatePolicy {
         Mode mode = displayInfo.getDefaultMode();
         float[] refreshRates = displayInfo.getDefaultRefreshRates();
         float bestRefreshRate = mode.getRefreshRate();
+        mMinSupportedRefreshRate = bestRefreshRate;
+        mMaxSupportedRefreshRate = bestRefreshRate;
         for (int i = refreshRates.length - 1; i >= 0; i--) {
+            mMinSupportedRefreshRate = Math.min(mMinSupportedRefreshRate, refreshRates[i]);
+            mMaxSupportedRefreshRate = Math.max(mMaxSupportedRefreshRate, refreshRates[i]);
+
             if (refreshRates[i] >= 60f && refreshRates[i] < bestRefreshRate) {
                 bestRefreshRate = refreshRates[i];
             }
@@ -78,12 +109,13 @@ class RefreshRatePolicy {
         return displayInfo.findDefaultModeByRefreshRate(bestRefreshRate);
     }
 
-    void addNonHighRefreshRatePackage(String packageName) {
-        mNonHighRefreshRatePackages.add(packageName);
+    void addRefreshRateRangeForPackage(String packageName,
+            float minRefreshRate, float maxRefreshRate) {
+        mNonHighRefreshRatePackages.add(packageName, minRefreshRate, maxRefreshRate);
         mWmService.requestTraversal();
     }
 
-    void removeNonHighRefreshRatePackage(String packageName) {
+    void removeRefreshRateRangeForPackage(String packageName) {
         mNonHighRefreshRatePackages.remove(packageName);
         mWmService.requestTraversal();
     }
@@ -172,8 +204,9 @@ class RefreshRatePolicy {
         // If app is using Camera, we set both the min and max refresh rate to the camera's
         // preferred refresh rate to make sure we don't end up with a refresh rate lower
         // than the camera capture rate, which will lead to dropping camera frames.
-        if (mNonHighRefreshRatePackages.contains(packageName)) {
-            return mLowRefreshRateMode.getRefreshRate();
+        RefreshRateRange range = mNonHighRefreshRatePackages.get(packageName);
+        if (range != null) {
+            return range.min;
         }
 
         return 0;
@@ -192,8 +225,9 @@ class RefreshRatePolicy {
 
         final String packageName = w.getOwningPackage();
         // If app is using Camera, force it to default (lower) refresh rate.
-        if (mNonHighRefreshRatePackages.contains(packageName)) {
-            return mLowRefreshRateMode.getRefreshRate();
+        RefreshRateRange range = mNonHighRefreshRatePackages.get(packageName);
+        if (range != null) {
+            return range.max;
         }
 
         return 0;

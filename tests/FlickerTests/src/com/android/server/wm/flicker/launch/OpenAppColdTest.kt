@@ -24,11 +24,8 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
-import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,11 +56,6 @@ import org.junit.runners.Parameterized
 @Group1
 open class OpenAppColdTest(testSpec: FlickerTestParameter)
     : OpenAppFromLauncherTransition(testSpec) {
-    @Before
-    open fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
-
     /**
      * Defines the transition used to run the test
      */
@@ -121,7 +113,7 @@ open class OpenAppColdTest(testSpec: FlickerTestParameter)
     override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 213852103)
+    @Presubmit
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 

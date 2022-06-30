@@ -22,6 +22,8 @@ import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.clearInvocations;
@@ -29,7 +31,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.LayoutInflater;
@@ -55,6 +59,9 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -108,10 +115,12 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private StatusBarUserSwitcherController mStatusBarUserSwitcherController;
     @Mock
     private StatusBarUserInfoTracker mStatusBarUserInfoTracker;
+    @Mock private SecureSettings mSecureSettings;
 
     private TestNotificationPanelViewStateProvider mNotificationPanelViewStateProvider;
     private KeyguardStatusBarView mKeyguardStatusBarView;
     private KeyguardStatusBarViewController mController;
+    private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setup() throws Exception {
@@ -150,7 +159,9 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mUserManager,
                 mStatusBarUserSwitcherFeatureController,
                 mStatusBarUserSwitcherController,
-                mStatusBarUserInfoTracker
+                mStatusBarUserInfoTracker,
+                mSecureSettings,
+                mFakeExecutor
         );
     }
 
@@ -343,6 +354,28 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
     }
 
+    @Test
+    public void setAlpha_explicitAlpha_setsExplicitAlpha() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        mController.setAlpha(0.5f);
+
+        assertThat(mKeyguardStatusBarView.getAlpha()).isEqualTo(0.5f);
+    }
+
+    @Test
+    public void setAlpha_explicitAlpha_thenMinusOneAlpha_setsAlphaBasedOnDefaultCriteria() {
+        mController.onViewAttached();
+        updateStateToKeyguard();
+
+        mController.setAlpha(0.5f);
+        mController.setAlpha(-1f);
+
+        assertThat(mKeyguardStatusBarView.getAlpha()).isGreaterThan(0);
+        assertThat(mKeyguardStatusBarView.getAlpha()).isNotEqualTo(0.5f);
+    }
+
     // TODO(b/195442899): Add more tests for #updateViewState once CLs are finalized.
 
     @Test
@@ -396,6 +429,39 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
 
         // THEN keyguard status bar view avatar is enabled
         assertThat(mKeyguardStatusBarView.isKeyguardUserAvatarEnabled()).isTrue();
+    }
+
+    @Test
+    public void testBlockedIcons_obeysSettingForVibrateIcon_settingOff() {
+        String str = mContext.getString(com.android.internal.R.string.status_bar_volume);
+
+        // GIVEN the setting is off
+        when(mSecureSettings.getInt(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON, 0))
+                .thenReturn(0);
+
+        // WHEN CollapsedStatusBarFragment builds the blocklist
+        mController.updateBlockedIcons();
+
+        // THEN status_bar_volume SHOULD be present in the list
+        boolean contains = mController.getBlockedIcons().contains(str);
+        assertTrue(contains);
+    }
+
+    @Test
+    public void testBlockedIcons_obeysSettingForVibrateIcon_settingOn() {
+        String str = mContext.getString(com.android.internal.R.string.status_bar_volume);
+
+        // GIVEN the setting is ON
+        when(mSecureSettings.getIntForUser(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON, 0,
+                UserHandle.USER_CURRENT))
+                .thenReturn(1);
+
+        // WHEN CollapsedStatusBarFragment builds the blocklist
+        mController.updateBlockedIcons();
+
+        // THEN status_bar_volume SHOULD NOT be present in the list
+        boolean contains = mController.getBlockedIcons().contains(str);
+        assertFalse(contains);
     }
 
     private void updateStateToNotKeyguard() {

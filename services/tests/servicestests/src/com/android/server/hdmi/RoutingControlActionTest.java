@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
@@ -149,7 +150,7 @@ public class RoutingControlActionTest {
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                        Collections.emptyList()) {
+                        Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     boolean isControlEnabled() {
                         return true;
@@ -186,6 +187,7 @@ public class RoutingControlActionTest {
                         true, false, false);
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mHdmiControlService.initService();
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);

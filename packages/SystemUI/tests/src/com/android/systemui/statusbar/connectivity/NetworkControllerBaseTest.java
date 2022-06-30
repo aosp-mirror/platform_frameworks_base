@@ -125,7 +125,9 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected DemoModeController mDemoModeController;
     protected CarrierConfigTracker mCarrierConfigTracker;
     protected FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
+    protected Handler mMainHandler;
     protected FeatureFlags mFeatureFlags;
+    protected WifiStatusTrackerFactory mWifiStatusTrackerFactory;
 
     protected int mSubId;
 
@@ -147,7 +149,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             // Print out mNetworkController state if the test fails.
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
-            mNetworkController.dump(null, pw, null);
+            mNetworkController.dump(pw, null);
             pw.flush();
             Log.d(TAG, sw.toString());
         }
@@ -174,9 +176,15 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mMockNsm = mock(NetworkScoreManager.class);
         mMockSubDefaults = mock(SubscriptionDefaults.class);
         mCarrierConfigTracker = mock(CarrierConfigTracker.class);
+        mMainHandler = mock(Handler.class);
         mNetCapabilities = new NetworkCapabilities();
         when(mMockTm.isDataCapable()).thenReturn(true);
         when(mMockTm.createForSubscriptionId(anyInt())).thenReturn(mMockTm);
+
+        doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(mMainHandler).post(any());
         doAnswer(invocation -> {
             int rssi = invocation.getArgument(0);
             if (rssi < -88) return 0;
@@ -213,12 +221,14 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             return null;
         }).when(mMockProvisionController).addCallback(any());
 
+        mWifiStatusTrackerFactory = new WifiStatusTrackerFactory(
+                mContext, mMockWm, mMockNsm, mMockCm, mMainHandler);
+
         mNetworkController = new NetworkControllerImpl(mContext,
                 mMockCm,
                 mMockTm,
                 mTelephonyListenerManager,
                 mMockWm,
-                mMockNsm,
                 mMockSm,
                 mConfig,
                 TestableLooper.get(this).getLooper(),
@@ -231,6 +241,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mMockBd,
                 mDemoModeController,
                 mCarrierConfigTracker,
+                mWifiStatusTrackerFactory,
+                mMainHandler,
                 mFeatureFlags,
                 mock(DumpManager.class)
         );
@@ -289,24 +301,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         when(mMockSm.getActiveSubscriptionInfoList()).thenReturn(subs);
         when(mMockSm.getCompleteActiveSubscriptionInfoList()).thenReturn(subs);
         mNetworkController.doUpdateMobileControllers();
-    }
-
-    protected NetworkControllerImpl setUpNoMobileData() {
-        when(mMockTm.isDataCapable()).thenReturn(false);
-        NetworkControllerImpl networkControllerNoMobile =
-                new NetworkControllerImpl(mContext, mMockCm, mMockTm, mTelephonyListenerManager,
-                        mMockWm, mMockNsm, mMockSm,
-                        mConfig, TestableLooper.get(this).getLooper(), mFakeExecutor,
-                        mCallbackHandler,
-                        mock(AccessPointControllerImpl.class),
-                        mock(DataUsageController.class), mMockSubDefaults,
-                        mock(DeviceProvisionedController.class), mMockBd, mDemoModeController,
-                        mCarrierConfigTracker, mFeatureFlags,
-                        mock(DumpManager.class));
-
-        setupNetworkController();
-
-        return networkControllerNoMobile;
     }
 
     // 2 Bars 3G GSM.

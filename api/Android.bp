@@ -123,20 +123,16 @@ combined_apis {
         "framework-scheduling",
         "framework-sdkextensions",
         "framework-statsd",
-        "framework-supplementalprocess",
+        "framework-sdksandbox",
         "framework-tethering",
         "framework-uwb",
         "framework-wifi",
         "i18n.module.public.api",
     ],
-    conditional_bootclasspath: [
-        "framework-auxiliary",
-        "framework-supplementalapi",
-    ],
     system_server_classpath: [
         "service-media-s",
         "service-permission",
-        "service-supplementalprocess",
+        "service-sdksandbox",
     ],
 }
 

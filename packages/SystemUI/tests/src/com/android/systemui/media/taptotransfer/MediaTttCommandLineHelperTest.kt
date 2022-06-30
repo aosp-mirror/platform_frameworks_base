@@ -21,13 +21,8 @@ import android.content.Context
 import android.media.MediaRoute2Info
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.media.taptotransfer.sender.AlmostCloseToEndCast
-import com.android.systemui.media.taptotransfer.sender.AlmostCloseToStartCast
-import com.android.systemui.media.taptotransfer.sender.TransferFailed
-import com.android.systemui.media.taptotransfer.sender.TransferToReceiverTriggered
-import com.android.systemui.media.taptotransfer.sender.TransferToThisDeviceSucceeded
-import com.android.systemui.media.taptotransfer.sender.TransferToThisDeviceTriggered
-import com.android.systemui.media.taptotransfer.sender.TransferToReceiverSucceeded
+import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
+import com.android.systemui.media.taptotransfer.sender.ChipStateSender
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -88,7 +83,7 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     @Test
     fun sender_almostCloseToStartCast_serviceCallbackCalled() {
         commandRegistry.onShellCommand(
-            pw, getSenderCommand(AlmostCloseToStartCast::class.simpleName!!)
+            pw, getSenderCommand(ChipStateSender.ALMOST_CLOSE_TO_START_CAST.name)
         )
 
         val routeInfoCaptor = argumentCaptor<MediaRoute2Info>()
@@ -103,7 +98,7 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     @Test
     fun sender_almostCloseToEndCast_serviceCallbackCalled() {
         commandRegistry.onShellCommand(
-            pw, getSenderCommand(AlmostCloseToEndCast::class.simpleName!!)
+            pw, getSenderCommand(ChipStateSender.ALMOST_CLOSE_TO_END_CAST.name)
         )
 
         val routeInfoCaptor = argumentCaptor<MediaRoute2Info>()
@@ -118,7 +113,7 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     @Test
     fun sender_transferToReceiverTriggered_chipDisplayWithCorrectState() {
         commandRegistry.onShellCommand(
-            pw, getSenderCommand(TransferToReceiverTriggered::class.simpleName!!)
+            pw, getSenderCommand(ChipStateSender.TRANSFER_TO_RECEIVER_TRIGGERED.name)
         )
 
         val routeInfoCaptor = argumentCaptor<MediaRoute2Info>()
@@ -133,7 +128,7 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     @Test
     fun sender_transferToThisDeviceTriggered_chipDisplayWithCorrectState() {
         commandRegistry.onShellCommand(
-            pw, getSenderCommand(TransferToThisDeviceTriggered::class.simpleName!!)
+            pw, getSenderCommand(ChipStateSender.TRANSFER_TO_THIS_DEVICE_TRIGGERED.name)
         )
 
         verify(statusBarManager).updateMediaTapToTransferSenderDisplay(
@@ -146,7 +141,7 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     @Test
     fun sender_transferToReceiverSucceeded_chipDisplayWithCorrectState() {
         commandRegistry.onShellCommand(
-            pw, getSenderCommand(TransferToReceiverSucceeded::class.simpleName!!)
+            pw, getSenderCommand(ChipStateSender.TRANSFER_TO_RECEIVER_SUCCEEDED.name)
         )
 
         val routeInfoCaptor = argumentCaptor<MediaRoute2Info>()
@@ -161,7 +156,7 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     @Test
     fun sender_transferToThisDeviceSucceeded_chipDisplayWithCorrectState() {
         commandRegistry.onShellCommand(
-            pw, getSenderCommand(TransferToThisDeviceSucceeded::class.simpleName!!)
+            pw, getSenderCommand(ChipStateSender.TRANSFER_TO_THIS_DEVICE_SUCCEEDED.name)
         )
 
         val routeInfoCaptor = argumentCaptor<MediaRoute2Info>()
@@ -174,8 +169,10 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     }
 
     @Test
-    fun sender_transferFailed_serviceCallbackCalled() {
-        commandRegistry.onShellCommand(pw, getSenderCommand(TransferFailed::class.simpleName!!))
+    fun sender_transferToReceiverFailed_serviceCallbackCalled() {
+        commandRegistry.onShellCommand(
+            pw, getSenderCommand(ChipStateSender.TRANSFER_TO_RECEIVER_FAILED.name)
+        )
 
         verify(statusBarManager).updateMediaTapToTransferSenderDisplay(
             eq(StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED),
@@ -185,8 +182,23 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     }
 
     @Test
+    fun sender_transferToThisDeviceFailed_serviceCallbackCalled() {
+        commandRegistry.onShellCommand(
+            pw, getSenderCommand(ChipStateSender.TRANSFER_TO_THIS_DEVICE_FAILED.name)
+        )
+
+        verify(statusBarManager).updateMediaTapToTransferSenderDisplay(
+            eq(StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED),
+            any(),
+            nullable(),
+            nullable())
+    }
+
+    @Test
     fun sender_farFromReceiver_serviceCallbackCalled() {
-        commandRegistry.onShellCommand(pw, getSenderCommand(FAR_FROM_RECEIVER_STATE))
+        commandRegistry.onShellCommand(
+            pw, getSenderCommand(ChipStateSender.FAR_FROM_RECEIVER.name)
+        )
 
         verify(statusBarManager).updateMediaTapToTransferSenderDisplay(
             eq(StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER),
@@ -197,7 +209,9 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
 
     @Test
     fun receiver_closeToSender_serviceCallbackCalled() {
-        commandRegistry.onShellCommand(pw, getReceiverCommand(CLOSE_TO_SENDER_STATE))
+        commandRegistry.onShellCommand(
+            pw, getReceiverCommand(ChipStateReceiver.CLOSE_TO_SENDER.name)
+        )
 
         verify(statusBarManager).updateMediaTapToTransferReceiverDisplay(
             eq(StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER),
@@ -209,7 +223,9 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
 
     @Test
     fun receiver_farFromSender_serviceCallbackCalled() {
-        commandRegistry.onShellCommand(pw, getReceiverCommand(FAR_FROM_SENDER_STATE))
+        commandRegistry.onShellCommand(
+            pw, getReceiverCommand(ChipStateReceiver.FAR_FROM_SENDER.name)
+        )
 
         verify(statusBarManager).updateMediaTapToTransferReceiverDisplay(
             eq(StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER),

@@ -74,11 +74,21 @@ class DozeLogger @Inject constructor(
         })
     }
 
-    fun logDozingSuppressed(isDozingSuppressed: Boolean) {
+    fun logPowerSaveChanged(powerSaveActive: Boolean, nextState: DozeMachine.State) {
         buffer.log(TAG, INFO, {
-            bool1 = isDozingSuppressed
+            bool1 = powerSaveActive
+            str1 = nextState.name
         }, {
-            "DozingSuppressed=$bool1"
+            "Power save active=$bool1 nextState=$str1"
+        })
+    }
+
+    fun logAlwaysOnSuppressedChange(isAodSuppressed: Boolean, nextState: DozeMachine.State) {
+        buffer.log(TAG, INFO, {
+            bool1 = isAodSuppressed
+            str1 = nextState.name
+        }, {
+            "Always on (AOD) suppressed changed, suppressed=$bool1 nextState=$str1"
         })
     }
 
@@ -257,11 +267,20 @@ class DozeLogger @Inject constructor(
         })
     }
 
-    fun logDozeSuppressed(state: DozeMachine.State) {
+    fun logAlwaysOnSuppressed(state: DozeMachine.State, reason: String) {
         buffer.log(TAG, INFO, {
             str1 = state.name
+            str2 = reason
         }, {
-            "Doze state suppressed, state=$str1"
+            "Always-on state suppressed, suppressed state=$str1 reason=$str2"
+        })
+    }
+
+    fun logImmediatelyEndDoze(reason: String) {
+        buffer.log(TAG, INFO, {
+            str1 = reason
+        }, {
+            "Doze immediately ended due to $str1"
         })
     }
 

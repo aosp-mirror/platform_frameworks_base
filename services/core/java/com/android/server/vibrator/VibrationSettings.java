@@ -34,6 +34,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioManager;
@@ -42,6 +43,7 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.VibrationAttributes;
@@ -50,6 +52,7 @@ import android.os.Vibrator;
 import android.os.Vibrator.VibrationIntensity;
 import android.os.vibrator.VibrationConfig;
 import android.provider.Settings;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
@@ -95,7 +98,9 @@ final class VibrationSettings {
             Arrays.asList(
                     USAGE_RINGTONE,
                     USAGE_ALARM,
-                    USAGE_COMMUNICATION_REQUEST));
+                    USAGE_COMMUNICATION_REQUEST,
+                    USAGE_PHYSICAL_EMULATION,
+                    USAGE_HARDWARE_FEEDBACK));
 
     /**
      * Usage allowed for vibrations when {@link Settings.System#VIBRATE_ON} is disabled.
@@ -106,6 +111,37 @@ final class VibrationSettings {
      */
     private static final int VIBRATE_ON_DISABLED_USAGE_ALLOWED = USAGE_ACCESSIBILITY;
 
+    /**
+     * Set of usages allowed for vibrations from system packages when the screen goes off.
+     *
+     * <p>Some examples are touch and hardware feedback, and physical emulation. When the system is
+     * playing one of these usages during the screen off event then the vibration will not be
+     * cancelled by the service.
+     */
+    private static final Set<Integer> SYSTEM_VIBRATION_SCREEN_OFF_USAGE_ALLOWLIST = new HashSet<>(
+            Arrays.asList(
+                    USAGE_TOUCH,
+                    USAGE_PHYSICAL_EMULATION,
+                    USAGE_HARDWARE_FEEDBACK));
+
+    /**
+     * Set of reasons for {@link PowerManager} going to sleep events that allows vibrations to
+     * continue running.
+     *
+     * <p>Some examples are timeout and inattentive, which indicates automatic screen off events.
+     * When a vibration is playing during one of these screen off events then it will not be
+     * cancelled by the service.
+     */
+    private static final Set<Integer> POWER_MANAGER_SLEEP_REASON_ALLOWLIST = new HashSet<>(
+            Arrays.asList(
+                    PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE,
+                    PowerManager.GO_TO_SLEEP_REASON_TIMEOUT));
+
+    private static final IntentFilter USER_SWITCHED_INTENT_FILTER =
+            new IntentFilter(Intent.ACTION_USER_SWITCHED);
+    private static final IntentFilter INTERNAL_RINGER_MODE_CHANGED_INTENT_FILTER =
+            new IntentFilter(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
+
     /** Listener for changes on vibration settings. */
     interface OnVibratorSettingsChanged {
         /** Callback triggered when any of the vibrator settings change. */
@@ -114,11 +150,13 @@ final class VibrationSettings {
 
     private final Object mLock = new Object();
     private final Context mContext;
-    private final SettingsObserver mSettingObserver;
+    private final String mSystemUiPackage;
+    @VisibleForTesting
+    final SettingsContentObserver mSettingObserver;
     @VisibleForTesting
     final UidObserver mUidObserver;
     @VisibleForTesting
-    final UserObserver mUserReceiver;
+    final SettingsBroadcastReceiver mSettingChangeReceiver;
 
     @GuardedBy("mLock")
     private final List<OnVibratorSettingsChanged> mListeners = new ArrayList<>();
@@ -129,6 +167,9 @@ final class VibrationSettings {
     @GuardedBy("mLock")
     @Nullable
     private AudioManager mAudioManager;
+    @GuardedBy("mLock")
+    @Nullable
+    private PowerManagerInternal mPowerManagerInternal;
 
     @GuardedBy("mLock")
     private boolean mVibrateInputDevices;
@@ -138,6 +179,8 @@ final class VibrationSettings {
     private boolean mBatterySaverMode;
     @GuardedBy("mLock")
     private boolean mVibrateOn;
+    @GuardedBy("mLock")
+    private int mRingerMode;
 
     VibrationSettings(Context context, Handler handler) {
         this(context, handler, new VibrationConfig(context.getResources()));
@@ -147,9 +190,12 @@ final class VibrationSettings {
     VibrationSettings(Context context, Handler handler, VibrationConfig config) {
         mContext = context;
         mVibrationConfig = config;
-        mSettingObserver = new SettingsObserver(handler);
+        mSettingObserver = new SettingsContentObserver(handler);
         mUidObserver = new UidObserver();
-        mUserReceiver = new UserObserver();
+        mSettingChangeReceiver = new SettingsBroadcastReceiver();
+
+        mSystemUiPackage = LocalServices.getService(PackageManagerInternal.class)
+                .getSystemUiServiceComponent().getPackageName();
 
         VibrationEffect clickEffect = createEffectFromResource(
                 com.android.internal.R.array.config_virtualKeyVibePattern);
@@ -169,13 +215,20 @@ final class VibrationSettings {
                 VibrationEffect.get(VibrationEffect.EFFECT_TICK, false));
 
         // Update with current values from settings.
-        updateSettings();
+        update();
     }
 
     public void onSystemReady() {
+        PowerManagerInternal pm = LocalServices.getService(PowerManagerInternal.class);
+        AudioManager am = mContext.getSystemService(AudioManager.class);
+        int ringerMode = am.getRingerModeInternal();
+
         synchronized (mLock) {
-            mAudioManager = mContext.getSystemService(AudioManager.class);
+            mPowerManagerInternal = pm;
+            mAudioManager = am;
+            mRingerMode = ringerMode;
         }
+
         try {
             ActivityManager.getService().registerUidObserver(mUidObserver,
                     ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_GONE,
@@ -184,7 +237,6 @@ final class VibrationSettings {
             // ignored; both services live in system_server
         }
 
-        PowerManagerInternal pm = LocalServices.getService(PowerManagerInternal.class);
         pm.registerLowPowerModeObserver(
                 new PowerManagerInternal.LowPowerModeListener() {
                     @Override
@@ -205,14 +257,12 @@ final class VibrationSettings {
                     }
                 });
 
-        IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-        mContext.registerReceiver(mUserReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        registerSettingsChangeReceiver(USER_SWITCHED_INTENT_FILTER);
+        registerSettingsChangeReceiver(INTERNAL_RINGER_MODE_CHANGED_INTENT_FILTER);
 
         // Listen to all settings that might affect the result of Vibrator.getVibrationIntensity.
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES));
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_ON));
-        registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_WHEN_RINGING));
-        registerSettingsObserver(Settings.System.getUriFor(Settings.System.APPLY_RAMPING_RINGER));
         registerSettingsObserver(Settings.System.getUriFor(
                 Settings.System.HAPTIC_FEEDBACK_ENABLED));
         registerSettingsObserver(
@@ -229,7 +279,7 @@ final class VibrationSettings {
                 Settings.System.getUriFor(Settings.System.RING_VIBRATION_INTENSITY));
 
         // Update with newly loaded services.
-        updateSettings();
+        update();
     }
 
     /**
@@ -336,40 +386,78 @@ final class VibrationSettings {
                 }
             }
 
-            if (!shouldVibrateForRingerModeLocked(usage)) {
-                return Vibration.Status.IGNORED_FOR_RINGER_MODE;
+            if (!attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY)) {
+                if (!shouldVibrateForRingerModeLocked(usage)) {
+                    return Vibration.Status.IGNORED_FOR_RINGER_MODE;
+                }
             }
         }
         return null;
     }
 
     /**
+     * Check if given vibration should be cancelled by the service when the screen goes off.
+     *
+     * <p>When the system is entering a non-interactive state, we want to cancel vibrations in case
+     * a misbehaving app has abandoned them. However, it may happen that the system is currently
+     * playing haptic feedback as part of the transition. So we don't cancel system vibrations of
+     * usages like touch and hardware feedback, and physical emulation.
+     *
+     * @return true if the vibration should be cancelled when the screen goes off, false otherwise.
+     */
+    public boolean shouldCancelVibrationOnScreenOff(int uid, String opPkg,
+            @VibrationAttributes.Usage int usage, long vibrationStartUptimeMillis) {
+        PowerManagerInternal pm;
+        synchronized (mLock) {
+            pm = mPowerManagerInternal;
+        }
+        if (pm != null) {
+            // The SleepData from PowerManager may refer to a more recent sleep than the broadcast
+            // that triggered this method call. That's ok because only automatic sleeps would be
+            // ignored here and not cancel a vibration, and those are usually triggered by timeout
+            // or inactivity, so it's unlikely that it will override a more active goToSleep reason.
+            PowerManager.SleepData sleepData = pm.getLastGoToSleep();
+            if ((sleepData.goToSleepUptimeMillis < vibrationStartUptimeMillis)
+                    || POWER_MANAGER_SLEEP_REASON_ALLOWLIST.contains(sleepData.goToSleepReason)) {
+                // Ignore screen off events triggered before the vibration started, and all
+                // automatic "go to sleep" events from allowlist.
+                Slog.d(TAG, "Ignoring screen off event triggered at uptime "
+                        + sleepData.goToSleepUptimeMillis + " for reason "
+                        + PowerManager.sleepReasonToString(sleepData.goToSleepReason));
+                return false;
+            }
+        }
+        if (!SYSTEM_VIBRATION_SCREEN_OFF_USAGE_ALLOWLIST.contains(usage)) {
+            // Usages not allowed even for system vibrations should always be cancelled.
+            return true;
+        }
+        // Only allow vibrations from System packages to continue vibrating when the screen goes off
+        return uid != Process.SYSTEM_UID && uid != 0 && !mSystemUiPackage.equals(opPkg);
+    }
+
+    /**
      * Return {@code true} if the device should vibrate for current ringer mode.
      *
      * <p>This checks the current {@link AudioManager#getRingerModeInternal()} against user settings
-     * for touch and ringtone usages only. All other usages are allowed by this method.
+     * for ringtone and notification usages. All other usages are allowed by this method.
      */
     @GuardedBy("mLock")
     private boolean shouldVibrateForRingerModeLocked(@VibrationAttributes.Usage int usageHint) {
-        // If audio manager was not loaded yet then assume most restrictive mode.
-        int ringerMode = (mAudioManager == null)
-                ? AudioManager.RINGER_MODE_SILENT
-                : mAudioManager.getRingerModeInternal();
-
-        switch (usageHint) {
-            case USAGE_TOUCH:
-            case USAGE_RINGTONE:
-                // Touch feedback and ringtone disabled when phone is on silent mode.
-                return ringerMode != AudioManager.RINGER_MODE_SILENT;
-            default:
-                // All other usages ignore ringer mode settings.
-                return true;
+        if ((usageHint != USAGE_RINGTONE) && (usageHint != USAGE_NOTIFICATION)) {
+            // Only ringtone and notification vibrations are disabled when phone is on silent mode.
+            return true;
         }
+        return mRingerMode != AudioManager.RINGER_MODE_SILENT;
     }
 
-    /** Updates all vibration settings and triggers registered listeners. */
-    @VisibleForTesting
-    void updateSettings() {
+    /** Update all cached settings and triggers registered listeners. */
+    void update() {
+        updateSettings();
+        updateRingerMode();
+        notifyListeners();
+    }
+
+    private void updateSettings() {
         synchronized (mLock) {
             mVibrateInputDevices = loadSystemSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0) > 0;
             mVibrateOn = loadSystemSetting(Settings.System.VIBRATE_ON, 1) > 0;
@@ -399,24 +487,16 @@ final class VibrationSettings {
                     loadSystemSetting(Settings.System.RING_VIBRATION_INTENSITY, -1),
                     getDefaultIntensity(USAGE_RINGTONE));
 
-
             mCurrentVibrationIntensities.clear();
             mCurrentVibrationIntensities.put(USAGE_ALARM, alarmIntensity);
             mCurrentVibrationIntensities.put(USAGE_NOTIFICATION, notificationIntensity);
             mCurrentVibrationIntensities.put(USAGE_MEDIA, mediaIntensity);
             mCurrentVibrationIntensities.put(USAGE_UNKNOWN, mediaIntensity);
+            mCurrentVibrationIntensities.put(USAGE_RINGTONE, ringIntensity);
 
             // Communication request is not disabled by the notification setting.
             mCurrentVibrationIntensities.put(USAGE_COMMUNICATION_REQUEST,
                     positiveNotificationIntensity);
-
-            if (!loadBooleanSetting(Settings.System.VIBRATE_WHEN_RINGING)
-                    && !loadBooleanSetting(Settings.System.APPLY_RAMPING_RINGER)) {
-                // Make sure deprecated boolean setting still disables ringtone vibrations.
-                mCurrentVibrationIntensities.put(USAGE_RINGTONE, Vibrator.VIBRATION_INTENSITY_OFF);
-            } else {
-                mCurrentVibrationIntensities.put(USAGE_RINGTONE, ringIntensity);
-            }
 
             // This should adapt the behavior preceding the introduction of this new setting
             // key, which is to apply HAPTIC_FEEDBACK_INTENSITY, unless it's disabled.
@@ -433,7 +513,16 @@ final class VibrationSettings {
             // A11y is not disabled by any haptic feedback setting.
             mCurrentVibrationIntensities.put(USAGE_ACCESSIBILITY, positiveHapticFeedbackIntensity);
         }
-        notifyListeners();
+    }
+
+    private void updateRingerMode() {
+        synchronized (mLock) {
+            // If audio manager was not loaded yet then assume most restrictive mode.
+            // This will be loaded again as soon as the audio manager is loaded in onSystemReady.
+            mRingerMode = (mAudioManager == null)
+                    ? AudioManager.RINGER_MODE_SILENT
+                    : mAudioManager.getRingerModeInternal();
+        }
     }
 
     @Override
@@ -550,6 +639,10 @@ final class VibrationSettings {
                 UserHandle.USER_ALL);
     }
 
+    private void registerSettingsChangeReceiver(IntentFilter intentFilter) {
+        mContext.registerReceiver(mSettingChangeReceiver, intentFilter);
+    }
+
     @Nullable
     private VibrationEffect createEffectFromResource(int resId) {
         long[] timings = getLongIntArray(mContext.getResources(), resId);
@@ -580,24 +673,34 @@ final class VibrationSettings {
     }
 
     /** Implementation of {@link ContentObserver} to be registered to a setting {@link Uri}. */
-    private final class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
+    @VisibleForTesting
+    final class SettingsContentObserver extends ContentObserver {
+        SettingsContentObserver(Handler handler) {
             super(handler);
         }
 
         @Override
         public void onChange(boolean selfChange) {
             updateSettings();
+            notifyListeners();
         }
     }
 
-    /** Implementation of {@link BroadcastReceiver} to update settings on current user change. */
+    /**
+     * Implementation of {@link BroadcastReceiver} to update settings on current user or ringer
+     * mode change.
+     */
     @VisibleForTesting
-    final class UserObserver extends BroadcastReceiver {
+    final class SettingsBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
-                updateSettings();
+            String action = intent.getAction();
+            if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                // Reload all settings, as they are user-based.
+                update();
+            } else if (AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION.equals(action)) {
+                updateRingerMode();
+                notifyListeners();
             }
         }
     }
@@ -632,6 +735,10 @@ final class VibrationSettings {
 
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
+        }
+
+        @Override
+        public void onUidProcAdjChanged(int uid) {
         }
     }
 }

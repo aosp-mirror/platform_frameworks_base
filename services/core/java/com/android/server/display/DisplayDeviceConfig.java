@@ -30,9 +30,8 @@ import android.util.Slog;
 import android.util.Spline;
 import android.view.DisplayAddress;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.config.BrightnessThresholds;
 import com.android.server.display.config.BrightnessThrottlingMap;
@@ -75,7 +74,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *  <pre>
  *  {@code
  *    <displayConfiguration>
- *      <densityMap>
+ *      <densityMapping>
  *        <density>
  *          <height>480</height>
  *          <width>720</width>
@@ -96,7 +95,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *          <width>3840</width>
  *          <density>640</density>
  *        </density>
- *      </densityMap>
+ *      </densityMapping>
  *
  *      <screenBrightnessMap>
  *        <point>
@@ -152,6 +151,9 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *      <screenBrightnessRampFastIncrease>0.02</screenBrightnessRampFastIncrease>
  *      <screenBrightnessRampSlowDecrease>0.03</screenBrightnessRampSlowDecrease>
  *      <screenBrightnessRampSlowIncrease>0.04</screenBrightnessRampSlowIncrease>
+ *
+ *      <screenBrightnessRampIncreaseMaxMillis>2000</screenBrightnessRampIncreaseMaxMillis>
+ *      <screenBrightnessRampDecreaseMaxMillis>3000</screenBrightnessRampDecreaseMaxMillis>
  *
  *      <lightSensor>
  *        <type>android.sensor.light</type>
@@ -260,6 +262,8 @@ public class DisplayDeviceConfig {
     private float mBrightnessRampFastIncrease = Float.NaN;
     private float mBrightnessRampSlowDecrease = Float.NaN;
     private float mBrightnessRampSlowIncrease = Float.NaN;
+    private long mBrightnessRampDecreaseMaxMillis = 0;
+    private long mBrightnessRampIncreaseMaxMillis = 0;
     private int mAmbientHorizonLong = AMBIENT_LIGHT_LONG_HORIZON_MILLIS;
     private int mAmbientHorizonShort = AMBIENT_LIGHT_SHORT_HORIZON_MILLIS;
     private float mScreenBrighteningMinThreshold = 0.0f;     // Retain behaviour as though there is
@@ -273,7 +277,7 @@ public class DisplayDeviceConfig {
     private List<String> mQuirks;
     private boolean mIsHighBrightnessModeEnabled = false;
     private HighBrightnessModeData mHbmData;
-    private DensityMap mDensityMap;
+    private DensityMapping mDensityMapping;
     private String mLoadedFrom = null;
 
     private BrightnessThrottlingData mBrightnessThrottlingData;
@@ -296,9 +300,9 @@ public class DisplayDeviceConfig {
      * @return A configuration instance for the specified display.
      */
     public static DisplayDeviceConfig create(Context context, long physicalDisplayId,
-            boolean isDefaultDisplay) {
+            boolean isFirstDisplay) {
         final DisplayDeviceConfig config = createWithoutDefaultValues(context, physicalDisplayId,
-                isDefaultDisplay);
+                isFirstDisplay);
 
         config.copyUninitializedValuesFromSecondaryConfig(loadDefaultConfigurationXml(context));
         return config;
@@ -323,7 +327,7 @@ public class DisplayDeviceConfig {
     }
 
     private static DisplayDeviceConfig createWithoutDefaultValues(Context context,
-            long physicalDisplayId, boolean isDefaultDisplay) {
+            long physicalDisplayId, boolean isFirstDisplay) {
         DisplayDeviceConfig config;
 
         config = loadConfigFromDirectory(context, Environment.getProductDirectory(),
@@ -341,7 +345,7 @@ public class DisplayDeviceConfig {
         // If no config can be loaded from any ddc xml at all,
         // prepare a whole config using the global config.xml.
         // Guaranteed not null
-        return create(context, isDefaultDisplay);
+        return create(context, isFirstDisplay);
     }
 
     private static DisplayConfiguration loadDefaultConfigurationXml(Context context) {
@@ -535,6 +539,14 @@ public class DisplayDeviceConfig {
         return mBrightnessRampSlowIncrease;
     }
 
+    public long getBrightnessRampDecreaseMaxMillis() {
+        return mBrightnessRampDecreaseMaxMillis;
+    }
+
+    public long getBrightnessRampIncreaseMaxMillis() {
+        return mBrightnessRampIncreaseMaxMillis;
+    }
+
     public int getAmbientHorizonLong() {
         return mAmbientHorizonLong;
     }
@@ -593,8 +605,8 @@ public class DisplayDeviceConfig {
         return mRefreshRateLimitations;
     }
 
-    public DensityMap getDensityMap() {
-        return mDensityMap;
+    public DensityMapping getDensityMapping() {
+        return mDensityMapping;
     }
 
     /**
@@ -629,6 +641,8 @@ public class DisplayDeviceConfig {
                 + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
                 + ", mBrightnessRampSlowDecrease=" + mBrightnessRampSlowDecrease
                 + ", mBrightnessRampSlowIncrease=" + mBrightnessRampSlowIncrease
+                + ", mBrightnessRampDecreaseMaxMillis=" + mBrightnessRampDecreaseMaxMillis
+                + ", mBrightnessRampIncreaseMaxMillis=" + mBrightnessRampIncreaseMaxMillis
                 + ", mAmbientHorizonLong=" + mAmbientHorizonLong
                 + ", mAmbientHorizonShort=" + mAmbientHorizonShort
                 + ", mScreenDarkeningMinThreshold=" + mScreenDarkeningMinThreshold
@@ -638,7 +652,7 @@ public class DisplayDeviceConfig {
                 + ", mAmbientLightSensor=" + mAmbientLightSensor
                 + ", mProximitySensor=" + mProximitySensor
                 + ", mRefreshRateLimitations= " + Arrays.toString(mRefreshRateLimitations.toArray())
-                + ", mDensityMap= " + mDensityMap
+                + ", mDensityMapping= " + mDensityMapping
                 + "}";
     }
 
@@ -682,7 +696,7 @@ public class DisplayDeviceConfig {
         try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
             final DisplayConfiguration config = XmlParser.read(in);
             if (config != null) {
-                loadDensityMap(config);
+                loadDensityMapping(config);
                 loadBrightnessDefaultFromDdcXml(config);
                 loadBrightnessConstraintsFromConfigXml();
                 loadBrightnessMap(config);
@@ -726,6 +740,8 @@ public class DisplayDeviceConfig {
         mBrightnessRampFastIncrease = PowerManager.BRIGHTNESS_MAX;
         mBrightnessRampSlowDecrease = PowerManager.BRIGHTNESS_MAX;
         mBrightnessRampSlowIncrease = PowerManager.BRIGHTNESS_MAX;
+        mBrightnessRampDecreaseMaxMillis = 0;
+        mBrightnessRampIncreaseMaxMillis = 0;
         setSimpleMappingStrategyValues();
         loadAmbientLightSensorFromConfigXml();
         setProxSensorUnspecified();
@@ -736,28 +752,28 @@ public class DisplayDeviceConfig {
             return;
         }
 
-        if (mDensityMap == null) {
-            loadDensityMap(defaultConfig);
+        if (mDensityMapping == null) {
+            loadDensityMapping(defaultConfig);
         }
     }
 
-    private void loadDensityMap(DisplayConfiguration config) {
-        if (config.getDensityMap() == null) {
+    private void loadDensityMapping(DisplayConfiguration config) {
+        if (config.getDensityMapping() == null) {
             return;
         }
 
-        final List<Density> entriesFromXml = config.getDensityMap().getDensity();
+        final List<Density> entriesFromXml = config.getDensityMapping().getDensity();
 
-        final DensityMap.Entry[] entries =
-                new DensityMap.Entry[entriesFromXml.size()];
+        final DensityMapping.Entry[] entries =
+                new DensityMapping.Entry[entriesFromXml.size()];
         for (int i = 0; i < entriesFromXml.size(); i++) {
             final Density density = entriesFromXml.get(i);
-            entries[i] = new DensityMap.Entry(
+            entries[i] = new DensityMapping.Entry(
                     density.getWidth().intValue(),
                     density.getHeight().intValue(),
                     density.getDensity().intValue());
         }
-        mDensityMap = DensityMap.createByOwning(entries);
+        mDensityMapping = DensityMapping.createByOwning(entries);
     }
 
     private void loadBrightnessDefaultFromDdcXml(DisplayConfiguration config) {
@@ -1115,6 +1131,15 @@ public class DisplayDeviceConfig {
                         + "values are present in display device config");
             }
             loadBrightnessRampsFromConfigXml();
+        }
+
+        final BigInteger increaseMax = config.getScreenBrightnessRampIncreaseMaxMillis();
+        if (increaseMax != null) {
+            mBrightnessRampIncreaseMaxMillis = increaseMax.intValue();
+        }
+        final BigInteger decreaseMax = config.getScreenBrightnessRampDecreaseMaxMillis();
+        if (decreaseMax != null) {
+            mBrightnessRampDecreaseMaxMillis = decreaseMax.intValue();
         }
     }
 

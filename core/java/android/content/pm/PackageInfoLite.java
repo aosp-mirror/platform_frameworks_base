@@ -79,6 +79,11 @@ public class PackageInfoLite implements Parcelable {
     public boolean debuggable;
 
     /**
+     * Indicates if this apk is a sdk.
+     */
+    public boolean isSdkLibrary;
+
+    /**
      * Specifies the recommended install location. Can be one of
      * {@link InstallLocationUtils#RECOMMEND_INSTALL_INTERNAL} to install on internal storage,
      * {@link InstallLocationUtils#RECOMMEND_INSTALL_EXTERNAL} to install on external media,

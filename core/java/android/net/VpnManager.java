@@ -100,6 +100,12 @@ public class VpnManager {
     /**
      * Action sent in {@link android.content.Intent}s to VpnManager clients when an event occurred.
      *
+     * <p>If the provisioning application declares a service handling this intent action, but is not
+     * already running, it will be started. Upon starting, the application is granted a short grace
+     * period to run in the background even while the device is idle to handle any potential
+     * failures. Applications requiring long-running actions triggered by one of these events should
+     * declare a foreground service to prevent being killed once the grace period expires.
+     *
      * This action will have a category of either {@link #CATEGORY_EVENT_IKE_ERROR},
      * {@link #CATEGORY_EVENT_NETWORK_ERROR}, or {@link #CATEGORY_EVENT_DEACTIVATED_BY_USER},
      * that the app can use to filter events it's interested in reacting to.
@@ -108,7 +114,7 @@ public class VpnManager {
      * <ul>
      *   <li>{@link #EXTRA_SESSION_KEY}, a {@code String} for the session key, as returned by
      *       {@link #startProvisionedVpnProfileSession}.
-     *   <li>{@link #EXTRA_TIMESTAMP}, a long for the timestamp at which the error occurred,
+     *   <li>{@link #EXTRA_TIMESTAMP_MILLIS}, a long for the timestamp at which the error occurred,
      *       in milliseconds since the epoch, as returned by
      *       {@link java.lang.System#currentTimeMillis}.
      *   <li>{@link #EXTRA_UNDERLYING_NETWORK}, a {@link Network} containing the underlying
@@ -161,6 +167,23 @@ public class VpnManager {
             "android.net.category.EVENT_DEACTIVATED_BY_USER";
 
     /**
+     * The always-on state of this VPN was changed
+     *
+     * <p>This may be the result of a user changing VPN settings, or a Device Policy Manager app
+     * having changed the VPN policy.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED =
+            "android.net.category.EVENT_ALWAYS_ON_STATE_CHANGED";
+
+    /**
+     * The VpnProfileState at the time that this event occurred.
+     *
+     * <p>This extra may be null if the VPN was revoked by the user, or the profile was deleted.
+     */
+    public static final String EXTRA_VPN_PROFILE_STATE = "android.net.extra.VPN_PROFILE_STATE";
+
+    /**
      * The key of the session that experienced this event, as a {@code String}.
      *
      * This is the same key that was returned by {@link #startProvisionedVpnProfileSession}.
@@ -170,14 +193,24 @@ public class VpnManager {
     /**
      * The network that was underlying the VPN when the event occurred, as a {@link Network}.
      *
-     * This extra will be null if there was no underlying network at the time of the event.
+     * <p>This extra will be null if there was no underlying network at the time of the event, or
+     *    the underlying network has no bearing on the event, as in the case of:
+     * <ul>
+     *   <li>CATEGORY_EVENT_DEACTIVATED_BY_USER
+     *   <li>CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED
+     * </ul>
      */
     public static final String EXTRA_UNDERLYING_NETWORK = "android.net.extra.UNDERLYING_NETWORK";
 
     /**
      * The {@link NetworkCapabilities} of the underlying network when the event occurred.
      *
-     * This extra will be null if there was no underlying network at the time of the event.
+     * <p>This extra will be null if there was no underlying network at the time of the event, or
+     *    the underlying network has no bearing on the event, as in the case of:
+     * <ul>
+     *   <li>CATEGORY_EVENT_DEACTIVATED_BY_USER
+     *   <li>CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED
+     * </ul>
      */
     public static final String EXTRA_UNDERLYING_NETWORK_CAPABILITIES =
             "android.net.extra.UNDERLYING_NETWORK_CAPABILITIES";
@@ -185,7 +218,12 @@ public class VpnManager {
     /**
      * The {@link LinkProperties} of the underlying network when the event occurred.
      *
-     * This extra will be null if there was no underlying network at the time of the event.
+     * <p>This extra will be null if there was no underlying network at the time of the event, or
+     *    the underlying network has no bearing on the event, as in the case of:
+     * <ul>
+     *   <li>CATEGORY_EVENT_DEACTIVATED_BY_USER
+     *   <li>CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED
+     * </ul>
      */
     public static final String EXTRA_UNDERLYING_LINK_PROPERTIES =
             "android.net.extra.UNDERLYING_LINK_PROPERTIES";
@@ -196,7 +234,7 @@ public class VpnManager {
      * This is a number of milliseconds since the epoch, suitable to be compared with
      * {@link java.lang.System#currentTimeMillis}.
      */
-    public static final String EXTRA_TIMESTAMP = "android.net.extra.TIMESTAMP";
+    public static final String EXTRA_TIMESTAMP_MILLIS = "android.net.extra.TIMESTAMP_MILLIS";
 
     /**
      * Extra for the error class, as an {@code int}.
@@ -403,6 +441,21 @@ public class VpnManager {
     }
 
     /**
+     * Retrieve the VpnProfileState for the profile provisioned by the calling package.
+     *
+     * @return the VpnProfileState with current information, or null if there was no profile
+     *         provisioned by the calling package.
+     */
+    @Nullable
+    public VpnProfileState getProvisionedVpnProfileState() {
+        try {
+            return mService.getProvisionedVpnProfileState(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Resets all VPN settings back to factory defaults.
      * @hide
      */
@@ -542,6 +595,63 @@ public class VpnManager {
     public boolean isVpnLockdownEnabled(int userId) {
         try {
             return mService.isVpnLockdownEnabled(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the application exclusion list for the specified VPN profile.
+     *
+     * <p>If an app in the set of excluded apps is not installed for the given user, it will be
+     * skipped in the list of app exclusions. If apps are installed or removed, any active VPN will
+     * have its UID set updated automatically. If the caller is not {@code userId},
+     * {@link android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission is required.
+     *
+     * <p>This will ONLY affect VpnManager profiles. As such, the NETWORK_SETTINGS provider MUST NOT
+     * allow configuration of these options if the application has not provided a VPN profile.
+     *
+     * @param userId the identifier of the user to set app exclusion list
+     * @param vpnPackage The package name for an installed VPN app on the device
+     * @param excludedApps the app exclusion list
+     * @throws IllegalStateException exception if vpn for the @code userId} is not ready yet.
+     *
+     * @return whether setting the list is successful or not
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public boolean setAppExclusionList(int userId, @NonNull String vpnPackage,
+            @NonNull List<String> excludedApps) {
+        try {
+            return mService.setAppExclusionList(userId, vpnPackage, excludedApps);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the application exclusion list for the specified VPN profile. If the caller is not
+     * {@code userId}, {@link android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission
+     * is required.
+     *
+     * @param userId the identifier of the user to set app exclusion list
+     * @param vpnPackage The package name for an installed VPN app on the device
+     * @return the list of packages for the specified VPN profile or null if no corresponding VPN
+     *         profile configured.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    @Nullable
+    public List<String> getAppExclusionList(int userId, @NonNull String vpnPackage) {
+        try {
+            return mService.getAppExclusionList(userId, vpnPackage);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

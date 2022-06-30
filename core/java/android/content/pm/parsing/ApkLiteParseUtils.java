@@ -87,6 +87,7 @@ public class ApkLiteParseUtils {
     private static final String TAG_USES_SDK = "uses-sdk";
     private static final String TAG_USES_SPLIT = "uses-split";
     private static final String TAG_MANIFEST = "manifest";
+    private static final String TAG_SDK_LIBRARY = "sdk-library";
     private static final int SDK_VERSION = Build.VERSION.SDK_INT;
     private static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
 
@@ -449,6 +450,8 @@ public class ApkLiteParseUtils {
 
         boolean hasDeviceAdminReceiver = false;
 
+        boolean isSdkLibrary = false;
+
         // Only search the tree when the tag is the direct child of <manifest> tag
         int type;
         final int searchDepth = parser.getDepth() + 1;
@@ -506,6 +509,8 @@ public class ApkLiteParseUtils {
                     } else if (TAG_RECEIVER.equals(parser.getName())) {
                         hasDeviceAdminReceiver |= isDeviceAdminReceiver(
                                 parser, hasBindDeviceAdminPermission);
+                    } else if (TAG_SDK_LIBRARY.equals(parser.getName())) {
+                        isSdkLibrary = true;
                     }
                 }
             } else if (TAG_OVERLAY.equals(parser.getName())) {
@@ -537,14 +542,17 @@ public class ApkLiteParseUtils {
 
                 int minVer = DEFAULT_MIN_SDK_VERSION;
                 String minCode = null;
+                boolean minAssigned = false;
                 int targetVer = DEFAULT_TARGET_SDK_VERSION;
                 String targetCode = null;
 
                 if (!TextUtils.isEmpty(minSdkVersionString)) {
                     try {
                         minVer = Integer.parseInt(minSdkVersionString);
+                        minAssigned = true;
                     } catch (NumberFormatException ignored) {
                         minCode = minSdkVersionString;
+                        minAssigned = !TextUtils.isEmpty(minCode);
                     }
                 }
 
@@ -553,7 +561,7 @@ public class ApkLiteParseUtils {
                         targetVer = Integer.parseInt(targetSdkVersionString);
                     } catch (NumberFormatException ignored) {
                         targetCode = targetSdkVersionString;
-                        if (minCode == null) {
+                        if (!minAssigned) {
                             minCode = targetCode;
                         }
                     }
@@ -562,8 +570,14 @@ public class ApkLiteParseUtils {
                     targetCode = minCode;
                 }
 
+                boolean allowUnknownCodenames = false;
+                if ((flags & FrameworkParsingPackageUtils.PARSE_APK_IN_APEX) != 0) {
+                    allowUnknownCodenames = true;
+                }
+
                 ParseResult<Integer> targetResult = FrameworkParsingPackageUtils.computeTargetSdkVersion(
-                        targetVer, targetCode, SDK_CODENAMES, input);
+                        targetVer, targetCode, SDK_CODENAMES, input,
+                        allowUnknownCodenames);
                 if (targetResult.isError()) {
                     return input.error(targetResult);
                 }
@@ -598,7 +612,7 @@ public class ApkLiteParseUtils {
                         overlayIsStatic, overlayPriority, requiredSystemPropertyName,
                         requiredSystemPropertyValue, minSdkVersion, targetSdkVersion,
                         rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second,
-                        hasDeviceAdminReceiver));
+                        hasDeviceAdminReceiver, isSdkLibrary));
     }
 
     private static boolean isDeviceAdminReceiver(

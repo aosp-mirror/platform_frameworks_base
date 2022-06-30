@@ -893,7 +893,8 @@ public final class AppExitInfoTracker {
         }
         FrameworkStatsLog.write(FrameworkStatsLog.APP_PROCESS_DIED,
                 info.getPackageUid(), processName, info.getReason(), info.getSubReason(),
-                info.getImportance(), (int) info.getPss(), (int) info.getRss());
+                info.getImportance(), (int) info.getPss(), (int) info.getRss(),
+                info.hasForegroundServices());
     }
 
     @GuardedBy("mLock")
@@ -1002,11 +1003,13 @@ public final class AppExitInfoTracker {
             info.setPackageName(app.info.packageName);
             info.setPackageList(app.getPackageList());
             info.setReason(ApplicationExitInfo.REASON_UNKNOWN);
+            info.setSubReason(ApplicationExitInfo.SUBREASON_UNKNOWN);
             info.setStatus(0);
             info.setImportance(procStateToImportance(app.mState.getReportedProcState()));
             info.setPss(app.mProfile.getLastPss());
             info.setRss(app.mProfile.getLastRss());
             info.setTimestamp(timestamp);
+            info.setHasForegroundServices(app.mServices.hasReportedForegroundServices());
         }
 
         return info;

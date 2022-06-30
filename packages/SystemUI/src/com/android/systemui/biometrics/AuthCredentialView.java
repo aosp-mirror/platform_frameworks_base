@@ -20,7 +20,7 @@ import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PASSWORD_LAST_ATTEMPT;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PATTERN_LAST_ATTEMPT;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PIN_LAST_ATTEMPT;
-import static android.app.admin.DevicePolicyResources.Strings.UNDEFINED;
+import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -53,6 +53,8 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -98,6 +100,8 @@ public abstract class AuthCredentialView extends LinearLayout {
     protected long mOperationId;
     protected int mEffectiveUserId;
     protected ErrorTimer mErrorTimer;
+
+    protected @Background DelayableExecutor mBackgroundExecutor;
 
     interface Callback {
         void onCredentialMatched(byte[] attestation);
@@ -215,6 +219,10 @@ public abstract class AuthCredentialView extends LinearLayout {
 
     void setContainerView(AuthContainerView containerView) {
         mContainerView = containerView;
+    }
+
+    void setBackgroundExecutor(@Background DelayableExecutor bgExecutor) {
+        mBackgroundExecutor = bgExecutor;
     }
 
     @Override
@@ -377,25 +385,33 @@ public abstract class AuthCredentialView extends LinearLayout {
     }
 
     private void showLastAttemptBeforeWipeDialog() {
-        final AlertDialog alertDialog = new AlertDialog.Builder(mContext)
-                .setTitle(R.string.biometric_dialog_last_attempt_before_wipe_dialog_title)
-                .setMessage(
-                        getLastAttemptBeforeWipeMessage(getUserTypeForWipe(), mCredentialType))
-                .setPositiveButton(android.R.string.ok, null)
-                .create();
-        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
-        alertDialog.show();
+        mBackgroundExecutor.execute(() -> {
+            final AlertDialog alertDialog = new AlertDialog.Builder(mContext)
+                    .setTitle(R.string.biometric_dialog_last_attempt_before_wipe_dialog_title)
+                    .setMessage(
+                            getLastAttemptBeforeWipeMessage(getUserTypeForWipe(), mCredentialType))
+                    .setPositiveButton(android.R.string.ok, null)
+                    .create();
+            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
+            mHandler.post(alertDialog::show);
+        });
     }
 
     private void showNowWipingDialog() {
-        final AlertDialog alertDialog = new AlertDialog.Builder(mContext)
-                .setMessage(getNowWipingMessage(getUserTypeForWipe()))
-                .setPositiveButton(R.string.biometric_dialog_now_wiping_dialog_dismiss, null)
-                .setOnDismissListener(
-                        dialog -> mContainerView.animateAway(AuthDialogCallback.DISMISSED_ERROR))
-                .create();
-        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
-        alertDialog.show();
+        mBackgroundExecutor.execute(() -> {
+            String nowWipingMessage = getNowWipingMessage(getUserTypeForWipe());
+            final AlertDialog alertDialog = new AlertDialog.Builder(mContext)
+                    .setMessage(nowWipingMessage)
+                    .setPositiveButton(
+                            com.android.settingslib.R.string.failed_attempts_now_wiping_dialog_dismiss,
+                            null /* OnClickListener */)
+                    .setOnDismissListener(
+                            dialog -> mContainerView.animateAway(
+                                    AuthDialogCallback.DISMISSED_ERROR))
+                    .create();
+            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
+            mHandler.post(alertDialog::show);
+        });
     }
 
     private @UserType int getUserTypeForWipe() {
@@ -410,6 +426,7 @@ public abstract class AuthCredentialView extends LinearLayout {
         }
     }
 
+    // This should not be called on the main thread to avoid making an IPC.
     private String getLastAttemptBeforeWipeMessage(
             @UserType int userType, @Utils.CredentialType int credentialType) {
         switch (userType) {
@@ -440,9 +457,10 @@ public abstract class AuthCredentialView extends LinearLayout {
         }
     }
 
+    // This should not be called on the main thread to avoid making an IPC.
     private String getLastAttemptBeforeWipeProfileMessage(
             @Utils.CredentialType int credentialType) {
-        return mDevicePolicyManager.getString(
+        return mDevicePolicyManager.getResources().getString(
                 getLastAttemptBeforeWipeProfileUpdatableStringId(credentialType),
                 () -> getLastAttemptBeforeWipeProfileDefaultMessage(credentialType));
     }
@@ -495,7 +513,7 @@ public abstract class AuthCredentialView extends LinearLayout {
     }
 
     private String getNowWipingMessage(@UserType int userType) {
-        return mDevicePolicyManager.getString(
+        return mDevicePolicyManager.getResources().getString(
                 getNowWipingUpdatableStringId(userType),
                 () -> getNowWipingDefaultMessage(userType));
     }
@@ -513,13 +531,13 @@ public abstract class AuthCredentialView extends LinearLayout {
         int resId;
         switch (userType) {
             case USER_TYPE_PRIMARY:
-                resId = R.string.biometric_dialog_failed_attempts_now_wiping_device;
+                resId = com.android.settingslib.R.string.failed_attempts_now_wiping_device;
                 break;
             case USER_TYPE_MANAGED_PROFILE:
-                resId = R.string.biometric_dialog_failed_attempts_now_wiping_profile;
+                resId = com.android.settingslib.R.string.failed_attempts_now_wiping_profile;
                 break;
             case USER_TYPE_SECONDARY:
-                resId = R.string.biometric_dialog_failed_attempts_now_wiping_user;
+                resId = com.android.settingslib.R.string.failed_attempts_now_wiping_user;
                 break;
             default:
                 throw new IllegalArgumentException("Unrecognized user type:" + userType);

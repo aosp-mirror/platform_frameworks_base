@@ -18,6 +18,8 @@ package com.android.server.vcn.util;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import android.os.PersistableBundle;
 
@@ -210,5 +212,94 @@ public class PersistableBundleUtilsTest {
                 PersistableBundleUtils.INTEGER_DESERIALIZER.fromPersistableBundle(integerBundle);
 
         assertEquals(testInt, result);
+    }
+
+    private PersistableBundle getTestBundle() {
+        final PersistableBundle bundle = new PersistableBundle();
+
+        bundle.putBoolean(TEST_KEY + "Boolean", true);
+        bundle.putBooleanArray(TEST_KEY + "BooleanArray", new boolean[] {true, false});
+        bundle.putDouble(TEST_KEY + "Double", 0.1);
+        bundle.putDoubleArray(TEST_KEY + "DoubleArray", new double[] {0.1, 0.2, 0.3});
+        bundle.putInt(TEST_KEY + "Int", 1);
+        bundle.putIntArray(TEST_KEY + "IntArray", new int[] {1, 2});
+        bundle.putLong(TEST_KEY + "Long", 5L);
+        bundle.putLongArray(TEST_KEY + "LongArray", new long[] {0L, -1L, -2L});
+        bundle.putString(TEST_KEY + "String", "TEST");
+        bundle.putStringArray(TEST_KEY + "StringArray", new String[] {"foo", "bar", "bas"});
+        bundle.putPersistableBundle(
+                TEST_KEY + "PersistableBundle",
+                new TestClass(1, TEST_INT_ARRAY, TEST_STRING_PREFIX, new PersistableBundle())
+                        .toPersistableBundle());
+
+        return bundle;
+    }
+
+    @Test
+    public void testMinimizeBundle() throws Exception {
+        final String[] minimizedKeys =
+                new String[] {
+                    TEST_KEY + "Boolean",
+                    TEST_KEY + "BooleanArray",
+                    TEST_KEY + "Double",
+                    TEST_KEY + "DoubleArray",
+                    TEST_KEY + "Int",
+                    TEST_KEY + "IntArray",
+                    TEST_KEY + "Long",
+                    TEST_KEY + "LongArray",
+                    TEST_KEY + "String",
+                    TEST_KEY + "StringArray",
+                    TEST_KEY + "PersistableBundle"
+                };
+
+        final PersistableBundle testBundle = getTestBundle();
+        testBundle.putBoolean(TEST_KEY + "Boolean2", true);
+
+        final PersistableBundle minimized =
+                PersistableBundleUtils.minimizeBundle(testBundle, minimizedKeys);
+
+        // Verify that the minimized bundle is NOT the same in size OR values due to the extra
+        // Boolean2 key
+        assertFalse(PersistableBundleUtils.isEqual(testBundle, minimized));
+
+        // Verify that removing the extra key from the source bundle results in equality.
+        testBundle.remove(TEST_KEY + "Boolean2");
+        assertTrue(PersistableBundleUtils.isEqual(testBundle, minimized));
+    }
+
+    @Test
+    public void testToFromDiskStableBytes() throws Exception {
+        final PersistableBundle testBundle = getTestBundle();
+        final PersistableBundle result =
+                PersistableBundleUtils.fromDiskStableBytes(
+                        PersistableBundleUtils.toDiskStableBytes(testBundle));
+        assertTrue(PersistableBundleUtils.isEqual(testBundle, result));
+    }
+
+    @Test
+    public void testEquality_identical() throws Exception {
+        final PersistableBundle left = getTestBundle();
+        final PersistableBundle right = getTestBundle();
+
+        assertTrue(PersistableBundleUtils.isEqual(left, right));
+    }
+
+    @Test
+    public void testEquality_different() throws Exception {
+        final PersistableBundle left = getTestBundle();
+        final PersistableBundle right = getTestBundle();
+
+        left.putBoolean(TEST_KEY + "Boolean2", true);
+        assertFalse(PersistableBundleUtils.isEqual(left, right));
+
+        left.remove(TEST_KEY + "Boolean2");
+        assertTrue(PersistableBundleUtils.isEqual(left, right));
+    }
+
+    @Test
+    public void testEquality_null() throws Exception {
+        assertFalse(PersistableBundleUtils.isEqual(getTestBundle(), null));
+        assertFalse(PersistableBundleUtils.isEqual(null, getTestBundle()));
+        assertTrue(PersistableBundleUtils.isEqual(null, null));
     }
 }

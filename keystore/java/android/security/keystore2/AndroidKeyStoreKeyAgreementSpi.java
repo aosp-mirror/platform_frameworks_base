@@ -61,6 +61,17 @@ public class AndroidKeyStoreKeyAgreementSpi extends KeyAgreementSpi
         }
     }
 
+    /**
+     * X25519 key agreement support.
+     *
+     * @hide
+     */
+    public static class XDH extends AndroidKeyStoreKeyAgreementSpi {
+        public XDH() {
+            super(Algorithm.EC);
+        }
+    }
+
     private final int mKeymintAlgorithm;
 
     // Fields below are populated by engineInit and should be preserved after engineDoFinal.

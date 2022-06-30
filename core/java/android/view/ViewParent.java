@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.view.accessibility.AccessibilityEvent;
+import android.window.OnBackInvokedDispatcher;
 
 /**
  * Defines the responsibilities for a class that will be a parent of a View.
@@ -696,5 +697,21 @@ public interface ViewParent {
         if (getParent() != null) {
             getParent().onDescendantUnbufferedRequested();
         }
+    }
+
+    /**
+     * Walk up the View hierarchy to find the nearest {@link OnBackInvokedDispatcher}.
+     *
+     * @return The {@link OnBackInvokedDispatcher} from this or the nearest
+     * ancestor, or null if the view is both not attached and have no ancestor providing an
+     * {@link OnBackInvokedDispatcher}.
+     *
+     * @param child The direct child of this view for which to find a dispatcher.
+     * @param requester The requester that will use the dispatcher. Can be the same as child.
+     */
+    @Nullable
+    default OnBackInvokedDispatcher findOnBackInvokedDispatcherForChild(@NonNull View child,
+            @NonNull View requester) {
+        return null;
     }
 }

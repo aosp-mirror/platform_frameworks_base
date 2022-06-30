@@ -106,7 +106,6 @@ import android.graphics.Region;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.IInputConstants;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -489,6 +488,13 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION = 0x8;
 
     /**
+     * Transition flag: Keyguard is going away to the launcher, and it needs us to clear the task
+     * snapshot of the launcher because it has changed something in the Launcher window.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT = 0x16;
+
+    /**
      * Transition flag: App is crashed.
      * @hide
      */
@@ -528,6 +534,7 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT,
             TRANSIT_FLAG_APP_CRASHED,
             TRANSIT_FLAG_OPEN_BEHIND,
             TRANSIT_FLAG_KEYGUARD_LOCKED,
@@ -718,8 +725,8 @@ public interface WindowManager extends ViewManager {
 
     /**
      * Returns a set of {@link WindowMetrics} for the given display. Each WindowMetrics instance
-     * is the maximum WindowMetrics for a device state, including rotations. This is not guaranteed
-     * to include all possible device states.
+     * is the maximum WindowMetrics for a device state. This is not guaranteed to include all
+     * possible device states.
      *
      * This API can only be used by Launcher.
      *
@@ -2385,6 +2392,16 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR = 0x00001000;
 
         /**
+         * Flag to indicate that the window frame should be the requested frame adding the display
+         * cutout frame. This will only be applied if a specific size smaller than the parent frame
+         * is given, and the window is covering the display cutout. The extended frame will not be
+         * larger than the parent frame.
+         *
+         * {@hide}
+         */
+        public static final int PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT = 0x00002000;
+
+        /**
          * Flag that will make window ignore app visibility and instead depend purely on the decor
          * view visibility for determining window visibility. This is used by recents to keep
          * drawing after it launches an app.
@@ -3091,16 +3108,18 @@ public interface WindowManager extends ViewManager {
 
         /**
          * The preferred refresh rate for the window.
-         *
+         * <p>
          * This must be one of the supported refresh rates obtained for the display(s) the window
          * is on. The selected refresh rate will be applied to the display's default mode.
-         *
+         * <p>
+         * This should be used in favor of {@link LayoutParams#preferredDisplayModeId} for
+         * applications that want to specify the refresh rate, but do not want to specify a
+         * preference for any other displayMode properties (e.g., resolution).
+         * <p>
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          *
          * @see Display#getSupportedRefreshRates()
-         * @deprecated use {@link #preferredDisplayModeId} instead
          */
-        @Deprecated
         public float preferredRefreshRate;
 
         /**
@@ -3350,8 +3369,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public static final int INPUT_FEATURE_NO_INPUT_CHANNEL =
-                IInputConstants.InputFeature.NO_INPUT_CHANNEL;
+        public static final int INPUT_FEATURE_NO_INPUT_CHANNEL = 1 << 0;
 
         /**
          * When this window has focus, does not call user activity for all input events so
@@ -3364,58 +3382,43 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY =
-                IInputConstants.InputFeature.DISABLE_USER_ACTIVITY;
+        public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 1 << 1;
 
         /**
          * An input spy window. This window will receive all pointer events within its touchable
-         * area, but will will not stop events from being sent to other windows below it in z-order.
+         * area, but will not stop events from being sent to other windows below it in z-order.
          * An input event will be dispatched to all spy windows above the top non-spy window at the
          * event's coordinates.
-         * @hide
-         */
-        public static final int INPUT_FEATURE_SPY =
-                IInputConstants.InputFeature.SPY;
-
-        /**
-         * When used with the window flag {@link #FLAG_NOT_TOUCHABLE}, this window will continue
-         * to receive events from a stylus device within its touchable region. All other pointer
-         * events, such as from a mouse or touchscreen, will be dispatched to the windows behind it.
-         *
-         * This input feature has no effect when the window flag {@link #FLAG_NOT_TOUCHABLE} is
-         * not set.
-         *
-         * The window must be a trusted overlay to use this input feature.
-         *
-         * @see #FLAG_NOT_TOUCHABLE
          *
          * @hide
          */
-        public static final int INPUT_FEATURE_INTERCEPTS_STYLUS =
-                IInputConstants.InputFeature.INTERCEPTS_STYLUS;
+        @RequiresPermission(permission.MONITOR_INPUT)
+        public static final int INPUT_FEATURE_SPY = 1 << 2;
 
         /**
          * An internal annotation for flags that can be specified to {@link #inputFeatures}.
          *
+         * NOTE: These are not the same as {@link android.os.InputConfig} flags.
+         *
          * @hide
          */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef(flag = true, prefix = { "INPUT_FEATURE_" }, value = {
-            INPUT_FEATURE_NO_INPUT_CHANNEL,
-            INPUT_FEATURE_DISABLE_USER_ACTIVITY,
-            INPUT_FEATURE_SPY,
-            INPUT_FEATURE_INTERCEPTS_STYLUS,
+        @IntDef(flag = true, prefix = {"INPUT_FEATURE_"}, value = {
+                INPUT_FEATURE_NO_INPUT_CHANNEL,
+                INPUT_FEATURE_DISABLE_USER_ACTIVITY,
+                INPUT_FEATURE_SPY,
         })
-        public @interface InputFeatureFlags {}
+        public @interface InputFeatureFlags {
+        }
 
         /**
-         * Control special features of the input subsystem.
+         * Control a set of features of the input subsystem that are exposed to the app process.
          *
-         * @see #INPUT_FEATURE_NO_INPUT_CHANNEL
-         * @see #INPUT_FEATURE_DISABLE_USER_ACTIVITY
-         * @see #INPUT_FEATURE_SPY
-         * @see #INPUT_FEATURE_INTERCEPTS_STYLUS
+         * WARNING: Do NOT use {@link android.os.InputConfig} flags! This must be set to flag values
+         * included in {@link InputFeatureFlags}.
+         *
          * @hide
+         * @see InputFeatureFlags
          */
         @InputFeatureFlags
         @UnsupportedAppUsage
@@ -3599,12 +3602,13 @@ public interface WindowManager extends ViewManager {
 
         /**
          * If specified, the insets provided by this window will be our window frame minus the
-         * insets specified by providedInternalInsets. This should not be used together with
-         * {@link WindowState#mGivenContentInsets}. If both of them are set, both will be applied.
+         * insets specified by providedInternalInsets for each type. This should not be used
+         * together with {@link WindowState#mGivenContentInsets}. If both of them are set, both will
+         * be applied.
          *
          * @hide
          */
-        public Insets providedInternalInsets = Insets.NONE;
+        public Insets[] providedInternalInsets;
 
         /**
          * If specified, the insets provided by this window for the IME will be our window frame
@@ -3612,7 +3616,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public Insets providedInternalImeInsets = Insets.NONE;
+        public Insets[] providedInternalImeInsets;
 
         /**
          * If specified, the frame that used to calculate relative {@link RoundedCorner} will be
@@ -3998,8 +4002,18 @@ public interface WindowManager extends ViewManager {
             } else {
                 out.writeInt(0);
             }
-            providedInternalInsets.writeToParcel(out, 0 /* parcelableFlags */);
-            providedInternalImeInsets.writeToParcel(out, 0 /* parcelableFlags */);
+            if (providedInternalInsets != null) {
+                out.writeInt(providedInternalInsets.length);
+                out.writeTypedArray(providedInternalInsets, 0 /* parcelableFlags */);
+            } else {
+                out.writeInt(0);
+            }
+            if (providedInternalImeInsets != null) {
+                out.writeInt(providedInternalImeInsets.length);
+                out.writeTypedArray(providedInternalImeInsets, 0 /* parcelableFlags */);
+            } else {
+                out.writeInt(0);
+            }
             out.writeBoolean(insetsRoundedCornerFrame);
             if (paramsForRotation != null) {
                 checkNonRecursiveParams();
@@ -4079,8 +4093,16 @@ public interface WindowManager extends ViewManager {
                 providesInsetsTypes = new int[insetsTypesLength];
                 in.readIntArray(providesInsetsTypes);
             }
-            providedInternalInsets = Insets.CREATOR.createFromParcel(in);
-            providedInternalImeInsets = Insets.CREATOR.createFromParcel(in);
+            int providedInternalInsetsLength = in.readInt();
+            if (providedInternalInsetsLength > 0) {
+                providedInternalInsets = new Insets[providedInternalInsetsLength];
+                in.readTypedArray(providedInternalInsets, Insets.CREATOR);
+            }
+            int providedInternalImeInsetsLength = in.readInt();
+            if (providedInternalImeInsetsLength > 0) {
+                providedInternalImeInsets = new Insets[providedInternalImeInsetsLength];
+                in.readTypedArray(providedInternalImeInsets, Insets.CREATOR);
+            }
             insetsRoundedCornerFrame = in.readBoolean();
             int paramsForRotationLength = in.readInt();
             if (paramsForRotationLength > 0) {
@@ -4383,12 +4405,12 @@ public interface WindowManager extends ViewManager {
                 changes |= LAYOUT_CHANGED;
             }
 
-            if (!providedInternalInsets.equals(o.providedInternalInsets)) {
+            if (!Arrays.equals(providedInternalInsets, o.providedInternalInsets)) {
                 providedInternalInsets = o.providedInternalInsets;
                 changes |= LAYOUT_CHANGED;
             }
 
-            if (!providedInternalImeInsets.equals(o.providedInternalImeInsets)) {
+            if (!Arrays.equals(providedInternalImeInsets, o.providedInternalImeInsets)) {
                 providedInternalImeInsets = o.providedInternalImeInsets;
                 changes |= LAYOUT_CHANGED;
             }
@@ -4599,13 +4621,21 @@ public interface WindowManager extends ViewManager {
                     sb.append(InsetsState.typeToString(providesInsetsTypes[i]));
                 }
             }
-            if (!providedInternalInsets.equals(Insets.NONE)) {
+            if (providedInternalInsets != null) {
+                sb.append(System.lineSeparator());
                 sb.append(" providedInternalInsets=");
-                sb.append(providedInternalInsets);
+                for (int i = 0; i < providedInternalInsets.length; ++i) {
+                    if (i > 0) sb.append(' ');
+                    sb.append((providedInternalInsets[i]));
+                }
             }
-            if (!providedInternalImeInsets.equals(Insets.NONE)) {
+            if (providedInternalImeInsets != null) {
+                sb.append(System.lineSeparator());
                 sb.append(" providedInternalImeInsets=");
-                sb.append(providedInternalImeInsets);
+                for (int i = 0; i < providedInternalImeInsets.length; ++i) {
+                    if (i > 0) sb.append(' ');
+                    sb.append((providedInternalImeInsets[i]));
+                }
             }
             if (insetsRoundedCornerFrame) {
                 sb.append(" insetsRoundedCornerFrame=");
@@ -4834,10 +4864,6 @@ public interface WindowManager extends ViewManager {
             if ((inputFeatures & INPUT_FEATURE_SPY) != 0) {
                 inputFeatures &= ~INPUT_FEATURE_SPY;
                 features.add("INPUT_FEATURE_SPY");
-            }
-            if ((inputFeatures & INPUT_FEATURE_INTERCEPTS_STYLUS) != 0) {
-                inputFeatures &= ~INPUT_FEATURE_INTERCEPTS_STYLUS;
-                features.add("INPUT_FEATURE_INTERCEPTS_STYLUS");
             }
             if (inputFeatures != 0) {
                 features.add(Integer.toHexString(inputFeatures));

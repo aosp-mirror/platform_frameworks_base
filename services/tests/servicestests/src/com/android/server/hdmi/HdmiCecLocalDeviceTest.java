@@ -17,6 +17,7 @@ package com.android.server.hdmi;
 
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
 
+import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
@@ -137,7 +138,8 @@ public class HdmiCecLocalDeviceTest {
         Context context = InstrumentationRegistry.getTargetContext();
 
         mHdmiControlService =
-                new HdmiControlService(context, Collections.emptyList()) {
+                new HdmiControlService(context, Collections.emptyList(),
+                        new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     boolean isControlEnabled() {
                         return isControlEnabled;
@@ -190,6 +192,7 @@ public class HdmiCecLocalDeviceTest {
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
         mHdmiControlService.initService();
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mNativeWrapper.setPhysicalAddress(0x2000);
         mTestLooper.dispatchAll();

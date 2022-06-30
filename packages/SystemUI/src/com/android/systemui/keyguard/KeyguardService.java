@@ -102,7 +102,7 @@ public class KeyguardService extends Service {
             "persist.wm.enable_remote_keyguard_animation";
 
     private static final int sEnableRemoteKeyguardAnimation =
-            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 1);
+            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 2);
 
     /**
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
@@ -220,7 +220,6 @@ public class KeyguardService extends Service {
             public void mergeAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t, IBinder mergeTarget,
                     IRemoteTransitionFinishedCallback finishCallback) {
-
             }
         };
     }
@@ -349,7 +348,7 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void onAnimationCancelled() {
+        public void onAnimationCancelled(boolean isKeyguardOccluded) {
             mKeyguardViewMediator.cancelKeyguardExitAnimation();
         }
     };

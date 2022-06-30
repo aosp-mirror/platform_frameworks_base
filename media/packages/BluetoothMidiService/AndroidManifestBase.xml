@@ -19,7 +19,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.bluetoothmidiservice"
           >
-    <uses-sdk android:minSdkVersion="33" android:targetSdkVersion="33" />
     <application
         android:label="BluetoothMidi"
         android:defaultToDeviceProtectedStorage="true"

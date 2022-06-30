@@ -23,11 +23,13 @@ import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
 import android.net.MacAddress;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.CollectionUtils;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -80,7 +82,7 @@ class AssociationStoreImpl implements AssociationStore {
 
         synchronized (mLock) {
             if (mIdMap.containsKey(id)) {
-                if (DEBUG) Log.w(TAG, "Association already stored.");
+                Slog.e(TAG, "Association with id " + id + " already exists.");
                 return;
             }
             mIdMap.put(id, association);
@@ -263,6 +265,21 @@ class AssociationStoreImpl implements AssociationStore {
     public void unregisterListener(@NonNull OnChangeListener listener) {
         synchronized (mListeners) {
             mListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Dumps current companion device association states.
+     */
+    public void dump(@NonNull PrintWriter out) {
+        out.append("Companion Device Associations: ");
+        if (getAssociations().isEmpty()) {
+            out.append("<empty>\n");
+        } else {
+            out.append("\n");
+            for (AssociationInfo a : getAssociations()) {
+                out.append("  ").append(a.toString()).append('\n');
+            }
         }
     }
 

@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 import static com.android.server.wm.DisplayRotationProto.FIXED_TO_USER_ROTATION_MODE;
@@ -32,7 +33,6 @@ import static com.android.server.wm.DisplayRotationProto.IS_FIXED_TO_USER_ROTATI
 import static com.android.server.wm.DisplayRotationProto.LAST_ORIENTATION;
 import static com.android.server.wm.DisplayRotationProto.ROTATION;
 import static com.android.server.wm.DisplayRotationProto.USER_ROTATION;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_ACTIVE;
@@ -56,7 +56,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.IDisplayWindowRotationCallback;
@@ -419,11 +418,8 @@ public class DisplayRotation {
      *         THE SCREEN.
      */
     boolean updateRotationUnchecked(boolean forceUpdate) {
-        final boolean useShellTransitions =
-                mDisplayContent.mTransitionController.isShellTransitionsEnabled();
-
         final int displayId = mDisplayContent.getDisplayId();
-        if (!forceUpdate && !useShellTransitions) {
+        if (!forceUpdate) {
             if (mDeferredRotationPauseCount > 0) {
                 // Rotation updates have been paused temporarily. Defer the update until updates
                 // have been resumed.
@@ -449,17 +445,14 @@ public class DisplayRotation {
                 return false;
             }
 
-            final RecentsAnimationController recentsAnimController =
-                    mService.getRecentsAnimationController();
-            if (recentsAnimController != null && mDisplayContent.mFixedRotationTransitionListener
-                    .isTopFixedOrientationRecentsAnimating()
-                    // If screen is off or the device is going to sleep, then still allow to update.
-                    && mService.mPolicy.okToAnimate(false /* ignoreScreenOn */)) {
+            if (mDisplayContent.mFixedRotationTransitionListener.shouldDeferRotation()) {
+                // Makes sure that after the transition is finished, updateOrientation() can see
+                // the difference from the latest orientation source.
+                mLastOrientation = SCREEN_ORIENTATION_UNSET;
                 // During the recents animation, the closing app might still be considered on top.
                 // In order to ignore its requested orientation to avoid a sensor led rotation (e.g
                 // user rotating the device while the recents animation is running), we ignore
                 // rotation update while the animation is running.
-                recentsAnimController.setCheckRotationAfterCleanup();
                 return false;
             }
         }
@@ -513,7 +506,7 @@ public class DisplayRotation {
 
         mDisplayContent.setLayoutNeeded();
 
-        if (useShellTransitions) {
+        if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
             final boolean wasCollecting = mDisplayContent.mTransitionController.isCollecting();
             final TransitionRequestInfo.DisplayChange change = wasCollecting ? null
                     : new TransitionRequestInfo.DisplayChange(mDisplayContent.getDisplayId(),
@@ -708,17 +701,17 @@ public class DisplayRotation {
     }
 
     boolean canRotateSeamlessly(int oldRotation, int newRotation) {
+        // If the navigation bar can't change sides, then it will jump when we change orientations
+        // and we don't rotate seamlessly - unless that is allowed, eg. with gesture navigation
+        // where the navbar is low-profile enough that this isn't very noticeable.
+        if (mAllowSeamlessRotationDespiteNavBarMoving || mDisplayPolicy.navigationBarCanMove()) {
+            return true;
+        }
         // For the upside down rotation we don't rotate seamlessly as the navigation bar moves
         // position. Note most apps (using orientation:sensor or user as opposed to fullSensor)
         // will not enter the reverse portrait orientation, so actually the orientation won't change
         // at all.
-        if (oldRotation == mUpsideDownRotation || newRotation == mUpsideDownRotation) {
-            return false;
-        }
-        // If the navigation bar can't change sides, then it will jump when we change orientations
-        // and we don't rotate seamlessly - unless that is allowed, eg. with gesture navigation
-        // where the navbar is low-profile enough that this isn't very noticeable.
-        return mAllowSeamlessRotationDespiteNavBarMoving || mDisplayPolicy.navigationBarCanMove();
+        return oldRotation != Surface.ROTATION_180 && newRotation != Surface.ROTATION_180;
     }
 
     void markForSeamlessRotation(WindowState w, boolean seamlesslyRotated) {
@@ -753,10 +746,11 @@ public class DisplayRotation {
         final boolean forceJumpcut = !mDisplayPolicy.isScreenOnFully()
                 || !mService.mPolicy.okToAnimate(false /* ignoreScreenOn */);
         final WindowState topFullscreen = mDisplayPolicy.getTopFullscreenOpaqueWindow();
-        if (DEBUG_ANIM) Slog.i(TAG, "selectRotationAnimation topFullscreen="
-                + topFullscreen + " rotationAnimation="
-                + (topFullscreen == null ? 0 : topFullscreen.getAttrs().rotationAnimation)
-                + " forceJumpcut=" + forceJumpcut);
+        ProtoLog.i(WM_DEBUG_ANIM, "selectRotationAnimation topFullscreen=%s"
+                + " rotationAnimation=%d forceJumpcut=%b",
+                topFullscreen,
+                topFullscreen == null ? 0 : topFullscreen.getAttrs().rotationAnimation,
+                forceJumpcut);
         if (forceJumpcut) {
             mTmpRotationAnim.mExit = R.anim.rotation_animation_jump_exit;
             mTmpRotationAnim.mEnter = R.anim.rotation_animation_enter;
@@ -1029,13 +1023,7 @@ public class DisplayRotation {
                 disable = false;
                 // Enable listener if not already enabled.
                 if (!mOrientationListener.mEnabled) {
-                    // Don't clear the current sensor orientation if the keyguard is going away in
-                    // dismiss mode. This allows window manager to use the last sensor reading to
-                    // determine the orientation vs. falling back to the last known orientation if
-                    // the sensor reading was cleared which can cause it to relaunch the app that
-                    // will show in the wrong orientation first before correcting leading to app
-                    // launch delays.
-                    mOrientationListener.enable(true /* clearCurrentRotation */);
+                    mOrientationListener.enable();
                 }
             }
         }
@@ -1229,16 +1217,8 @@ public class DisplayRotation {
                 || orientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT) {
             // Otherwise, use sensor only if requested by the application or enabled
             // by default for USER or UNSPECIFIED modes.  Does not apply to NOSENSOR.
-            if (mAllowAllRotations == ALLOW_ALL_ROTATIONS_UNDEFINED) {
-                // Can't read this during init() because the context doesn't have display metrics at
-                // that time so we cannot determine tablet vs. phone then.
-                mAllowAllRotations = mContext.getResources().getBoolean(
-                        R.bool.config_allowAllRotations)
-                                ? ALLOW_ALL_ROTATIONS_ENABLED
-                                : ALLOW_ALL_ROTATIONS_DISABLED;
-            }
             if (sensorRotation != Surface.ROTATION_180
-                    || mAllowAllRotations == ALLOW_ALL_ROTATIONS_ENABLED
+                    || getAllowAllRotations() == ALLOW_ALL_ROTATIONS_ENABLED
                     || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
                     || orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_USER) {
                 preferredRotation = sensorRotation;
@@ -1327,6 +1307,19 @@ public class DisplayRotation {
         }
     }
 
+    private int getAllowAllRotations() {
+        if (mAllowAllRotations == ALLOW_ALL_ROTATIONS_UNDEFINED) {
+            // Can't read this during init() because the context doesn't have display metrics at
+            // that time so we cannot determine tablet vs. phone then.
+            mAllowAllRotations = mContext.getResources().getBoolean(
+                    R.bool.config_allowAllRotations)
+                    ? ALLOW_ALL_ROTATIONS_ENABLED
+                    : ALLOW_ALL_ROTATIONS_DISABLED;
+        }
+
+        return mAllowAllRotations;
+    }
+
     private boolean isLandscapeOrSeascape(int rotation) {
         return rotation == mLandscapeRotation || rotation == mSeascapeRotation;
     }
@@ -1354,6 +1347,11 @@ public class DisplayRotation {
 
             case ActivityInfo.SCREEN_ORIENTATION_USER:
             case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED:
+                // When all rotations enabled it works with any of the 4 rotations
+                if (getAllowAllRotations() == ALLOW_ALL_ROTATIONS_ENABLED) {
+                    return preferredRotation >= 0;
+                }
+
                 // Works with any rotation except upside down.
                 return (preferredRotation >= 0) && (preferredRotation != Surface.ROTATION_180);
         }
@@ -1565,33 +1563,11 @@ public class DisplayRotation {
         proto.end(token);
     }
 
-    private class OrientationListener extends WindowOrientationListener {
-        final SparseArray<Runnable> mRunnableCache = new SparseArray<>(5);
-        boolean mEnabled;
+    private class OrientationListener extends WindowOrientationListener implements Runnable {
+        transient boolean mEnabled;
 
         OrientationListener(Context context, Handler handler) {
             super(context, handler);
-        }
-
-        private class UpdateRunnable implements Runnable {
-            final int mRotation;
-
-            UpdateRunnable(int rotation) {
-                mRotation = rotation;
-            }
-
-            @Override
-            public void run() {
-                // Send interaction power boost to improve redraw performance.
-                mService.mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 0);
-                if (isRotationChoicePossible(mCurrentAppOrientation)) {
-                    final boolean isValid = isValidRotationChoice(mRotation);
-                    sendProposedRotationChangeToStatusBarInternal(mRotation, isValid);
-                } else {
-                    mService.updateRotation(false /* alwaysSendConfiguration */,
-                            false /* forceRelayout */);
-                }
-            }
         }
 
         @Override
@@ -1610,26 +1586,38 @@ public class DisplayRotation {
         @Override
         public void onProposedRotationChanged(int rotation) {
             ProtoLog.v(WM_DEBUG_ORIENTATION, "onProposedRotationChanged, rotation=%d", rotation);
-            Runnable r = mRunnableCache.get(rotation, null);
-            if (r == null) {
-                r = new UpdateRunnable(rotation);
-                mRunnableCache.put(rotation, r);
+            // Send interaction power boost to improve redraw performance.
+            mService.mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 0);
+            if (isRotationChoicePossible(mCurrentAppOrientation)) {
+                final boolean isValid = isValidRotationChoice(rotation);
+                sendProposedRotationChangeToStatusBarInternal(rotation, isValid);
+            } else {
+                mService.updateRotation(false /* alwaysSendConfiguration */,
+                        false /* forceRelayout */);
             }
-            getHandler().post(r);
         }
 
         @Override
-        public void enable(boolean clearCurrentRotation) {
-            super.enable(clearCurrentRotation);
+        public void enable() {
             mEnabled = true;
+            getHandler().post(this);
             ProtoLog.v(WM_DEBUG_ORIENTATION, "Enabling listeners");
         }
 
         @Override
         public void disable() {
-            super.disable();
             mEnabled = false;
+            getHandler().post(this);
             ProtoLog.v(WM_DEBUG_ORIENTATION, "Disabling listeners");
+        }
+
+        @Override
+        public void run() {
+            if (mEnabled) {
+                super.enable();
+            } else {
+                super.disable();
+            }
         }
     }
 
@@ -1688,7 +1676,7 @@ public class DisplayRotation {
                 mSensorRotation = (listener == null || !listener.mEnabled)
                         ? -2 /* disabled */ : dr.mLastSensorRotation;
                 final DisplayContent dc = dr.mDisplayContent;
-                mIgnoreOrientationRequest = dc.mIgnoreOrientationRequest;
+                mIgnoreOrientationRequest = dc.getIgnoreOrientationRequest();
                 final TaskDisplayArea requestingTda = dc.getOrientationRequestingTaskDisplayArea();
                 mNonDefaultRequestingTaskDisplayArea = requestingTda == null
                         ? "none" : requestingTda != dc.getDefaultTaskDisplayArea()

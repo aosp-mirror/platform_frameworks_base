@@ -24,12 +24,11 @@
     android:id="@id/contentPanel">
 
     <RelativeLayout
-        android:id="@+id/title_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"
         android:elevation="@dimen/resolver_elevation"
-        android:paddingTop="@dimen/resolver_small_margin"
+        android:paddingTop="24dp"
         android:paddingStart="@dimen/resolver_edge_margin"
         android:paddingEnd="@dimen/resolver_edge_margin"
         android:paddingBottom="@dimen/resolver_title_padding_bottom"
@@ -37,18 +36,23 @@
 
         <ImageView
             android:id="@+id/icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
+            android:scaleType="fitCenter"
         />
 
         <TextView
             android:id="@+id/open_cross_profile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingTop="16dp"
             android:layout_below="@id/icon"
             android:layout_centerHorizontal="true"
+            android:textSize="24sp"
+            android:lineHeight="32sp"
+            android:gravity="center"
             android:textColor="?android:textColorPrimary"
         />
     </RelativeLayout>
@@ -58,15 +62,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"
+        android:paddingTop="32dp"
+        android:paddingBottom="@dimen/resolver_button_bar_spacing"
         android:orientation="vertical"
         android:background="?attr/colorBackground"
         android:layout_ignoreOffset="true">
-        <View
-            android:id="@+id/resolver_button_bar_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?attr/colorBackground"
-            android:foreground="?attr/dividerVertical" />
         <RelativeLayout
             style="?attr/buttonBarStyle"
             android:layout_width="match_parent"
@@ -77,10 +77,8 @@
             android:orientation="horizontal"
             android:layoutDirection="locale"
             android:measureWithLargestChild="true"
-            android:paddingTop="@dimen/resolver_button_bar_spacing"
-            android:paddingBottom="@dimen/resolver_button_bar_spacing"
-            android:paddingStart="@dimen/resolver_edge_margin"
-            android:paddingEnd="@dimen/resolver_small_margin"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="2dp"
             android:elevation="@dimen/resolver_elevation">
 
             <Button
@@ -89,7 +87,9 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:maxLines="2"
-                style="@android:style/Widget.DeviceDefault.Button.Borderless"
+                android:background="@drawable/resolver_outlined_button_bg"
+                style="?android:attr/borderlessButtonStyle"
+                android:paddingHorizontal="16dp"
                 android:fontFamily="@android:string/config_headlineFontFamilyMedium"
                 android:textAllCaps="false"
                 android:text="@string/activity_resolver_use_once"
@@ -98,12 +98,15 @@
             <Button
                 android:id="@+id/button_open"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:maxLines="2"
-                style="@android:style/Widget.DeviceDefault.Button.Colored"
+                android:paddingHorizontal="16dp"
+                android:background="@drawable/resolver_button_bg"
+                style="?android:attr/borderlessButtonStyle"
                 android:fontFamily="@android:string/config_headlineFontFamilyMedium"
                 android:textAllCaps="false"
-                android:layout_height="wrap_content"
+                android:textColor="@color/resolver_button_text"
                 android:text="@string/whichViewApplicationLabel"
             />
         </RelativeLayout>

@@ -19,6 +19,8 @@ package android.companion.virtual;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
+import android.hardware.display.IVirtualDisplayCallback;
+import android.hardware.display.VirtualDisplayConfig;
 
 /**
  * Interface for communication between VirtualDeviceManager and VirtualDeviceManagerService.
@@ -37,8 +39,21 @@ interface IVirtualDeviceManager {
      *   CDM. Virtual devices must have a corresponding association with CDM in order to be created.
      * @param params The parameters for creating this virtual device. See {@link
      *   VirtualDeviceManager.VirtualDeviceParams}.
+     * @param activityListener The listener to listen for activity changes in a virtual device.
      */
     IVirtualDevice createVirtualDevice(
             in IBinder token, String packageName, int associationId,
             in VirtualDeviceParams params, in IVirtualDeviceActivityListener activityListener);
+
+    /**
+     * Creates a virtual display owned by a particular virtual device.
+     *
+     * @param virtualDisplayConfig The configuration used in creating the display
+     * @param callback A callback that receives display lifecycle events
+     * @param virtualDevice The device that will own this display
+     * @param packageName The package name of the calling app
+     */
+    int createVirtualDisplay(in VirtualDisplayConfig virtualDisplayConfig,
+            in IVirtualDisplayCallback callback, in IVirtualDevice virtualDevice,
+            String packageName);
 }

@@ -19,6 +19,7 @@ package com.android.systemui.controls.dagger
 import android.content.ContentResolver
 import android.content.Context
 import android.database.ContentObserver
+import android.os.UserHandle
 import android.provider.Settings
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.management.ControlsListingController
@@ -73,10 +74,11 @@ class ControlsComponent @Inject constructor(
 
     init {
         if (featureEnabled) {
-            secureSettings.registerContentObserver(
+            secureSettings.registerContentObserverForUser(
                 Settings.Secure.getUriFor(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS),
                 false, /* notifyForDescendants */
-                showWhileLockedObserver
+                showWhileLockedObserver,
+                UserHandle.USER_ALL
             )
             updateShowWhileLocked()
         }
@@ -123,8 +125,8 @@ class ControlsComponent @Inject constructor(
     }
 
     private fun updateShowWhileLocked() {
-        canShowWhileLockedSetting = secureSettings.getInt(
-            Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 0) != 0
+        canShowWhileLockedSetting = secureSettings.getIntForUser(
+            Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 0, UserHandle.USER_CURRENT) != 0
     }
 
     enum class Visibility {

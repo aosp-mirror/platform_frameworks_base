@@ -158,12 +158,7 @@ public class UiTranslationController implements Dumpable {
             case STATE_UI_TRANSLATION_FINISHED:
                 destroyTranslators();
                 runForEachView((view, callback) -> {
-                    callback.onClearTranslation(view);
-                    view.clearViewTranslationResponse();
-                    if (view.hasTranslationTransientState()) {
-                        view.setHasTransientState(false);
-                        view.setHasTranslationTransientState(false);
-                    }
+                    view.clearTranslationState();
                 });
                 notifyTranslationFinished(/* activityDestroyed= */ false);
                 synchronized (mLock) {

@@ -88,6 +88,10 @@ public class FaceResetLockoutClient extends HalClientMonitor<AidlSession> implem
         mCallback.onClientFinished(this, true /* success */);
     }
 
+    public boolean interruptsPrecedingClients() {
+        return true;
+    }
+
     /**
      * Reset the local lockout state and notify any listeners.
      *

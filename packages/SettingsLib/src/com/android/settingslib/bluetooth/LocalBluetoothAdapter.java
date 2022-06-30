@@ -126,7 +126,10 @@ public class LocalBluetoothAdapter {
     }
 
     public ParcelUuid[] getUuids() {
-        return mAdapter.getUuids();
+        List<ParcelUuid> uuidsList = mAdapter.getUuidsList();
+        ParcelUuid[] uuidsArray = new ParcelUuid[uuidsList.size()];
+        uuidsList.toArray(uuidsArray);
+        return uuidsArray;
     }
 
     public boolean isDiscovering() {

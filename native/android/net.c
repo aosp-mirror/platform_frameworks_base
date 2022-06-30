@@ -162,11 +162,11 @@ void android_res_cancel(int nsend_fd) {
     resNetworkCancel(nsend_fd);
 }
 
-int android_tag_socket_with_uid(int sockfd, int tag, uid_t uid) {
+int android_tag_socket_with_uid(int sockfd, uint32_t tag, uid_t uid) {
     return tagSocket(sockfd, tag, uid);
 }
 
-int android_tag_socket(int sockfd, int tag) {
+int android_tag_socket(int sockfd, uint32_t tag) {
     return tagSocket(sockfd, tag, -1);
 }
 

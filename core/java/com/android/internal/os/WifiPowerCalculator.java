@@ -111,9 +111,10 @@ public class WifiPowerCalculator extends PowerCalculator {
             calculateApp(powerDurationAndTraffic, app.getBatteryStatsUid(), powerModel,
                     rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED,
                     batteryStats.hasWifiActivityReporting(), consumptionUC);
-
-            totalAppDurationMs += powerDurationAndTraffic.durationMs;
-            totalAppPowerMah += powerDurationAndTraffic.powerMah;
+            if (!app.isVirtualUid()) {
+                totalAppDurationMs += powerDurationAndTraffic.durationMs;
+                totalAppPowerMah += powerDurationAndTraffic.powerMah;
+            }
 
             app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI,
                     powerDurationAndTraffic.durationMs);

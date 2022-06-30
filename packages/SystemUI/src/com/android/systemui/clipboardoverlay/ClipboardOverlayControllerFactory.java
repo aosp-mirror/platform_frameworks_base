@@ -18,6 +18,9 @@ package com.android.systemui.clipboardoverlay;
 
 import android.content.Context;
 
+import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.screenshot.TimeoutHandler;
 
@@ -29,13 +32,23 @@ import javax.inject.Inject;
 @SysUISingleton
 public class ClipboardOverlayControllerFactory {
 
+    private final UiEventLogger mUiEventLogger;
+    private final BroadcastDispatcher mBroadcastDispatcher;
+    private final BroadcastSender mBroadcastSender;
+
     @Inject
-    public ClipboardOverlayControllerFactory() {}
+    public ClipboardOverlayControllerFactory(BroadcastDispatcher broadcastDispatcher,
+            BroadcastSender broadcastSender, UiEventLogger uiEventLogger) {
+        this.mBroadcastDispatcher = broadcastDispatcher;
+        this.mBroadcastSender = broadcastSender;
+        this.mUiEventLogger = uiEventLogger;
+    }
 
     /**
      * One new ClipboardOverlayController, coming right up!
      */
     public ClipboardOverlayController create(Context context) {
-        return new ClipboardOverlayController(context, new TimeoutHandler(context));
+        return new ClipboardOverlayController(context, mBroadcastDispatcher, mBroadcastSender,
+                new TimeoutHandler(context), mUiEventLogger);
     }
 }

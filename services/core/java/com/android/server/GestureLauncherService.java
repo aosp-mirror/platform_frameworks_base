@@ -75,6 +75,13 @@ public class GestureLauncherService extends SystemService {
     @VisibleForTesting static final long CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS = 300;
 
     /**
+     * Min time in milliseconds to complete the emergency gesture for it count. If the gesture is
+     * completed faster than this, we assume it's not performed by human and the
+     * event gets ignored.
+     */
+    @VisibleForTesting static final int EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS = 160;
+
+    /**
      * Interval in milliseconds in which the power button must be depressed in succession to be
      * considered part of an extended sequence of taps. Note that this is a looser threshold than
      * the camera launch gesture, because the purpose of this threshold is to measure the
@@ -184,6 +191,7 @@ public class GestureLauncherService extends SystemService {
     private int mEmergencyGesturePowerButtonCooldownPeriodMs;
 
     private long mLastPowerDown;
+    private long mFirstPowerDown;
     private long mLastEmergencyGestureTriggered;
     private int mPowerButtonConsecutiveTaps;
     private int mPowerButtonSlowConsecutiveTaps;
@@ -553,10 +561,12 @@ public class GestureLauncherService extends SystemService {
             mLastPowerDown = event.getEventTime();
             if (powerTapInterval >= POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS) {
                 // Tap too slow, reset consecutive tap counts.
+                mFirstPowerDown  = event.getEventTime();
                 mPowerButtonConsecutiveTaps = 1;
                 mPowerButtonSlowConsecutiveTaps = 1;
             } else if (powerTapInterval >= CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS) {
                 // Tap too slow for shortcuts
+                mFirstPowerDown  = event.getEventTime();
                 mPowerButtonConsecutiveTaps = 1;
                 mPowerButtonSlowConsecutiveTaps++;
             } else {
@@ -575,7 +585,26 @@ public class GestureLauncherService extends SystemService {
                     intercept = interactive;
                 }
                 if (mPowerButtonConsecutiveTaps == EMERGENCY_GESTURE_POWER_TAP_COUNT_THRESHOLD) {
-                    launchEmergencyGesture = true;
+                    long emergencyGestureSpentTime = event.getEventTime() - mFirstPowerDown;
+                    long emergencyGestureTapDetectionMinTimeMs = Settings.Global.getInt(
+                            mContext.getContentResolver(),
+                            Settings.Global.EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS,
+                            EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS);
+                    if (emergencyGestureSpentTime <= emergencyGestureTapDetectionMinTimeMs) {
+                        Slog.i(TAG, "Emergency gesture detected but it's too fast. Gesture time: "
+                                + emergencyGestureSpentTime + " ms");
+                        // Reset consecutive tap counts.
+                        mFirstPowerDown = event.getEventTime();
+                        mPowerButtonConsecutiveTaps = 1;
+                        mPowerButtonSlowConsecutiveTaps = 1;
+                    } else {
+                        Slog.i(TAG, "Emergency gesture detected. Gesture time: "
+                                + emergencyGestureSpentTime + " ms");
+                        launchEmergencyGesture = true;
+                        mMetricsLogger.histogram("emergency_gesture_spent_time",
+                                (int) emergencyGestureSpentTime);
+
+                    }
                 }
             }
             if (mCameraDoubleTapPowerEnabled

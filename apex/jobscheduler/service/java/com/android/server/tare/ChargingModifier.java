@@ -76,6 +76,8 @@ class ChargingModifier extends Modifier {
     }
 
     private final class ChargingTracker extends BroadcastReceiver {
+        private boolean mIsSetup = false;
+
         /**
          * Track whether we're "charging", where charging means that we're ready to commit to
          * doing work.
@@ -83,6 +85,10 @@ class ChargingModifier extends Modifier {
         private volatile boolean mCharging;
 
         public void startTracking(@NonNull Context context) {
+            if (mIsSetup) {
+                return;
+            }
+
             final IntentFilter filter = new IntentFilter();
             filter.addAction(BatteryManager.ACTION_CHARGING);
             filter.addAction(BatteryManager.ACTION_DISCHARGING);
@@ -91,10 +97,17 @@ class ChargingModifier extends Modifier {
             // Initialise tracker state.
             final BatteryManager batteryManager = context.getSystemService(BatteryManager.class);
             mCharging = batteryManager.isCharging();
+
+            mIsSetup = true;
         }
 
         public void stopTracking(@NonNull Context context) {
+            if (!mIsSetup) {
+                return;
+            }
+
             context.unregisterReceiver(this);
+            mIsSetup = false;
         }
 
         @Override

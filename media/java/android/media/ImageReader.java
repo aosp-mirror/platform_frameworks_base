@@ -643,6 +643,9 @@ public class ImageReader implements AutoCloseable {
 
     /**
      * <p>Return the frame to the ImageReader for reuse.</p>
+     *
+     * This method should only be called via {@link SurfaceImage#close} which ensures that image
+     * closing is atomic.
      */
     private void releaseImage(Image i) {
         if (! (i instanceof SurfaceImage) ) {
@@ -1125,6 +1128,8 @@ public class ImageReader implements AutoCloseable {
     }
 
     private class SurfaceImage extends android.media.Image {
+        private final Object mCloseLock = new Object();
+
         public SurfaceImage(int format) {
             mFormat = format;
             mHardwareBufferFormat = ImageReader.this.mHardwareBufferFormat;
@@ -1139,7 +1144,9 @@ public class ImageReader implements AutoCloseable {
 
         @Override
         public void close() {
-            ImageReader.this.releaseImage(this);
+            synchronized (this.mCloseLock) {
+                ImageReader.this.releaseImage(this);
+            }
         }
 
         public ImageReader getReader() {

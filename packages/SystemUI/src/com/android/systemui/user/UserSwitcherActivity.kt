@@ -23,7 +23,6 @@ import android.content.IntentFilter
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.os.UserManager
@@ -43,7 +42,7 @@ import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
-import com.android.systemui.statusbar.phone.ShadeController
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdapter
 import com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA
@@ -64,7 +63,7 @@ class UserSwitcherActivity @Inject constructor(
     private val layoutInflater: LayoutInflater,
     private val falsingManager: FalsingManager,
     private val userManager: UserManager,
-    private val shadeController: ShadeController
+    private val userTracker: UserTracker
 ) : LifecycleActivity() {
 
     private lateinit var parent: ViewGroup
@@ -72,6 +71,11 @@ class UserSwitcherActivity @Inject constructor(
     private var popupMenu: UserSwitcherPopupMenu? = null
     private lateinit var addButton: View
     private var addUserRecords = mutableListOf<UserRecord>()
+    private val userSwitchedCallback: UserTracker.Callback = object : UserTracker.Callback {
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            finish()
+        }
+    }
     // When the add users options become available, insert another option to manage users
     private val manageUserRecord = UserRecord(
         null /* info */,
@@ -149,8 +153,8 @@ class UserSwitcherActivity @Inject constructor(
         }
 
         private fun getDrawable(item: UserRecord): Drawable {
-            var drawable = if (item.isCurrent && item.isGuest) {
-                getDrawable(R.drawable.ic_avatar_guest_user)
+            var drawable = if (item.isGuest) {
+                getDrawable(R.drawable.ic_account_circle)
             } else {
                 findUserIcon(item)
             }
@@ -168,7 +172,7 @@ class UserSwitcherActivity @Inject constructor(
             val ld = getDrawable(R.drawable.user_switcher_icon_large).mutate()
                 as LayerDrawable
             if (item == userSwitcherController.getCurrentUserRecord()) {
-                (ld.getDrawable(1) as GradientDrawable).apply {
+                (ld.findDrawableByLayerId(R.id.ring) as GradientDrawable).apply {
                     val stroke = resources
                         .getDimensionPixelSize(R.dimen.user_switcher_icon_selected_width)
                     val color = Utils.getColorAttrDefaultColor(
@@ -180,15 +184,7 @@ class UserSwitcherActivity @Inject constructor(
                 }
             }
 
-            ld.addLayer(
-                InsetDrawable(
-                    drawable,
-                    resources.getDimensionPixelSize(
-                        R.dimen.user_switcher_icon_large_margin
-                    )
-                )
-            )
-
+            ld.setDrawableByLayerId(R.id.user_avatar, drawable)
             return ld
         }
 
@@ -224,6 +220,7 @@ class UserSwitcherActivity @Inject constructor(
         initBroadcastReceiver()
 
         parent.post { buildUserViews() }
+        userTracker.addCallback(userSwitchedCallback, mainExecutor)
     }
 
     private fun showPopupMenu() {
@@ -344,6 +341,7 @@ class UserSwitcherActivity @Inject constructor(
         super.onDestroy()
 
         broadcastDispatcher.unregisterReceiver(broadcastReceiver)
+        userTracker.removeCallback(userSwitchedCallback)
     }
 
     private fun initBroadcastReceiver() {

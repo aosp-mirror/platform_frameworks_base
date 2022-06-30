@@ -42,6 +42,7 @@ import android.os.SystemClock;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -72,14 +73,28 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     private static final long INVALID_THREAD_ID = -1;
     private static final long TRMS_LOCK_TIMEOUT = 500;
 
+    private static final int INVALID_FE_COUNT = -1;
+
     // Map of the registered client profiles
     private Map<Integer, ClientProfile> mClientProfiles = new HashMap<>();
     private int mNextUnusedClientId = 0;
 
     // Map of the current available frontend resources
     private Map<Integer, FrontendResource> mFrontendResources = new HashMap<>();
-    // Backup Map of the current available frontend resources
+    // SparseIntArray of the max usable number for each frontend resource type
+    private SparseIntArray mFrontendMaxUsableNums = new SparseIntArray();
+    // SparseIntArray of the currently used number for each frontend resource type
+    private SparseIntArray mFrontendUsedNums = new SparseIntArray();
+    // SparseIntArray of the existing number for each frontend resource type
+    private SparseIntArray mFrontendExistingNums = new SparseIntArray();
+
+    // Backups for the frontend resource maps for enabling testing with custom resource maps
+    // such as TunerTest.testHasUnusedFrontend1()
     private Map<Integer, FrontendResource> mFrontendResourcesBackup = new HashMap<>();
+    private SparseIntArray mFrontendMaxUsableNumsBackup = new SparseIntArray();
+    private SparseIntArray mFrontendUsedNumsBackup = new SparseIntArray();
+    private SparseIntArray mFrontendExistingNumsBackup = new SparseIntArray();
+
     // Map of the current available lnb resources
     private Map<Integer, LnbResource> mLnbResources = new HashMap<>();
     // Map of the current available Cas resources
@@ -264,6 +279,29 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                     return false;
                 }
                 return requestFrontendInternal(request, frontendHandle);
+            }
+        }
+
+        @Override
+        public boolean setMaxNumberOfFrontends(int frontendType, int maxUsableNum) {
+            enforceTunerAccessPermission("requestFrontend");
+            enforceTrmAccessPermission("requestFrontend");
+            if (maxUsableNum < 0) {
+                Slog.w(TAG, "setMaxNumberOfFrontends failed with maxUsableNum:" + maxUsableNum
+                        + " frontendType:" + frontendType);
+                return false;
+            }
+            synchronized (mLock) {
+                return setMaxNumberOfFrontendsInternal(frontendType, maxUsableNum);
+            }
+        }
+
+        @Override
+        public int getMaxNumberOfFrontends(int frontendType) {
+            enforceTunerAccessPermission("requestFrontend");
+            enforceTrmAccessPermission("requestFrontend");
+            synchronized (mLock) {
+                return getMaxNumberOfFrontendsInternal(frontendType);
             }
         }
 
@@ -572,71 +610,19 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             }
 
             synchronized (mLock) {
-                if (mClientProfiles != null) {
-                    pw.println("ClientProfiles:");
-                    pw.increaseIndent();
-                    for (Map.Entry<Integer, ClientProfile> entry : mClientProfiles.entrySet()) {
-                        pw.println(entry.getKey() + " : " + entry.getValue());
-                    }
-                    pw.decreaseIndent();
-                }
-
-                if (mFrontendResources != null) {
-                    pw.println("FrontendResources:");
-                    pw.increaseIndent();
-                    for (Map.Entry<Integer, FrontendResource> entry
-                            : mFrontendResources.entrySet()) {
-                        pw.println(entry.getKey() + " : " + entry.getValue());
-                    }
-                    pw.decreaseIndent();
-                }
-
-                if (mFrontendResourcesBackup != null) {
-                    pw.println("FrontendResourcesBackUp:");
-                    pw.increaseIndent();
-                    for (Map.Entry<Integer, FrontendResource> entry
-                            : mFrontendResourcesBackup.entrySet()) {
-                        pw.println(entry.getKey() + " : " + entry.getValue());
-                    }
-                    pw.decreaseIndent();
-                }
-
-                if (mLnbResources != null) {
-                    pw.println("LnbResources:");
-                    pw.increaseIndent();
-                    for (Map.Entry<Integer, LnbResource> entry : mLnbResources.entrySet()) {
-                        pw.println(entry.getKey() + " : " + entry.getValue());
-                    }
-                    pw.decreaseIndent();
-                }
-
-                if (mCasResources != null) {
-                    pw.println("CasResources:");
-                    pw.increaseIndent();
-                    for (Map.Entry<Integer, CasResource> entry : mCasResources.entrySet()) {
-                        pw.println(entry.getKey() + " : " + entry.getValue());
-                    }
-                    pw.decreaseIndent();
-                }
-
-                if (mCiCamResources != null) {
-                    pw.println("CiCamResources:");
-                    pw.increaseIndent();
-                    for (Map.Entry<Integer, CiCamResource> entry : mCiCamResources.entrySet()) {
-                        pw.println(entry.getKey() + " : " + entry.getValue());
-                    }
-                    pw.decreaseIndent();
-                }
-
-                if (mListeners != null) {
-                    pw.println("Listners:");
-                    pw.increaseIndent();
-                    for (Map.Entry<Integer, ResourcesReclaimListenerRecord> entry
-                            : mListeners.entrySet()) {
-                        pw.println(entry.getKey() + " : " + entry.getValue());
-                    }
-                    pw.decreaseIndent();
-                }
+                dumpMap(mClientProfiles, "ClientProfiles:", "\n", pw);
+                dumpMap(mFrontendResources, "FrontendResources:", "\n", pw);
+                dumpSIA(mFrontendExistingNums, "FrontendExistingNums:", ", ", pw);
+                dumpSIA(mFrontendUsedNums, "FrontendUsedNums:", ", ", pw);
+                dumpSIA(mFrontendMaxUsableNums, "FrontendMaxUsableNums:", ", ", pw);
+                dumpMap(mFrontendResourcesBackup, "FrontendResourcesBackUp:", "\n", pw);
+                dumpSIA(mFrontendExistingNumsBackup, "FrontendExistingNumsBackup:", ", ", pw);
+                dumpSIA(mFrontendUsedNumsBackup, "FrontendUsedNumsBackup:", ", ", pw);
+                dumpSIA(mFrontendMaxUsableNumsBackup, "FrontendUsedNumsBackup:", ", ", pw);
+                dumpMap(mLnbResources, "LnbResource:", "\n", pw);
+                dumpMap(mCasResources, "CasResource:", "\n", pw);
+                dumpMap(mCiCamResources, "CiCamResource:", "\n", pw);
+                dumpMap(mListeners, "Listners:", "\n", pw);
             }
         }
 
@@ -786,10 +772,10 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     protected void storeResourceMapInternal(int resourceType) {
         switch (resourceType) {
             case TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND:
-                if (mFrontendResources != null && mFrontendResources.size() > 0) {
-                    mFrontendResourcesBackup.putAll(mFrontendResources);
-                    mFrontendResources.clear();
-                }
+                replaceFeResourceMap(mFrontendResources, mFrontendResourcesBackup);
+                replaceFeCounts(mFrontendExistingNums, mFrontendExistingNumsBackup);
+                replaceFeCounts(mFrontendUsedNums, mFrontendUsedNumsBackup);
+                replaceFeCounts(mFrontendMaxUsableNums, mFrontendMaxUsableNumsBackup);
                 break;
                 // TODO: implement for other resource type when needed
             default:
@@ -800,9 +786,10 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     protected void clearResourceMapInternal(int resourceType) {
         switch (resourceType) {
             case TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND:
-                if (mFrontendResources != null) {
-                    mFrontendResources.clear();
-                }
+                replaceFeResourceMap(null, mFrontendResources);
+                replaceFeCounts(null, mFrontendExistingNums);
+                replaceFeCounts(null, mFrontendUsedNums);
+                replaceFeCounts(null, mFrontendMaxUsableNums);
                 break;
                 // TODO: implement for other resource type when needed
             default:
@@ -813,12 +800,10 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     protected void restoreResourceMapInternal(int resourceType) {
         switch (resourceType) {
             case TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND:
-                if (mFrontendResourcesBackup != null
-                        && mFrontendResourcesBackup.size() > 0) {
-                    mFrontendResources.clear();
-                    mFrontendResources.putAll(mFrontendResourcesBackup);
-                    mFrontendResourcesBackup.clear();
-                }
+                replaceFeResourceMap(mFrontendResourcesBackup, mFrontendResources);
+                replaceFeCounts(mFrontendExistingNumsBackup, mFrontendExistingNums);
+                replaceFeCounts(mFrontendUsedNumsBackup, mFrontendUsedNums);
+                replaceFeCounts(mFrontendMaxUsableNumsBackup, mFrontendMaxUsableNums);
                 break;
                 // TODO: implement for other resource type when needed
             default:
@@ -954,6 +939,11 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         for (FrontendResource fr : getFrontendResources().values()) {
             if (fr.getType() == request.frontendType) {
                 if (!fr.isInUse()) {
+                    // Unused resource cannot be acquired if the max is already reached, but
+                    // TRM still has to look for the reclaim candidate
+                    if (isFrontendMaxNumUseReached(request.frontendType)) {
+                        continue;
+                    }
                     // Grant unused frontend with no exclusive group members first.
                     if (fr.getExclusiveGroupMemberFeHandles().isEmpty()) {
                         grantingFrontendHandle = fr.getHandle();
@@ -1021,6 +1011,9 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         for (int inUseHandle : newOwnerProfile.getInUseFrontendHandles()) {
             getFrontendResource(inUseHandle).setOwner(newOwnerId);
         }
+        // change the primary frontend
+        newOwnerProfile.setPrimaryFrontend(currentOwnerProfile.getPrimaryFrontend());
+        currentOwnerProfile.setPrimaryFrontend(TunerResourceManager.INVALID_RESOURCE_HANDLE);
         // double check there is no other resources tied to the previous owner
         for (int inUseHandle : currentOwnerProfile.getInUseFrontendHandles()) {
             int ownerId = getFrontendResource(inUseHandle).getOwnerClientId();
@@ -1657,11 +1650,13 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         FrontendResource grantingFrontend = getFrontendResource(grantingHandle);
         ClientProfile ownerProfile = getClientProfile(ownerClientId);
         grantingFrontend.setOwner(ownerClientId);
+        increFrontendNum(mFrontendUsedNums, grantingFrontend.getType());
         ownerProfile.useFrontend(grantingHandle);
         for (int exclusiveGroupMember : grantingFrontend.getExclusiveGroupMemberFeHandles()) {
             getFrontendResource(exclusiveGroupMember).setOwner(ownerClientId);
             ownerProfile.useFrontend(exclusiveGroupMember);
         }
+        ownerProfile.setPrimaryFrontend(grantingHandle);
     }
 
     private void updateLnbClientMappingOnNewGrant(int grantingHandle, int ownerClientId) {
@@ -1755,6 +1750,109 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         return mFrontendResources;
     }
 
+    private boolean setMaxNumberOfFrontendsInternal(int frontendType, int maxUsableNum) {
+        int usedNum = mFrontendUsedNums.get(frontendType, INVALID_FE_COUNT);
+        if (usedNum == INVALID_FE_COUNT || usedNum <= maxUsableNum) {
+            mFrontendMaxUsableNums.put(frontendType, maxUsableNum);
+            return true;
+        } else {
+            Slog.e(TAG, "max number of frontend for frontendType: " + frontendType
+                    + " cannot be set to a value lower than the current usage count."
+                    + " (requested max num = " + maxUsableNum + ", current usage = " + usedNum);
+            return false;
+        }
+    }
+
+    private int getMaxNumberOfFrontendsInternal(int frontendType) {
+        int existingNum = mFrontendExistingNums.get(frontendType, INVALID_FE_COUNT);
+        if (existingNum == INVALID_FE_COUNT) {
+            Log.e(TAG, "existingNum is -1 for " + frontendType);
+            return -1;
+        }
+        int maxUsableNum = mFrontendMaxUsableNums.get(frontendType, INVALID_FE_COUNT);
+        if (maxUsableNum == INVALID_FE_COUNT) {
+            return existingNum;
+        } else {
+            return maxUsableNum;
+        }
+    }
+
+    private boolean isFrontendMaxNumUseReached(int frontendType) {
+        int maxUsableNum = mFrontendMaxUsableNums.get(frontendType, INVALID_FE_COUNT);
+        if (maxUsableNum == INVALID_FE_COUNT) {
+            return false;
+        }
+        int useNum = mFrontendUsedNums.get(frontendType, INVALID_FE_COUNT);
+        if (useNum == INVALID_FE_COUNT) {
+            useNum = 0;
+        }
+        return useNum >= maxUsableNum;
+    }
+
+    private void increFrontendNum(SparseIntArray targetNums, int frontendType) {
+        int num = targetNums.get(frontendType, INVALID_FE_COUNT);
+        if (num == INVALID_FE_COUNT) {
+            targetNums.put(frontendType, 1);
+        } else {
+            targetNums.put(frontendType, num + 1);
+        }
+    }
+
+    private void decreFrontendNum(SparseIntArray targetNums, int frontendType) {
+        int num = targetNums.get(frontendType, INVALID_FE_COUNT);
+        if (num != INVALID_FE_COUNT) {
+            targetNums.put(frontendType, num - 1);
+        }
+    }
+
+    private void replaceFeResourceMap(Map<Integer, FrontendResource> srcMap, Map<Integer,
+            FrontendResource> dstMap) {
+        if (dstMap != null) {
+            dstMap.clear();
+            if (srcMap != null && srcMap.size() > 0) {
+                dstMap.putAll(srcMap);
+            }
+        }
+    }
+
+    private void replaceFeCounts(SparseIntArray srcCounts, SparseIntArray dstCounts) {
+        if (dstCounts != null) {
+            dstCounts.clear();
+            if (srcCounts != null) {
+                for (int i = 0; i < srcCounts.size(); i++) {
+                    dstCounts.put(srcCounts.keyAt(i), srcCounts.valueAt(i));
+                }
+            }
+        }
+    }
+    private void dumpMap(Map<?, ?> targetMap, String headline, String delimiter,
+            IndentingPrintWriter pw) {
+        if (targetMap != null) {
+            pw.println(headline);
+            pw.increaseIndent();
+            for (Map.Entry<?, ?> entry : targetMap.entrySet()) {
+                pw.print(entry.getKey() + " : " + entry.getValue());
+                pw.print(delimiter);
+            }
+            pw.println();
+            pw.decreaseIndent();
+        }
+    }
+
+    private void dumpSIA(SparseIntArray array, String headline, String delimiter,
+            IndentingPrintWriter pw) {
+        if (array != null) {
+            pw.println(headline);
+            pw.increaseIndent();
+            for (int i = 0; i < array.size(); i++) {
+                pw.print(array.keyAt(i) + " : " + array.valueAt(i));
+                pw.print(delimiter);
+            }
+            pw.println();
+            pw.decreaseIndent();
+        }
+    }
+
     private void addFrontendResource(FrontendResource newFe) {
         // Update the exclusive group member list in all the existing Frontend resource
         for (FrontendResource fe : getFrontendResources().values()) {
@@ -1771,6 +1869,8 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
         // Update resource list and available id list
         mFrontendResources.put(newFe.getHandle(), newFe);
+        increFrontendNum(mFrontendExistingNums, newFe.getType());
+
     }
 
     private void removeFrontendResource(int removingHandle) {
@@ -1789,6 +1889,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             getFrontendResource(excGroupmemberFeHandle)
                     .removeExclusiveGroupMemberFeId(fe.getHandle());
         }
+        decreFrontendNum(mFrontendExistingNums, fe.getType());
         mFrontendResources.remove(removingHandle);
     }
 
@@ -1918,6 +2019,15 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             }
 
         }
+
+        int primaryFeId = profile.getPrimaryFrontend();
+        if (primaryFeId != TunerResourceManager.INVALID_RESOURCE_HANDLE) {
+            FrontendResource primaryFe = getFrontendResource(primaryFeId);
+            if (primaryFe != null) {
+                decreFrontendNum(mFrontendUsedNums, primaryFe.getType());
+            }
+        }
+
         profile.releaseFrontend();
     }
 

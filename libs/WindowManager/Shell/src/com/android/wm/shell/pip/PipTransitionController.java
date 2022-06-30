@@ -70,8 +70,8 @@ public abstract class PipTransitionController implements Transitions.TransitionH
                     if (direction == TRANSITION_DIRECTION_REMOVE_STACK) {
                         return;
                     }
-                    if (isInPipDirection(direction) && animator.getContentOverlay() != null) {
-                        mPipOrganizer.fadeOutAndRemoveOverlay(animator.getContentOverlay(),
+                    if (isInPipDirection(direction) && animator.getContentOverlayLeash() != null) {
+                        mPipOrganizer.fadeOutAndRemoveOverlay(animator.getContentOverlayLeash(),
                                 animator::clearContentOverlay, true /* withStartDelay*/);
                     }
                     onFinishResize(taskInfo, animator.getDestinationBounds(), direction, tx);
@@ -82,8 +82,8 @@ public abstract class PipTransitionController implements Transitions.TransitionH
                 public void onPipAnimationCancel(TaskInfo taskInfo,
                         PipAnimationController.PipTransitionAnimator animator) {
                     final int direction = animator.getTransitionDirection();
-                    if (isInPipDirection(direction) && animator.getContentOverlay() != null) {
-                        mPipOrganizer.fadeOutAndRemoveOverlay(animator.getContentOverlay(),
+                    if (isInPipDirection(direction) && animator.getContentOverlayLeash() != null) {
+                        mPipOrganizer.fadeOutAndRemoveOverlay(animator.getContentOverlayLeash(),
                                 animator::clearContentOverlay, true /* withStartDelay */);
                     }
                     sendOnPipTransitionCancelled(animator.getTransitionDirection());
@@ -193,6 +193,17 @@ public abstract class PipTransitionController implements Transitions.TransitionH
             ActivityInfo activityInfo) {
         mPipBoundsState.setBoundsStateForEntry(componentName, activityInfo, params,
                 mPipBoundsAlgorithm);
+    }
+
+    /**
+     * Called when the display is going to rotate.
+     *
+     * @return {@code true} if it was handled, otherwise the existing pip logic
+     *                      will deal with rotation.
+     */
+    public boolean handleRotateDisplay(int startRotation, int endRotation,
+            WindowContainerTransaction wct) {
+        return false;
     }
 
     /**

@@ -24,7 +24,6 @@ import android.os.Build
 import android.os.storage.StorageManager
 import android.util.ArrayMap
 import android.util.PackageUtils
-import com.android.internal.util.FunctionalUtils
 import com.android.server.SystemConfig.SharedLibraryEntry
 import com.android.server.compat.PlatformCompat
 import com.android.server.extendedtestutils.wheneverStatic
@@ -35,7 +34,6 @@ import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
 import com.android.server.testutils.mock
-import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.nullable
 import com.android.server.testutils.spy
 import com.android.server.testutils.whenever
@@ -43,14 +41,13 @@ import com.android.server.utils.WatchedLongSparseArray
 import com.google.common.truth.Truth.assertThat
 import libcore.util.HexEncoding
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
+import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mock
-import org.mockito.Mockito.anyLong
-import org.mockito.Mockito.anyString
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -68,23 +65,27 @@ class SharedLibrariesImplTest {
         const val BUILTIN_LIB_NAME = "builtin.lib"
         const val STATIC_LIB_NAME = "static.lib"
         const val STATIC_LIB_VERSION = 7L
-        const val STATIC_LIB_PACKAGE_NAME = "com.android.lib.static.provider"
+        const val STATIC_LIB_DECLARING_PACKAGE_NAME = "com.android.lib.static.provider"
+        const val STATIC_LIB_PACKAGE_NAME = "com.android.lib.static.provider_7"
         const val DYNAMIC_LIB_NAME = "dynamic.lib"
         const val DYNAMIC_LIB_PACKAGE_NAME = "com.android.lib.dynamic.provider"
         const val CONSUMER_PACKAGE_NAME = "com.android.lib.consumer"
         const val VERSION_UNDEFINED = SharedLibraryInfo.VERSION_UNDEFINED.toLong()
     }
 
+    private val mMockSystem = MockSystemRule()
+    private val mTempFolder = TemporaryFolder()
+
     @Rule
     @JvmField
-    val mRule = MockSystemRule()
-
-    private val mExistingPackages: ArrayMap<String, AndroidPackage> = ArrayMap()
-    private val mExistingSettings: MutableMap<String, PackageSetting> = mutableMapOf()
+    val mRules = RuleChain.outerRule(mTempFolder).around(mMockSystem)!!
 
     private lateinit var mSharedLibrariesImpl: SharedLibrariesImpl
     private lateinit var mPms: PackageManagerService
     private lateinit var mSettings: Settings
+    private lateinit var mComputer: Computer
+    private lateinit var mExistingPackages: ArrayMap<String, AndroidPackage>
+    private lateinit var builtinLibDirectory: File
 
     @Mock
     private lateinit var mDeletePackageHelper: DeletePackageHelper
@@ -98,10 +99,11 @@ class SharedLibrariesImplTest {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        mRule.system().stageNominalSystemState()
-        addExistingPackages()
+        mMockSystem.system().stageNominalSystemState()
+        stageBuiltinLibrary(mTempFolder.newFolder())
+        stageScanExistingPackages()
 
-        mPms = spy(PackageManagerService(mRule.mocks().injector,
+        mPms = spy(PackageManagerService(mMockSystem.mocks().injector,
             false /*coreOnly*/,
             false /*factoryTest*/,
             MockSystem.DEFAULT_VERSION_INFO.fingerprint,
@@ -109,34 +111,27 @@ class SharedLibrariesImplTest {
             false /*isUserDebugBuild*/,
             Build.VERSION_CODES.CUR_DEVELOPMENT,
             Build.VERSION.INCREMENTAL))
-        mSettings = mRule.mocks().injector.settings
-        mSharedLibrariesImpl = SharedLibrariesImpl(mPms, mRule.mocks().injector)
+        mMockSystem.system().validateFinalState()
+        mSettings = mMockSystem.mocks().injector.settings
+        mSharedLibrariesImpl = mMockSystem.mocks().injector.sharedLibrariesImpl
         mSharedLibrariesImpl.setDeletePackageHelper(mDeletePackageHelper)
-        addExistingSharedLibraries()
+        mComputer = spy(mPms.snapshotComputer())
+        mExistingPackages = getExistingPackages(
+            DYNAMIC_LIB_PACKAGE_NAME, STATIC_LIB_PACKAGE_NAME, CONSUMER_PACKAGE_NAME)
 
-        whenever(mSettings.getPackageLPr(any())) { mExistingSettings[arguments[0]] }
-        whenever(mRule.mocks().injector.getSystemService(StorageManager::class.java))
+        whenever(mMockSystem.mocks().injector.getSystemService(StorageManager::class.java))
             .thenReturn(mStorageManager)
         whenever(mStorageManager.findPathForUuid(nullable())).thenReturn(mFile)
-        doAnswer { it.arguments[0] }.`when`(mPms).resolveInternalPackageName(any(), any())
-        doAnswer {
-            mockThrowOnUnmocked<Computer> {
-                whenever(sharedLibraries) { mSharedLibrariesImpl.sharedLibraries }
-                whenever(resolveInternalPackageName(anyString(), anyLong())) {
-                    mPms.resolveInternalPackageName(getArgument(0), getArgument(1))
-                }
-                whenever(getPackageStateInternal(anyString())) {
-                    mPms.getPackageStateInternal(getArgument(0))
-                }
-            }
-        }.`when`(mPms).snapshotComputer()
+        doAnswer { mComputer }.`when`(mPms).snapshotComputer()
+        doAnswer { STATIC_LIB_PACKAGE_NAME }.`when`(mComputer).resolveInternalPackageName(
+            eq(STATIC_LIB_DECLARING_PACKAGE_NAME), eq(STATIC_LIB_VERSION))
         whenever(mDeletePackageHelper.deletePackageX(any(), any(), any(), any(), any()))
             .thenReturn(PackageManager.DELETE_SUCCEEDED)
-        whenever(mRule.mocks().injector.compatibility).thenReturn(mPlatformCompat)
+        whenever(mMockSystem.mocks().injector.compatibility).thenReturn(mPlatformCompat)
         wheneverStatic { HexEncoding.decode(STATIC_LIB_NAME, false) }
                 .thenReturn(PackageUtils.computeSha256DigestBytes(
-                        mExistingSettings[STATIC_LIB_PACKAGE_NAME]!!
-                                .pkg.signingDetails.signatures!![0].toByteArray()))
+                        mSettings.getPackageLPr(STATIC_LIB_PACKAGE_NAME)
+                            .pkg.signingDetails.signatures!![0].toByteArray()))
     }
 
     @Test
@@ -189,8 +184,6 @@ class SharedLibrariesImplTest {
 
     @Test
     fun removeSharedLibrary() {
-        doAnswer { mutableListOf(VersionedPackage(CONSUMER_PACKAGE_NAME, 1L)) }.`when`(mPms)
-            .getPackagesUsingSharedLibrary(any(), any(), any(), any())
         val staticInfo = mSharedLibrariesImpl
             .getSharedLibraryInfo(STATIC_LIB_NAME, STATIC_LIB_VERSION)!!
 
@@ -199,8 +192,6 @@ class SharedLibrariesImplTest {
         assertThat(mSharedLibrariesImpl.getSharedLibraryInfos(STATIC_LIB_NAME)).isNull()
         assertThat(mSharedLibrariesImpl
             .getStaticLibraryInfos(staticInfo.declaringPackage.packageName)).isNull()
-        verify(mExistingSettings[CONSUMER_PACKAGE_NAME]!!)
-            .setOverlayPathsForLibrary(any(), nullable(), any())
     }
 
     @Test
@@ -214,11 +205,11 @@ class SharedLibrariesImplTest {
 
     @Test
     fun getLatestSharedLibraVersion() {
-        val newLibSetting = addPackage(STATIC_LIB_PACKAGE_NAME + "_" + 10, 10L,
+        val pair = createBasicAndroidPackage(STATIC_LIB_PACKAGE_NAME + "_" + 10, 10L,
             staticLibrary = STATIC_LIB_NAME, staticLibraryVersion = 10L)
 
         val latestInfo =
-            mSharedLibrariesImpl.getLatestStaticSharedLibraVersionLPr(newLibSetting.pkg)!!
+            mSharedLibrariesImpl.getLatestStaticSharedLibraVersionLPr(pair.second)!!
 
         assertThat(latestInfo).isNotNull()
         assertThat(latestInfo.name).isEqualTo(STATIC_LIB_NAME)
@@ -243,7 +234,8 @@ class SharedLibrariesImplTest {
 
     @Test
     fun updateSharedLibraries_withDynamicLibPackage() {
-        val testPackageSetting = mExistingSettings[DYNAMIC_LIB_PACKAGE_NAME]!!
+        val testPackageSetting = mSettings.getPackageLPr(DYNAMIC_LIB_PACKAGE_NAME)
+        testPackageSetting.setPkgStateLibraryFiles(listOf())
         assertThat(testPackageSetting.usesLibraryFiles).isEmpty()
 
         mSharedLibrariesImpl.updateSharedLibrariesLPw(testPackageSetting.pkg, testPackageSetting,
@@ -253,57 +245,62 @@ class SharedLibrariesImplTest {
         assertThat(testPackageSetting.usesLibraryFiles).contains(builtinLibPath(BUILTIN_LIB_NAME))
     }
 
-    @Ignore("b/216603387")
     @Test
     fun updateSharedLibraries_withStaticLibPackage() {
-        val testPackageSetting = mExistingSettings[STATIC_LIB_PACKAGE_NAME]!!
-        assertThat(testPackageSetting.usesLibraryFiles).isEmpty()
-
-        mSharedLibrariesImpl.updateSharedLibrariesLPw(testPackageSetting.pkg, testPackageSetting,
-                null /* changingLib */, null /* changingLibSetting */, mExistingPackages)
-
-        assertThat(testPackageSetting.usesLibraryFiles).hasSize(1)
-        assertThat(testPackageSetting.usesLibraryFiles).contains(apkPath(DYNAMIC_LIB_PACKAGE_NAME))
-    }
-
-    @Ignore("b/216603387")
-    @Test
-    fun updateSharedLibraries_withConsumerPackage() {
-        val testPackageSetting = mExistingSettings[CONSUMER_PACKAGE_NAME]!!
+        val testPackageSetting = mSettings.getPackageLPr(STATIC_LIB_PACKAGE_NAME)
+        testPackageSetting.setPkgStateLibraryFiles(listOf())
         assertThat(testPackageSetting.usesLibraryFiles).isEmpty()
 
         mSharedLibrariesImpl.updateSharedLibrariesLPw(testPackageSetting.pkg, testPackageSetting,
                 null /* changingLib */, null /* changingLibSetting */, mExistingPackages)
 
         assertThat(testPackageSetting.usesLibraryFiles).hasSize(2)
+        assertThat(testPackageSetting.usesLibraryFiles).contains(builtinLibPath(BUILTIN_LIB_NAME))
         assertThat(testPackageSetting.usesLibraryFiles).contains(apkPath(DYNAMIC_LIB_PACKAGE_NAME))
-        assertThat(testPackageSetting.usesLibraryFiles).contains(apkPath(STATIC_LIB_PACKAGE_NAME))
     }
 
-    @Ignore("b/216603387")
+    @Test
+    fun updateSharedLibraries_withConsumerPackage() {
+        val testPackageSetting = mSettings.getPackageLPr(CONSUMER_PACKAGE_NAME)
+        testPackageSetting.setPkgStateLibraryFiles(listOf())
+        assertThat(testPackageSetting.usesLibraryFiles).isEmpty()
+
+        mSharedLibrariesImpl.updateSharedLibrariesLPw(testPackageSetting.pkg, testPackageSetting,
+                null /* changingLib */, null /* changingLibSetting */, mExistingPackages)
+
+        assertThat(testPackageSetting.usesLibraryFiles).hasSize(3)
+        assertThat(testPackageSetting.usesLibraryFiles).contains(builtinLibPath(BUILTIN_LIB_NAME))
+        assertThat(testPackageSetting.usesLibraryFiles).contains(apkPath(DYNAMIC_LIB_PACKAGE_NAME))
+        assertThat(testPackageSetting.usesLibraryFiles)
+            .contains(apkPath(STATIC_LIB_DECLARING_PACKAGE_NAME))
+    }
+
     @Test
     fun updateAllSharedLibraries() {
-        mExistingSettings.forEach {
-            assertThat(it.value.usesLibraryFiles).isEmpty()
+        mExistingPackages.forEach {
+            val setting = mSettings.getPackageLPr(it.key)
+            setting.setPkgStateLibraryFiles(listOf())
+            assertThat(setting.usesLibraryFiles).isEmpty()
         }
 
         mSharedLibrariesImpl.updateAllSharedLibrariesLPw(
                 null /* updatedPkg */, null /* updatedPkgSetting */, mExistingPackages)
 
-        var testPackageSetting = mExistingSettings[DYNAMIC_LIB_PACKAGE_NAME]!!
+        var testPackageSetting = mSettings.getPackageLPr(DYNAMIC_LIB_PACKAGE_NAME)
         assertThat(testPackageSetting.usesLibraryFiles).hasSize(1)
         assertThat(testPackageSetting.usesLibraryFiles).contains(builtinLibPath(BUILTIN_LIB_NAME))
 
-        testPackageSetting = mExistingSettings[STATIC_LIB_PACKAGE_NAME]!!
+        testPackageSetting = mSettings.getPackageLPr(STATIC_LIB_PACKAGE_NAME)
         assertThat(testPackageSetting.usesLibraryFiles).hasSize(2)
         assertThat(testPackageSetting.usesLibraryFiles).contains(builtinLibPath(BUILTIN_LIB_NAME))
         assertThat(testPackageSetting.usesLibraryFiles).contains(apkPath(DYNAMIC_LIB_PACKAGE_NAME))
 
-        testPackageSetting = mExistingSettings[CONSUMER_PACKAGE_NAME]!!
+        testPackageSetting = mSettings.getPackageLPr(CONSUMER_PACKAGE_NAME)
         assertThat(testPackageSetting.usesLibraryFiles).hasSize(3)
         assertThat(testPackageSetting.usesLibraryFiles).contains(builtinLibPath(BUILTIN_LIB_NAME))
         assertThat(testPackageSetting.usesLibraryFiles).contains(apkPath(DYNAMIC_LIB_PACKAGE_NAME))
-        assertThat(testPackageSetting.usesLibraryFiles).contains(apkPath(STATIC_LIB_PACKAGE_NAME))
+        assertThat(testPackageSetting.usesLibraryFiles)
+            .contains(apkPath(STATIC_LIB_DECLARING_PACKAGE_NAME))
     }
 
     @Test
@@ -326,7 +323,7 @@ class SharedLibrariesImplTest {
         val parsedPackage = pair.second.apply {
             isSystem = true
         } as ParsedPackage
-        val packageSetting = mRule.system()
+        val packageSetting = mMockSystem.system()
             .createBasicSettingBuilder(pair.first.parentFile, parsedPackage.hideAsFinal())
             .setPkgFlags(ApplicationInfo.FLAG_SYSTEM).build()
         val scanRequest = ScanRequest(parsedPackage, null, null, null, null,
@@ -340,54 +337,79 @@ class SharedLibrariesImplTest {
         assertThat(allowedInfos[0].name).isEqualTo(TEST_LIB_NAME)
     }
 
-    private fun addExistingPackages() {
+    private fun getExistingPackages(vararg args: String): ArrayMap<String, AndroidPackage> {
+        val existingPackages = ArrayMap<String, AndroidPackage>()
+        args.forEach {
+            existingPackages[it] = mSettings.getPackageLPr(it).pkg
+        }
+        return existingPackages
+    }
+
+    private fun stageBuiltinLibrary(folder: File) {
+        builtinLibDirectory = folder
+        val libPath = File(builtinLibPath(BUILTIN_LIB_NAME))
+        libPath.createNewFile()
+        MockSystem.addDefaultSharedLibrary(BUILTIN_LIB_NAME, libEntry(BUILTIN_LIB_NAME))
+    }
+
+    private fun stageScanExistingPackages() {
         // add a dynamic shared library that is using the builtin library
-        addPackage(DYNAMIC_LIB_PACKAGE_NAME, 1L,
+        stageScanExistingPackage(DYNAMIC_LIB_PACKAGE_NAME, 1L,
             libraries = arrayOf(DYNAMIC_LIB_NAME),
             usesLibraries = arrayOf(BUILTIN_LIB_NAME))
 
         // add a static shared library v7 that is using the dynamic shared library
-        addPackage(STATIC_LIB_PACKAGE_NAME, STATIC_LIB_VERSION,
+        stageScanExistingPackage(STATIC_LIB_DECLARING_PACKAGE_NAME, STATIC_LIB_VERSION,
             staticLibrary = STATIC_LIB_NAME, staticLibraryVersion = STATIC_LIB_VERSION,
             usesLibraries = arrayOf(DYNAMIC_LIB_NAME))
 
         // add a consumer package that is using the dynamic and static shared library
-        addPackage(CONSUMER_PACKAGE_NAME, 1L,
+        stageScanExistingPackage(CONSUMER_PACKAGE_NAME, 1L,
+            isSystem = true,
             usesLibraries = arrayOf(DYNAMIC_LIB_NAME),
             usesStaticLibraries = arrayOf(STATIC_LIB_NAME),
             usesStaticLibraryVersions = arrayOf(STATIC_LIB_VERSION))
     }
 
-    private fun addExistingSharedLibraries() {
-        mSharedLibrariesImpl.addBuiltInSharedLibraryLPw(libEntry(BUILTIN_LIB_NAME))
-        mSharedLibrariesImpl.commitSharedLibraryInfoLPw(
-            libOfDynamic(DYNAMIC_LIB_PACKAGE_NAME, DYNAMIC_LIB_NAME))
-        mSharedLibrariesImpl.commitSharedLibraryInfoLPw(
-            libOfStatic(STATIC_LIB_PACKAGE_NAME, STATIC_LIB_NAME, STATIC_LIB_VERSION))
-    }
-
-    private fun addPackage(
+    private fun stageScanExistingPackage(
         packageName: String,
         version: Long,
+        isSystem: Boolean = false,
         libraries: Array<String>? = null,
         staticLibrary: String? = null,
         staticLibraryVersion: Long = 0L,
         usesLibraries: Array<String>? = null,
         usesStaticLibraries: Array<String>? = null,
         usesStaticLibraryVersions: Array<Long>? = null
-    ): PackageSetting {
-        val pair = createBasicAndroidPackage(packageName, version, libraries, staticLibrary,
-            staticLibraryVersion, usesLibraries, usesStaticLibraries, usesStaticLibraryVersions)
-        val apkPath = pair.first
-        val parsingPackage = pair.second
-        val spyPkg = spy((parsingPackage as ParsedPackage).hideAsFinal())
-        mExistingPackages[packageName] = spyPkg
-
-        val spyPackageSetting = spy(mRule.system()
-            .createBasicSettingBuilder(apkPath.parentFile, spyPkg).build())
-        mExistingSettings[spyPackageSetting.packageName] = spyPackageSetting
-
-        return spyPackageSetting
+    ) {
+        val withPackage = { pkg: PackageImpl ->
+            pkg.setSystem(isSystem || libraries != null)
+            pkg.setTargetSdkVersion(Build.VERSION_CODES.S)
+            libraries?.forEach { pkg.addLibraryName(it) }
+            staticLibrary?.let {
+                pkg.setStaticSharedLibName(it)
+                pkg.setStaticSharedLibVersion(staticLibraryVersion)
+                pkg.setStaticSharedLibrary(true)
+            }
+            usesLibraries?.forEach { pkg.addUsesLibrary(it) }
+            usesStaticLibraries?.forEachIndexed { index, s ->
+                pkg.addUsesStaticLibrary(s,
+                    usesStaticLibraryVersions?.get(index) ?: 0L,
+                    arrayOf(s))
+            }
+            pkg
+        }
+        val withSetting = { settingBuilder: PackageSettingBuilder ->
+            if (staticLibrary != null) {
+                settingBuilder.setName(getStaticSharedLibInternalPackageName(packageName, version))
+            }
+            if (isSystem || libraries != null) {
+                settingBuilder.setPkgFlags(ApplicationInfo.FLAG_SYSTEM)
+            }
+            settingBuilder
+        }
+        mMockSystem.system().stageScanExistingPackage(
+            packageName, version, mMockSystem.system().dataAppDirectory, withPackage, withSetting)
     }
 
     private fun createBasicAndroidPackage(
@@ -403,8 +425,8 @@ class SharedLibrariesImplTest {
         assertFalse { libraries != null && staticLibrary != null }
         assertTrue { (usesStaticLibraries?.size ?: -1) == (usesStaticLibraryVersions?.size ?: -1) }
 
-        val pair = mRule.system()
-            .createBasicAndroidPackage(mRule.system().dataAppDirectory, packageName, version)
+        val pair = mMockSystem.system()
+            .createBasicAndroidPackage(mMockSystem.system().dataAppDirectory, packageName, version)
         pair.second.apply {
             setTargetSdkVersion(Build.VERSION_CODES.S)
             libraries?.forEach { addLibraryName(it) }
@@ -440,17 +462,17 @@ class SharedLibrariesImplTest {
             false /* isNative */)
 
     private fun libOfStatic(
-        packageName: String,
+        declaringPackageName: String,
         libName: String,
         version: Long
     ): SharedLibraryInfo =
         SharedLibraryInfo(null /* path */,
-            packageName,
-            listOf(apkPath(packageName)),
+            getStaticSharedLibInternalPackageName(declaringPackageName, version),
+            listOf(apkPath(declaringPackageName)),
             libName,
             version,
             SharedLibraryInfo.TYPE_STATIC,
-            VersionedPackage(packageName, version /* versionCode */),
+            VersionedPackage(declaringPackageName, version /* versionCode */),
             null /* dependentPackages */,
             null /* dependencies */,
             false /* isNative */)
@@ -467,8 +489,14 @@ class SharedLibrariesImplTest {
             null /* dependencies */,
             false /* isNative */)
 
-    private fun builtinLibPath(libName: String): String = "/system/app/$libName/$libName.jar"
+    private fun builtinLibPath(libName: String) =
+        File(builtinLibDirectory, "$libName.jar").path
 
-    private fun apkPath(packageName: String): String =
-            File(mRule.system().dataAppDirectory, packageName).path
+    private fun apkPath(packageName: String) =
+        File(mMockSystem.system().dataAppDirectory, packageName).path
+
+    private fun getStaticSharedLibInternalPackageName(
+        declaringPackageName: String,
+        version: Long
+    ) = "${declaringPackageName}_$version"
 }

@@ -26,21 +26,28 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.Pair;
 
 import com.android.server.pm.Computer;
+import com.android.server.pm.DumpState;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.component.ParsedActivity;
+import com.android.server.pm.pkg.component.ParsedIntentInfo;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.component.ParsedProvider;
 import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.utils.WatchableImpl;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public abstract class ComponentResolverBase extends WatchableImpl implements ComponentResolverApi {
 
@@ -305,4 +312,116 @@ public abstract class ComponentResolverBase extends WatchableImpl implements Com
             outInfo.add(info);
         }
     }
+
+    @Override
+    public void dumpActivityResolvers(@NonNull PrintWriter pw, @NonNull DumpState dumpState,
+            @NonNull String packageName) {
+        if (mActivities.dump(pw, dumpState.getTitlePrinted() ? "\nActivity Resolver Table:"
+                        : "Activity Resolver Table:", "  ", packageName,
+                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+            dumpState.setTitlePrinted(true);
+        }
+    }
+
+    @Override
+    public void dumpProviderResolvers(@NonNull PrintWriter pw, @NonNull DumpState dumpState,
+            @NonNull String packageName) {
+        if (mProviders.dump(pw, dumpState.getTitlePrinted() ? "\nProvider Resolver Table:"
+                        : "Provider Resolver Table:", "  ", packageName,
+                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+            dumpState.setTitlePrinted(true);
+        }
+    }
+
+    @Override
+    public void dumpReceiverResolvers(@NonNull PrintWriter pw, @NonNull DumpState dumpState,
+            @NonNull String packageName) {
+        if (mReceivers.dump(pw, dumpState.getTitlePrinted() ? "\nReceiver Resolver Table:"
+                        : "Receiver Resolver Table:", "  ", packageName,
+                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+            dumpState.setTitlePrinted(true);
+        }
+    }
+
+    @Override
+    public void dumpServiceResolvers(@NonNull PrintWriter pw, @NonNull DumpState dumpState,
+            @NonNull String packageName) {
+        if (mServices.dump(pw, dumpState.getTitlePrinted() ? "\nService Resolver Table:"
+                        : "Service Resolver Table:", "  ", packageName,
+                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+            dumpState.setTitlePrinted(true);
+        }
+    }
+
+    @Override
+    public void dumpContentProviders(@NonNull Computer computer, @NonNull PrintWriter pw,
+            @NonNull DumpState dumpState, @NonNull String packageName) {
+        boolean printedSomething = false;
+        for (ParsedProvider p : mProviders.mProviders.values()) {
+            if (packageName != null && !packageName.equals(p.getPackageName())) {
+                continue;
+            }
+            if (!printedSomething) {
+                if (dumpState.onTitlePrinted()) {
+                    pw.println();
+                }
+                pw.println("Registered ContentProviders:");
+                printedSomething = true;
+            }
+            pw.print("  ");
+            ComponentName.printShortString(pw, p.getPackageName(), p.getName());
+            pw.println(":");
+            pw.print("    ");
+            pw.println(p.toString());
+        }
+        printedSomething = false;
+        for (Map.Entry<String, ParsedProvider> entry :
+                mProvidersByAuthority.entrySet()) {
+            ParsedProvider p = entry.getValue();
+            if (packageName != null && !packageName.equals(p.getPackageName())) {
+                continue;
+            }
+            if (!printedSomething) {
+                if (dumpState.onTitlePrinted()) {
+                    pw.println();
+                }
+                pw.println("ContentProvider Authorities:");
+                printedSomething = true;
+            }
+            pw.print("  [");
+            pw.print(entry.getKey());
+            pw.println("]:");
+            pw.print("    ");
+            pw.println(p.toString());
+
+            AndroidPackage pkg = computer.getPackage(p.getPackageName());
+
+            if (pkg != null) {
+                pw.print("      applicationInfo=");
+                pw.println(AndroidPackageUtils.generateAppInfoWithoutState(pkg));
+            }
+        }
+    }
+
+    @Override
+    public void dumpServicePermissions(@NonNull PrintWriter pw, @NonNull DumpState dumpState) {
+        if (dumpState.onTitlePrinted()) pw.println();
+        pw.println("Service permissions:");
+
+        final Iterator<Pair<ParsedService, ParsedIntentInfo>> filterIterator =
+                mServices.filterIterator();
+        while (filterIterator.hasNext()) {
+            final Pair<ParsedService, ParsedIntentInfo> pair = filterIterator.next();
+            ParsedService service = pair.first;
+
+            final String permission = service.getPermission();
+            if (permission != null) {
+                pw.print("    ");
+                pw.print(service.getComponentName().flattenToShortString());
+                pw.print(": ");
+                pw.println(permission);
+            }
+        }
+    }
+
 }

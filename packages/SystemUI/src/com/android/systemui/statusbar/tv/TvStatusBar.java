@@ -73,6 +73,8 @@ public class TvStatusBar extends CoreStartable implements CommandQueue.Callbacks
 
     @Override
     public void showPictureInPictureMenu() {
-        mContext.sendBroadcast(new Intent(ACTION_SHOW_PIP_MENU), SYSTEMUI_PERMISSION);
+        mContext.sendBroadcast(
+                new Intent(ACTION_SHOW_PIP_MENU).setPackage(mContext.getPackageName()),
+                SYSTEMUI_PERMISSION);
     }
 }

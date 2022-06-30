@@ -777,6 +777,8 @@ public class ZenModeConfig implements Parcelable {
         final int calls = safeInt(parser, ALLOW_ATT_CALLS_FROM, ZenPolicy.PEOPLE_TYPE_UNSET);
         final int messages = safeInt(parser, ALLOW_ATT_MESSAGES_FROM, ZenPolicy.PEOPLE_TYPE_UNSET);
         final int repeatCallers = safeInt(parser, ALLOW_ATT_REPEAT_CALLERS, ZenPolicy.STATE_UNSET);
+        final int conversations = safeInt(parser, ALLOW_ATT_CONV_FROM,
+                ZenPolicy.CONVERSATION_SENDERS_UNSET);
         final int alarms = safeInt(parser, ALLOW_ATT_ALARMS, ZenPolicy.STATE_UNSET);
         final int media = safeInt(parser, ALLOW_ATT_MEDIA, ZenPolicy.STATE_UNSET);
         final int system = safeInt(parser, ALLOW_ATT_SYSTEM, ZenPolicy.STATE_UNSET);
@@ -793,6 +795,10 @@ public class ZenModeConfig implements Parcelable {
         }
         if (repeatCallers != ZenPolicy.STATE_UNSET) {
             builder.allowRepeatCallers(repeatCallers == ZenPolicy.STATE_ALLOW);
+            policySet = true;
+        }
+        if (conversations != ZenPolicy.CONVERSATION_SENDERS_UNSET) {
+            builder.allowConversations(conversations);
             policySet = true;
         }
         if (alarms != ZenPolicy.STATE_UNSET) {
@@ -870,6 +876,7 @@ public class ZenModeConfig implements Parcelable {
         writeZenPolicyState(ALLOW_ATT_MESSAGES_FROM, policy.getPriorityMessageSenders(), out);
         writeZenPolicyState(ALLOW_ATT_REPEAT_CALLERS, policy.getPriorityCategoryRepeatCallers(),
                 out);
+        writeZenPolicyState(ALLOW_ATT_CONV_FROM, policy.getPriorityConversationSenders(), out);
         writeZenPolicyState(ALLOW_ATT_ALARMS, policy.getPriorityCategoryAlarms(), out);
         writeZenPolicyState(ALLOW_ATT_MEDIA, policy.getPriorityCategoryMedia(), out);
         writeZenPolicyState(ALLOW_ATT_SYSTEM, policy.getPriorityCategorySystem(), out);
@@ -892,6 +899,10 @@ public class ZenModeConfig implements Parcelable {
         if (Objects.equals(attr, ALLOW_ATT_CALLS_FROM)
                 || Objects.equals(attr, ALLOW_ATT_MESSAGES_FROM)) {
             if (val != ZenPolicy.PEOPLE_TYPE_UNSET) {
+                out.attributeInt(null, attr, val);
+            }
+        } else if (Objects.equals(attr, ALLOW_ATT_CONV_FROM)) {
+            if (val != ZenPolicy.CONVERSATION_SENDERS_UNSET) {
                 out.attributeInt(null, attr, val);
             }
         } else {

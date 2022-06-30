@@ -16,6 +16,10 @@
 
 package com.android.server;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
+import android.app.job.JobScheduler;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -43,13 +47,15 @@ public class BinaryTransparencyServiceTest {
 
     @Before
     public void setUp() {
-        mContext = ApplicationProvider.getApplicationContext();
+        mContext = spy(ApplicationProvider.getApplicationContext());
         mBinaryTransparencyService = new BinaryTransparencyService(mContext);
         mTestInterface = mBinaryTransparencyService.new BinaryTransparencyServiceImpl();
     }
 
     private void prepSignedInfo() {
         // simulate what happens on boot completed phase
+        // but we avoid calling JobScheduler.schedule by returning a null.
+        doReturn(null).when(mContext).getSystemService(JobScheduler.class);
         mBinaryTransparencyService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
     }
 

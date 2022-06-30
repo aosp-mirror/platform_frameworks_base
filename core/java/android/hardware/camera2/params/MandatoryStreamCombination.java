@@ -66,7 +66,7 @@ public final class MandatoryStreamCombination {
         private final boolean mIsUltraHighResolution;
         private final boolean mIsMaximumSize;
         private final boolean mIs10BitCapable;
-        private final int mStreamUseCase;
+        private final long mStreamUseCase;
 
         /**
          * Create a new {@link MandatoryStreamInformation}.
@@ -168,7 +168,7 @@ public final class MandatoryStreamCombination {
          */
         public MandatoryStreamInformation(@NonNull List<Size> availableSizes, @Format int format,
                 boolean isMaximumSize, boolean isInput, boolean isUltraHighResolution,
-                boolean is10BitCapable, @StreamUseCase int streamUseCase) {
+                boolean is10BitCapable, @StreamUseCase long streamUseCase) {
             if (availableSizes.isEmpty()) {
                 throw new IllegalArgumentException("No available sizes");
             }
@@ -308,9 +308,9 @@ public final class MandatoryStreamCombination {
          * For {@link MandatoryStreamInformation} belonging to other mandatory stream
          * combinations, the return value will be DEFAULT. </p>
          *
-         * @return the integer stream use case.
+         * @return the long integer stream use case.
          */
-        public @StreamUseCase int getStreamUseCase() {
+        public @StreamUseCase long getStreamUseCase() {
             return mStreamUseCase;
         }
 
@@ -365,15 +365,15 @@ public final class MandatoryStreamCombination {
     /**
      * Short hand for stream use cases
      */
-    private static final int STREAM_USE_CASE_PREVIEW =
+    private static final long STREAM_USE_CASE_PREVIEW =
             CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW;
-    private static final int STREAM_USE_CASE_STILL_CAPTURE =
+    private static final long STREAM_USE_CASE_STILL_CAPTURE =
             CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE;
-    private static final int STREAM_USE_CASE_RECORD =
+    private static final long STREAM_USE_CASE_RECORD =
             CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD;
-    private static final int STREAM_USE_CASE_PREVIEW_VIDEO_STILL =
+    private static final long STREAM_USE_CASE_PREVIEW_VIDEO_STILL =
             CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL;
-    private static final int STREAM_USE_CASE_VIDEO_CALL =
+    private static final long STREAM_USE_CASE_VIDEO_CALL =
             CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL;
 
     /**
@@ -471,12 +471,12 @@ public final class MandatoryStreamCombination {
     private static final class StreamTemplate {
         public int mFormat;
         public SizeThreshold mSizeThreshold;
-        public int mStreamUseCase;
+        public long mStreamUseCase;
         public StreamTemplate(int format, SizeThreshold sizeThreshold) {
             this(format, sizeThreshold, CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT);
         }
         public StreamTemplate(@Format int format, @NonNull SizeThreshold sizeThreshold,
-                @StreamUseCase int streamUseCase) {
+                @StreamUseCase long streamUseCase) {
             mFormat = format;
             mSizeThreshold = sizeThreshold;
             mStreamUseCase = streamUseCase;
@@ -1265,43 +1265,43 @@ public final class MandatoryStreamCombination {
     private static StreamCombinationTemplate sPreviewStabilizedStreamCombinations[] = {
         // 1 stream combinations
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD)},
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p)},
                 "Stabilized preview, GPU video processing, or no-preview stabilized recording"),
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD)},
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p)},
                 "Stabilized preview, GPU video processing, or no-preview stabilized recording"),
         //2 stream combinations
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM),
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p)},
                 "Standard JPEG still imaging with stabilized preview"),
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM),
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p)},
                 "Standard YUV still imaging with stabilized preview"),
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM),
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p)},
                 "Standard YUV still imaging with stabilized in-app image processing stream"),
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM),
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p)},
                 "Standard JPEG still imaging with stabilized in-app image processing stream"),
 
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p),
                 new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
                 "High-resolution video recording with preview both streams stabilized"),
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p),
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
                 "High-resolution video recording with preview both streams stabilized"),
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p),
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
                 "High-resolution video recording with preview both streams stabilized"),
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p),
                 new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
                 "High-resolution video recording with preview both streams stabilized"),
     };
@@ -1430,7 +1430,7 @@ public final class MandatoryStreamCombination {
             StreamCombinationTemplate []chosenStreamCombinations =
                     sPreviewStabilizedStreamCombinations;
 
-            if (mIsPreviewStabilizationSupported) {
+            if (!mIsPreviewStabilizationSupported) {
                 Log.v(TAG, "Device does not support preview stabilization");
                  return null;
              }

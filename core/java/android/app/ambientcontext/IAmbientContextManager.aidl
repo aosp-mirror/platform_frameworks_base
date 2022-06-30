@@ -25,7 +25,7 @@ import android.os.RemoteCallback;
  *
  * @hide
  */
-oneway interface IAmbientContextManager {
+interface IAmbientContextManager {
     void registerObserver(in AmbientContextEventRequest request,
         in PendingIntent resultPendingIntent,
         in RemoteCallback statusCallback);

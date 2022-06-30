@@ -448,9 +448,10 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testOnBiometricAuthenticated() {
-        mCommandQueue.onBiometricAuthenticated();
+        final int id = 12;
+        mCommandQueue.onBiometricAuthenticated(id);
         waitForIdleSync();
-        verify(mCallbacks).onBiometricAuthenticated();
+        verify(mCallbacks).onBiometricAuthenticated(eq(id));
     }
 
     @Test
@@ -474,9 +475,10 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testHideAuthenticationDialog() {
-        mCommandQueue.hideAuthenticationDialog();
+        final long id = 4;
+        mCommandQueue.hideAuthenticationDialog(id);
         waitForIdleSync();
-        verify(mCallbacks).hideAuthenticationDialog();
+        verify(mCallbacks).hideAuthenticationDialog(eq(id));
     }
 
     @Test

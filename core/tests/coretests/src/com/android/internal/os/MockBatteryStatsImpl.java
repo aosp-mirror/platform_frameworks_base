@@ -26,6 +26,7 @@ import android.net.NetworkStats;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
@@ -193,13 +194,30 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         return this;
     }
 
+    @GuardedBy("this")
+    public MockBatteryStatsImpl setMaxHistoryFiles(int maxHistoryFiles) {
+        mConstants.MAX_HISTORY_FILES = maxHistoryFiles;
+        return this;
+    }
+
+    @GuardedBy("this")
+    public MockBatteryStatsImpl setMaxHistoryBuffer(int maxHistoryBuffer) {
+        mConstants.MAX_HISTORY_BUFFER = maxHistoryBuffer;
+        return this;
+    }
+
     public int getAndClearExternalStatsSyncFlags() {
         final int flags = mExternalStatsSync.flags;
         mExternalStatsSync.flags = 0;
         return flags;
     }
 
-    private class DummyExternalStatsSync implements ExternalStatsSync {
+    public void setDummyExternalStatsSync(DummyExternalStatsSync externalStatsSync) {
+        mExternalStatsSync = externalStatsSync;
+        setExternalStatsSyncLocked(mExternalStatsSync);
+    }
+
+    public static class DummyExternalStatsSync implements ExternalStatsSync {
         public int flags = 0;
 
         @Override
@@ -244,8 +262,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         }
 
         @Override
-        public Future<?> scheduleSyncDueToProcessStateChange(long delayMillis) {
-            return null;
+        public void scheduleSyncDueToProcessStateChange(int flags, long delayMillis) {
         }
     }
 }

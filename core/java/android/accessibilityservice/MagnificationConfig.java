@@ -42,9 +42,9 @@ import java.lang.annotation.RetentionPolicy;
  * </p>
  *
  * <p>
- * When the magnification config uses {@link #MAGNIFICATION_MODE_WINDOW}.
- * {@link AccessibilityService} will be able to control the activated window magnifier
- * on the display.
+ * When the magnification config uses {@link #MAGNIFICATION_MODE_WINDOW} and the platform
+ * supports {@link android.content.pm.PackageManager#FEATURE_WINDOW_MAGNIFICATION} feature.
+ * {@link AccessibilityService} will be able to control window magnifier on the display.
  * </p>
  *
  * <p>
@@ -57,9 +57,12 @@ public final class MagnificationConfig implements Parcelable {
 
     /** The controlling magnification mode. It controls the activated magnifier. */
     public static final int MAGNIFICATION_MODE_DEFAULT = 0;
-    /** The controlling magnification mode. It controls fullscreen magnifier. */
+    /** The controlling magnification mode. It controls full-screen magnifier. */
     public static final int MAGNIFICATION_MODE_FULLSCREEN = 1;
-    /** The controlling magnification mode. It controls window magnifier. */
+    /**
+     * The controlling magnification mode. It is valid if the platform supports
+     * {@link android.content.pm.PackageManager#FEATURE_WINDOW_MAGNIFICATION} feature.
+     */
     public static final int MAGNIFICATION_MODE_WINDOW = 2;
 
     /** @hide */

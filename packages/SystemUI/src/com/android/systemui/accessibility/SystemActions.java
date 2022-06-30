@@ -54,7 +54,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.util.Assert;
 
@@ -180,7 +180,7 @@ public class SystemActions extends CoreStartable {
     private final Optional<Recents> mRecentsOptional;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final NotificationShadeWindowController mNotificationShadeController;
     private final StatusBarWindowCallback mNotificationShadeCallback;
     private boolean mDismissNotificationShadeActionRegistered;
@@ -188,7 +188,7 @@ public class SystemActions extends CoreStartable {
     @Inject
     public SystemActions(Context context,
             NotificationShadeWindowController notificationShadeController,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Optional<Recents> recentsOptional) {
         super(context);
         mRecentsOptional = recentsOptional;
@@ -201,7 +201,7 @@ public class SystemActions extends CoreStartable {
         // NotificationShadeWindowController.registerCallback() only keeps weak references.
         mNotificationShadeCallback = (keyguardShowing, keyguardOccluded, bouncerShowing, mDozing) ->
                 registerOrUnregisterDismissNotificationShadeAction();
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
     }
 
     @Override
@@ -311,9 +311,10 @@ public class SystemActions extends CoreStartable {
 
         // Saving state in instance variable since this callback is called quite often to avoid
         // binder calls
-        final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
-        if (statusBarOptional.map(StatusBar::isPanelExpanded).orElse(false)
-                && !statusBarOptional.get().isKeyguardShowing()) {
+        final Optional<CentralSurfaces> centralSurfacesOptional =
+                mCentralSurfacesOptionalLazy.get();
+        if (centralSurfacesOptional.map(CentralSurfaces::isPanelExpanded).orElse(false)
+                && !centralSurfacesOptional.get().isKeyguardShowing()) {
             if (!mDismissNotificationShadeActionRegistered) {
                 mA11yManager.registerSystemAction(
                         createRemoteAction(
@@ -466,12 +467,12 @@ public class SystemActions extends CoreStartable {
     }
 
     private void handleNotifications() {
-        mStatusBarOptionalLazy.get().ifPresent(StatusBar::animateExpandNotificationsPanel);
+        mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::animateExpandNotificationsPanel);
     }
 
     private void handleQuickSettings() {
-        mStatusBarOptionalLazy.get().ifPresent(
-                statusBar -> statusBar.animateExpandSettingsPanel(null));
+        mCentralSurfacesOptionalLazy.get().ifPresent(
+                centralSurfaces -> centralSurfaces.animateExpandSettingsPanel(null));
     }
 
     private void handlePowerDialog() {
@@ -524,8 +525,8 @@ public class SystemActions extends CoreStartable {
     }
 
     private void handleAccessibilityDismissNotificationShade() {
-        mStatusBarOptionalLazy.get().ifPresent(
-                statusBar -> statusBar.animateCollapsePanels(
+        mCentralSurfacesOptionalLazy.get().ifPresent(
+                centralSurfaces -> centralSurfaces.animateCollapsePanels(
                         CommandQueue.FLAG_EXCLUDE_NONE, false /* force */));
     }
 

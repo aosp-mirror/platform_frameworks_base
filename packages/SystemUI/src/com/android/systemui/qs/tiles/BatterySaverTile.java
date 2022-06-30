@@ -116,6 +116,11 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     public void handleSetListening(boolean listening) {
         super.handleSetListening(listening);
         mSetting.setListening(listening);
+        if (!listening) {
+            // If we stopped listening, it means that the tile is not visible. In that case, we
+            // don't need to save the view anymore
+            mBatteryController.clearLastPowerSaverStartView();
+        }
     }
 
     @Override
@@ -128,7 +133,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         if (getState().state == Tile.STATE_UNAVAILABLE) {
             return;
         }
-        mBatteryController.setPowerSaveMode(!mPowerSave);
+        mBatteryController.setPowerSaveMode(!mPowerSave, view);
     }
 
     @Override

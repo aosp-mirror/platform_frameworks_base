@@ -454,6 +454,7 @@ class ShortcutRequestPinProcessor {
         final String shortcutId = original.getId();
 
         List<ShortcutInfo> changedShortcuts = null;
+        final ShortcutPackage ps;
 
         synchronized (mLock) {
             if (!(mService.isUserUnlockedL(appUserId)
@@ -472,8 +473,7 @@ class ShortcutRequestPinProcessor {
                 return true;
             }
 
-            final ShortcutPackage ps = mService.getPackageShortcutsForPublisherLocked(
-                    appPackageName, appUserId);
+            ps = mService.getPackageShortcutsForPublisherLocked(appPackageName, appUserId);
             final ShortcutInfo current = ps.findShortcutById(shortcutId);
 
             // The shortcut might have been changed, so we need to do the same validation again.
@@ -527,7 +527,7 @@ class ShortcutRequestPinProcessor {
         }
 
         mService.verifyStates();
-        mService.packageShortcutsChanged(appPackageName, appUserId, changedShortcuts, null);
+        mService.packageShortcutsChanged(ps, changedShortcuts, null);
 
         return true;
     }

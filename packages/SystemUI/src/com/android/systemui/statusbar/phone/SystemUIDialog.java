@@ -31,6 +31,7 @@ import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.Window;
@@ -63,6 +64,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     // TODO(b/203389579): Remove this once the dialog width on large screens has been agreed on.
     private static final String FLAG_TABLET_DIALOG_WIDTH =
             "persist.systemui.flag_tablet_dialog_width";
+    private static final int DEFAULT_THEME = R.style.Theme_SystemUI_Dialog;
+    private static final boolean DEFAULT_DISMISS_ON_DEVICE_LOCK = true;
 
     private final Context mContext;
     @Nullable private final DismissReceiver mDismissReceiver;
@@ -78,11 +81,15 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     private List<Runnable> mOnCreateRunnables = new ArrayList<>();
 
     public SystemUIDialog(Context context) {
-        this(context, R.style.Theme_SystemUI_Dialog);
+        this(context, DEFAULT_THEME, DEFAULT_DISMISS_ON_DEVICE_LOCK);
     }
 
     public SystemUIDialog(Context context, int theme) {
-        this(context, theme, true /* dismissOnDeviceLock */);
+        this(context, theme, DEFAULT_DISMISS_ON_DEVICE_LOCK);
+    }
+
+    public SystemUIDialog(Context context, boolean dismissOnDeviceLock) {
+        this(context, DEFAULT_THEME, dismissOnDeviceLock);
     }
 
     public SystemUIDialog(Context context, int theme, boolean dismissOnDeviceLock) {
@@ -370,11 +377,17 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     }
 
     private static int getHorizontalInsets(Dialog dialog) {
-        if (dialog.getWindow().getDecorView() == null) {
+        View decorView = dialog.getWindow().getDecorView();
+        if (decorView == null) {
             return 0;
         }
 
-        Drawable background = dialog.getWindow().getDecorView().getBackground();
+        // We first look for the background on the dialogContentWithBackground added by
+        // DialogLaunchAnimator. If it's not there, we use the background of the DecorView.
+        View viewWithBackground = decorView.findViewByPredicate(
+                view -> view.getTag(R.id.tag_dialog_background) != null);
+        Drawable background = viewWithBackground != null ? viewWithBackground.getBackground()
+                : decorView.getBackground();
         Insets insets = background != null ? background.getOpticalInsets() : Insets.NONE;
         return insets.left + insets.right;
     }

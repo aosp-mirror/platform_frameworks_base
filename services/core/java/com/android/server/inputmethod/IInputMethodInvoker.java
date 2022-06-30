@@ -30,8 +30,10 @@ import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
+import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
@@ -108,10 +110,10 @@ final class IInputMethodInvoker {
     @AnyThread
     void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
             int configChanges, boolean stylusHwSupported,
-            boolean shouldShowImeSwitcherWhenImeIsShown) {
+            @InputMethodNavButtonFlags int navButtonFlags) {
         try {
             mTarget.initializeInternal(token, privOps, configChanges, stylusHwSupported,
-                    shouldShowImeSwitcherWhenImeIsShown);
+                    navButtonFlags);
         } catch (RemoteException e) {
             logRemoteException(e);
         }
@@ -147,20 +149,20 @@ final class IInputMethodInvoker {
 
     @AnyThread
     void startInput(IBinder startInputToken, IInputContext inputContext, EditorInfo attribute,
-            boolean restarting, boolean shouldShowImeSwitcherWhenImeIsShown) {
+            boolean restarting, @InputMethodNavButtonFlags int navButtonFlags,
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         try {
             mTarget.startInput(startInputToken, inputContext, attribute, restarting,
-                    shouldShowImeSwitcherWhenImeIsShown);
+                    navButtonFlags, imeDispatcher);
         } catch (RemoteException e) {
             logRemoteException(e);
         }
     }
 
     @AnyThread
-    void onShouldShowImeSwitcherWhenImeIsShownChanged(boolean shouldShowImeSwitcherWhenImeIsShown) {
+    void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
         try {
-            mTarget.onShouldShowImeSwitcherWhenImeIsShownChanged(
-                    shouldShowImeSwitcherWhenImeIsShown);
+            mTarget.onNavButtonFlagsChanged(navButtonFlags);
         } catch (RemoteException e) {
             logRemoteException(e);
         }
@@ -241,6 +243,15 @@ final class IInputMethodInvoker {
     void initInkWindow() {
         try {
             mTarget.initInkWindow();
+        } catch (RemoteException e) {
+            logRemoteException(e);
+        }
+    }
+
+    @AnyThread
+    void finishStylusHandwriting() {
+        try {
+            mTarget.finishStylusHandwriting();
         } catch (RemoteException e) {
             logRemoteException(e);
         }

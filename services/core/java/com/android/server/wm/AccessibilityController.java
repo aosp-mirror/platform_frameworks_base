@@ -79,6 +79,7 @@ import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -138,7 +139,7 @@ final class AccessibilityController {
             new SparseArray<>();
     private SparseArray<IBinder> mFocusedWindow = new SparseArray<>();
     private int mFocusedDisplay = -1;
-    private boolean mIsImeVisible = false;
+    private final SparseBooleanArray mIsImeVisibleArray = new SparseBooleanArray();
     // Set to true if initializing window population complete.
     private boolean mAllObserversInitialized = true;
     private final AccessibilityWindowsPopulator mAccessibilityWindowsPopulator;
@@ -167,8 +168,11 @@ final class AccessibilityController {
             if (dc != null) {
                 final Display display = dc.getDisplay();
                 if (display != null && display.getType() != Display.TYPE_OVERLAY) {
-                    mDisplayMagnifiers.put(displayId, new DisplayMagnifier(
-                            mService, dc, display, callbacks));
+                    final DisplayMagnifier magnifier = new DisplayMagnifier(
+                            mService, dc, display, callbacks);
+                    magnifier.notifyImeWindowVisibilityChanged(
+                            mIsImeVisibleArray.get(displayId, false));
+                    mDisplayMagnifiers.put(displayId, magnifier);
                     result = true;
                 }
             }
@@ -442,6 +446,29 @@ final class AccessibilityController {
         // Not relevant for the window observer.
     }
 
+    public Pair<Matrix, MagnificationSpec> getWindowTransformationMatrixAndMagnificationSpec(
+            IBinder token) {
+        synchronized (mService.mGlobalLock) {
+            final Matrix transformationMatrix = new Matrix();
+            final MagnificationSpec magnificationSpec = new MagnificationSpec();
+
+            final WindowState windowState = mService.mWindowMap.get(token);
+            if (windowState != null) {
+                windowState.getTransformationMatrix(new float[9], transformationMatrix);
+
+                if (hasCallbacks()) {
+                    final MagnificationSpec otherMagnificationSpec =
+                            getMagnificationSpecForWindow(windowState);
+                    if (otherMagnificationSpec != null && !otherMagnificationSpec.isNop()) {
+                        magnificationSpec.setTo(otherMagnificationSpec);
+                    }
+                }
+            }
+
+            return new Pair<>(transformationMatrix, magnificationSpec);
+        }
+    }
+
     MagnificationSpec getMagnificationSpecForWindow(WindowState windowState) {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
             mAccessibilityTracing.logTrace(TAG + ".getMagnificationSpecForWindow",
@@ -483,11 +510,13 @@ final class AccessibilityController {
             mAccessibilityTracing.logTrace(TAG + ".updateImeVisibilityIfNeeded",
                     FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId + ";shown=" + shown);
         }
-        if (mIsImeVisible == shown) {
+
+        final boolean isDisplayImeVisible = mIsImeVisibleArray.get(displayId, false);
+        if (isDisplayImeVisible == shown) {
             return;
         }
 
-        mIsImeVisible = shown;
+        mIsImeVisibleArray.put(displayId, shown);
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
             displayMagnifier.notifyImeWindowVisibilityChanged(shown);
@@ -523,6 +552,7 @@ final class AccessibilityController {
     }
 
     public void onDisplayRemoved(int displayId) {
+        mIsImeVisibleArray.delete(displayId);
         mFocusedWindow.remove(displayId);
     }
 
@@ -1591,7 +1621,7 @@ final class AccessibilityController {
             // Do not account space of trusted non-touchable windows, except the split-screen
             // divider.
             // If it's not trusted, touch events are not sent to the windows behind it.
-            if (((a11yWindow.getFlags() & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0)
+            if (!a11yWindow.isTouchable()
                     && (a11yWindow.getType() != TYPE_DOCK_DIVIDER)
                     && a11yWindow.isTrustedOverlay()) {
                 return false;
@@ -1616,8 +1646,7 @@ final class AccessibilityController {
             // Ignore non-touchable windows, except the split-screen divider, which is
             // occasionally non-touchable but still useful for identifying split-screen
             // mode and the PIP menu.
-            if (((a11yWindow.getFlags()
-                    & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0)
+            if (!a11yWindow.isTouchable()
                     && (a11yWindow.getType() != TYPE_DOCK_DIVIDER
                     && !a11yWindow.isPIPMenu())) {
                 return false;

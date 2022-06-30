@@ -11,11 +11,13 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.PorterDuffXfermode
 import android.graphics.RadialGradient
 import android.graphics.Shader
+import android.os.Trace
 import android.util.AttributeSet
 import android.util.MathUtils.lerp
 import android.view.View
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.statusbar.LightRevealEffect.Companion.getPercentPastThreshold
+import com.android.systemui.util.getColorWithAlpha
 import java.util.function.Consumer
 
 /**
@@ -222,6 +224,8 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
 
                 revealEffect.setRevealAmountOnScrim(value, this)
                 updateScrimOpaque()
+                Trace.traceCounter(Trace.TRACE_TAG_APP, "light_reveal_amount",
+                        (field * 100).toInt())
                 invalidate()
             }
         }
@@ -355,8 +359,8 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
     }
 
     override fun onDraw(canvas: Canvas?) {
-        if (canvas == null || revealGradientWidth <= 0 || revealGradientHeight <= 0
-            || revealAmount == 0f) {
+        if (canvas == null || revealGradientWidth <= 0 || revealGradientHeight <= 0 ||
+            revealAmount == 0f) {
             if (revealAmount < 1f) {
                 canvas?.drawColor(revealGradientEndColor)
             }
@@ -364,7 +368,7 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
         }
 
         if (startColorAlpha > 0f) {
-            canvas.drawColor(updateColorAlpha(revealGradientEndColor, startColorAlpha))
+            canvas.drawColor(getColorWithAlpha(revealGradientEndColor, startColorAlpha))
         }
 
         with(shaderGradientMatrix) {
@@ -380,15 +384,7 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
 
     private fun setPaintColorFilter() {
         gradientPaint.colorFilter = PorterDuffColorFilter(
-            updateColorAlpha(revealGradientEndColor, revealGradientEndColorAlpha),
+            getColorWithAlpha(revealGradientEndColor, revealGradientEndColorAlpha),
             PorterDuff.Mode.MULTIPLY)
     }
-
-    private fun updateColorAlpha(color: Int, alpha: Float): Int =
-        Color.argb(
-            (alpha * 255).toInt(),
-            Color.red(color),
-            Color.green(color),
-            Color.blue(color)
-        )
 }

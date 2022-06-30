@@ -104,8 +104,6 @@ public class QRCodeScannerTileTest extends SysuiTestCase {
         assertEquals(state.label, mContext.getString(R.string.qr_code_scanner_title));
         assertEquals(state.contentDescription, mContext.getString(R.string.qr_code_scanner_title));
         assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.ic_qr_code_scanner));
-        assertEquals(state.secondaryLabel,
-                mContext.getString(R.string.qr_code_scanner_description));
     }
 
     @Test

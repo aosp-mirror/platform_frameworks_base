@@ -508,7 +508,7 @@ public class UsbPortManager {
      *
      * @param portId port identifier.
      */
-    public boolean resetUsbPort(@NonNull String portId, int transactionId,
+    public void resetUsbPort(@NonNull String portId, int transactionId,
             @NonNull IUsbOperationInternal callback, IndentingPrintWriter pw) {
         synchronized (mLock) {
             Objects.requireNonNull(callback);
@@ -525,12 +525,11 @@ public class UsbPortManager {
                             "resetUsbPort: Failed to call OperationComplete. opId:"
                             + transactionId, e);
                 }
-                return false;
             }
 
             try {
                 try {
-                    return mUsbPortHal.resetUsbPort(portId, transactionId, callback);
+                    mUsbPortHal.resetUsbPort(portId, transactionId, callback);
                 } catch (Exception e) {
                     logAndPrintException(pw,
                         "reseetUsbPort: Failed to resetUsbPort. opId:"
@@ -542,7 +541,6 @@ public class UsbPortManager {
                         "resetUsbPort: Failed to call onOperationComplete. opId:"
                         + transactionId, e);
             }
-            return false;
         }
     }
 

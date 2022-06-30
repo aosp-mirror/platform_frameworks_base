@@ -17,7 +17,7 @@
       "path": "frameworks/opt/net/wifi"
     }
   ],
-  "postsubmit": [
+  "presubmit": [
     {
       "name": "FrameworksCoreTests",
       "options": [

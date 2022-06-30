@@ -396,6 +396,20 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
                 getLatestGeolocationSuggestion());
     }
 
+    @Override
+    public boolean isTelephonyTimeZoneDetectionSupported() {
+        synchronized (this) {
+            return mCurrentConfigurationInternal.isTelephonyDetectionSupported();
+        }
+    }
+
+    @Override
+    public boolean isGeoTimeZoneDetectionSupported() {
+        synchronized (this) {
+            return mCurrentConfigurationInternal.isGeoDetectionSupported();
+        }
+    }
+
     private static int scoreTelephonySuggestion(@NonNull TelephonyTimeZoneSuggestion suggestion) {
         int score;
         if (suggestion.getZoneId() == null) {

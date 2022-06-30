@@ -117,7 +117,9 @@ public class CpuPowerCalculator extends PowerCalculator {
                 }
             }
             calculateApp(app, app.getBatteryStatsUid(), query, result, keys);
-            totalPowerMah += result.powerMah;
+            if (!app.isVirtualUid()) {
+                totalPowerMah += result.powerMah;
+            }
         }
 
         final long consumptionUC = batteryStats.getCpuMeasuredBatteryConsumptionUC();

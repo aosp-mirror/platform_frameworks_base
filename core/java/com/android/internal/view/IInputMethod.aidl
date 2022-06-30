@@ -23,6 +23,7 @@ import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
+import android.window.ImeOnBackInvokedDispatcher;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInputContext;
@@ -37,8 +38,7 @@ import com.android.internal.view.InlineSuggestionsRequestInfo;
  */
 oneway interface IInputMethod {
     void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
-             int configChanges, boolean stylusHwSupported,
-             boolean shouldShowImeSwitcherWhenImeIsShown);
+             int configChanges, boolean stylusHwSupported, int navigationBarFlags);
 
     void onCreateInlineSuggestionsRequest(in InlineSuggestionsRequestInfo requestInfo,
             in IInlineSuggestionsRequestCallback cb);
@@ -48,10 +48,10 @@ oneway interface IInputMethod {
     void unbindInput();
 
     void startInput(in IBinder startInputToken, in IInputContext inputContext,
-            in EditorInfo attribute, boolean restarting,
-             boolean shouldShowImeSwitcherWhenImeIsShown);
+            in EditorInfo attribute, boolean restarting, int navigationBarFlags,
+            in ImeOnBackInvokedDispatcher imeDispatcher);
 
-    void onShouldShowImeSwitcherWhenImeIsShownChanged(boolean shouldShowImeSwitcherWhenImeIsShown);
+    void onNavButtonFlagsChanged(int navButtonFlags);
 
     void createSession(in InputChannel channel, IInputSessionCallback callback);
 
@@ -69,4 +69,6 @@ oneway interface IInputMethod {
             in List<MotionEvent> events);
 
     void initInkWindow();
+
+    void finishStylusHandwriting();
 }

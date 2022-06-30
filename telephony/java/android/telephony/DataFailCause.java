@@ -1661,8 +1661,8 @@ public final class DataFailCause {
 
     /** @hide */
     public static String toString(@DataFailureCause int dataFailCause) {
-        int cause = getFailCause(dataFailCause);
-        return (cause == UNKNOWN) ? "UNKNOWN(" + dataFailCause + ")" : sFailCauseMap.get(cause);
+        return sFailCauseMap.getOrDefault(dataFailCause, "UNKNOWN") + "(0x"
+                + Integer.toHexString(dataFailCause) + ")";
     }
 
     /** @hide */
@@ -1672,5 +1672,10 @@ public final class DataFailCause {
         } else {
             return UNKNOWN;
         }
+    }
+
+    /** @hide */
+    public static boolean isFailCauseExisting(@DataFailureCause int failCause) {
+        return sFailCauseMap.containsKey(failCause);
     }
 }

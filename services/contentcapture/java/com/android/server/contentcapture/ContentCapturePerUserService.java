@@ -46,7 +46,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -76,7 +75,6 @@ import com.android.server.contentcapture.RemoteContentCaptureService.ContentCapt
 import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.io.PrintWriter;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,10 +87,6 @@ final class ContentCapturePerUserService
         implements ContentCaptureServiceCallbacks {
 
     private static final String TAG = ContentCapturePerUserService.class.getSimpleName();
-
-    private static final int MAX_REBIND_COUNTS = 5;
-    // 5 minutes
-    private static final long REBIND_DURATION_MS = 5 * 60 * 1_000;
 
     @GuardedBy("mLock")
     private final SparseArray<ContentCaptureServerSession> mSessions = new SparseArray<>();
@@ -127,18 +121,11 @@ final class ContentCapturePerUserService
     @GuardedBy("mLock")
     private ContentCaptureServiceInfo mInfo;
 
-    private Instant mLastRebindTime;
-    private int mRebindCount;
-    private final Handler mHandler;
-
-    private final Runnable mReBindServiceRunnable = new RebindServiceRunnable();
-
     // TODO(b/111276913): add mechanism to prune stale sessions, similar to Autofill's
 
     ContentCapturePerUserService(@NonNull ContentCaptureManagerService master,
-            @NonNull Object lock, boolean disabled, @UserIdInt int userId, Handler handler) {
+            @NonNull Object lock, boolean disabled, @UserIdInt int userId) {
         super(master, lock, userId);
-        mHandler = handler;
         updateRemoteServiceLocked(disabled);
     }
 
@@ -203,43 +190,9 @@ final class ContentCapturePerUserService
         Slog.w(TAG, "remote service died: " + service);
         synchronized (mLock) {
             mZombie = true;
-            // Reset rebindCount if over 12 hours mLastRebindTime
-            if (mLastRebindTime != null && Instant.now().isAfter(
-                    mLastRebindTime.plusMillis(12 * 60 * 60 * 1000))) {
-                if (mMaster.debug) {
-                    Slog.i(TAG, "The current rebind count " + mRebindCount + " is reset.");
-                }
-                mRebindCount = 0;
-            }
-            if (mRebindCount >= MAX_REBIND_COUNTS) {
-                writeServiceEvent(
-                        FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_REMOTE_SERVICE_DIED,
-                        getServiceComponentName());
-            }
-            if (mRebindCount < MAX_REBIND_COUNTS) {
-                mHandler.removeCallbacks(mReBindServiceRunnable);
-                mHandler.postDelayed(mReBindServiceRunnable, REBIND_DURATION_MS);
-            }
-        }
-    }
-
-    private void updateRemoteServiceAndResurrectSessionsLocked() {
-        boolean disabled = !isEnabledLocked();
-        updateRemoteServiceLocked(disabled);
-        resurrectSessionsLocked();
-    }
-
-    private final class RebindServiceRunnable implements Runnable{
-
-        @Override
-        public void run() {
-            synchronized (mLock) {
-                if (mZombie) {
-                    mLastRebindTime = Instant.now();
-                    mRebindCount++;
-                    updateRemoteServiceAndResurrectSessionsLocked();
-                }
-            }
+            writeServiceEvent(
+                    FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_REMOTE_SERVICE_DIED,
+                    getServiceComponentName());
         }
     }
 
@@ -287,8 +240,8 @@ final class ContentCapturePerUserService
     }
 
     void onPackageUpdatedLocked() {
-        mRebindCount = 0;
-        updateRemoteServiceAndResurrectSessionsLocked();
+        updateRemoteServiceLocked(!isEnabledLocked());
+        resurrectSessionsLocked();
     }
 
     @GuardedBy("mLock")
@@ -330,7 +283,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
-                    componentName, /* isChildSession= */ false);
+                    /* isChildSession= */ false);
             return;
         }
         if (serviceComponentName == null) {
@@ -354,7 +307,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NOT_WHITELISTED, serviceComponentName,
-                    componentName, /* isChildSession= */ false);
+                    /* isChildSession= */ false);
             return;
         }
 
@@ -368,7 +321,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_DUPLICATED_ID,
-                    serviceComponentName, componentName, /* isChildSession= */ false);
+                    serviceComponentName, /* isChildSession= */ false);
             return;
         }
 
@@ -385,7 +338,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
-                    componentName, /* isChildSession= */ false);
+                    /* isChildSession= */ false);
             return;
         }
 
@@ -602,8 +555,6 @@ final class ContentCapturePerUserService
             mInfo.dump(prefix2, pw);
         }
         pw.print(prefix); pw.print("Zombie: "); pw.println(mZombie);
-        pw.print(prefix); pw.print("Rebind count: "); pw.println(mRebindCount);
-        pw.print(prefix); pw.print("Last rebind: "); pw.println(mLastRebindTime);
 
         if (mRemoteService != null) {
             pw.print(prefix); pw.println("remote service:");
@@ -740,7 +691,7 @@ final class ContentCapturePerUserService
         @Override
         public void writeSessionFlush(int sessionId, ComponentName app, FlushMetrics flushMetrics,
                 ContentCaptureOptions options, int flushReason) {
-            ContentCaptureMetricsLogger.writeSessionFlush(sessionId, getServiceComponentName(), app,
+            ContentCaptureMetricsLogger.writeSessionFlush(sessionId, getServiceComponentName(),
                     flushMetrics, options, flushReason);
         }
 

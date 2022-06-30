@@ -13,11 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <android-base/logging.h>
+#include <android-base/stringprintf.h>
 #include <dmabufinfo/dmabufinfo.h>
 #include <jni.h>
 #include <meminfo/sysmeminfo.h>
+#include <procinfo/process.h>
 
 #include "core_jni_helpers.h"
+
+using DmaBuffer = ::android::dmabufinfo::DmaBuffer;
+using android::base::ReadFileToString;
+using android::base::StringPrintf;
 
 namespace {
 static jclass gProcessDmabufClazz;
@@ -28,30 +35,127 @@ static jmethodID gProcessGpuMemCtor;
 
 namespace android {
 
-static jobject KernelAllocationStats_getDmabufAllocations(JNIEnv *env, jobject, jint pid) {
-    std::vector<dmabufinfo::DmaBuffer> buffers;
-    if (!dmabufinfo::ReadDmaBufMapRefs(pid, &buffers)) {
+struct PidDmaInfo {
+    uid_t uid;
+    std::string cmdline;
+    int oomScoreAdj;
+};
+
+static jobjectArray KernelAllocationStats_getDmabufAllocations(JNIEnv *env, jobject) {
+    std::vector<DmaBuffer> buffers;
+
+    if (!dmabufinfo::ReadDmaBufs(&buffers)) {
         return nullptr;
     }
-    jint mappedSize = 0;
-    jint mappedCount = buffers.size();
-    for (const auto &buffer : buffers) {
-        mappedSize += buffer.size();
-    }
-    mappedSize /= 1024;
 
-    jint retainedSize = -1;
-    jint retainedCount = -1;
-    if (dmabufinfo::ReadDmaBufFdRefs(pid, &buffers)) {
-        retainedCount = buffers.size();
-        retainedSize = 0;
-        for (const auto &buffer : buffers) {
-            retainedSize += buffer.size();
+    // Create a reverse map from pid to dmabufs
+    // Store dmabuf inodes & sizes for later processing.
+    std::unordered_map<pid_t, std::set<ino_t>> pidToInodes;
+    std::unordered_map<ino_t, long> inodeToSize;
+    for (auto &buf : buffers) {
+        for (auto pid : buf.pids()) {
+            pidToInodes[pid].insert(buf.inode());
         }
-        retainedSize /= 1024;
+        inodeToSize[buf.inode()] = buf.size();
     }
-    return env->NewObject(gProcessDmabufClazz, gProcessDmabufCtor, retainedSize, retainedCount,
-                          mappedSize, mappedCount);
+
+    pid_t surfaceFlingerPid = -1;
+    // The set of all inodes that are being retained by SurfaceFlinger. Buffers
+    // shared between another process and SF will appear in this set.
+    std::set<ino_t> surfaceFlingerBufferInodes;
+    // The set of all inodes that are being retained by any process other
+    // than SurfaceFlinger. Buffers shared between another process and SF will
+    // appear in this set.
+    std::set<ino_t> otherProcessBufferInodes;
+
+    // Find SurfaceFlinger pid & get cmdlines, oomScoreAdj, etc for each pid
+    // holding any DMA buffers.
+    std::unordered_map<pid_t, PidDmaInfo> pidDmaInfos;
+    for (const auto &pidToInodeEntry : pidToInodes) {
+        pid_t pid = pidToInodeEntry.first;
+
+        android::procinfo::ProcessInfo processInfo;
+        if (!android::procinfo::GetProcessInfo(pid, &processInfo)) {
+            continue;
+        }
+
+        std::string cmdline;
+        if (!ReadFileToString(StringPrintf("/proc/%d/cmdline", pid), &cmdline)) {
+            continue;
+        }
+
+        // cmdline strings are null-delimited, so we split on \0 here
+        if (cmdline.substr(0, cmdline.find('\0')) == "/system/bin/surfaceflinger") {
+            if (surfaceFlingerPid == -1) {
+                surfaceFlingerPid = pid;
+                surfaceFlingerBufferInodes = pidToInodes[pid];
+            } else {
+                LOG(ERROR) << "getDmabufAllocations found multiple SF processes; pid1: " << pid
+                           << ", pid2:" << surfaceFlingerPid;
+                surfaceFlingerPid = -2; // Used as a sentinel value below
+            }
+        } else {
+            otherProcessBufferInodes.insert(pidToInodes[pid].begin(), pidToInodes[pid].end());
+        }
+
+        std::string oomScoreAdjStr;
+        if (!ReadFileToString(StringPrintf("/proc/%d/oom_score_adj", pid), &oomScoreAdjStr)) {
+            continue;
+        }
+
+        pidDmaInfos[pid] = PidDmaInfo{.uid = processInfo.uid,
+                                      .cmdline = cmdline,
+                                      .oomScoreAdj = atoi(oomScoreAdjStr.c_str())};
+    }
+
+    if (surfaceFlingerPid < 0) {
+        LOG(ERROR) << "getDmabufAllocations could not identify SurfaceFlinger "
+                   << "process via /proc/pid/cmdline";
+    }
+
+    jobjectArray ret = env->NewObjectArray(pidDmaInfos.size(), gProcessDmabufClazz, NULL);
+    int retArrayIndex = 0;
+    for (const auto &pidDmaInfosEntry : pidDmaInfos) {
+        pid_t pid = pidDmaInfosEntry.first;
+
+        // For all processes apart from SurfaceFlinger, this set will store the
+        // dmabuf inodes that are shared with SF. For SF, it will store the inodes
+        // that are shared with any other process.
+        std::set<ino_t> sharedBuffers;
+        if (pid == surfaceFlingerPid) {
+            set_intersection(surfaceFlingerBufferInodes.begin(), surfaceFlingerBufferInodes.end(),
+                             otherProcessBufferInodes.begin(), otherProcessBufferInodes.end(),
+                             std::inserter(sharedBuffers, sharedBuffers.end()));
+        } else if (surfaceFlingerPid > 0) {
+            set_intersection(pidToInodes[pid].begin(), pidToInodes[pid].end(),
+                             surfaceFlingerBufferInodes.begin(), surfaceFlingerBufferInodes.end(),
+                             std::inserter(sharedBuffers, sharedBuffers.begin()));
+        } // If surfaceFlingerPid < 0; it means we failed to identify it, and
+        // the SF-related fields below should be left empty.
+
+        long totalSize = 0;
+        long sharedBuffersSize = 0;
+        for (const auto &inode : pidToInodes[pid]) {
+            totalSize += inodeToSize[inode];
+            if (sharedBuffers.count(inode)) {
+                sharedBuffersSize += inodeToSize[inode];
+            }
+        }
+
+        jobject obj = env->NewObject(gProcessDmabufClazz, gProcessDmabufCtor,
+                                     /* uid */ pidDmaInfos[pid].uid,
+                                     /* process name */
+                                     env->NewStringUTF(pidDmaInfos[pid].cmdline.c_str()),
+                                     /* oomscore */ pidDmaInfos[pid].oomScoreAdj,
+                                     /* retainedSize */ totalSize / 1024,
+                                     /* retainedCount */ pidToInodes[pid].size(),
+                                     /* sharedWithSurfaceFlinger size */ sharedBuffersSize / 1024,
+                                     /* sharedWithSurfaceFlinger count */ sharedBuffers.size());
+
+        env->SetObjectArrayElement(ret, retArrayIndex++, obj);
+    }
+
+    return ret;
 }
 
 static jobject KernelAllocationStats_getGpuAllocations(JNIEnv *env) {
@@ -74,7 +178,7 @@ static jobject KernelAllocationStats_getGpuAllocations(JNIEnv *env) {
 }
 
 static const JNINativeMethod methods[] = {
-        {"getDmabufAllocations", "(I)Lcom/android/internal/os/KernelAllocationStats$ProcessDmabuf;",
+        {"getDmabufAllocations", "()[Lcom/android/internal/os/KernelAllocationStats$ProcessDmabuf;",
          (void *)KernelAllocationStats_getDmabufAllocations},
         {"getGpuAllocations", "()[Lcom/android/internal/os/KernelAllocationStats$ProcessGpuMem;",
          (void *)KernelAllocationStats_getGpuAllocations},
@@ -86,7 +190,8 @@ int register_com_android_internal_os_KernelAllocationStats(JNIEnv *env) {
     jclass clazz =
             FindClassOrDie(env, "com/android/internal/os/KernelAllocationStats$ProcessDmabuf");
     gProcessDmabufClazz = MakeGlobalRefOrDie(env, clazz);
-    gProcessDmabufCtor = GetMethodIDOrDie(env, gProcessDmabufClazz, "<init>", "(IIII)V");
+    gProcessDmabufCtor =
+            GetMethodIDOrDie(env, gProcessDmabufClazz, "<init>", "(ILjava/lang/String;IIIII)V");
 
     clazz = FindClassOrDie(env, "com/android/internal/os/KernelAllocationStats$ProcessGpuMem");
     gProcessGpuMemClazz = MakeGlobalRefOrDie(env, clazz);

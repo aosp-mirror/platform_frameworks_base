@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DRAW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
@@ -34,7 +35,6 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMAT
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
@@ -60,6 +60,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -178,10 +179,9 @@ class WindowStateAnimator {
 
     void onAnimationFinished() {
         // Done animating, clean up.
-        if (DEBUG_ANIM) Slog.v(
-                TAG, "Animation done in " + this + ": exiting=" + mWin.mAnimatingExit
-                        + ", reportedVisible="
-                        + (mWin.mActivityRecord != null && mWin.mActivityRecord.reportedVisible));
+        ProtoLog.v(WM_DEBUG_ANIM, "Animation done in %s: exiting=%b, reportedVisible=%b",
+                this, mWin.mAnimatingExit,
+                (mWin.mActivityRecord != null && mWin.mActivityRecord.reportedVisible));
 
         mWin.checkPolicyVisibilityChange();
         final DisplayContent displayContent = mWin.getDisplayContent();
@@ -264,9 +264,8 @@ class WindowStateAnimator {
         if (mDrawState != COMMIT_DRAW_PENDING && mDrawState != READY_TO_SHOW) {
             return false;
         }
-        if (DEBUG_ANIM) {
-            Slog.i(TAG, "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW " + mSurfaceController);
-        }
+        ProtoLog.i(WM_DEBUG_ANIM, "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW %s",
+                mSurfaceController);
         mDrawState = READY_TO_SHOW;
         boolean result = false;
         final ActivityRecord activity = mWin.mActivityRecord;
@@ -298,9 +297,7 @@ class WindowStateAnimator {
 
         w.setHasSurface(false);
 
-        if (DEBUG_ANIM) {
-            Slog.i(TAG, "createSurface " + this + ": mDrawState=DRAW_PENDING");
-        }
+        ProtoLog.i(WM_DEBUG_ANIM, "createSurface %s: mDrawState=DRAW_PENDING", this);
 
         resetDrawState();
 
@@ -442,50 +439,6 @@ class WindowStateAnimator {
         return mService.useBLASTSync() && mWin.useBLASTSync();
     }
 
-    private boolean shouldConsumeMainWindowSizeTransaction() {
-        // We only consume the transaction when the client is calling relayout
-        // because this is the only time we know the frameNumber will be valid
-        // due to the client renderer being paused. Put otherwise, only when
-        // mInRelayout is true can we guarantee the next frame will contain
-        // the most recent configuration.
-        if (!mWin.mInRelayout) return false;
-        // Since we can only do this for one window, we focus on the main application window
-        if (mAttrType != TYPE_BASE_APPLICATION) return false;
-        final Task task = mWin.getTask();
-        if (task == null) return false;
-        if (task.getMainWindowSizeChangeTransaction() == null) return false;
-        // Likewise we only focus on the task root, since we can only use one window
-        if (!mWin.mActivityRecord.isRootOfTask()) return false;
-        return true;
-    }
-
-    void setSurfaceBoundariesLocked(SurfaceControl.Transaction t) {
-        if (mSurfaceController == null) {
-            return;
-        }
-
-        final WindowState w = mWin;
-        final Task task = w.getTask();
-        if (shouldConsumeMainWindowSizeTransaction()) {
-            if (isInBlastSync()) {
-                // If we're in a sync transaction, there's no need to call defer transaction.
-                // The sync transaction will contain the buffer so the bounds change transaction
-                // will only be applied with the buffer.
-                t.merge(task.getMainWindowSizeChangeTransaction());
-                task.setMainWindowSizeChangeTransaction(null);
-            } else {
-                mWin.applyWithNextDraw(finishedFrame -> {
-                      final SurfaceControl.Transaction sizeChangedTransaction =
-                          task.getMainWindowSizeChangeTransaction();
-                      if (sizeChangedTransaction != null) {
-                          finishedFrame.merge(sizeChangedTransaction);
-                          task.setMainWindowSizeChangeTransaction(null);
-                      }
-                });
-            }
-        }
-    }
-
     void prepareSurfaceLocked(SurfaceControl.Transaction t) {
         final WindowState w = mWin;
         if (!hasSurface()) {
@@ -500,8 +453,6 @@ class WindowStateAnimator {
         }
 
         computeShownFrameLocked();
-
-        setSurfaceBoundariesLocked(t);
 
         if (w.isParentWindowHidden() || !w.isOnScreen()) {
             hide(t, "prepareSurfaceLocked");
@@ -549,8 +500,8 @@ class WindowStateAnimator {
                 }
             }
         } else {
-            if (DEBUG_ANIM && mWin.isAnimating(TRANSITION | PARENTS)) {
-                Slog.v(TAG, "prepareSurface: No changes in animation for " + this);
+            if (mWin.isAnimating(TRANSITION | PARENTS)) {
+                ProtoLog.v(WM_DEBUG_ANIM, "prepareSurface: No changes in animation for %s", this);
             }
         }
 
@@ -692,15 +643,12 @@ class WindowStateAnimator {
                             mWin.mAttrs, attr, TRANSIT_OLD_NONE);
                 }
             }
-            if (DEBUG_ANIM) Slog.v(TAG,
-                    "applyAnimation: win=" + this
-                    + " anim=" + anim + " attr=0x" + Integer.toHexString(attr)
-                    + " a=" + a
-                    + " transit=" + transit
-                    + " type=" + mAttrType
-                    + " isEntrance=" + isEntrance + " Callers " + Debug.getCallers(3));
+            if (ProtoLogImpl.isEnabled(WM_DEBUG_ANIM)) {
+                ProtoLog.v(WM_DEBUG_ANIM, "applyAnimation: win=%s"
+                        + " anim=%d attr=0x%x a=%s transit=%d type=%d isEntrance=%b Callers %s",
+                        this, anim, attr, a, transit, mAttrType, isEntrance, Debug.getCallers(20));
+            }
             if (a != null) {
-                if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + this);
                 Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "WSA#startAnimation");
                 mWin.startAnimation(a);
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);

@@ -167,7 +167,7 @@ public class JobParameters implements Parcelable {
     /**
      * The job used up its maximum execution time and timed out. Each individual job has a maximum
      * execution time limit, regardless of how much total quota the app has. See the note on
-     * {@link JobScheduler} for the execution time limits.
+     * {@link JobScheduler} and {@link JobInfo} for the execution time limits.
      */
     public static final int STOP_REASON_TIMEOUT = 3;
     /**

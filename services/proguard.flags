@@ -33,6 +33,11 @@
   public <init>(...);
 }
 
+# Accessed from com.android.compos APEX
+-keep,allowoptimization,allowaccessmodification class com.android.internal.art.ArtStatsLog {
+   public static void write(...);
+}
+
 # Binder interfaces
 -keep,allowoptimization,allowaccessmodification class * extends android.os.IInterface
 -keep,allowoptimization,allowaccessmodification class * extends android.os.IHwInterface
@@ -40,9 +45,15 @@
 # Global entities normally kept through explicit Manifest entries
 # TODO(b/210510433): Revisit and consider generating from frameworks/base/core/res/AndroidManifest.xml,
 # by including that manifest with the library rule that triggers optimization.
--keep,allowoptimization,allowaccessmodification class * extends android.app.backup.BackupAgent
--keep,allowoptimization,allowaccessmodification class * extends android.content.BroadcastReceiver
--keep,allowoptimization,allowaccessmodification class * extends android.content.ContentProvider
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.app.Activity
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.app.Service
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.app.backup.BackupAgent
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.content.BroadcastReceiver
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.content.ContentProvider
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.preference.Preference
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.view.View {
+  public <init>(...);
+}
 
 # Various classes subclassed in or referenced via JNI in ethernet-service
 -keep public class android.net.** { *; }
@@ -57,6 +68,9 @@
 # TODO(b/210510433): Revisit and consider generating from frameworks/base/core/res/res/values/config.xml.
 -keep,allowoptimization,allowaccessmodification public class com.android.server.notification.** implements com.android.server.notification.NotificationSignalExtractor
 
+# OEM provided DisplayAreaPolicy.Provider defined in frameworks/base/core/res/res/values/config.xml.
+-keep,allowoptimization,allowaccessmodification class com.android.server.wm.** implements com.android.server.wm.DisplayAreaPolicy$Provider
+
 # JNI keep rules
 # TODO(b/210510433): Revisit and fix with @Keep, or consider auto-generating from
 # frameworks/base/services/core/jni/onload.cpp.
@@ -67,6 +81,7 @@
 -keep,allowoptimization,allowaccessmodification class com.android.server.location.gnss.GnssConfiguration$HalInterfaceVersion { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.location.gnss.GnssPowerStats { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.location.gnss.hal.GnssNative { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.pm.PackageManagerShellCommandDataLoader { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.sensors.SensorManagerInternal$ProximityActiveListener { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.sensors.SensorService { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareImpl$AudioSessionProvider$AudioSession { *; }

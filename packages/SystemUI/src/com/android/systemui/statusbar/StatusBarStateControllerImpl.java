@@ -44,6 +44,7 @@ import android.view.animation.Interpolator;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.logging.UiEventLogger;
@@ -56,7 +57,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController.StateList
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -174,8 +174,19 @@ public class StatusBarStateControllerImpl implements
         if (state > MAX_STATE || state < MIN_STATE) {
             throw new IllegalArgumentException("Invalid state " + state);
         }
-        if (!force && state == mState) {
+
+        // Unless we're explicitly asked to force the state change, don't apply the new state if
+        // it's identical to both the current and upcoming states, since that should not be
+        // necessary.
+        if (!force && state == mState && state == mUpcomingState) {
             return false;
+        }
+
+        if (state != mUpcomingState) {
+            Log.d(TAG, "setState: requested state " + StatusBarState.toString(state)
+                    + "!= upcomingState: " + StatusBarState.toString(mUpcomingState) + ". "
+                    + "This usually means the status bar state transition was interrupted before "
+                    + "the upcoming state could be applied.");
         }
 
         // Record the to-be mState and mLastState
@@ -194,7 +205,7 @@ public class StatusBarStateControllerImpl implements
             }
             mLastState = mState;
             mState = state;
-            mUpcomingState = state;
+            updateUpcomingState(mState);
             mUiEventLogger.log(StatusBarStateEvent.fromState(mState));
             Trace.instantForTrack(Trace.TRACE_TAG_APP, "UI Events", "StatusBarState " + tag);
             for (RankedListener rl : new ArrayList<>(mListeners)) {
@@ -212,8 +223,18 @@ public class StatusBarStateControllerImpl implements
 
     @Override
     public void setUpcomingState(int nextState) {
-        mUpcomingState = nextState;
-        recordHistoricalState(mUpcomingState /* newState */, mState /* lastState */, true);
+        recordHistoricalState(nextState /* newState */, mState /* lastState */, true);
+        updateUpcomingState(nextState);
+
+    }
+
+    private void updateUpcomingState(int upcomingState) {
+        if (mUpcomingState != upcomingState) {
+            mUpcomingState = upcomingState;
+            for (RankedListener rl : new ArrayList<>(mListeners)) {
+                rl.mListener.onUpcomingStateChanged(mUpcomingState);
+            }
+        }
     }
 
     @Override
@@ -315,10 +336,24 @@ public class StatusBarStateControllerImpl implements
                     ? Interpolators.FAST_OUT_SLOW_IN
                     : Interpolators.TOUCH_RESPONSE_REVERSE;
         }
-        mDarkAnimator = ObjectAnimator.ofFloat(this, SET_DARK_AMOUNT_PROPERTY, mDozeAmountTarget);
-        mDarkAnimator.setInterpolator(Interpolators.LINEAR);
-        mDarkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
-        mDarkAnimator.addListener(new AnimatorListenerAdapter() {
+        if (mDozeAmount == 1f && !mIsDozing) {
+            // Workaround to force relayoutWindow to be called a frame earlier. Otherwise, if
+            // mDozeAmount = 1f, then neither start() nor the first frame of the animation will
+            // cause the scrim opacity to change, which ultimately results in an extra relayout and
+            // causes us to miss a frame. By settings the doze amount to be <1f a frame earlier,
+            // we can batch the relayout with the one in NotificationShadeWindowControllerImpl.
+            setDozeAmountInternal(0.99f);
+        }
+        mDarkAnimator = createDarkAnimator();
+    }
+
+    @VisibleForTesting
+    protected ObjectAnimator createDarkAnimator() {
+        ObjectAnimator darkAnimator = ObjectAnimator.ofFloat(
+                this, SET_DARK_AMOUNT_PROPERTY, mDozeAmountTarget);
+        darkAnimator.setInterpolator(Interpolators.LINEAR);
+        darkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
+        darkAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationCancel(Animator animation) {
                 cancelInteractionJankMonitor();
@@ -334,7 +369,8 @@ public class StatusBarStateControllerImpl implements
                 beginInteractionJankMonitor();
             }
         });
-        mDarkAnimator.start();
+        darkAnimator.start();
+        return darkAnimator;
     }
 
     private void setDozeAmountInternal(float dozeAmount) {
@@ -420,8 +456,9 @@ public class StatusBarStateControllerImpl implements
      * notified before unranked, and we will sort ranked listeners from low to high
      *
      * @deprecated This method exists only to solve latent inter-dependencies from refactoring
-     * StatusBarState out of StatusBar.java. Any new listeners should be built not to need ranking
-     * (i.e., they are non-dependent on the order of operations of StatusBarState listeners).
+     * StatusBarState out of CentralSurfaces.java. Any new listeners should be built not to need
+     * ranking (i.e., they are non-dependent on the order of operations of StatusBarState
+     * listeners).
      */
     @Deprecated
     @Override
@@ -507,11 +544,11 @@ public class StatusBarStateControllerImpl implements
      * Returns String readable state of status bar from {@link StatusBarState}
      */
     public static String describe(int state) {
-        return StatusBarState.toShortString(state);
+        return StatusBarState.toString(state);
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("StatusBarStateController: ");
         pw.println(" mState=" + mState + " (" + describe(mState) + ")");
         pw.println(" mLastState=" + mLastState + " (" + describe(mLastState) + ")");

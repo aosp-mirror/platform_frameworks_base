@@ -22,7 +22,7 @@ import android.view.ViewGroup;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
-import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
+import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -175,7 +175,7 @@ public interface NotificationListContainer extends
     /**
      * Apply parameters of the expand animation to the layout
      */
-    default void applyExpandAnimationParams(ExpandAnimationParameters params) {}
+    default void applyLaunchAnimationParams(LaunchAnimationParameters params) {}
 
     default void setExpandingNotification(ExpandableNotificationRow row) {}
 

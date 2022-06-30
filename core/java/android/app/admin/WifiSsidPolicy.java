@@ -25,6 +25,7 @@ import android.util.ArraySet;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -132,6 +133,23 @@ public final class WifiSsidPolicy implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mPolicyType);
         dest.writeArraySet(mSsids);
+    }
+
+    @Override
+    public boolean equals(Object thatObject) {
+        if (this == thatObject) {
+            return true;
+        }
+        if (!(thatObject instanceof WifiSsidPolicy)) {
+            return false;
+        }
+        WifiSsidPolicy that = (WifiSsidPolicy) thatObject;
+        return mPolicyType == that.mPolicyType && Objects.equals(mSsids, that.mSsids);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mPolicyType, mSsids);
     }
 
     @Override

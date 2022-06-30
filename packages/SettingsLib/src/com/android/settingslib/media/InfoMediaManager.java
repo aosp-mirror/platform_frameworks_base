@@ -15,13 +15,13 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.TYPE_BLE_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_DOCK;
 import static android.media.MediaRoute2Info.TYPE_GROUP;
 import static android.media.MediaRoute2Info.TYPE_HDMI;
 import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
-import static android.media.MediaRoute2Info.TYPE_BLE_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 import static android.media.MediaRoute2Info.TYPE_UNKNOWN;
@@ -31,6 +31,8 @@ import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
+
+import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
@@ -161,6 +163,31 @@ public class InfoMediaManager extends MediaManager {
             return null;
         }
         return sessionInfos.get(sessionInfos.size() - 1);
+    }
+
+    boolean isRoutingSessionAvailableForVolumeControl() {
+        if (mVolumeAdjustmentForRemoteGroupSessions) {
+            return true;
+        }
+        List<RoutingSessionInfo> sessions =
+                mRouterManager.getRoutingSessions(mPackageName);
+        boolean foundNonSystemSession = false;
+        boolean isGroup = false;
+        for (RoutingSessionInfo session : sessions) {
+            if (!session.isSystemSession()) {
+                foundNonSystemSession = true;
+                int selectedRouteCount = session.getSelectedRoutes().size();
+                if (selectedRouteCount > 1) {
+                    isGroup = true;
+                    break;
+                }
+            }
+        }
+        if (!foundNonSystemSession) {
+            Log.d(TAG, "No routing session for " + mPackageName);
+            return false;
+        }
+        return !isGroup;
     }
 
     /**
@@ -440,6 +467,7 @@ public class InfoMediaManager extends MediaManager {
         RoutingSessionInfo routingSessionInfo = getRoutingSessionInfo(packageName);
         if (routingSessionInfo != null) {
             infos.addAll(mRouterManager.getSelectedRoutes(routingSessionInfo));
+            infos.addAll(mRouterManager.getSelectableRoutes(routingSessionInfo));
         }
         final List<MediaRoute2Info> transferableRoutes =
                 mRouterManager.getTransferableRoutes(packageName);
@@ -471,9 +499,11 @@ public class InfoMediaManager extends MediaManager {
                 mediaDevice = new InfoMediaDevice(mContext, mRouterManager, route,
                         mPackageName);
                 if (!TextUtils.isEmpty(mPackageName)
-                        && getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())
-                        && mCurrentConnectedDevice == null) {
-                    mCurrentConnectedDevice = mediaDevice;
+                        && getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())) {
+                    mediaDevice.setState(STATE_SELECTED);
+                    if (mCurrentConnectedDevice == null) {
+                        mCurrentConnectedDevice = mediaDevice;
+                    }
                 }
                 break;
             case TYPE_BUILTIN_SPEAKER:

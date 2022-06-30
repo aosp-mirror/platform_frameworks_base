@@ -289,9 +289,9 @@ public class TareController extends StateController {
             };
 
     /**
-     * List of jobs that started while the UID was in the TOP state. There will be no more than
-     * 16 ({@link JobSchedulerService#MAX_JOB_CONTEXTS_COUNT}) running at once, so an ArraySet is
-     * fine.
+     * List of jobs that started while the UID was in the TOP state. There will usually be no more
+     * than {@value JobConcurrencyManager#MAX_STANDARD_JOB_CONCURRENCY} running at once, so an
+     * ArraySet is fine.
      */
     @GuardedBy("mLock")
     private final ArraySet<JobStatus> mTopStartedJobs = new ArraySet<>();
@@ -528,7 +528,7 @@ public class TareController extends StateController {
     @NonNull
     private ActionBill getRunningBill(JobStatus jobStatus) {
         // TODO: factor in network cost when available
-        if (jobStatus.shouldTreatAsExpeditedJob()) {
+        if (jobStatus.shouldTreatAsExpeditedJob() || jobStatus.startedAsExpeditedJob) {
             if (jobStatus.getEffectivePriority() == JobInfo.PRIORITY_MAX) {
                 return BILL_JOB_RUNNING_MAX_EXPEDITED;
             } else {
@@ -636,10 +636,6 @@ public class TareController extends StateController {
             return true;
         }
         if (mService.isCurrentlyRunningLocked(jobStatus)) {
-            if (jobStatus.isRequestedExpeditedJob()) {
-                return canAffordBillLocked(jobStatus, getRunningBill(jobStatus))
-                        || canAffordBillLocked(jobStatus, BILL_JOB_RUNNING_DEFAULT);
-            }
             return canAffordBillLocked(jobStatus, getRunningBill(jobStatus));
         }
 

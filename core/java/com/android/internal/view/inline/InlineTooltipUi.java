@@ -15,24 +15,30 @@
  */
 package com.android.internal.view.inline;
 
+import static android.view.autofill.AutofillManager.DEVICE_CONFIG_AUTOFILL_TOOLTIP_SHOW_UP_DELAY;
 import static android.view.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.transition.Transition;
 import android.util.Slog;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.inline.InlineContentView;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 
 /**
  * UI container for the inline suggestion tooltip.
@@ -40,12 +46,24 @@ import java.io.PrintWriter;
 public final class InlineTooltipUi extends PopupWindow implements AutoCloseable {
     private static final String TAG = "InlineTooltipUi";
 
+    private static final int FIRST_TIME_SHOW_DEFAULT_DELAY_MS = 250;
+
     private final WindowManager mWm;
     private final ViewGroup mContentContainer;
 
     private boolean mShowing;
 
     private WindowManager.LayoutParams mWindowLayoutParams;
+
+    private DelayShowRunnable mDelayShowTooltip;
+
+    private boolean mHasEverDetached;
+
+    private boolean mDelayShowAtStart = true;
+    private boolean mDelaying = false;
+    private int mShowDelayConfigMs;
+
+    private final Rect mTmpRect = new Rect();
 
     private final View.OnAttachStateChangeListener mAnchorOnAttachStateChangeListener =
             new View.OnAttachStateChangeListener() {
@@ -56,6 +74,7 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
 
                 @Override
                 public void onViewDetachedFromWindow(View v) {
+                    mHasEverDetached = true;
                     dismiss();
                 }
             };
@@ -66,6 +85,13 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
                 @Override
                 public void onLayoutChange(View v, int left, int top, int right, int bottom,
                         int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    if (mHasEverDetached) {
+                        // If the tooltip is ever detached, skip adjusting the position,
+                        // because it only accepts to attach once and does not show again
+                        // after detaching.
+                        return;
+                    }
+
                     if (mHeight != bottom - top) {
                         mHeight = bottom - top;
                         adjustPosition();
@@ -76,6 +102,13 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
     public InlineTooltipUi(@NonNull Context context) {
         mContentContainer = new LinearLayout(new ContextWrapper(context));
         mWm = context.getSystemService(WindowManager.class);
+
+        // That's a default delay time, and it will scale via the value of
+        // Settings.Global.ANIMATOR_DURATION_SCALE
+        mShowDelayConfigMs = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_AUTOFILL_TOOLTIP_SHOW_UP_DELAY,
+                FIRST_TIME_SHOW_DEFAULT_DELAY_MS);
 
         setTouchModal(false);
         setOutsideTouchable(true);
@@ -95,7 +128,7 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
 
     @Override
     public void close() {
-        hide();
+        dismiss();
     }
 
     @Override
@@ -117,14 +150,57 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
      * The effective {@code update} method that should be called by its clients.
      */
     public void update(View anchor) {
+        if (anchor == null) {
+            final View oldAnchor = getAnchor();
+            if (oldAnchor != null) {
+                removeDelayShowTooltip(oldAnchor);
+            }
+            return;
+        }
+
+        if (mDelayShowAtStart) {
+            // To avoid showing when the anchor is doing the fade in animation. That will
+            // cause the tooltip to show in the wrong position and jump at the start.
+            mDelayShowAtStart = false;
+            mDelaying = true;
+
+            if (mDelayShowTooltip == null) {
+                mDelayShowTooltip = new DelayShowRunnable(anchor);
+            }
+
+            int delayTimeMs = mShowDelayConfigMs;
+            try {
+                final float scale = Settings.Global.getFloat(
+                        anchor.getContext().getContentResolver(),
+                        Settings.Global.ANIMATOR_DURATION_SCALE);
+                delayTimeMs *= scale;
+            } catch (Settings.SettingNotFoundException e) {
+                // do nothing
+            }
+            anchor.postDelayed(mDelayShowTooltip, delayTimeMs);
+        } else if (!mDelaying) {
+            // Note: If we are going to reuse the tooltip, we need to take care the delay in
+            // the case that update for the new anchor.
+            updateInner(anchor);
+        }
+    }
+
+    private void removeDelayShowTooltip(View anchor) {
+        if (mDelayShowTooltip != null) {
+            anchor.removeCallbacks(mDelayShowTooltip);
+            mDelayShowTooltip = null;
+        }
+    }
+
+    private void updateInner(View anchor) {
+        if (mHasEverDetached) {
+            return;
+        }
         // set to the application type with the highest z-order
         setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL);
 
-        // The first time to show up, the height of tooltip is zero,
-        // so set the offset Y to 2 * anchor height.
-        final int achoredHeight = mContentContainer.getHeight();
-        final int offsetY = (achoredHeight == 0)
-                ? -anchor.getHeight() << 1 : -anchor.getHeight() - achoredHeight;
+        final int offsetY = -anchor.getHeight() - getPreferHeight(anchor);
+
         if (!isShowing()) {
             setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
             setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
@@ -133,6 +209,34 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
             update(anchor, 0 , offsetY, WindowManager.LayoutParams.WRAP_CONTENT,
                     WindowManager.LayoutParams.WRAP_CONTENT);
         }
+    }
+
+    private int getPreferHeight(View anchor) {
+        // The first time to show up, the height of tooltip is zero, so make its height
+        // the same as anchor.
+        final int achoredHeight = mContentContainer.getHeight();
+        return (achoredHeight == 0) ? anchor.getHeight() : achoredHeight;
+    }
+
+    @Override
+    protected boolean findDropDownPosition(View anchor, WindowManager.LayoutParams outParams,
+            int xOffset, int yOffset, int width, int height, int gravity, boolean allowScroll) {
+        boolean isAbove = super.findDropDownPosition(anchor, outParams, xOffset, yOffset, width,
+                height, gravity, allowScroll);
+        // Make the tooltips y fo position is above or under the parent of the anchor,
+        // otherwise suggestions doesn't clickable.
+        ViewParent parent = anchor.getParent();
+        if (parent instanceof View) {
+            final Rect r = mTmpRect;
+            ((View) parent).getGlobalVisibleRect(r);
+            if (isAbove) {
+                outParams.y = r.top - getPreferHeight(anchor);
+            } else {
+                outParams.y = r.bottom + 1;
+            }
+        }
+
+        return isAbove;
     }
 
     @Override
@@ -175,7 +279,9 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
         final View anchor = getAnchor();
         if (anchor != null) {
             anchor.removeOnAttachStateChangeListener(mAnchorOnAttachStateChangeListener);
+            removeDelayShowTooltip(anchor);
         }
+        mHasEverDetached = true;
         super.detachFromAnchor();
     }
 
@@ -185,7 +291,6 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
             return;
         }
 
-        setShowing(false);
         setTransitioningToDismiss(true);
 
         hide();
@@ -193,6 +298,7 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
         if (getOnDismissListener() != null) {
             getOnDismissListener().onDismiss();
         }
+        super.dismiss();
     }
 
     private void adjustPosition() {
@@ -202,15 +308,15 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
     }
 
     private void show(WindowManager.LayoutParams params) {
-        if (sVerbose) {
-            Slog.v(TAG, "show()");
-        }
         mWindowLayoutParams = params;
 
         try {
             params.packageName = "android";
             params.setTitle("Autofill Inline Tooltip"); // Title is set for debugging purposes
             if (!mShowing) {
+                if (sVerbose) {
+                    Slog.v(TAG, "show()");
+                }
                 params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
                 params.privateFlags |=
@@ -232,11 +338,11 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
     }
 
     private void hide() {
-        if (sVerbose) {
-            Slog.v(TAG, "hide()");
-        }
         try {
             if (mShowing) {
+                if (sVerbose) {
+                    Slog.v(TAG, "hide()");
+                }
                 mContentContainer.removeOnLayoutChangeListener(mAnchoredOnLayoutChangeListener);
                 mWm.removeView(mContentContainer);
                 mShowing = false;
@@ -334,6 +440,28 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
                 final int[] coordinates = mContentContainer.getLocationOnScreen();
                 pw.print(coordinates[0]); pw.print("x"); pw.println(coordinates[1]);
             }
+        }
+    }
+
+    private class DelayShowRunnable implements Runnable {
+        WeakReference<View> mAnchor;
+
+        DelayShowRunnable(View anchor) {
+            mAnchor = new WeakReference<>(anchor);
+        }
+
+        @Override
+        public void run() {
+            mDelaying = false;
+            final View anchor = mAnchor.get();
+            if (anchor != null) {
+                updateInner(anchor);
+            }
+        }
+
+        public void setAnchor(View anchor) {
+            mAnchor.clear();
+            mAnchor = new WeakReference<>(anchor);
         }
     }
 }

@@ -22,7 +22,6 @@ import android.app.IUidObserver
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Person
-import android.content.Intent
 import android.service.notification.NotificationListenerService.REASON_USER_STOPPED
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -205,17 +204,15 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     /** Regression test for b/194731244. */
     @Test
-    fun onEntryUpdated_calledManyTimes_uidObserverUnregisteredManyTimes() {
-        val numCalls = 4
-
-        for (i in 0 until numCalls) {
+    fun onEntryUpdated_calledManyTimes_uidObserverOnlyRegisteredOnce() {
+        for (i in 0 until 4) {
             // Re-create the notification each time so that it's considered a different object and
-            // observers will get re-registered (and hopefully unregistered).
+            // will re-trigger the whole flow.
             notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
         }
 
-        // There should be 1 observer still registered, so we should unregister n-1 times.
-        verify(mockIActivityManager, times(numCalls - 1)).unregisterUidObserver(any())
+        verify(mockIActivityManager, times(1))
+            .registerUidObserver(any(), any(), any(), any())
     }
 
     /** Regression test for b/216248574. */
@@ -462,6 +459,19 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 .isEqualTo(OngoingCallLogger.OngoingCallEvents.ONGOING_CALL_CLICKED.id)
     }
 
+    /** Regression test for b/212467440. */
+    @Test
+    fun chipClicked_activityStarterTriggeredWithUnmodifiedIntent() {
+        val notifEntry = createOngoingCallNotifEntry()
+        val pendingIntent = notifEntry.sbn.notification.contentIntent
+        notifCollectionListener.onEntryUpdated(notifEntry)
+
+        chipView.performClick()
+
+        // Ensure that the sysui didn't modify the notification's intent -- see b/212467440.
+        verify(mockActivityStarter).postStartActivityDismissingKeyguard(eq(pendingIntent), any())
+    }
+
     @Test
     fun notifyChipVisibilityChanged_visibleEventLogged() {
         controller.notifyChipVisibilityChanged(true)
@@ -603,7 +613,6 @@ class OngoingCallControllerTest : SysuiTestCase() {
             notificationEntryBuilder.modifyNotification(context).setContentIntent(null)
         } else {
             val contentIntent = mock(PendingIntent::class.java)
-            `when`(contentIntent.intent).thenReturn(mock(Intent::class.java))
             notificationEntryBuilder.modifyNotification(context).setContentIntent(contentIntent)
         }
 

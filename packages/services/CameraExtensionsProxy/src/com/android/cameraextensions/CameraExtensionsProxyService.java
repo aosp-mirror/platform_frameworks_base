@@ -19,6 +19,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Camera;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -123,15 +124,21 @@ public class CameraExtensionsProxyService extends Service {
 
     private static final String CAMERA_EXTENSION_VERSION_NAME =
             "androidx.camera.extensions.impl.ExtensionVersionImpl";
-    private static final String LATEST_VERSION = "1.2.0";
+    private static final String LATEST_VERSION = "1.3.0";
+    // No support for the init sequence
     private static final String NON_INIT_VERSION_PREFIX = "1.0";
+    // Support advanced API and latency queries
     private static final String ADVANCED_VERSION_PREFIX = "1.2";
+    // Support for the capture request & result APIs
     private static final String RESULTS_VERSION_PREFIX = "1.3";
+    private static final String[] ADVANCED_VERSION_PREFIXES = {ADVANCED_VERSION_PREFIX,
+            RESULTS_VERSION_PREFIX};
     private static final String[] SUPPORTED_VERSION_PREFIXES = {RESULTS_VERSION_PREFIX,
             ADVANCED_VERSION_PREFIX, "1.1", NON_INIT_VERSION_PREFIX};
     private static final boolean EXTENSIONS_PRESENT = checkForExtensions();
     private static final String EXTENSIONS_VERSION = EXTENSIONS_PRESENT ?
             (new ExtensionVersionImpl()).checkApiVersion(LATEST_VERSION) : null;
+    private static final boolean LATENCY_API_SUPPORTED = checkForLatencyAPI();
     private static final boolean ADVANCED_API_SUPPORTED = checkForAdvancedAPI();
     private static final boolean INIT_API_SUPPORTED = EXTENSIONS_PRESENT &&
             (!EXTENSIONS_VERSION.startsWith(NON_INIT_VERSION_PREFIX));
@@ -142,14 +149,30 @@ public class CameraExtensionsProxyService extends Service {
     private HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
     private CameraManager mCameraManager;
 
-    private static boolean checkForAdvancedAPI() {
-        if (EXTENSIONS_PRESENT && EXTENSIONS_VERSION.startsWith(ADVANCED_VERSION_PREFIX)) {
-            try {
-                return (new ExtensionVersionImpl()).isAdvancedExtenderImplemented();
-            } catch (NoSuchMethodError e) {
-                // This could happen in case device specific extension implementations are using an
-                // older extension API but incorrectly set the extension version.
+    private static boolean checkForLatencyAPI() {
+        if (!EXTENSIONS_PRESENT) {
+            return false;
+        }
+
+        for (String advancedVersions : ADVANCED_VERSION_PREFIXES) {
+            if (EXTENSIONS_VERSION.startsWith(advancedVersions)) {
+                return true;
             }
+        }
+
+        return false;
+    }
+
+    private static boolean checkForAdvancedAPI() {
+        if (!checkForLatencyAPI()) {
+            return false;
+        }
+
+        try {
+            return (new ExtensionVersionImpl()).isAdvancedExtenderImplemented();
+        } catch (NoSuchMethodError e) {
+            // This could happen in case device specific extension implementations are using
+            // an older extension API but incorrectly set the extension version.
         }
 
         return false;
@@ -291,7 +314,7 @@ public class CameraExtensionsProxyService extends Service {
                 if (INIT_API_SUPPORTED) {
                     if (mActiveClients.isEmpty()) {
                         InitializerFuture status = new InitializerFuture();
-                        InitializerImpl.init(EXTENSIONS_VERSION, ctx, new InitializeHandler(status),
+                        InitializerImpl.init(LATEST_VERSION, ctx, new InitializeHandler(status),
                                 new HandlerExecutor(mHandler));
                         boolean initSuccess;
                         try {
@@ -752,13 +775,65 @@ public class CameraExtensionsProxyService extends Service {
         public ISessionProcessorImpl getSessionProcessor() {
             return new SessionProcessorImplStub(mAdvancedExtender.createSessionProcessor());
         }
+
+        @Override
+        public CameraMetadataNative getAvailableCaptureRequestKeys(String cameraId) {
+            if (RESULT_API_SUPPORTED) {
+                List<CaptureRequest.Key> supportedCaptureKeys =
+                        mAdvancedExtender.getAvailableCaptureRequestKeys();
+
+                if ((supportedCaptureKeys != null) && !supportedCaptureKeys.isEmpty()) {
+                    CameraMetadataNative ret = new CameraMetadataNative();
+                    long vendorId = mMetadataVendorIdMap.containsKey(cameraId) ?
+                            mMetadataVendorIdMap.get(cameraId) : Long.MAX_VALUE;
+                    ret.setVendorId(vendorId);
+                    int requestKeyTags [] = new int[supportedCaptureKeys.size()];
+                    int i = 0;
+                    for (CaptureRequest.Key key : supportedCaptureKeys) {
+                        requestKeyTags[i++] = CameraMetadataNative.getTag(key.getName(), vendorId);
+                    }
+                    ret.set(CameraCharacteristics.REQUEST_AVAILABLE_REQUEST_KEYS, requestKeyTags);
+
+                    return ret;
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        public CameraMetadataNative getAvailableCaptureResultKeys(String cameraId) {
+            if (RESULT_API_SUPPORTED) {
+                List<CaptureResult.Key> supportedResultKeys =
+                        mAdvancedExtender.getAvailableCaptureResultKeys();
+
+                if ((supportedResultKeys != null) && !supportedResultKeys.isEmpty()) {
+                    CameraMetadataNative ret = new CameraMetadataNative();
+                    long vendorId = mMetadataVendorIdMap.containsKey(cameraId) ?
+                            mMetadataVendorIdMap.get(cameraId) : Long.MAX_VALUE;
+                    ret.setVendorId(vendorId);
+                    int resultKeyTags [] = new int[supportedResultKeys.size()];
+                    int i = 0;
+                    for (CaptureResult.Key key : supportedResultKeys) {
+                        resultKeyTags[i++] = CameraMetadataNative.getTag(key.getName(), vendorId);
+                    }
+                    ret.set(CameraCharacteristics.REQUEST_AVAILABLE_RESULT_KEYS, resultKeyTags);
+
+                    return ret;
+                }
+            }
+
+            return null;
+        }
     }
 
     private class CaptureCallbackStub implements SessionProcessorImpl.CaptureCallback {
         private final ICaptureCallback mCaptureCallback;
+        private final String mCameraId;
 
-        private CaptureCallbackStub(ICaptureCallback captureCallback) {
+        private CaptureCallbackStub(ICaptureCallback captureCallback, String cameraId) {
             mCaptureCallback = captureCallback;
+            mCameraId = cameraId;
         }
 
         @Override
@@ -818,6 +893,29 @@ public class CameraExtensionsProxyService extends Service {
                     Log.e(TAG, "Failed to notify capture sequence abort due to remote " +
                             "exception!");
                 }
+            }
+        }
+
+        @Override
+        public void onCaptureCompleted(long timestamp, int requestId,
+                Map<CaptureResult.Key, Object> result) {
+
+            if (result == null) {
+                Log.e(TAG, "Invalid capture result received!");
+            }
+
+            CameraMetadataNative captureResults = new CameraMetadataNative();
+            if (mMetadataVendorIdMap.containsKey(mCameraId)) {
+                captureResults.setVendorId(mMetadataVendorIdMap.get(mCameraId));
+            }
+            for (Map.Entry<CaptureResult.Key, Object> entry : result.entrySet()) {
+                captureResults.set(entry.getKey(), entry.getValue());
+            }
+
+            try {
+                mCaptureCallback.onCaptureCompleted(timestamp, requestId, captureResults);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to notify capture complete due to remote exception!");
             }
         }
     }
@@ -1059,41 +1157,13 @@ public class CameraExtensionsProxyService extends Service {
             CameraSessionConfig ret = new CameraSessionConfig();
             ret.outputConfigs = new ArrayList<>();
             for (Camera2OutputConfigImpl output : outputConfigs) {
-                CameraOutputConfig entry = new CameraOutputConfig();
-                entry.outputId = new OutputConfigId();
-                entry.outputId.id = output.getId();
-                entry.physicalCameraId = output.getPhysicalCameraId();
-                entry.surfaceGroupId = output.getSurfaceGroupId();
-                if (output instanceof SurfaceOutputConfigImpl) {
-                    SurfaceOutputConfigImpl surfaceConfig = (SurfaceOutputConfigImpl) output;
-                    entry.type = CameraOutputConfig.TYPE_SURFACE;
-                    entry.surface = surfaceConfig.getSurface();
-                } else if (output instanceof ImageReaderOutputConfigImpl) {
-                    ImageReaderOutputConfigImpl imageReaderOutputConfig =
-                            (ImageReaderOutputConfigImpl) output;
-                    entry.type = CameraOutputConfig.TYPE_IMAGEREADER;
-                    entry.size = new android.hardware.camera2.extension.Size();
-                    entry.size.width = imageReaderOutputConfig.getSize().getWidth();
-                    entry.size.height = imageReaderOutputConfig.getSize().getHeight();
-                    entry.imageFormat = imageReaderOutputConfig.getImageFormat();
-                    entry.capacity = imageReaderOutputConfig.getMaxImages();
-                } else if (output instanceof MultiResolutionImageReaderOutputConfigImpl) {
-                    MultiResolutionImageReaderOutputConfigImpl multiResReaderConfig =
-                            (MultiResolutionImageReaderOutputConfigImpl) output;
-                    entry.type = CameraOutputConfig.TYPE_MULTIRES_IMAGEREADER;
-                    entry.imageFormat = multiResReaderConfig.getImageFormat();
-                    entry.capacity = multiResReaderConfig.getMaxImages();
-                } else {
-                    throw new IllegalStateException("Unknown output config type!");
-                }
+                CameraOutputConfig entry = getCameraOutputConfig(output);
                 List<Camera2OutputConfigImpl> sharedOutputs =
                         output.getSurfaceSharingOutputConfigs();
                 if ((sharedOutputs != null) && (!sharedOutputs.isEmpty())) {
-                    entry.surfaceSharingOutputConfigs = new ArrayList<>();
+                    entry.sharedSurfaceConfigs = new ArrayList<>();
                     for (Camera2OutputConfigImpl sharedOutput : sharedOutputs) {
-                        OutputConfigId outputId = new OutputConfigId();
-                        outputId.id = sharedOutput.getId();
-                        entry.surfaceSharingOutputConfigs.add(outputId);
+                        entry.sharedSurfaceConfigs.add(getCameraOutputConfig(sharedOutput));
                     }
                 }
                 ret.outputConfigs.add(entry);
@@ -1124,7 +1194,7 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public int startRepeating(ICaptureCallback callback) {
-            return mSessionProcessor.startRepeating(new CaptureCallbackStub(callback));
+            return mSessionProcessor.startRepeating(new CaptureCallbackStub(callback, mCameraId));
         }
 
         @Override
@@ -1133,12 +1203,29 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
-        public int startCapture(ICaptureCallback callback, int jpegRotation, int jpegQuality) {
+        public void setParameters(CaptureRequest captureRequest) {
             HashMap<CaptureRequest.Key<?>, Object> paramMap = new HashMap<>();
-            paramMap.put(CaptureRequest.JPEG_ORIENTATION, jpegRotation);
-            paramMap.put(CaptureRequest.JPEG_QUALITY, jpegQuality);
+            for (CaptureRequest.Key captureRequestKey : captureRequest.getKeys()) {
+                paramMap.put(captureRequestKey, captureRequest.get(captureRequestKey));
+            }
+
             mSessionProcessor.setParameters(paramMap);
-            return mSessionProcessor.startCapture(new CaptureCallbackStub(callback));
+        }
+
+        @Override
+        public int startTrigger(CaptureRequest captureRequest, ICaptureCallback callback) {
+            HashMap<CaptureRequest.Key<?>, Object> triggerMap = new HashMap<>();
+            for (CaptureRequest.Key captureRequestKey : captureRequest.getKeys()) {
+                triggerMap.put(captureRequestKey, captureRequest.get(captureRequestKey));
+            }
+
+            return mSessionProcessor.startTrigger(triggerMap,
+                    new CaptureCallbackStub(callback, mCameraId));
+        }
+
+        @Override
+        public int startCapture(ICaptureCallback callback) {
+            return mSessionProcessor.startCapture(new CaptureCallbackStub(callback, mCameraId));
         }
     }
 
@@ -1382,7 +1469,7 @@ public class CameraExtensionsProxyService extends Service {
         @Override
         public LatencyRange getEstimatedCaptureLatencyRange(
                 android.hardware.camera2.extension.Size outputSize) {
-            if (EXTENSIONS_VERSION.startsWith(ADVANCED_VERSION_PREFIX)) {
+            if (LATENCY_API_SUPPORTED) {
                 Size sz = new Size(outputSize.width, outputSize.height);
                 Range<Long> latencyRange = mImageExtender.getEstimatedCaptureLatencyRange(sz);
                 if (latencyRange != null) {
@@ -1760,5 +1847,37 @@ public class CameraExtensionsProxyService extends Service {
                 mParcelImage.fence = null;
             }
         }
+    }
+
+    private static CameraOutputConfig getCameraOutputConfig(Camera2OutputConfigImpl output) {
+        CameraOutputConfig ret = new CameraOutputConfig();
+        ret.outputId = new OutputConfigId();
+        ret.outputId.id = output.getId();
+        ret.physicalCameraId = output.getPhysicalCameraId();
+        ret.surfaceGroupId = output.getSurfaceGroupId();
+        if (output instanceof SurfaceOutputConfigImpl) {
+            SurfaceOutputConfigImpl surfaceConfig = (SurfaceOutputConfigImpl) output;
+            ret.type = CameraOutputConfig.TYPE_SURFACE;
+            ret.surface = surfaceConfig.getSurface();
+        } else if (output instanceof ImageReaderOutputConfigImpl) {
+            ImageReaderOutputConfigImpl imageReaderOutputConfig =
+                    (ImageReaderOutputConfigImpl) output;
+            ret.type = CameraOutputConfig.TYPE_IMAGEREADER;
+            ret.size = new android.hardware.camera2.extension.Size();
+            ret.size.width = imageReaderOutputConfig.getSize().getWidth();
+            ret.size.height = imageReaderOutputConfig.getSize().getHeight();
+            ret.imageFormat = imageReaderOutputConfig.getImageFormat();
+            ret.capacity = imageReaderOutputConfig.getMaxImages();
+        } else if (output instanceof MultiResolutionImageReaderOutputConfigImpl) {
+            MultiResolutionImageReaderOutputConfigImpl multiResReaderConfig =
+                    (MultiResolutionImageReaderOutputConfigImpl) output;
+            ret.type = CameraOutputConfig.TYPE_MULTIRES_IMAGEREADER;
+            ret.imageFormat = multiResReaderConfig.getImageFormat();
+            ret.capacity = multiResReaderConfig.getMaxImages();
+        } else {
+            throw new IllegalStateException("Unknown output config type!");
+        }
+
+        return ret;
     }
 }

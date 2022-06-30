@@ -73,7 +73,7 @@ import dagger.Subcomponent;
         SystemUIBinder.class,
         SystemUIModule.class,
         SystemUICoreStartableModule.class,
-        SystemUIDefaultModule.class})
+        ReferenceSystemUIModule.class})
 public interface SysUIComponent {
 
     /**

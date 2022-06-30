@@ -1414,11 +1414,9 @@ public class PackageParser {
         final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
         final ParseResult<android.content.pm.SigningDetails> result;
         if (skipVerify) {
-            // systemDir APKs are already trusted, save time by not verifying; since the signature
-            // is not verified and some system apps can have their V2+ signatures stripped allow
-            // pulling the certs from the jar signature.
+            // systemDir APKs are already trusted, save time by not verifying
             result = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(
-                    input, apkPath, SigningDetails.SignatureSchemeVersion.JAR);
+                    input, apkPath, minSignatureScheme);
         } else {
             result = ApkSignatureVerifier.verify(input, apkPath, minSignatureScheme);
         }
@@ -1944,19 +1942,26 @@ public class PackageParser {
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifest);
 
-        String str = sa.getNonConfigurationString(
-                com.android.internal.R.styleable.AndroidManifest_sharedUserId, 0);
-        if (str != null && str.length() > 0) {
-            String nameError = validateName(str, true, true);
-            if (nameError != null && !"android".equals(pkg.packageName)) {
-                outError[0] = "<manifest> specifies bad sharedUserId name \""
-                    + str + "\": " + nameError;
-                mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID;
-                return null;
+        int maxSdkVersion = 0;
+        if (PackageManager.ENABLE_SHARED_UID_MIGRATION) {
+            maxSdkVersion = sa.getInteger(
+                    com.android.internal.R.styleable.AndroidManifest_sharedUserMaxSdkVersion, 0);
+        }
+        if (maxSdkVersion == 0 || maxSdkVersion >= Build.VERSION.RESOURCES_SDK_INT) {
+            String str = sa.getNonConfigurationString(
+                    com.android.internal.R.styleable.AndroidManifest_sharedUserId, 0);
+            if (str != null && str.length() > 0) {
+                String nameError = validateName(str, true, true);
+                if (nameError != null && !"android".equals(pkg.packageName)) {
+                    outError[0] = "<manifest> specifies bad sharedUserId name \""
+                            + str + "\": " + nameError;
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID;
+                    return null;
+                }
+                pkg.mSharedUserId = str.intern();
+                pkg.mSharedUserLabel = sa.getResourceId(
+                        com.android.internal.R.styleable.AndroidManifest_sharedUserLabel, 0);
             }
-            pkg.mSharedUserId = str.intern();
-            pkg.mSharedUserLabel = sa.getResourceId(
-                    com.android.internal.R.styleable.AndroidManifest_sharedUserLabel, 0);
         }
 
         pkg.installLocation = sa.getInteger(

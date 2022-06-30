@@ -284,7 +284,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
                 .setCreateActivity(true).build().getTopMostActivity();
         activity2.getTask().setResumedActivity(activity2, "test");
 
-        mAtm.mAmInternal.deletePendingTopUid(activity1.getUid());
+        mAtm.mAmInternal.deletePendingTopUid(activity1.getUid(), Long.MAX_VALUE);
         clearInvocations(mAtm);
         activity1.moveFocusableActivityToTop("test");
         assertTrue(mAtm.mAmInternal.isPendingTopUid(activity1.getUid()));

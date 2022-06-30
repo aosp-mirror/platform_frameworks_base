@@ -187,6 +187,14 @@ public class AssistManager {
                     }
 
                     @Override
+                    public void onVoiceSessionWindowVisibilityChanged(boolean visible)
+                            throws RemoteException {
+                        if (VERBOSE) {
+                            Log.v(TAG, "Window visibility changed: " + visible);
+                        }
+                    }
+
+                    @Override
                     public void onSetUiHints(Bundle hints) {
                         if (VERBOSE) {
                             Log.v(TAG, "UI hints received");

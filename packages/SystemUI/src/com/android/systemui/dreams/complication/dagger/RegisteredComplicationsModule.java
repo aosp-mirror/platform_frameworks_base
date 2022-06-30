@@ -24,10 +24,12 @@ import dagger.Module;
  * Module for all components with corresponding dream layer complications registered in
  * {@link SystemUIBinder}.
  */
-@Module(subcomponents = {
-        DreamClockTimeComplicationComponent.class,
-        DreamClockDateComplicationComponent.class,
-        DreamWeatherComplicationComponent.class,
-})
+@Module(includes = {
+                DreamClockDateComplicationModule.class,
+                DreamClockTimeComplicationModule.class,
+        },
+        subcomponents = {
+                DreamWeatherComplicationComponent.class,
+        })
 public interface RegisteredComplicationsModule {
 }

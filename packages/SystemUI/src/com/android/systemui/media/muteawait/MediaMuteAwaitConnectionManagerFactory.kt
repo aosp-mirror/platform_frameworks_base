@@ -30,6 +30,7 @@ import javax.inject.Inject
 class MediaMuteAwaitConnectionManagerFactory @Inject constructor(
     private val mediaFlags: MediaFlags,
     private val context: Context,
+    private val logger: MediaMuteAwaitLogger,
     @Main private val mainExecutor: Executor
 ) {
     private val deviceIconUtil = DeviceIconUtil()
@@ -40,7 +41,7 @@ class MediaMuteAwaitConnectionManagerFactory @Inject constructor(
             return null
         }
         return MediaMuteAwaitConnectionManager(
-                mainExecutor, localMediaManager, context, deviceIconUtil
+                mainExecutor, localMediaManager, context, deviceIconUtil, logger
         )
     }
 }

@@ -123,6 +123,7 @@ public class CompanionDeviceDiscoveryService extends Service {
         intent.setAction(ACTION_START_DISCOVERY);
         intent.putExtra(EXTRA_ASSOCIATION_REQUEST, associationRequest);
         sStateLiveData.setValue(DiscoveryState.STARTING);
+        sScanResultsLiveData.setValue(Collections.emptyList());
 
         context.startService(intent);
     }
@@ -186,7 +187,6 @@ public class CompanionDeviceDiscoveryService extends Service {
         mStopAfterFirstMatch = request.isSingleDevice();
         mDiscoveryStarted = true;
         sStateLiveData.setValue(DiscoveryState.DISCOVERY_IN_PROGRESS);
-        sScanResultsLiveData.setValue(Collections.emptyList());
 
         final List<DeviceFilter<?>> allFilters = request.getDeviceFilters();
         final List<BluetoothDeviceFilter> btFilters =

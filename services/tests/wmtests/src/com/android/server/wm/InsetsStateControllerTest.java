@@ -30,7 +30,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
@@ -182,12 +181,13 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         // Make IME and stay visible during the test.
         mImeWindow.setHasSurface(true);
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
-        getController().onImeControlTargetChanged(mDisplayContent.getImeTarget(IME_TARGET_INPUT));
+        getController().onImeControlTargetChanged(
+                mDisplayContent.getImeInputTarget().getWindowState());
         final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
         requestedVisibilities.setVisibility(ITYPE_IME, true);
-        mDisplayContent.getImeTarget(IME_TARGET_INPUT).getWindow()
+        mDisplayContent.getImeInputTarget().getWindowState()
                 .setRequestedVisibilities(requestedVisibilities);
-        getController().onInsetsModified(mDisplayContent.getImeTarget(IME_TARGET_INPUT));
+        getController().onInsetsModified(mDisplayContent.getImeInputTarget().getWindowState());
 
         // Send our spy window (app) into the system so that we can detect the invocation.
         final WindowState win = createWindow(null, TYPE_APPLICATION, "app");
@@ -280,6 +280,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 rect.set(0, 1, 2, 3)));
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(ime, null, null);
         statusBar.setControllableInsetProvider(statusBarProvider);
+        statusBar.updateSourceFrame(statusBar.getFrame());
 
         statusBarProvider.onPostLayout();
 
@@ -446,6 +447,36 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNull(app.getInsetsState().peekSource(ITYPE_NAVIGATION_BAR));
         app.mAttrs.receiveInsetsIgnoringZOrder = true;
         assertNotNull(app.getInsetsState().peekSource(ITYPE_NAVIGATION_BAR));
+    }
+
+    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testGetInsetsHintForNewControl() {
+        final WindowState app1 = createTestWindow("app1");
+        final WindowState app2 = createTestWindow("app2");
+
+        makeWindowVisible(mImeWindow);
+        final InsetsSourceProvider imeInsetsProvider = getController().getSourceProvider(ITYPE_IME);
+        imeInsetsProvider.setWindowContainer(mImeWindow, null, null);
+        imeInsetsProvider.updateSourceFrame(mImeWindow.getFrame());
+
+        imeInsetsProvider.updateControlForTarget(app1, false);
+        imeInsetsProvider.onPostLayout();
+        final InsetsSourceControl control1 = imeInsetsProvider.getControl(app1);
+        assertNotNull(control1);
+        assertEquals(imeInsetsProvider.getSource().getFrame().height(),
+                control1.getInsetsHint().bottom);
+
+        // Simulate the IME control target updated from app1 to app2 when IME insets was invisible.
+        imeInsetsProvider.setServerVisible(false);
+        imeInsetsProvider.updateControlForTarget(app2, false);
+
+        // Verify insetsHint of the new control is same as last IME source frame after the layout.
+        imeInsetsProvider.onPostLayout();
+        final InsetsSourceControl control2 = imeInsetsProvider.getControl(app2);
+        assertNotNull(control2);
+        assertEquals(imeInsetsProvider.getSource().getFrame().height(),
+                control2.getInsetsHint().bottom);
     }
 
     private WindowState createTestWindow(String name) {

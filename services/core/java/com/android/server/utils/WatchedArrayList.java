@@ -273,6 +273,13 @@ public class WatchedArrayList<E> extends WatchableImpl
     }
 
     /**
+     * Return true if all the objects in the given collection are in this array list.
+     */
+    public boolean containsAll(Collection<?> c) {
+        return mStorage.containsAll(c);
+    }
+
+    /**
      * Ensure capacity.
      */
     public void ensureCapacity(int min) {
@@ -409,7 +416,7 @@ public class WatchedArrayList<E> extends WatchableImpl
         dst.mStorage.ensureCapacity(end);
         for (int i = 0; i < end; i++) {
             final E val = Snapshots.maybeSnapshot(src.get(i));
-            dst.add(i, val);
+            dst.mStorage.add(val);
         }
         dst.seal();
     }

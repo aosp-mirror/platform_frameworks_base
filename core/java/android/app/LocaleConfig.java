@@ -45,7 +45,9 @@ import java.util.Set;
  * referenced in the manifest via {@code android:localeConfig} on
  * {@code <application>}.
  *
- * For more information, see TODO(b/214154050): add link to guide
+ * <p>For more information, see
+ * <a href="https://developer.android.com/about/versions/13/features/app-languages#use-localeconfig">
+ * the section on per-app language preferences</a>.
  *
  * @attr ref android.R.styleable#LocaleConfig_Locale_name
  * @attr ref android.R.styleable#AndroidManifestApplication_localeConfig
@@ -97,7 +99,7 @@ public class LocaleConfig {
             XmlResourceParser parser = res.getXml(resId);
             parseLocaleConfig(parser, res);
         } catch (Resources.NotFoundException e) {
-            Slog.w(TAG, "The resource file pointed to by the given resource ID isn't found.", e);
+            Slog.w(TAG, "The resource file pointed to by the given resource ID isn't found.");
             mStatus = STATUS_NOT_SPECIFIED;
         } catch (XmlPullParserException | IOException e) {
             Slog.w(TAG, "Failed to parse XML configuration from "

@@ -32,6 +32,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.ShellCommandHandler;
@@ -66,6 +67,7 @@ public class WMShellTest extends SysuiTestCase {
 
     @Mock CommandQueue mCommandQueue;
     @Mock ConfigurationController mConfigurationController;
+    @Mock KeyguardStateController mKeyguardStateController;
     @Mock KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock NavigationModeController mNavigationModeController;
     @Mock ScreenLifecycle mScreenLifecycle;
@@ -90,9 +92,9 @@ public class WMShellTest extends SysuiTestCase {
                 Optional.of(mSplitScreen), Optional.of(mOneHanded), Optional.of(mHideDisplayCutout),
                 Optional.of(mShellCommandHandler), Optional.of(mCompatUI),
                 Optional.of(mDragAndDrop),
-                mCommandQueue, mConfigurationController, mKeyguardUpdateMonitor,
-                mNavigationModeController, mScreenLifecycle, mSysUiState, mProtoTracer,
-                mWakefulnessLifecycle, mUserInfoController, mSysUiMainExecutor);
+                mCommandQueue, mConfigurationController, mKeyguardStateController,
+                mKeyguardUpdateMonitor, mNavigationModeController, mScreenLifecycle, mSysUiState,
+                mProtoTracer, mWakefulnessLifecycle, mUserInfoController, mSysUiMainExecutor);
     }
 
     @Test
@@ -132,6 +134,6 @@ public class WMShellTest extends SysuiTestCase {
     public void initCompatUI_registersCallbacks() {
         mWMShell.initCompatUi(mCompatUI);
 
-        verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
+        verify(mKeyguardStateController).addCallback(any(KeyguardStateController.Callback.class));
     }
 }

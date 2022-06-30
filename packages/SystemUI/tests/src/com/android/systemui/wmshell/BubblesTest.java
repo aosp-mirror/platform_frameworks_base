@@ -57,6 +57,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -65,11 +66,15 @@ import android.hardware.face.FaceManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.Pair;
+import android.util.SparseArray;
+import android.view.View;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -98,6 +103,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -131,6 +137,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
 
 import com.google.common.collect.ImmutableList;
@@ -144,6 +151,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -343,7 +351,9 @@ public class BubblesTest extends SysuiTestCase {
                         mock(BatteryController.class),
                         mock(HeadsUpManager.class),
                         mock(NotificationInterruptLogger.class),
-                        mock(Handler.class)
+                        mock(Handler.class),
+                        mock(NotifPipelineFlags.class),
+                        mock(KeyguardNotificationVisibilityProvider.class)
                 );
 
         when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(false);
@@ -356,6 +366,7 @@ public class BubblesTest extends SysuiTestCase {
                 mStatusBarService,
                 mWindowManager,
                 mWindowManagerShellWrapper,
+                mock(UserManager.class),
                 mLauncherApps,
                 mBubbleLogger,
                 mTaskStackListener,
@@ -363,6 +374,7 @@ public class BubblesTest extends SysuiTestCase {
                 mPositioner,
                 mock(DisplayController.class),
                 mOneHandedOptional,
+                mock(DragAndDropController.class),
                 syncExecutor,
                 mock(Handler.class),
                 mTaskViewTransitions,
@@ -374,7 +386,7 @@ public class BubblesTest extends SysuiTestCase {
                 mContext,
                 mBubbleController.asBubbles(),
                 mNotificationShadeWindowController,
-                mStatusBarStateController,
+                mock(KeyguardStateController.class),
                 mShadeController,
                 mConfigurationController,
                 mStatusBarService,
@@ -1004,7 +1016,7 @@ public class BubblesTest extends SysuiTestCase {
         assertBubbleNotificationSuppressedFromShade(mBubbleEntry);
 
         // Should notify delegate that shade state changed
-        verify(mBubbleController).onBubbleNotificationSuppressionChanged(
+        verify(mBubbleController).onBubbleMetadataFlagChanged(
                 mBubbleData.getBubbleInStackWithKey(mRow.getKey()));
     }
 
@@ -1021,7 +1033,7 @@ public class BubblesTest extends SysuiTestCase {
         assertBubbleNotificationSuppressedFromShade(mBubbleEntry);
 
         // Should notify delegate that shade state changed
-        verify(mBubbleController).onBubbleNotificationSuppressionChanged(
+        verify(mBubbleController).onBubbleMetadataFlagChanged(
                 mBubbleData.getBubbleInStackWithKey(mRow.getKey()));
     }
 
@@ -1221,7 +1233,7 @@ public class BubblesTest extends SysuiTestCase {
         final Context userContext = setUpContextWithPackageManager(workPkg,
                 mock(ApplicationInfo.class));
 
-        // If things are working correctly, StatusBar.getPackageManagerForUser will call this
+        // If things are working correctly, CentralSurfaces.getPackageManagerForUser will call this
         when(context.createPackageContextAsUser(eq(workPkg), anyInt(), eq(workUser)))
                 .thenReturn(userContext);
 
@@ -1422,6 +1434,86 @@ public class BubblesTest extends SysuiTestCase {
         Intent i = new Intent(Intent.ACTION_SCREEN_OFF);
         mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
         assertStackCollapsed();
+    }
+
+    @Test
+    public void testOnStatusBarStateChanged() {
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleData.setExpanded(true);
+        assertStackExpanded();
+        BubbleStackView stackView = mBubbleController.getStackView();
+        assertThat(stackView.getVisibility()).isEqualTo(View.VISIBLE);
+
+        mBubbleController.onStatusBarStateChanged(false);
+
+        assertStackCollapsed();
+        assertThat(stackView.getVisibility()).isEqualTo(View.INVISIBLE);
+
+        mBubbleController.onStatusBarStateChanged(true);
+        assertThat(stackView.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void testSetShouldAutoExpand_notifiesFlagChanged() {
+        mEntryListener.onPendingEntryAdded(mRow);
+
+        assertTrue(mBubbleController.hasBubbles());
+        Bubble b = mBubbleData.getBubbleInStackWithKey(mBubbleEntry.getKey());
+        assertThat(b.shouldAutoExpand()).isFalse();
+
+        // Set it to the same thing
+        b.setShouldAutoExpand(false);
+
+        // Verify it doesn't notify
+        verify(mBubbleController, never()).onBubbleMetadataFlagChanged(any());
+
+        // Set it to something different
+        b.setShouldAutoExpand(true);
+        verify(mBubbleController).onBubbleMetadataFlagChanged(b);
+    }
+
+    @Test
+    public void testUpdateBubble_skipsDndSuppressListNotifs() {
+        mBubbleEntry = new BubbleEntry(mRow.getSbn(), mRow.getRanking(), mRow.isDismissable(),
+                mRow.shouldSuppressNotificationDot(), true /* DndSuppressNotifFromList */,
+                mRow.shouldSuppressPeek());
+        mBubbleEntry.getBubbleMetadata().setFlags(
+                Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
+
+        mBubbleController.updateBubble(mBubbleEntry);
+
+        Bubble b = mBubbleData.getPendingBubbleWithKey(mBubbleEntry.getKey());
+        assertThat(b.shouldAutoExpand()).isFalse();
+        assertThat(mBubbleData.getBubbleInStackWithKey(mBubbleEntry.getKey())).isNull();
+    }
+
+    @Test
+    public void testOnRankingUpdate_DndSuppressListNotif() {
+        // It's in the stack
+        mBubbleController.updateBubble(mBubbleEntry);
+        assertThat(mBubbleData.hasBubbleInStackWithKey(mBubbleEntry.getKey())).isTrue();
+
+        // Set current user profile
+        SparseArray<UserInfo> userInfos = new SparseArray<>();
+        userInfos.put(mBubbleEntry.getStatusBarNotification().getUser().getIdentifier(),
+                mock(UserInfo.class));
+        mBubbleController.onCurrentProfilesChanged(userInfos);
+
+        // Send ranking update that the notif is suppressed from the list.
+        HashMap<String, Pair<BubbleEntry, Boolean>> entryDataByKey = new HashMap<>();
+        mBubbleEntry = new BubbleEntry(mRow.getSbn(), mRow.getRanking(), mRow.isDismissable(),
+                mRow.shouldSuppressNotificationDot(), true /* DndSuppressNotifFromList */,
+                mRow.shouldSuppressPeek());
+        Pair<BubbleEntry, Boolean> pair = new Pair(mBubbleEntry, true);
+        entryDataByKey.put(mBubbleEntry.getKey(), pair);
+
+        NotificationListenerService.RankingMap rankingMap =
+                mock(NotificationListenerService.RankingMap.class);
+        when(rankingMap.getOrderedKeys()).thenReturn(new String[] { mBubbleEntry.getKey() });
+        mBubbleController.onRankingUpdated(rankingMap, entryDataByKey);
+
+        // Should no longer be in the stack
+        assertThat(mBubbleData.hasBubbleInStackWithKey(mBubbleEntry.getKey())).isFalse();
     }
 
     /** Creates a bubble using the userId and package. */

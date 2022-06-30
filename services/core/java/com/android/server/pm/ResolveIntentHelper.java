@@ -115,7 +115,7 @@ final class ResolveIntentHelper {
             if (!mUserManager.exists(userId)) return null;
             final int callingUid = Binder.getCallingUid();
             flags = computer.updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
-                    computer.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId,
+                    computer.isImplicitImageCaptureIntentAndNotSetByDpc(intent, userId,
                             resolvedType, flags));
             computer.enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
                     false /*checkShell*/, "resolve intent");
@@ -170,9 +170,9 @@ final class ResolveIntentHelper {
                 }
                 // If we have saved a preference for a preferred activity for
                 // this Intent, use that.
-                ResolveInfo ri = mPreferredActivityHelper.findPreferredActivityNotLocked(intent,
-                        resolvedType, flags, query, true, false, debug, userId,
-                        queryMayBeFiltered);
+                ResolveInfo ri = mPreferredActivityHelper.findPreferredActivityNotLocked(computer,
+                        intent, resolvedType, flags, query, true, false, debug,
+                        userId, queryMayBeFiltered);
                 if (ri != null) {
                     return ri;
                 }
@@ -306,18 +306,34 @@ final class ResolveIntentHelper {
         return new IntentSender(target);
     }
 
-    // In this method, we have to know the actual calling UID, but in some cases Binder's
-    // call identity is removed, so the UID has to be passed in explicitly.
-    public @NonNull List<ResolveInfo> queryIntentReceiversInternal(Computer computer, Intent intent,
+    /**
+     * Retrieve all receivers that can handle a broadcast of the given intent.
+     * @param queryingUid the results will be filtered in the context of this UID instead.
+     */
+    @NonNull
+    public List<ResolveInfo> queryIntentReceiversInternal(Computer computer, Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId,
-            int filterCallingUid) {
+            int queryingUid) {
+        return queryIntentReceiversInternal(computer, intent, resolvedType, flags, userId,
+                queryingUid, false);
+    }
+
+    /**
+     * @see PackageManagerInternal#queryIntentReceivers(Intent, String, long, int, int, boolean)
+     */
+    @NonNull
+    public List<ResolveInfo> queryIntentReceiversInternal(Computer computer, Intent intent,
+            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId,
+            int filterCallingUid, boolean forSend) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
-        computer.enforceCrossUserPermission(filterCallingUid, userId, false /*requireFullPermission*/,
-                false /*checkShell*/, "query intent receivers");
-        final String instantAppPkgName = computer.getInstantAppPackageName(filterCallingUid);
-        flags = computer.updateFlagsForResolve(flags, userId, filterCallingUid,
+        // The identity used to filter the receiver components
+        final int queryingUid = forSend ? Process.SYSTEM_UID : filterCallingUid;
+        computer.enforceCrossUserPermission(queryingUid, userId,
+                false /*requireFullPermission*/, false /*checkShell*/, "query intent receivers");
+        final String instantAppPkgName = computer.getInstantAppPackageName(queryingUid);
+        flags = computer.updateFlagsForResolve(flags, userId, queryingUid,
                 false /*includeInstantApps*/,
-                computer.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId,
+                computer.isImplicitImageCaptureIntentAndNotSetByDpc(intent, userId,
                         resolvedType, flags));
         Intent originalIntent = null;
         ComponentName comp = intent.getComponent();
@@ -397,7 +413,7 @@ final class ResolveIntentHelper {
                     list, true, originalIntent, resolvedType, filterCallingUid);
         }
 
-        return computer.applyPostResolutionFilter(list, instantAppPkgName, false, filterCallingUid,
+        return computer.applyPostResolutionFilter(list, instantAppPkgName, false, queryingUid,
                 false, userId, intent);
     }
 
@@ -562,7 +578,7 @@ final class ResolveIntentHelper {
         final int callingUid = Binder.getCallingUid();
         flags = computer.updateFlagsForResolve(flags, userId, callingUid,
                 false /*includeInstantApps*/,
-                computer.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId,
+                computer.isImplicitImageCaptureIntentAndNotSetByDpc(intent, userId,
                         resolvedType, flags));
         computer.enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
                 false /*checkShell*/, "query intent activity options");

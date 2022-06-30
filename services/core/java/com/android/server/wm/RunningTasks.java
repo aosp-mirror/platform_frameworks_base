@@ -57,8 +57,6 @@ class RunningTasks {
     private ArraySet<Integer> mProfileIds;
     private boolean mAllowed;
     private boolean mFilterOnlyVisibleRecents;
-    private Task mTopDisplayFocusRootTask;
-    private Task mTopDisplayAdjacentTask;
     private RecentTasks mRecentTasks;
     private boolean mKeepIntentExtra;
 
@@ -78,15 +76,8 @@ class RunningTasks {
         mAllowed = (flags & FLAG_ALLOWED) == FLAG_ALLOWED;
         mFilterOnlyVisibleRecents =
                 (flags & FLAG_FILTER_ONLY_VISIBLE_RECENTS) == FLAG_FILTER_ONLY_VISIBLE_RECENTS;
-        mTopDisplayFocusRootTask = root.getTopDisplayFocusedRootTask();
         mRecentTasks = root.mService.getRecentTasks();
         mKeepIntentExtra = (flags & FLAG_KEEP_INTENT_EXTRA) == FLAG_KEEP_INTENT_EXTRA;
-
-        if (mTopDisplayFocusRootTask.getAdjacentTaskFragment() != null) {
-            mTopDisplayAdjacentTask = mTopDisplayFocusRootTask.getAdjacentTaskFragment().asTask();
-        } else {
-            mTopDisplayAdjacentTask = null;
-        }
 
         final PooledConsumer c = PooledLambda.obtainConsumer(RunningTasks::processTask, this,
                 PooledLambda.__(Task.class));
@@ -131,18 +122,15 @@ class RunningTasks {
             return;
         }
 
-        final Task rootTask = task.getRootTask();
-        if (rootTask == mTopDisplayFocusRootTask && rootTask.getTopMostTask() == task) {
-            // For the focused top root task, update the last root task active time so that it
-            // can be used to determine the order of the tasks (it may not be set for newly
-            // created tasks)
+        if (task.isVisible()) {
+            // For the visible task, update the last active time so that it can be used to determine
+            // the order of the tasks (it may not be set for newly created tasks)
             task.touchActiveTime();
-        } else if (rootTask == mTopDisplayAdjacentTask && rootTask.getTopMostTask() == task) {
-            // The short-term workaround for launcher could get suitable running task info in
-            // split screen.
-            task.touchActiveTime();
-            // TreeSet doesn't allow same value and make sure this task is lower than focus one.
-            task.lastActiveTime--;
+            if (!task.isFocused()) {
+                // TreeSet doesn't allow the same value and make sure this task is lower than the
+                // focused one.
+                task.lastActiveTime -= mTmpSortedSet.size();
+            }
         }
 
         mTmpSortedSet.add(task);

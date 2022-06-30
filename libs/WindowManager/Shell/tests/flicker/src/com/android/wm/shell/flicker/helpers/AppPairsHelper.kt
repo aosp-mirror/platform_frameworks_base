@@ -37,7 +37,7 @@ class AppPairsHelper(
         val displayBounds = WindowUtils.displayBounds
         val secondaryAppBounds = Region.from(0,
                 dividerBounds.bounds.bottom - WindowUtils.dockedStackDividerInset,
-                displayBounds.right, displayBounds.bottom - WindowUtils.navigationBarHeight)
+                displayBounds.right, displayBounds.bottom - WindowUtils.navigationBarFrameHeight)
         return secondaryAppBounds
     }
 

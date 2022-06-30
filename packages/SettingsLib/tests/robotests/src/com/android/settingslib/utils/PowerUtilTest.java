@@ -122,9 +122,9 @@ public class PowerUtilTest {
                 true /* basedOnUsage */);
 
         // additional battery percentage in this string
-        assertThat(info).isEqualTo("Phone may shut down soon (10%)");
+        assertThat(info.contains("may shut down soon (10%)")).isTrue();
         // shortened string should not have percentage
-        assertThat(info2).isEqualTo("Phone may shut down soon");
+        assertThat(info2.contains("may shut down soon")).isTrue();
     }
 
     @Test

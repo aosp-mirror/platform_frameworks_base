@@ -21,6 +21,9 @@ import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
+import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_ACTIVITY;
+import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER;
+import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_STARTED_SERVICE;
 import static com.android.server.am.ProcessRecord.TAG;
 
 import android.annotation.ElapsedRealtimeLong;
@@ -294,13 +297,6 @@ final class ProcessStateRecord {
      */
     @GuardedBy("mService")
     private boolean mSystemNoUi;
-
-    /**
-     * If the proc state is PROCESS_STATE_BOUND_FOREGROUND_SERVICE or above, it can start FGS.
-     * It must obtain the proc state from a persistent/top process or FGS, not transitive.
-     */
-    @GuardedBy("mService")
-    private int mAllowStartFgsState = PROCESS_STATE_NONEXISTENT;
 
     /**
      * Whether or not the app is background restricted (OP_RUN_ANY_IN_BACKGROUND is NOT allowed).
@@ -701,6 +697,11 @@ final class ProcessStateRecord {
     @GuardedBy("mProcLock")
     void setHasStartedServices(boolean hasStartedServices) {
         mHasStartedServices = hasStartedServices;
+        if (hasStartedServices) {
+            mApp.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_STARTED_SERVICE);
+        } else {
+            mApp.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_STARTED_SERVICE);
+        }
     }
 
     @GuardedBy("mProcLock")
@@ -1006,6 +1007,11 @@ final class ProcessStateRecord {
         if (mCachedHasActivities == VALUE_INVALID) {
             mCachedHasActivities = mApp.getWindowProcessController().hasActivities() ? VALUE_TRUE
                     : VALUE_FALSE;
+            if (mCachedHasActivities == VALUE_TRUE) {
+                mApp.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_ACTIVITY);
+            } else {
+                mApp.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_ACTIVITY);
+            }
         }
         return mCachedHasActivities == VALUE_TRUE;
     }
@@ -1072,6 +1078,9 @@ final class ProcessStateRecord {
             if (mCachedIsReceivingBroadcast == VALUE_TRUE) {
                 mCachedSchedGroup = tmpQueue.contains(mService.mFgBroadcastQueue)
                         ? ProcessList.SCHED_GROUP_DEFAULT : ProcessList.SCHED_GROUP_BACKGROUND;
+                mApp.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER);
+            } else {
+                mApp.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER);
             }
         }
         return mCachedIsReceivingBroadcast == VALUE_TRUE;
@@ -1165,33 +1174,15 @@ final class ProcessStateRecord {
         mCurRawAdj = mSetRawAdj = mCurAdj = mSetAdj = mVerifiedAdj = ProcessList.INVALID_ADJ;
         mCurCapability = mSetCapability = PROCESS_CAPABILITY_NONE;
         mCurSchedGroup = mSetSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
-        mCurProcState = mCurRawProcState = mSetProcState = mAllowStartFgsState =
-                PROCESS_STATE_NONEXISTENT;
+        mCurProcState = mCurRawProcState = mSetProcState = PROCESS_STATE_NONEXISTENT;
         for (int i = 0; i < mCachedCompatChanges.length; i++) {
             mCachedCompatChanges[i] = VALUE_INVALID;
         }
     }
 
     @GuardedBy("mService")
-    void resetAllowStartFgsState() {
-        mAllowStartFgsState = PROCESS_STATE_NONEXISTENT;
-    }
-
-    @GuardedBy("mService")
-    void bumpAllowStartFgsState(int newProcState) {
-        if (newProcState < mAllowStartFgsState) {
-            mAllowStartFgsState = newProcState;
-        }
-    }
-
-    @GuardedBy("mService")
-    int getAllowStartFgsState() {
-        return mAllowStartFgsState;
-    }
-
-    @GuardedBy("mService")
-    boolean isAllowedStartFgsState() {
-        return mAllowStartFgsState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+    boolean isAllowedStartFgs() {
+        return mCurProcState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
     }
 
     @GuardedBy("mService")
@@ -1331,8 +1322,6 @@ final class ProcessStateRecord {
         pw.print(" setCapability=");
         ActivityManager.printCapabilitiesFull(pw, mSetCapability);
         pw.println();
-        pw.print(prefix); pw.print("allowStartFgsState=");
-        pw.print(mAllowStartFgsState);
         if (mBackgroundRestricted) {
             pw.print(" backgroundRestricted=");
             pw.print(mBackgroundRestricted);

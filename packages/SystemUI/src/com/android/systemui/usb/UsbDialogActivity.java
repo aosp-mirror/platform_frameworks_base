@@ -41,7 +41,7 @@ abstract class UsbDialogActivity extends AlertActivity
     private TextView mClearDefaultHint;
 
     @Override
-    protected final void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addSystemFlags(
                 WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
@@ -87,11 +87,10 @@ abstract class UsbDialogActivity extends AlertActivity
         }
     }
 
-    void setAlertParams(int strId) {
+    void setAlertParams(String title, String message) {
         final AlertController.AlertParams ap = mAlertParams;
-        ap.mTitle = mDialogHelper.getAppName();
-        ap.mMessage = getString(strId, mDialogHelper.getAppName(),
-                mDialogHelper.getDeviceDescription());
+        ap.mTitle = title;
+        ap.mMessage = message;
         ap.mPositiveButtonText = getString(android.R.string.ok);
         ap.mNegativeButtonText = getString(android.R.string.cancel);
         ap.mPositiveButtonListener = this;

@@ -74,7 +74,7 @@ public class PipBoundsAlgorithm {
     /**
      * TODO: move the resources to SysUI package.
      */
-    protected void reloadResources(Context context) {
+    private void reloadResources(Context context) {
         final Resources res = context.getResources();
         mDefaultAspectRatio = res.getFloat(
                 R.dimen.config_pictureInPictureDefaultAspectRatio);
@@ -194,7 +194,7 @@ public class PipBoundsAlgorithm {
     public float getAspectRatioOrDefault(
             @android.annotation.Nullable PictureInPictureParams params) {
         return params != null && params.hasSetAspectRatio()
-                ? params.getAspectRatio()
+                ? params.getAspectRatioFloat()
                 : getDefaultAspectRatio();
     }
 

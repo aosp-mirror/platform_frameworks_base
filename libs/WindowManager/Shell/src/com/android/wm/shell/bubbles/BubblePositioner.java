@@ -88,6 +88,9 @@ public class BubblePositioner {
     private int mMaxBubbles;
     private int mBubbleSize;
     private int mSpacingBetweenBubbles;
+    private int mBubblePaddingTop;
+    private int mBubbleOffscreenAmount;
+    private int mStackOffset;
 
     private int mExpandedViewMinHeight;
     private int mExpandedViewLargeScreenWidth;
@@ -187,6 +190,10 @@ public class BubblePositioner {
         mSpacingBetweenBubbles = res.getDimensionPixelSize(R.dimen.bubble_spacing);
         mDefaultMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
+        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+        mBubbleOffscreenAmount = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
+        mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
+
         if (mIsSmallTablet) {
             mExpandedViewLargeScreenWidth = (int) (bounds.width()
                     * EXPANDED_VIEW_SMALL_TABLET_WIDTH_PERCENT);
@@ -212,10 +219,7 @@ public class BubblePositioner {
             mExpandedViewLargeScreenInsetFurthestEdge = mExpandedViewPadding;
         }
 
-        mOverflowWidth = mIsLargeScreen
-                ? mExpandedViewLargeScreenWidth
-                : res.getDimensionPixelSize(
-                        R.dimen.bubble_expanded_view_phone_landscape_overflow_width);
+        mOverflowWidth = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_overflow_width);
         mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
@@ -332,6 +336,26 @@ public class BubblePositioner {
                 : mBubbleSize;
     }
 
+    /** The amount of padding at the top of the screen that the bubbles avoid when being placed. */
+    public int getBubblePaddingTop() {
+        return mBubblePaddingTop;
+    }
+
+    /** The amount the stack hang off of the screen when collapsed. */
+    public int getStackOffScreenAmount() {
+        return mBubbleOffscreenAmount;
+    }
+
+    /** Offset of bubbles in the stack (i.e. how much they overlap). */
+    public int getStackOffset() {
+        return mStackOffset;
+    }
+
+    /** Size of the visible (non-overlapping) part of the pointer. */
+    public int getPointerSize() {
+        return mPointerHeight - mPointerOverlap;
+    }
+
     /** The maximum number of bubbles that can be displayed comfortably on screen. */
     public int getMaxBubbles() {
         return mMaxBubbles;
@@ -348,6 +372,15 @@ public class BubblePositioner {
         mImeHeight = height;
     }
 
+    private int getExpandedViewLargeScreenInsetFurthestEdge(boolean isOverflow) {
+        if (isOverflow && mIsLargeScreen) {
+            return mScreenRect.width()
+                    - mExpandedViewLargeScreenInsetClosestEdge
+                    - mOverflowWidth;
+        }
+        return mExpandedViewLargeScreenInsetFurthestEdge;
+    }
+
     /**
      * Calculates the padding for the bubble expanded view.
      *
@@ -361,7 +394,9 @@ public class BubblePositioner {
      * padding is added.
      */
     public int[] getExpandedViewContainerPadding(boolean onLeft, boolean isOverflow) {
-        final int pointerTotalHeight = mPointerHeight - mPointerOverlap;
+        final int pointerTotalHeight = getPointerSize();
+        final int expandedViewLargeScreenInsetFurthestEdge =
+                getExpandedViewLargeScreenInsetFurthestEdge(isOverflow);
         if (mIsLargeScreen) {
             // Note:
             // If we're in portrait OR if we're a small tablet, then the two insets values will
@@ -369,10 +404,10 @@ public class BubblePositioner {
             // [left, top, right, bottom]
             mPaddings[0] = onLeft
                     ? mExpandedViewLargeScreenInsetClosestEdge - pointerTotalHeight
-                    : mExpandedViewLargeScreenInsetFurthestEdge;
+                    : expandedViewLargeScreenInsetFurthestEdge;
             mPaddings[1] = 0;
             mPaddings[2] = onLeft
-                    ? mExpandedViewLargeScreenInsetFurthestEdge
+                    ? expandedViewLargeScreenInsetFurthestEdge
                     : mExpandedViewLargeScreenInsetClosestEdge - pointerTotalHeight;
             // Overflow doesn't show manage button / get padding from it so add padding here
             mPaddings[3] = isOverflow ? mExpandedViewPadding : 0;
@@ -549,7 +584,7 @@ public class BubblePositioner {
         }
 
         if (showBubblesVertically() && mImeVisible) {
-            return new PointF(x, getExpandedBubbleYForIme(index, state.numberOfBubbles));
+            return new PointF(x, getExpandedBubbleYForIme(index, state));
         }
         return new PointF(x, y);
     }
@@ -559,10 +594,10 @@ public class BubblePositioner {
      * is showing.
      *
      * @param index the index of the bubble in the stack.
-     * @param numberOfBubbles the total number of bubbles in the stack.
+     * @param state information about the stack state (# of bubbles, selected bubble).
      * @return y position of the bubble on-screen when the stack is expanded.
      */
-    private float getExpandedBubbleYForIme(int index, int numberOfBubbles) {
+    private float getExpandedBubbleYForIme(int index, BubbleStackView.StackViewState state) {
         final float top = getAvailableRect().top + mExpandedViewPadding;
         if (!showBubblesVertically()) {
             // Showing horizontally: align to top
@@ -570,12 +605,11 @@ public class BubblePositioner {
         }
 
         // Showing vertically: might need to translate the bubbles above the IME.
-        // Subtract spacing here to provide a margin between top of IME and bottom of bubble row.
-        final float bottomInset = getImeHeight() + mInsets.bottom - (mSpacingBetweenBubbles * 2);
-        final float expandedStackSize = getExpandedStackSize(numberOfBubbles);
-        final float centerPosition = showBubblesVertically()
-                ? mPositionRect.centerY()
-                : mPositionRect.centerX();
+        // Add spacing here to provide a margin between top of IME and bottom of bubble row.
+        final float bottomHeight = getImeHeight() + mInsets.bottom + (mSpacingBetweenBubbles * 2);
+        final float bottomInset = mScreenRect.bottom - bottomHeight;
+        final float expandedStackSize = getExpandedStackSize(state.numberOfBubbles);
+        final float centerPosition = mPositionRect.centerY();
         final float rowBottom = centerPosition + (expandedStackSize / 2f);
         final float rowTop = centerPosition - (expandedStackSize / 2f);
         float rowTopForIme = rowTop;
@@ -586,7 +620,7 @@ public class BubblePositioner {
             if (rowTop - translationY < top) {
                 // Even if we shift the bubbles, they will still overlap with the IME.
                 // Hide the overflow for a lil more space:
-                final float expandedStackSizeNoO = getExpandedStackSize(numberOfBubbles - 1);
+                final float expandedStackSizeNoO = getExpandedStackSize(state.numberOfBubbles - 1);
                 final float centerPositionNoO = showBubblesVertically()
                         ? mPositionRect.centerY()
                         : mPositionRect.centerX();
@@ -595,6 +629,13 @@ public class BubblePositioner {
                 translationY = rowBottomNoO - bottomInset;
                 rowTopForIme = rowTopNoO - translationY;
             }
+        }
+        // Check if the selected bubble is within the appropriate space
+        final float selectedPosition = rowTopForIme
+                + (state.selectedIndex * (mBubbleSize + mSpacingBetweenBubbles));
+        if (selectedPosition < top) {
+            // We must always keep the selected bubble in view so we'll have to allow more overlap.
+            rowTopForIme = top;
         }
         return rowTopForIme + (index * (mBubbleSize + mSpacingBetweenBubbles));
     }
@@ -659,7 +700,28 @@ public class BubblePositioner {
         return new BubbleStackView.RelativeStackPosition(
                 startOnLeft,
                 startingVerticalOffset / mPositionRect.height())
-                .getAbsolutePositionInRegion(new RectF(mPositionRect));
+                .getAbsolutePositionInRegion(getAllowableStackPositionRegion(
+                        1 /* default starts with 1 bubble */));
+    }
+
+
+    /**
+     * Returns the region that the stack position must stay within. This goes slightly off the left
+     * and right sides of the screen, below the status bar/cutout and above the navigation bar.
+     * While the stack position is not allowed to rest outside of these bounds, it can temporarily
+     * be animated or dragged beyond them.
+     */
+    public RectF getAllowableStackPositionRegion(int bubbleCount) {
+        final RectF allowableRegion = new RectF(getAvailableRect());
+        final int imeHeight = getImeHeight();
+        final float bottomPadding = bubbleCount > 1
+                ? mBubblePaddingTop + mStackOffset
+                : mBubblePaddingTop;
+        allowableRegion.left -= mBubbleOffscreenAmount;
+        allowableRegion.top += mBubblePaddingTop;
+        allowableRegion.right += mBubbleOffscreenAmount - mBubbleSize;
+        allowableRegion.bottom -= imeHeight + bottomPadding + mBubbleSize;
+        return allowableRegion;
     }
 
     /**

@@ -21,6 +21,14 @@ import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 import static android.text.TextUtils.formatSimple;
 
+import static com.android.internal.util.FrameworkStatsLog.BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__BOOT_COMPLETED;
+import static com.android.internal.util.FrameworkStatsLog.BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__LOCKED_BOOT_COMPLETED;
+import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
+import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
+import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST;
+import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_DEFERRAL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_LIGHT;
@@ -28,6 +36,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
+
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -51,12 +60,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.Process;
@@ -64,6 +73,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.permission.IPermissionManager;
 import android.text.TextUtils;
 import android.util.EventLog;
@@ -75,6 +85,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -250,12 +261,16 @@ public final class BroadcastQueue {
 
     public void enqueueParallelBroadcastLocked(BroadcastRecord r) {
         r.enqueueClockTime = System.currentTimeMillis();
+        r.enqueueTime = SystemClock.uptimeMillis();
+        r.enqueueRealTime = SystemClock.elapsedRealtime();
         mParallelBroadcasts.add(r);
         enqueueBroadcastHelper(r);
     }
 
     public void enqueueOrderedBroadcastLocked(BroadcastRecord r) {
         r.enqueueClockTime = System.currentTimeMillis();
+        r.enqueueTime = SystemClock.uptimeMillis();
+        r.enqueueRealTime = SystemClock.elapsedRealtime();
         mDispatcher.enqueueOrderedBroadcastLocked(r);
         enqueueBroadcastHelper(r);
     }
@@ -306,7 +321,7 @@ public final class BroadcastQueue {
     }
 
     private final void processCurBroadcastLocked(BroadcastRecord r,
-            ProcessRecord app) throws RemoteException {
+            ProcessRecord app, int receiverType, int processTemperature) throws RemoteException {
         if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                 "Process cur broadcast " + r + " for app " + app);
         final IApplicationThread thread = app.getThread();
@@ -352,6 +367,10 @@ public final class BroadcastQueue {
             if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                     "Process cur broadcast " + r + " DELIVERED for app " + app);
             started = true;
+            FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, app.uid,
+                    r.callingUid == -1 ? Process.SYSTEM_UID : r.callingUid,
+                    ActivityManagerService.getShortAction(r.intent.getAction()),
+                    receiverType, processTemperature);
         } finally {
             if (!started) {
                 if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
@@ -388,7 +407,9 @@ public final class BroadcastQueue {
             }
             try {
                 mPendingBroadcast = null;
-                processCurBroadcastLocked(br, app);
+                processCurBroadcastLocked(br, app,
+                        BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST,
+                        BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD);
                 didSomething = true;
             } catch (Exception e) {
                 Slog.w(TAG, "Exception in new application when starting receiver "
@@ -618,8 +639,8 @@ public final class BroadcastQueue {
 
     void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
             Intent intent, int resultCode, String data, Bundle extras,
-            boolean ordered, boolean sticky, int sendingUser)
-            throws RemoteException {
+            boolean ordered, boolean sticky, int sendingUser,
+            int receiverUid, int callingUid) throws RemoteException {
         // Send the intent to the receiver asynchronously using one-way binder calls.
         if (app != null) {
             final IApplicationThread thread = app.getThread();
@@ -653,6 +674,12 @@ public final class BroadcastQueue {
             receiver.performReceive(intent, resultCode, data, extras, ordered,
                     sticky, sendingUser);
         }
+        FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED,
+                receiverUid == -1 ? Process.SYSTEM_UID : receiverUid,
+                callingUid == -1 ? Process.SYSTEM_UID : callingUid,
+                ActivityManagerService.getShortAction(intent.getAction()),
+                BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME,
+                BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM);
     }
 
     private void deliverToRegisteredReceiverLocked(BroadcastRecord r,
@@ -850,6 +877,21 @@ public final class BroadcastQueue {
             }
         }
 
+        // Check that the receiver does *not* belong to any of the excluded packages
+        if (!skip && r.excludedPackages != null && r.excludedPackages.length > 0) {
+            if (ArrayUtils.contains(r.excludedPackages, filter.packageName)) {
+                Slog.w(TAG, "Skipping delivery of excluded package "
+                        + r.intent.toString()
+                        + " to " + filter.receiverList.app
+                        + " (pid=" + filter.receiverList.pid
+                        + ", uid=" + filter.receiverList.uid + ")"
+                        + " excludes package " + filter.packageName
+                        + " due to sender " + r.callerPackage
+                        + " (uid " + r.callingUid + ")");
+                skip = true;
+            }
+        }
+
         // If the broadcast also requires an app op check that as well.
         if (!skip && r.appOp != AppOpsManager.OP_NONE
                 && mService.getAppOpsManager().noteOpNoThrow(r.appOp,
@@ -869,9 +911,9 @@ public final class BroadcastQueue {
 
         // Ensure that broadcasts are only sent to other apps if they are explicitly marked as
         // exported, or are System level broadcasts
-        if (!skip && !filter.exported && !Process.isCoreUid(r.callingUid)
-                && filter.receiverList.uid != r.callingUid) {
-
+        if (!skip && !filter.exported && mService.checkComponentPermission(null, r.callingPid,
+                r.callingUid, filter.receiverList.uid, filter.exported)
+                != PackageManager.PERMISSION_GRANTED) {
             Slog.w(TAG, "Exported Denial: sending "
                     + r.intent.toString()
                     + ", action: " + r.intent.getAction()
@@ -940,7 +982,8 @@ public final class BroadcastQueue {
                 maybeReportBroadcastDispatchedEventLocked(r, filter.owningUid);
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
                         new Intent(r.intent), r.resultCode, r.resultData,
-                        r.resultExtras, r.ordered, r.initialSticky, r.userId);
+                        r.resultExtras, r.ordered, r.initialSticky, r.userId,
+                        filter.receiverList.uid, r.callingUid);
                 // parallel broadcasts are fire-and-forget, not bookended by a call to
                 // finishReceiverLocked(), so we manage their activity-start token here
                 if (filter.receiverList.app != null
@@ -1121,6 +1164,7 @@ public final class BroadcastQueue {
         while (mParallelBroadcasts.size() > 0) {
             r = mParallelBroadcasts.remove(0);
             r.dispatchTime = SystemClock.uptimeMillis();
+            r.dispatchRealTime = SystemClock.elapsedRealtime();
             r.dispatchClockTime = System.currentTimeMillis();
 
             if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
@@ -1291,7 +1335,9 @@ public final class BroadcastQueue {
                             }
                             performReceiveLocked(r.callerApp, r.resultTo,
                                     new Intent(r.intent), r.resultCode,
-                                    r.resultData, r.resultExtras, false, false, r.userId);
+                                    r.resultData, r.resultExtras, false, false, r.userId,
+                                    r.callingUid, r.callingUid);
+                            logBootCompletedBroadcastCompletionLatencyIfPossible(r);
                             // Set this to null so that the reference
                             // (local and remote) isn't kept in the mBroadcastHistory.
                             r.resultTo = null;
@@ -1408,6 +1454,7 @@ public final class BroadcastQueue {
         r.receiverTime = SystemClock.uptimeMillis();
         if (recIdx == 0) {
             r.dispatchTime = r.receiverTime;
+            r.dispatchRealTime = SystemClock.elapsedRealtime();
             r.dispatchClockTime = System.currentTimeMillis();
 
             if (mLogLatencyMetrics) {
@@ -1708,6 +1755,19 @@ public final class BroadcastQueue {
             }
         }
 
+        // Check that the receiver does *not* belong to any of the excluded packages
+        if (!skip && r.excludedPackages != null && r.excludedPackages.length > 0) {
+            if (ArrayUtils.contains(r.excludedPackages, component.getPackageName())) {
+                Slog.w(TAG, "Skipping delivery of excluded package "
+                        + r.intent + " to "
+                        + component.flattenToShortString()
+                        + " excludes package " + component.getPackageName()
+                        + " due to sender " + r.callerPackage
+                        + " (uid " + r.callingUid + ")");
+                skip = true;
+            }
+        }
+
         if (!skip && info.activityInfo.applicationInfo.uid != Process.SYSTEM_UID &&
                 r.requiredPermissions != null && r.requiredPermissions.length > 0) {
             for (int i = 0; i < r.requiredPermissions.length; i++) {
@@ -1796,7 +1856,9 @@ public final class BroadcastQueue {
                 app.addPackage(info.activityInfo.packageName,
                         info.activityInfo.applicationInfo.longVersionCode, mService.mProcessStats);
                 maybeAddAllowBackgroundActivityStartsToken(app, r);
-                processCurBroadcastLocked(r, app);
+                processCurBroadcastLocked(r, app,
+                        BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST,
+                        BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM);
                 return;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception when sending broadcast to "
@@ -1829,8 +1891,9 @@ public final class BroadcastQueue {
         r.curApp = mService.startProcessLocked(targetProcess,
                 info.activityInfo.applicationInfo, true,
                 r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND,
-                new HostingRecord("broadcast", r.curComponent), isActivityCapable
-                ? ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE : ZYGOTE_POLICY_FLAG_EMPTY,
+                new HostingRecord(HostingRecord.HOSTING_TYPE_BROADCAST, r.curComponent,
+                        r.intent.getAction()),
+                isActivityCapable ? ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE : ZYGOTE_POLICY_FLAG_EMPTY,
                 (r.intent.getFlags() & Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0, false);
         if (r.curApp == null) {
             // Ah, this recipient is unavailable.  Finish it if necessary,
@@ -1866,10 +1929,60 @@ public final class BroadcastQueue {
         return null;
     }
 
+    private void logBootCompletedBroadcastCompletionLatencyIfPossible(BroadcastRecord r) {
+        // Only log after last receiver.
+        // In case of split BOOT_COMPLETED broadcast, make sure only call this method on the
+        // last BroadcastRecord of the split broadcast which has non-null resultTo.
+        final int numReceivers = (r.receivers != null) ? r.receivers.size() : 0;
+        if (r.nextReceiver < numReceivers) {
+            return;
+        }
+        final String action = r.intent.getAction();
+        int event = 0;
+        if (Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(action)) {
+            event = BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__LOCKED_BOOT_COMPLETED;
+        } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+            event = BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__BOOT_COMPLETED;
+        }
+        if (event != 0) {
+            final int dispatchLatency = (int)(r.dispatchTime - r.enqueueTime);
+            final int completeLatency = (int)
+                    (SystemClock.uptimeMillis() - r.enqueueTime);
+            final int dispatchRealLatency = (int)(r.dispatchRealTime - r.enqueueRealTime);
+            final int completeRealLatency = (int)
+                    (SystemClock.elapsedRealtime() - r.enqueueRealTime);
+            int userType = FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN;
+            // This method is called very infrequently, no performance issue we call
+            // LocalServices.getService() here.
+            final UserManagerInternal umInternal = LocalServices.getService(
+                    UserManagerInternal.class);
+            final UserInfo userInfo = umInternal.getUserInfo(r.userId);
+            if (userInfo != null) {
+                userType = UserManager.getUserTypeForStatsd(userInfo.userType);
+            }
+            Slog.i(TAG_BROADCAST,
+                    "BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED action:"
+                            + action
+                            + " dispatchLatency:" + dispatchLatency
+                            + " completeLatency:" + completeLatency
+                            + " dispatchRealLatency:" + dispatchRealLatency
+                            + " completeRealLatency:" + completeRealLatency
+                            + " receiversSize:" + numReceivers
+                            + " userId:" + r.userId
+                            + " userType:" + (userInfo != null? userInfo.userType : null));
+            FrameworkStatsLog.write(
+                    BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED,
+                    event,
+                    dispatchLatency,
+                    completeLatency,
+                    dispatchRealLatency,
+                    completeRealLatency,
+                    r.userId,
+                    userType);
+        }
+    }
+
     private void maybeReportBroadcastDispatchedEventLocked(BroadcastRecord r, int targetUid) {
-        // STOPSHIP (217251579): Temporarily use temp-allowlist reason to identify
-        // push messages and record response events.
-        useTemporaryAllowlistReasonAsSignal(r);
         if (r.options == null || r.options.getIdForResponseEvent() <= 0) {
             return;
         }
@@ -1882,17 +1995,6 @@ public final class BroadcastQueue {
                 r.callingUid, targetPackage, UserHandle.of(r.userId),
                 r.options.getIdForResponseEvent(), SystemClock.elapsedRealtime(),
                 mService.getUidStateLocked(targetUid));
-    }
-
-    private void useTemporaryAllowlistReasonAsSignal(BroadcastRecord r) {
-        if (r.options == null || r.options.getIdForResponseEvent() > 0) {
-            return;
-        }
-        final int reasonCode = r.options.getTemporaryAppAllowlistReasonCode();
-        if (reasonCode == PowerExemptionManager.REASON_PUSH_MESSAGING
-                || reasonCode == PowerExemptionManager.REASON_PUSH_MESSAGING_OVER_QUOTA) {
-            r.options.recordResponseEventWhileInBackground(reasonCode);
-        }
     }
 
     @NonNull
@@ -2166,7 +2268,7 @@ public final class BroadcastQueue {
     }
 
     boolean isIdle() {
-        return mParallelBroadcasts.isEmpty() && mDispatcher.isEmpty()
+        return mParallelBroadcasts.isEmpty() && mDispatcher.isIdle()
                 && (mPendingBroadcast == null);
     }
 

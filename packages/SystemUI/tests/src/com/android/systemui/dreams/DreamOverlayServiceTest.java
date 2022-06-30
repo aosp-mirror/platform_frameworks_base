@@ -19,6 +19,7 @@ package com.android.systemui.dreams;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +29,7 @@ import android.service.dreams.DreamService;
 import android.service.dreams.IDreamOverlay;
 import android.service.dreams.IDreamOverlayCallback;
 import android.testing.AndroidTestingRunner;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 
@@ -36,9 +38,9 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dreams.complication.DreamPreviewComplication;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -97,7 +99,10 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     DreamOverlayStateController mStateController;
 
     @Mock
-    DreamPreviewComplication mPreviewComplication;
+    ViewGroup mDreamOverlayContainerViewParent;
+
+    @Mock
+    UiEventLogger mUiEventLogger;
 
     DreamOverlayService mService;
 
@@ -124,7 +129,21 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 mDreamOverlayComponentFactory,
                 mStateController,
                 mKeyguardUpdateMonitor,
-                mPreviewComplication);
+                mUiEventLogger);
+    }
+
+    @Test
+    public void testOnStartMetricsLogged() throws Exception {
+        final IBinder proxy = mService.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        mMainExecutor.runAllReady();
+
+        verify(mUiEventLogger).log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_ENTER_START);
+        verify(mUiEventLogger).log(
+                DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START);
     }
 
     @Test
@@ -152,44 +171,36 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldShowComplicationsTrueByDefault() {
-        mService.onBind(new Intent());
+    public void testDreamOverlayContainerViewRemovedFromOldParentWhenInitialized()
+            throws Exception {
+        when(mDreamOverlayContainerView.getParent())
+                .thenReturn(mDreamOverlayContainerViewParent)
+                .thenReturn(null);
 
-        assertThat(mService.shouldShowComplications()).isTrue();
+        final IBinder proxy = mService.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        mMainExecutor.runAllReady();
+
+        verify(mDreamOverlayContainerViewParent).removeView(mDreamOverlayContainerView);
     }
 
     @Test
-    public void testShouldShowComplicationsSetByIntentExtra() {
-        final Intent intent = new Intent();
-        intent.putExtra(DreamService.EXTRA_SHOW_COMPLICATIONS, false);
-        mService.onBind(intent);
+    public void testShouldShowComplicationsFalseByDefault() {
+        mService.onBind(new Intent());
 
         assertThat(mService.shouldShowComplications()).isFalse();
     }
 
     @Test
-    public void testPreviewModeFalseByDefault() {
-        mService.onBind(new Intent());
-
-        assertThat(mService.isPreviewMode()).isFalse();
-    }
-
-    @Test
-    public void testPreviewModeSetByIntentExtra() {
+    public void testShouldShowComplicationsSetByIntentExtra() {
         final Intent intent = new Intent();
-        intent.putExtra(DreamService.EXTRA_IS_PREVIEW, true);
+        intent.putExtra(DreamService.EXTRA_SHOW_COMPLICATIONS, true);
         mService.onBind(intent);
 
-        assertThat(mService.isPreviewMode()).isTrue();
-    }
-
-    @Test
-    public void testDreamLabel() {
-        final Intent intent = new Intent();
-        intent.putExtra(DreamService.EXTRA_DREAM_LABEL, "TestDream");
-        mService.onBind(intent);
-
-        assertThat(mService.getDreamLabel()).isEqualTo("TestDream");
+        assertThat(mService.shouldShowComplications()).isTrue();
     }
 
     @Test
@@ -200,5 +211,26 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         verify(mKeyguardUpdateMonitor).removeCallback(any());
         verify(mLifecycleRegistry).setCurrentState(Lifecycle.State.DESTROYED);
         verify(mStateController).setOverlayActive(false);
+    }
+
+    @Test
+    public void testDecorViewNotAddedToWindowAfterDestroy() throws Exception {
+        when(mDreamOverlayContainerView.getParent())
+                .thenReturn(mDreamOverlayContainerViewParent)
+                .thenReturn(null);
+
+        final IBinder proxy = mService.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+
+        // Destroy the service.
+        mService.onDestroy();
+
+        // Run executor tasks.
+        mMainExecutor.runAllReady();
+
+        verify(mWindowManager, never()).addView(any(), any());
     }
 }

@@ -47,8 +47,8 @@ import org.mockito.MockitoAnnotations;
 
 /**
  * Verifies that particular sets of dependencies don't have dependencies on others. For example,
- * code managing notifications shouldn't directly depend on StatusBar, since there are platforms
- * which want to manage notifications, but don't use StatusBar.
+ * code managing notifications shouldn't directly depend on CentralSurfaces, since there are
+ * platforms which want to manage notifications, but don't use CentralSurfaces.
  */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

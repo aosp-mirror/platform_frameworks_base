@@ -42,11 +42,6 @@ interface ISplitScreen {
     oneway void unregisterSplitScreenListener(in ISplitScreenListener listener) = 2;
 
     /**
-     * Hides the side-stage if it is currently visible.
-     */
-    oneway void setSideStageVisibility(boolean visible) = 3;
-
-    /**
      * Removes a task from the side stage.
      */
     oneway void removeFromSideStage(int taskId) = 4;
@@ -103,11 +98,14 @@ interface ISplitScreen {
     /**
      * Blocking call that notifies and gets additional split-screen targets when entering
      * recents (for example: the dividerBar).
-     * @param cancel is true if leaving recents back to split (eg. the gesture was cancelled).
      * @param appTargets apps that will be re-parented to display area
      */
-    RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel,
-                                                   in RemoteAnimationTarget[] appTargets) = 13;
+    RemoteAnimationTarget[] onGoingToRecentsLegacy(in RemoteAnimationTarget[] appTargets) = 13;
 
-
+    /**
+     * Blocking call that notifies and gets additional split-screen targets when entering
+     * recents (for example: the dividerBar). Different than the method above in that this one
+     * does not expect split to currently be running.
+     */
+    RemoteAnimationTarget[] onStartingSplitLegacy(in RemoteAnimationTarget[] appTargets) = 14;
 }

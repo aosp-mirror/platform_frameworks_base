@@ -262,6 +262,8 @@ public class HdmiCecMessage {
                 return "Give Audio Status";
             case Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE:
                 return "Set System Audio Mode";
+            case Constants.MESSAGE_SET_AUDIO_VOLUME_LEVEL:
+                return "Set Audio Volume Level";
             case Constants.MESSAGE_REPORT_AUDIO_STATUS:
                 return "Report Audio Status";
             case Constants.MESSAGE_GIVE_SYSTEM_AUDIO_MODE_STATUS:

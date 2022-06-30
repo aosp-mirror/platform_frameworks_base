@@ -27,5 +27,7 @@ import android.media.VolumeInfo;
 oneway interface IAudioDeviceVolumeDispatcher {
 
     void dispatchDeviceVolumeChanged(in AudioDeviceAttributes device, in VolumeInfo vol);
+    void dispatchDeviceVolumeAdjusted(in AudioDeviceAttributes device, in VolumeInfo vol,
+            int direction, int mode);
 
 }

@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.dagger;
 
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 
@@ -36,6 +37,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ExternalMainThread;
 import com.android.wm.shell.common.annotations.ShellAnimationThread;
+import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
 
@@ -194,5 +196,29 @@ public abstract class WMShellConcurrencyModule {
         } catch (InterruptedException e) {
             throw new RuntimeException("Failed to initialize SfVsync animation handler in 1s", e);
         }
+    }
+
+    /**
+     * Provides a Shell background thread Handler for low priority background tasks.
+     */
+    @WMSingleton
+    @Provides
+    @ShellBackgroundThread
+    public static Handler provideSharedBackgroundHandler() {
+        HandlerThread shellBackgroundThread = new HandlerThread("wmshell.background",
+                THREAD_PRIORITY_BACKGROUND);
+        shellBackgroundThread.start();
+        return shellBackgroundThread.getThreadHandler();
+    }
+
+    /**
+     * Provides a Shell background thread Executor for low priority background tasks.
+     */
+    @WMSingleton
+    @Provides
+    @ShellBackgroundThread
+    public static ShellExecutor provideSharedBackgroundExecutor(
+            @ShellBackgroundThread Handler handler) {
+        return new HandlerExecutor(handler);
     }
 }

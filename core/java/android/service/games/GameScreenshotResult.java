@@ -18,8 +18,6 @@ package android.service.games;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -30,9 +28,7 @@ import java.util.Objects;
 /**
  * Result object for calls to {@link IGameSessionController#takeScreenshot}.
  *
- * It includes a status (see {@link #getStatus}) and, if the status is
- * {@link #GAME_SCREENSHOT_SUCCESS} an {@link android.graphics.Bitmap} result (see {@link
- * #getBitmap}).
+ * It includes a status only (see {@link #getStatus}).
  *
  * @hide
  */
@@ -54,8 +50,7 @@ public final class GameScreenshotResult implements Parcelable {
 
     /**
      * Indicates that the result of a call to {@link IGameSessionController#takeScreenshot} was
-     * successful and an {@link android.graphics.Bitmap} result should be available by calling
-     * {@link #getBitmap}.
+     * successful.
      *
      * @hide
      */
@@ -81,9 +76,7 @@ public final class GameScreenshotResult implements Parcelable {
             new Parcelable.Creator<GameScreenshotResult>() {
                 @Override
                 public GameScreenshotResult createFromParcel(Parcel source) {
-                    return new GameScreenshotResult(
-                            source.readInt(),
-                            source.readParcelable(null, Bitmap.class));
+                    return new GameScreenshotResult(source.readInt());
                 }
 
                 @Override
@@ -95,14 +88,11 @@ public final class GameScreenshotResult implements Parcelable {
     @GameScreenshotStatus
     private final int mStatus;
 
-    @Nullable
-    private final Bitmap mBitmap;
-
     /**
-     * Creates a successful {@link GameScreenshotResult} with the provided bitmap.
+     * Creates a successful {@link GameScreenshotResult}.
      */
-    public static GameScreenshotResult createSuccessResult(@NonNull Bitmap bitmap) {
-        return new GameScreenshotResult(GAME_SCREENSHOT_SUCCESS, bitmap);
+    public static GameScreenshotResult createSuccessResult() {
+        return new GameScreenshotResult(GAME_SCREENSHOT_SUCCESS);
     }
 
     /**
@@ -110,12 +100,11 @@ public final class GameScreenshotResult implements Parcelable {
      * {@link #GAME_SCREENSHOT_ERROR_INTERNAL_ERROR} status.
      */
     public static GameScreenshotResult createInternalErrorResult() {
-        return new GameScreenshotResult(GAME_SCREENSHOT_ERROR_INTERNAL_ERROR, null);
+        return new GameScreenshotResult(GAME_SCREENSHOT_ERROR_INTERNAL_ERROR);
     }
 
-    private GameScreenshotResult(@GameScreenshotStatus int status, @Nullable Bitmap bitmap) {
+    private GameScreenshotResult(@GameScreenshotStatus int status) {
         this.mStatus = status;
-        this.mBitmap = bitmap;
     }
 
     @Override
@@ -126,7 +115,6 @@ public final class GameScreenshotResult implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mStatus);
-        dest.writeParcelable(mBitmap, flags);
     }
 
     @GameScreenshotStatus
@@ -134,29 +122,12 @@ public final class GameScreenshotResult implements Parcelable {
         return mStatus;
     }
 
-    /**
-     * Gets the {@link Bitmap} result from a successful screenshot attempt.
-     *
-     * @return The bitmap.
-     * @throws IllegalStateException if this method is called when {@link #getStatus} does not
-     *                               return {@link #GAME_SCREENSHOT_SUCCESS}.
-     */
-    @NonNull
-    public Bitmap getBitmap() {
-        if (mBitmap == null) {
-            throw new IllegalStateException("Bitmap not available for failed screenshot result");
-        }
-        return mBitmap;
-    }
-
     @Override
     public String toString() {
         return "GameScreenshotResult{"
                 + "mStatus="
                 + mStatus
-                + ", has bitmap='"
-                + mBitmap != null ? "yes" : "no"
-                + "\'}";
+                + "}";
     }
 
     @Override
@@ -170,12 +141,11 @@ public final class GameScreenshotResult implements Parcelable {
         }
 
         GameScreenshotResult that = (GameScreenshotResult) o;
-        return mStatus == that.mStatus
-                && Objects.equals(mBitmap, that.mBitmap);
+        return mStatus == that.mStatus;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mStatus, mBitmap);
+        return Objects.hash(mStatus);
     }
 }

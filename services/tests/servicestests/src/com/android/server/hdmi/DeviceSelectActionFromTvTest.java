@@ -20,6 +20,7 @@ import static android.hardware.hdmi.HdmiControlManager.POWER_STATUS_ON;
 import static android.hardware.hdmi.HdmiControlManager.POWER_STATUS_STANDBY;
 import static android.hardware.hdmi.HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
 
+import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
 import static com.android.server.hdmi.Constants.ADDR_TV;
@@ -109,7 +110,7 @@ public class DeviceSelectActionFromTvTest {
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                        Collections.emptyList()) {
+                        Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     boolean isControlEnabled() {
                         return true;
@@ -145,6 +146,7 @@ public class DeviceSelectActionFromTvTest {
                                  true, false, false);
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mHdmiControlService.initService();
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);

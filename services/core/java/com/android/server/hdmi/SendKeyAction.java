@@ -172,8 +172,19 @@ final class SendKeyAction extends HdmiCecFeatureAction {
     }
 
     private void sendKeyUp() {
-        sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(getSourceAddress(),
-                mTargetAddress));
+        // When using Absolute Volume Control, query audio status after a volume key is released.
+        // This allows us to notify AudioService of the resulting volume or mute status changes.
+        if (HdmiCecKeycode.isVolumeKeycode(mLastKeycode)
+                && localDevice().getService().isAbsoluteVolumeControlEnabled()) {
+            sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(getSourceAddress(),
+                    mTargetAddress),
+                    __ -> sendCommand(HdmiCecMessageBuilder.buildGiveAudioStatus(
+                            getSourceAddress(),
+                            localDevice().findAudioReceiverAddress())));
+        } else {
+            sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(getSourceAddress(),
+                    mTargetAddress));
+        }
     }
 
     @Override

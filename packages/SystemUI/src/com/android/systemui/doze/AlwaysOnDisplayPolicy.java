@@ -29,11 +29,15 @@ import android.util.KeyValueListParser;
 import android.util.Log;
 
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
+
+import javax.inject.Inject;
 
 /**
  * Class to store the policy for AOD, which comes from
  * {@link android.provider.Settings.Global}
  */
+@SysUISingleton
 public class AlwaysOnDisplayPolicy {
     public static final String TAG = "AlwaysOnDisplayPolicy";
 
@@ -130,6 +134,7 @@ public class AlwaysOnDisplayPolicy {
     private final Context mContext;
     private SettingsObserver mSettingsObserver;
 
+    @Inject
     public AlwaysOnDisplayPolicy(Context context) {
         context = context.getApplicationContext();
         mContext = context;

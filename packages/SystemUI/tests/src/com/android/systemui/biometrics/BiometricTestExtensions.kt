@@ -29,6 +29,7 @@ fun SensorLocationInternal.asFingerprintSensorProperties(
     @FingerprintSensorProperties.SensorType sensorType: Int =
         FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
     maxEnrollmentsPerUser: Int = 1,
+    halControlsIllumination: Boolean = true,
     info: List<ComponentInfoInternal> = listOf(ComponentInfoInternal("a", "b", "c", "d", "e")),
     resetLockoutRequiresHardwareAuthToken: Boolean = false
 ) = FingerprintSensorPropertiesInternal(
@@ -37,6 +38,7 @@ fun SensorLocationInternal.asFingerprintSensorProperties(
     maxEnrollmentsPerUser,
     info,
     sensorType,
+    halControlsIllumination,
     resetLockoutRequiresHardwareAuthToken,
     listOf(this)
 )

@@ -508,7 +508,8 @@ public class ActivityStartController {
      */
     int startActivityInTaskFragment(@NonNull TaskFragment taskFragment,
             @NonNull Intent activityIntent, @Nullable Bundle activityOptions,
-            @Nullable IBinder resultTo, int callingUid, int callingPid) {
+            @Nullable IBinder resultTo, int callingUid, int callingPid,
+            @Nullable IBinder errorCallbackToken) {
         final ActivityRecord caller =
                 resultTo != null ? ActivityRecord.forTokenLocked(resultTo) : null;
         return obtainStarter(activityIntent, "startActivityInTaskFragment")
@@ -518,7 +519,10 @@ public class ActivityStartController {
                 .setRequestCode(-1)
                 .setCallingUid(callingUid)
                 .setCallingPid(callingPid)
+                .setRealCallingUid(callingUid)
+                .setRealCallingPid(callingPid)
                 .setUserId(caller != null ? caller.mUserId : mService.getCurrentUserId())
+                .setErrorCallbackToken(errorCallbackToken)
                 .execute();
     }
 
@@ -544,10 +548,8 @@ public class ActivityStartController {
 
         if (mLastHomeActivityStartRecord != null && (!dumpPackagePresent
                 || dumpPackage.equals(mLastHomeActivityStartRecord.packageName))) {
-            if (!dumped) {
-                dumped = true;
-                dumpLastHomeActivityStartResult(pw, prefix);
-            }
+            dumped = true;
+            dumpLastHomeActivityStartResult(pw, prefix);
             pw.print(prefix);
             pw.println("mLastHomeActivityStartRecord:");
             mLastHomeActivityStartRecord.dump(pw, prefix + "  ", true /* dumpAll */);
@@ -565,6 +567,7 @@ public class ActivityStartController {
                     dumpLastHomeActivityStartResult(pw, prefix);
                 }
                 pw.print(prefix);
+                pw.println("mLastStarter:");
                 mLastStarter.dump(pw, prefix + "  ");
 
                 if (dumpPackagePresent) {

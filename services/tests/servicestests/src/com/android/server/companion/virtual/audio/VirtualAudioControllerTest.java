@@ -16,6 +16,7 @@
 
 package com.android.server.companion.virtual.audio;
 
+import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 import static android.media.AudioAttributes.FLAG_SECURE;
 import static android.media.AudioPlaybackConfiguration.PLAYER_STATE_STARTED;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
@@ -25,7 +26,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import android.companion.virtual.audio.IAudioSessionCallback;
+import android.companion.virtual.VirtualDeviceParams;
+import android.companion.virtual.audio.IAudioConfigChangedCallback;
+import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.media.AudioPlaybackConfiguration;
@@ -59,7 +62,10 @@ public class VirtualAudioControllerTest {
     private Context mContext;
     private VirtualAudioController mVirtualAudioController;
     private GenericWindowPolicyController mGenericWindowPolicyController;
-    @Mock IAudioSessionCallback mCallback;
+    @Mock
+    private IAudioRoutingCallback mRoutingCallback;
+    @Mock
+    private IAudioConfigChangedCallback mConfigChangedCallback;
 
     @Before
     public void setUp() {
@@ -70,52 +76,60 @@ public class VirtualAudioControllerTest {
                 FLAG_SECURE,
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                 /* allowedUsers= */ new ArraySet<>(),
+                /* allowedCrossTaskNavigations= */ new ArraySet<>(),
+                /* blockedCrossTaskNavigations= */ new ArraySet<>(),
                 /* allowedActivities= */ new ArraySet<>(),
                 /* blockedActivities= */ new ArraySet<>(),
-                /* activityListener= */null,
-                /* activityBlockedCallback= */ null);
+                VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED,
+                /* activityListener= */ null,
+                /* activityBlockedCallback= */ null,
+                /* deviceProfile= */ DEVICE_PROFILE_APP_STREAMING);
     }
 
     @Test
     public void startListening_receivesCallback() throws RemoteException {
         ArraySet<Integer> runningUids = new ArraySet<>();
         runningUids.add(APP1_UID);
-        int[] appUids = new int[] {APP1_UID};
+        int[] appUids = new int[]{APP1_UID};
 
-        mVirtualAudioController.startListening(mGenericWindowPolicyController, mCallback);
+        mVirtualAudioController.startListening(
+                mGenericWindowPolicyController, mRoutingCallback, mConfigChangedCallback);
 
         mGenericWindowPolicyController.onRunningAppsChanged(runningUids);
-        verify(mCallback).onAppsNeedingAudioRoutingChanged(appUids);
+        verify(mRoutingCallback).onAppsNeedingAudioRoutingChanged(appUids);
     }
 
     @Test
     public void stopListening_removesCallback() throws RemoteException {
         ArraySet<Integer> runningUids = new ArraySet<>();
         runningUids.add(APP1_UID);
-        int[] appUids = new int[] {APP1_UID};
-        mVirtualAudioController.startListening(mGenericWindowPolicyController, mCallback);
+        int[] appUids = new int[]{APP1_UID};
+        mVirtualAudioController.startListening(
+                mGenericWindowPolicyController, mRoutingCallback, mConfigChangedCallback);
 
         mVirtualAudioController.stopListening();
 
         mGenericWindowPolicyController.onRunningAppsChanged(runningUids);
-        verify(mCallback, never()).onAppsNeedingAudioRoutingChanged(appUids);
+        verify(mRoutingCallback, never()).onAppsNeedingAudioRoutingChanged(appUids);
     }
 
     @Test
     public void onRunningAppsChanged_notifiesAudioRoutingModified() throws RemoteException {
-        mVirtualAudioController.startListening(mGenericWindowPolicyController, mCallback);
+        mVirtualAudioController.startListening(
+                mGenericWindowPolicyController, mRoutingCallback, mConfigChangedCallback);
 
         ArraySet<Integer> runningUids = new ArraySet<>();
         runningUids.add(APP1_UID);
         mVirtualAudioController.onRunningAppsChanged(runningUids);
 
-        int[] appUids = new int[] {APP1_UID};
-        verify(mCallback).onAppsNeedingAudioRoutingChanged(appUids);
+        int[] appUids = new int[]{APP1_UID};
+        verify(mRoutingCallback).onAppsNeedingAudioRoutingChanged(appUids);
     }
 
     @Test
     public void onRunningAppsChanged_audioIsPlaying_doesNothing() throws RemoteException {
-        mVirtualAudioController.startListening(mGenericWindowPolicyController, mCallback);
+        mVirtualAudioController.startListening(
+                mGenericWindowPolicyController, mRoutingCallback, mConfigChangedCallback);
         mVirtualAudioController.addPlayingAppsForTesting(APP2_UID);
 
         ArraySet<Integer> runningUids = new ArraySet<>();
@@ -123,7 +137,7 @@ public class VirtualAudioControllerTest {
         mVirtualAudioController.onRunningAppsChanged(runningUids);
 
         int[] appUids = new int[]{APP1_UID};
-        verify(mCallback, never()).onAppsNeedingAudioRoutingChanged(appUids);
+        verify(mRoutingCallback, never()).onAppsNeedingAudioRoutingChanged(appUids);
     }
 
     @Test
@@ -143,7 +157,8 @@ public class VirtualAudioControllerTest {
 
     @Test
     public void onPlaybackConfigChanged_sendsCallback() throws RemoteException {
-        mVirtualAudioController.startListening(mGenericWindowPolicyController, mCallback);
+        mVirtualAudioController.startListening(
+                mGenericWindowPolicyController, mRoutingCallback, mConfigChangedCallback);
         ArraySet<Integer> runningUids = new ArraySet<>();
         runningUids.add(APP1_UID);
         mVirtualAudioController.onRunningAppsChanged(runningUids);
@@ -151,12 +166,13 @@ public class VirtualAudioControllerTest {
 
         mVirtualAudioController.onPlaybackConfigChanged(configs);
 
-        verify(mCallback).onPlaybackConfigChanged(configs);
+        verify(mConfigChangedCallback).onPlaybackConfigChanged(configs);
     }
 
     @Test
     public void onRecordingConfigChanged_sendsCallback() throws RemoteException {
-        mVirtualAudioController.startListening(mGenericWindowPolicyController, mCallback);
+        mVirtualAudioController.startListening(
+                mGenericWindowPolicyController, mRoutingCallback, mConfigChangedCallback);
         ArraySet<Integer> runningUids = new ArraySet<>();
         runningUids.add(APP1_UID);
         mVirtualAudioController.onRunningAppsChanged(runningUids);
@@ -164,7 +180,7 @@ public class VirtualAudioControllerTest {
 
         mVirtualAudioController.onRecordingConfigChanged(configs);
 
-        verify(mCallback).onRecordingConfigChanged(configs);
+        verify(mConfigChangedCallback).onRecordingConfigChanged(configs);
     }
 
     private List<AudioPlaybackConfiguration> createPlaybackConfigurations(

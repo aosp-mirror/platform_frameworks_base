@@ -171,7 +171,7 @@ class ResizeLegacySplitScreen(
             val bottomAppBounds = Region.from(0,
                 dividerBounds.bottom - WindowUtils.dockedStackDividerInset,
                 displayBounds.right,
-                displayBounds.bottom - WindowUtils.navigationBarHeight)
+                displayBounds.bottom - WindowUtils.navigationBarFrameHeight)
             visibleRegion(Components.SimpleActivity.COMPONENT.toFlickerComponent())
                 .coversExactly(topAppBounds)
             visibleRegion(Components.ImeActivity.COMPONENT.toFlickerComponent())
@@ -192,7 +192,7 @@ class ResizeLegacySplitScreen(
             val bottomAppBounds = Region.from(0,
                 dividerBounds.bottom - WindowUtils.dockedStackDividerInset,
                 displayBounds.right,
-                displayBounds.bottom - WindowUtils.navigationBarHeight)
+                displayBounds.bottom - WindowUtils.navigationBarFrameHeight)
 
             visibleRegion(Components.SimpleActivity.COMPONENT.toFlickerComponent())
                 .coversExactly(topAppBounds)

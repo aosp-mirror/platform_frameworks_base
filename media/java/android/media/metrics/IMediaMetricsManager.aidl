@@ -41,4 +41,6 @@ interface IMediaMetricsManager {
     String getEditingSessionId(int userId);
     String getBundleSessionId(int userId);
     void reportBundleMetrics(in String sessionId, in PersistableBundle metrics, int userId);
+
+    void releaseSessionId(in String sessionId, int userId);
 }

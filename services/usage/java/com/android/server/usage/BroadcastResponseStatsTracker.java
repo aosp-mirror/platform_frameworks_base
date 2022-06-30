@@ -16,10 +16,6 @@
 
 package com.android.server.usage;
 
-import static android.app.ActivityManager.procStateToString;
-
-import static com.android.server.usage.UsageStatsService.DEBUG_RESPONSE_STATS;
-
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -27,15 +23,23 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager.ProcessState;
+import android.app.role.OnRoleHoldersChangedListener;
+import android.app.role.RoleManager;
 import android.app.usage.BroadcastResponseStats;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
-import android.text.TextUtils;
-import android.util.LongSparseArray;
+import android.permission.PermissionManager;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.LongArrayQueue;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.lang.annotation.Retention;
@@ -44,19 +48,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 class BroadcastResponseStatsTracker {
-    private static final String TAG = "ResponseStatsTracker";
+    static final String TAG = "ResponseStatsTracker";
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"NOTIFICATION_EVENT"}, value = {
-            NOTIFICATION_EVENT_POSTED,
-            NOTIFICATION_EVENT_UPDATED,
-            NOTIFICATION_EVENT_CANCELLED
+    @IntDef(prefix = {"NOTIFICATION_EVENT_TYPE_"}, value = {
+            NOTIFICATION_EVENT_TYPE_POSTED,
+            NOTIFICATION_EVENT_TYPE_UPDATED,
+            NOTIFICATION_EVENT_TYPE_CANCELLED
     })
-    public @interface NotificationEvent {}
+    public @interface NotificationEventType {}
 
-    private static final int NOTIFICATION_EVENT_POSTED = 0;
-    private static final int NOTIFICATION_EVENT_UPDATED = 1;
-    private static final int NOTIFICATION_EVENT_CANCELLED = 2;
+    static final int NOTIFICATION_EVENT_TYPE_POSTED = 0;
+    static final int NOTIFICATION_EVENT_TYPE_UPDATED = 1;
+    static final int NOTIFICATION_EVENT_TYPE_CANCELLED = 2;
 
     private final Object mLock = new Object();
 
@@ -75,103 +79,166 @@ class BroadcastResponseStatsTracker {
     private SparseArray<SparseArray<UserBroadcastResponseStats>> mUserResponseStats =
             new SparseArray<>();
 
+    /**
+     * Cache of package names holding exempted roles.
+     *
+     * Contains the mapping of userId -> {roleName -> <packages>} data.
+     */
+    // TODO: Use SparseArrayMap to simplify the logic.
+    @GuardedBy("mLock")
+    private SparseArray<ArrayMap<String, List<String>>> mExemptedRoleHoldersCache =
+            new SparseArray<>();
+    private final OnRoleHoldersChangedListener mRoleHoldersChangedListener =
+            this::onRoleHoldersChanged;
+
     private AppStandbyInternal mAppStandby;
+    private BroadcastResponseStatsLogger mLogger;
+    private RoleManager mRoleManager;
 
     BroadcastResponseStatsTracker(@NonNull AppStandbyInternal appStandby) {
         mAppStandby = appStandby;
+        mLogger = new BroadcastResponseStatsLogger();
+    }
+
+    void onSystemServicesReady(Context context) {
+        mRoleManager = context.getSystemService(RoleManager.class);
+        mRoleManager.addOnRoleHoldersChangedListenerAsUser(BackgroundThread.getExecutor(),
+                mRoleHoldersChangedListener, UserHandle.ALL);
     }
 
     // TODO (206518114): Move all callbacks handling to a handler thread.
     void reportBroadcastDispatchEvent(int sourceUid, @NonNull String targetPackage,
             UserHandle targetUser, long idForResponseEvent,
             @ElapsedRealtimeLong long timestampMs, @ProcessState int targetUidProcState) {
-        if (DEBUG_RESPONSE_STATS) {
-            Slog.d(TAG, TextUtils.formatSimple("reportBroadcastDispatchEvent; "
-                            + "srcUid=%d, tgtPkg=%s, tgtUsr=%d, id=%d, ts=%s, state=%s",
-                    sourceUid, targetPackage, targetUser, idForResponseEvent,
-                    TimeUtils.formatDuration(timestampMs), procStateToString(targetUidProcState)));
-        }
+        mLogger.logBroadcastDispatchEvent(sourceUid, targetPackage, targetUser,
+                idForResponseEvent, timestampMs, targetUidProcState);
         if (targetUidProcState <= mAppStandby.getBroadcastResponseFgThresholdState()) {
-            // No need to track the broadcast response state while the target app is
+            // No need to track the broadcast response stats while the target app is
             // in the foreground.
             return;
         }
+        if (doesPackageHoldExemptedRole(targetPackage, targetUser)) {
+            // Package holds an exempted role, so no need to track the broadcast response stats.
+            return;
+        }
+        if (doesPackageHoldExemptedPermission(targetPackage, targetUser)) {
+            // Package holds an exempted permission, so no need to track the broadcast response
+            // stats
+            return;
+        }
         synchronized (mLock) {
-            final LongSparseArray<BroadcastEvent> broadcastEvents =
+            final ArraySet<BroadcastEvent> broadcastEvents =
                     getOrCreateBroadcastEventsLocked(targetPackage, targetUser);
-            final BroadcastEvent broadcastEvent = new BroadcastEvent(
+            final BroadcastEvent broadcastEvent = getOrCreateBroadcastEvent(broadcastEvents,
                     sourceUid, targetPackage, targetUser.getIdentifier(), idForResponseEvent);
-            broadcastEvents.append(timestampMs, broadcastEvent);
-            final BroadcastResponseStats responseStats =
-                    getOrCreateBroadcastResponseStats(broadcastEvent);
-            responseStats.incrementBroadcastsDispatchedCount(1);
+            broadcastEvent.addTimestampMs(timestampMs);
+
+            // Delete any old broadcast event related data so that we don't keep accumulating them.
+            recordAndPruneOldBroadcastDispatchTimestamps(broadcastEvent);
         }
     }
 
     void reportNotificationPosted(@NonNull String packageName, UserHandle user,
             @ElapsedRealtimeLong long timestampMs) {
-        reportNotificationEvent(NOTIFICATION_EVENT_POSTED, packageName, user, timestampMs);
+        reportNotificationEvent(NOTIFICATION_EVENT_TYPE_POSTED, packageName, user, timestampMs);
     }
 
     void reportNotificationUpdated(@NonNull String packageName, UserHandle user,
             @ElapsedRealtimeLong long timestampMs) {
-        reportNotificationEvent(NOTIFICATION_EVENT_UPDATED, packageName, user, timestampMs);
+        reportNotificationEvent(NOTIFICATION_EVENT_TYPE_UPDATED, packageName, user, timestampMs);
 
     }
 
     void reportNotificationCancelled(@NonNull String packageName, UserHandle user,
             @ElapsedRealtimeLong long timestampMs) {
-        reportNotificationEvent(NOTIFICATION_EVENT_CANCELLED, packageName, user, timestampMs);
+        reportNotificationEvent(NOTIFICATION_EVENT_TYPE_CANCELLED, packageName, user, timestampMs);
     }
 
-    private void reportNotificationEvent(@NotificationEvent int event,
+    private void reportNotificationEvent(@NotificationEventType int event,
             @NonNull String packageName, UserHandle user, @ElapsedRealtimeLong long timestampMs) {
-        if (DEBUG_RESPONSE_STATS) {
-            Slog.d(TAG, TextUtils.formatSimple(
-                    "reportNotificationEvent; event=<%s>, pkg=%s, usr=%d, ts=%s",
-                    notificationEventToString(event), packageName, user.getIdentifier(),
-                    TimeUtils.formatDuration(timestampMs)));
-        }
-        // TODO (206518114): Store last N events to dump for debugging purposes.
+        mLogger.logNotificationEvent(event, packageName, user, timestampMs);
         synchronized (mLock) {
-            final LongSparseArray<BroadcastEvent> broadcastEvents =
+            final ArraySet<BroadcastEvent> broadcastEvents =
                     getBroadcastEventsLocked(packageName, user);
             if (broadcastEvents == null) {
                 return;
             }
-            // TODO (206518114): Add LongSparseArray.removeAtRange()
+            final long broadcastResponseWindowDurationMs =
+                    mAppStandby.getBroadcastResponseWindowDurationMs();
+            final long broadcastsSessionWithResponseDurationMs =
+                    mAppStandby.getBroadcastSessionsWithResponseDurationMs();
+            final boolean recordAllBroadcastsSessionsWithinResponseWindow =
+                    mAppStandby.shouldNoteResponseEventForAllBroadcastSessions();
             for (int i = broadcastEvents.size() - 1; i >= 0; --i) {
-                final long dispatchTimestampMs = broadcastEvents.keyAt(i);
-                final long elapsedDurationMs = timestampMs - dispatchTimestampMs;
-                if (elapsedDurationMs <= 0) {
-                    continue;
-                }
-                if (dispatchTimestampMs >= timestampMs) {
-                    continue;
-                }
-                if (elapsedDurationMs <= mAppStandby.getBroadcastResponseWindowDurationMs()) {
-                    final BroadcastEvent broadcastEvent = broadcastEvents.valueAt(i);
-                    final BroadcastResponseStats responseStats =
-                            getBroadcastResponseStats(broadcastEvent);
-                    if (responseStats == null) {
-                        continue;
+                final BroadcastEvent broadcastEvent = broadcastEvents.valueAt(i);
+                recordAndPruneOldBroadcastDispatchTimestamps(broadcastEvent);
+
+                final LongArrayQueue dispatchTimestampsMs = broadcastEvent.getTimestampsMs();
+                long broadcastsSessionEndTimestampMs = 0;
+                // We only need to look at the broadcast events that occurred before
+                // this notification related event.
+                while (dispatchTimestampsMs.size() > 0
+                        && dispatchTimestampsMs.peekFirst() < timestampMs) {
+                    final long dispatchTimestampMs = dispatchTimestampsMs.peekFirst();
+                    final long elapsedDurationMs = timestampMs - dispatchTimestampMs;
+                    // Only increment the counts if the broadcast was sent not too long ago, as
+                    // decided by 'broadcastResponseWindowDurationMs' and is part of a new session.
+                    // That is, it occurred 'broadcastsSessionWithResponseDurationMs' after the
+                    // previously handled broadcast event which is represented by
+                    // 'broadcastsSessionEndTimestampMs'.
+                    if (elapsedDurationMs <= broadcastResponseWindowDurationMs
+                            && dispatchTimestampMs >= broadcastsSessionEndTimestampMs) {
+                        if (broadcastsSessionEndTimestampMs != 0
+                                && !recordAllBroadcastsSessionsWithinResponseWindow) {
+                            break;
+                        }
+                        final BroadcastResponseStats responseStats =
+                                getOrCreateBroadcastResponseStats(broadcastEvent);
+                        responseStats.incrementBroadcastsDispatchedCount(1);
+                        broadcastsSessionEndTimestampMs = dispatchTimestampMs
+                                + broadcastsSessionWithResponseDurationMs;
+                        switch (event) {
+                            case NOTIFICATION_EVENT_TYPE_POSTED:
+                                responseStats.incrementNotificationsPostedCount(1);
+                                break;
+                            case NOTIFICATION_EVENT_TYPE_UPDATED:
+                                responseStats.incrementNotificationsUpdatedCount(1);
+                                break;
+                            case NOTIFICATION_EVENT_TYPE_CANCELLED:
+                                responseStats.incrementNotificationsCancelledCount(1);
+                                break;
+                            default:
+                                Slog.wtf(TAG, "Unknown event: " + event);
+                        }
                     }
-                    switch (event) {
-                        case NOTIFICATION_EVENT_POSTED:
-                            responseStats.incrementNotificationsPostedCount(1);
-                            break;
-                        case NOTIFICATION_EVENT_UPDATED:
-                            responseStats.incrementNotificationsUpdatedCount(1);
-                            break;
-                        case NOTIFICATION_EVENT_CANCELLED:
-                            responseStats.incrementNotificationsCancelledCount(1);
-                            break;
-                        default:
-                            Slog.wtf(TAG, "Unknown event: " + event);
-                    }
+                    dispatchTimestampsMs.removeFirst();
                 }
-                broadcastEvents.removeAt(i);
+                if (dispatchTimestampsMs.size() == 0) {
+                    broadcastEvents.removeAt(i);
+                }
             }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void recordAndPruneOldBroadcastDispatchTimestamps(BroadcastEvent broadcastEvent) {
+        final LongArrayQueue timestampsMs = broadcastEvent.getTimestampsMs();
+        final long broadcastResponseWindowDurationMs =
+                mAppStandby.getBroadcastResponseWindowDurationMs();
+        final long broadcastsSessionDurationMs =
+                mAppStandby.getBroadcastSessionsDurationMs();
+        final long nowElapsedMs = SystemClock.elapsedRealtime();
+        long broadcastsSessionEndTimestampMs = 0;
+        while (timestampsMs.size() > 0
+                && timestampsMs.peekFirst() < (nowElapsedMs - broadcastResponseWindowDurationMs)) {
+            final long eventTimestampMs = timestampsMs.peekFirst();
+            if (eventTimestampMs >= broadcastsSessionEndTimestampMs) {
+                final BroadcastResponseStats responseStats =
+                        getOrCreateBroadcastResponseStats(broadcastEvent);
+                responseStats.incrementBroadcastsDispatchedCount(1);
+                broadcastsSessionEndTimestampMs = eventTimestampMs + broadcastsSessionDurationMs;
+            }
+            timestampsMs.removeFirst();
         }
     }
 
@@ -222,6 +289,62 @@ class BroadcastResponseStatsTracker {
         }
     }
 
+    boolean doesPackageHoldExemptedRole(@NonNull String packageName, @NonNull UserHandle user) {
+        final List<String> exemptedRoles = mAppStandby.getBroadcastResponseExemptedRoles();
+        synchronized (mLock) {
+            for (int i = exemptedRoles.size() - 1; i >= 0; --i) {
+                final String roleName = exemptedRoles.get(i);
+                final List<String> roleHolders = getRoleHoldersLocked(roleName, user);
+                if (CollectionUtils.contains(roleHolders, packageName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    boolean doesPackageHoldExemptedPermission(@NonNull String packageName,
+            @NonNull UserHandle user) {
+        final List<String> exemptedPermissions = mAppStandby
+                .getBroadcastResponseExemptedPermissions();
+        for (int i = exemptedPermissions.size() - 1; i >= 0; --i) {
+            final String permissionName = exemptedPermissions.get(i);
+            if (PermissionManager.checkPackageNamePermission(permissionName, packageName,
+                    user.getIdentifier()) == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    private List<String> getRoleHoldersLocked(@NonNull String roleName, @NonNull UserHandle user) {
+        ArrayMap<String, List<String>> roleHoldersForUser = mExemptedRoleHoldersCache.get(
+                user.getIdentifier());
+        if (roleHoldersForUser == null) {
+            roleHoldersForUser = new ArrayMap<>();
+            mExemptedRoleHoldersCache.put(user.getIdentifier(), roleHoldersForUser);
+        }
+        List<String> roleHolders = roleHoldersForUser.get(roleName);
+        if (roleHolders == null && mRoleManager != null) {
+            roleHolders = mRoleManager.getRoleHoldersAsUser(roleName, user);
+            roleHoldersForUser.put(roleName, roleHolders);
+        }
+        return roleHolders;
+    }
+
+    private void onRoleHoldersChanged(@NonNull String roleName, @NonNull UserHandle user) {
+        synchronized (mLock) {
+            final ArrayMap<String, List<String>> roleHoldersForUser =
+                    mExemptedRoleHoldersCache.get(user.getIdentifier());
+            if (roleHoldersForUser == null) {
+                return;
+            }
+            roleHoldersForUser.remove(roleName);
+        }
+    }
+
     void onUserRemoved(@UserIdInt int userId) {
         synchronized (mLock) {
             mUserBroadcastEvents.remove(userId);
@@ -229,6 +352,7 @@ class BroadcastResponseStatsTracker {
             for (int i = mUserResponseStats.size() - 1; i >= 0; --i) {
                 mUserResponseStats.valueAt(i).remove(userId);
             }
+            mExemptedRoleHoldersCache.remove(userId);
         }
     }
 
@@ -261,7 +385,7 @@ class BroadcastResponseStatsTracker {
 
     @GuardedBy("mLock")
     @Nullable
-    private LongSparseArray<BroadcastEvent> getBroadcastEventsLocked(
+    private ArraySet<BroadcastEvent> getBroadcastEventsLocked(
             @NonNull String packageName, UserHandle user) {
         final UserBroadcastEvents userBroadcastEvents = mUserBroadcastEvents.get(
                 user.getIdentifier());
@@ -273,7 +397,7 @@ class BroadcastResponseStatsTracker {
 
     @GuardedBy("mLock")
     @NonNull
-    private LongSparseArray<BroadcastEvent> getOrCreateBroadcastEventsLocked(
+    private ArraySet<BroadcastEvent> getOrCreateBroadcastEventsLocked(
             @NonNull String packageName, UserHandle user) {
         UserBroadcastEvents userBroadcastEvents = mUserBroadcastEvents.get(user.getIdentifier());
         if (userBroadcastEvents == null) {
@@ -281,16 +405,6 @@ class BroadcastResponseStatsTracker {
             mUserBroadcastEvents.put(user.getIdentifier(), userBroadcastEvents);
         }
         return userBroadcastEvents.getOrCreateBroadcastEvents(packageName);
-    }
-
-    @GuardedBy("mLock")
-    @Nullable
-    private BroadcastResponseStats getBroadcastResponseStats(
-            @NonNull BroadcastEvent broadcastEvent) {
-        final int sourceUid = broadcastEvent.getSourceUid();
-        final SparseArray<UserBroadcastResponseStats> responseStatsForUid =
-                mUserResponseStats.get(sourceUid);
-        return getBroadcastResponseStats(responseStatsForUid, broadcastEvent);
     }
 
     @GuardedBy("mLock")
@@ -329,17 +443,17 @@ class BroadcastResponseStatsTracker {
         return userResponseStats.getOrCreateBroadcastResponseStats(broadcastEvent);
     }
 
-    @NonNull
-    private String notificationEventToString(@NotificationEvent int event) {
-        switch (event) {
-            case NOTIFICATION_EVENT_POSTED:
-                return "posted";
-            case NOTIFICATION_EVENT_UPDATED:
-                return "updated";
-            case NOTIFICATION_EVENT_CANCELLED:
-                return "cancelled";
-            default:
-                return String.valueOf(event);
+    private static BroadcastEvent getOrCreateBroadcastEvent(
+            ArraySet<BroadcastEvent> broadcastEvents,
+            int sourceUid, String targetPackage, int targetUserId, long idForResponseEvent) {
+        final BroadcastEvent broadcastEvent = new BroadcastEvent(
+                sourceUid, targetPackage, targetUserId, idForResponseEvent);
+        final int index = broadcastEvents.indexOf(broadcastEvent);
+        if (index >= 0) {
+            return broadcastEvents.valueAt(index);
+        } else {
+            broadcastEvents.add(broadcastEvent);
+            return broadcastEvent;
         }
     }
 
@@ -351,6 +465,10 @@ class BroadcastResponseStatsTracker {
             dumpBroadcastEventsLocked(ipw);
             ipw.println();
             dumpResponseStatsLocked(ipw);
+            ipw.println();
+            dumpRoleHoldersLocked(ipw);
+            ipw.println();
+            mLogger.dumpLogs(ipw);
         }
 
         ipw.decreaseIndent();
@@ -389,6 +507,33 @@ class BroadcastResponseStatsTracker {
                 ipw.increaseIndent();
                 broadcastResponseStats.dump(ipw);
                 ipw.decreaseIndent();
+            }
+            ipw.decreaseIndent();
+        }
+        ipw.decreaseIndent();
+    }
+
+    @GuardedBy("mLock")
+    private void dumpRoleHoldersLocked(@NonNull IndentingPrintWriter ipw) {
+        ipw.println("Role holders:");
+        ipw.increaseIndent();
+        for (int userIdx = 0; userIdx < mExemptedRoleHoldersCache.size(); ++userIdx) {
+            final int userId = mExemptedRoleHoldersCache.keyAt(userIdx);
+            final ArrayMap<String, List<String>> roleHoldersForUser =
+                    mExemptedRoleHoldersCache.valueAt(userIdx);
+            ipw.println("User " + userId + ":");
+            ipw.increaseIndent();
+            for (int roleIdx = 0; roleIdx < roleHoldersForUser.size(); ++roleIdx) {
+                final String roleName = roleHoldersForUser.keyAt(roleIdx);
+                final List<String> holders = roleHoldersForUser.valueAt(roleIdx);
+                ipw.print(roleName + ": ");
+                for (int holderIdx = 0; holderIdx < holders.size(); ++holderIdx) {
+                    if (holderIdx > 0) {
+                        ipw.print(", ");
+                    }
+                    ipw.print(holders.get(holderIdx));
+                }
+                ipw.println();
             }
             ipw.decreaseIndent();
         }

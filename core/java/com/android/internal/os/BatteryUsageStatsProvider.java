@@ -18,13 +18,16 @@ package com.android.internal.os;
 
 import android.content.Context;
 import android.hardware.SensorManager;
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Parcel;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.UidBatteryConsumer;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -162,6 +165,8 @@ public class BatteryUsageStatsProvider {
         final boolean includeProcessStateData = ((query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0)
                 && mStats.isProcessStateDataAvailable();
+        final boolean includeVirtualUids =  ((query.getFlags()
+                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_VIRTUAL_UIDS) != 0);
 
         final BatteryUsageStats.Builder batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
                 mStats.getCustomEnergyConsumerNames(), includePowerModels,
@@ -174,6 +179,10 @@ public class BatteryUsageStatsProvider {
         SparseArray<? extends BatteryStats.Uid> uidStats = mStats.getUidStats();
         for (int i = uidStats.size() - 1; i >= 0; i--) {
             final BatteryStats.Uid uid = uidStats.valueAt(i);
+            if (!includeVirtualUids && uid.getUid() == Process.SDK_SANDBOX_VIRTUAL_UID) {
+                continue;
+            }
+
             batteryUsageStatsBuilder.getOrCreateUidBatteryConsumerBuilder(uid)
                     .setTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND,
                             getProcessBackgroundTimeMs(uid, realtimeUs))
@@ -223,7 +232,52 @@ public class BatteryUsageStatsProvider {
             batteryUsageStatsBuilder.setBatteryHistory(batteryStatsHistory);
         }
 
-        return batteryUsageStatsBuilder.build();
+        BatteryUsageStats stats = batteryUsageStatsBuilder.build();
+        if (includeProcessStateData) {
+            verify(stats);
+        }
+        return stats;
+    }
+
+    // STOPSHIP(b/229906525): remove verification before shipping
+    private static boolean sErrorReported;
+    private void verify(BatteryUsageStats stats) {
+        if (sErrorReported) {
+            return;
+        }
+
+        final double precision = 2.0;   // Allow rounding errors up to 2 mAh
+        final int[] components =
+                {BatteryConsumer.POWER_COMPONENT_CPU,
+                        BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                        BatteryConsumer.POWER_COMPONENT_WIFI,
+                        BatteryConsumer.POWER_COMPONENT_BLUETOOTH};
+        final int[] states =
+                {BatteryConsumer.PROCESS_STATE_FOREGROUND,
+                        BatteryConsumer.PROCESS_STATE_BACKGROUND,
+                        BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE,
+                        BatteryConsumer.PROCESS_STATE_CACHED};
+        for (UidBatteryConsumer ubc : stats.getUidBatteryConsumers()) {
+            for (int component : components) {
+                double consumedPower = ubc.getConsumedPower(ubc.getKey(component));
+                double sumStates = 0;
+                for (int state : states) {
+                    sumStates += ubc.getConsumedPower(ubc.getKey(component, state));
+                }
+                if (sumStates > consumedPower + precision) {
+                    String error = "Sum of states exceeds total. UID = " + ubc.getUid() + " "
+                            + BatteryConsumer.powerComponentIdToString(component)
+                            + " total = " + consumedPower + " states = " + sumStates;
+                    if (!sErrorReported) {
+                        Slog.wtf(TAG, error);
+                        sErrorReported = true;
+                    } else {
+                        Slog.e(TAG, error);
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     private long getProcessForegroundTimeMs(BatteryStats.Uid uid, long realtimeUs) {

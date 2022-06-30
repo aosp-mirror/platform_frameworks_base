@@ -63,17 +63,6 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
     int checkUidPermission(int uid, @NonNull String permissionName);
 
     /**
-     * Check whether a particular UID has been granted the POST_NOTIFICATIONS permission, or if
-     * access should be granted based on legacy access (currently symbolized by the REVIEW_REQUIRED
-     * permission flag
-     *
-     * @param uid the UID
-     * @return {@code PERMISSION_GRANTED} if the permission is granted, or legacy access is granted,
-     *         {@code PERMISSION_DENIED} otherwise
-     */
-    int checkPostNotificationsPermissionGrantedOrLegacyAccess(int uid);
-
-    /**
      * Adds a listener for runtime permission state (permissions or flags) changes.
      *
      * @param listener The listener.
@@ -460,8 +449,8 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
 
     /**
      * Provides the uid of the currently active
-     * {@link android.service.voice.HotwordDetectionService}, which should be granted RECORD_AUDIO
-     * and CAPTURE_AUDIO_HOTWORD permissions.
+     * {@link android.service.voice.HotwordDetectionService}, which should be granted RECORD_AUDIO,
+     * CAPTURE_AUDIO_HOTWORD and CAPTURE_AUDIO_OUTPUT permissions.
      */
     interface HotwordDetectionServiceProvider {
         int getUid();

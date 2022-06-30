@@ -432,7 +432,8 @@ class ActivityLaunchAnimator(
                 right = windowBounds.right
             )
             val callback = this@ActivityLaunchAnimator.callback!!
-            val windowBackgroundColor = callback.getBackgroundColor(window.taskInfo)
+            val windowBackgroundColor = window.taskInfo?.let { callback.getBackgroundColor(it) }
+                    ?: window.backgroundColor
 
             // Make sure we use the modified timings when animating a dialog into an app.
             val launchAnimator = if (controller.isDialogLaunch) {
@@ -595,7 +596,7 @@ class ActivityLaunchAnimator(
             controller.onLaunchAnimationCancelled()
         }
 
-        override fun onAnimationCancelled() {
+        override fun onAnimationCancelled(isKeyguardOccluded: Boolean) {
             if (timedOut) {
                 return
             }

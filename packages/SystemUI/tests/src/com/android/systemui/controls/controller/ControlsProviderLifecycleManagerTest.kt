@@ -210,4 +210,25 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
                 eq(actionCallbackService))
         assertEquals(action, wrapperCaptor.getValue().getWrappedAction())
     }
+
+    @Test
+    fun testFalseBindCallsUnbind() {
+        val falseContext = mock(Context::class.java)
+        `when`(falseContext.bindServiceAsUser(any(), any(), anyInt(), any())).thenReturn(false)
+        val manager = ControlsProviderLifecycleManager(
+            falseContext,
+            executor,
+            actionCallbackService,
+            UserHandle.of(0),
+            componentName
+        )
+        manager.bindService()
+        executor.runAllReady()
+
+        val captor = ArgumentCaptor.forClass(
+            ServiceConnection::class.java
+        )
+        verify(falseContext).bindServiceAsUser(any(), captor.capture(), anyInt(), any())
+        verify(falseContext).unbindService(captor.value)
+    }
 }

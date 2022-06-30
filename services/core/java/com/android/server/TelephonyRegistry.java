@@ -91,7 +91,7 @@ import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.telephony.ICarrierPrivilegesListener;
+import com.android.internal.telephony.ICarrierPrivilegesCallback;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.ITelephonyRegistry;
@@ -153,7 +153,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         IPhoneStateListener callback;
         IOnSubscriptionsChangedListener onSubscriptionsChangedListenerCallback;
         IOnSubscriptionsChangedListener onOpportunisticSubscriptionsChangedListenerCallback;
-        ICarrierPrivilegesListener carrierPrivilegesListener;
+        ICarrierPrivilegesCallback carrierPrivilegesCallback;
 
         int callerUid;
         int callerPid;
@@ -178,8 +178,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return (onOpportunisticSubscriptionsChangedListenerCallback != null);
         }
 
-        boolean matchCarrierPrivilegesListener() {
-            return carrierPrivilegesListener != null;
+        boolean matchCarrierPrivilegesCallback() {
+            return carrierPrivilegesCallback != null;
         }
 
         boolean canReadCallLog() {
@@ -199,7 +199,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     + onSubscriptionsChangedListenerCallback
                     + " onOpportunisticSubscriptionsChangedListenererCallback="
                     + onOpportunisticSubscriptionsChangedListenerCallback
-                    + " carrierPrivilegesListener=" + carrierPrivilegesListener
+                    + " carrierPrivilegesCallback=" + carrierPrivilegesCallback
                     + " subId=" + subId + " phoneId=" + phoneId + " events=" + eventList + "}";
         }
     }
@@ -414,7 +414,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPreciseDataConnectionStates;
 
     /** Per-phoneId snapshot of privileged packages (names + UIDs). */
-    private List<Pair<List<String>, int[]>> mCarrierPrivilegeStates;
+    @NonNull private List<Pair<List<String>, int[]>> mCarrierPrivilegeStates;
+    /** Per-phoneId of CarrierService (PackageName, UID) pair. */
+    @NonNull private List<Pair<String, Integer>> mCarrierServiceStates;
 
     /**
      * Support backward compatibility for {@link android.telephony.TelephonyDisplayInfo}.
@@ -705,6 +707,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 cutListToSize(mPhysicalChannelConfigs, mNumPhones);
                 cutListToSize(mLinkCapacityEstimateLists, mNumPhones);
                 cutListToSize(mCarrierPrivilegeStates, mNumPhones);
+                cutListToSize(mCarrierServiceStates, mNumPhones);
                 return;
             }
 
@@ -746,6 +749,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mAllowedNetworkTypeValue[i] = -1;
                 mLinkCapacityEstimateLists.add(i, INVALID_LCE_LIST);
                 mCarrierPrivilegeStates.add(i, new Pair<>(Collections.emptyList(), new int[0]));
+                mCarrierServiceStates.add(i, new Pair<>(null, Process.INVALID_UID));
             }
         }
     }
@@ -813,6 +817,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mDataEnabledReason = new int[numPhones];
         mLinkCapacityEstimateLists = new ArrayList<>();
         mCarrierPrivilegeStates = new ArrayList<>();
+        mCarrierServiceStates = new ArrayList<>();
 
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
@@ -851,6 +856,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mAllowedNetworkTypeValue[i] = -1;
             mLinkCapacityEstimateLists.add(i, INVALID_LCE_LIST);
             mCarrierPrivilegeStates.add(i, new Pair<>(Collections.emptyList(), new int[0]));
+            mCarrierServiceStates.add(i, new Pair<>(null, Process.INVALID_UID));
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -1028,12 +1034,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         Set<Integer> eventList = Arrays.stream(events).boxed().collect(Collectors.toSet());
         listen(renounceFineLocationAccess, renounceFineLocationAccess, callingPackage,
                 callingFeatureId, callback, eventList, notifyNow, subId);
-    }
-
-    private void listen(String callingPackage, @Nullable String callingFeatureId,
-            IPhoneStateListener callback, Set<Integer> events, boolean notifyNow, int subId) {
-        listen(false, false, callingPackage,
-                callingFeatureId, callback, events, notifyNow, subId);
     }
 
     private void listen(boolean renounceFineLocationAccess,
@@ -2013,10 +2013,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
 
-        ApnSetting apnSetting = preciseState.getApnSetting();
-
         synchronized (mRecords) {
-            if (validatePhoneId(phoneId)) {
+            if (validatePhoneId(phoneId) && preciseState.getApnSetting() != null) {
                 Pair<Integer, ApnSetting> key = Pair.create(preciseState.getTransportType(),
                         preciseState.getApnSetting());
                 PreciseDataConnectionState oldState = mPreciseDataConnectionStates.get(phoneId)
@@ -2357,9 +2355,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
 
-        if (VDBG) {
-            log("notifyActiveDataSubIdChanged: activeDataSubId=" + activeDataSubId);
-        }
+        log("notifyActiveDataSubIdChanged: activeDataSubId=" + activeDataSubId);
+        mLocalLog.log("notifyActiveDataSubIdChanged: activeDataSubId=" + activeDataSubId);
 
         mActiveDataSubId = activeDataSubId;
         synchronized (mRecords) {
@@ -2786,16 +2783,16 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void addCarrierPrivilegesListener(
+    public void addCarrierPrivilegesCallback(
             int phoneId,
-            ICarrierPrivilegesListener callback,
-            String callingPackage,
-            String callingFeatureId) {
+            @NonNull ICarrierPrivilegesCallback callback,
+            @NonNull String callingPackage,
+            @NonNull String callingFeatureId) {
         int callerUserId = UserHandle.getCallingUserId();
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
-                "addCarrierPrivilegesListener");
+                "addCarrierPrivilegesCallback");
         if (VDBG) {
             log(
                     "listen carrier privs: E pkg=" + pii(callingPackage) + " phoneId=" + phoneId
@@ -2804,6 +2801,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             + " callback=" + callback
                             + " callback.asBinder=" + callback.asBinder());
         }
+
+        // In case this is triggered from the caller who has handled multiple SIM config change
+        // firstly, we need to update the status (mNumPhone and mCarrierPrivilegeStates) firstly.
+        // This is almost a no-op if there is no multiple SIM config change in advance.
+        onMultiSimConfigChanged();
 
         synchronized (mRecords) {
             if (!validatePhoneId(phoneId)) {
@@ -2815,7 +2817,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             if (r == null) return;
 
             r.context = mContext;
-            r.carrierPrivilegesListener = callback;
+            r.carrierPrivilegesCallback = callback;
             r.callingPackage = callingPackage;
             r.callingFeatureId = callingFeatureId;
             r.callerUid = Binder.getCallingUid();
@@ -2827,10 +2829,18 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
 
             Pair<List<String>, int[]> state = mCarrierPrivilegeStates.get(phoneId);
+            Pair<String, Integer> carrierServiceState = mCarrierServiceStates.get(phoneId);
             try {
-                r.carrierPrivilegesListener.onCarrierPrivilegesChanged(
-                        Collections.unmodifiableList(state.first),
-                        Arrays.copyOf(state.second, state.second.length));
+                if (r.matchCarrierPrivilegesCallback()) {
+                    // Here, two callbacks are triggered in quick succession on the same binder.
+                    // In typical case, we expect the callers to care about only one or the other.
+                    r.carrierPrivilegesCallback.onCarrierPrivilegesChanged(
+                            Collections.unmodifiableList(state.first),
+                            Arrays.copyOf(state.second, state.second.length));
+
+                    r.carrierPrivilegesCallback.onCarrierServiceChanged(carrierServiceState.first,
+                            carrierServiceState.second);
+                }
             } catch (RemoteException ex) {
                 remove(r.binder);
             }
@@ -2838,12 +2848,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void removeCarrierPrivilegesListener(
-            ICarrierPrivilegesListener callback, String callingPackage) {
+    public void removeCarrierPrivilegesCallback(
+            @NonNull ICarrierPrivilegesCallback callback, @NonNull String callingPackage) {
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
-                "removeCarrierPrivilegesListener");
+                "removeCarrierPrivilegesCallback");
         remove(callback.asBinder());
     }
 
@@ -2859,6 +2869,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             + ", <packages=" + pii(privilegedPackageNames)
                             + ", uids=" + Arrays.toString(privilegedUids) + ">");
         }
+
+        // In case this is triggered from the caller who has handled multiple SIM config change
+        // firstly, we need to update the status (mNumPhone and mCarrierPrivilegeStates) firstly.
+        // This is almost a no-op if there is no multiple SIM config change in advance.
+        onMultiSimConfigChanged();
+
         synchronized (mRecords) {
             if (!validatePhoneId(phoneId)) {
                 throw new IllegalArgumentException("Invalid slot index: " + phoneId);
@@ -2868,15 +2884,48 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             for (Record r : mRecords) {
                 // Listeners are per-slot, not per-subscription. This is to provide a stable
                 // view across SIM profile switches.
-                if (!r.matchCarrierPrivilegesListener()
+                if (!r.matchCarrierPrivilegesCallback()
                         || !idMatch(r, SubscriptionManager.INVALID_SUBSCRIPTION_ID, phoneId)) {
                     continue;
                 }
                 try {
                     // Make sure even in-process listeners can't modify the values.
-                    r.carrierPrivilegesListener.onCarrierPrivilegesChanged(
+                    r.carrierPrivilegesCallback.onCarrierPrivilegesChanged(
                             Collections.unmodifiableList(privilegedPackageNames),
                             Arrays.copyOf(privilegedUids, privilegedUids.length));
+                } catch (RemoteException ex) {
+                    mRemoveList.add(r.binder);
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    @Override
+    public void notifyCarrierServiceChanged(int phoneId, @Nullable String packageName, int uid) {
+        if (!checkNotifyPermission("notifyCarrierServiceChanged")) return;
+        if (!validatePhoneId(phoneId)) return;
+        if (VDBG) {
+            log("notifyCarrierServiceChanged: phoneId=" + phoneId
+                    + ", package=" + pii(packageName) + ", uid=" + uid);
+        }
+
+        // In case this is triggered from the caller who has handled multiple SIM config change
+        // firstly, we need to update the status (mNumPhone and mCarrierServiceStates) firstly.
+        // This is almost a no-op if there is no multiple SIM config change in advance.
+        onMultiSimConfigChanged();
+
+        synchronized (mRecords) {
+            mCarrierServiceStates.set(
+                    phoneId, new Pair<>(packageName, uid));
+            for (Record r : mRecords) {
+                // Listeners are per-slot, not per-subscription.
+                if (!r.matchCarrierPrivilegesCallback()
+                        || !idMatch(r, SubscriptionManager.INVALID_SUBSCRIPTION_ID, phoneId)) {
+                    continue;
+                }
+                try {
+                    r.carrierPrivilegesCallback.onCarrierServiceChanged(packageName, uid);
                 } catch (RemoteException ex) {
                     mRemoveList.add(r.binder);
                 }
@@ -2940,6 +2989,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println(
                         "mCarrierPrivilegeState=<packages=" + pii(carrierPrivilegeState.first)
                                 + ", uids=" + Arrays.toString(carrierPrivilegeState.second) + ">");
+                Pair<String, Integer> carrierServiceState = mCarrierServiceStates.get(i);
+                pw.println("mCarrierServiceState=<package=" + pii(carrierServiceState.first)
+                        + ", uid=" + carrierServiceState.second + ">");
                 pw.decreaseIndent();
             }
 
@@ -3013,42 +3065,88 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             Binder.restoreCallingIdentity(ident);
         }
 
+        // Send the broadcast exactly once to all possible disjoint sets of apps.
+        // If the location master switch is on, broadcast the ServiceState 4 times:
+        // - Full ServiceState sent to apps with ACCESS_FINE_LOCATION and READ_PHONE_STATE
+        // - Full ServiceState sent to apps with ACCESS_FINE_LOCATION and
+        //   READ_PRIVILEGED_PHONE_STATE but not READ_PHONE_STATE
+        // - Sanitized ServiceState sent to apps with READ_PHONE_STATE but not ACCESS_FINE_LOCATION
+        // - Sanitized ServiceState sent to apps with READ_PRIVILEGED_PHONE_STATE but neither
+        //   READ_PHONE_STATE nor ACCESS_FINE_LOCATION
+        // If the location master switch is off, broadcast the ServiceState multiple times:
+        // - Full ServiceState sent to all apps permitted to bypass the location master switch if
+        //   they have either READ_PHONE_STATE or READ_PRIVILEGED_PHONE_STATE
+        // - Sanitized ServiceState sent to all other apps with READ_PHONE_STATE
+        // - Sanitized ServiceState sent to all other apps with READ_PRIVILEGED_PHONE_STATE but not
+        //   READ_PHONE_STATE
+        if (Binder.withCleanCallingIdentity(() ->
+                LocationAccessPolicy.isLocationModeEnabled(mContext, mContext.getUserId()))) {
+            Intent fullIntent = createServiceStateIntent(state, subId, phoneId, false);
+            mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
+                    fullIntent,
+                    new String[]{Manifest.permission.READ_PHONE_STATE,
+                            Manifest.permission.ACCESS_FINE_LOCATION});
+            mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
+                    fullIntent,
+                    new String[]{Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+                            Manifest.permission.ACCESS_FINE_LOCATION},
+                    new String[]{Manifest.permission.READ_PHONE_STATE});
+
+            Intent sanitizedIntent = createServiceStateIntent(state, subId, phoneId, true);
+            mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
+                    sanitizedIntent,
+                    new String[]{Manifest.permission.READ_PHONE_STATE},
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION});
+            mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
+                    sanitizedIntent,
+                    new String[]{Manifest.permission.READ_PRIVILEGED_PHONE_STATE},
+                    new String[]{Manifest.permission.READ_PHONE_STATE,
+                            Manifest.permission.ACCESS_FINE_LOCATION});
+        } else {
+            String[] locationBypassPackages = Binder.withCleanCallingIdentity(() ->
+                    LocationAccessPolicy.getLocationBypassPackages(mContext));
+            for (String locationBypassPackage : locationBypassPackages) {
+                Intent fullIntent = createServiceStateIntent(state, subId, phoneId, false);
+                fullIntent.setPackage(locationBypassPackage);
+                mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
+                        fullIntent,
+                        new String[]{Manifest.permission.READ_PHONE_STATE});
+                mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
+                        fullIntent,
+                        new String[]{Manifest.permission.READ_PRIVILEGED_PHONE_STATE},
+                        new String[]{Manifest.permission.READ_PHONE_STATE});
+            }
+
+            Intent sanitizedIntent = createServiceStateIntent(state, subId, phoneId, true);
+            mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
+                    sanitizedIntent,
+                    new String[]{Manifest.permission.READ_PHONE_STATE},
+                    new String[]{/* no excluded permissions */},
+                    locationBypassPackages);
+            mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
+                    sanitizedIntent,
+                    new String[]{Manifest.permission.READ_PRIVILEGED_PHONE_STATE},
+                    new String[]{Manifest.permission.READ_PHONE_STATE},
+                    locationBypassPackages);
+        }
+    }
+
+    private Intent createServiceStateIntent(ServiceState state, int subId, int phoneId,
+            boolean sanitizeLocation) {
         Intent intent = new Intent(Intent.ACTION_SERVICE_STATE);
         intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         Bundle data = new Bundle();
-        state.fillInNotifierBundle(data);
+        if (sanitizeLocation) {
+            state.createLocationInfoSanitizedCopy(true).fillInNotifierBundle(data);
+        } else {
+            state.fillInNotifierBundle(data);
+        }
         intent.putExtras(data);
-        // Pass the subscription along with the intent.
         intent.putExtra(PHONE_CONSTANTS_SUBSCRIPTION_KEY, subId);
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         intent.putExtra(PHONE_CONSTANTS_SLOT_KEY, phoneId);
         intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, phoneId);
-
-        // Send the broadcast twice -- once for all apps with READ_PHONE_STATE, then again
-        // for all apps with READ_PRIVILEGED_PHONE_STATE but not READ_PHONE_STATE.
-        // Do this again twice, the first time for apps with ACCESS_FINE_LOCATION, then again with
-        // the location-sanitized service state for all apps without ACCESS_FINE_LOCATION.
-        // This ensures that any app holding either READ_PRIVILEGED_PHONE_STATE or READ_PHONE_STATE
-        // get this broadcast exactly once, and we are not exposing location without permission.
-        mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(intent,
-                new String[] {Manifest.permission.READ_PHONE_STATE,
-                        Manifest.permission.ACCESS_FINE_LOCATION});
-        mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(intent,
-                new String[] {Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
-                        Manifest.permission.ACCESS_FINE_LOCATION},
-                new String[] {Manifest.permission.READ_PHONE_STATE});
-
-        // Replace bundle with location-sanitized ServiceState
-        data = new Bundle();
-        state.createLocationInfoSanitizedCopy(true).fillInNotifierBundle(data);
-        intent.putExtras(data);
-        mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(intent,
-                new String[] {Manifest.permission.READ_PHONE_STATE},
-                new String[] {Manifest.permission.ACCESS_FINE_LOCATION});
-        mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(intent,
-                new String[] {Manifest.permission.READ_PRIVILEGED_PHONE_STATE},
-                new String[] {Manifest.permission.READ_PHONE_STATE,
-                        Manifest.permission.ACCESS_FINE_LOCATION});
+        return intent;
     }
 
     private void broadcastSignalStrengthChanged(SignalStrength signalStrength, int phoneId,
@@ -3328,7 +3426,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private boolean validatePhoneId(int phoneId) {
-        boolean valid = (phoneId >= 0) && (phoneId < mNumPhones);
+        // Call getActiveModemCount to get the latest value instead of depending on mNumPhone
+        boolean valid = (phoneId >= 0) && (phoneId < getTelephonyManager().getActiveModemCount());
         if (VDBG) log("validatePhoneId: " + valid);
         return valid;
     }

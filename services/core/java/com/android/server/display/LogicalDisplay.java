@@ -227,12 +227,12 @@ final class LogicalDisplay {
                 info.largestNominalAppHeight = mOverrideDisplayInfo.largestNominalAppHeight;
                 info.logicalWidth = mOverrideDisplayInfo.logicalWidth;
                 info.logicalHeight = mOverrideDisplayInfo.logicalHeight;
+                info.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
+                info.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
                 info.rotation = mOverrideDisplayInfo.rotation;
                 info.displayCutout = mOverrideDisplayInfo.displayCutout;
                 info.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
                 info.roundedCorners = mOverrideDisplayInfo.roundedCorners;
-                info.shouldConstrainMetricsForLauncher =
-                        mOverrideDisplayInfo.shouldConstrainMetricsForLauncher;
             }
             mInfo.set(info);
         }
@@ -380,6 +380,9 @@ final class LogicalDisplay {
             }
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_ALWAYS_UNLOCKED;
+            }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_TOUCH_FEEDBACK_DISABLED;
             }
             Rect maskingInsets = getMaskingInsets(deviceInfo);
             int maskedWidth = deviceInfo.width - maskingInsets.left - maskingInsets.right;

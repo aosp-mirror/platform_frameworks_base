@@ -67,6 +67,8 @@ import com.android.server.power.batterysaver.BatterySaverStateMachine;
 import com.android.server.power.batterysaver.BatterySavingStats;
 import com.android.server.testutils.OffsettableClock;
 
+import java.util.concurrent.Executor;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -164,7 +166,8 @@ public class PowerManagerServiceMockingTest {
             @Override
             Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
                     SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
-                    FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector) {
+                    FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector,
+                    Executor executor) {
                 return mNotifierMock;
             }
 

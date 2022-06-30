@@ -21,6 +21,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -37,7 +38,9 @@ class LetterboxEduDialogLayout extends ConstraintLayout {
     // The alpha of a background is a number between 0 (fully transparent) to 255 (fully opaque).
     // 204 is simply 255 * 0.8.
     static final int BACKGROUND_DIM_ALPHA = 204;
+
     private View mDialogContainer;
+    private TextView mDialogTitle;
     private Drawable mBackgroundDim;
 
     public LetterboxEduDialogLayout(Context context) {
@@ -59,6 +62,10 @@ class LetterboxEduDialogLayout extends ConstraintLayout {
 
     View getDialogContainer() {
         return mDialogContainer;
+    }
+
+    TextView getDialogTitle() {
+        return mDialogTitle;
     }
 
     Drawable getBackgroundDim() {
@@ -84,6 +91,7 @@ class LetterboxEduDialogLayout extends ConstraintLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mDialogContainer = findViewById(R.id.letterbox_education_dialog_container);
+        mDialogTitle = findViewById(R.id.letterbox_education_dialog_title);
         mBackgroundDim = getBackground().mutate();
         // Set the alpha of the background dim to 0 for enter animation.
         mBackgroundDim.setAlpha(0);

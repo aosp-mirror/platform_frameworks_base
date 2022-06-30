@@ -67,7 +67,7 @@ class PrivacyDialog(
             attributes.receiveInsetsIgnoringZOrder = true
             setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL)
         }
-
+        setTitle(R.string.ongoing_privacy_dialog_a11y_title)
         setContentView(R.layout.privacy_dialog)
         rootView = requireViewById<ViewGroup>(R.id.root)
 
@@ -165,6 +165,7 @@ class PrivacyDialog(
             PrivacyType.TYPE_LOCATION -> R.drawable.privacy_item_circle_location
             PrivacyType.TYPE_CAMERA -> R.drawable.privacy_item_circle_camera
             PrivacyType.TYPE_MICROPHONE -> R.drawable.privacy_item_circle_microphone
+            PrivacyType.TYPE_MEDIA_PROJECTION -> R.drawable.privacy_item_circle_media_projection
         }) as LayerDrawable
     }
 

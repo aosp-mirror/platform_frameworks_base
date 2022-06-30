@@ -463,21 +463,22 @@ public final class PowerManager {
     /**
      * @hide
      */
-    public static String sleepReasonToString(int sleepReason) {
+    public static String sleepReasonToString(@GoToSleepReason int sleepReason) {
         switch (sleepReason) {
+            case GO_TO_SLEEP_REASON_ACCESSIBILITY: return "accessibility";
             case GO_TO_SLEEP_REASON_APPLICATION: return "application";
             case GO_TO_SLEEP_REASON_DEVICE_ADMIN: return "device_admin";
-            case GO_TO_SLEEP_REASON_TIMEOUT: return "timeout";
-            case GO_TO_SLEEP_REASON_LID_SWITCH: return "lid_switch";
-            case GO_TO_SLEEP_REASON_POWER_BUTTON: return "power_button";
-            case GO_TO_SLEEP_REASON_HDMI: return "hdmi";
-            case GO_TO_SLEEP_REASON_SLEEP_BUTTON: return "sleep_button";
-            case GO_TO_SLEEP_REASON_ACCESSIBILITY: return "accessibility";
-            case GO_TO_SLEEP_REASON_FORCE_SUSPEND: return "force_suspend";
-            case GO_TO_SLEEP_REASON_INATTENTIVE: return "inattentive";
+            case GO_TO_SLEEP_REASON_DEVICE_FOLD: return "device_folded";
             case GO_TO_SLEEP_REASON_DISPLAY_GROUP_REMOVED: return "display_group_removed";
             case GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF: return "display_groups_turned_off";
-            case GO_TO_SLEEP_REASON_DEVICE_FOLD: return "device_folded";
+            case GO_TO_SLEEP_REASON_FORCE_SUSPEND: return "force_suspend";
+            case GO_TO_SLEEP_REASON_HDMI: return "hdmi";
+            case GO_TO_SLEEP_REASON_INATTENTIVE: return "inattentive";
+            case GO_TO_SLEEP_REASON_LID_SWITCH: return "lid_switch";
+            case GO_TO_SLEEP_REASON_POWER_BUTTON: return "power_button";
+            case GO_TO_SLEEP_REASON_QUIESCENT: return "quiescent";
+            case GO_TO_SLEEP_REASON_SLEEP_BUTTON: return "sleep_button";
+            case GO_TO_SLEEP_REASON_TIMEOUT: return "timeout";
             default: return Integer.toString(sleepReason);
         }
     }
@@ -566,7 +567,8 @@ public final class PowerManager {
             WAKE_REASON_HDMI,
             WAKE_REASON_DISPLAY_GROUP_ADDED,
             WAKE_REASON_DISPLAY_GROUP_TURNED_ON,
-            WAKE_REASON_UNFOLD_DEVICE
+            WAKE_REASON_UNFOLD_DEVICE,
+            WAKE_REASON_DREAM_FINISHED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WakeReason{}
@@ -575,18 +577,20 @@ public final class PowerManager {
      * @hide
      */
     @IntDef(prefix = { "GO_TO_SLEEP_REASON_" }, value = {
+            GO_TO_SLEEP_REASON_ACCESSIBILITY,
             GO_TO_SLEEP_REASON_APPLICATION,
             GO_TO_SLEEP_REASON_DEVICE_ADMIN,
-            GO_TO_SLEEP_REASON_TIMEOUT,
+            GO_TO_SLEEP_REASON_DEVICE_FOLD,
+            GO_TO_SLEEP_REASON_DISPLAY_GROUP_REMOVED,
+            GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF,
+            GO_TO_SLEEP_REASON_FORCE_SUSPEND,
+            GO_TO_SLEEP_REASON_HDMI,
+            GO_TO_SLEEP_REASON_INATTENTIVE,
             GO_TO_SLEEP_REASON_LID_SWITCH,
             GO_TO_SLEEP_REASON_POWER_BUTTON,
-            GO_TO_SLEEP_REASON_HDMI,
-            GO_TO_SLEEP_REASON_SLEEP_BUTTON,
-            GO_TO_SLEEP_REASON_ACCESSIBILITY,
-            GO_TO_SLEEP_REASON_FORCE_SUSPEND,
-            GO_TO_SLEEP_REASON_INATTENTIVE,
             GO_TO_SLEEP_REASON_QUIESCENT,
-            GO_TO_SLEEP_REASON_DEVICE_FOLD
+            GO_TO_SLEEP_REASON_SLEEP_BUTTON,
+            GO_TO_SLEEP_REASON_TIMEOUT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface GoToSleepReason{}
@@ -673,6 +677,12 @@ public final class PowerManager {
     public static final int WAKE_REASON_UNFOLD_DEVICE = 12;
 
     /**
+     * Wake up reason code: Waking the device due to the dream finishing.
+     * @hide
+     */
+    public static final int WAKE_REASON_DREAM_FINISHED = 13;
+
+    /**
      * Convert the wake reason to a string for debugging purposes.
      * @hide
      */
@@ -691,11 +701,14 @@ public final class PowerManager {
             case WAKE_REASON_DISPLAY_GROUP_ADDED: return "WAKE_REASON_DISPLAY_GROUP_ADDED";
             case WAKE_REASON_DISPLAY_GROUP_TURNED_ON: return "WAKE_REASON_DISPLAY_GROUP_TURNED_ON";
             case WAKE_REASON_UNFOLD_DEVICE: return "WAKE_REASON_UNFOLD_DEVICE";
+            case WAKE_REASON_DREAM_FINISHED: return "WAKE_REASON_DREAM_FINISHED";
             default: return Integer.toString(wakeReason);
         }
     }
 
     /**
+     * Information related to the device waking up, triggered by {@link #wakeUp}.
+     *
      * @hide
      */
     public static class WakeData {
@@ -704,9 +717,9 @@ public final class PowerManager {
             this.wakeReason = wakeReason;
             this.sleepDuration = sleepDuration;
         }
-        public long wakeTime;
-        public @WakeReason int wakeReason;
-        public long sleepDuration;
+        public final long wakeTime;
+        public final @WakeReason int wakeReason;
+        public final long sleepDuration;
 
         @Override
         public boolean equals(@Nullable Object o) {
@@ -721,6 +734,35 @@ public final class PowerManager {
         @Override
         public int hashCode() {
             return Objects.hash(wakeTime, wakeReason, sleepDuration);
+        }
+    }
+
+    /**
+     * Information related to the device going to sleep, triggered by {@link #goToSleep}.
+     *
+     * @hide
+     */
+    public static class SleepData {
+        public SleepData(long goToSleepUptimeMillis, @GoToSleepReason int goToSleepReason) {
+            this.goToSleepUptimeMillis = goToSleepUptimeMillis;
+            this.goToSleepReason = goToSleepReason;
+        }
+        public final long goToSleepUptimeMillis;
+        public final @GoToSleepReason int goToSleepReason;
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (o instanceof SleepData) {
+                final SleepData other = (SleepData) o;
+                return goToSleepUptimeMillis == other.goToSleepUptimeMillis
+                        && goToSleepReason == other.goToSleepReason;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(goToSleepUptimeMillis, goToSleepReason);
         }
     }
 
@@ -2636,6 +2678,7 @@ public final class PowerManager {
      *
      * @hide
      */
+    @GoToSleepReason
     public int getLastSleepReason() {
         try {
             return mService.getLastSleepReason();

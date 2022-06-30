@@ -30,6 +30,7 @@ import static android.app.AppOpsManager.OPSTR_COARSE_LOCATION;
 import static android.app.AppOpsManager.OPSTR_FINE_LOCATION;
 import static android.app.AppOpsManager.OPSTR_PHONE_CALL_CAMERA;
 import static android.app.AppOpsManager.OPSTR_PHONE_CALL_MICROPHONE;
+import static android.app.AppOpsManager.OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OPSTR_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
@@ -47,6 +48,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.icu.text.ListFormatter;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.Process;
 import android.os.UserHandle;
@@ -136,6 +138,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
 
     private static final List<String> MIC_OPS = List.of(
             OPSTR_PHONE_CALL_MICROPHONE,
+            OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO,
             OPSTR_RECORD_AUDIO
     );
 
@@ -146,6 +149,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
 
     private static @NonNull String getGroupForOp(String op) {
         switch (op) {
+            case OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO:
             case OPSTR_RECORD_AUDIO:
                 return MICROPHONE;
             case OPSTR_CAMERA:
@@ -411,10 +415,13 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
     }
 
     /**
-     * Returns true if the app supports subattribution.
+     * Returns true if the app satisfies subattribution policies and supports it
      */
     private boolean isSubattributionSupported(String packageName, int uid) {
         try {
+            if (!isLocationProvider(packageName)) {
+                return false;
+            }
             PackageManager userPkgManager =
                     getUserContext(UserHandle.getUserHandleForUid(uid)).getPackageManager();
             ApplicationInfo appInfo = userPkgManager.getApplicationInfoAsUser(packageName,
@@ -427,6 +434,15 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+    }
+
+    /**
+     * @param packageName
+     * @return If the package is location provider
+     */
+    private boolean isLocationProvider(String packageName) {
+        return Objects.requireNonNull(
+                mContext.getSystemService(LocationManager.class)).isProviderPackage(packageName);
     }
 
     /**

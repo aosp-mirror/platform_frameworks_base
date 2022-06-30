@@ -1,9 +1,6 @@
 {
     "presubmit": [
         {
-            "name": "CtsLocationFineTestCases"
-        },
-        {
             "name": "CtsLocationCoarseTestCases"
         },
         {
@@ -32,7 +29,12 @@
             "file_patterns": ["SensorPrivacyService\\.java"]
         },
         {
-            "name": "BinaryTransparencyServiceTest",
+            "name": "FrameworksServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.BinaryTransparencyServiceTest"
+                }
+            ],
             "file_patterns": ["BinaryTransparencyService\\.java"]
         }
     ],
@@ -63,6 +65,11 @@
                 }
             ],
             "file_patterns": ["ClipboardService\\.java"]
+        }
+    ],
+    "postsubmit": [
+        {
+            "name": "CtsLocationFineTestCases"
         }
     ]
 }

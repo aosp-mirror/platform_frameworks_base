@@ -16,11 +16,12 @@
 
 package com.android.systemui.dreams.complication;
 
-import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewComponent.SCOPED_COMPLICATIONS_LAYOUT;
+import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.SCOPED_COMPLICATIONS_LAYOUT;
 import static com.android.systemui.dreams.complication.dagger.ComplicationModule.SCOPED_COMPLICATIONS_MODEL;
 
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.util.Log;
 import android.view.View;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -30,6 +31,7 @@ import com.android.systemui.util.ViewController;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -42,6 +44,8 @@ import javax.inject.Named;
  * a {@link ComplicationLayoutEngine}.
  */
 public class ComplicationHostViewController extends ViewController<ConstraintLayout> {
+    public static final String TAG = "ComplicationHostViewController";
+
     private final ComplicationLayoutEngine mLayoutEngine;
     private final LifecycleOwner mLifecycleOwner;
     private final ComplicationCollectionViewModel mComplicationCollectionViewModel;
@@ -113,6 +117,12 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
                     final Complication.ViewHolder viewHolder = complication.getComplication()
                             .createView(complication);
                     mComplications.put(id, viewHolder);
+                    if (viewHolder.getView().getParent() != null) {
+                        Log.e(TAG, "View for complication "
+                                + complication.getComplication().getClass()
+                                + " already has a parent. Make sure not to reuse complication "
+                                + "views!");
+                    }
                     mLayoutEngine.addComplication(id, viewHolder.getView(),
                             viewHolder.getLayoutParams(), viewHolder.getCategory());
                 });
@@ -134,5 +144,12 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
      */
     public View getView() {
         return mView;
+    }
+
+    /**
+     * Gets an unordered list of all the views at a particular position.
+     */
+    public List<View> getViewsAtPosition(@ComplicationLayoutParams.Position int position) {
+        return mLayoutEngine.getViewsAtPosition(position);
     }
 }

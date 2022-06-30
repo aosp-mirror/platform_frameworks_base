@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.annotation.Nullable;
 import android.util.ArrayMap;
 
 import java.util.Collection;
@@ -43,16 +44,19 @@ public class CircularQueue<K, V> extends LinkedList<K> {
     /**
      * Put a (key|value) pair in the CircularQueue. Only the key will be added to the queue. Value
      * will be added to the ArrayMap.
-     * @return {@code true} (as specified by {@link Collection#add})
+     * @return the most recently removed value if keys were removed, or {@code null} if no keys were
+     * removed.
      */
-    public boolean put(K key, V value) {
+    @Nullable
+    public V put(K key, V value) {
         super.add(key);
         mArrayMap.put(key, value);
+        V removedValue = null;
         while (size() > mLimit) {
             K removedKey = super.remove();
-            mArrayMap.remove(removedKey);
+            removedValue = mArrayMap.remove(removedKey);
         }
-        return true;
+        return removedValue;
     }
 
     /**

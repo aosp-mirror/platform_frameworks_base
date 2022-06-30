@@ -26,7 +26,7 @@
     <xs:element name="displayConfiguration">
         <xs:complexType>
             <xs:sequence>
-                <xs:element type="densityMap" name="densityMap" minOccurs="0" maxOccurs="1">
+                <xs:element type="densityMapping" name="densityMapping" minOccurs="0" maxOccurs="1">
                     <xs:annotation name="nullable"/>
                     <xs:annotation name="final"/>
                 </xs:element>
@@ -55,6 +55,16 @@
                     <xs:annotation name="final"/>
                 </xs:element>
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowIncrease">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Maximum time in milliseconds that a brightness increase animation
+                     can take. -->
+                <xs:element type="xs:nonNegativeInteger" name="screenBrightnessRampIncreaseMaxMillis">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Maximum time in milliseconds that a brightness decrease animation
+                     can take. -->
+                <xs:element type="xs:nonNegativeInteger" name="screenBrightnessRampDecreaseMaxMillis">
                     <xs:annotation name="final"/>
                 </xs:element>
                 <xs:element type="sensorDetails" name="lightSensor">
@@ -281,7 +291,7 @@
         </xs:sequence>
     </xs:complexType>
 
-    <xs:complexType name="densityMap">
+    <xs:complexType name="densityMapping">
         <xs:sequence>
             <xs:element name="density" type="density" maxOccurs="unbounded" minOccurs="1">
             </xs:element>

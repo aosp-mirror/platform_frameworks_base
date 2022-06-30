@@ -35,6 +35,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyManager;
 import android.telephony.UiccCardInfo;
@@ -827,6 +828,18 @@ public class EuiccManager {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long SWITCH_WITHOUT_PORT_INDEX_EXCEPTION_ON_DISABLE = 218393363L;
 
+    /**
+     * With support for MEP(multiple enabled profile) in Android T, a SIM card can enable multiple
+     * profile on different port. If apps are not target SDK T yet and keep calling the
+     * switchToSubscription or download API without specifying the port index, we should
+     * keep the existing behaviour by always use port index 0 even the device itself has MEP eUICC,
+     * this is for carrier app's backward compatibility.
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long SHOULD_RESOLVE_PORT_INDEX_FOR_APPS = 224562872L;
+
     private final Context mContext;
     private int mCardId;
 
@@ -1165,7 +1178,8 @@ public class EuiccManager {
      * subscription on the eUICC and the platform will internally resolve a port based on following
      * rules:
      * <ul>
-     *    <li>always use the default port 0 is eUICC does not support MEP.
+     *    <li>always use the default port 0 is eUICC does not support MEP or the apps are
+     *    not targeting on Android T.
      *    <li>In SS(Single SIM) mode, if the embedded slot already has an active port, then enable
      *    the subscription on this port.
      *    <li>In SS mode, if the embedded slot is not active, then try to enable the subscription on
@@ -1194,18 +1208,16 @@ public class EuiccManager {
             return;
         }
         try {
-            // TODO: Uncomment below compat change code once callers are ported to use
-            //  switchToSubscription with portIndex for disable operation.
-            // if (subscriptionId == SubscriptionManager.INVALID_SUBSCRIPTION_ID
-            //        && getIEuiccController().isCompatChangeEnabled(mContext.getOpPackageName(),
-            //        SWITCH_WITHOUT_PORT_INDEX_EXCEPTION_ON_DISABLE)) {
-            //    // Apps targeting on Android T and beyond will get exception whenever
-            //    // switchToSubscription without portIndex is called with INVALID_SUBSCRIPTION_ID.
-            //    Log.e(TAG, "switchToSubscription without portIndex is not allowed for"
-            //            + " disable operation");
-            //    throw new IllegalArgumentException("Must use switchToSubscription with portIndex"
-            //            + " API for disable operation");
-            // }
+            if (subscriptionId == SubscriptionManager.INVALID_SUBSCRIPTION_ID
+                     && getIEuiccController().isCompatChangeEnabled(mContext.getOpPackageName(),
+                     SWITCH_WITHOUT_PORT_INDEX_EXCEPTION_ON_DISABLE)) {
+                // Apps targeting on Android T and beyond will get exception whenever
+                // switchToSubscription without portIndex is called with INVALID_SUBSCRIPTION_ID.
+                Log.e(TAG, "switchToSubscription without portIndex is not allowed for"
+                        + " disable operation");
+                throw new IllegalArgumentException("Must use switchToSubscription with portIndex"
+                        + " API for disable operation");
+            }
             getIEuiccController().switchToSubscription(mCardId,
                     subscriptionId, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {

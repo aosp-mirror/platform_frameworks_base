@@ -35,7 +35,6 @@ import com.android.internal.app.ResolverActivity;
 import com.android.internal.app.ResolverListAdapter.ResolveInfoPresentationGetter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -173,9 +172,8 @@ public class DisplayResolveInfo implements TargetInfo, Parcelable {
 
     @Override
     public boolean startAsCaller(ResolverActivity activity, Bundle options, int userId) {
-        // TODO: if the start-as-caller API no longer requires a permission token, this can go back
-        // to inlining the real activity-start call, and we can remove startAsCallerImpl.
-        return activity.startAsCallerImpl(mResolvedIntent, options, false, userId);
+        activity.startActivityAsCaller(mResolvedIntent, options, false, userId);
+        return true;
     }
 
     @Override
@@ -207,7 +205,7 @@ public class DisplayResolveInfo implements TargetInfo, Parcelable {
         dest.writeCharSequence(mDisplayLabel);
         dest.writeCharSequence(mExtendedInfo);
         dest.writeParcelable(mResolvedIntent, 0);
-        dest.writeParcelableArray((Intent[]) mSourceIntents.toArray(), 0);
+        dest.writeTypedList(mSourceIntents);
         dest.writeBoolean(mIsSuspended);
         dest.writeBoolean(mPinned);
         dest.writeParcelable(mResolveInfo, 0);
@@ -228,9 +226,7 @@ public class DisplayResolveInfo implements TargetInfo, Parcelable {
         mDisplayLabel = in.readCharSequence();
         mExtendedInfo = in.readCharSequence();
         mResolvedIntent = in.readParcelable(null /* ClassLoader */, android.content.Intent.class);
-        mSourceIntents.addAll(
-                Arrays.asList((Intent[]) in.readParcelableArray(null /* ClassLoader */,
-                        Intent.class)));
+        in.readTypedList(mSourceIntents, Intent.CREATOR);
         mIsSuspended = in.readBoolean();
         mPinned = in.readBoolean();
         mResolveInfo = in.readParcelable(null /* ClassLoader */, android.content.pm.ResolveInfo.class);

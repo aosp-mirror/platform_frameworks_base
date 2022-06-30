@@ -16,24 +16,33 @@
 
 package com.android.systemui.dreams.complication;
 
-import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewComponent.COMPLICATION_MARGIN;
-import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewComponent.SCOPED_COMPLICATIONS_LAYOUT;
+import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.COMPLICATIONS_FADE_IN_DURATION;
+import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.COMPLICATIONS_FADE_OUT_DURATION;
+import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGIN;
+import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.SCOPED_COMPLICATIONS_LAYOUT;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Constraints;
 
 import com.android.systemui.R;
+import com.android.systemui.dreams.complication.ComplicationLayoutParams.Position;
+import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.touch.TouchInsetManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -43,7 +52,8 @@ import javax.inject.Named;
  * their layout parameters and attributes. The management of this set is done by
  * {@link ComplicationHostViewController}.
  */
-public class ComplicationLayoutEngine  {
+@DreamOverlayComponent.DreamOverlayScope
+public class ComplicationLayoutEngine implements Complication.VisibilityController {
     public static final String TAG = "ComplicationLayoutEngine";
 
     /**
@@ -371,6 +381,14 @@ public class ComplicationLayoutEngine  {
                 directionGroup.updateViews(head.getView());
             }
         }
+
+        private ArrayList<ViewEntry> getViews() {
+            final ArrayList<ViewEntry> views = new ArrayList<>();
+            for (DirectionGroup directionGroup : mDirectionGroups.values()) {
+                views.addAll(directionGroup.getViews());
+            }
+            return views;
+        }
     }
 
     /**
@@ -447,6 +465,10 @@ public class ComplicationLayoutEngine  {
                 groupHead = viewEntry.getView();
             }
         }
+
+        private List<ViewEntry> getViews() {
+            return mViews;
+        }
     }
 
     private final ConstraintLayout mLayout;
@@ -454,15 +476,45 @@ public class ComplicationLayoutEngine  {
     private final HashMap<ComplicationId, ViewEntry> mEntries = new HashMap<>();
     private final HashMap<Integer, PositionGroup> mPositions = new HashMap<>();
     private final TouchInsetManager.TouchInsetSession mSession;
+    private final int mFadeInDuration;
+    private final int mFadeOutDuration;
+    private ViewPropertyAnimator mViewPropertyAnimator;
 
     /** */
     @Inject
     public ComplicationLayoutEngine(@Named(SCOPED_COMPLICATIONS_LAYOUT) ConstraintLayout layout,
             @Named(COMPLICATION_MARGIN) int margin,
-            TouchInsetManager.TouchInsetSession session) {
+            TouchInsetManager.TouchInsetSession session,
+            @Named(COMPLICATIONS_FADE_IN_DURATION) int fadeInDuration,
+            @Named(COMPLICATIONS_FADE_OUT_DURATION) int fadeOutDuration) {
         mLayout = layout;
         mMargin = margin;
         mSession = session;
+        mFadeInDuration = fadeInDuration;
+        mFadeOutDuration = fadeOutDuration;
+    }
+
+    @Override
+    public void setVisibility(int visibility, boolean animate) {
+        final boolean appearing = visibility == View.VISIBLE;
+
+        if (mViewPropertyAnimator != null) {
+            mViewPropertyAnimator.cancel();
+        }
+
+        if (appearing) {
+            mLayout.setVisibility(View.VISIBLE);
+        }
+
+        mViewPropertyAnimator = mLayout.animate()
+                .alpha(appearing ? 1f : 0f)
+                .setDuration(appearing ? mFadeInDuration : mFadeOutDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mLayout.setVisibility(visibility);
+                    }
+                });
     }
 
     /**
@@ -477,6 +529,8 @@ public class ComplicationLayoutEngine  {
      */
     public void addComplication(ComplicationId id, View view,
             ComplicationLayoutParams lp, @Complication.Category int category) {
+        Log.d(TAG, "engine: " + this + " addComplication");
+
         // If the complication is present, remove.
         if (mEntries.containsKey(id)) {
             removeComplication(id);
@@ -501,13 +555,26 @@ public class ComplicationLayoutEngine  {
     /**
      * Removes a complication by {@link ComplicationId}.
      */
-    public void removeComplication(ComplicationId id) {
-        if (!mEntries.containsKey(id)) {
+    public boolean removeComplication(ComplicationId id) {
+        final ViewEntry entry = mEntries.remove(id);
+
+        if (entry == null) {
             Log.e(TAG, "could not find id:" + id);
-            return;
+            return false;
         }
 
-        final ViewEntry entry = mEntries.get(id);
         entry.remove();
+        return true;
+    }
+
+    /**
+     * Gets an unordered list of all the views at a particular position.
+     */
+    public List<View> getViewsAtPosition(@Position int position) {
+        return mPositions.entrySet().stream()
+                .filter(entry -> (entry.getKey() & position) == position)
+                .flatMap(entry -> entry.getValue().getViews().stream())
+                .map(ViewEntry::getView)
+                .collect(Collectors.toList());
     }
 }

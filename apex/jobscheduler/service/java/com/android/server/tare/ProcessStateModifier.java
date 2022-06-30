@@ -97,6 +97,10 @@ class ProcessStateModifier extends Modifier {
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
         }
+
+        @Override
+        public void onUidProcAdjChanged(int uid) {
+        }
     };
 
     ProcessStateModifier(@NonNull InternalResourceService irs) {
@@ -146,8 +150,11 @@ class ProcessStateModifier extends Modifier {
                 return 0;
             case PROC_STATE_BUCKET_FGS:
                 // Can't get notification priority. Just use CTP for now.
-                return ctp;
+                return Math.min(ctp, price);
             case PROC_STATE_BUCKET_BFGS:
+                if (price <= ctp) {
+                    return price;
+                }
                 return (long) (ctp + .5 * (price - ctp));
             case PROC_STATE_BUCKET_BG:
             default:

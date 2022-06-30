@@ -24,6 +24,7 @@ import android.os.Parcelable
 
 interface Flag<T> {
     val id: Int
+    val teamfood: Boolean
 }
 
 interface ParcelableFlag<T> : Flag<T>, Parcelable {
@@ -44,7 +45,8 @@ interface SysPropFlag<T> : Flag<T> {
 
 data class BooleanFlag @JvmOverloads constructor(
     override val id: Int,
-    override val default: Boolean = false
+    override val default: Boolean = false,
+    override val teamfood: Boolean = false
 ) : ParcelableFlag<Boolean> {
 
     companion object {
@@ -66,20 +68,25 @@ data class BooleanFlag @JvmOverloads constructor(
     }
 }
 
-data class ResourceBooleanFlag constructor(
+data class ResourceBooleanFlag @JvmOverloads constructor(
     override val id: Int,
-    @BoolRes override val resourceId: Int
+    @BoolRes override val resourceId: Int,
+    override val teamfood: Boolean = false
 ) : ResourceFlag<Boolean>
 
-data class SysPropBooleanFlag constructor(
+data class SysPropBooleanFlag @JvmOverloads constructor(
     override val id: Int,
     override val name: String,
     override val default: Boolean = false
-) : SysPropFlag<Boolean>
+) : SysPropFlag<Boolean> {
+    // TODO(b/223379190): Teamfood not supported for sysprop flags yet.
+    override val teamfood: Boolean = false
+}
 
 data class StringFlag @JvmOverloads constructor(
     override val id: Int,
-    override val default: String = ""
+    override val default: String = "",
+    override val teamfood: Boolean = false
 ) : ParcelableFlag<String> {
     companion object {
         @JvmField
@@ -100,14 +107,16 @@ data class StringFlag @JvmOverloads constructor(
     }
 }
 
-data class ResourceStringFlag constructor(
+data class ResourceStringFlag @JvmOverloads constructor(
     override val id: Int,
-    @StringRes override val resourceId: Int
+    @StringRes override val resourceId: Int,
+    override val teamfood: Boolean = false
 ) : ResourceFlag<String>
 
 data class IntFlag @JvmOverloads constructor(
     override val id: Int,
-    override val default: Int = 0
+    override val default: Int = 0,
+    override val teamfood: Boolean = false
 ) : ParcelableFlag<Int> {
 
     companion object {
@@ -129,14 +138,16 @@ data class IntFlag @JvmOverloads constructor(
     }
 }
 
-data class ResourceIntFlag constructor(
+data class ResourceIntFlag @JvmOverloads constructor(
     override val id: Int,
-    @IntegerRes override val resourceId: Int
+    @IntegerRes override val resourceId: Int,
+    override val teamfood: Boolean = false
 ) : ResourceFlag<Int>
 
 data class LongFlag @JvmOverloads constructor(
     override val id: Int,
-    override val default: Long = 0
+    override val default: Long = 0,
+    override val teamfood: Boolean = false
 ) : ParcelableFlag<Long> {
 
     companion object {
@@ -160,7 +171,8 @@ data class LongFlag @JvmOverloads constructor(
 
 data class FloatFlag @JvmOverloads constructor(
     override val id: Int,
-    override val default: Float = 0f
+    override val default: Float = 0f,
+    override val teamfood: Boolean = false
 ) : ParcelableFlag<Float> {
 
     companion object {
@@ -182,14 +194,16 @@ data class FloatFlag @JvmOverloads constructor(
     }
 }
 
-data class ResourceFloatFlag constructor(
+data class ResourceFloatFlag @JvmOverloads constructor(
     override val id: Int,
-    override val resourceId: Int
+    override val resourceId: Int,
+    override val teamfood: Boolean = false
 ) : ResourceFlag<Int>
 
 data class DoubleFlag @JvmOverloads constructor(
     override val id: Int,
-    override val default: Double = 0.0
+    override val default: Double = 0.0,
+    override val teamfood: Boolean = false
 ) : ParcelableFlag<Double> {
 
     companion object {

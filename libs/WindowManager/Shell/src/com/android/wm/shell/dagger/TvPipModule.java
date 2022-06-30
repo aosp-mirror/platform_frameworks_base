@@ -18,6 +18,7 @@ package com.android.wm.shell.dagger;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.SystemClock;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -27,10 +28,11 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellMainThread;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
+import com.android.wm.shell.pip.PipAppOpsListener;
 import com.android.wm.shell.pip.PipMediaController;
+import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
@@ -38,10 +40,12 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.tv.TvPipBoundsAlgorithm;
+import com.android.wm.shell.pip.tv.TvPipBoundsController;
 import com.android.wm.shell.pip.tv.TvPipBoundsState;
 import com.android.wm.shell.pip.tv.TvPipController;
 import com.android.wm.shell.pip.tv.TvPipMenuController;
 import com.android.wm.shell.pip.tv.TvPipNotificationController;
+import com.android.wm.shell.pip.tv.TvPipTaskOrganizer;
 import com.android.wm.shell.pip.tv.TvPipTransition;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
@@ -62,12 +66,16 @@ public abstract class TvPipModule {
             Context context,
             TvPipBoundsState tvPipBoundsState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
+            TvPipBoundsController tvPipBoundsController,
+            PipAppOpsListener pipAppOpsListener,
             PipTaskOrganizer pipTaskOrganizer,
             TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
             PipTransitionController pipTransitionController,
             TvPipNotificationController tvPipNotificationController,
             TaskStackListenerImpl taskStackListener,
+            PipParamsChangedForwarder pipParamsChangedForwarder,
+            DisplayController displayController,
             WindowManagerShellWrapper windowManagerShellWrapper,
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.of(
@@ -75,14 +83,33 @@ public abstract class TvPipModule {
                         context,
                         tvPipBoundsState,
                         tvPipBoundsAlgorithm,
+                        tvPipBoundsController,
+                        pipAppOpsListener,
                         pipTaskOrganizer,
                         pipTransitionController,
                         tvPipMenuController,
                         pipMediaController,
                         tvPipNotificationController,
                         taskStackListener,
+                        pipParamsChangedForwarder,
+                        displayController,
                         windowManagerShellWrapper,
                         mainExecutor));
+    }
+
+    @WMSingleton
+    @Provides
+    static TvPipBoundsController provideTvPipBoundsController(
+            Context context,
+            @ShellMainThread Handler mainHandler,
+            TvPipBoundsState tvPipBoundsState,
+            TvPipBoundsAlgorithm tvPipBoundsAlgorithm) {
+        return new TvPipBoundsController(
+                context,
+                SystemClock::uptimeMillis,
+                mainHandler,
+                tvPipBoundsState,
+                tvPipBoundsAlgorithm);
     }
 
     @WMSingleton
@@ -133,8 +160,11 @@ public abstract class TvPipModule {
     @Provides
     static TvPipNotificationController provideTvPipNotificationController(Context context,
             PipMediaController pipMediaController,
+            PipParamsChangedForwarder pipParamsChangedForwarder,
+            TvPipBoundsState tvPipBoundsState,
             @ShellMainThread Handler mainHandler) {
-        return new TvPipNotificationController(context, pipMediaController, mainHandler);
+        return new TvPipNotificationController(context, pipMediaController,
+                pipParamsChangedForwarder, tvPipBoundsState, mainHandler);
     }
 
     @WMSingleton
@@ -160,16 +190,30 @@ public abstract class TvPipModule {
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
             PipTransitionController pipTransitionController,
+            PipParamsChangedForwarder pipParamsChangedForwarder,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
-            Optional<LegacySplitScreenController> splitScreenOptional,
-            Optional<SplitScreenController> newSplitScreenOptional,
+            Optional<SplitScreenController> splitScreenControllerOptional,
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new PipTaskOrganizer(context,
+        return new TvPipTaskOrganizer(context,
                 syncTransactionQueue, pipTransitionState, tvPipBoundsState, tvPipBoundsAlgorithm,
                 tvPipMenuController, pipAnimationController, pipSurfaceTransactionHelper,
-                pipTransitionController, splitScreenOptional, newSplitScreenOptional,
+                pipTransitionController, pipParamsChangedForwarder, splitScreenControllerOptional,
                 displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipParamsChangedForwarder providePipParamsChangedForwarder() {
+        return new PipParamsChangedForwarder();
+    }
+
+    @WMSingleton
+    @Provides
+    static PipAppOpsListener providePipAppOpsListener(Context context,
+            PipTaskOrganizer pipTaskOrganizer,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new PipAppOpsListener(context, pipTaskOrganizer::removePip, mainExecutor);
     }
 }

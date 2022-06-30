@@ -67,6 +67,7 @@ public final class TransitionRequestInfo implements Parcelable {
         @Nullable private Rect mEndAbsBounds = null;
         private int mStartRotation = WindowConfiguration.ROTATION_UNDEFINED;
         private int mEndRotation = WindowConfiguration.ROTATION_UNDEFINED;
+        private boolean mPhysicalDisplayChanged = false;
 
         /** Create empty display-change. */
         public DisplayChange(int displayId) {
@@ -121,6 +122,11 @@ public final class TransitionRequestInfo implements Parcelable {
         }
 
         @DataClass.Generated.Member
+        public boolean isPhysicalDisplayChanged() {
+            return mPhysicalDisplayChanged;
+        }
+
+        @DataClass.Generated.Member
         public @android.annotation.NonNull DisplayChange setStartAbsBounds(@android.annotation.NonNull Rect value) {
             mStartAbsBounds = value;
             return this;
@@ -144,6 +150,12 @@ public final class TransitionRequestInfo implements Parcelable {
             return this;
         }
 
+        @DataClass.Generated.Member
+        public @android.annotation.NonNull DisplayChange setPhysicalDisplayChanged( boolean value) {
+            mPhysicalDisplayChanged = value;
+            return this;
+        }
+
         @Override
         @DataClass.Generated.Member
         public String toString() {
@@ -155,7 +167,8 @@ public final class TransitionRequestInfo implements Parcelable {
                     "startAbsBounds = " + mStartAbsBounds + ", " +
                     "endAbsBounds = " + mEndAbsBounds + ", " +
                     "startRotation = " + mStartRotation + ", " +
-                    "endRotation = " + mEndRotation +
+                    "endRotation = " + mEndRotation + ", " +
+                    "physicalDisplayChanged = " + mPhysicalDisplayChanged +
             " }";
         }
 
@@ -166,6 +179,7 @@ public final class TransitionRequestInfo implements Parcelable {
             // void parcelFieldName(Parcel dest, int flags) { ... }
 
             byte flg = 0;
+            if (mPhysicalDisplayChanged) flg |= 0x20;
             if (mStartAbsBounds != null) flg |= 0x2;
             if (mEndAbsBounds != null) flg |= 0x4;
             dest.writeByte(flg);
@@ -188,6 +202,7 @@ public final class TransitionRequestInfo implements Parcelable {
             // static FieldType unparcelFieldName(Parcel in) { ... }
 
             byte flg = in.readByte();
+            boolean physicalDisplayChanged = (flg & 0x20) != 0;
             int displayId = in.readInt();
             Rect startAbsBounds = (flg & 0x2) == 0 ? null : (Rect) in.readTypedObject(Rect.CREATOR);
             Rect endAbsBounds = (flg & 0x4) == 0 ? null : (Rect) in.readTypedObject(Rect.CREATOR);
@@ -199,6 +214,7 @@ public final class TransitionRequestInfo implements Parcelable {
             this.mEndAbsBounds = endAbsBounds;
             this.mStartRotation = startRotation;
             this.mEndRotation = endRotation;
+            this.mPhysicalDisplayChanged = physicalDisplayChanged;
 
             // onConstructed(); // You can define this method to get a callback
         }
@@ -218,10 +234,10 @@ public final class TransitionRequestInfo implements Parcelable {
         };
 
         @DataClass.Generated(
-                time = 1639445520915L,
+                time = 1648141181315L,
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/core/java/android/window/TransitionRequestInfo.java",
-                inputSignatures = "private final  int mDisplayId\nprivate @android.annotation.Nullable android.graphics.Rect mStartAbsBounds\nprivate @android.annotation.Nullable android.graphics.Rect mEndAbsBounds\nprivate  int mStartRotation\nprivate  int mEndRotation\nclass DisplayChange extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genSetters=true, genBuilder=false, genConstructor=false)")
+                inputSignatures = "private final  int mDisplayId\nprivate @android.annotation.Nullable android.graphics.Rect mStartAbsBounds\nprivate @android.annotation.Nullable android.graphics.Rect mEndAbsBounds\nprivate  int mStartRotation\nprivate  int mEndRotation\nprivate  boolean mPhysicalDisplayChanged\nclass DisplayChange extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genSetters=true, genBuilder=false, genConstructor=false)")
         @Deprecated
         private void __metadata() {}
 

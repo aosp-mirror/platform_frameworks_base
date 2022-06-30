@@ -67,7 +67,7 @@ final class ButtonDispatcher {
         }
     };
 
-    public ButtonDispatcher(int id) {
+    ButtonDispatcher(int id) {
         mId = id;
     }
 
@@ -125,8 +125,8 @@ final class ButtonDispatcher {
 
     public void setImageDrawable(KeyButtonDrawable drawable) {
         mImageDrawable = drawable;
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
+        final int numViews = mViews.size();
+        for (int i = 0; i < numViews; i++) {
             if (mViews.get(i) instanceof ButtonInterface) {
                 ((ButtonInterface) mViews.get(i)).setImageDrawable(mImageDrawable);
             }
@@ -143,8 +143,8 @@ final class ButtonDispatcher {
         }
 
         mVisibility = visibility;
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
+        final int numViews = mViews.size();
+        for (int i = 0; i < numViews; i++) {
             mViews.get(i).setVisibility(mVisibility);
         }
     }
@@ -188,8 +188,8 @@ final class ButtonDispatcher {
             int nextAlpha = (int) (alpha * 255);
             if (prevAlpha != nextAlpha) {
                 mAlpha = nextAlpha / 255f;
-                final int N = mViews.size();
-                for (int i = 0; i < N; i++) {
+                final int numViews = mViews.size();
+                for (int i = 0; i < numViews; i++) {
                     mViews.get(i).setAlpha(mAlpha);
                 }
             }
@@ -198,8 +198,8 @@ final class ButtonDispatcher {
 
     public void setDarkIntensity(float darkIntensity) {
         mDarkIntensity = darkIntensity;
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
+        final int numViews = mViews.size();
+        for (int i = 0; i < numViews; i++) {
             if (mViews.get(i) instanceof ButtonInterface) {
                 ((ButtonInterface) mViews.get(i)).setDarkIntensity(darkIntensity);
             }
@@ -208,8 +208,8 @@ final class ButtonDispatcher {
 
     public void setDelayTouchFeedback(boolean delay) {
         mDelayTouchFeedback = delay;
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
+        final int numViews = mViews.size();
+        for (int i = 0; i < numViews; i++) {
             if (mViews.get(i) instanceof ButtonInterface) {
                 ((ButtonInterface) mViews.get(i)).setDelayTouchFeedback(delay);
             }
@@ -218,55 +218,55 @@ final class ButtonDispatcher {
 
     public void setOnClickListener(View.OnClickListener clickListener) {
         mClickListener = clickListener;
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
+        final int numViews = mViews.size();
+        for (int i = 0; i < numViews; i++) {
             mViews.get(i).setOnClickListener(mClickListener);
         }
     }
 
     public void setOnTouchListener(View.OnTouchListener touchListener) {
         mTouchListener = touchListener;
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
+        final int numViews = mViews.size();
+        for (int i = 0; i < numViews; i++) {
             mViews.get(i).setOnTouchListener(mTouchListener);
         }
     }
 
     public void setLongClickable(boolean isLongClickable) {
         mLongClickable = isLongClickable;
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
+        final int numViews = mViews.size();
+        for (int i = 0; i < numViews; i++) {
             mViews.get(i).setLongClickable(mLongClickable);
         }
     }
 
     public void setOnLongClickListener(View.OnLongClickListener longClickListener) {
         mLongClickListener = longClickListener;
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
+        final int numViews = mViews.size();
+        for (int i = 0; i < numViews; i++) {
             mViews.get(i).setOnLongClickListener(mLongClickListener);
         }
     }
 
     public void setOnHoverListener(View.OnHoverListener hoverListener) {
         mOnHoverListener = hoverListener;
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
+        final int numViews = mViews.size();
+        for (int i = 0; i < numViews; i++) {
             mViews.get(i).setOnHoverListener(mOnHoverListener);
         }
     }
 
     public void setAccessibilityDelegate(AccessibilityDelegate delegate) {
         mAccessibilityDelegate = delegate;
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
+        final int numViews = mViews.size();
+        for (int i = 0; i < numViews; i++) {
             mViews.get(i).setAccessibilityDelegate(delegate);
         }
     }
 
     public void setTranslation(int x, int y, int z) {
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
+        final int numViews = mViews.size();
+        for (int i = 0; i < numViews; i++) {
             final View view = mViews.get(i);
             view.setTranslationX(x);
             view.setTranslationY(y);

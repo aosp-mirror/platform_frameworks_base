@@ -85,7 +85,7 @@ public class CsipDeviceManager {
             // Once there is other devices with the same groupId, to add new device as member
             // devices.
             if (CsipDevice != null) {
-                CsipDevice.setMemberDevice(newDevice);
+                CsipDevice.addMemberDevice(newDevice);
                 newDevice.setName(CsipDevice.getName());
                 return true;
             }
@@ -148,7 +148,7 @@ public class CsipDeviceManager {
             log("onGroupIdChanged: removed from UI device =" + cachedDevice
                     + ", with groupId=" + groupId + " firstMatchedIndex=" + firstMatchedIndex);
 
-            mainDevice.setMemberDevice(cachedDevice);
+            mainDevice.addMemberDevice(cachedDevice);
             mCachedDevices.remove(i);
             mBtManager.getEventManager().dispatchDeviceRemoved(cachedDevice);
             break;

@@ -51,6 +51,7 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
@@ -67,7 +68,6 @@ import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Optional;
@@ -116,6 +116,7 @@ public final class WMShell extends CoreStartable
 
     private final CommandQueue mCommandQueue;
     private final ConfigurationController mConfigurationController;
+    private final KeyguardStateController mKeyguardStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final NavigationModeController mNavigationModeController;
     private final ScreenLifecycle mScreenLifecycle;
@@ -129,7 +130,7 @@ public final class WMShell extends CoreStartable
     private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
     private KeyguardUpdateMonitorCallback mPipKeyguardCallback;
     private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
-    private KeyguardUpdateMonitorCallback mCompatUIKeyguardCallback;
+    private KeyguardStateController.Callback mCompatUIKeyguardCallback;
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
 
     @Inject
@@ -143,6 +144,7 @@ public final class WMShell extends CoreStartable
             Optional<DragAndDrop> dragAndDropOptional,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
+            KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             NavigationModeController navigationModeController,
             ScreenLifecycle screenLifecycle,
@@ -154,6 +156,7 @@ public final class WMShell extends CoreStartable
         super(context);
         mCommandQueue = commandQueue;
         mConfigurationController = configurationController;
+        mKeyguardStateController = keyguardStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mNavigationModeController = navigationModeController;
         mScreenLifecycle = screenLifecycle;
@@ -197,9 +200,13 @@ public final class WMShell extends CoreStartable
         mPipKeyguardCallback = new KeyguardUpdateMonitorCallback() {
             @Override
             public void onKeyguardVisibilityChanged(boolean showing) {
-                if (showing) {
-                    pip.hidePipMenu(null, null);
-                }
+                pip.onKeyguardVisibilityChanged(showing,
+                        mKeyguardStateController.isAnimatingBetweenKeyguardAndSurfaceBehind());
+            }
+
+            @Override
+            public void onKeyguardDismissAnimationFinished() {
+                pip.onKeyguardDismissAnimationFinished();
             }
         };
         mKeyguardUpdateMonitor.registerCallback(mPipKeyguardCallback);
@@ -362,13 +369,13 @@ public final class WMShell extends CoreStartable
 
     @VisibleForTesting
     void initCompatUi(CompatUI sizeCompatUI) {
-        mCompatUIKeyguardCallback = new KeyguardUpdateMonitorCallback() {
+        mCompatUIKeyguardCallback = new KeyguardStateController.Callback() {
             @Override
-            public void onKeyguardOccludedChanged(boolean occluded) {
-                sizeCompatUI.onKeyguardOccludedChanged(occluded);
+            public void onKeyguardShowingChanged() {
+                sizeCompatUI.onKeyguardShowingChanged(mKeyguardStateController.isShowing());
             }
         };
-        mKeyguardUpdateMonitor.registerCallback(mCompatUIKeyguardCallback);
+        mKeyguardStateController.addCallback(mCompatUIKeyguardCallback);
     }
 
     void initDragAndDrop(DragAndDrop dragAndDrop) {
@@ -395,7 +402,7 @@ public final class WMShell extends CoreStartable
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         // Handle commands if provided
         if (mShellCommandHandler.isPresent()
                 && mShellCommandHandler.get().handleCommand(args, pw)) {

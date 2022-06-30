@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static com.android.internal.util.LatencyTracker.ACTION_LOAD_SHARE_SHEET;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.animation.Animator;
@@ -28,7 +30,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.app.SharedElementCallback;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionManager;
@@ -71,11 +72,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -107,7 +106,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -156,18 +154,6 @@ public class ChooserActivity extends ResolverActivity implements
         SelectableTargetInfoCommunicator {
     private static final String TAG = "ChooserActivity";
 
-    /**
-     * Whether this chooser is operating in "headless springboard" mode (as determined during
-     * onCreate). In this mode, our activity sits in the background and waits for the new
-     * "unbundled" chooser to handle the Sharesheet experience; the system ChooserActivity is
-     * responsible only for providing the startActivityAsCaller permission token and keeping it
-     * valid for the life of the unbundled delegate activity.
-     *
-     * TODO: when the unbundled chooser is fully launched, the system-side "springboard" can use a
-     * simpler implementation that doesn't inherit from ResolverActivity.
-     */
-    private boolean mIsHeadlessSpringboardActivity;
-
     private AppPredictor mPersonalAppPredictor;
     private AppPredictor mWorkAppPredictor;
     private boolean mShouldDisplayLandscape;
@@ -183,16 +169,6 @@ public class ChooserActivity extends ResolverActivity implements
     public static final String EXTRA_PRIVATE_RETAIN_IN_ON_STOP
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
-    /**
-     * Boolean extra added to "unbundled Sharesheet" delegation intents to signal whether the app
-     * prediction service is available. Our query of the service <em>availability</em> depends on
-     * privileges that are only available in the system, even though the service itself would then
-     * be available to the unbundled component. For now, we just include the query result as part of
-     * the handover intent.
-     * TODO: investigate whether the privileged query is necessary to determine the availability.
-     */
-    public static final String EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE =
-            "com.android.internal.app.ChooserActivity.EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE";
 
     /**
      * Transition name for the first image preview.
@@ -216,12 +192,10 @@ public class ChooserActivity extends ResolverActivity implements
     private static final String SHORTCUT_TARGET = "shortcut_target";
     private static final int APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
     public static final String APP_PREDICTION_INTENT_FILTER_KEY = "intent_filter";
+    private static final String SHARED_TEXT_KEY = "shared_text";
 
     private static final String PLURALS_COUNT = "count";
     private static final String PLURALS_FILE_NAME = "file_name";
-
-    @VisibleForTesting
-    public static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
 
     private boolean mIsAppPredictorComponentAvailable;
     private Map<ChooserTarget, AppTarget> mDirectShareAppTargetCache;
@@ -263,11 +237,6 @@ public class ChooserActivity extends ResolverActivity implements
 
     private static final float DIRECT_SHARE_EXPANSION_RATE = 0.78f;
 
-    private boolean mEnableChooserDelegate =
-            DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                    SystemUiDeviceConfigFlags.USE_DELEGATE_CHOOSER,
-                    false);
-
     private static final int DEFAULT_SALT_EXPIRATION_DAYS = 7;
     private int mMaxHashSaltDays = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
             SystemUiDeviceConfigFlags.HASH_SALT_MAX_DAYS,
@@ -278,6 +247,13 @@ public class ChooserActivity extends ResolverActivity implements
             DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP,
                     DEFAULT_IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP);
+
+    private static final int DEFAULT_LIST_VIEW_UPDATE_DELAY_MS = 125;
+
+    @VisibleForTesting
+    int mListViewUpdateDelayMs = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
+            SystemUiDeviceConfigFlags.SHARESHEET_LIST_VIEW_UPDATE_DELAY,
+            DEFAULT_LIST_VIEW_UPDATE_DELAY_MS);
 
     private Bundle mReplacementExtras;
     private IntentSender mChosenComponentSender;
@@ -324,6 +300,8 @@ public class ChooserActivity extends ResolverActivity implements
 
     @VisibleForTesting
     protected ChooserMultiProfilePagerAdapter mChooserMultiProfilePagerAdapter;
+    private final EnterTransitionAnimationDelegate mEnterTransitionAnimationDelegate =
+            new EnterTransitionAnimationDelegate();
 
     private boolean mRemoveSharedElements = false;
 
@@ -407,7 +385,7 @@ public class ChooserActivity extends ResolverActivity implements
                         // transition animation.
                         getWindow().setWindowAnimations(0);
                     }
-                    startPostponedEnterTransition();
+                    mEnterTransitionAnimationDelegate.markImagePreviewReady();
                     return true;
                 }
             });
@@ -455,7 +433,7 @@ public class ChooserActivity extends ResolverActivity implements
                     mHideParentOnFail = false;
                 }
                 mRemoveSharedElements = true;
-                startPostponedEnterTransition();
+                mEnterTransitionAnimationDelegate.markImagePreviewReady();
             }
         }
 
@@ -534,13 +512,9 @@ public class ChooserActivity extends ResolverActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (handOverToDelegateChooser()) {
-            super_onCreate(savedInstanceState);
-            mIsHeadlessSpringboardActivity = true;
-            return;
-        }
-
         final long intentReceivedTime = System.currentTimeMillis();
+        mLatencyTracker.onActionStart(ACTION_LOAD_SHARE_SHEET);
+
         getChooserActivityLogger().logSharesheetTriggered();
         // This is the only place this value is being set. Effectively final.
         mIsAppPredictorComponentAvailable = isAppPredictionServiceAvailable();
@@ -752,70 +726,7 @@ public class ChooserActivity extends ResolverActivity implements
                 mRemoveSharedElements = false;
             }
         });
-        postponeEnterTransition();
-    }
-
-    private boolean handOverToDelegateChooser() {
-        // Check the explicit classname so that we don't interfere with the flow of any subclasses.
-        if (!this.getClass().getName().equals("com.android.internal.app.ChooserActivity")
-                || !mEnableChooserDelegate) {
-            return false;
-        }
-
-        try {
-            Intent delegationIntent = new Intent();
-            final ComponentName delegateActivity = ComponentName.unflattenFromString(
-                    Resources.getSystem().getString(R.string.config_chooserActivity));
-            IBinder permissionToken = ActivityTaskManager.getService()
-                    .requestStartActivityPermissionToken(delegateActivity);
-            delegationIntent.setComponent(delegateActivity);
-            delegationIntent.putExtra(Intent.EXTRA_INTENT, getIntent());
-            delegationIntent.putExtra(ActivityTaskManager.EXTRA_PERMISSION_TOKEN, permissionToken);
-
-            // Query prediction availability; mIsAppPredictorComponentAvailable isn't initialized.
-            delegationIntent.putExtra(
-                    EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE, isAppPredictionServiceAvailable());
-
-            delegationIntent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-
-            // Don't close until the delegate finishes, or the token will be invalidated.
-            mAwaitingDelegateResponse = true;
-            startActivityForResult(delegationIntent, REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER);
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, e.toString());
-        }
-        return false;
-    }
-
-    @Override
-    protected void onRestart() {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onRestart();
-            return;
-        }
-
-        super.onRestart();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onSaveInstanceState(outState);
-            return;
-        }
-
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onRestoreInstanceState(savedInstanceState);
-            return;
-        }
-
-        super.onRestoreInstanceState(savedInstanceState);
+        mEnterTransitionAnimationDelegate.postponeTransition();
     }
 
     @Override
@@ -972,34 +883,8 @@ public class ChooserActivity extends ResolverActivity implements
     /**
      * Returns true if app prediction service is defined and the component exists on device.
      */
-    @VisibleForTesting
-    public boolean isAppPredictionServiceAvailable() {
-        if (getPackageManager().getAppPredictionServicePackageName() == null) {
-            // Default AppPredictionService is not defined.
-            return false;
-        }
-
-        final String appPredictionServiceName =
-                getString(R.string.config_defaultAppPredictionService);
-        if (appPredictionServiceName == null) {
-            return false;
-        }
-        final ComponentName appPredictionComponentName =
-                ComponentName.unflattenFromString(appPredictionServiceName);
-        if (appPredictionComponentName == null) {
-            return false;
-        }
-
-        // Check if the app prediction component actually exists on the device. The component is
-        // only visible when this is running in a system activity; otherwise this check will fail.
-        Intent intent = new Intent();
-        intent.setComponent(appPredictionComponentName);
-        if (getPackageManager().resolveService(intent, PackageManager.MATCH_ALL) == null) {
-            Log.e(TAG, "App prediction service is defined, but does not exist: "
-                    + appPredictionServiceName);
-            return false;
-        }
-        return true;
+    private boolean isAppPredictionServiceAvailable() {
+        return getPackageManager().getAppPredictionServicePackageName() != null;
     }
 
     /**
@@ -1085,7 +970,6 @@ public class ChooserActivity extends ResolverActivity implements
             ClipboardManager clipboardManager = (ClipboardManager) getSystemService(
                     Context.CLIPBOARD_SERVICE);
             clipboardManager.setPrimaryClipAsPackage(clipData, getReferrerPackageName());
-            Toast.makeText(getApplicationContext(), R.string.copied, Toast.LENGTH_SHORT).show();
 
             // Log share completion via copy
             LogMaker targetLogMaker = new LogMaker(
@@ -1094,7 +978,8 @@ public class ChooserActivity extends ResolverActivity implements
             getChooserActivityLogger().logShareTargetSelected(
                     SELECTION_TYPE_COPY,
                     "",
-                    -1);
+                    -1,
+                    false);
 
             setResult(RESULT_OK);
             finish();
@@ -1102,12 +987,13 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onConfigurationChanged(newConfig);
-            return;
-        }
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: " + getComponentName().flattenToShortString());
+    }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         ViewPager viewPager = findViewById(R.id.profile_pager);
         if (viewPager.isLayoutRtl()) {
@@ -1118,6 +1004,7 @@ public class ChooserActivity extends ResolverActivity implements
         mMaxTargetsPerRow = getResources().getInteger(R.integer.config_chooser_max_targets_per_row);
         adjustPreviewWidth(newConfig.orientation, null);
         updateStickyContentPreview();
+        updateTabPadding();
     }
 
     private boolean shouldDisplayLandscape(int orientation) {
@@ -1138,6 +1025,20 @@ public class ChooserActivity extends ResolverActivity implements
         updateLayoutWidth(R.id.content_preview_text_layout, width, parent);
         updateLayoutWidth(R.id.content_preview_title_layout, width, parent);
         updateLayoutWidth(R.id.content_preview_file_layout, width, parent);
+    }
+
+    private void updateTabPadding() {
+        if (shouldShowTabs()) {
+            View tabs = findViewById(R.id.tabs);
+            float iconSize = getResources().getDimension(R.dimen.chooser_icon_size);
+            // The entire width consists of icons or padding. Divide the item padding in half to get
+            // paddingHorizontal.
+            float padding = (tabs.getWidth() - mMaxTargetsPerRow * iconSize)
+                    / mMaxTargetsPerRow / 2;
+            // Subtract the margin the buttons already have.
+            padding -= getResources().getDimension(R.dimen.resolver_profile_tab_margin);
+            tabs.setPadding((int) padding, 0, (int) padding, 0);
+        }
     }
 
     private void updateLayoutWidth(int layoutResourceId, int width, View parent) {
@@ -1277,12 +1178,11 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_NEARBY,
                             "",
-                            -1);
+                            -1,
+                            false);
                     // Action bar is user-independent, always start as primary
                     safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
-                    if (!mAwaitingDelegateResponse) {
-                        finish();
-                    }
+                    finish();
                 }
         );
         b.setId(R.id.chooser_nearby_button);
@@ -1301,12 +1201,11 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_EDIT,
                             "",
-                            -1);
+                            -1,
+                            false);
                     // Action bar is user-independent, always start as primary
                     safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
-                    if (!mAwaitingDelegateResponse) {
-                        finish();
-                    }
+                    finish();
                 }
         );
         b.setId(R.id.chooser_edit_button);
@@ -1344,6 +1243,9 @@ public class ChooserActivity extends ResolverActivity implements
 
         if (layout != null) {
             adjustPreviewWidth(getResources().getConfiguration().orientation, layout);
+        }
+        if (previewType != CONTENT_PREVIEW_IMAGE) {
+            mEnterTransitionAnimationDelegate.markImagePreviewReady();
         }
 
         return layout;
@@ -1660,8 +1562,8 @@ public class ChooserActivity extends ResolverActivity implements
     protected void onDestroy() {
         super.onDestroy();
 
-        if (mIsHeadlessSpringboardActivity) {
-            return;
+        if (isFinishing()) {
+            mLatencyTracker.onActionCancel(ACTION_LOAD_SHARE_SHEET);
         }
 
         if (mRefinementResultReceiver != null) {
@@ -1750,29 +1652,48 @@ public class ChooserActivity extends ResolverActivity implements
         return getIntent().getBooleanExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE, true);
     }
 
-    private void showTargetDetails(DisplayResolveInfo ti) {
-        if (ti == null) return;
+    private void showTargetDetails(TargetInfo targetInfo) {
+        if (targetInfo == null) return;
 
         ArrayList<DisplayResolveInfo> targetList;
+        ChooserTargetActionsDialogFragment fragment = new ChooserTargetActionsDialogFragment();
+        Bundle bundle = new Bundle();
 
-        // For multiple targets, include info on all targets
-        if (ti instanceof MultiDisplayResolveInfo) {
-            MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) ti;
+        if (targetInfo instanceof SelectableTargetInfo) {
+            SelectableTargetInfo selectableTargetInfo = (SelectableTargetInfo) targetInfo;
+            if (selectableTargetInfo.getDisplayResolveInfo() == null
+                    || selectableTargetInfo.getChooserTarget() == null) {
+                Log.e(TAG, "displayResolveInfo or chooserTarget in selectableTargetInfo are null");
+                return;
+            }
+            targetList = new ArrayList<>();
+            targetList.add(selectableTargetInfo.getDisplayResolveInfo());
+            bundle.putString(ChooserTargetActionsDialogFragment.SHORTCUT_ID_KEY,
+                    selectableTargetInfo.getChooserTarget().getIntentExtras().getString(
+                            Intent.EXTRA_SHORTCUT_ID));
+            bundle.putBoolean(ChooserTargetActionsDialogFragment.IS_SHORTCUT_PINNED_KEY,
+                    selectableTargetInfo.isPinned());
+            bundle.putParcelable(ChooserTargetActionsDialogFragment.INTENT_FILTER_KEY,
+                    getTargetIntentFilter());
+            if (selectableTargetInfo.getDisplayLabel() != null) {
+                bundle.putString(ChooserTargetActionsDialogFragment.SHORTCUT_TITLE_KEY,
+                        selectableTargetInfo.getDisplayLabel().toString());
+            }
+        } else if (targetInfo instanceof MultiDisplayResolveInfo) {
+            // For multiple targets, include info on all targets
+            MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) targetInfo;
             targetList = mti.getTargets();
         } else {
             targetList = new ArrayList<DisplayResolveInfo>();
-            targetList.add(ti);
+            targetList.add((DisplayResolveInfo) targetInfo);
         }
-
-        ChooserTargetActionsDialogFragment f = new ChooserTargetActionsDialogFragment();
-        Bundle b = new Bundle();
-        b.putParcelable(ChooserTargetActionsDialogFragment.USER_HANDLE_KEY,
+        bundle.putParcelable(ChooserTargetActionsDialogFragment.USER_HANDLE_KEY,
                 mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
-        b.putParcelableArrayList(ChooserTargetActionsDialogFragment.TARGET_INFOS_KEY,
+        bundle.putParcelableArrayList(ChooserTargetActionsDialogFragment.TARGET_INFOS_KEY,
                 targetList);
-        f.setArguments(b);
+        fragment.setArguments(bundle);
 
-        f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
+        fragment.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
     }
 
     private void modifyTargetIntent(Intent in) {
@@ -1865,7 +1786,8 @@ public class ChooserActivity extends ResolverActivity implements
                             target.getComponentName().getPackageName()
                                     + target.getTitle().toString(),
                             mMaxHashSaltDays);
-                    directTargetAlsoRanked = getRankedPosition((SelectableTargetInfo) targetInfo);
+                    SelectableTargetInfo selectableTargetInfo = (SelectableTargetInfo) targetInfo;
+                    directTargetAlsoRanked = getRankedPosition(selectableTargetInfo);
 
                     if (mCallerChooserTargets != null) {
                         numCallerProvided = mCallerChooserTargets.length;
@@ -1873,7 +1795,8 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_SERVICE,
                             targetInfo.getResolveInfo().activityInfo.processName,
-                            value
+                            value,
+                            selectableTargetInfo.isPinned()
                     );
                     break;
                 case ChooserListAdapter.TARGET_CALLER:
@@ -1884,7 +1807,8 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_APP,
                             targetInfo.getResolveInfo().activityInfo.processName,
-                            value
+                            value,
+                            targetInfo.isPinned()
                     );
                     break;
                 case ChooserListAdapter.TARGET_STANDARD_AZ:
@@ -1895,7 +1819,8 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_STANDARD,
                             targetInfo.getResolveInfo().activityInfo.processName,
-                            value
+                            value,
+                            false
                     );
                     break;
             }
@@ -1965,10 +1890,10 @@ public class ChooserActivity extends ResolverActivity implements
         try {
             final Intent intent = getTargetIntent();
             String dataString = intent.getDataString();
-            if (!TextUtils.isEmpty(dataString)) {
-                return new IntentFilter(intent.getAction(), dataString);
-            }
             if (intent.getType() == null) {
+                if (!TextUtils.isEmpty(dataString)) {
+                    return new IntentFilter(intent.getAction(), dataString);
+                }
                 Log.e(TAG, "Failed to get target intent filter: intent data and type are null");
                 return null;
             }
@@ -2305,6 +2230,7 @@ public class ChooserActivity extends ResolverActivity implements
         final IntentFilter filter = getTargetIntentFilter();
         Bundle extras = new Bundle();
         extras.putParcelable(APP_PREDICTION_INTENT_FILTER_KEY, filter);
+        populateTextContent(extras);
         AppPredictionContext appPredictionContext = new AppPredictionContext.Builder(contextAsUser)
             .setUiSurface(APP_PREDICTION_SHARE_UI_SURFACE)
             .setPredictedTargetCount(APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT)
@@ -2321,6 +2247,12 @@ public class ChooserActivity extends ResolverActivity implements
             mWorkAppPredictor = appPredictionSession;
         }
         return appPredictionSession;
+    }
+
+    private void populateTextContent(Bundle extras) {
+        final Intent intent = getTargetIntent();
+        String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+        extras.putString(SHARED_TEXT_KEY, sharedText);
     }
 
     /**
@@ -2357,9 +2289,7 @@ public class ChooserActivity extends ResolverActivity implements
             TargetInfo clonedTarget = selectedTarget.cloneFilledIn(matchingIntent, 0);
             if (super.onTargetSelected(clonedTarget, false)) {
                 updateModelAndChooserCounts(clonedTarget);
-                if (!mAwaitingDelegateResponse) {
-                    finish();
-                }
+                finish();
                 return;
             }
         }
@@ -2570,6 +2500,8 @@ public class ChooserActivity extends ResolverActivity implements
                 recyclerView.setAdapter(gridAdapter);
                 ((GridLayoutManager) recyclerView.getLayoutManager()).setSpanCount(
                         mMaxTargetsPerRow);
+
+                updateTabPadding();
             }
 
             UserHandle currentUserHandle = mChooserMultiProfilePagerAdapter.getCurrentUserHandle();
@@ -2587,93 +2519,94 @@ public class ChooserActivity extends ResolverActivity implements
                 if (mResolverDrawerLayout == null || gridAdapter == null) {
                     return;
                 }
-
-                final int bottomInset = mSystemWindowInsets != null
-                                            ? mSystemWindowInsets.bottom : 0;
-                int offset = bottomInset;
-                int rowsToShow = gridAdapter.getSystemRowCount()
-                        + gridAdapter.getProfileRowCount()
-                        + gridAdapter.getServiceTargetRowCount()
-                        + gridAdapter.getCallerAndRankedTargetRowCount();
-
-                // then this is most likely not a SEND_* action, so check
-                // the app target count
-                if (rowsToShow == 0) {
-                    rowsToShow = gridAdapter.getRowCount();
-                }
-
-                // still zero? then use a default height and leave, which
-                // can happen when there are no targets to show
-                if (rowsToShow == 0 && !shouldShowStickyContentPreview()) {
-                    offset += getResources().getDimensionPixelSize(
-                            R.dimen.chooser_max_collapsed_height);
-                    mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
-                    return;
-                }
-
-                View stickyContentPreview = findViewById(R.id.content_preview_container);
-                if (shouldShowStickyContentPreview() && isStickyContentPreviewShowing()) {
-                    offset += stickyContentPreview.getHeight();
-                }
-
-                if (shouldShowTabs()) {
-                    offset += findViewById(R.id.tabs).getHeight();
-                }
-
-                View tabDivider = findViewById(R.id.resolver_tab_divider);
-                if (tabDivider.getVisibility() == View.VISIBLE) {
-                    offset += tabDivider.getHeight();
-                }
-
-                if (recyclerView.getVisibility() == View.VISIBLE) {
-                    int directShareHeight = 0;
-                    rowsToShow = Math.min(4, rowsToShow);
-                    boolean shouldShowExtraRow = shouldShowExtraRow(rowsToShow);
-                    mLastNumberOfChildren = recyclerView.getChildCount();
-                    for (int i = 0, childCount = recyclerView.getChildCount();
-                            i < childCount && rowsToShow > 0; i++) {
-                        View child = recyclerView.getChildAt(i);
-                        if (((GridLayoutManager.LayoutParams)
-                                child.getLayoutParams()).getSpanIndex() != 0) {
-                            continue;
-                        }
-                        int height = child.getHeight();
-                        offset += height;
-                        if (shouldShowExtraRow) {
-                            offset += height;
-                        }
-
-                        if (gridAdapter.getTargetType(
-                                recyclerView.getChildAdapterPosition(child))
-                                == ChooserListAdapter.TARGET_SERVICE) {
-                            directShareHeight = height;
-                        }
-                        rowsToShow--;
-                    }
-
-                    boolean isExpandable = getResources().getConfiguration().orientation
-                            == Configuration.ORIENTATION_PORTRAIT && !isInMultiWindowMode();
-                    if (directShareHeight != 0 && isSendAction(getTargetIntent())
-                            && isExpandable) {
-                        // make sure to leave room for direct share 4->8 expansion
-                        int requiredExpansionHeight =
-                                (int) (directShareHeight / DIRECT_SHARE_EXPANSION_RATE);
-                        int topInset = mSystemWindowInsets != null ? mSystemWindowInsets.top : 0;
-                        int minHeight = bottom - top - mResolverDrawerLayout.getAlwaysShowHeight()
-                                - requiredExpansionHeight - topInset - bottomInset;
-
-                        offset = Math.min(offset, minHeight);
-                    }
-                } else {
-                    ViewGroup currentEmptyStateView = getActiveEmptyStateView();
-                    if (currentEmptyStateView.getVisibility() == View.VISIBLE) {
-                        offset += currentEmptyStateView.getHeight();
-                    }
-                }
-
-                mResolverDrawerLayout.setCollapsibleHeightReserved(Math.min(offset, bottom - top));
+                int offset = calculateDrawerOffset(top, bottom, recyclerView, gridAdapter);
+                mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
+                mEnterTransitionAnimationDelegate.markOffsetCalculated();
             });
         }
+    }
+
+    private int calculateDrawerOffset(
+            int top, int bottom, RecyclerView recyclerView, ChooserGridAdapter gridAdapter) {
+
+        final int bottomInset = mSystemWindowInsets != null
+                ? mSystemWindowInsets.bottom : 0;
+        int offset = bottomInset;
+        int rowsToShow = gridAdapter.getSystemRowCount()
+                + gridAdapter.getProfileRowCount()
+                + gridAdapter.getServiceTargetRowCount()
+                + gridAdapter.getCallerAndRankedTargetRowCount();
+
+        // then this is most likely not a SEND_* action, so check
+        // the app target count
+        if (rowsToShow == 0) {
+            rowsToShow = gridAdapter.getRowCount();
+        }
+
+        // still zero? then use a default height and leave, which
+        // can happen when there are no targets to show
+        if (rowsToShow == 0 && !shouldShowStickyContentPreview()) {
+            offset += getResources().getDimensionPixelSize(
+                    R.dimen.chooser_max_collapsed_height);
+            return offset;
+        }
+
+        View stickyContentPreview = findViewById(R.id.content_preview_container);
+        if (shouldShowStickyContentPreview() && isStickyContentPreviewShowing()) {
+            offset += stickyContentPreview.getHeight();
+        }
+
+        if (shouldShowTabs()) {
+            offset += findViewById(R.id.tabs).getHeight();
+        }
+
+        if (recyclerView.getVisibility() == View.VISIBLE) {
+            int directShareHeight = 0;
+            rowsToShow = Math.min(4, rowsToShow);
+            boolean shouldShowExtraRow = shouldShowExtraRow(rowsToShow);
+            mLastNumberOfChildren = recyclerView.getChildCount();
+            for (int i = 0, childCount = recyclerView.getChildCount();
+                    i < childCount && rowsToShow > 0; i++) {
+                View child = recyclerView.getChildAt(i);
+                if (((GridLayoutManager.LayoutParams)
+                        child.getLayoutParams()).getSpanIndex() != 0) {
+                    continue;
+                }
+                int height = child.getHeight();
+                offset += height;
+                if (shouldShowExtraRow) {
+                    offset += height;
+                }
+
+                if (gridAdapter.getTargetType(
+                        recyclerView.getChildAdapterPosition(child))
+                        == ChooserListAdapter.TARGET_SERVICE) {
+                    directShareHeight = height;
+                }
+                rowsToShow--;
+            }
+
+            boolean isExpandable = getResources().getConfiguration().orientation
+                    == Configuration.ORIENTATION_PORTRAIT && !isInMultiWindowMode();
+            if (directShareHeight != 0 && isSendAction(getTargetIntent())
+                    && isExpandable) {
+                // make sure to leave room for direct share 4->8 expansion
+                int requiredExpansionHeight =
+                        (int) (directShareHeight / DIRECT_SHARE_EXPANSION_RATE);
+                int topInset = mSystemWindowInsets != null ? mSystemWindowInsets.top : 0;
+                int minHeight = bottom - top - mResolverDrawerLayout.getAlwaysShowHeight()
+                        - requiredExpansionHeight - topInset - bottomInset;
+
+                offset = Math.min(offset, minHeight);
+            }
+        } else {
+            ViewGroup currentEmptyStateView = getActiveEmptyStateView();
+            if (currentEmptyStateView.getVisibility() == View.VISIBLE) {
+                offset += currentEmptyStateView.getHeight();
+            }
+        }
+
+        return Math.min(offset, bottom - top);
     }
 
     /**
@@ -2741,7 +2674,7 @@ public class ChooserActivity extends ResolverActivity implements
         Message msg = Message.obtain();
         msg.what = ChooserHandler.LIST_VIEW_UPDATE_MESSAGE;
         msg.obj = userHandle;
-        mChooserHandler.sendMessageDelayed(msg, LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        mChooserHandler.sendMessageDelayed(msg, mListViewUpdateDelayMs);
     }
 
     @Override
@@ -2768,6 +2701,7 @@ public class ChooserActivity extends ResolverActivity implements
         if (rebuildComplete) {
             getChooserActivityLogger().logSharesheetAppLoadComplete();
             maybeQueryAdditionalPostProcessingTargets(chooserListAdapter);
+            mLatencyTracker.onActionEnd(ACTION_LOAD_SHARE_SHEET);
         }
     }
 
@@ -2813,7 +2747,7 @@ public class ChooserActivity extends ResolverActivity implements
         if (mResolverDrawerLayout == null) {
             return;
         }
-        int elevatedViewResId = shouldShowTabs() ? R.id.resolver_tab_divider : R.id.chooser_header;
+        int elevatedViewResId = shouldShowTabs() ? R.id.tabs : R.id.chooser_header;
         final View elevatedView = mResolverDrawerLayout.findViewById(elevatedViewResId);
         final float defaultElevation = elevatedView.getElevation();
         final float chooserHeaderScrollElevation =
@@ -3000,8 +2934,10 @@ public class ChooserActivity extends ResolverActivity implements
     private boolean shouldShowTargetDetails(TargetInfo ti) {
         ComponentName nearbyShare = getNearbySharingComponent();
         //  Suppress target details for nearby share to hide pin/unpin action
-        return !(nearbyShare != null && nearbyShare.equals(ti.getResolvedComponentName())
-                && shouldNearbyShareBeFirstInRankedRow());
+        boolean isNearbyShare = nearbyShare != null && nearbyShare.equals(
+                ti.getResolvedComponentName()) && shouldNearbyShareBeFirstInRankedRow();
+        return ti instanceof SelectableTargetInfo
+                || (ti instanceof DisplayResolveInfo && !isNearbyShare);
     }
 
     /**
@@ -3098,8 +3034,6 @@ public class ChooserActivity extends ResolverActivity implements
         private DirectShareViewHolder mDirectShareViewHolder;
         private int mChooserTargetWidth = 0;
         private boolean mShowAzLabelIfPoss;
-
-        private boolean mHideContentPreview = false;
         private boolean mLayoutRequested = false;
 
         private int mFooterHeight = 0;
@@ -3170,7 +3104,6 @@ public class ChooserActivity extends ResolverActivity implements
          * personal and work tabs.
          */
         public void hideContentPreview() {
-            mHideContentPreview = true;
             mLayoutRequested = true;
             notifyDataSetChanged();
         }
@@ -3360,18 +3293,15 @@ public class ChooserActivity extends ResolverActivity implements
                     }
                 });
 
-                // Direct Share targets should not show any menu
-                if (!isDirectShare) {
-                    v.setOnLongClickListener(v1 -> {
-                        final TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
-                                holder.getItemIndex(column), true);
-                        // This should always be the case for non-DS targets, check for validity
-                        if (ti instanceof DisplayResolveInfo && shouldShowTargetDetails(ti)) {
-                            showTargetDetails((DisplayResolveInfo) ti);
-                        }
-                        return true;
-                    });
-                }
+                // Show menu for both direct share and app share targets after long click.
+                v.setOnLongClickListener(v1 -> {
+                    TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
+                            holder.getItemIndex(column), true);
+                    if (shouldShowTargetDetails(ti)) {
+                        showTargetDetails(ti);
+                    }
+                    return true;
+                });
 
                 holder.addView(i, v);
 
@@ -4008,6 +3938,51 @@ public class ChooserActivity extends ResolverActivity implements
             }
 
             canvas.drawRoundRect(x, y, width, height, mRadius, mRadius, mRoundRectPaint);
+        }
+    }
+
+    /**
+     * A helper class to track app's readiness for the scene transition animation.
+     * The app is ready when both the image is laid out and the drawer offset is calculated.
+     */
+    private class EnterTransitionAnimationDelegate implements View.OnLayoutChangeListener {
+        private boolean mPreviewReady = false;
+        private boolean mOffsetCalculated = false;
+
+        void postponeTransition() {
+            postponeEnterTransition();
+        }
+
+        void markImagePreviewReady() {
+            if (!mPreviewReady) {
+                mPreviewReady = true;
+                maybeStartListenForLayout();
+            }
+        }
+
+        void markOffsetCalculated() {
+            if (!mOffsetCalculated) {
+                mOffsetCalculated = true;
+                maybeStartListenForLayout();
+            }
+        }
+
+        private void maybeStartListenForLayout() {
+            if (mPreviewReady && mOffsetCalculated && mResolverDrawerLayout != null) {
+                if (mResolverDrawerLayout.isInLayout()) {
+                    startPostponedEnterTransition();
+                } else {
+                    mResolverDrawerLayout.addOnLayoutChangeListener(this);
+                    mResolverDrawerLayout.requestLayout();
+                }
+            }
+        }
+
+        @Override
+        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
+                int oldTop, int oldRight, int oldBottom) {
+            v.removeOnLayoutChangeListener(this);
+            startPostponedEnterTransition();
         }
     }
 

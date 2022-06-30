@@ -14,8 +14,8 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
-import static com.android.systemui.statusbar.phone.StatusBar.MULTIUSER_DEBUG;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.MULTIUSER_DEBUG;
 
 import android.service.notification.StatusBarNotification;
 import android.util.Log;

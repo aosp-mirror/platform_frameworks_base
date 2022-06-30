@@ -29,10 +29,13 @@ import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.connectivity.AccessPointControllerImpl;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.NetworkControllerImpl;
+import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DeviceControlsController;
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl;
 import com.android.systemui.statusbar.policy.DevicePostureController;
@@ -82,6 +85,10 @@ public interface StatusBarPolicyModule {
     /** */
     @Binds
     CastController provideCastController(CastControllerImpl controllerImpl);
+
+    /** */
+    @Binds
+    ConfigurationController bindConfigurationController(ConfigurationControllerImpl impl);
 
     /** */
     @Binds
@@ -181,5 +188,12 @@ public interface StatusBarPolicyModule {
     static String[] providesDeviceStateRotationLockDefaults(@Main Resources resources) {
         return resources.getStringArray(
                 R.array.config_perDeviceStateRotationLockDefaults);
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static DataSaverController provideDataSaverController(NetworkController networkController) {
+        return networkController.getDataSaverController();
     }
 }

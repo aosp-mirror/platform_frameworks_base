@@ -16,9 +16,13 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_BOUND_SERVICE;
+import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE;
+
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -40,6 +44,23 @@ final class ProcessServiceRecord {
      * Running any services that are foreground?
      */
     private boolean mHasForegroundServices;
+
+    /**
+     * Last reported state of whether it's running any services that are foreground.
+     */
+    private boolean mRepHasForegroundServices;
+
+    /**
+     * Running any services that are almost perceptible (started with
+     * {@link Context#BIND_ALMOST_PERCEPTIBLE} while the app was on TOP)?
+     */
+    private boolean mHasTopStartedAlmostPerceptibleServices;
+
+    /**
+     * The latest value of {@link ServiceRecord#lastTopAlmostPerceptibleBindRequestUptimeMs} among
+     * the currently running services.
+     */
+    private long mLastTopStartedAlmostPerceptibleBindRequestUptimeMs;
 
     /**
      * Service that applied current connectionGroup/Importance.
@@ -128,10 +149,23 @@ final class ProcessServiceRecord {
         mHasForegroundServices = hasForegroundServices;
         mFgServiceTypes = fgServiceTypes;
         mApp.getWindowProcessController().setHasForegroundServices(hasForegroundServices);
+        if (hasForegroundServices) {
+            mApp.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE);
+        } else {
+            mApp.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE);
+        }
     }
 
     boolean hasForegroundServices() {
         return mHasForegroundServices;
+    }
+
+    void setHasReportedForegroundServices(boolean hasForegroundServices) {
+        mRepHasForegroundServices = hasForegroundServices;
+    }
+
+    boolean hasReportedForegroundServices() {
+        return mRepHasForegroundServices;
     }
 
     int getForegroundServiceTypes() {
@@ -144,6 +178,46 @@ final class ProcessServiceRecord {
 
     void setReportedForegroundServiceTypes(int foregroundServiceTypes) {
         mRepFgServiceTypes = foregroundServiceTypes;
+    }
+
+    void updateHasTopStartedAlmostPerceptibleServices() {
+        mHasTopStartedAlmostPerceptibleServices = false;
+        mLastTopStartedAlmostPerceptibleBindRequestUptimeMs = 0;
+        for (int s = mServices.size() - 1; s >= 0; --s) {
+            final ServiceRecord sr = mServices.valueAt(s);
+            mLastTopStartedAlmostPerceptibleBindRequestUptimeMs = Math.max(
+                    mLastTopStartedAlmostPerceptibleBindRequestUptimeMs,
+                    sr.lastTopAlmostPerceptibleBindRequestUptimeMs);
+            if (!mHasTopStartedAlmostPerceptibleServices && isAlmostPerceptible(sr)) {
+                mHasTopStartedAlmostPerceptibleServices = true;
+            }
+        }
+    }
+
+    private boolean isAlmostPerceptible(ServiceRecord record) {
+        if (record.lastTopAlmostPerceptibleBindRequestUptimeMs <= 0) {
+            return false;
+        }
+        final ArrayMap<IBinder, ArrayList<ConnectionRecord>> serviceConnections =
+                record.getConnections();
+        for (int m = serviceConnections.size() - 1; m >= 0; --m) {
+            final ArrayList<ConnectionRecord> clist = serviceConnections.valueAt(m);
+
+            for (int c = clist.size() - 1; c >= 0; --c) {
+                final ConnectionRecord cr = clist.get(c);
+                if ((cr.flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    boolean hasTopStartedAlmostPerceptibleServices() {
+        return mHasTopStartedAlmostPerceptibleServices
+                || (mLastTopStartedAlmostPerceptibleBindRequestUptimeMs > 0
+                && SystemClock.uptimeMillis() - mLastTopStartedAlmostPerceptibleBindRequestUptimeMs
+                < mService.mConstants.mServiceBindAlmostPerceptibleTimeoutMs);
     }
 
     ServiceRecord getConnectionService() {
@@ -242,6 +316,15 @@ final class ProcessServiceRecord {
         boolean added = mServices.add(record);
         if (added && record.serviceInfo != null) {
             mApp.getWindowProcessController().onServiceStarted(record.serviceInfo);
+            updateHostingComonentTypeForBindingsLocked();
+        }
+        if (record.lastTopAlmostPerceptibleBindRequestUptimeMs > 0) {
+            mLastTopStartedAlmostPerceptibleBindRequestUptimeMs = Math.max(
+                    mLastTopStartedAlmostPerceptibleBindRequestUptimeMs,
+                    record.lastTopAlmostPerceptibleBindRequestUptimeMs);
+            if (!mHasTopStartedAlmostPerceptibleServices) {
+                mHasTopStartedAlmostPerceptibleServices = isAlmostPerceptible(record);
+            }
         }
         return added;
     }
@@ -253,7 +336,14 @@ final class ProcessServiceRecord {
      * @return true if the service was removed, false otherwise.
      */
     boolean stopService(ServiceRecord record) {
-        return mServices.remove(record);
+        final boolean removed = mServices.remove(record);
+        if (record.lastTopAlmostPerceptibleBindRequestUptimeMs > 0) {
+            updateHasTopStartedAlmostPerceptibleServices();
+        }
+        if (removed) {
+            updateHostingComonentTypeForBindingsLocked();
+        }
+        return removed;
     }
 
     /**
@@ -261,6 +351,7 @@ final class ProcessServiceRecord {
      */
     void stopAllServices() {
         mServices.clear();
+        updateHasTopStartedAlmostPerceptibleServices();
     }
 
     /**
@@ -371,6 +462,23 @@ final class ProcessServiceRecord {
     }
 
     @GuardedBy("mService")
+    void updateHostingComonentTypeForBindingsLocked() {
+        boolean hasBoundClient = false;
+        for (int i = numberOfRunningServices() - 1; i >= 0; i--) {
+            final ServiceRecord sr = getRunningServiceAt(i);
+            if (sr != null && !sr.getConnections().isEmpty()) {
+                hasBoundClient = true;
+                break;
+            }
+        }
+        if (hasBoundClient) {
+            mApp.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_BOUND_SERVICE);
+        } else {
+            mApp.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_BOUND_SERVICE);
+        }
+    }
+
+    @GuardedBy("mService")
     boolean incServiceCrashCountLocked(long now) {
         final boolean procIsBoundForeground = mApp.mState.getCurProcState()
                 == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
@@ -407,6 +515,13 @@ final class ProcessServiceRecord {
         if (mHasForegroundServices || mApp.mState.getForcingToImportant() != null) {
             pw.print(prefix); pw.print("mHasForegroundServices="); pw.print(mHasForegroundServices);
             pw.print(" forcingToImportant="); pw.println(mApp.mState.getForcingToImportant());
+        }
+        if (mHasTopStartedAlmostPerceptibleServices
+                || mLastTopStartedAlmostPerceptibleBindRequestUptimeMs > 0) {
+            pw.print(prefix); pw.print("mHasTopStartedAlmostPerceptibleServices=");
+            pw.print(mHasTopStartedAlmostPerceptibleServices);
+            pw.print(" mLastTopStartedAlmostPerceptibleBindRequestUptimeMs=");
+            pw.println(mLastTopStartedAlmostPerceptibleBindRequestUptimeMs);
         }
         if (mHasClientActivities || mHasAboveClient || mTreatLikeActivity) {
             pw.print(prefix); pw.print("hasClientActivities="); pw.print(mHasClientActivities);

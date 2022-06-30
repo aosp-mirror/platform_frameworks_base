@@ -44,7 +44,6 @@ import android.content.pm.UserInfo;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -649,7 +648,7 @@ public class IntentForwarderActivityTest {
 
         @Override
         public void startActivityAsCaller(Intent intent, @Nullable Bundle options,
-                IBinder permissionToken, boolean ignoreTargetSecurity, int userId) {
+                boolean ignoreTargetSecurity, int userId) {
             mStartActivityIntent = intent;
             mUserIdActivityLaunchedIn = userId;
         }

@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.collection.render
 
 import android.annotation.MainThread
 import android.view.View
-import com.android.systemui.util.kotlin.transform
 import com.android.systemui.util.traceSection
 
 /**
@@ -41,7 +40,6 @@ class ShadeViewDiffer(
 ) {
     private val rootNode = ShadeNode(rootController)
     private val nodes = mutableMapOf(rootController to rootNode)
-    private val views = mutableMapOf<View, ShadeNode>()
 
     /**
      * Adds and removes views from the root (and its children) until their structure matches the
@@ -66,26 +64,25 @@ class ShadeViewDiffer(
      *
      * For debugging purposes.
      */
-    fun getViewLabel(view: View): String = views[view]?.label ?: view.toString()
+    fun getViewLabel(view: View): String =
+            nodes.values.firstOrNull { node -> node.view === view }?.label ?: view.toString()
 
-    private fun detachChildren(
-        parentNode: ShadeNode,
-        specMap: Map<NodeController, NodeSpec>
-    ) {
-        val parentSpec = specMap[parentNode.controller]
-
-        for (i in parentNode.getChildCount() - 1 downTo 0) {
-            val childView = parentNode.getChildAt(i)
-            views[childView]?.let { childNode ->
-                val childSpec = specMap[childNode.controller]
-
-                maybeDetachChild(parentNode, parentSpec, childNode, childSpec)
-
-                if (childNode.controller.getChildCount() > 0) {
-                    detachChildren(childNode, specMap)
+    private fun detachChildren(parentNode: ShadeNode, specMap: Map<NodeController, NodeSpec>) {
+        val views = nodes.values.associateBy { it.view }
+        fun detachRecursively(parentNode: ShadeNode, specMap: Map<NodeController, NodeSpec>) {
+            val parentSpec = specMap[parentNode.controller]
+            for (i in parentNode.getChildCount() - 1 downTo 0) {
+                val childView = parentNode.getChildAt(i)
+                views[childView]?.let { childNode ->
+                    val childSpec = specMap[childNode.controller]
+                    maybeDetachChild(parentNode, parentSpec, childNode, childSpec)
+                    if (childNode.controller.getChildCount() > 0) {
+                        detachRecursively(childNode, specMap)
+                    }
                 }
             }
         }
+        detachRecursively(parentNode, specMap)
     }
 
     private fun maybeDetachChild(
@@ -94,14 +91,13 @@ class ShadeViewDiffer(
         childNode: ShadeNode,
         childSpec: NodeSpec?
     ) {
-        val newParentNode = transform(childSpec?.parent) { getNode(it) }
+        val newParentNode = childSpec?.parent?.let { getNode(it) }
 
         if (newParentNode != parentNode) {
             val childCompletelyRemoved = newParentNode == null
 
             if (childCompletelyRemoved) {
                 nodes.remove(childNode.controller)
-                views.remove(childNode.controller.view)
             }
 
             logger.logDetachingChild(
@@ -115,10 +111,7 @@ class ShadeViewDiffer(
         }
     }
 
-    private fun attachChildren(
-        parentNode: ShadeNode,
-        specMap: Map<NodeController, NodeSpec>
-    ) {
+    private fun attachChildren(parentNode: ShadeNode, specMap: Map<NodeController, NodeSpec>) {
         val parentSpec = checkNotNull(specMap[parentNode.controller])
 
         for ((index, childSpec) in parentSpec.children.withIndex()) {
@@ -160,7 +153,6 @@ class ShadeViewDiffer(
         if (node == null) {
             node = ShadeNode(spec.controller)
             nodes[node.controller] = node
-            views[node.view] = node
         }
         return node
     }
@@ -194,10 +186,9 @@ class ShadeViewDiffer(
 
 private class DuplicateNodeException(message: String) : RuntimeException(message)
 
-private class ShadeNode(
-    val controller: NodeController
-) {
-    val view = controller.view
+private class ShadeNode(val controller: NodeController) {
+    val view: View
+        get() = controller.view
 
     var parent: ShadeNode? = null
 

@@ -50,5 +50,7 @@ interface ISensorPrivacyManager {
     void suppressToggleSensorPrivacyReminders(int userId, int sensor, IBinder token,
             boolean suppress);
 
+    boolean requiresAuthentication();
+
     void showSensorUseDialog(int sensor);
 }

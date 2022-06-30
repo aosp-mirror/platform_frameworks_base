@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricConstants;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -71,6 +72,24 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
 
     @Override
     public void onRemoved(@NonNull BiometricAuthenticator.Identifier identifier, int remaining) {
+        // This happens when we have failed to remove a biometric.
+        if (identifier == null) {
+            Slog.e(TAG, "identifier was null, skipping onRemove()");
+            try {
+                if (getListener() != null) {
+                    getListener().onError(getSensorId(), getCookie(),
+                            BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_REMOVE,
+                            0 /* vendorCode */);
+                } else {
+                    Slog.e(TAG, "Error, listener was null, not sending onError callback");
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to send error to client for onRemoved", e);
+            }
+            mCallback.onClientFinished(this, false /* success */);
+            return;
+        }
+
         Slog.d(TAG, "onRemoved: " + identifier.getBiometricId() + " remaining: " + remaining);
         mBiometricUtils.removeBiometricForUser(getContext(), getTargetUserId(),
                 identifier.getBiometricId());

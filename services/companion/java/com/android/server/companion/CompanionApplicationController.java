@@ -33,6 +33,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.PerUser;
 import com.android.internal.util.CollectionUtils;
 
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +50,7 @@ import java.util.Map;
  * The following is the list of the APIs provided by {@link CompanionApplicationController} (to be
  * utilized by {@link CompanionDeviceManagerService}):
  * <ul>
- * <li> {@link #bindCompanionApplication(int, String)}
+ * <li> {@link #bindCompanionApplication(int, String, boolean)}
  * <li> {@link #unbindCompanionApplication(int, String)}
  * <li> {@link #notifyCompanionApplicationDeviceAppeared(AssociationInfo)}
  * <li> {@link #notifyCompanionApplicationDeviceDisappeared(AssociationInfo)}
@@ -103,13 +104,25 @@ class CompanionApplicationController {
         mCompanionServicesRegister.invalidate(userId);
     }
 
-    void bindCompanionApplication(@UserIdInt int userId, @NonNull String packageName) {
-        if (DEBUG) Log.i(TAG, "bind() u" + userId + "/" + packageName);
+    void bindCompanionApplication(@UserIdInt int userId, @NonNull String packageName,
+            boolean isSelfManaged) {
+        if (DEBUG) {
+            Log.i(TAG, "bind() u" + userId + "/" + packageName
+                    + " isSelfManaged=" + isSelfManaged);
+        }
 
         final List<ComponentName> companionServices =
                 mCompanionServicesRegister.forPackage(userId, packageName);
-        final List<CompanionDeviceServiceConnector> serviceConnectors;
+        if (companionServices.isEmpty()) {
+            Slog.w(TAG, "Can not bind companion applications u" + userId + "/" + packageName + ": "
+                    + "eligible CompanionDeviceService not found.\n"
+                    + "A CompanionDeviceService should declare an intent-filter for "
+                    + "\"android.companion.CompanionDeviceService\" action and require "
+                    + "\"android.permission.BIND_COMPANION_DEVICE_SERVICE\" permission.");
+            return;
+        }
 
+        final List<CompanionDeviceServiceConnector> serviceConnectors;
         synchronized (mBoundCompanionApplications) {
             if (mBoundCompanionApplications.containsValueForPackage(userId, packageName)) {
                 if (DEBUG) Log.e(TAG, "u" + userId + "/" + packageName + " is ALREADY bound.");
@@ -117,14 +130,8 @@ class CompanionApplicationController {
             }
 
             serviceConnectors = CollectionUtils.map(companionServices, componentName ->
-                            new CompanionDeviceServiceConnector(mContext, userId, componentName));
-
-            if (serviceConnectors.isEmpty()) {
-                Slog.e(TAG, "Can't find CompanionDeviceService implementer in package: "
-                        + packageName + ". Please check if they are correctly declared.");
-                return;
-            }
-
+                            CompanionDeviceServiceConnector.newInstance(mContext, userId,
+                                    componentName, isSelfManaged));
             mBoundCompanionApplications.setValueForPackage(userId, packageName, serviceConnectors);
         }
 
@@ -145,7 +152,11 @@ class CompanionApplicationController {
             serviceConnectors = mBoundCompanionApplications.removePackage(userId, packageName);
         }
         if (serviceConnectors == null) {
-            if (DEBUG) Log.e(TAG, "u" + userId + "/" + packageName + " is NOT bound");
+            if (DEBUG) {
+                Log.e(TAG, "unbindCompanionApplication(): "
+                        + "u" + userId + "/" + packageName + " is NOT bound");
+                Log.d(TAG, "Stacktrace", new Throwable());
+            }
             return;
         }
 
@@ -191,7 +202,11 @@ class CompanionApplicationController {
         final CompanionDeviceServiceConnector primaryServiceConnector =
                 getPrimaryServiceConnector(userId, packageName);
         if (primaryServiceConnector == null) {
-            if (DEBUG) Log.e(TAG, "u" + userId + "/" + packageName + " is NOT bound.");
+            if (DEBUG) {
+                Log.e(TAG, "notify_CompanionApplicationDevice_Appeared(): "
+                        + "u" + userId + "/" + packageName + " is NOT bound.");
+                Log.d(TAG, "Stacktrace", new Throwable());
+            }
             return;
         }
 
@@ -209,11 +224,37 @@ class CompanionApplicationController {
         final CompanionDeviceServiceConnector primaryServiceConnector =
                 getPrimaryServiceConnector(userId, packageName);
         if (primaryServiceConnector == null) {
-            if (DEBUG) Log.e(TAG, "u" + userId + "/" + packageName + " is NOT bound.");
+            if (DEBUG) {
+                Log.e(TAG, "notify_CompanionApplicationDevice_Disappeared(): "
+                        + "u" + userId + "/" + packageName + " is NOT bound.");
+                Log.d(TAG, "Stacktrace", new Throwable());
+            }
             return;
         }
 
         primaryServiceConnector.postOnDeviceDisappeared(association);
+    }
+
+    void dump(@NonNull PrintWriter out) {
+        out.append("Companion Device Application Controller: \n");
+
+        synchronized (mBoundCompanionApplications) {
+            out.append("  Bound Companion Applications: ");
+            if (mBoundCompanionApplications.size() == 0) {
+                out.append("<empty>\n");
+            } else {
+                out.append("\n");
+                mBoundCompanionApplications.dump(out);
+            }
+        }
+
+        out.append("  Companion Applications Scheduled For Rebinding: ");
+        if (mScheduledForRebindingCompanionApplications.size() == 0) {
+            out.append("<empty>\n");
+        } else {
+            out.append("\n");
+            mScheduledForRebindingCompanionApplications.dump(out);
+        }
     }
 
     private void onPrimaryServiceBindingDied(@UserIdInt int userId, @NonNull String packageName) {
@@ -251,12 +292,6 @@ class CompanionApplicationController {
         synchronized @NonNull List<ComponentName> forPackage(
                 @UserIdInt int userId, @NonNull String packageName) {
             return forUser(userId).getOrDefault(packageName, Collections.emptyList());
-        }
-
-        synchronized @NonNull ComponentName primaryForPackage(
-                @UserIdInt int userId, @NonNull String packageName) {
-            // The primary service is always at the head of the list.
-            return forPackage(userId, packageName).get(0);
         }
 
         synchronized void invalidate(@UserIdInt int userId) {
@@ -318,6 +353,24 @@ class CompanionApplicationController {
                     final String packageName = packageValue.getKey();
                     final T value = packageValue.getValue();
                     Log.d(TAG, "u" + userId + "\\" + packageName + " -> " + value);
+                }
+            }
+        }
+
+        private void dump(@NonNull PrintWriter out) {
+            for (int i = 0; i < size(); i++) {
+                final int userId = keyAt(i);
+                final Map<String, T> forUser = get(userId);
+                if (forUser.isEmpty()) {
+                    out.append("    u").append(String.valueOf(userId)).append(": <empty>\n");
+                }
+
+                for (Map.Entry<String, T> packageValue : forUser.entrySet()) {
+                    final String packageName = packageValue.getKey();
+                    final T value = packageValue.getValue();
+                    out.append("    u").append(String.valueOf(userId)).append("\\")
+                            .append(packageName).append(" -> ")
+                            .append(value.toString()).append('\n');
                 }
             }
         }

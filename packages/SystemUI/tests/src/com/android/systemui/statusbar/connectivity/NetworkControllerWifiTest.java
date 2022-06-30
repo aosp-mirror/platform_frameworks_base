@@ -31,9 +31,10 @@ import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.telephony.CellSignalStrength;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.mobile.TelephonyIcons;
 

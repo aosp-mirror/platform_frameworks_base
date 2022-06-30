@@ -157,6 +157,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         win.getFrame().set(0, 0, 500, 100);
 
         addWindow(win);
+        win.updateSourceFrame(win.getFrame());
         InsetsStateController controller = mDisplayContent.getInsetsStateController();
         controller.onPostLayout();
 
@@ -185,6 +186,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         win.getFrame().set(0, 0, 500, 100);
 
         addWindow(win);
+        win.updateSourceFrame(win.getFrame());
         mDisplayContent.getInsetsStateController().onPostLayout();
 
         InsetsSourceProvider provider =

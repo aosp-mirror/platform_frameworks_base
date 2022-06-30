@@ -19,12 +19,15 @@ package com.android.server.input;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputMonitor;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+
+import com.android.server.policy.WindowManagerPolicy;
 
 /**
  * An internal implementation of an {@link InputMonitor} that uses a spy window.
@@ -56,22 +59,19 @@ class GestureMonitorSpyWindow {
         mWindowHandle.name = name;
         mWindowHandle.token = mClientChannel.getToken();
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
-        mWindowHandle.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         mWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-        mWindowHandle.visible = true;
-        mWindowHandle.focusable = false;
-        mWindowHandle.hasWallpaper = false;
-        mWindowHandle.paused = false;
         mWindowHandle.ownerPid = pid;
         mWindowHandle.ownerUid = uid;
-        mWindowHandle.inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY;
         mWindowHandle.scaleFactor = 1.0f;
-        mWindowHandle.trustedOverlay = true;
         mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
+        mWindowHandle.inputConfig =
+                InputConfig.NOT_FOCUSABLE | InputConfig.SPY | InputConfig.TRUSTED_OVERLAY;
 
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
-        t.setLayer(mInputSurface, Integer.MAX_VALUE);
+        // Gesture monitor should be above handwriting event surface, hence setting it to
+        // WindowManagerPolicy.INPUT_DISPLAY_OVERLAY_LAYER + 1
+        t.setLayer(mInputSurface, WindowManagerPolicy.INPUT_DISPLAY_OVERLAY_LAYER + 1);
         t.setPosition(mInputSurface, 0, 0);
         t.setCrop(mInputSurface, null /* crop to parent surface */);
         t.show(mInputSurface);

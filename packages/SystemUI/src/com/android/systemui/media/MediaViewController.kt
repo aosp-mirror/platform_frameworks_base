@@ -25,6 +25,7 @@ import com.android.systemui.util.animation.MeasurementOutput
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionLayoutController
 import com.android.systemui.util.animation.TransitionViewState
+import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
 /**
@@ -34,7 +35,8 @@ import javax.inject.Inject
 class MediaViewController @Inject constructor(
     private val context: Context,
     private val configurationController: ConfigurationController,
-    private val mediaHostStatesManager: MediaHostStatesManager
+    private val mediaHostStatesManager: MediaHostStatesManager,
+    private val logger: MediaViewLogger
 ) {
 
     /**
@@ -42,7 +44,7 @@ class MediaViewController @Inject constructor(
      * session-based player, or recommendation
      */
     enum class TYPE {
-        PLAYER, PLAYER_SESSION, RECOMMENDATION
+        PLAYER, RECOMMENDATION
     }
 
     companion object {
@@ -188,11 +190,6 @@ class MediaViewController @Inject constructor(
     var isGutsVisible = false
         private set
 
-    /**
-     * Whether the settings button in the guts should be visible
-     */
-    var shouldHideGutsSettings = false
-
     init {
         mediaHostStatesManager.addController(this)
         layoutController.sizeChangedListener = { width: Int, height: Int ->
@@ -261,16 +258,10 @@ class MediaViewController @Inject constructor(
      */
     private fun setGutsViewState(viewState: TransitionViewState) {
         val controlsIds = when (type) {
-            TYPE.PLAYER -> PlayerViewHolder.controlsIds
-            TYPE.PLAYER_SESSION -> PlayerSessionViewHolder.controlsIds
+            TYPE.PLAYER -> MediaViewHolder.controlsIds
             TYPE.RECOMMENDATION -> RecommendationViewHolder.controlsIds
         }
-        val gutsIds = when (type) {
-            TYPE.PLAYER -> PlayerViewHolder.gutsIds
-            TYPE.PLAYER_SESSION -> PlayerSessionViewHolder.gutsIds
-            TYPE.RECOMMENDATION -> RecommendationViewHolder.gutsIds
-        }
-
+        val gutsIds = GutsViewHolder.ids
         controlsIds.forEach { id ->
             viewState.widgetStates.get(id)?.let { state ->
                 // Make sure to use the unmodified state if guts are not visible.
@@ -279,12 +270,11 @@ class MediaViewController @Inject constructor(
             }
         }
         gutsIds.forEach { id ->
-            viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
-            viewState.widgetStates.get(id)?.gone = !isGutsVisible
-        }
-
-        if (shouldHideGutsSettings) {
-            viewState.widgetStates.get(R.id.settings)?.gone = true
+            viewState.widgetStates.get(id)?.let { state ->
+                // Make sure to use the unmodified state if guts are visible
+                state.alpha = if (isGutsVisible) state.alpha else 0f
+                state.gone = if (isGutsVisible) state.gone else true
+            }
         }
     }
 
@@ -306,6 +296,7 @@ class MediaViewController @Inject constructor(
         // Copy the key since this might call recursively into it and we're using tmpKey
         cacheKey = cacheKey.copy()
         val result: TransitionViewState?
+
         if (transitionLayout != null) {
             // Let's create a new measurement
             if (state.expansion == 0.0f || state.expansion == 1.0f) {
@@ -357,8 +348,12 @@ class MediaViewController @Inject constructor(
      * Attach a view to this controller. This may perform measurements if it's not available yet
      * and should therefore be done carefully.
      */
-    fun attach(transitionLayout: TransitionLayout, type: TYPE) {
+    fun attach(
+        transitionLayout: TransitionLayout,
+        type: TYPE
+    ) = traceSection("MediaViewController#attach") {
         updateMediaViewControllerType(type)
+        logger.logMediaLocation("attach", currentStartLocation, currentEndLocation)
         this.transitionLayout = transitionLayout
         layoutController.attach(transitionLayout)
         if (currentEndLocation == -1) {
@@ -377,7 +372,9 @@ class MediaViewController @Inject constructor(
      * and all widgets know their location. Calling this method may create a measurement if we
      * don't have a cached value available already.
      */
-    fun getMeasurementsForState(hostState: MediaHostState): MeasurementOutput? {
+    fun getMeasurementsForState(
+        hostState: MediaHostState
+    ): MeasurementOutput? = traceSection("MediaViewController#getMeasurementsForState") {
         val viewState = obtainViewState(hostState) ?: return null
         measurement.measuredWidth = viewState.width
         measurement.measuredHeight = viewState.height
@@ -393,10 +390,11 @@ class MediaViewController @Inject constructor(
         @MediaLocation endLocation: Int,
         transitionProgress: Float,
         applyImmediately: Boolean
-    ) {
+    ) = traceSection("MediaViewController#setCurrentState") {
         currentEndLocation = endLocation
         currentStartLocation = startLocation
         currentTransitionProgress = transitionProgress
+        logger.logMediaLocation("setCurrentState", startLocation, endLocation)
 
         val shouldAnimate = animateNextStateChange && !applyImmediately
 
@@ -449,6 +447,7 @@ class MediaViewController @Inject constructor(
             result = layoutController.getInterpolatedState(startViewState, endViewState,
                     transitionProgress, tmpState)
         }
+        logger.logMediaSize("setCurrentState", result.width, result.height)
         layoutController.setState(result, applyImmediately, shouldAnimate, animationDuration,
                 animationDelay)
     }
@@ -466,6 +465,7 @@ class MediaViewController @Inject constructor(
             result.height = Math.max(it.measuredHeight, result.height)
             result.width = Math.max(it.measuredWidth, result.width)
         }
+        logger.logMediaSize("update to carousel", result.width, result.height)
         return result
     }
 
@@ -475,10 +475,6 @@ class MediaViewController @Inject constructor(
         // These XML resources contain ConstraintSets that will apply to this player type's layout
         when (type) {
             TYPE.PLAYER -> {
-                collapsedLayout.load(context, R.xml.media_collapsed)
-                expandedLayout.load(context, R.xml.media_expanded)
-            }
-            TYPE.PLAYER_SESSION -> {
                 collapsedLayout.load(context, R.xml.media_session_collapsed)
                 expandedLayout.load(context, R.xml.media_session_expanded)
             }
@@ -526,7 +522,7 @@ class MediaViewController @Inject constructor(
     /**
      * Clear all existing measurements and refresh the state to match the view.
      */
-    fun refreshState() {
+    fun refreshState() = traceSection("MediaViewController#refreshState") {
         // Let's clear all of our measurements and recreate them!
         viewStates.clear()
         if (firstRefresh) {

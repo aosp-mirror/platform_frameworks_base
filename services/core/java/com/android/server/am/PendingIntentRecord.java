@@ -310,6 +310,17 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 requiredPermission, null, null, 0, 0, 0, options);
     }
 
+    /**
+     * Return true if the activity options allows PendingIntent to use caller's BAL permission.
+     */
+    public static boolean isPendingIntentBalAllowedByPermission(
+            @Nullable ActivityOptions activityOptions) {
+        if (activityOptions == null) {
+            return false;
+        }
+        return activityOptions.isPendingIntentBackgroundActivityLaunchAllowedByPermission();
+    }
+
     public static boolean isPendingIntentBalAllowedByCaller(
             @Nullable ActivityOptions activityOptions) {
         if (activityOptions == null) {
@@ -368,8 +379,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
 
             // Apply any launch flags from the ActivityOptions. This is to ensure that the caller
             // can specify a consistent launch mode even if the PendingIntent is immutable
-            final ActivityOptions opts = options != null ? ActivityOptions.fromBundle(options)
-                    : null;
+            final ActivityOptions opts = ActivityOptions.fromBundle(options);
             if (opts != null) {
                 finalIntent.addFlags(opts.getPendingIntentLaunchFlags());
             }

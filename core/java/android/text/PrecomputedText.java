@@ -99,7 +99,7 @@ public class PrecomputedText implements Spannable {
         private final @Layout.HyphenationFrequency int mHyphenationFrequency;
 
         // The line break configuration for calculating text wrapping.
-        private final @Nullable LineBreakConfig mLineBreakConfig;
+        private final @NonNull LineBreakConfig mLineBreakConfig;
 
         /**
          * A builder for creating {@link Params}.
@@ -119,7 +119,7 @@ public class PrecomputedText implements Spannable {
                     Layout.HYPHENATION_FREQUENCY_NORMAL;
 
             // The line break configuration for calculating text wrapping.
-            private @Nullable LineBreakConfig mLineBreakConfig;
+            private @NonNull LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
 
             /**
              * Builder constructor.
@@ -212,7 +212,7 @@ public class PrecomputedText implements Spannable {
         // For the external developers, use Builder instead.
         /** @hide */
         public Params(@NonNull TextPaint paint,
-                @Nullable LineBreakConfig lineBreakConfig,
+                @NonNull LineBreakConfig lineBreakConfig,
                 @NonNull TextDirectionHeuristic textDir,
                 @Layout.BreakStrategy int strategy,
                 @Layout.HyphenationFrequency int frequency) {
@@ -260,11 +260,12 @@ public class PrecomputedText implements Spannable {
         }
 
         /**
-         * Return the line break configuration for this text.
+         * Returns the {@link LineBreakConfig} for this text.
          *
-         * @return the current line break configuration, null if no line break configuration is set.
+         * @return the current line break configuration. The {@link LineBreakConfig} with default
+         * values will be returned if no line break configuration is set.
          */
-        public @Nullable LineBreakConfig getLineBreakConfig() {
+        public @NonNull LineBreakConfig getLineBreakConfig() {
             return mLineBreakConfig;
         }
 
@@ -297,37 +298,14 @@ public class PrecomputedText implements Spannable {
         /** @hide */
         public @CheckResultUsableResult int checkResultUsable(@NonNull TextPaint paint,
                 @NonNull TextDirectionHeuristic textDir, @Layout.BreakStrategy int strategy,
-                @Layout.HyphenationFrequency int frequency, @Nullable LineBreakConfig lbConfig) {
+                @Layout.HyphenationFrequency int frequency, @NonNull LineBreakConfig lbConfig) {
             if (mBreakStrategy == strategy && mHyphenationFrequency == frequency
-                    && isLineBreakEquals(mLineBreakConfig, lbConfig)
+                    && mLineBreakConfig.equals(lbConfig)
                     && mPaint.equalsForTextMeasurement(paint)) {
                 return mTextDir == textDir ? USABLE : NEED_RECOMPUTE;
             } else {
                 return UNUSABLE;
             }
-        }
-
-        /**
-         * Check the two LineBreakConfig instances are equal.
-         * This method assumes they are equal if one parameter is null and the other parameter has
-         * a LineBreakStyle value of LineBreakConfig.LINE_BREAK_STYLE_NONE.
-         *
-         * @param o1 the first LineBreakConfig instance.
-         * @param o2 the second LineBreakConfig instance.
-         * @return true if the two LineBreakConfig instances are equal.
-         */
-        private boolean isLineBreakEquals(LineBreakConfig o1, LineBreakConfig o2) {
-            if (Objects.equals(o1, o2)) {
-                return true;
-            }
-            if (o1 == null && (o2 != null
-                    && o2.getLineBreakStyle() == LineBreakConfig.LINE_BREAK_STYLE_NONE)) {
-                return true;
-            } else if (o2 == null && (o1 != null
-                    && o1.getLineBreakStyle() == LineBreakConfig.LINE_BREAK_STYLE_NONE)) {
-                return true;
-            }
-            return false;
         }
 
         /**

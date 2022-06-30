@@ -184,8 +184,17 @@ public class KeyguardManager {
     })
     @interface LockTypes {}
 
-    // TODO(b/220379118): register only one binder listener and keep a map of listener to executor.
-    private final ArrayMap<KeyguardLockedStateListener, IKeyguardLockedStateListener>
+    private final IKeyguardLockedStateListener mIKeyguardLockedStateListener =
+            new IKeyguardLockedStateListener.Stub() {
+                @Override
+                public void onKeyguardLockedStateChanged(boolean isKeyguardLocked) {
+                    mKeyguardLockedStateListeners.forEach((listener, executor) -> {
+                        executor.execute(
+                                () -> listener.onKeyguardLockedStateChanged(isKeyguardLocked));
+                    });
+                }
+            };
+    private final ArrayMap<KeyguardLockedStateListener, Executor>
             mKeyguardLockedStateListeners = new ArrayMap<>();
 
     /**
@@ -252,8 +261,10 @@ public class KeyguardManager {
             CharSequence title, CharSequence description, int userId,
             boolean disallowBiometricsIfPolicyExists) {
         Intent intent = this.createConfirmDeviceCredentialIntent(title, description, userId);
-        intent.putExtra(EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS,
-                disallowBiometricsIfPolicyExists);
+        if (intent != null) {
+            intent.putExtra(EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS,
+                    disallowBiometricsIfPolicyExists);
+        }
         return intent;
     }
 
@@ -1094,25 +1105,23 @@ public class KeyguardManager {
     }
 
     /**
-     * Registers a listener to execute when the keyguard visibility changes.
+     * Registers a listener to execute when the keyguard locked state changes.
      *
-     * @param listener The listener to add to receive keyguard visibility changes.
+     * @param listener The listener to add to receive keyguard locked state changes.
+     *
+     * @see #isKeyguardLocked()
+     * @see #removeKeyguardLockedStateListener(KeyguardLockedStateListener)
      */
     @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
     public void addKeyguardLockedStateListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull KeyguardLockedStateListener listener) {
         synchronized (mKeyguardLockedStateListeners) {
+            mKeyguardLockedStateListeners.put(listener, executor);
+            if (mKeyguardLockedStateListeners.size() > 1) {
+                return;
+            }
             try {
-                final IKeyguardLockedStateListener innerListener =
-                        new IKeyguardLockedStateListener.Stub() {
-                    @Override
-                    public void onKeyguardLockedStateChanged(boolean isKeyguardLocked) {
-                        executor.execute(
-                                () -> listener.onKeyguardLockedStateChanged(isKeyguardLocked));
-                    }
-                };
-                mWM.addKeyguardLockedStateListener(innerListener);
-                mKeyguardLockedStateListeners.put(listener, innerListener);
+                mWM.addKeyguardLockedStateListener(mIKeyguardLockedStateListener);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1120,22 +1129,25 @@ public class KeyguardManager {
     }
 
     /**
-     * Unregisters a listener that executes when the keyguard visibility changes.
+     * Unregisters a listener that executes when the keyguard locked state changes.
+     *
+     * @param listener The listener to remove.
+     *
+     * @see #isKeyguardLocked()
+     * @see #addKeyguardLockedStateListener(Executor, KeyguardLockedStateListener)
      */
     @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
     public void removeKeyguardLockedStateListener(@NonNull KeyguardLockedStateListener listener) {
         synchronized (mKeyguardLockedStateListeners) {
-            IKeyguardLockedStateListener innerListener = mKeyguardLockedStateListeners.get(
-                    listener);
-            if (innerListener == null) {
+            mKeyguardLockedStateListeners.remove(listener);
+            if (!mKeyguardLockedStateListeners.isEmpty()) {
                 return;
             }
             try {
-                mWM.removeKeyguardLockedStateListener(innerListener);
+                mWM.removeKeyguardLockedStateListener(mIKeyguardLockedStateListener);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
-            mKeyguardLockedStateListeners.remove(listener);
         }
     }
 }

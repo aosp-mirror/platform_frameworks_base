@@ -107,9 +107,6 @@ public final class Trace {
     public static final long TRACE_TAG_RRO = 1L << 26;
     /** @hide */
     public static final long TRACE_TAG_THERMAL = 1L << 27;
-    /** @hide */
-
-    public static final long TRACE_TAG_APEX_MANAGER = 1L << 18;
 
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
     private static final int MAX_SECTION_NAME_LEN = 127;
@@ -138,6 +135,12 @@ public final class Trace {
     private static native void nativeAsyncTraceBegin(long tag, String name, int cookie);
     @FastNative
     private static native void nativeAsyncTraceEnd(long tag, String name, int cookie);
+    @FastNative
+    private static native void nativeAsyncTraceForTrackBegin(long tag,
+            String trackName, String name, int cookie);
+    @FastNative
+    private static native void nativeAsyncTraceForTrackEnd(long tag,
+            String trackName, String name, int cookie);
     @FastNative
     private static native void nativeInstant(long tag, String name);
     @FastNative
@@ -271,6 +274,47 @@ public final class Trace {
     public static void asyncTraceEnd(long traceTag, @NonNull String methodName, int cookie) {
         if (isTagEnabled(traceTag)) {
             nativeAsyncTraceEnd(traceTag, methodName, cookie);
+        }
+    }
+
+
+    /**
+     * Writes a trace message to indicate that a given section of code has
+     * begun. Must be followed by a call to {@link #asyncTraceForTrackEnd} using the same
+     * tag. This function operates exactly like {@link #asyncTraceBegin(long, String, int)},
+     * except with the inclusion of a track name argument for where this method should appear.
+     *
+     * @param traceTag The trace tag.
+     * @param trackName The track where the event should appear in the trace.
+     * @param methodName The method name to appear in the trace.
+     * @param cookie Unique identifier for distinguishing simultaneous events
+     *
+     * @hide
+     */
+    public static void asyncTraceForTrackBegin(long traceTag,
+            @NonNull String trackName, @NonNull String methodName, int cookie) {
+        if (isTagEnabled(traceTag)) {
+            nativeAsyncTraceForTrackBegin(traceTag, trackName, methodName, cookie);
+        }
+    }
+
+    /**
+     * Writes a trace message to indicate that the current method has ended.
+     * Must be called exactly once for each call to
+     * {@link #asyncTraceForTrackBegin(long, String, String, int)}
+     * using the same tag, track name, name and cookie.
+     *
+     * @param traceTag The trace tag.
+     * @param trackName The track where the event should appear in the trace.
+     * @param methodName The method name to appear in the trace.
+     * @param cookie Unique identifier for distinguishing simultaneous events
+     *
+     * @hide
+     */
+    public static void asyncTraceForTrackEnd(long traceTag,
+            @NonNull String trackName, @NonNull String methodName, int cookie) {
+        if (isTagEnabled(traceTag)) {
+            nativeAsyncTraceForTrackEnd(traceTag, trackName, methodName, cookie);
         }
     }
 

@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.legacy;
 
-import static com.android.systemui.statusbar.phone.StatusBar.SPEW;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.SPEW;
 
 import android.service.notification.StatusBarNotification;
 import android.util.Log;

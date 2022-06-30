@@ -48,18 +48,6 @@ class ScreenOnCoordinator @Inject constructor(
         SysUIUnfoldComponent::getFoldAodAnimationController).getOrNull()
     private val pendingTasks = PendingTasksContainer()
 
-    private var wakeAndUnlockingTask: Runnable? = null
-    var wakeAndUnlocking = false
-        set(value) {
-            if (!value && field) {
-                // When updating the value back to false, mark the task complete in order to
-                // callback onDrawn
-                wakeAndUnlockingTask?.run()
-                wakeAndUnlockingTask = null
-            }
-            field = value
-        }
-
     init {
         screenLifecycle.addObserver(this)
     }
@@ -76,10 +64,6 @@ class ScreenOnCoordinator @Inject constructor(
         unfoldLightRevealAnimation?.onScreenTurningOn(pendingTasks.registerTask("unfold-reveal"))
         foldAodAnimationController?.onScreenTurningOn(pendingTasks.registerTask("fold-to-aod"))
 
-        if (wakeAndUnlocking) {
-            wakeAndUnlockingTask = pendingTasks.registerTask("wake-and-unlocking")
-        }
-
         pendingTasks.onTasksComplete { onDrawn.run() }
         Trace.endSection()
     }
@@ -90,9 +74,5 @@ class ScreenOnCoordinator @Inject constructor(
         foldAodAnimationController?.onScreenTurnedOn()
 
         pendingTasks.reset()
-    }
-
-    override fun onScreenTurnedOff() {
-        wakeAndUnlockingTask = null
     }
 }

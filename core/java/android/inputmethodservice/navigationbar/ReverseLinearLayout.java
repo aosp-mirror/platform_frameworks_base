@@ -30,9 +30,8 @@ import java.util.ArrayList;
 /**
  * Automatically reverses the order of children as they are added.
  * Also reverse the width and height values of layout params
- * @hide
  */
-public class ReverseLinearLayout extends LinearLayout {
+class ReverseLinearLayout extends LinearLayout {
 
     /** If true, the layout is reversed vs. a regular linear layout */
     private boolean mIsLayoutReverse;
@@ -40,7 +39,7 @@ public class ReverseLinearLayout extends LinearLayout {
     /** If true, the layout is opposite to it's natural reversity from the layout direction */
     private boolean mIsAlternativeOrder;
 
-    public ReverseLinearLayout(Context context, @Nullable AttributeSet attrs) {
+    ReverseLinearLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
@@ -129,7 +128,7 @@ public class ReverseLinearLayout extends LinearLayout {
 
     public static class ReverseRelativeLayout extends RelativeLayout implements Reversible {
 
-        public ReverseRelativeLayout(Context context) {
+        ReverseRelativeLayout(Context context) {
             super(context);
         }
 

@@ -17,6 +17,7 @@
 package com.android.systemui.unfold
 
 import android.hardware.SensorManager
+import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.progress.FixedTimingTransitionProgressProvider
 import com.android.systemui.unfold.progress.PhysicsBasedUnfoldTransitionProgressProvider
@@ -30,6 +31,7 @@ import com.android.systemui.unfold.util.ScaleAwareTransitionProgressProvider
 import dagger.Module
 import dagger.Provides
 import java.util.Optional
+import java.util.concurrent.Executor
 import javax.inject.Singleton
 
 @Module
@@ -67,10 +69,11 @@ class UnfoldSharedModule {
     @Provides
     fun hingeAngleProvider(
         config: UnfoldTransitionConfig,
-        sensorManager: SensorManager
+        sensorManager: SensorManager,
+        @UiBackground executor: Executor
     ): HingeAngleProvider =
         if (config.isHingeAngleEnabled) {
-            HingeSensorAngleProvider(sensorManager)
+            HingeSensorAngleProvider(sensorManager, executor)
         } else {
             EmptyHingeAngleProvider
         }

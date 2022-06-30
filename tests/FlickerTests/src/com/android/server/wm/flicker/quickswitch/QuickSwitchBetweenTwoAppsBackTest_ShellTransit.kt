@@ -16,8 +16,8 @@
 
 package com.android.server.wm.flicker.quickswitch
 
-import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.RequiresDevice
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group1
@@ -45,8 +45,8 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-@FlakyTest(bugId = 219690120)
-class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(testSpec: FlickerTestParameter)
+@FlakyTest(bugId = 228009808)
+open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(testSpec: FlickerTestParameter)
     : QuickSwitchBetweenTwoAppsBackTest(testSpec) {
     @Before
     override fun before() {

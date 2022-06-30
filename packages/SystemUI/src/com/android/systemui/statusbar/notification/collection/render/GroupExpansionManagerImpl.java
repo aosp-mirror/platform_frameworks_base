@@ -23,7 +23,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.Coordinator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -98,7 +97,7 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Coordin
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("NotificationEntryExpansion state:");
         pw.println("  # expanded groups: " +  mExpandedGroups.size());
         for (NotificationEntry entry : mExpandedGroups) {

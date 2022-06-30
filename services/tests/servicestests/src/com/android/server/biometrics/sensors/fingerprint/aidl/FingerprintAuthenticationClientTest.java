@@ -31,9 +31,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
+import android.content.ComponentName;
+import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.PointerContext;
+import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -63,14 +69,18 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 @Presubmit
 @SmallTest
 public class FingerprintAuthenticationClientTest {
 
+    private static final int SENSOR_ID = 4;
     private static final int USER_ID = 8;
     private static final long OP_ID = 7;
+    private static final long REQUEST_ID = 88;
     private static final int POINTER_ID = 0;
     private static final int TOUCH_X = 8;
     private static final int TOUCH_Y = 20;
@@ -92,6 +102,8 @@ public class FingerprintAuthenticationClientTest {
     @Mock
     private BiometricContext mBiometricContext;
     @Mock
+    private BiometricManager mBiometricManager;
+    @Mock
     private LockoutCache mLockoutCache;
     @Mock
     private IUdfpsOverlayController mUdfpsOverlayController;
@@ -103,6 +115,10 @@ public class FingerprintAuthenticationClientTest {
     private ClientMonitorCallback mCallback;
     @Mock
     private Sensor.HalSessionCallback mHalSessionCallback;
+    @Mock
+    private ActivityTaskManager mActivityTaskManager;
+    @Mock
+    private ICancellationSignal mCancellationSignal;
     @Mock
     private Probe mLuxProbe;
     @Captor
@@ -117,6 +133,7 @@ public class FingerprintAuthenticationClientTest {
 
     @Before
     public void setup() {
+        mContext.addMockSystemService(BiometricManager.class, mBiometricManager);
         when(mBiometricLogger.createALSCallback(anyBoolean())).thenAnswer(i ->
                 new CallbackWithProbe<>(mLuxProbe, i.getArgument(0)));
         when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
@@ -211,6 +228,18 @@ public class FingerprintAuthenticationClientTest {
     }
 
     @Test
+    public void luxProbeWhenFingerDown_unlessDestroyed() throws RemoteException {
+        final FingerprintAuthenticationClient client = createClient();
+        client.start(mCallback);
+        client.onAuthenticated(new Fingerprint("name", 2 /* enrollmentId */, SENSOR_ID),
+                true /* authenticated */, new ArrayList<>());
+        verify(mLuxProbe).destroy();
+
+        client.onAcquired(2, 0);
+        verify(mLuxProbe, never()).enable();
+    }
+
+    @Test
     public void notifyHalWhenContextChanges() throws RemoteException {
         final FingerprintAuthenticationClient client = createClient();
         client.start(mCallback);
@@ -259,7 +288,7 @@ public class FingerprintAuthenticationClientTest {
 
         client.start(mCallback);
 
-        verify(mUdfpsOverlayController).showUdfpsOverlay(anyInt(), anyInt(), any());
+        verify(mUdfpsOverlayController).showUdfpsOverlay(eq(REQUEST_ID), anyInt(), anyInt(), any());
         verify(mSideFpsController).show(anyInt(), anyInt());
 
         block.accept(client);
@@ -268,21 +297,50 @@ public class FingerprintAuthenticationClientTest {
         verify(mSideFpsController).hide(anyInt());
     }
 
+    @Test
+    public void cancelsAuthWhenNotInForeground() throws Exception {
+        final ActivityManager.RunningTaskInfo topTask = new ActivityManager.RunningTaskInfo();
+        topTask.topActivity = new ComponentName("other", "thing");
+        when(mActivityTaskManager.getTasks(anyInt())).thenReturn(List.of(topTask));
+        when(mHal.authenticateWithContext(anyLong(), any())).thenReturn(mCancellationSignal);
+
+        final FingerprintAuthenticationClient client = createClientWithoutBackgroundAuth();
+        client.start(mCallback);
+        client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */, 2 /* deviceId */),
+                true /* authenticated */, new ArrayList<>());
+
+        verify(mCancellationSignal).cancel();
+    }
+
     private FingerprintAuthenticationClient createClient() throws RemoteException {
-        return createClient(100);
+        return createClient(100 /* version */, true /* allowBackgroundAuthentication */);
+    }
+
+    private FingerprintAuthenticationClient createClientWithoutBackgroundAuth()
+            throws RemoteException {
+        return createClient(100 /* version */, false /* allowBackgroundAuthentication */);
     }
 
     private FingerprintAuthenticationClient createClient(int version) throws RemoteException {
+        return createClient(version, true /* allowBackgroundAuthentication */);
+    }
+
+    private FingerprintAuthenticationClient createClient(int version,
+            boolean allowBackgroundAuthentication) throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
         final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
         return new FingerprintAuthenticationClient(mContext, () -> aidl, mToken,
-                2 /* requestId */, mClientMonitorCallbackConverter, 5 /* targetUserId */, OP_ID,
+                REQUEST_ID, mClientMonitorCallbackConverter, 5 /* targetUserId */, OP_ID,
         false /* restricted */, "test-owner", 4 /* cookie */, false /* requireConfirmation */,
         9 /* sensorId */, mBiometricLogger, mBiometricContext,
         true /* isStrongBiometric */,
         null /* taskStackListener */, mLockoutCache,
-        mUdfpsOverlayController, mSideFpsController,
-        false /* allowBackgroundAuthentication */, mSensorProps);
+        mUdfpsOverlayController, mSideFpsController, allowBackgroundAuthentication, mSensorProps) {
+            @Override
+            protected ActivityTaskManager getActivityTaskManager() {
+                return mActivityTaskManager;
+            }
+        };
     }
 }

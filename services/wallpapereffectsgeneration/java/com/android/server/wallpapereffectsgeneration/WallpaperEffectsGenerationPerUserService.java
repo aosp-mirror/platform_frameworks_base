@@ -141,6 +141,13 @@ public class WallpaperEffectsGenerationPerUserService extends
         invokeCinematicListenerAndCleanup(cinematicEffectResponse);
     }
 
+    /**
+     * Checks whether the calling uid matches the bind service uid.
+     */
+    public boolean isCallingUidAllowed(int callingUid) {
+        return getServiceUidLocked() ==  callingUid;
+    }
+
     @GuardedBy("mLock")
     private void updateRemoteServiceLocked() {
         if (mRemoteService != null) {
@@ -152,7 +159,6 @@ public class WallpaperEffectsGenerationPerUserService extends
             invokeCinematicListenerAndCleanup(
                     createErrorCinematicEffectResponse(mCinematicEffectListenerWrapper.mTaskId));
         }
-
     }
 
     void onPackageUpdatedLocked() {
@@ -227,14 +233,13 @@ public class WallpaperEffectsGenerationPerUserService extends
     @Nullable
     private RemoteWallpaperEffectsGenerationService ensureRemoteServiceLocked() {
         if (mRemoteService == null) {
-            final String serviceName = getComponentNameLocked();
-            if (serviceName == null) {
+            final ComponentName serviceComponent = updateServiceInfoLocked();
+            if (serviceComponent == null) {
                 if (mMaster.verbose) {
                     Slog.v(TAG, "ensureRemoteServiceLocked(): not set");
                 }
                 return null;
             }
-            ComponentName serviceComponent = ComponentName.unflattenFromString(serviceName);
 
             mRemoteService = new RemoteWallpaperEffectsGenerationService(getContext(),
                     serviceComponent, mUserId, this,

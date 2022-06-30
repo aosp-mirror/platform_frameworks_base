@@ -15,11 +15,16 @@
  */
 package com.android.systemui.dreams.complication;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -31,6 +36,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import javax.inject.Provider;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -45,9 +52,28 @@ public class DreamClockDateComplicationTest extends SysuiTestCase {
     @Mock
     private DreamClockDateComplication mComplication;
 
+    @Mock
+    private Provider<DreamClockDateComplication.DreamClockDateViewHolder>
+            mDreamClockDateViewHolderProvider;
+
+    @Mock
+    private DreamClockDateComplication.DreamClockDateViewHolder
+            mDreamClockDateViewHolder;
+
+    @Mock
+    private ComplicationViewModel mComplicationViewModel;
+
+    @Mock
+    private View mView;
+
+    @Mock
+    private ComplicationLayoutParams mLayoutParams;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        when(mDreamClockDateViewHolderProvider.get()).thenReturn(mDreamClockDateViewHolder);
+
     }
 
     /**
@@ -62,5 +88,41 @@ public class DreamClockDateComplicationTest extends SysuiTestCase {
                         mComplication);
         registrant.start();
         verify(mDreamOverlayStateController).addComplication(eq(mComplication));
+    }
+
+    /**
+     * Verifies {@link DreamClockDateComplication} has the required type.
+     */
+    @Test
+    public void testComplicationRequiredTypeAvailability() {
+        final DreamClockDateComplication complication =
+                new DreamClockDateComplication(mDreamClockDateViewHolderProvider);
+        assertEquals(Complication.COMPLICATION_TYPE_DATE,
+                complication.getRequiredTypeAvailability());
+    }
+
+    /**
+     * Verifies {@link DreamClockDateComplication.DreamClockDateViewHolder} is obtainable from its
+     * provider when the complication creates view.
+     */
+    @Test
+    public void testComplicationViewHolderProviderOnCreateView() {
+        final DreamClockDateComplication complication =
+                new DreamClockDateComplication(mDreamClockDateViewHolderProvider);
+        final Complication.ViewHolder viewHolder = complication.createView(mComplicationViewModel);
+        verify(mDreamClockDateViewHolderProvider).get();
+        assertThat(viewHolder).isEqualTo(mDreamClockDateViewHolder);
+    }
+
+    /**
+     * Verifies {@link DreamClockDateComplication.DreamClockDateViewHolder} has the intended view
+     * and layout parameters from constructor.
+     */
+    @Test
+    public void testComplicationViewHolderContentAccessors() {
+        final DreamClockDateComplication.DreamClockDateViewHolder viewHolder =
+                new DreamClockDateComplication.DreamClockDateViewHolder(mView, mLayoutParams);
+        assertThat(viewHolder.getView()).isEqualTo(mView);
+        assertThat(viewHolder.getLayoutParams()).isEqualTo(mLayoutParams);
     }
 }

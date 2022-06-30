@@ -91,6 +91,7 @@ import com.android.internal.R;
 import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.server.pm.SharedUidMigration;
 import com.android.server.pm.permission.CompatibilityPermissionInfo;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ComponentParseUtils;
@@ -235,8 +236,14 @@ public class ParsingPackageUtils {
      */
     public static final int PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY = 1 << 7;
     public static final int PARSE_FRAMEWORK_RES_SPLITS = 1 << 8;
+    public static final int PARSE_APK_IN_APEX = 1 << 9;
 
     public static final int PARSE_CHATTY = 1 << 31;
+
+    /** The total maximum number of activities, services, providers and activity-aliases */
+    private static final int MAX_NUM_COMPONENTS = 30000;
+    private static final String MAX_NUM_COMPONENTS_ERR_MSG =
+            "Total number of components has exceeded the maximum number: " + MAX_NUM_COMPONENTS;
 
     @IntDef(flag = true, prefix = { "PARSE_" }, value = {
             PARSE_CHATTY,
@@ -384,6 +391,9 @@ public class ParsingPackageUtils {
         int liteParseFlags = 0;
         if ((flags & PARSE_FRAMEWORK_RES_SPLITS) != 0) {
             liteParseFlags = flags;
+        }
+        if ((flags & PARSE_APK_IN_APEX) != 0) {
+            liteParseFlags |= PARSE_APK_IN_APEX;
         }
         final ParseResult<PackageLite> liteResult =
                 ApkLiteParseUtils.parseClusterPackageLite(input, packageDir, frameworkSplits,
@@ -833,9 +843,18 @@ public class ParsingPackageUtils {
             if (result.isError()) {
                 return input.error(result);
             }
+
+            if (hasTooManyComponents(pkg)) {
+                return input.error(MAX_NUM_COMPONENTS_ERR_MSG);
+            }
         }
 
         return input.success(pkg);
+    }
+
+    private static boolean hasTooManyComponents(ParsingPackage pkg) {
+        return pkg.getActivities().size() + pkg.getServices().size() + pkg.getProviders().size()
+                > MAX_NUM_COMPONENTS;
     }
 
     /**
@@ -893,9 +912,7 @@ public class ParsingPackageUtils {
                 .setTargetSandboxVersion(anInteger(PARSE_DEFAULT_TARGET_SANDBOX,
                         R.styleable.AndroidManifest_targetSandboxVersion, sa))
                 /* Set the global "on SD card" flag */
-                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0)
-                .setInheritKeyStoreKeys(bool(false,
-                        R.styleable.AndroidManifest_inheritKeyStoreKeys, sa));
+                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0);
 
         boolean foundApp = false;
         final int depth = parser.getDepth();
@@ -951,7 +968,7 @@ public class ParsingPackageUtils {
         if (ParsedPermissionUtils.declareDuplicatePermission(pkg)) {
             return input.error(
                     INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
-                    "Declare duplicate permissions with different protection levels."
+                    "Found duplicate permission with a different attribute value."
             );
         }
 
@@ -1003,7 +1020,7 @@ public class ParsingPackageUtils {
             case TAG_FEATURE_GROUP:
                 return parseFeatureGroup(input, pkg, res, parser);
             case TAG_USES_SDK:
-                return parseUsesSdk(input, pkg, res, parser);
+                return parseUsesSdk(input, pkg, res, parser, flags);
             case TAG_SUPPORT_SCREENS:
                 return parseSupportScreens(input, pkg, res, parser);
             case TAG_PROTECTED_BROADCAST:
@@ -1047,8 +1064,11 @@ public class ParsingPackageUtils {
             }
         }
 
-        int maxSdkVersion = anInteger(0, R.styleable.AndroidManifest_sharedUserMaxSdkVersion, sa);
-        boolean leaving = (maxSdkVersion != 0) && (maxSdkVersion < Build.VERSION.RESOURCES_SDK_INT);
+        boolean leaving = false;
+        if (!SharedUidMigration.isDisabled()) {
+            int max = anInteger(0, R.styleable.AndroidManifest_sharedUserMaxSdkVersion, sa);
+            leaving = (max != 0) && (max < Build.VERSION.RESOURCES_SDK_INT);
+        }
 
         return input.success(pkg
                 .setLeavingSharedUid(leaving)
@@ -1512,23 +1532,28 @@ public class ParsingPackageUtils {
     }
 
     private static ParseResult<ParsingPackage> parseUsesSdk(ParseInput input,
-            ParsingPackage pkg, Resources res, XmlResourceParser parser)
+            ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags)
             throws IOException, XmlPullParserException {
         if (SDK_VERSION > 0) {
+            final boolean isApkInApex = (flags & PARSE_APK_IN_APEX) != 0;
             TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestUsesSdk);
             try {
                 int minVers = ParsingUtils.DEFAULT_MIN_SDK_VERSION;
                 String minCode = null;
+                boolean minAssigned = false;
                 int targetVers = ParsingUtils.DEFAULT_TARGET_SDK_VERSION;
                 String targetCode = null;
+                int maxVers = Integer.MAX_VALUE;
 
                 TypedValue val = sa.peekValue(R.styleable.AndroidManifestUsesSdk_minSdkVersion);
                 if (val != null) {
                     if (val.type == TypedValue.TYPE_STRING && val.string != null) {
                         minCode = val.string.toString();
+                        minAssigned = !TextUtils.isEmpty(minCode);
                     } else {
                         // If it's not a string, it's an integer.
                         minVers = val.data;
+                        minAssigned = true;
                     }
                 }
 
@@ -1536,7 +1561,7 @@ public class ParsingPackageUtils {
                 if (val != null) {
                     if (val.type == TypedValue.TYPE_STRING && val.string != null) {
                         targetCode = val.string.toString();
-                        if (minCode == null) {
+                        if (!minAssigned) {
                             minCode = targetCode;
                         }
                     } else {
@@ -1548,8 +1573,17 @@ public class ParsingPackageUtils {
                     targetCode = minCode;
                 }
 
+                if (isApkInApex) {
+                    val = sa.peekValue(R.styleable.AndroidManifestUsesSdk_maxSdkVersion);
+                    if (val != null) {
+                        // maxSdkVersion only supports integer
+                        maxVers = val.data;
+                    }
+                }
+
                 ParseResult<Integer> targetSdkVersionResult = FrameworkParsingPackageUtils
-                        .computeTargetSdkVersion(targetVers, targetCode, SDK_CODENAMES, input);
+                        .computeTargetSdkVersion(targetVers, targetCode, SDK_CODENAMES, input,
+                                isApkInApex);
                 if (targetSdkVersionResult.isError()) {
                     return input.error(targetSdkVersionResult);
                 }
@@ -1572,6 +1606,15 @@ public class ParsingPackageUtils {
 
                 pkg.setMinSdkVersion(minSdkVersion)
                         .setTargetSdkVersion(targetSdkVersion);
+                if (isApkInApex) {
+                    ParseResult<Integer> maxSdkVersionResult = FrameworkParsingPackageUtils
+                            .computeMaxSdkVersion(maxVers, SDK_VERSION, input);
+                    if (maxSdkVersionResult.isError()) {
+                        return input.error(maxSdkVersionResult);
+                    }
+                    int maxSdkVersion = maxSdkVersionResult.getResult();
+                    pkg.setMaxSdkVersion(maxSdkVersion);
+                }
 
                 int type;
                 final int innerDepth = parser.getDepth();
@@ -2120,6 +2163,9 @@ public class ParsingPackageUtils {
 
             if (result.isError()) {
                 return input.error(result);
+            }
+            if (hasTooManyComponents(pkg)) {
+                return input.error(MAX_NUM_COMPONENTS_ERR_MSG);
             }
         }
 
@@ -3065,11 +3111,9 @@ public class ParsingPackageUtils {
         }
         final ParseResult<SigningDetails> verified;
         if (skipVerify) {
-            // systemDir APKs are already trusted, save time by not verifying; since the
-            // signature is not verified and some system apps can have their V2+ signatures
-            // stripped allow pulling the certs from the jar signature.
+            // systemDir APKs are already trusted, save time by not verifying
             verified = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(input, baseCodePath,
-                    SigningDetails.SignatureSchemeVersion.JAR);
+                    minSignatureScheme);
         } else {
             verified = ApkSignatureVerifier.verify(input, baseCodePath, minSignatureScheme);
         }

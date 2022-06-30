@@ -236,8 +236,6 @@ android_media_MediaProfiles_native_get_camcorder_profiles(JNIEnv *env, jobject /
     camcorder_quality q = static_cast<camcorder_quality>(quality);
     const MediaProfiles::CamcorderProfile *cp = sProfiles->getCamcorderProfile(id, q);
     if (!cp) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                          "Error retrieving camcorder profile params");
         return NULL;
     }
 

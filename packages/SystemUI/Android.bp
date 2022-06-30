@@ -128,6 +128,10 @@ android_library {
     kotlincflags: ["-Xjvm-default=enable"],
 
     plugins: ["dagger2-compiler"],
+
+    lint: {
+        extra_check_modules: ["SystemUILintChecker"],
+    },
 }
 
 filegroup {

@@ -43,9 +43,9 @@
     </Transition>
 
     <Transition
-        android:id="@+id/split_header_transition"
-        app:constraintSetStart="@id/split_header_constraint"
-        app:constraintSetEnd="@id/split_header_constraint"/>
+        android:id="@+id/large_screen_header_transition"
+        app:constraintSetStart="@id/large_screen_header_constraint"
+        app:constraintSetEnd="@id/large_screen_header_constraint"/>
 
     <!--
         Placeholder ConstraintSet. They are populated in the controller for this class.
@@ -56,6 +56,6 @@
 
     <ConstraintSet android:id="@id/qs_header_constraint"/>
 
-    <ConstraintSet android:id="@id/split_header_constraint" />
+    <ConstraintSet android:id="@id/large_screen_header_constraint" />
 
 </MotionScene>

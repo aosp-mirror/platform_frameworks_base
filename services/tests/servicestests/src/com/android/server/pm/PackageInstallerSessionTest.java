@@ -20,10 +20,15 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -68,12 +73,17 @@ public class PackageInstallerSessionTest {
     @Mock
     PackageManagerService mMockPackageManagerInternal;
 
+    @Mock
+    Computer mSnapshot;
+
     @Before
     public void setUp() throws Exception {
         mTmpDir = mTemporaryFolder.newFolder("PackageInstallerSessionTest");
         mSessionsFile = new AtomicFile(
                 new File(mTmpDir.getAbsolutePath() + "/sessions.xml"), "package-session");
         MockitoAnnotations.initMocks(this);
+        when(mSnapshot.getPackageUid(anyString(), anyLong(), anyInt())).thenReturn(0);
+        when(mMockPackageManagerInternal.snapshotComputer()).thenReturn(mSnapshot);
     }
 
     @Test
@@ -188,7 +198,7 @@ public class PackageInstallerSessionTest {
                 /* isFailed */ false,
                 /* isApplied */false,
                 /* stagedSessionErrorCode */
-                PackageInstaller.SessionInfo.SESSION_VERIFICATION_FAILED,
+                PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
                 /* stagedSessionErrorMessage */ "some error");
     }
 

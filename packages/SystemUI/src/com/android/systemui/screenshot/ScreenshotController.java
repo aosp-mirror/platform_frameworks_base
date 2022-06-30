@@ -27,6 +27,7 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_UI;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW;
 import static com.android.systemui.screenshot.LogConfig.logTag;
+import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER;
 
 import static java.util.Objects.requireNonNull;
 
@@ -78,20 +79,23 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 import android.window.WindowContext;
+
+import androidx.concurrent.futures.CallbackToFutureAdapter;
 
 import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.clipboardoverlay.ClipboardOverlayController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback;
+import com.android.systemui.util.Assert;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -138,7 +142,7 @@ public class ScreenshotController {
                 }
 
                 @Override
-                public void onAnimationCancelled() {
+                public void onAnimationCancelled(boolean isKeyguardOccluded) {
                 }
             };
 
@@ -247,11 +251,12 @@ public class ScreenshotController {
     private final ImageExporter mImageExporter;
     private final Executor mMainExecutor;
     private final ExecutorService mBgExecutor;
+    private final BroadcastSender mBroadcastSender;
 
     private final WindowManager mWindowManager;
     private final WindowManager.LayoutParams mWindowLayoutParams;
     private final AccessibilityManager mAccessibilityManager;
-    private final MediaPlayer mCameraSound;
+    private final ListenableFuture<MediaPlayer> mCameraSound;
     private final ScrollCaptureClient mScrollCaptureClient;
     private final PhoneWindow mWindow;
     private final DisplayManager mDisplayManager;
@@ -270,7 +275,6 @@ public class ScreenshotController {
     private RequestCallback mCurrentRequestCallback;
     private String mPackageName = "";
     private BroadcastReceiver mCopyBroadcastReceiver;
-
 
     /** Tracks config changes that require re-creating UI */
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
@@ -293,7 +297,8 @@ public class ScreenshotController {
             ScrollCaptureController scrollCaptureController,
             LongScreenshotData longScreenshotHolder,
             ActivityManager activityManager,
-            TimeoutHandler timeoutHandler) {
+            TimeoutHandler timeoutHandler,
+            BroadcastSender broadcastSender) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
         mScrollCaptureClient = scrollCaptureClient;
@@ -304,6 +309,7 @@ public class ScreenshotController {
         mLongScreenshotHolder = longScreenshotHolder;
         mIsLowRamDevice = activityManager.isLowRamDevice();
         mBgExecutor = Executors.newSingleThreadExecutor();
+        mBroadcastSender = broadcastSender;
 
         mScreenshotHandler = timeoutHandler;
         mScreenshotHandler.setDefaultTimeoutMillis(SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS);
@@ -334,18 +340,13 @@ public class ScreenshotController {
         reloadAssets();
 
         // Setup the Camera shutter sound
-        mCameraSound = MediaPlayer.create(mContext,
-                Uri.fromFile(new File(mContext.getResources().getString(
-                        com.android.internal.R.string.config_cameraShutterSound))), null,
-                new AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build(), AudioSystem.newAudioSessionId());
+        mCameraSound = loadCameraSound();
 
         mCopyBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (ClipboardOverlayController.COPY_OVERLAY_ACTION.equals(intent.getAction())) {
+                    mUiEventLogger.log(SCREENSHOT_DISMISSED_OTHER);
                     dismissScreenshot(false);
                 }
             }
@@ -355,8 +356,10 @@ public class ScreenshotController {
                 ClipboardOverlayController.SELF_PERMISSION, null, Context.RECEIVER_NOT_EXPORTED);
     }
 
+    @MainThread
     void takeScreenshotFullscreen(ComponentName topComponent, Consumer<Uri> finisher,
             RequestCallback requestCallback) {
+        Assert.isMainThread();
         mCurrentRequestCallback = requestCallback;
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getDefaultDisplay().getRealMetrics(displayMetrics);
@@ -365,11 +368,12 @@ public class ScreenshotController {
                 new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels));
     }
 
+    @MainThread
     void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
             Insets visibleInsets, int taskId, int userId, ComponentName topComponent,
             Consumer<Uri> finisher, RequestCallback requestCallback) {
         // TODO: use task Id, userId, topComponent for smart handler
-
+        Assert.isMainThread();
         if (screenshot == null) {
             Log.e(TAG, "Got null bitmap from screenshot message");
             mNotificationsController.notifyScreenshotError(
@@ -392,8 +396,10 @@ public class ScreenshotController {
     /**
      * Displays a screenshot selector
      */
+    @MainThread
     void takeScreenshotPartial(ComponentName topComponent,
             final Consumer<Uri> finisher, RequestCallback requestCallback) {
+        Assert.isMainThread();
         mScreenshotView.reset();
         mCurrentRequestCallback = requestCallback;
 
@@ -432,16 +438,32 @@ public class ScreenshotController {
         return mScreenshotView.isPendingSharedTransition();
     }
 
+    // Any cleanup needed when the service is being destroyed.
+    void onDestroy() {
+        removeWindow();
+        releaseMediaPlayer();
+        releaseContext();
+        mBgExecutor.shutdownNow();
+    }
+
     /**
      * Release the constructed window context.
      */
-    void releaseContext() {
+    private void releaseContext() {
         mContext.unregisterReceiver(mCopyBroadcastReceiver);
         mContext.release();
-        if (mCameraSound != null) {
-            mCameraSound.release();
+    }
+
+    private void releaseMediaPlayer() {
+        // Note that this may block if the sound is still being loaded (very unlikely) but we can't
+        // reliably release in the background because the service is being destroyed.
+        try {
+            MediaPlayer player = mCameraSound.get();
+            if (player != null) {
+                player.release();
+            }
+        } catch (InterruptedException | ExecutionException e) {
         }
-        mBgExecutor.shutdownNow();
     }
 
     /**
@@ -475,6 +497,7 @@ public class ScreenshotController {
                 setWindowFocusable(false);
             }
         });
+        mScreenshotView.setDefaultTimeoutMillis(mScreenshotHandler.getDefaultTimeoutMillis());
 
         mScreenshotView.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -517,7 +540,7 @@ public class ScreenshotController {
 
         saveScreenshot(screenshot, finisher, screenRect, Insets.NONE, topComponent, true);
 
-        mContext.sendBroadcast(new Intent(ClipboardOverlayController.SCREENSHOT_ACTION),
+        mBroadcastSender.sendBroadcast(new Intent(ClipboardOverlayController.SCREENSHOT_ACTION),
                 ClipboardOverlayController.SELF_PERMISSION);
     }
 
@@ -549,14 +572,9 @@ public class ScreenshotController {
 
     private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
             Insets screenInsets, ComponentName topComponent, boolean showFlash) {
-        if (mAccessibilityManager.isEnabled()) {
-            AccessibilityEvent event =
-                    new AccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-            event.setContentDescription(
-                    mContext.getResources().getString(R.string.screenshot_saving_title));
-            mAccessibilityManager.sendAccessibilityEvent(event);
-        }
-
+        withWindowAttached(() ->
+                mScreenshotView.announceForAccessibility(
+                        mContext.getResources().getString(R.string.screenshot_saving_title)));
 
         if (mScreenshotView.isAttachedToWindow()) {
             // if we didn't already dismiss for another reason
@@ -623,6 +641,7 @@ public class ScreenshotController {
                                 }
                             }
                         }
+
                         @Override
                         public void requestCompatCameraControl(boolean showControl,
                                 boolean transformationApplied,
@@ -665,15 +684,21 @@ public class ScreenshotController {
         if (mLastScrollCaptureRequest != null) {
             mLastScrollCaptureRequest.cancel(true);
         }
-        mLastScrollCaptureRequest = mScrollCaptureClient.request(DEFAULT_DISPLAY);
+        final ListenableFuture<ScrollCaptureResponse> future =
+                mScrollCaptureClient.request(DEFAULT_DISPLAY);
+        mLastScrollCaptureRequest = future;
         mLastScrollCaptureRequest.addListener(() ->
-                onScrollCaptureResponseReady(mLastScrollCaptureRequest), mMainExecutor);
+                onScrollCaptureResponseReady(future), mMainExecutor);
     }
 
     private void onScrollCaptureResponseReady(Future<ScrollCaptureResponse> responseFuture) {
         try {
             if (mLastScrollCaptureResponse != null) {
                 mLastScrollCaptureResponse.close();
+                mLastScrollCaptureResponse = null;
+            }
+            if (responseFuture.isCancelled()) {
+                return;
             }
             mLastScrollCaptureResponse = responseFuture.get();
             if (!mLastScrollCaptureResponse.isConnected()) {
@@ -698,12 +723,11 @@ public class ScreenshotController {
                 // delay starting scroll capture to make sure the scrim is up before the app moves
                 mScreenshotView.post(() -> runBatchScrollCapture(response));
             });
-        } catch (CancellationException e) {
-            // Ignore
         } catch (InterruptedException | ExecutionException e) {
             Log.e(TAG, "requestScrollCapture failed", e);
         }
     }
+
     ListenableFuture<ScrollCaptureController.LongScreenshot> mLongScreenshotFuture;
 
     private void runBatchScrollCapture(ScrollCaptureResponse response) {
@@ -810,15 +834,42 @@ public class ScreenshotController {
         }
     }
 
+    private ListenableFuture<MediaPlayer> loadCameraSound() {
+        // The media player creation is slow and needs on the background thread.
+        return CallbackToFutureAdapter.getFuture((completer) -> {
+            mBgExecutor.execute(() -> {
+                MediaPlayer player = MediaPlayer.create(mContext,
+                        Uri.fromFile(new File(mContext.getResources().getString(
+                                com.android.internal.R.string.config_cameraShutterSound))), null,
+                        new AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                .build(), AudioSystem.newAudioSessionId());
+                completer.set(player);
+            });
+            return "ScreenshotController#loadCameraSound";
+        });
+    }
+
+    private void playCameraSound() {
+        mCameraSound.addListener(() -> {
+            try {
+                MediaPlayer player = mCameraSound.get();
+                if (player != null) {
+                    player.start();
+                }
+            } catch (InterruptedException | ExecutionException e) {
+            }
+        }, mBgExecutor);
+    }
+
     /**
      * Save the bitmap but don't show the normal screenshot UI.. just a toast (or notification on
      * failure).
      */
     private void saveScreenshotAndToast(Consumer<Uri> finisher) {
         // Play the shutter sound to notify that we've taken a screenshot
-        if (mCameraSound != null) {
-            mCameraSound.start();
-        }
+        playCameraSound();
 
         saveScreenshotInWorkerThread(
                 /* onComplete */ finisher,
@@ -852,9 +903,7 @@ public class ScreenshotController {
                 mScreenshotView.createScreenshotDropInAnimation(screenRect, showFlash);
 
         // Play the shutter sound to notify that we've taken a screenshot
-        if (mCameraSound != null) {
-            mCameraSound.start();
-        }
+        playCameraSound();
 
         if (DEBUG_ANIM) {
             Log.d(TAG, "starting post-screenshot animation");

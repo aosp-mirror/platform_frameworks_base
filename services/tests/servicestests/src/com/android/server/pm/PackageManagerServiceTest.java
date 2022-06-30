@@ -23,11 +23,10 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.Assert.fail;
 
 import static java.lang.reflect.Modifier.isFinal;
-import static java.lang.reflect.Modifier.isPrivate;
-import static java.lang.reflect.Modifier.isProtected;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.content.IIntentReceiver;
@@ -63,7 +62,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -101,7 +99,7 @@ public class PackageManagerServiceTest {
                     @Nullable Bundle bOptions) {
             }
 
-            public void sendPackageAddedForNewUsers(String packageName,
+            public void sendPackageAddedForNewUsers(@NonNull Computer snapshot, String packageName,
                     boolean sendBootComplete, boolean includeStopped, int appId,
                     int[] userIds, int[] instantUserIds, int dataLoaderType) {
             }
@@ -191,8 +189,8 @@ public class PackageManagerServiceTest {
     @Test
     public void testKnownPackageToString_shouldNotGetUnknown() {
         final List<String> packageNames = new ArrayList<>();
-        for (int i = 0; i <= PackageManagerInternal.LAST_KNOWN_PACKAGE; i++) {
-            packageNames.add(PackageManagerInternal.knownPackageToString(i));
+        for (int i = 0; i <= KnownPackages.LAST_KNOWN_PACKAGE; i++) {
+            packageNames.add(KnownPackages.knownPackageToString(i));
         }
         assertWithMessage(
                 "The Ids of KnownPackage should be continuous and the string representation "
@@ -207,7 +205,7 @@ public class PackageManagerServiceTest {
                 "The last KnownPackage Id should be assigned to PackageManagerInternal"
                         + ".LAST_KNOWN_PACKAGE.").that(
                 knownPackageIds.get(knownPackageIds.size() - 1)).isEqualTo(
-                PackageManagerInternal.LAST_KNOWN_PACKAGE);
+                KnownPackages.LAST_KNOWN_PACKAGE);
     }
 
     @Test
@@ -456,147 +454,6 @@ public class PackageManagerServiceTest {
         return null;
     }
 
-    // Return the boolean locked value.  A null return means the annotation was not
-    // found.  This method will fail if the annotation is found but is not one of the
-    // known constants.
-    private Boolean getOverride(Method m) {
-        final String name = "Computer." + displayName(m);
-        final Computer.LiveImplementation annotation =
-                m.getAnnotation(Computer.LiveImplementation.class);
-        if (annotation == null) {
-            return null;
-        }
-        final int override = annotation.override();
-        if (override == Computer.LiveImplementation.MANDATORY) {
-            return true;
-        } else if (override == Computer.LiveImplementation.NOT_ALLOWED) {
-            return false;
-        } else {
-            flag(name, "invalid Live value: " + override);
-            return null;
-        }
-    }
-
-    @Test
-    public void testComputerStructure() {
-        // Verify that Copmuter methods are properly annotated and that ComputerLocked is
-        // properly populated per annotations.
-        // Call PackageManagerService.validateComputer();
-        Class base = Computer.class;
-
-        HashMap<Method, Boolean> methodType = new HashMap<>();
-
-        // Verify that all Computer methods are annotated and that the annotation
-        // parameter locked() is valid.
-        for (Method m : base.getDeclaredMethods()) {
-            final String name = "Computer." + displayName(m);
-            Boolean override = getOverride(m);
-            if (override == null) {
-                flag(name, "missing required Live annotation");
-            }
-            methodType.put(m, override);
-        }
-
-        Class coreClass = ComputerEngine.class;
-        final Method[] coreMethods = coreClass.getDeclaredMethods();
-
-        // Examine every method in the core.  If it inherits from a base method it must be
-        // "public final" if the base is NOT_ALLOWED or "public" if the base is MANDATORY.
-        // If the core method does not inherit from the base then it must be either
-        // private or protected.
-        for (Method m : base.getDeclaredMethods()) {
-            String name = "Computer." + displayName(m);
-            final boolean locked = methodType.get(m);
-            final Method core = matchMethod(m, coreMethods);
-            if (core == null) {
-                flag(name, "not overridden in ComputerEngine");
-                continue;
-            }
-            name = "ComputerEngine." + displayName(m);
-            final int modifiers = core.getModifiers();
-            if (!locked) {
-                if (!isPublic(modifiers)) {
-                    flag(name, "is not public");
-                }
-                if (!isFinal(modifiers)) {
-                    flag(name, "is not final");
-                }
-            }
-        }
-        // Any methods left in the coreMethods array must be private or protected.
-        // Protected methods must be overridden (and final) in the live list.
-        Method[] coreHelpers = new Method[coreMethods.length];
-        int coreIndex = 0;
-        for (Method m : coreMethods) {
-            if (m != null) {
-                final String name = "ComputerEngine." + displayName(m);
-                if (name.contains(".lambda$static")) {
-                    // skip static lambda function
-                    continue;
-                }
-
-                final int modifiers = m.getModifiers();
-                if (isPrivate(modifiers)) {
-                    // Okay
-                } else if (isProtected(modifiers)) {
-                    coreHelpers[coreIndex++] = m;
-                } else {
-                    flag(name, "is neither private nor protected");
-                }
-            }
-        }
-
-        Class liveClass = ComputerLocked.class;
-        final Method[] liveMethods = liveClass.getDeclaredMethods();
-
-        // Examine every method in the live list.  Every method must be final and must
-        // inherit either from base or core.  If the method inherits from a base method
-        // then the base must be MANDATORY.
-        for (Method m : base.getDeclaredMethods()) {
-            String name = "Computer." + displayName(m);
-            final boolean locked = methodType.get(m);
-            final Method live = matchMethod(m, liveMethods);
-            if (live == null) {
-                if (locked) {
-                    flag(name, "not overridden in ComputerLocked");
-                }
-                continue;
-            }
-            if (!locked) {
-                flag(name, "improperly overridden in ComputerLocked");
-                continue;
-            }
-
-            name = "ComputerLocked." + displayName(m);
-            final int modifiers = live.getModifiers();
-            if (!locked) {
-                if (!isPublic(modifiers)) {
-                    flag(name, "is not public");
-                }
-                if (!isFinal(modifiers)) {
-                    flag(name, "is not final");
-                }
-            }
-        }
-        for (Method m : coreHelpers) {
-            if (m == null) {
-                continue;
-            }
-            String name = "ComputerLocked." + displayName(m);
-            final Method live = matchMethod(m, liveMethods);
-            if (live == null) {
-                flag(name, "is not overridden in ComputerLocked");
-                continue;
-            }
-        }
-        for (Method m : liveMethods) {
-            if (m != null) {
-                String name = "ComputerLocked." + displayName(m);
-                flag(name, "illegal local method");
-            }
-        }
-    }
-
     private static PerPackageReadTimeouts[] getPerPackageReadTimeouts(String knownDigestersList) {
         final String defaultTimeouts = "3600000001:3600000002:3600000003";
         List<PerPackageReadTimeouts> result = PerPackageReadTimeouts.parseDigestersList(
@@ -613,7 +470,7 @@ public class PackageManagerServiceTest {
 
     private List<Integer> getKnownPackageIdsList() throws IllegalAccessException {
         final ArrayList<Integer> knownPackageIds = new ArrayList<>();
-        final Field[] allFields = PackageManagerInternal.class.getDeclaredFields();
+        final Field[] allFields = KnownPackages.class.getDeclaredFields();
         for (Field field : allFields) {
             final int modifier = field.getModifiers();
             if (isPublic(modifier) && isStatic(modifier) && isFinal(modifier)
@@ -666,13 +523,9 @@ public class PackageManagerServiceTest {
             userId = um.createUser("Test User", 0 /* flags */).getUserHandle().getIdentifier();
             runShellCommand("am start-user -w " + userId);
             // Since the test APK isn't installed on the 2nd user, the reason should be unknown.
+            assertWithMessage("The test APK should not be installed in the 2nd user").that(
+                    mIPackageManager.getPackageInfo(TEST_PKG_NAME, 0 /* flags */, userId)).isNull();
             assertWithMessage("The install reason in 2nd user should be unknown.").that(
-                    mIPackageManager.getInstallReason(TEST_PKG_NAME, userId)).isEqualTo(
-                    PackageManager.INSTALL_REASON_UNKNOWN);
-
-            // Try to update test APK with different reason INSTALL_REASON_USER
-            runShellCommand("pm install --install-reason 4 " + testApk);
-            assertWithMessage("The install reason in 2nd user should keep unknown.").that(
                     mIPackageManager.getInstallReason(TEST_PKG_NAME, userId)).isEqualTo(
                     PackageManager.INSTALL_REASON_UNKNOWN);
         } finally {

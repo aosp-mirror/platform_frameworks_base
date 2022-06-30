@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
+import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_FULLSCREEN_MAGNIFICATION;
@@ -139,7 +140,8 @@ public abstract class DisplayAreaPolicy {
                         .addFeature(new Feature.Builder(wmService.mPolicy, "OneHanded",
                                 FEATURE_ONE_HANDED)
                                 .all()
-                                .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL)
+                                .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL,
+                                        TYPE_SECURE_SYSTEM_OVERLAY)
                                 .build());
             }
             rootHierarchy

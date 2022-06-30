@@ -849,6 +849,14 @@ public class HardwareRenderer {
         nSetContentDrawBounds(mNativeProxy, left, top, right, bottom);
     }
 
+    /**
+     * Force the new frame to draw, ensuring the UI draw request will attempt a draw this vsync.
+     * @hide
+     */
+    public void forceDrawNextFrame() {
+        nForceDrawNextFrame(mNativeProxy);
+    }
+
     /** @hide */
     public void setPictureCaptureCallback(@Nullable PictureCapturedCallback callback) {
         nSetPictureCaptureCallback(mNativeProxy, callback);
@@ -976,12 +984,12 @@ public class HardwareRenderer {
     }
 
     /**
-     * b/68769804: For low FPS experiments.
+     * b/68769804, b/66945974: For low FPS experiments.
      *
      * @hide
      */
     public static void setFPSDivisor(int divisor) {
-        nHackySetRTAnimationsEnabled(divisor <= 1);
+        nSetRtAnimationsEnabled(divisor <= 1);
     }
 
     /**
@@ -1143,6 +1151,16 @@ public class HardwareRenderer {
     // TODO(b/194195794): Add link to androidx's Screenshot library for help with this
     public static void setDrawingEnabled(boolean drawingEnabled) {
         nSetDrawingEnabled(drawingEnabled);
+    }
+
+    /**
+     * Disable RenderThread animations that schedule draws directly from RenderThread. This is used
+     * when we don't want to de-schedule draw requests that come from the UI thread.
+     *
+     * @hide
+     */
+    public static void setRtAnimationsEnabled(boolean enabled) {
+        nSetRtAnimationsEnabled(enabled);
     }
 
     private static final class DestroyContextRunnable implements Runnable {
@@ -1423,6 +1441,8 @@ public class HardwareRenderer {
     private static native void nSetContentDrawBounds(long nativeProxy, int left,
             int top, int right, int bottom);
 
+    private static native void nForceDrawNextFrame(long nativeProxy);
+
     private static native void nSetPictureCaptureCallback(long nativeProxy,
             PictureCapturedCallback callback);
 
@@ -1451,9 +1471,6 @@ public class HardwareRenderer {
 
     private static native void nSetHighContrastText(boolean enabled);
 
-    // For temporary experimentation b/66945974
-    private static native void nHackySetRTAnimationsEnabled(boolean enabled);
-
     private static native void nSetDebuggingEnabled(boolean enabled);
 
     private static native void nSetIsolatedProcess(boolean enabled);
@@ -1472,4 +1489,6 @@ public class HardwareRenderer {
     private static native void nSetDrawingEnabled(boolean drawingEnabled);
 
     private static native boolean nIsDrawingEnabled();
+
+    private static native void nSetRtAnimationsEnabled(boolean rtAnimationsEnabled);
 }

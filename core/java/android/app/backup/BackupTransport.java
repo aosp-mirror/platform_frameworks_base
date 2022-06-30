@@ -665,184 +665,292 @@ public class BackupTransport {
 
         @Override
         public void name(AndroidFuture<String> resultFuture) throws RemoteException {
-            String result = BackupTransport.this.name();
-            resultFuture.complete(result);
+            try {
+                String result = BackupTransport.this.name();
+                resultFuture.complete(result);
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void configurationIntent(AndroidFuture<Intent> resultFuture)
                 throws RemoteException {
-            Intent result = BackupTransport.this.configurationIntent();
-            resultFuture.complete(result);
+            try {
+                Intent result = BackupTransport.this.configurationIntent();
+                resultFuture.complete(result);
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void currentDestinationString(AndroidFuture<String> resultFuture)
                 throws RemoteException {
-            String result = BackupTransport.this.currentDestinationString();
-            resultFuture.complete(result);
+            try {
+                String result = BackupTransport.this.currentDestinationString();
+                resultFuture.complete(result);
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void dataManagementIntent(AndroidFuture<Intent> resultFuture)
                 throws RemoteException {
-            Intent result = BackupTransport.this.dataManagementIntent();
-            resultFuture.complete(result);
+            try {
+                Intent result = BackupTransport.this.dataManagementIntent();
+                resultFuture.complete(result);
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void dataManagementIntentLabel(AndroidFuture<CharSequence> resultFuture)
                 throws RemoteException {
-            CharSequence result = BackupTransport.this.dataManagementIntentLabel();
-            resultFuture.complete(result);
+            try {
+                CharSequence result = BackupTransport.this.dataManagementIntentLabel();
+                resultFuture.complete(result);
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void transportDirName(AndroidFuture<String> resultFuture) throws RemoteException {
-            String result = BackupTransport.this.transportDirName();
-            resultFuture.complete(result);
+            try {
+                String result = BackupTransport.this.transportDirName();
+                resultFuture.complete(result);
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void requestBackupTime(AndroidFuture<Long> resultFuture) throws RemoteException {
-            long result = BackupTransport.this.requestBackupTime();
-            resultFuture.complete(result);
+            try {
+                long result = BackupTransport.this.requestBackupTime();
+                resultFuture.complete(result);
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void initializeDevice(ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.initializeDevice();
-            callback.onOperationCompleteWithStatus(result);
+            try {
+                int result = BackupTransport.this.initializeDevice();
+                callback.onOperationCompleteWithStatus(result);
+            } catch (RuntimeException e) {
+                callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
         }
 
         @Override
         public void performBackup(PackageInfo packageInfo, ParcelFileDescriptor inFd, int flags,
                 ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.performBackup(packageInfo, inFd, flags);
-            callback.onOperationCompleteWithStatus(result);
+            try {
+                int result = BackupTransport.this.performBackup(packageInfo, inFd, flags);
+                callback.onOperationCompleteWithStatus(result);
+            } catch (RuntimeException e) {
+                callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
         }
 
         @Override
         public void clearBackupData(PackageInfo packageInfo, ITransportStatusCallback callback)
                 throws RemoteException {
-            int result = BackupTransport.this.clearBackupData(packageInfo);
-            callback.onOperationCompleteWithStatus(result);
+            try {
+                int result = BackupTransport.this.clearBackupData(packageInfo);
+                callback.onOperationCompleteWithStatus(result);
+            } catch (RuntimeException e) {
+                callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
         }
 
         @Override
         public void finishBackup(ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.finishBackup();
-            callback.onOperationCompleteWithStatus(result);
+            try {
+                int result = BackupTransport.this.finishBackup();
+                callback.onOperationCompleteWithStatus(result);
+            } catch (RuntimeException e) {
+                callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
         }
 
         @Override
         public void getAvailableRestoreSets(AndroidFuture<List<RestoreSet>> resultFuture)
                 throws RemoteException {
-            RestoreSet[] result = BackupTransport.this.getAvailableRestoreSets();
-            resultFuture.complete(Arrays.asList(result));
+            try {
+                RestoreSet[] result = BackupTransport.this.getAvailableRestoreSets();
+                resultFuture.complete(Arrays.asList(result));
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void getCurrentRestoreSet(AndroidFuture<Long> resultFuture)
                 throws RemoteException {
-            long result = BackupTransport.this.getCurrentRestoreSet();
-            resultFuture.complete(result);
+            try {
+                long result = BackupTransport.this.getCurrentRestoreSet();
+                resultFuture.complete(result);
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void startRestore(long token, PackageInfo[] packages,
                 ITransportStatusCallback callback)  throws RemoteException {
-            int result = BackupTransport.this.startRestore(token, packages);
-            callback.onOperationCompleteWithStatus(result);
+            try {
+                int result = BackupTransport.this.startRestore(token, packages);
+                callback.onOperationCompleteWithStatus(result);
+            } catch (RuntimeException e) {
+                callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
         }
 
         @Override
         public void nextRestorePackage(AndroidFuture<RestoreDescription> resultFuture)
                 throws RemoteException {
-            RestoreDescription result = BackupTransport.this.nextRestorePackage();
-            resultFuture.complete(result);
+            try {
+                RestoreDescription result = BackupTransport.this.nextRestorePackage();
+                resultFuture.complete(result);
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void getRestoreData(ParcelFileDescriptor outFd,
                 ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.getRestoreData(outFd);
-            callback.onOperationCompleteWithStatus(result);
+            try {
+                int result = BackupTransport.this.getRestoreData(outFd);
+                callback.onOperationCompleteWithStatus(result);
+            } catch (RuntimeException e) {
+                callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
         }
 
         @Override
         public void finishRestore(ITransportStatusCallback callback)
                 throws RemoteException {
-            BackupTransport.this.finishRestore();
-            callback.onOperationComplete();
+            try {
+                BackupTransport.this.finishRestore();
+                callback.onOperationComplete();
+            } catch (RuntimeException e) {
+                callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
         }
 
         @Override
         public void requestFullBackupTime(AndroidFuture<Long> resultFuture)
                 throws RemoteException {
-            long result = BackupTransport.this.requestFullBackupTime();
-            resultFuture.complete(result);
+            try {
+                long result = BackupTransport.this.requestFullBackupTime();
+                resultFuture.complete(result);
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void performFullBackup(PackageInfo targetPackage, ParcelFileDescriptor socket,
                 int flags, ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.performFullBackup(targetPackage, socket, flags);
-            callback.onOperationCompleteWithStatus(result);
+            try {
+                int result = BackupTransport.this.performFullBackup(targetPackage, socket, flags);
+                callback.onOperationCompleteWithStatus(result);
+            } catch (RuntimeException e) {
+                callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
         }
 
         @Override
         public void checkFullBackupSize(long size, ITransportStatusCallback callback)
                 throws RemoteException {
-            int result = BackupTransport.this.checkFullBackupSize(size);
-            callback.onOperationCompleteWithStatus(result);
+            try {
+                int result = BackupTransport.this.checkFullBackupSize(size);
+                callback.onOperationCompleteWithStatus(result);
+            } catch (RuntimeException e) {
+            callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
         }
 
         @Override
         public void sendBackupData(int numBytes, ITransportStatusCallback callback)
                 throws RemoteException {
-            int result = BackupTransport.this.sendBackupData(numBytes);
-            callback.onOperationCompleteWithStatus(result);
+            try {
+                int result = BackupTransport.this.sendBackupData(numBytes);
+                callback.onOperationCompleteWithStatus(result);
+            } catch (RuntimeException e) {
+                callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
         }
 
         @Override
         public void cancelFullBackup(ITransportStatusCallback callback) throws RemoteException {
-            BackupTransport.this.cancelFullBackup();
-            callback.onOperationComplete();
+            try {
+                BackupTransport.this.cancelFullBackup();
+                callback.onOperationComplete();
+            } catch (RuntimeException e) {
+                callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
         }
 
         @Override
         public void isAppEligibleForBackup(PackageInfo targetPackage, boolean isFullBackup,
                 AndroidFuture<Boolean> resultFuture) throws RemoteException {
-            boolean result = BackupTransport.this.isAppEligibleForBackup(targetPackage,
-                    isFullBackup);
-            resultFuture.complete(result);
+            try {
+                boolean result = BackupTransport.this.isAppEligibleForBackup(targetPackage,
+                        isFullBackup);
+                resultFuture.complete(result);
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void getBackupQuota(String packageName, boolean isFullBackup,
                 AndroidFuture<Long> resultFuture) throws RemoteException {
-            long result = BackupTransport.this.getBackupQuota(packageName, isFullBackup);
-            resultFuture.complete(result);
+            try {
+                long result = BackupTransport.this.getBackupQuota(packageName, isFullBackup);
+                resultFuture.complete(result);
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void getTransportFlags(AndroidFuture<Integer> resultFuture) throws RemoteException {
-            int result = BackupTransport.this.getTransportFlags();
-            resultFuture.complete(result);
+            try {
+                int result = BackupTransport.this.getTransportFlags();
+                resultFuture.complete(result);
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
         }
 
         @Override
         public void getNextFullRestoreDataChunk(ParcelFileDescriptor socket,
                 ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.getNextFullRestoreDataChunk(socket);
-            callback.onOperationCompleteWithStatus(result);
+            try {
+                int result = BackupTransport.this.getNextFullRestoreDataChunk(socket);
+                callback.onOperationCompleteWithStatus(result);
+            } catch (RuntimeException e) {
+                callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
         }
 
         @Override
         public void abortFullRestore(ITransportStatusCallback callback) throws RemoteException {
-            int result = BackupTransport.this.abortFullRestore();
-            callback.onOperationCompleteWithStatus(result);
+            try {
+                int result = BackupTransport.this.abortFullRestore();
+                callback.onOperationCompleteWithStatus(result);
+            } catch (RuntimeException e) {
+                callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
         }
     }
 }

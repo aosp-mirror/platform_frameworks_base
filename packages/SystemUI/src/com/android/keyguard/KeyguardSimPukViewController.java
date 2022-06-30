@@ -113,6 +113,12 @@ public class KeyguardSimPukViewController
     }
 
     @Override
+    public void reloadColors() {
+        super.reloadColors();
+        mView.reloadColors();
+    }
+
+    @Override
     protected void verifyPasswordAndUnlock() {
         mStateMachine.next();
     }
@@ -251,9 +257,6 @@ public class KeyguardSimPukViewController
     public boolean confirmPin() {
         return mPinText.equals(mPasswordEntry.getText());
     }
-
-
-
 
     private void updateSim() {
         getSimUnlockProgressDialog().show();

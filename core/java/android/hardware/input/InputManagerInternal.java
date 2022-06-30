@@ -21,7 +21,6 @@ import android.graphics.PointF;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
 import android.view.InputChannel;
-import android.view.InputEvent;
 
 import java.util.List;
 
@@ -31,14 +30,6 @@ import java.util.List;
  * @hide Only for use within the system server.
  */
 public abstract class InputManagerInternal {
-    /**
-     * Inject an input event.
-     *
-     * @param event The InputEvent to inject
-     * @param mode Synchronous or asynchronous mode
-     * @return True if injection has succeeded
-     */
-    public abstract boolean injectInputEvent(InputEvent event, int mode);
 
     /**
      * Called by the display manager to set information about the displays as needed
@@ -84,8 +75,15 @@ public abstract class InputManagerInternal {
     /**
      * Sets the display id that the MouseCursorController will be forced to target. Pass
      * {@link android.view.Display#INVALID_DISPLAY} to clear the override.
+     *
+     * Note: This method generally blocks until the pointer display override has propagated.
+     * When setting a new override, the caller should ensure that an input device that can control
+     * the mouse pointer is connected. If a new override is set when no such input device is
+     * connected, the caller may be blocked for an arbitrary period of time.
+     *
+     * @return true if the pointer displayId was set successfully, or false if it fails.
      */
-    public abstract void setVirtualMousePointerDisplayId(int pointerDisplayId);
+    public abstract boolean setVirtualMousePointerDisplayId(int pointerDisplayId);
 
     /**
      * Gets the display id that the MouseCursorController is being forced to target. Returns

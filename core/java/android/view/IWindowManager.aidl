@@ -200,7 +200,12 @@ interface IWindowManager
     boolean isKeyguardSecure(int userId);
     void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message);
 
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)")
     void addKeyguardLockedStateListener(in IKeyguardLockedStateListener listener);
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)")
     void removeKeyguardLockedStateListener(in IKeyguardLockedStateListener listener);
 
     // Requires INTERACT_ACROSS_USERS_FULL permission
@@ -243,7 +248,7 @@ interface IWindowManager
      * Set whether screen capture is disabled for all windows of a specific user from
      * the device policy cache.
      */
-    void refreshScreenCaptureDisabled(int userId);
+    void refreshScreenCaptureDisabled();
 
     // These can only be called with the SET_ORIENTATION permission.
     /**
@@ -671,17 +676,6 @@ interface IWindowManager
     void setDisplayImePolicy(int displayId, int imePolicy);
 
     /**
-     * Waits for transactions to get applied before injecting input, optionally waiting for
-     * animations to complete. This includes waiting for the input windows to get sent to
-     * InputManager.
-     *
-     * This is needed for testing since the system add windows and injects input
-     * quick enough that the windows don't have time to get sent to InputManager.
-     */
-    boolean injectInputAfterTransactionsApplied(in InputEvent ev, int mode,
-            boolean waitForAnimations);
-
-    /**
      * Waits until input information has been sent from WindowManager to native InputManager,
      * optionally waiting for animations to complete.
      *
@@ -955,4 +949,10 @@ interface IWindowManager
      * @hide
      */
     Bitmap snapshotTaskForRecents(int taskId);
+
+    /**
+     * Informs the system whether the recents app is currently behind the system bars. If so,
+     * means the recents app can control the SystemUI flags, and vice-versa.
+     */
+    void setRecentsAppBehindSystemBars(boolean behindSystemBars);
 }

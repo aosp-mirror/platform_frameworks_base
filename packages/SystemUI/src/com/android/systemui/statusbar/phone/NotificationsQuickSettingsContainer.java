@@ -18,12 +18,15 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.WindowInsets;
 
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.systemui.R;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -54,6 +57,9 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     private View mQSScrollView;
     private View mQSContainer;
 
+    @Nullable
+    private Consumer<Configuration> mConfigurationChangedListener;
+
     public NotificationsQuickSettingsContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -79,20 +85,22 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         invalidate();
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mConfigurationChangedListener != null) {
+            mConfigurationChangedListener.accept(newConfig);
+        }
+    }
+
+    public void setConfigurationChangedListener(Consumer<Configuration> listener) {
+        mConfigurationChangedListener = listener;
+    }
+
     public void setNotificationsMarginBottom(int margin) {
         LayoutParams params = (LayoutParams) mStackScroller.getLayoutParams();
         params.bottomMargin = margin;
         mStackScroller.setLayoutParams(params);
-    }
-
-    public void setQSScrollPaddingBottom(int paddingBottom) {
-        if (mQSScrollView != null) {
-            mQSScrollView.setPaddingRelative(
-                    mQSScrollView.getPaddingLeft(),
-                    mQSScrollView.getPaddingTop(),
-                    mQSScrollView.getPaddingRight(),
-                    paddingBottom);
-        }
     }
 
     public void setQSContainerPaddingBottom(int paddingBottom) {
@@ -104,10 +112,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
                     paddingBottom
             );
         }
-    }
-
-    public int getDefaultNotificationsMarginBottom() {
-        return ((LayoutParams) mStackScroller.getLayoutParams()).bottomMargin;
     }
 
     public void setInsetsChangedListener(Consumer<WindowInsets> onInsetsChangedListener) {
@@ -180,4 +184,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         }
     }
 
+    public void applyConstraints(ConstraintSet constraintSet) {
+        constraintSet.applyTo(this);
+    }
 }

@@ -16,6 +16,10 @@
 
 package com.android.server.wm.flicker.ime
 
+import android.view.WindowInsets.Type.ime
+import android.view.WindowInsets.Type.navigationBars
+import android.view.WindowInsets.Type.statusBars
+
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
@@ -35,6 +39,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 
 /**
  * Test IME snapshot mechanism won't apply when transitioning from non-IME focused dialog activity.
@@ -44,7 +50,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 219749605)
 class LaunchAppShowImeAndDialogThemeAppTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
@@ -57,6 +62,10 @@ class LaunchAppShowImeAndDialogThemeAppTest(private val testSpec: FlickerTestPar
                     testApp.launchViaIntent(wmHelper)
                     wmHelper.waitImeShown()
                     testApp.startDialogThemedActivity(wmHelper)
+                    // Verify IME insets isn't visible on dialog since it's non-IME focusable window
+                    assertFalse(testApp.getInsetsVisibleFromDialog(ime()))
+                    assertTrue(testApp.getInsetsVisibleFromDialog(statusBars()))
+                    assertTrue(testApp.getInsetsVisibleFromDialog(navigationBars()))
                 }
             }
             teardown {
@@ -80,7 +89,7 @@ class LaunchAppShowImeAndDialogThemeAppTest(private val testSpec: FlickerTestPar
     /**
      * Checks that [FlickerComponentName.IME] layer is visible at the end of the transition
      */
-    @Presubmit
+    @FlakyTest(bugId = 227142436)
     @Test
     fun imeLayerExistsEnd() {
         testSpec.assertLayersEnd {

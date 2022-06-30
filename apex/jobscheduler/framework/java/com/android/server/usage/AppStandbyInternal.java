@@ -1,7 +1,9 @@
 package com.android.server.usage;
 
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager.ProcessState;
 import android.app.usage.AppStandbyInfo;
@@ -55,6 +57,13 @@ public interface AppStandbyInternal {
          * an active state due to user interaction.
          */
         public void onUserInteractionStarted(String packageName, @UserIdInt int userId) {
+            // No-op by default
+        }
+
+        /**
+         * Optional callback to inform the listener to give the app a temporary quota bump.
+         */
+        public void triggerTemporaryQuotaBump(String packageName, @UserIdInt int userId) {
             // No-op by default
         }
     }
@@ -143,6 +152,17 @@ public interface AppStandbyInternal {
     void setAppStandbyBuckets(@NonNull List<AppStandbyInfo> appBuckets, int userId, int callingUid,
             int callingPid);
 
+    /** Return the lowest bucket this app can enter. */
+    @StandbyBuckets
+    int getAppMinStandbyBucket(String packageName, int appId, int userId,
+            boolean shouldObfuscateInstantApps);
+
+    /**
+     * Return the bucketing reason code of the given app.
+     */
+    int getAppStandbyBucketReason(@NonNull String packageName, @UserIdInt int userId,
+            @ElapsedRealtimeLong long elapsedRealtime);
+
     /**
      * Put the specified app in the
      * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED}
@@ -198,6 +218,11 @@ public interface AppStandbyInternal {
 
     void setActiveAdminApps(Set<String> adminPkgs, int userId);
 
+    /**
+     * @return {@code true} if the given package is an active device admin app.
+     */
+    boolean isActiveDeviceAdmin(String packageName, int userId);
+
     void onAdminDataAvailable();
 
     void clearCarrierPrivilegedApps();
@@ -232,4 +257,50 @@ public interface AppStandbyInternal {
      */
     @ProcessState
     int getBroadcastResponseFgThresholdState();
+
+    /**
+     * Returns the duration within which any broadcasts occurred will be treated as one broadcast
+     * session.
+     */
+    long getBroadcastSessionsDurationMs();
+
+    /**
+     * Returns the duration within which any broadcasts occurred (with a corresponding response
+     * event) will be treated as one broadcast session. This similar to
+     * {@link #getBroadcastSessionsDurationMs()}, except that this duration will be used to group
+     * only broadcasts that have a corresponding response event into sessions.
+     */
+    long getBroadcastSessionsWithResponseDurationMs();
+
+    /**
+     * Returns {@code true} if the response event should be attributed to all the broadcast
+     * sessions that occurred within the broadcast response window and {@code false} if the
+     * response event should be attributed to only the earliest broadcast session within the
+     * broadcast response window.
+     */
+    boolean shouldNoteResponseEventForAllBroadcastSessions();
+
+    /**
+     * Returns the list of roles whose holders are exempted from the requirement of starting
+     * a response event after receiving a broadcast.
+     */
+    @NonNull
+    List<String> getBroadcastResponseExemptedRoles();
+
+    /**
+     * Returns the list of permissions whose holders are exempted from the requirement of starting
+     * a response event after receiving a broadcast.
+     */
+    @NonNull
+    List<String> getBroadcastResponseExemptedPermissions();
+
+    /**
+     * Return the last known value corresponding to the {@code key} from
+     * {@link android.provider.DeviceConfig#NAMESPACE_APP_STANDBY} in AppStandbyController.
+     */
+    @Nullable
+    String getAppStandbyConstant(@NonNull String key);
+
+    /** Clears the last used timestamps data for the given {@code packageName}. */
+    void clearLastUsedTimestampsForTest(@NonNull String packageName, @UserIdInt int userId);
 }

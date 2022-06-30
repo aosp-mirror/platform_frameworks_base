@@ -43,11 +43,12 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.pm.KnownPackages;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.PackageSetting;
+import com.android.server.pm.dex.DynamicCodeLogger;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.AndroidPackageApi;
-import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
@@ -68,50 +69,6 @@ import java.util.function.Consumer;
  * @hide Only for use within the system server.
  */
 public abstract class PackageManagerInternal {
-    @IntDef(prefix = "PACKAGE_", value = {
-            PACKAGE_SYSTEM,
-            PACKAGE_SETUP_WIZARD,
-            PACKAGE_INSTALLER,
-            PACKAGE_UNINSTALLER,
-            PACKAGE_VERIFIER,
-            PACKAGE_BROWSER,
-            PACKAGE_SYSTEM_TEXT_CLASSIFIER,
-            PACKAGE_PERMISSION_CONTROLLER,
-            PACKAGE_CONFIGURATOR,
-            PACKAGE_INCIDENT_REPORT_APPROVER,
-            PACKAGE_APP_PREDICTOR,
-            PACKAGE_OVERLAY_CONFIG_SIGNATURE,
-            PACKAGE_WIFI,
-            PACKAGE_COMPANION,
-            PACKAGE_RETAIL_DEMO,
-            PACKAGE_RECENTS,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface KnownPackage {}
-
-    public static final int PACKAGE_SYSTEM = 0;
-    public static final int PACKAGE_SETUP_WIZARD = 1;
-    public static final int PACKAGE_INSTALLER = 2;
-    public static final int PACKAGE_UNINSTALLER = 3;
-    public static final int PACKAGE_VERIFIER = 4;
-    public static final int PACKAGE_BROWSER = 5;
-    public static final int PACKAGE_SYSTEM_TEXT_CLASSIFIER = 6;
-    public static final int PACKAGE_PERMISSION_CONTROLLER = 7;
-    public static final int PACKAGE_WELLBEING = 8;
-    public static final int PACKAGE_DOCUMENTER = 9;
-    public static final int PACKAGE_CONFIGURATOR = 10;
-    public static final int PACKAGE_INCIDENT_REPORT_APPROVER = 11;
-    public static final int PACKAGE_APP_PREDICTOR = 12;
-    public static final int PACKAGE_OVERLAY_CONFIG_SIGNATURE = 13;
-    public static final int PACKAGE_WIFI = 14;
-    public static final int PACKAGE_COMPANION = 15;
-    public static final int PACKAGE_RETAIL_DEMO = 16;
-    public static final int PACKAGE_RECENTS = 17;
-    public static final int PACKAGE_AMBIENT_CONTEXT_DETECTION = 18;
-    // Integer value of the last known package ID. Increases as new ID is added to KnownPackage.
-    // Please note the numbers should be continuous.
-    public static final int LAST_KNOWN_PACKAGE = PACKAGE_AMBIENT_CONTEXT_DETECTION;
-
     @LongDef(flag = true, prefix = "RESOLVE_", value = {
             RESOLVE_NON_BROWSER_ONLY,
             RESOLVE_NON_RESOLVER_ONLY
@@ -193,6 +150,19 @@ public abstract class PackageManagerInternal {
      * @return True a permissions review is required.
      */
     public abstract boolean isPermissionsReviewRequired(String packageName, int userId);
+
+
+    /**
+     * Gets whether a given package name belongs to the calling uid. If the calling uid is an
+     * {@link Process#isSdkSandboxUid(int) sdk sandbox uid}, checks whether the package name is
+     * equal to {@link PackageManager#getSdkSandboxPackageName()}.
+     *
+     * @param packageName The package name to check.
+     * @param callingUid The calling uid.
+     * @param userId The user under which to check.
+     * @return True if the package name belongs to the calling uid.
+     */
+    public abstract boolean isSameApp(String packageName, int callingUid, int userId);
 
     /**
      * Retrieve all of the information we know about a particular package/application.
@@ -364,10 +334,14 @@ public abstract class PackageManagerInternal {
 
     /**
      * Retrieve all receivers that can handle a broadcast of the given intent.
+     * @param filterCallingUid The results will be filtered in the context of this UID instead
+     *                         of the calling UID.
+     * @param forSend true if the invocation is intended for sending broadcasts. The value
+     *                of this parameter affects how packages are filtered.
      */
     public abstract List<ResolveInfo> queryIntentReceivers(Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
-            int filterCallingUid, int userId);
+            int filterCallingUid, int userId, boolean forSend);
 
     /**
      * Retrieve all services that can be performed for the given intent.
@@ -401,10 +375,10 @@ public abstract class PackageManagerInternal {
             int deviceOwnerUserId, String deviceOwner, SparseArray<String> profileOwners);
 
     /**
-     * Called by Owners to set the package names protected by the device owner.
+     * Marks packages as protected for a given user or all users in case of USER_ALL.
      */
-    public abstract void setDeviceOwnerProtectedPackages(
-            String deviceOwnerPackageName, List<String> packageNames);
+    public abstract void setOwnerProtectedPackages(
+            @UserIdInt int userId, @NonNull List<String> packageNames);
 
     /**
      * Returns {@code true} if a given package can't be wiped. Otherwise, returns {@code false}.
@@ -657,6 +631,11 @@ public abstract class PackageManagerInternal {
     public abstract void notifyPackageUse(String packageName, int reason);
 
     /**
+     * Notify the package is force stopped.
+     */
+    public abstract void onPackageProcessKilledForUninstall(String packageName);
+
+    /**
      * Returns a package object for the given package name.
      */
     public abstract @Nullable AndroidPackage getPackage(@NonNull String packageName);
@@ -669,8 +648,6 @@ public abstract class PackageManagerInternal {
 
     @Nullable
     public abstract PackageStateInternal getPackageStateInternal(@NonNull String packageName);
-
-    public abstract @Nullable PackageState getPackageState(@NonNull String packageName);
 
     @NonNull
     public abstract ArrayMap<String, ? extends PackageStateInternal> getPackageStates();
@@ -737,12 +714,11 @@ public abstract class PackageManagerInternal {
      */
     public abstract boolean isResolveActivityComponent(@NonNull ComponentInfo component);
 
-
     /**
      * Returns a list of package names for a known package
      */
     public abstract @NonNull String[] getKnownPackageNames(
-            @KnownPackage int knownPackage, int userId);
+            @KnownPackages.KnownPackage int knownPackage, int userId);
 
     /**
      * Returns whether the package is an instant app.
@@ -883,6 +859,11 @@ public abstract class PackageManagerInternal {
      */
     public abstract void freeStorage(String volumeUuid, long bytes,
             @StorageManager.AllocateFlags int flags) throws IOException;
+
+    /**
+     * Blocking call to clear all cached app data above quota.
+     */
+    public abstract void freeAllAppCacheAboveQuota(@NonNull String volumeUuid) throws IOException;
 
     /** Returns {@code true} if the specified component is enabled and matches the given flags. */
     public abstract boolean isEnabledAndMatches(@NonNull ParsedMainComponent component,
@@ -1121,55 +1102,6 @@ public abstract class PackageManagerInternal {
             @NonNull InstalledLoadingProgressCallback callback, int userId);
 
     /**
-     * Returns the string representation of a known package. For example,
-     * {@link #PACKAGE_SETUP_WIZARD} is represented by the string Setup Wizard.
-     *
-     * @param knownPackage The known package.
-     * @return The string representation.
-     */
-    public static @NonNull String knownPackageToString(@KnownPackage int knownPackage) {
-        switch (knownPackage) {
-            case PACKAGE_SYSTEM:
-                return "System";
-            case PACKAGE_SETUP_WIZARD:
-                return "Setup Wizard";
-            case PACKAGE_INSTALLER:
-                return "Installer";
-            case PACKAGE_UNINSTALLER:
-                return "Uninstaller";
-            case PACKAGE_VERIFIER:
-                return "Verifier";
-            case PACKAGE_BROWSER:
-                return "Browser";
-            case PACKAGE_SYSTEM_TEXT_CLASSIFIER:
-                return "System Text Classifier";
-            case PACKAGE_PERMISSION_CONTROLLER:
-                return "Permission Controller";
-            case PACKAGE_WELLBEING:
-                return "Wellbeing";
-            case PACKAGE_DOCUMENTER:
-                return "Documenter";
-            case PACKAGE_CONFIGURATOR:
-                return "Configurator";
-            case PACKAGE_INCIDENT_REPORT_APPROVER:
-                return "Incident Report Approver";
-            case PACKAGE_APP_PREDICTOR:
-                return "App Predictor";
-            case PACKAGE_WIFI:
-                return "Wi-Fi";
-            case PACKAGE_COMPANION:
-                return "Companion";
-            case PACKAGE_RETAIL_DEMO:
-                return "Retail Demo";
-            case PACKAGE_OVERLAY_CONFIG_SIGNATURE:
-                return "Overlay Config Signature";
-            case PACKAGE_RECENTS:
-                return "Recents";
-        }
-        return "Unknown";
-    }
-
-    /**
      * Callback to listen for loading progress of a package installed on Incremental File System.
      */
     public abstract static class InstalledLoadingProgressCallback {
@@ -1280,6 +1212,11 @@ public abstract class PackageManagerInternal {
     public abstract SharedUserApi getSharedUserApi(int sharedUserAppId);
 
     /**
+     * Returns if the given uid is privileged or not.
+     */
+    public abstract boolean isUidPrivileged(int uid);
+
+    /**
      * Initiates a package state mutation request, returning the current state as known by
      * PackageManager. This allows the later commit request to compare the initial values and
      * determine if any state was changed or any packages were updated since the whole request
@@ -1344,4 +1281,8 @@ public abstract class PackageManagerInternal {
      */
     @NonNull
     public abstract PackageDataSnapshot snapshot();
+
+    public abstract void shutdown();
+
+    public abstract DynamicCodeLogger getDynamicCodeLogger();
 }

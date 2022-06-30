@@ -110,10 +110,7 @@ public class BackupTransportClientTest {
 
         Thread thread = new Thread(() -> {
             try {
-                /*String name =*/ client.transportDirName();
-                fail("transportDirName should be cancelled");
-            } catch (CancellationException ex) {
-                // This is expected.
+                assertThat(client.transportDirName()).isNull();
             } catch (Exception ex) {
                 fail("unexpected Exception: " + ex.getClass().getCanonicalName());
             }
@@ -189,7 +186,7 @@ public class BackupTransportClientTest {
     }
 
     @Test
-    public void testFinishBackup_canceledBeforeCompletion_throwsException() throws Exception {
+    public void testFinishBackup_canceledBeforeCompletion_returnsError() throws Exception {
         TestCallbacksFakeTransportBinder binder = new TestCallbacksFakeTransportBinder();
         BackupTransportClient client = new BackupTransportClient(binder);
 

@@ -39,12 +39,6 @@ import dagger.Subcomponent;
  *
  * Anything that depends on {@link CollapsedStatusBarFragment} or {@link PhoneStatusBarView}
  * should be included here or in {@link StatusBarFragmentModule}.
- *
- * Note that this is completely separate from
- * {@link com.android.systemui.statusbar.phone.dagger.StatusBarComponent}. This component gets
- * re-created on each new fragment creation, whereas
- * {@link com.android.systemui.statusbar.phone.dagger.StatusBarComponent} is only created once in
- * {@link com.android.systemui.statusbar.phone.StatusBar} and never re-created.
  */
 
 @Subcomponent(modules = {StatusBarFragmentModule.class})

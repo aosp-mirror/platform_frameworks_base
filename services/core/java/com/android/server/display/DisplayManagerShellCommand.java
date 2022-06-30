@@ -60,8 +60,6 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setDisplayModeDirectorLoggingEnabled(false);
             case "dwb-set-cct":
                 return setAmbientColorTemperatureOverride();
-            case "constrain-launcher-metrics":
-                return setConstrainLauncherMetrics();
             case "set-user-preferred-display-mode":
                 return setUserPreferredDisplayMode();
             case "clear-user-preferred-display-mode":
@@ -78,6 +76,8 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setUserDisabledHdrTypes();
             case "get-user-disabled-hdr-types":
                 return getUserDisabledHdrTypes();
+            case "get-displays":
+                return getDisplays();
             case "dock":
                 return setDockedAndIdle();
             case "undock":
@@ -112,9 +112,6 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Disable display mode director logging.");
         pw.println("  dwb-set-cct CCT");
         pw.println("    Sets the ambient color temperature override to CCT (use -1 to disable).");
-        pw.println("  constrain-launcher-metrics [true|false]");
-        pw.println("    Sets if Display#getRealSize and getRealMetrics should be constrained for ");
-        pw.println("    Launcher.");
         pw.println("  set-user-preferred-display-mode WIDTH HEIGHT REFRESH-RATE "
                 + "DISPLAY_ID (optional)");
         pw.println("    Sets the user preferred display mode which has fields WIDTH, HEIGHT and "
@@ -138,12 +135,27 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Sets the user disabled HDR types as TYPES");
         pw.println("  get-user-disabled-hdr-types");
         pw.println("    Returns the user disabled HDR types");
+        pw.println("  get-displays [CATEGORY]");
+        pw.println("    Returns the current displays. Can specify string category among");
+        pw.println("    DisplayManager.DISPLAY_CATEGORY_*; must use the actual string value.");
         pw.println("  dock");
         pw.println("    Sets brightness to docked + idle screen brightness mode");
         pw.println("  undock");
         pw.println("    Sets brightness to active (normal) screen brightness mode");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
+    }
+
+    private int getDisplays() {
+        String category = getNextArg();
+        DisplayManager dm = mService.getContext().getSystemService(DisplayManager.class);
+        Display[] displays = dm.getDisplays(category);
+        PrintWriter out = getOutPrintWriter();
+        out.println("Displays:");
+        for (int i = 0; i < displays.length; i++) {
+            out.println("  " + displays[i]);
+        }
+        return 0;
     }
 
     private int setBrightness() {
@@ -202,17 +214,6 @@ class DisplayManagerShellCommand extends ShellCommand {
             return 1;
         }
         mService.setAmbientColorTemperatureOverride(cct);
-        return 0;
-    }
-
-    private int setConstrainLauncherMetrics() {
-        String constrainText = getNextArg();
-        if (constrainText == null) {
-            getErrPrintWriter().println("Error: no value specified");
-            return 1;
-        }
-        boolean constrain = Boolean.parseBoolean(constrainText);
-        mService.setShouldConstrainMetricsForLauncher(constrain);
         return 0;
     }
 

@@ -156,6 +156,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     int FINISH_LAYOUT_REDO_ANIM = 0x0008;
     /** Layer for the screen off animation */
     int COLOR_FADE_LAYER = 0x40000001;
+    /** Layer for Input overlays for capturing inputs for gesture detection, etc. */
+    int INPUT_DISPLAY_OVERLAY_LAYER = 0x7f000000;
+    /** Layer for Screen Decoration: The top most visible layer just below input overlay layers */
+    int SCREEN_DECOR_DISPLAY_OVERLAY_LAYER = INPUT_DISPLAY_OVERLAY_LAYER - 1;
 
     /**
      * Register shortcuts for window manager to dispatch.
@@ -771,6 +775,20 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * we're going to sleep, such as GO_TO_SLEEP_REASON_POWER_BUTTON or GO_TO_SLEEP_REASON_TIMEOUT.
      */
     public void finishedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason);
+
+    /**
+     * Called when a particular PowerGroup has changed wakefulness.
+     *
+     * @param groupId The id of the PowerGroup.
+     * @param wakefulness One of PowerManagerInternal.WAKEFULNESS_* indicating the wake state for
+     * the group
+     * @param pmSleepReason One of PowerManager.GO_TO_SLEEP_REASON_*, detailing the reason this
+     * group is going to sleep.
+     * @param globalWakefulness The global wakefulness, which may or may not match that of this
+     * group. One of PowerManagerInternal.WAKEFULNESS_*
+     */
+    void onPowerGroupWakefulnessChanged(int groupId, int wakefulness,
+            @PowerManager.GoToSleepReason int pmSleepReason, int globalWakefulness);
 
     /**
      * Called when the display is about to turn on to show content.

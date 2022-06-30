@@ -35,7 +35,6 @@ import com.android.systemui.statusbar.notification.collection.render.RenderStage
 import com.android.systemui.statusbar.notification.collection.render.ShadeViewManagerFactory;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
@@ -115,9 +114,9 @@ public class NotifPipelineInitializer implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        mNotifPluggableCoordinators.dump(fd, pw, args);
-        mGroupCoalescer.dump(fd, pw, args);
+    public void dump(PrintWriter pw, String[] args) {
+        mNotifPluggableCoordinators.dump(pw, args);
+        mGroupCoalescer.dump(pw, args);
     }
 
     private static final String TAG = "NotifPipeline";

@@ -17,13 +17,13 @@ package android.hardware.fingerprint;
 
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.IBiometricStateListener;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
-import android.hardware.fingerprint.IFingerprintStateListener;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.Fingerprint;
@@ -52,7 +52,7 @@ interface IFingerprintService {
     // permission. This is effectively deprecated, since it only comes through FingerprintManager
     // now. A requestId is returned that can be used to cancel this operation.
     long authenticate(IBinder token, long operationId, int sensorId, int userId,
-            IFingerprintServiceReceiver receiver, String opPackageName,
+            IFingerprintServiceReceiver receiver, String opPackageName, String attributionTag,
             boolean shouldIgnoreEnrollmentState);
 
     // Uses the fingerprint hardware to detect for the presence of a finger, without giving details
@@ -74,7 +74,7 @@ interface IFingerprintService {
     void startPreparedClient(int sensorId, int cookie);
 
     // Cancel authentication for the given requestId.
-    void cancelAuthentication(IBinder token, String opPackageName, long requestId);
+    void cancelAuthentication(IBinder token, String opPackageName, String attributionTag, long requestId);
 
     // Cancel finger detection for the given requestId.
     void cancelFingerprintDetect(IBinder token, String opPackageName, long requestId);
@@ -101,10 +101,10 @@ interface IFingerprintService {
     void rename(int fingerId, int userId, String name);
 
     // Get a list of enrolled fingerprints in the given userId.
-    List<Fingerprint> getEnrolledFingerprints(int userId, String opPackageName);
+    List<Fingerprint> getEnrolledFingerprints(int userId, String opPackageName, String attributionTag);
 
     // Determine if the HAL is loaded and ready. Meant to support the deprecated FingerprintManager APIs
-    boolean isHardwareDetectedDeprecated(String opPackageName);
+    boolean isHardwareDetectedDeprecated(String opPackageName, String attributionTag);
 
     // Determine if the specified HAL is loaded and ready
     boolean isHardwareDetected(int sensorId, String opPackageName);
@@ -116,7 +116,7 @@ interface IFingerprintService {
     void revokeChallenge(IBinder token, int sensorId, int userId, String opPackageName, long challenge);
 
     // Determine if a user has at least one enrolled fingerprint. Meant to support the deprecated FingerprintManager APIs
-    boolean hasEnrolledFingerprintsDeprecated(int userId, String opPackageName);
+    boolean hasEnrolledFingerprintsDeprecated(int userId, String opPackageName, String attributionTag);
 
     // Determine if a user has at least one enrolled fingerprint.
     boolean hasEnrolledFingerprints(int sensorId, int userId, String opPackageName);
@@ -155,13 +155,13 @@ interface IFingerprintService {
     void addAuthenticatorsRegisteredCallback(IFingerprintAuthenticatorsRegisteredCallback callback);
 
     // Notifies about a finger touching the sensor area.
-    void onPointerDown(int sensorId, int x, int y, float minor, float major);
+    void onPointerDown(long requestId, int sensorId, int x, int y, float minor, float major);
 
     // Notifies about a finger leaving the sensor area.
-    void onPointerUp(int sensorId);
+    void onPointerUp(long requestId, int sensorId);
 
     // Notifies about the fingerprint UI being ready (e.g. HBM illumination is enabled).
-    void onUiReady(int sensorId);
+    void onUiReady(long requestId, int sensorId);
 
     // Sets the controller for managing the UDFPS overlay.
     void setUdfpsOverlayController(in IUdfpsOverlayController controller);
@@ -169,6 +169,6 @@ interface IFingerprintService {
     // Sets the controller for managing the SideFPS overlay.
     void setSidefpsController(in ISidefpsController controller);
 
-    // Registers FingerprintStateListener in list stored by FingerprintService.
-    void registerFingerprintStateListener(IFingerprintStateListener listener);
+    // Registers BiometricStateListener.
+    void registerBiometricStateListener(IBiometricStateListener listener);
 }

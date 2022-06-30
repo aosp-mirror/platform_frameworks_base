@@ -37,8 +37,8 @@ class ScreenOffAnimationController @Inject constructor(
     private val animations: List<ScreenOffAnimation> =
         listOfNotNull(foldToAodAnimation, unlockedScreenOffAnimation)
 
-    fun initialize(statusBar: StatusBar, lightRevealScrim: LightRevealScrim) {
-        animations.forEach { it.initialize(statusBar, lightRevealScrim) }
+    fun initialize(centralSurfaces: CentralSurfaces, lightRevealScrim: LightRevealScrim) {
+        animations.forEach { it.initialize(centralSurfaces, lightRevealScrim) }
         wakefulnessLifecycle.addObserver(this)
     }
 
@@ -131,7 +131,7 @@ class ScreenOffAnimationController @Inject constructor(
         animations.any { it.isKeyguardHideDelayed() }
 
     /**
-     * Return true to make the StatusBar expanded so we can animate [LightRevealScrim]
+     * Return true to make the status bar expanded so we can animate [LightRevealScrim]
      */
     fun shouldShowLightRevealScrim(): Boolean =
         animations.any { it.shouldPlayAnimation() }
@@ -197,7 +197,7 @@ class ScreenOffAnimationController @Inject constructor(
 }
 
 interface ScreenOffAnimation {
-    fun initialize(statusBar: StatusBar, lightRevealScrim: LightRevealScrim) {}
+    fun initialize(centralSurfaces: CentralSurfaces, lightRevealScrim: LightRevealScrim) {}
 
     /**
      * Called when started going to sleep, should return true if the animation will be played

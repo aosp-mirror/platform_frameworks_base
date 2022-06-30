@@ -79,6 +79,11 @@ class AnrHelper {
             WindowProcessController parentProcess, boolean aboveSystem, String annotation) {
         final int incomingPid = anrProcess.mPid;
         synchronized (mAnrRecords) {
+            if (incomingPid == 0) {
+                // Extreme corner case such as zygote is no response to return pid for the process.
+                Slog.i(TAG, "Skip zero pid ANR, process=" + anrProcess.processName);
+                return;
+            }
             if (mProcessingPid == incomingPid) {
                 Slog.i(TAG, "Skip duplicated ANR, pid=" + incomingPid + " " + annotation);
                 return;

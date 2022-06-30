@@ -45,6 +45,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telephony.CallQuality;
+import android.telephony.CellIdentity;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.util.ArraySet;
 import android.view.Surface;
@@ -561,15 +562,6 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int PROPERTY_CROSS_SIM = 1 << 13;
 
-    /**
-     * Connection is a tethered external call.
-     * <p>
-     * Indicates that the {@link Connection} is fixed on this device but the audio streams are
-     * re-routed to another device.
-     * <p>
-     */
-    public static final int PROPERTY_TETHERED_CALL = 1 << 14;
-
     //**********************************************************************************************
     // Next PROPERTY value: 1<<14
     //**********************************************************************************************
@@ -846,10 +838,10 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.extra.AUDIO_CODEC_BANDWIDTH_KHZ";
 
     /**
-     * Last known cell identity key to be used to fill geo location header in case of an emergency
-     * call. This entry will not be filled if call is not identified as an emergency call.
-     * {@link Connection}. Only provided to the {@link ConnectionService} for the purpose
-     * of placing an emergency call; will not be present in the {@link InCallService} layer.
+     * Last known cell identity key {@link CellIdentity} to be used to fill geo location header
+     * in case of an emergency  call. This entry will not be filled if call is not identified as
+     * an emergency call. Only provided to the {@link ConnectionService}  for the purpose of
+     * placing an emergency call; will not be present in the  {@link InCallService} layer.
      * The {@link ConnectionService}'s implementation will be logged for fine location access
      * when an outgoing call is placed in this case.
      */
@@ -1408,6 +1400,18 @@ public abstract class Connection extends Conferenceable {
          * Session modify request rejected by remote user.
          */
         public static final int SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE = 5;
+
+
+        /**@hide*/
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(prefix = "SESSION_MODIFY_REQUEST_", value = {
+                SESSION_MODIFY_REQUEST_SUCCESS,
+                SESSION_MODIFY_REQUEST_FAIL,
+                SESSION_MODIFY_REQUEST_INVALID,
+                SESSION_MODIFY_REQUEST_TIMED_OUT,
+                SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE
+        })
+        public @interface RttSessionModifyStatus {}
     }
 
     /**

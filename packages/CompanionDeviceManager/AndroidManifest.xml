@@ -46,6 +46,7 @@
             android:launchMode="singleInstance"
             android:excludeFromRecents="true"
             android:permission="android.permission.BIND_COMPANION_DEVICE_MANAGER_SERVICE"
+            android:configChanges="orientation|screenSize"
             android:theme="@style/ChooserActivity"/>
 
         <service
