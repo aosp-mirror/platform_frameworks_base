@@ -21,31 +21,42 @@ import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.NotificationLog
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
 import com.android.systemui.statusbar.notification.logKey
+import com.android.systemui.util.Compile
 import javax.inject.Inject
 
 class ShadeListBuilderLogger @Inject constructor(
+    notifPipelineFlags: NotifPipelineFlags,
     @NotificationLog private val buffer: LogBuffer
 ) {
-    fun logOnBuildList() {
+    fun logOnBuildList(reason: String?) {
         buffer.log(TAG, INFO, {
+            str1 = reason
         }, {
-            "Request received from NotifCollection"
+            "Request received from NotifCollection for $str1"
         })
     }
 
-    fun logEndBuildList(buildId: Int, topLevelEntries: Int, numChildren: Int) {
+    fun logEndBuildList(
+        buildId: Int,
+        topLevelEntries: Int,
+        numChildren: Int,
+        enforcedVisualStability: Boolean
+    ) {
         buffer.log(TAG, INFO, {
             long1 = buildId.toLong()
             int1 = topLevelEntries
             int2 = numChildren
+            bool1 = enforcedVisualStability
         }, {
-            "(Build $long1) Build complete ($int1 top-level entries, $int2 children)"
+            "(Build $long1) Build complete ($int1 top-level entries, $int2 children)" +
+                    " enforcedVisualStability=$bool1"
         })
     }
 
@@ -280,6 +291,8 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
+    val logRankInFinalList = Compile.IS_DEBUG && notifPipelineFlags.isDevLoggingEnabled()
+
     fun logFinalList(entries: List<ListEntry>) {
         if (entries.isEmpty()) {
             buffer.log(TAG, DEBUG, {}, { "(empty list)" })
@@ -289,16 +302,20 @@ class ShadeListBuilderLogger @Inject constructor(
             buffer.log(TAG, DEBUG, {
                 int1 = i
                 str1 = entry.logKey
+                bool1 = logRankInFinalList
+                int2 = entry.representativeEntry!!.ranking.rank
             }, {
-                "[$int1] $str1"
+                "[$int1] $str1".let { if (bool1) "$it rank=$int2" else it }
             })
 
             if (entry is GroupEntry) {
                 entry.summary?.let {
                     buffer.log(TAG, DEBUG, {
                         str1 = it.logKey
+                        bool1 = logRankInFinalList
+                        int2 = it.ranking.rank
                     }, {
-                        "  [*] $str1 (summary)"
+                        "  [*] $str1 (summary)".let { if (bool1) "$it rank=$int2" else it }
                     })
                 }
                 for (j in entry.children.indices) {
@@ -306,8 +323,10 @@ class ShadeListBuilderLogger @Inject constructor(
                     buffer.log(TAG, DEBUG, {
                         int1 = j
                         str1 = child.logKey
+                        bool1 = logRankInFinalList
+                        int2 = child.ranking.rank
                     }, {
-                        "  [$int1] $str1"
+                        "  [$int1] $str1".let { if (bool1) "$it rank=$int2" else it }
                     })
                 }
             }
