@@ -159,6 +159,10 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
 
     @Override
     public void onDisplayAreaVanished(@NonNull DisplayAreaInfo displayAreaInfo) {
+        final SurfaceControl leash = mDisplayAreaTokenMap.get(displayAreaInfo.token);
+        if (leash != null) {
+            leash.release();
+        }
         mDisplayAreaTokenMap.remove(displayAreaInfo.token);
     }
 
