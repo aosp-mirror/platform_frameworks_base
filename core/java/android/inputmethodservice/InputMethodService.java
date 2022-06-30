@@ -145,7 +145,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethod;
-import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
@@ -699,23 +698,21 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public final void initializeInternal(@NonNull IBinder token,
-                IInputMethodPrivilegedOperations privilegedOperations, int configChanges,
-                boolean stylusHwSupported, @InputMethodNavButtonFlags int navButtonFlags) {
+        public final void initializeInternal(@NonNull IInputMethod.InitParams params) {
             if (mDestroyed) {
                 Log.i(TAG, "The InputMethodService has already onDestroyed()."
                     + "Ignore the initialization.");
                 return;
             }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.initializeInternal");
-            mConfigTracker.onInitialize(configChanges);
-            mPrivOps.set(privilegedOperations);
-            InputMethodPrivilegedOperationsRegistry.put(token, mPrivOps);
-            if (stylusHwSupported) {
+            mConfigTracker.onInitialize(params.configChanges);
+            mPrivOps.set(params.privilegedOperations);
+            InputMethodPrivilegedOperationsRegistry.put(params.token, mPrivOps);
+            if (params.stylusHandWritingSupported) {
                 mInkWindow = new InkWindow(mWindow.getContext());
             }
-            mNavigationBarController.onNavButtonFlagsChanged(navButtonFlags);
-            attachToken(token);
+            mNavigationBarController.onNavButtonFlagsChanged(params.navigationBarFlags);
+            attachToken(params.token);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 

@@ -35,8 +35,16 @@ import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
  * Top-level interface to an input method component (implemented in a Service).
  */
 oneway interface IInputMethod {
-    void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
-             int configChanges, boolean stylusHwSupported, int navigationBarFlags);
+
+    parcelable InitParams {
+        IBinder token;
+        IInputMethodPrivilegedOperations privilegedOperations;
+        int configChanges;
+        boolean stylusHandWritingSupported;
+        int navigationBarFlags;
+    }
+
+    void initializeInternal(in InitParams params);
 
     void onCreateInlineSuggestionsRequest(in InlineSuggestionsRequestInfo requestInfo,
             in IInlineSuggestionsRequestCallback cb);

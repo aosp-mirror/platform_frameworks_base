@@ -32,7 +32,6 @@ import android.view.View;
 
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputMethod;
-import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 
@@ -100,21 +99,12 @@ public interface InputMethod {
      * unique token for the session it has with the system service as well as
      * IPC endpoint to do some other privileged operations.
      *
-     * @param token special token for the system to identify
-     *              {@link InputMethodService}
-     * @param privilegedOperations IPC endpoint to do some privileged
-     *                             operations that are allowed only to the
-     *                             current IME.
-     * @param configChanges {@link InputMethodInfo#getConfigChanges()} declared by IME.
-     * @param stylusHwSupported {@link InputMethodInfo#supportsStylusHandwriting()} declared by IME.
-     * @param navButtonFlags The initial state of {@link InputMethodNavButtonFlags}.
+     * @param params Contains parameters to initialize the {@link InputMethodService}.
      * @hide
      */
     @MainThread
-    default void initializeInternal(IBinder token,
-            IInputMethodPrivilegedOperations privilegedOperations, int configChanges,
-            boolean stylusHwSupported, @InputMethodNavButtonFlags int navButtonFlags) {
-        attachToken(token);
+    default void initializeInternal(@NonNull IInputMethod.InitParams params) {
+        attachToken(params.token);
     }
 
     /**
