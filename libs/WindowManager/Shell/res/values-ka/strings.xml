@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"ბუშტი"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"მართვა"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ბუშტი დაიხურა."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"შეეხეთ ამ აპის გადასატვირთად და გადადით სრულ ეკრანზე."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"შეეხეთ, რომ გადატვირთოთ ეს აპი უკეთესი ხედისთვის."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"კამერად პრობლემები აქვს?\nშეეხეთ გამოსასწორებლად"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"არ გამოსწორდა?\nშეეხეთ წინა ვერსიის დასაბრუნებლად"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"კამერას პრობლემები არ აქვს? შეეხეთ უარყოფისთვის."</string>

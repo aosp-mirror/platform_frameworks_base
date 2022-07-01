@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"ബബിൾ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"മാനേജ് ചെയ്യുക"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ബബിൾ ഡിസ്മിസ് ചെയ്തു."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"ഈ ആപ്പ് റീസ്‌റ്റാർട്ട് ചെയ്‌ത് പൂർണ്ണ സ്ക്രീനിലേക്ക് മാറാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"മികച്ച കാഴ്‌ചയ്‌ക്കായി ഈ ആപ്പ് റീസ്‌റ്റാർട്ട് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ക്യാമറ പ്രശ്നങ്ങളുണ്ടോ?\nശരിയാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"അത് പരിഹരിച്ചില്ലേ?\nപുനഃസ്ഥാപിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ക്യാമറാ പ്രശ്നങ്ങളൊന്നുമില്ലേ? നിരസിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
