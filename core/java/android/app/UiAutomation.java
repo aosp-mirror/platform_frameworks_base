@@ -1068,10 +1068,7 @@ public final class UiAutomation {
      * @param window Window to take a screenshot of
      *
      * @return The screenshot bitmap on success, null otherwise.
-     *
-     * @hide
      */
-    @TestApi
     @Nullable
     public Bitmap takeScreenshot(@NonNull Window window) {
         if (window == null) {
