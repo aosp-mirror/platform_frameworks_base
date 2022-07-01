@@ -38,14 +38,10 @@ import java.util.List;
  * other ways manipulating the SpeechRecognizer results before powering dictation features.
  */
 @DataClass(
-        genBuilder = true,
-        genConstructor = false,
         genEqualsHashCode = true,
         genParcelable = true,
         genToString = true
 )
-@DataClass.Suppress(
-        {"Builder.setStartPosition", "Builder.setEndPosition", "Builder.addAlternative"})
 public final class AlternativeSpan implements Parcelable {
     /**
      * The start position of the span of the originally recognized string.
@@ -64,17 +60,14 @@ public final class AlternativeSpan implements Parcelable {
     /**
      * All the alternatives for the [mStart, mEnd) span.
      *
-     * <p> Must not be empty. If the recognizer does not produce an alternative, this list will
-     * contain a single empty string.
+     * <p> Must not be empty. The object will only be created
+     * if there are some alternatives for the given span.
      *
      * <p> The alternatives may be strings of different lengths than the span they can replace.
      */
     @NonNull
     @DataClass.PluralOf("alternative")
     private final List<String> mAlternatives;
-    private static List<String> defaultAlternatives() {
-        return new ArrayList<>();
-    }
 
     private void onConstructed() {
         Preconditions.checkArgumentNonnegative(mStartPosition,
@@ -100,8 +93,27 @@ public final class AlternativeSpan implements Parcelable {
     //@formatter:off
 
 
+    /**
+     * Creates a new AlternativeSpan.
+     *
+     * @param startPosition
+     *   The start position of the span of the originally recognized string.
+     *
+     *   <p> Must be set to a non-negative value before building.
+     * @param endPosition
+     *   The exclusive end position of the span of the originally recognized string.
+     *
+     *   <p> Must be set to a value greater than the start of the span before building.
+     * @param alternatives
+     *   All the alternatives for the [mStart, mEnd) span.
+     *
+     *   <p> Must not be empty. The object will only be created
+     *   if there are some alternatives for the given span.
+     *
+     *   <p> The alternatives may be strings of different lengths than the span they can replace.
+     */
     @DataClass.Generated.Member
-    /* package-private */ AlternativeSpan(
+    public AlternativeSpan(
             int startPosition,
             int endPosition,
             @NonNull List<String> alternatives) {
@@ -137,8 +149,8 @@ public final class AlternativeSpan implements Parcelable {
     /**
      * All the alternatives for the [mStart, mEnd) span.
      *
-     * <p> Must not be empty. If the recognizer does not produce an alternative, this list will
-     * contain a single empty string.
+     * <p> Must not be empty. The object will only be created
+     * if there are some alternatives for the given span.
      *
      * <p> The alternatives may be strings of different lengths than the span they can replace.
      */
@@ -241,82 +253,11 @@ public final class AlternativeSpan implements Parcelable {
         }
     };
 
-    /**
-     * A builder for {@link AlternativeSpan}
-     */
-    @SuppressWarnings("WeakerAccess")
-    @DataClass.Generated.Member
-    public static final class Builder {
-
-        private int mStartPosition;
-        private int mEndPosition;
-        private @NonNull List<String> mAlternatives;
-
-        private long mBuilderFieldsSet = 0L;
-
-        /**
-         * Creates a new Builder.
-         *
-         * @param startPosition
-         *   The start position of the span of the originally recognized string.
-         *
-         *   <p> Must be set to a non-negative value before building.
-         * @param endPosition
-         *   The exclusive end position of the span of the originally recognized string.
-         *
-         *   <p> Must be set to a value greater than the start of the span before building.
-         */
-        public Builder(
-                int startPosition,
-                int endPosition) {
-            mStartPosition = startPosition;
-            mEndPosition = endPosition;
-        }
-
-        /**
-         * All the alternatives for the [mStart, mEnd) span.
-         *
-         * <p> Must not be empty. If the recognizer does not produce an alternative, this list will
-         * contain a single empty string.
-         *
-         * <p> The alternatives may be strings of different lengths than the span they can replace.
-         */
-        @DataClass.Generated.Member
-        public @NonNull Builder setAlternatives(@NonNull List<String> value) {
-            checkNotUsed();
-            mBuilderFieldsSet |= 0x4;
-            mAlternatives = value;
-            return this;
-        }
-
-        /** Builds the instance. This builder should not be touched after calling this! */
-        public @NonNull AlternativeSpan build() {
-            checkNotUsed();
-            mBuilderFieldsSet |= 0x8; // Mark builder used
-
-            if ((mBuilderFieldsSet & 0x4) == 0) {
-                mAlternatives = defaultAlternatives();
-            }
-            AlternativeSpan o = new AlternativeSpan(
-                    mStartPosition,
-                    mEndPosition,
-                    mAlternatives);
-            return o;
-        }
-
-        private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x8) != 0) {
-                throw new IllegalStateException(
-                        "This Builder should not be reused. Use a new Builder instance instead");
-            }
-        }
-    }
-
     @DataClass.Generated(
-            time = 1655225556488L,
+            time = 1656603431902L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/speech/AlternativeSpan.java",
-            inputSignatures = "private final  int mStartPosition\nprivate final  int mEndPosition\nprivate final @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"alternative\") java.util.List<java.lang.String> mAlternatives\nprivate static  java.util.List<java.lang.String> defaultAlternatives()\nprivate  void onConstructed()\nclass AlternativeSpan extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genBuilder=true, genConstructor=false, genEqualsHashCode=true, genParcelable=true, genToString=true)")
+            inputSignatures = "private final  int mStartPosition\nprivate final  int mEndPosition\nprivate final @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"alternative\") java.util.List<java.lang.String> mAlternatives\nprivate  void onConstructed()\nclass AlternativeSpan extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

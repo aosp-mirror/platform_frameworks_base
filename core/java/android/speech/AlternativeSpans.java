@@ -32,21 +32,15 @@ import java.util.List;
  * specific span (substring) of the originally recognized string.
  */
 @DataClass(
-        genBuilder = true,
-        genConstructor = false,
         genEqualsHashCode = true,
         genParcelable = true,
         genToString = true
 )
-@DataClass.Suppress({"Builder.addSpan"})
 public final class AlternativeSpans implements Parcelable {
     /** List of {@link AlternativeSpan} for a specific speech recognition result. */
     @NonNull
     @DataClass.PluralOf("span")
     private final List<AlternativeSpan> mSpans;
-    private static List<AlternativeSpan> defaultSpans() {
-        return new ArrayList<>();
-    }
 
 
 
@@ -63,8 +57,14 @@ public final class AlternativeSpans implements Parcelable {
     //@formatter:off
 
 
+    /**
+     * Creates a new AlternativeSpans.
+     *
+     * @param spans
+     *   List of {@link AlternativeSpan} for a specific speech recognition result.
+     */
     @DataClass.Generated.Member
-    /* package-private */ AlternativeSpans(
+    public AlternativeSpans(
             @NonNull List<AlternativeSpan> spans) {
         this.mSpans = spans;
         com.android.internal.util.AnnotationValidations.validate(
@@ -163,57 +163,11 @@ public final class AlternativeSpans implements Parcelable {
         }
     };
 
-    /**
-     * A builder for {@link AlternativeSpans}
-     */
-    @SuppressWarnings("WeakerAccess")
-    @DataClass.Generated.Member
-    public static final class Builder {
-
-        private @NonNull List<AlternativeSpan> mSpans;
-
-        private long mBuilderFieldsSet = 0L;
-
-        public Builder() {
-        }
-
-        /**
-         * List of {@link AlternativeSpan} for a specific speech recognition result.
-         */
-        @DataClass.Generated.Member
-        public @NonNull Builder setSpans(@NonNull List<AlternativeSpan> value) {
-            checkNotUsed();
-            mBuilderFieldsSet |= 0x1;
-            mSpans = value;
-            return this;
-        }
-
-        /** Builds the instance. This builder should not be touched after calling this! */
-        public @NonNull AlternativeSpans build() {
-            checkNotUsed();
-            mBuilderFieldsSet |= 0x2; // Mark builder used
-
-            if ((mBuilderFieldsSet & 0x1) == 0) {
-                mSpans = defaultSpans();
-            }
-            AlternativeSpans o = new AlternativeSpans(
-                    mSpans);
-            return o;
-        }
-
-        private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x2) != 0) {
-                throw new IllegalStateException(
-                        "This Builder should not be reused. Use a new Builder instance instead");
-            }
-        }
-    }
-
     @DataClass.Generated(
-            time = 1655151024975L,
+            time = 1656603476918L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/speech/AlternativeSpans.java",
-            inputSignatures = "private final @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"span\") java.util.List<android.speech.AlternativeSpan> mSpans\nprivate static  java.util.List<android.speech.AlternativeSpan> defaultSpans()\nclass AlternativeSpans extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genBuilder=true, genConstructor=false, genEqualsHashCode=true, genParcelable=true, genToString=true)")
+            inputSignatures = "private final @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"span\") java.util.List<android.speech.AlternativeSpan> mSpans\nclass AlternativeSpans extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 
