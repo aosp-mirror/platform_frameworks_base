@@ -199,9 +199,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private static final String FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE =
         "registerUiTestAutomationService";
 
-    private static final String TEMPORARY_ENABLE_ACCESSIBILITY_UNTIL_KEYGUARD_REMOVED =
-            "temporaryEnableAccessibilityStateUntilKeyguardRemoved";
-
     private static final String GET_WINDOW_TOKEN = "getWindowToken";
 
     private static final String SET_PIP_ACTION_REPLACEMENT =
@@ -1231,46 +1228,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         synchronized (mLock) {
             mUiAutomationManager.unregisterUiTestAutomationServiceLocked(serviceClient);
-        }
-    }
-
-    @Override
-    public void temporaryEnableAccessibilityStateUntilKeyguardRemoved(
-            ComponentName service, boolean touchExplorationEnabled) {
-        if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
-            mTraceManager.logTrace(
-                    LOG_TAG + ".temporaryEnableAccessibilityStateUntilKeyguardRemoved",
-                    FLAGS_ACCESSIBILITY_MANAGER,
-                    "service=" + service + ";touchExplorationEnabled=" + touchExplorationEnabled);
-        }
-
-        mSecurityPolicy.enforceCallingPermission(
-                Manifest.permission.TEMPORARY_ENABLE_ACCESSIBILITY,
-                TEMPORARY_ENABLE_ACCESSIBILITY_UNTIL_KEYGUARD_REMOVED);
-        if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MANAGER_INTERNAL)) {
-            mTraceManager.logTrace("WindowManagerInternal.isKeyguardLocked",
-                    FLAGS_WINDOW_MANAGER_INTERNAL);
-        }
-        if (!mWindowManagerService.isKeyguardLocked()) {
-            return;
-        }
-        synchronized (mLock) {
-            // Set the temporary state.
-            AccessibilityUserState userState = getCurrentUserStateLocked();
-
-            userState.setTouchExplorationEnabledLocked(touchExplorationEnabled);
-            userState.setDisplayMagnificationEnabledLocked(false);
-            userState.disableShortcutMagnificationLocked();
-            userState.setAutoclickEnabledLocked(false);
-            userState.mEnabledServices.clear();
-            userState.mEnabledServices.add(service);
-            userState.getBindingServicesLocked().clear();
-            userState.getCrashedServicesLocked().clear();
-            userState.mTouchExplorationGrantedServices.clear();
-            userState.mTouchExplorationGrantedServices.add(service);
-
-            // User the current state instead settings.
-            onUserStateChangedLocked(userState);
         }
     }
 
