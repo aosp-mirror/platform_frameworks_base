@@ -3585,9 +3585,6 @@ public final class InputMethodManager {
 
         final Printer p = new PrintWriterPrinter(fout);
         p.println("Input method client state for " + this + ":");
-
-        p.println("  mService=" + mService);
-        p.println("  mMainLooper=" + mMainLooper);
         p.println("  mFallbackInputConnection=" + mFallbackInputConnection);
         p.println("  mActive=" + mActive
                 + " mRestartOnNextWindowFocus=" + mRestartOnNextWindowFocus
