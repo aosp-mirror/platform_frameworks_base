@@ -199,6 +199,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private boolean mNavBarAttachedToApp = false;
     private int mRecentsDisplayId = INVALID_DISPLAY;
 
+    /** The delay for light bar appearance animation. */
+    long mStatusBarTransitionDelay;
+
     /** @see #setCanPipOnFinish */
     private boolean mCanPipOnFinish = true;
 
@@ -871,7 +874,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
         buildFinishTransaction(mFinishTransaction, info.getRootLeash());
         if (mController.getTransitionPlayer() != null) {
-            mController.dispatchLegacyAppTransitionStarting(info);
+            mController.dispatchLegacyAppTransitionStarting(info, mStatusBarTransitionDelay);
             try {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Calling onTransitionReady: %s", info);
