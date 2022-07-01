@@ -500,11 +500,6 @@ public final class InputMethodManager {
     // -----------------------------------------------------------
 
     /**
-     * Sequence number of this binding, as returned by the server.
-     */
-    int mBindSequence = -1;
-
-    /**
      * ID of the method we are bound to.
      *
      * @deprecated New code should use {@code mCurBindState.mImeId}.
@@ -913,8 +908,9 @@ public final class InputMethodManager {
                         Log.i(TAG, "handleMessage: MSG_BIND " + res.sequence + "," + res.id);
                     }
                     synchronized (mH) {
-                        if (mBindSequence < 0 || mBindSequence != res.sequence) {
-                            Log.w(TAG, "Ignoring onBind: cur seq=" + mBindSequence
+                        final int curBindSequence = getBindSequenceLocked();
+                        if (curBindSequence < 0 || curBindSequence != res.sequence) {
+                            Log.w(TAG, "Ignoring onBind: cur seq=" + curBindSequence
                                     + ", given seq=" + res.sequence);
                             if (res.channel != null && res.channel != mCurChannel) {
                                 res.channel.dispose();
@@ -929,7 +925,6 @@ public final class InputMethodManager {
                         mCurMethod = res.method; // for @UnsupportedAppUsage
                         mCurBindState = new BindState(res);
                         mCurId = res.id; // for @UnsupportedAppUsage
-                        mBindSequence = res.sequence;
                         mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
                     }
                     startInputInner(StartInputReason.BOUND_TO_IMMS, null, 0, 0, 0);
@@ -945,7 +940,7 @@ public final class InputMethodManager {
                     }
                     final boolean startInput;
                     synchronized (mH) {
-                        if (mBindSequence != sequence) {
+                        if (getBindSequenceLocked() != sequence) {
                             return;
                         }
                         clearAllAccessibilityBindingLocked();
@@ -972,8 +967,9 @@ public final class InputMethodManager {
                                 + "," + res.id);
                     }
                     synchronized (mH) {
-                        if (mBindSequence < 0 || mBindSequence != res.sequence) {
-                            Log.w(TAG, "Ignoring onBind: cur seq=" + mBindSequence
+                        final int curBindSequence = getBindSequenceLocked();
+                        if (curBindSequence < 0 || curBindSequence != res.sequence) {
+                            Log.w(TAG, "Ignoring onBind: cur seq=" + curBindSequence
                                     + ", given seq=" + res.sequence);
                             if (res.channel != null && res.channel != mCurChannel) {
                                 res.channel.dispose();
@@ -1017,10 +1013,10 @@ public final class InputMethodManager {
                                 + sequence + " id=" + id);
                     }
                     synchronized (mH) {
-                        if (mBindSequence != sequence) {
+                        if (getBindSequenceLocked() != sequence) {
                             if (DEBUG) {
-                                Log.i(TAG, "mBindSequence =" + mBindSequence + " sequence ="
-                                        + sequence + " id=" + id);
+                                Log.i(TAG, "current BindSequence =" + getBindSequenceLocked()
+                                        + " sequence =" + sequence + " id=" + id);
                             }
                             return;
                         }
@@ -1101,7 +1097,7 @@ public final class InputMethodManager {
                     final float[] matrixValues = (float[]) msg.obj;
                     final int bindSequence = msg.arg1;
                     synchronized (mH) {
-                        if (mBindSequence != bindSequence) {
+                        if (getBindSequenceLocked() != bindSequence) {
                             return;
                         }
                         if (matrixValues == null || mVirtualDisplayToScreenMatrix == null) {
@@ -1628,10 +1624,9 @@ public final class InputMethodManager {
         if (DEBUG) Log.v(TAG, "Clearing binding!");
         clearConnectionLocked();
         setInputChannelLocked(null);
-        // We only reset sequence number for input method, but not accessibility.
-        mBindSequence = -1;
         mCurId = null; // for @UnsupportedAppUsage
         mCurMethod = null; // for @UnsupportedAppUsage
+        // We only reset sequence number for input method, but not accessibility.
         mCurBindState = null;
     }
 
@@ -2390,7 +2385,6 @@ public final class InputMethodManager {
             mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
             if (res.id != null) {
                 setInputChannelLocked(res.channel);
-                mBindSequence = res.sequence;
                 mCurMethod = res.method; // for @UnsupportedAppUsage
                 mCurBindState = new BindState(res);
                 mAccessibilityInputMethodSession.clear();
@@ -3494,7 +3488,7 @@ public final class InputMethodManager {
         p.println("  mFallbackInputConnection=" + mFallbackInputConnection);
         p.println("  mActive=" + mActive
                 + " mRestartOnNextWindowFocus=" + mRestartOnNextWindowFocus
-                + " mBindSequence=" + mBindSequence
+                + " mBindSequence=" + getBindSequenceLocked()
                 + " mCurImeId=" + getImeIdLocked());
         p.println("  mFullscreenMode=" + mFullscreenMode);
         if (isImeSessionAvailableLocked()) {
@@ -3593,11 +3587,17 @@ public final class InputMethodManager {
         @Nullable
         final String mImeId;
 
+        /**
+         * Sequence number of this binding, as returned by the server.
+         */
+        final int mBindSequence;
+
         BindState(@NonNull InputBindResult inputBindResult) {
             mImeSession = IInputMethodSessionInvoker.createOrNull(inputBindResult.method);
             mIsInputMethodSuppressingSpellChecker =
                     inputBindResult.isInputMethodSuppressingSpellChecker;
             mImeId = inputBindResult.id;
+            mBindSequence = inputBindResult.sequence;
         }
     }
 
@@ -3609,6 +3609,11 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     private String getImeIdLocked() {
         return mCurBindState != null ? mCurBindState.mImeId : null;
+    }
+
+    @GuardedBy("mH")
+    private int getBindSequenceLocked() {
+        return mCurBindState != null ? mCurBindState.mBindSequence : -1;
     }
 
     private static String dumpViewInfo(@Nullable final View view) {
