@@ -310,7 +310,7 @@ public class NotifCollection implements Dumpable {
         }
 
         locallyDismissNotifications(entriesToLocallyDismiss);
-        dispatchEventsAndRebuildList();
+        dispatchEventsAndRebuildList("dismissNotifications");
     }
 
     /**
@@ -354,7 +354,7 @@ public class NotifCollection implements Dumpable {
         }
 
         locallyDismissNotifications(entries);
-        dispatchEventsAndRebuildList();
+        dispatchEventsAndRebuildList("dismissAllNotifications");
     }
 
     /**
@@ -401,7 +401,7 @@ public class NotifCollection implements Dumpable {
 
         postNotification(sbn, requireRanking(rankingMap, sbn.getKey()));
         applyRanking(rankingMap);
-        dispatchEventsAndRebuildList();
+        dispatchEventsAndRebuildList("onNotificationPosted");
     }
 
     private void onNotificationGroupPosted(List<CoalescedEvent> batch) {
@@ -412,7 +412,7 @@ public class NotifCollection implements Dumpable {
         for (CoalescedEvent event : batch) {
             postNotification(event.getSbn(), event.getRanking());
         }
-        dispatchEventsAndRebuildList();
+        dispatchEventsAndRebuildList("onNotificationGroupPosted");
     }
 
     private void onNotificationRemoved(
@@ -433,14 +433,14 @@ public class NotifCollection implements Dumpable {
         entry.mCancellationReason = reason;
         tryRemoveNotification(entry);
         applyRanking(rankingMap);
-        dispatchEventsAndRebuildList();
+        dispatchEventsAndRebuildList("onNotificationRemoved");
     }
 
     private void onNotificationRankingUpdate(RankingMap rankingMap) {
         Assert.isMainThread();
         mEventQueue.add(new RankingUpdatedEvent(rankingMap));
         applyRanking(rankingMap);
-        dispatchEventsAndRebuildList();
+        dispatchEventsAndRebuildList("onNotificationRankingUpdate");
     }
 
     private void onNotificationChannelModified(
@@ -450,7 +450,7 @@ public class NotifCollection implements Dumpable {
             int modificationType) {
         Assert.isMainThread();
         mEventQueue.add(new ChannelChangedEvent(pkgName, user, channel, modificationType));
-        dispatchEventsAndRebuildList();
+        dispatchEventsAndRebuildList("onNotificationChannelModified");
     }
 
     private void onNotificationsInitialized() {
@@ -610,7 +610,7 @@ public class NotifCollection implements Dumpable {
         mEventQueue.add(new RankingAppliedEvent());
     }
 
-    private void dispatchEventsAndRebuildList() {
+    private void dispatchEventsAndRebuildList(String reason) {
         Trace.beginSection("NotifCollection.dispatchEventsAndRebuildList");
         mAmDispatchingToOtherCode = true;
         while (!mEventQueue.isEmpty()) {
@@ -619,7 +619,7 @@ public class NotifCollection implements Dumpable {
         mAmDispatchingToOtherCode = false;
 
         if (mBuildListener != null) {
-            mBuildListener.onBuildList(mReadOnlyNotificationSet);
+            mBuildListener.onBuildList(mReadOnlyNotificationSet, reason);
         }
         Trace.endSection();
     }
@@ -654,7 +654,7 @@ public class NotifCollection implements Dumpable {
 
         if (!isLifetimeExtended(entry)) {
             if (tryRemoveNotification(entry)) {
-                dispatchEventsAndRebuildList();
+                dispatchEventsAndRebuildList("onEndLifetimeExtension");
             }
         }
     }
@@ -955,7 +955,7 @@ public class NotifCollection implements Dumpable {
         mEventQueue.add(new EntryUpdatedEvent(entry, false /* fromSystem */));
 
         // Skip the applyRanking step and go straight to dispatching the events
-        dispatchEventsAndRebuildList();
+        dispatchEventsAndRebuildList("updateNotificationInternally");
     }
 
     /**
