@@ -131,7 +131,6 @@ class BackNavigationController {
                         "Focused window found using getFocusedWindowToken");
             }
 
-            OnBackInvokedCallbackInfo overrideCallbackInfo = null;
             if (window != null) {
                 // This is needed to bridge the old and new back behavior with recents.  While in
                 // Overview with live tile enabled, the previous app is technically focused but we
@@ -140,15 +139,18 @@ class BackNavigationController {
                 // the right window to consume back while in overview, so we need to route it to
                 // launcher and use the legacy behavior of injecting KEYCODE_BACK since the existing
                 // compat callback in VRI only works when the window is focused.
+                // This symptom also happen while shell transition enabled, we can check that by
+                // isTransientLaunch to know whether the focus window is point to live tile.
                 final RecentsAnimationController recentsAnimationController =
                         wmService.getRecentsAnimationController();
-                if (recentsAnimationController != null
-                        && recentsAnimationController.shouldApplyInputConsumer(
-                        window.getActivityRecord())) {
-                    window = recentsAnimationController.getTargetAppMainWindow();
-                    overrideCallbackInfo = recentsAnimationController.getBackInvokedInfo();
+                final ActivityRecord ar = window.mActivityRecord;
+                if ((ar != null && ar.isActivityTypeHomeOrRecents()
+                        && ar.mTransitionController.isTransientLaunch(ar))
+                        || (recentsAnimationController != null
+                        && recentsAnimationController.shouldApplyInputConsumer(ar))) {
                     ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "Current focused window being animated by "
                             + "recents. Overriding back callback to recents controller callback.");
+                    return null;
                 }
             }
 
@@ -166,9 +168,7 @@ class BackNavigationController {
             if (window != null) {
                 currentActivity = window.mActivityRecord;
                 currentTask = window.getTask();
-                callbackInfo = overrideCallbackInfo != null
-                        ? overrideCallbackInfo
-                        : window.getOnBackInvokedCallbackInfo();
+                callbackInfo = window.getOnBackInvokedCallbackInfo();
                 if (callbackInfo == null) {
                     Slog.e(TAG, "No callback registered, returning null.");
                     return null;
@@ -213,8 +213,10 @@ class BackNavigationController {
             Task finalTask = currentTask;
             prevActivity = currentTask.getActivity(
                     (r) -> !r.finishing && r.getTask() == finalTask && !r.isTopRunningActivity());
-            if (window.getParent().getChildCount() > 1 && window.getParent().getChildAt(0)
-                    != window) {
+            // TODO Dialog window does not need to attach on activity, check
+            // window.mAttrs.type != TYPE_BASE_APPLICATION
+            if ((window.getParent().getChildCount() > 1
+                    && window.getParent().getChildAt(0) != window)) {
                 // Are we the top window of our parent? If not, we are a window on top of the
                 // activity, we won't close the activity.
                 backType = BackNavigationInfo.TYPE_DIALOG_CLOSE;
@@ -379,7 +381,8 @@ class BackNavigationController {
 
     private void onBackNavigationDone(
             Bundle result, WindowState focusedWindow, WindowContainer<?> windowContainer,
-            int backType, Task task, ActivityRecord prevActivity, boolean prepareAnimation) {
+            int backType, @Nullable Task task, @Nullable ActivityRecord prevActivity,
+            boolean prepareAnimation) {
         SurfaceControl surfaceControl = windowContainer.getSurfaceControl();
         boolean triggerBack = result != null && result.getBoolean(
                 BackNavigationInfo.KEY_TRIGGER_BACK);
@@ -404,7 +407,7 @@ class BackNavigationController {
                         "Setting Activity.mLauncherTaskBehind to false. Activity=%s",
                         prevActivity);
             }
-        } else {
+        } else if (task != null) {
             task.mBackGestureStarted = false;
         }
         resetSurfaces(windowContainer);

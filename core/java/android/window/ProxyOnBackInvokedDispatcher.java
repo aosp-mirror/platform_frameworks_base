@@ -122,7 +122,7 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
         for (Pair<OnBackInvokedCallback, Integer> callbackPair : mCallbacks) {
             int priority = callbackPair.second;
-            if (priority >= 0) {
+            if (priority >= PRIORITY_DEFAULT) {
                 mActualDispatcher.registerOnBackInvokedCallback(priority, callbackPair.first);
             } else {
                 mActualDispatcher.registerSystemOnBackInvokedCallback(callbackPair.first);
