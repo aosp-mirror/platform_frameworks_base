@@ -65,13 +65,6 @@ class SmartspaceDedupingCoordinator @Inject constructor(
         statusBarStateController.addCallback(statusBarStateListener)
         smartspaceController.addListener(this::onNewSmartspaceTargets)
 
-        if (!pipeline.isNewPipelineEnabled) {
-            // TODO (b/173126564): Remove this once the old pipeline is no longer necessary
-            notificationLockscreenUserManager.addKeyguardNotificationSuppressor { entry ->
-                isDupedWithSmartspaceContent(entry)
-            }
-        }
-
         recordStatusBarState(statusBarStateController.state)
     }
 
