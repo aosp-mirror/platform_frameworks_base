@@ -79,7 +79,6 @@ import java.util.List;
  * @attr ref android.R.styleable#AccessibilityService_accessibilityEventTypes
  * @attr ref android.R.styleable#AccessibilityService_accessibilityFeedbackType
  * @attr ref android.R.styleable#AccessibilityService_accessibilityFlags
- * @attr ref android.R.styleable#AccessibilityService_canRequestEnhancedWebAccessibility
  * @attr ref android.R.styleable#AccessibilityService_canRequestFilterKeyEvents
  * @attr ref android.R.styleable#AccessibilityService_canRequestTouchExplorationMode
  * @attr ref android.R.styleable#AccessibilityService_canRetrieveWindowContent
@@ -1424,8 +1423,6 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT";
             case CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION:
                 return "CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION";
-            case CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY:
-                return "CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY";
             case CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS:
                 return "CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS";
             case CAPABILITY_CAN_CONTROL_MAGNIFICATION:

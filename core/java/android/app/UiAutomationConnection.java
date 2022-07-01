@@ -549,7 +549,6 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 | AccessibilityServiceInfo.FLAG_FORCE_DIRECT_BOOT_AWARE;
         info.setCapabilities(AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
-                | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS);
         try {
             // Calling out with a lock held is fine since if the system
