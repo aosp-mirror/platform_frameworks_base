@@ -63,9 +63,6 @@ interface IAccessibilityManager {
 
     void unregisterUiTestAutomationService(IAccessibilityServiceClient client);
 
-    void temporaryEnableAccessibilityStateUntilKeyguardRemoved(in ComponentName service,
-            boolean touchExplorationEnabled);
-
     // Used by UiAutomation
     IBinder getWindowToken(int windowId, int userId);
 
