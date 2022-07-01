@@ -36,10 +36,19 @@ interface IInputMethodManager {
             int untrustedDisplayId);
 
     // TODO: Use ParceledListSlice instead
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     List<InputMethodInfo> getInputMethodList(int userId);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     List<InputMethodInfo> getAwareLockedInputMethodList(int userId, int directBootAwareness);
+
     // TODO: Use ParceledListSlice instead
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     List<InputMethodInfo> getEnabledInputMethodList(int userId);
+
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
             boolean allowsImplicitlySelectedSubtypes);
     InputMethodSubtype getLastInputMethodSubtype();
@@ -48,9 +57,12 @@ interface IInputMethodManager {
             in ResultReceiver resultReceiver, int reason);
     boolean hideSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
             in ResultReceiver resultReceiver, int reason);
+
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window
     // has gained focus, and if 'editorInfo' is non-null then also does startInput.
     // @NonNull
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     InputBindResult startInputOrWindowGainedFocus(
             /* @StartInputReason */ int startInputReason,
             in IInputMethodClient client, in IBinder windowToken,
@@ -62,8 +74,12 @@ interface IInputMethodManager {
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.WRITE_SECURE_SETTINGS)")
     void showInputMethodPickerFromSystem(in IInputMethodClient client,
             int auxiliarySubtypeMode, int displayId);
+
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
     boolean isInputMethodPickerShownForTest();
     InputMethodSubtype getCurrentInputMethodSubtype();
@@ -76,8 +92,11 @@ interface IInputMethodManager {
             int childDisplayId, in float[] matrixValues);
 
     oneway void reportPerceptibleAsync(in IBinder windowToken, boolean perceptible);
-    /** Remove the IME surface. Requires INTERNAL_SYSTEM_WINDOW permission. */
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)")
     void removeImeSurface();
+
     /** Remove the IME surface. Requires passing the currently focused window. */
     oneway void removeImeSurfaceFromWindowAsync(in IBinder windowToken);
     void startProtoDump(in byte[] protoDump, int source, String where);
@@ -90,6 +109,9 @@ interface IInputMethodManager {
 
     /** Start Stylus handwriting session **/
     void startStylusHandwriting(in IInputMethodClient client);
+
     /** Returns {@code true} if currently selected IME supports Stylus handwriting. */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     boolean isStylusHandwritingAvailableAsUser(int userId);
 }
