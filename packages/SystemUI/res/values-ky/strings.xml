@@ -530,11 +530,11 @@
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык. Уюм тармактын трафигин көзөмөлдөй алат"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Бул түзмөктү <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> камсыздады."</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Бул түзмөк уюмуңузга таандык жана <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташтырылган"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык жана <xliff:g id="VPN_APP">%2$s</xliff:g> колдонмосуна туташтырылган"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык жана <xliff:g id="VPN_APP">%2$s</xliff:g> колдонмосуна туташып турат"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Бул түзмөк уюмуңузга таандык"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Бул түзмөк төмөнкүгө таандык: <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Бул түзмөк уюмуңузга таандык жана VPN\'дерге туташтырылган"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык жана VPN\'дерге туташтырылган"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык жана VPN\'дерге туташып турат"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ишканаңыз жумуш профилиңиздин тармак трафигин көзөмөлдөй алат"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> жумуш профилиңиздеги тармак трафигин көзөмөлдөй алат"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Жумуш профилинин тармактагы аракеттери IT администраторуна көрүнөт"</string>
