@@ -129,8 +129,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         public void onFullyShown() {
             mBouncerAnimating = false;
             updateStates();
-            mCentralSurfaces.wakeUpIfDozing(SystemClock.uptimeMillis(),
-                    mCentralSurfaces.getBouncerContainer(), "BOUNCER_VISIBLE");
         }
 
         @Override

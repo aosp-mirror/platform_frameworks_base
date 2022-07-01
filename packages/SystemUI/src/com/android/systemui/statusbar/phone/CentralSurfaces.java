@@ -564,8 +564,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void setLaunchEmergencyActionOnFinishedWaking(boolean launch);
 
-    void setTopHidesStatusBar(boolean hides);
-
     QSPanelController getQSPanelController();
 
     boolean areNotificationAlertsDisabled();
