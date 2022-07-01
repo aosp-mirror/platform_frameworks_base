@@ -2082,7 +2082,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.mAttrs.type == TYPE_WALLPAPER) {
             dc.mWallpaperController.clearLastWallpaperTimeoutTime();
             dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-        } else if (win.hasWallpaper()) {
+        } else if (dc.mWallpaperController.isWallpaperTarget(win)) {
             dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
         }
 
