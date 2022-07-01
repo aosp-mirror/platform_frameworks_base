@@ -77,11 +77,6 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
             }
         }
 
-    /** {@inheritDoc}  */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
-
     /**
      * Checks [pipApp] window remains visible throughout the animation
      */
