@@ -9,6 +9,9 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
+import com.android.systemui.statusbar.phone.panelstate.STATE_CLOSED
+import com.android.systemui.statusbar.phone.panelstate.STATE_OPEN
+import com.android.systemui.statusbar.phone.panelstate.STATE_OPENING
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import org.junit.Before
 import org.junit.Test
@@ -39,8 +42,9 @@ class ScrimShadeTransitionControllerTest : SysuiTestCase() {
                 dumpManager,
                 scrimController,
                 context.resources,
-                statusBarStateController
-            )
+                statusBarStateController)
+
+        controller.onPanelStateChanged(STATE_OPENING)
     }
 
     @Test
@@ -54,8 +58,7 @@ class ScrimShadeTransitionControllerTest : SysuiTestCase() {
 
     @Test
     fun onPanelExpansionChanged_inSplitShade_unlockedShade_setsFractionBasedOnDragDownAmount() {
-        whenever(statusBarStateController.currentOrUpcomingState)
-            .thenReturn(StatusBarState.SHADE)
+        whenever(statusBarStateController.currentOrUpcomingState).thenReturn(StatusBarState.SHADE)
         val scrimShadeTransitionDistance =
             context.resources.getDimensionPixelSize(R.dimen.split_shade_scrim_transition_distance)
         setSplitShadeEnabled(true)
@@ -68,23 +71,20 @@ class ScrimShadeTransitionControllerTest : SysuiTestCase() {
 
     @Test
     fun onPanelExpansionChanged_inSplitShade_largeDragDownAmount_fractionIsNotGreaterThan1() {
-        whenever(statusBarStateController.currentOrUpcomingState)
-            .thenReturn(StatusBarState.SHADE)
+        whenever(statusBarStateController.currentOrUpcomingState).thenReturn(StatusBarState.SHADE)
         val scrimShadeTransitionDistance =
             context.resources.getDimensionPixelSize(R.dimen.split_shade_scrim_transition_distance)
         setSplitShadeEnabled(true)
 
         controller.onPanelExpansionChanged(
-            EXPANSION_EVENT.copy(dragDownPxAmount = 100f * scrimShadeTransitionDistance)
-        )
+            EXPANSION_EVENT.copy(dragDownPxAmount = 100f * scrimShadeTransitionDistance))
 
         verify(scrimController).setRawPanelExpansionFraction(1f)
     }
 
     @Test
     fun onPanelExpansionChanged_inSplitShade_negativeDragDownAmount_fractionIsNotLessThan0() {
-        whenever(statusBarStateController.currentOrUpcomingState)
-            .thenReturn(StatusBarState.SHADE)
+        whenever(statusBarStateController.currentOrUpcomingState).thenReturn(StatusBarState.SHADE)
         setSplitShadeEnabled(true)
 
         controller.onPanelExpansionChanged(EXPANSION_EVENT.copy(dragDownPxAmount = -100f))
@@ -114,6 +114,30 @@ class ScrimShadeTransitionControllerTest : SysuiTestCase() {
         verify(scrimController).setRawPanelExpansionFraction(EXPANSION_EVENT.fraction)
     }
 
+    @Test
+    fun onPanelExpansionChanged_inSplitShade_panelOpen_setsFractionEqualToEventFraction() {
+        controller.onPanelStateChanged(STATE_OPEN)
+        whenever(statusBarStateController.currentOrUpcomingState)
+            .thenReturn(StatusBarState.KEYGUARD)
+        setSplitShadeEnabled(true)
+
+        controller.onPanelExpansionChanged(EXPANSION_EVENT)
+
+        verify(scrimController).setRawPanelExpansionFraction(EXPANSION_EVENT.fraction)
+    }
+
+    @Test
+    fun onPanelExpansionChanged_inSplitShade_panelClosed_setsFractionEqualToEventFraction() {
+        controller.onPanelStateChanged(STATE_CLOSED)
+        whenever(statusBarStateController.currentOrUpcomingState)
+            .thenReturn(StatusBarState.KEYGUARD)
+        setSplitShadeEnabled(true)
+
+        controller.onPanelExpansionChanged(EXPANSION_EVENT)
+
+        verify(scrimController).setRawPanelExpansionFraction(EXPANSION_EVENT.fraction)
+    }
+
     private fun setSplitShadeEnabled(enabled: Boolean) {
         overrideResource(R.bool.config_use_split_notification_shade, enabled)
         configurationController.notifyConfigurationChanged()
@@ -122,7 +146,6 @@ class ScrimShadeTransitionControllerTest : SysuiTestCase() {
     companion object {
         val EXPANSION_EVENT =
             PanelExpansionChangeEvent(
-                fraction = 0.5f, expanded = true, tracking = true, dragDownPxAmount = 10f
-            )
+                fraction = 0.5f, expanded = true, tracking = true, dragDownPxAmount = 10f)
     }
 }

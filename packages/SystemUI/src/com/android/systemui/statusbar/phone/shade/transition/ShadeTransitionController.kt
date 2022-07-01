@@ -11,6 +11,7 @@ import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.statusbar.phone.panelstate.PanelState
+import com.android.systemui.statusbar.phone.panelstate.panelStateToString
 import com.android.systemui.statusbar.policy.ConfigurationController
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -34,6 +35,8 @@ constructor(
     lateinit var qs: QS
 
     private var inSplitShade = false
+    private var currentPanelState: Int? = null
+    private var lastPanelExpansionChangeEvent: PanelExpansionChangeEvent? = null
 
     private val splitShadeOverScroller by lazy {
         splitShadeOverScrollerFactory.create({ qs }, { notificationStackScrollLayoutController })
@@ -66,10 +69,13 @@ constructor(
     }
 
     private fun onPanelStateChanged(@PanelState state: Int) {
+        currentPanelState = state
         shadeOverScroller.onPanelStateChanged(state)
+        scrimShadeTransitionController.onPanelStateChanged(state)
     }
 
     private fun onPanelExpansionChanged(event: PanelExpansionChangeEvent) {
+        lastPanelExpansionChangeEvent = event
         shadeOverScroller.onDragDownAmountChanged(event.dragDownPxAmount)
         scrimShadeTransitionController.onPanelExpansionChanged(event)
     }
@@ -84,6 +90,8 @@ constructor(
             """
             ShadeTransitionController:
                 inSplitShade: $inSplitShade
+                currentPanelState: ${currentPanelState?.panelStateToString()}
+                lastPanelExpansionChangeEvent: $lastPanelExpansionChangeEvent
                 qs.isInitialized: ${this::qs.isInitialized}
                 npvc.isInitialized: ${this::notificationPanelViewController.isInitialized}
                 nssl.isInitialized: ${this::notificationStackScrollLayoutController.isInitialized}

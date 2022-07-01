@@ -38,7 +38,9 @@ import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
+import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -82,6 +84,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.ColorUtilKt;
 import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.time.SystemClock;
 
@@ -683,7 +686,18 @@ public class MediaControlPanel {
                 WallpaperColors wallpaperColors = WallpaperColors
                         .fromBitmap(artworkIcon.getBitmap());
                 mutableColorScheme = new ColorScheme(wallpaperColors, true, Style.CONTENT);
-                artwork = getScaledBackground(artworkIcon, width, height);
+                Drawable albumArt = getScaledBackground(artworkIcon, width, height);
+                GradientDrawable gradient = (GradientDrawable) mContext
+                        .getDrawable(R.drawable.qs_media_scrim);
+                gradient.setColors(new int[] {
+                        ColorUtilKt.getColorWithAlpha(
+                                MediaColorSchemesKt.backgroundStartFromScheme(mutableColorScheme),
+                                0.25f),
+                        ColorUtilKt.getColorWithAlpha(
+                                MediaColorSchemesKt.backgroundEndFromScheme(mutableColorScheme),
+                                0.9f),
+                });
+                artwork = new LayerDrawable(new Drawable[] { albumArt, gradient });
                 isArtworkBound = true;
             } else {
                 // If there's no artwork, use colors from the app icon
@@ -735,7 +749,7 @@ public class MediaControlPanel {
                 }
 
                 // Transition Colors to current color scheme
-                mColorSchemeTransition.updateColorScheme(colorScheme, mIsArtworkBound);
+                mColorSchemeTransition.updateColorScheme(colorScheme);
 
                 // App icon - use notification icon
                 ImageView appIconView = mMediaViewHolder.getAppIcon();
