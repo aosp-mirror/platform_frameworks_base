@@ -260,7 +260,7 @@ public class CompanionTransportManager {
             } else if (isResponse(message)) {
                 processResponse(message, sequence, data);
             } else {
-                Slog.w(TAG, "Unknown message " + Integer.toHexString(message));
+                Slog.w(TAG, "Unknown message 0x" + Integer.toHexString(message));
             }
         }
 
@@ -288,7 +288,7 @@ public class CompanionTransportManager {
                     break;
                 }
                 default: {
-                    Slog.w(TAG, "Unknown request " + Integer.toHexString(message));
+                    Slog.w(TAG, "Unknown request 0x" + Integer.toHexString(message));
                     sendMessage(MESSAGE_RESPONSE_FAILURE, sequence, EmptyArray.BYTE);
                     break;
                 }
@@ -308,12 +308,14 @@ public class CompanionTransportManager {
             switch (message) {
                 case MESSAGE_RESPONSE_SUCCESS: {
                     future.complete(data);
+                    break;
                 }
                 case MESSAGE_RESPONSE_FAILURE: {
                     future.completeExceptionally(new RuntimeException("Remote failure"));
+                    break;
                 }
                 default: {
-                    Slog.w(TAG, "Ignoring unknown response " + Integer.toHexString(message));
+                    Slog.w(TAG, "Ignoring unknown response 0x" + Integer.toHexString(message));
                 }
             }
         }
