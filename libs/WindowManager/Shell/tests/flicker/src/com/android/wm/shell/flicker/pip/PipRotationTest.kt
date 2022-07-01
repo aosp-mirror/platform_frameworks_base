@@ -29,7 +29,6 @@ import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -94,13 +93,6 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @FlakyTest
     @Test
     override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
-
-    /**
-     * Checks the position of the status bar at the start and end of the transition
-     */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     /**
      * Checks that [fixedApp] layer is within [screenBoundsStart] at the start of the transition
