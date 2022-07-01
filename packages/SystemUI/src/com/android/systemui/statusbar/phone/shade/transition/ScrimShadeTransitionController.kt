@@ -11,6 +11,8 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
+import com.android.systemui.statusbar.phone.panelstate.PanelState
+import com.android.systemui.statusbar.phone.panelstate.STATE_OPENING
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.LargeScreenUtils
 import java.io.PrintWriter
@@ -30,8 +32,9 @@ constructor(
 
     private var inSplitShade = false
     private var splitShadeScrimTransitionDistance = 0
-    private var lastExpansionFraction: Float = 0f
+    private var lastExpansionFraction: Float? = null
     private var lastExpansionEvent: PanelExpansionChangeEvent? = null
+    private var currentPanelState: Int? = null
 
     init {
         updateResources()
@@ -41,8 +44,8 @@ constructor(
                     updateResources()
                 }
             })
-        dumpManager
-            .registerDumpable(ScrimShadeTransitionController::class.java.simpleName, this::dump)
+        dumpManager.registerDumpable(
+            ScrimShadeTransitionController::class.java.simpleName, this::dump)
     }
 
     private fun updateResources() {
@@ -51,20 +54,37 @@ constructor(
             resources.getDimensionPixelSize(R.dimen.split_shade_scrim_transition_distance)
     }
 
-    fun onPanelExpansionChanged(panelExpansionChangeEvent: PanelExpansionChangeEvent) {
-        val expansionFraction = calculateScrimExpansionFraction(panelExpansionChangeEvent)
-        scrimController.setRawPanelExpansionFraction(expansionFraction)
-        lastExpansionFraction = expansionFraction
-        lastExpansionEvent = panelExpansionChangeEvent
+    fun onPanelStateChanged(@PanelState state: Int) {
+        currentPanelState = state
+        onStateChanged()
     }
 
-    private fun calculateScrimExpansionFraction(expansionEvent: PanelExpansionChangeEvent): Float {
-        return if (inSplitShade && isScreenUnlocked()) {
+    fun onPanelExpansionChanged(panelExpansionChangeEvent: PanelExpansionChangeEvent) {
+        lastExpansionEvent = panelExpansionChangeEvent
+        onStateChanged()
+    }
+
+    private fun onStateChanged() {
+        val expansionEvent = lastExpansionEvent ?: return
+        val panelState = currentPanelState
+        val expansionFraction = calculateScrimExpansionFraction(expansionEvent, panelState)
+        scrimController.setRawPanelExpansionFraction(expansionFraction)
+        lastExpansionFraction = expansionFraction
+    }
+
+    private fun calculateScrimExpansionFraction(
+        expansionEvent: PanelExpansionChangeEvent,
+        @PanelState panelState: Int?
+    ): Float {
+        return if (canUseCustomFraction(panelState)) {
             constrain(expansionEvent.dragDownPxAmount / splitShadeScrimTransitionDistance, 0f, 1f)
         } else {
             expansionEvent.fraction
         }
     }
+
+    private fun canUseCustomFraction(panelState: Int?) =
+        inSplitShade && isScreenUnlocked() && panelState == STATE_OPENING
 
     private fun isScreenUnlocked() =
         statusBarStateController.currentOrUpcomingState == StatusBarState.SHADE
@@ -78,9 +98,9 @@ constructor(
                     isScreenUnlocked: ${isScreenUnlocked()}
                     splitShadeScrimTransitionDistance: $splitShadeScrimTransitionDistance
                   State:
+                    currentPanelState: $currentPanelState
                     lastExpansionFraction: $lastExpansionFraction
                     lastExpansionEvent: $lastExpansionEvent
-            """.trimIndent()
-        )
+            """.trimIndent())
     }
 }

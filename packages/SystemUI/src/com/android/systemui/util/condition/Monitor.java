@@ -92,7 +92,15 @@ public class Monitor {
     }
 
     private void updateConditionMetState(Condition condition) {
-        mConditions.get(condition).stream().forEach(token -> mSubscriptions.get(token).update());
+        final ArraySet<Subscription.Token> subscriptions = mConditions.get(condition);
+
+        // It's possible the condition was removed between the time the callback occurred and
+        // update was executed on the main thread.
+        if (subscriptions == null) {
+            return;
+        }
+
+        subscriptions.stream().forEach(token -> mSubscriptions.get(token).update());
     }
 
     /**
