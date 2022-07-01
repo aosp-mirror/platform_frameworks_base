@@ -48,18 +48,9 @@ class SaferParcelChecker : Detector(), SourceCodeScanner {
         return "$prefix$name($parameters)"
     }
 
-    /** Taken from androidx-main:core/core/src/main/java/androidx/core/os/BuildCompat.java */
     private fun isAtLeastT(context: Context): Boolean {
         val project = if (context.isGlobalAnalysis()) context.mainProject else context.project
-        return project.isAndroidProject
-                && project.minSdkVersion.featureLevel >= 32
-                && isAtLeastPreReleaseCodename("Tiramisu", project.minSdkVersion.codename)
-    }
-
-    /** Taken from androidx-main:core/core/src/main/java/androidx/core/os/BuildCompat.java */
-    private fun isAtLeastPreReleaseCodename(min: String, actual: String): Boolean {
-        if (actual == "REL") return false
-        return actual.uppercase(Locale.ROOT) >= min.uppercase(Locale.ROOT)
+        return project.isAndroidProject && project.minSdkVersion.featureLevel >= 33
     }
 
     companion object {

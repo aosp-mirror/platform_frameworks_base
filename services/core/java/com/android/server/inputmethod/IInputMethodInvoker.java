@@ -108,12 +108,17 @@ final class IInputMethodInvoker {
     }
 
     @AnyThread
-    void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
-            int configChanges, boolean stylusHwSupported,
-            @InputMethodNavButtonFlags int navButtonFlags) {
+    void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privilegedOperations,
+            int configChanges, boolean stylusHandWritingSupported,
+            @InputMethodNavButtonFlags int navigationBarFlags) {
+        final IInputMethod.InitParams params = new IInputMethod.InitParams();
+        params.token = token;
+        params.privilegedOperations = privilegedOperations;
+        params.configChanges = configChanges;
+        params.stylusHandWritingSupported = stylusHandWritingSupported;
+        params.navigationBarFlags = navigationBarFlags;
         try {
-            mTarget.initializeInternal(token, privOps, configChanges, stylusHwSupported,
-                    navButtonFlags);
+            mTarget.initializeInternal(params);
         } catch (RemoteException e) {
             logRemoteException(e);
         }
@@ -148,13 +153,19 @@ final class IInputMethodInvoker {
     }
 
     @AnyThread
-    void startInput(IBinder startInputToken, IRemoteInputConnection inputConnection,
+    void startInput(IBinder startInputToken, IRemoteInputConnection remoteInputConnection,
             EditorInfo editorInfo, boolean restarting,
             @InputMethodNavButtonFlags int navButtonFlags,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
+        final IInputMethod.StartInputParams params = new IInputMethod.StartInputParams();
+        params.startInputToken = startInputToken;
+        params.remoteInputConnection = remoteInputConnection;
+        params.editorInfo = editorInfo;
+        params.restarting = restarting;
+        params.navigationBarFlags = navButtonFlags;
+        params.imeDispatcher = imeDispatcher;
         try {
-            mTarget.startInput(startInputToken, inputConnection, editorInfo, restarting,
-                    navButtonFlags, imeDispatcher);
+            mTarget.startInput(params);
         } catch (RemoteException e) {
             logRemoteException(e);
         }

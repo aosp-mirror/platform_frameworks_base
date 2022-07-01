@@ -99,12 +99,6 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
         post(companionService -> companionService.onDeviceDisappeared(associationInfo));
     }
 
-    void postOnMessageDispatchedFromSystem(int associationId, int messageId,
-            @NonNull byte[] message) {
-        post(companionService ->
-                companionService.onMessageDispatchedFromSystem(messageId, associationId, message));
-    }
-
     /**
      * Post "unbind" job, which will run *after* all previously posted jobs complete.
      *

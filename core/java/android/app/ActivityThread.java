@@ -5857,16 +5857,16 @@ public final class ActivityThread extends ClientTransactionHandler
 
         final boolean movedToDifferentDisplay = isDifferentDisplay(activity.getDisplayId(),
                 displayId);
-        final Configuration currentResConfig = activity.getResources().getConfiguration();
-        final int diff = currentResConfig.diffPublicOnly(newConfig);
-        final boolean hasPublicResConfigChange = diff != 0;
+        final Configuration currentConfig = activity.mCurrentConfig;
+        final int diff = currentConfig.diffPublicOnly(newConfig);
+        final boolean hasPublicConfigChange = diff != 0;
         final ActivityClientRecord r = getActivityClient(activityToken);
         // TODO(b/173090263): Use diff instead after the improvement of AssetManager and
         // ResourcesImpl constructions.
-        final boolean shouldUpdateResources = hasPublicResConfigChange
-                || shouldUpdateResources(activityToken, currentResConfig, newConfig,
-                amOverrideConfig, movedToDifferentDisplay, hasPublicResConfigChange);
-        final boolean shouldReportChange = shouldReportChange(activity.mCurrentConfig, newConfig,
+        final boolean shouldUpdateResources = hasPublicConfigChange
+                || shouldUpdateResources(activityToken, currentConfig, newConfig, amOverrideConfig,
+                movedToDifferentDisplay, hasPublicConfigChange);
+        final boolean shouldReportChange = shouldReportChange(diff, currentConfig, newConfig,
                 r != null ? r.mSizeConfigurations : null,
                 activity.mActivityInfo.getRealConfigChanged());
         // Nothing significant, don't proceed with updating and reporting.
@@ -5890,6 +5890,9 @@ public final class ActivityThread extends ClientTransactionHandler
                 amOverrideConfig, contextThemeWrapperOverrideConfig);
         mResourcesManager.updateResourcesForActivity(activityToken, finalOverrideConfig, displayId);
 
+        activity.mConfigChangeFlags = 0;
+        activity.mCurrentConfig = new Configuration(newConfig);
+
         // Apply the ContextThemeWrapper override if necessary.
         // NOTE: Make sure the configurations are not modified, as they are treated as immutable
         // in many places.
@@ -5900,10 +5903,8 @@ public final class ActivityThread extends ClientTransactionHandler
             activity.dispatchMovedToDisplay(displayId, configToReport);
         }
 
-        activity.mConfigChangeFlags = 0;
         if (shouldReportChange) {
             activity.mCalled = false;
-            activity.mCurrentConfig = new Configuration(newConfig);
             activity.onConfigurationChanged(configToReport);
             if (!activity.mCalled) {
                 throw new SuperNotCalledException("Activity " + activity.getLocalClassName() +
@@ -5918,6 +5919,8 @@ public final class ActivityThread extends ClientTransactionHandler
      * Returns {@code true} if {@link Activity#onConfigurationChanged(Configuration)} should be
      * dispatched.
      *
+     * @param publicDiff Usually computed by {@link Configuration#diffPublicOnly(Configuration)}.
+     *                   This parameter is to prevent we compute it again.
      * @param currentConfig The current configuration cached in {@link Activity#mCurrentConfig}.
      *                      It is {@code null} before the first config update from the server side.
      * @param newConfig The updated {@link Configuration}
@@ -5926,10 +5929,9 @@ public final class ActivityThread extends ClientTransactionHandler
      * @return {@code true} if the config change should be reported to the Activity
      */
     @VisibleForTesting
-    public static boolean shouldReportChange(@Nullable Configuration currentConfig,
+    public static boolean shouldReportChange(int publicDiff, @Nullable Configuration currentConfig,
             @NonNull Configuration newConfig, @Nullable SizeConfigurationBuckets sizeBuckets,
             int handledConfigChanges) {
-        final int publicDiff = currentConfig.diffPublicOnly(newConfig);
         // Don't report the change if there's no public diff between current and new config.
         if (publicDiff == 0) {
             return false;

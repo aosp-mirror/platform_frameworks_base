@@ -2351,47 +2351,6 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public static void setDisplayProjection(IBinder displayToken,
-            int orientation, Rect layerStackRect, Rect displayRect) {
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setDisplayProjection(displayToken, orientation,
-                    layerStackRect, displayRect);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public static void setDisplayLayerStack(IBinder displayToken, int layerStack) {
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setDisplayLayerStack(displayToken, layerStack);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public static void setDisplaySurface(IBinder displayToken, Surface surface) {
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setDisplaySurface(displayToken, surface);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public static void setDisplaySize(IBinder displayToken, int width, int height) {
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setDisplaySize(displayToken, width, height);
-        }
-    }
-
-    /**
      * Overrides HDR modes for a display device.
      *
      * If the caller does not have ACCESS_SURFACE_FLINGER permission, this will throw a Security

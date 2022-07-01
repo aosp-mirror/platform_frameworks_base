@@ -27,6 +27,8 @@ import com.android.systemui.log.LogBufferFactory;
 import com.android.systemui.log.LogcatEchoTracker;
 import com.android.systemui.log.LogcatEchoTrackerDebug;
 import com.android.systemui.log.LogcatEchoTrackerProd;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
+import com.android.systemui.util.Compile;
 
 import dagger.Module;
 import dagger.Provides;
@@ -48,8 +50,14 @@ public class LogModule {
     @Provides
     @SysUISingleton
     @NotificationLog
-    public static LogBuffer provideNotificationsLogBuffer(LogBufferFactory factory) {
-        return factory.create("NotifLog", 1000 /* maxSize */, false /* systrace */);
+    public static LogBuffer provideNotificationsLogBuffer(
+            LogBufferFactory factory,
+            NotifPipelineFlags notifPipelineFlags) {
+        int maxSize = 1000;
+        if (Compile.IS_DEBUG && notifPipelineFlags.isDevLoggingEnabled()) {
+            maxSize *= 10;
+        }
+        return factory.create("NotifLog", maxSize, false /* systrace */);
     }
 
     /** Provides a logging buffer for logs related to heads up presentation of notifications. */

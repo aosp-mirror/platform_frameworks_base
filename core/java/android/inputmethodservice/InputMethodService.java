@@ -144,7 +144,7 @@ import android.window.WindowMetricsHelper;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
-import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
@@ -698,23 +698,21 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public final void initializeInternal(@NonNull IBinder token,
-                IInputMethodPrivilegedOperations privilegedOperations, int configChanges,
-                boolean stylusHwSupported, @InputMethodNavButtonFlags int navButtonFlags) {
+        public final void initializeInternal(@NonNull IInputMethod.InitParams params) {
             if (mDestroyed) {
                 Log.i(TAG, "The InputMethodService has already onDestroyed()."
                     + "Ignore the initialization.");
                 return;
             }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.initializeInternal");
-            mConfigTracker.onInitialize(configChanges);
-            mPrivOps.set(privilegedOperations);
-            InputMethodPrivilegedOperationsRegistry.put(token, mPrivOps);
-            if (stylusHwSupported) {
+            mConfigTracker.onInitialize(params.configChanges);
+            mPrivOps.set(params.privilegedOperations);
+            InputMethodPrivilegedOperationsRegistry.put(params.token, mPrivOps);
+            if (params.stylusHandWritingSupported) {
                 mInkWindow = new InkWindow(mWindow.getContext());
             }
-            mNavigationBarController.onNavButtonFlagsChanged(navButtonFlags);
-            attachToken(token);
+            mNavigationBarController.onNavButtonFlagsChanged(params.navigationBarFlags);
+            attachToken(params.token);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
@@ -821,25 +819,23 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public final void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
-                @NonNull EditorInfo editorInfo, boolean restarting,
-                @NonNull IBinder startInputToken, @InputMethodNavButtonFlags int navButtonFlags,
-                @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
-            mPrivOps.reportStartInputAsync(startInputToken);
-            mNavigationBarController.onNavButtonFlagsChanged(navButtonFlags);
-            if (restarting) {
-                restartInput(inputConnection, editorInfo);
+        public final void dispatchStartInput(@Nullable InputConnection inputConnection,
+                @NonNull IInputMethod.StartInputParams params) {
+            mPrivOps.reportStartInputAsync(params.startInputToken);
+            mNavigationBarController.onNavButtonFlagsChanged(params.navigationBarFlags);
+            if (params.restarting) {
+                restartInput(inputConnection, params.editorInfo);
             } else {
-                startInput(inputConnection, editorInfo);
+                startInput(inputConnection, params.editorInfo);
             }
             // Update the IME dispatcher last, so that the previously registered back callback
             // (if any) can be unregistered using the old dispatcher if {@link #doFinishInput()}
             // is called from {@link #startInput(InputConnection, EditorInfo)} or
             // {@link #restartInput(InputConnection, EditorInfo)}.
-            mImeDispatcher = imeDispatcher;
+            mImeDispatcher = params.imeDispatcher;
             if (mWindow != null) {
                 mWindow.getOnBackInvokedDispatcher().setImeOnBackInvokedDispatcher(
-                        imeDispatcher);
+                        params.imeDispatcher);
             }
         }
 

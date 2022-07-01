@@ -729,7 +729,7 @@ class SaferParcelCheckerTest : LintDetectorTest() {
 
     private val includes =
         arrayOf(
-            manifest().minSdk("Tiramisu"),
+            manifest().minSdk("33"),
             java(
                 """
                         package android.os;
