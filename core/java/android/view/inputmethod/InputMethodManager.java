@@ -490,13 +490,6 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     private Matrix mVirtualDisplayToScreenMatrix = null;
 
-    /**
-     * As reported by {@link InputBindResult}. This value is determined by
-     * {@link com.android.internal.R.styleable#InputMethod_suppressesSpellChecking}.
-     */
-    @GuardedBy("mH")
-    private boolean mIsInputMethodSuppressingSpellChecker = false;
-
     // -----------------------------------------------------------
 
     /**
@@ -512,7 +505,7 @@ public final class InputMethodManager {
     /**
      * Kept for {@link UnsupportedAppUsage}.  Not officially maintained.
      *
-     * @deprecated New code should use {@link #mCurrentInputMethodSession}.
+     * @deprecated New code should use {@code mCurBindState.mImeSession}.
      */
     @Deprecated
     @GuardedBy("mH")
@@ -521,11 +514,12 @@ public final class InputMethodManager {
     IInputMethodSession mCurMethod;
 
     /**
-     * Encapsulates IPCs to the currently connected InputMethodService.
+     * Encapsulates per-binding state from {@link InputBindResult}.
      */
-    @Nullable
     @GuardedBy("mH")
-    private IInputMethodSessionInvoker mCurrentInputMethodSession = null;
+    @Nullable
+    private BindState mCurBindState;
+
     /**
      * Encapsulates IPCs to the currently connected AccessibilityServices.
      */
@@ -692,8 +686,8 @@ public final class InputMethodManager {
         public void finishInputAndReportToIme() {
             synchronized (mH) {
                 finishInputLocked();
-                if (mCurrentInputMethodSession != null) {
-                    mCurrentInputMethodSession.finishInput();
+                if (isImeSessionAvailableLocked()) {
+                    mCurBindState.mImeSession.finishInput();
                 }
                 forAccessibilitySessionsLocked(
                         IAccessibilityInputMethodSessionInvoker::finishInput);
@@ -822,8 +816,7 @@ public final class InputMethodManager {
         @Override
         public boolean hasActiveConnection(View view) {
             synchronized (mH) {
-                if (!hasServedByInputMethodLocked(view)
-                        || mCurrentInputMethodSession == null) {
+                if (!hasServedByInputMethodLocked(view) || !isImeSessionAvailableLocked()) {
                     return false;
                 }
 
@@ -931,13 +924,10 @@ public final class InputMethodManager {
 
                         setInputChannelLocked(res.channel);
                         mCurMethod = res.method; // for @UnsupportedAppUsage
-                        mCurrentInputMethodSession =
-                                IInputMethodSessionInvoker.createOrNull(res.method);
+                        mCurBindState = new BindState(res);
                         mCurId = res.id;
                         mBindSequence = res.sequence;
                         mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
-                        mIsInputMethodSuppressingSpellChecker =
-                                res.isInputMethodSuppressingSpellChecker;
                     }
                     startInputInner(StartInputReason.BOUND_TO_IMMS, null, 0, 0, 0);
                     return;
@@ -1127,7 +1117,7 @@ public final class InputMethodManager {
                         }
                         mVirtualDisplayToScreenMatrix.setValues(matrixValues);
 
-                        if (mCursorAnchorInfo == null || mCurrentInputMethodSession == null
+                        if (mCursorAnchorInfo == null || !isImeSessionAvailableLocked()
                                 || mServedInputConnection == null) {
                             return;
                         }
@@ -1136,7 +1126,7 @@ public final class InputMethodManager {
                         }
                         // Since the host VirtualDisplay is moved, we need to issue
                         // IMS#updateCursorAnchorInfo() again.
-                        mCurrentInputMethodSession.updateCursorAnchorInfo(
+                        mCurBindState.mImeSession.updateCursorAnchorInfo(
                                 CursorAnchorInfo.createForAdditionalParentMatrix(
                                         mCursorAnchorInfo, mVirtualDisplayToScreenMatrix));
                     }
@@ -1652,7 +1642,8 @@ public final class InputMethodManager {
      */
     public boolean isInputMethodSuppressingSpellChecker() {
         synchronized (mH) {
-            return mIsInputMethodSuppressingSpellChecker;
+            return mCurBindState != null
+                    && mCurBindState.mIsInputMethodSuppressingSpellChecker;
         }
     }
 
@@ -1668,8 +1659,7 @@ public final class InputMethodManager {
         mBindSequence = -1;
         mCurId = null;
         mCurMethod = null; // for @UnsupportedAppUsage
-        mCurrentInputMethodSession = null;
-        mIsInputMethodSuppressingSpellChecker = false;
+        mCurBindState = null;
     }
 
     /**
@@ -1762,8 +1752,8 @@ public final class InputMethodManager {
             }
 
             mCompletions = completions;
-            if (mCurrentInputMethodSession != null) {
-                mCurrentInputMethodSession.displayCompletions(mCompletions);
+            if (isImeSessionAvailableLocked()) {
+                mCurBindState.mImeSession.displayCompletions(mCompletions);
             }
         }
     }
@@ -1782,8 +1772,8 @@ public final class InputMethodManager {
                 return;
             }
 
-            if (mCurrentInputMethodSession != null) {
-                mCurrentInputMethodSession.updateExtractedText(token, text);
+            if (isImeSessionAvailableLocked()) {
+                mCurBindState.mImeSession.updateExtractedText(token, text);
             }
         }
     }
@@ -2218,7 +2208,7 @@ public final class InputMethodManager {
                 // OK to ignore because the calling InputConnection is already abandoned.
                 return true;
             }
-            if (mCurrentInputMethodSession == null) {
+            if (!isImeSessionAvailableLocked()) {
                 // IME is not yet bound to the client.  Need to fall back to the restartInput().
                 return false;
             }
@@ -2229,7 +2219,7 @@ public final class InputMethodManager {
             mCursorCandEnd = textSnapshot.getCompositionEnd();
             editorInfo.initialCapsMode = textSnapshot.getCursorCapsMode();
             editorInfo.setInitialSurroundingTextInternal(textSnapshot.getSurroundingText());
-            mCurrentInputMethodSession.invalidateInput(editorInfo, mServedInputConnection,
+            mCurBindState.mImeSession.invalidateInput(editorInfo, mServedInputConnection,
                     sessionId);
             final IRemoteAccessibilityInputConnection accessibilityInputConnection =
                     mServedInputConnection.asIRemoteAccessibilityInputConnection();
@@ -2436,12 +2426,11 @@ public final class InputMethodManager {
                 return false;
             }
             mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
-            mIsInputMethodSuppressingSpellChecker = res.isInputMethodSuppressingSpellChecker;
             if (res.id != null) {
                 setInputChannelLocked(res.channel);
                 mBindSequence = res.sequence;
                 mCurMethod = res.method; // for @UnsupportedAppUsage
-                mCurrentInputMethodSession = IInputMethodSessionInvoker.createOrNull(res.method);
+                mCurBindState = new BindState(res);
                 mAccessibilityInputMethodSession.clear();
                 if (res.accessibilitySessions != null) {
                     for (int i = 0; i < res.accessibilitySessions.size(); i++) {
@@ -2464,8 +2453,8 @@ public final class InputMethodManager {
                     break;
             }
             if (mCompletions != null) {
-                if (mCurrentInputMethodSession != null) {
-                    mCurrentInputMethodSession.displayCompletions(mCompletions);
+                if (isImeSessionAvailableLocked()) {
+                    mCurBindState.mImeSession.displayCompletions(mCompletions);
                 }
             }
         }
@@ -2630,7 +2619,7 @@ public final class InputMethodManager {
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#notifyImeHidden", this,
                 null /* icProto */);
         synchronized (mH) {
-            if (mCurrentInputMethodSession != null && mCurRootView != null
+            if (isImeSessionAvailableLocked() && mCurRootView != null
                     && mCurRootView.getWindowToken() == windowToken) {
                 try {
                     mService.hideSoftInput(mClient, windowToken, 0 /* flags */,
@@ -2681,7 +2670,7 @@ public final class InputMethodManager {
         checkFocus();
         synchronized (mH) {
             if (!hasServedByInputMethodLocked(view) || mCurrentEditorInfo == null
-                    || mCurrentInputMethodSession == null) {
+                    || !isImeSessionAvailableLocked()) {
                 return;
             }
 
@@ -2695,9 +2684,9 @@ public final class InputMethodManager {
                 if (DEBUG) Log.d(TAG, "updateSelection");
 
                 if (DEBUG) {
-                    Log.v(TAG, "SELECTION CHANGE: " + mCurrentInputMethodSession);
+                    Log.v(TAG, "SELECTION CHANGE: " + mCurBindState.mImeSession);
                 }
-                mCurrentInputMethodSession.updateSelection(mCursorSelStart, mCursorSelEnd, selStart,
+                mCurBindState.mImeSession.updateSelection(mCursorSelStart, mCursorSelEnd, selStart,
                         selEnd, candidatesStart, candidatesEnd);
                 forAccessibilitySessionsLocked(wrapper -> wrapper.updateSelection(mCursorSelStart,
                         mCursorSelEnd, selStart, selEnd, candidatesStart, candidatesEnd));
@@ -2738,11 +2727,11 @@ public final class InputMethodManager {
         checkFocus();
         synchronized (mH) {
             if (!hasServedByInputMethodLocked(view) || mCurrentEditorInfo == null
-                    || mCurrentInputMethodSession == null) {
+                    || !isImeSessionAvailableLocked()) {
                 return;
             }
             if (DEBUG) Log.v(TAG, "onViewClicked: " + focusChanged);
-            mCurrentInputMethodSession.viewClicked(focusChanged);
+            mCurBindState.mImeSession.viewClicked(focusChanged);
         }
     }
 
@@ -2807,15 +2796,15 @@ public final class InputMethodManager {
         checkFocus();
         synchronized (mH) {
             if (!hasServedByInputMethodLocked(view) || mCurrentEditorInfo == null
-                    || mCurrentInputMethodSession == null) {
+                    || !isImeSessionAvailableLocked()) {
                 return;
             }
 
             mTmpCursorRect.set(left, top, right, bottom);
             if (!mCursorRect.equals(mTmpCursorRect)) {
-                if (DEBUG) Log.d(TAG, "updateCursor: " + mCurrentInputMethodSession);
+                if (DEBUG) Log.d(TAG, "updateCursor: " + mCurBindState.mImeSession);
 
-                mCurrentInputMethodSession.updateCursor(mTmpCursorRect);
+                mCurBindState.mImeSession.updateCursor(mTmpCursorRect);
                 mCursorRect.set(mTmpCursorRect);
             }
         }
@@ -2839,7 +2828,7 @@ public final class InputMethodManager {
         checkFocus();
         synchronized (mH) {
             if (!hasServedByInputMethodLocked(view) || mCurrentEditorInfo == null
-                    || mCurrentInputMethodSession == null) {
+                    || !isImeSessionAvailableLocked()) {
                 return;
             }
             // If immediate bit is set, we will call updateCursorAnchorInfo() even when the data has
@@ -2857,11 +2846,11 @@ public final class InputMethodManager {
             }
             if (DEBUG) Log.v(TAG, "updateCursorAnchorInfo: " + cursorAnchorInfo);
             if (mVirtualDisplayToScreenMatrix != null) {
-                mCurrentInputMethodSession.updateCursorAnchorInfo(
+                mCurBindState.mImeSession.updateCursorAnchorInfo(
                         CursorAnchorInfo.createForAdditionalParentMatrix(
                                 cursorAnchorInfo, mVirtualDisplayToScreenMatrix));
             } else {
-                mCurrentInputMethodSession.updateCursorAnchorInfo(cursorAnchorInfo);
+                mCurBindState.mImeSession.updateCursorAnchorInfo(cursorAnchorInfo);
             }
             mCursorAnchorInfo = cursorAnchorInfo;
         }
@@ -2889,11 +2878,11 @@ public final class InputMethodManager {
         checkFocus();
         synchronized (mH) {
             if (!hasServedByInputMethodLocked(view) || mCurrentEditorInfo == null
-                    || mCurrentInputMethodSession == null) {
+                    || !isImeSessionAvailableLocked()) {
                 return;
             }
             if (DEBUG) Log.v(TAG, "APP PRIVATE COMMAND " + action + ": " + data);
-            mCurrentInputMethodSession.appPrivateCommand(action, data);
+            mCurBindState.mImeSession.appPrivateCommand(action, data);
         }
     }
 
@@ -3052,7 +3041,7 @@ public final class InputMethodManager {
     public int dispatchInputEvent(InputEvent event, Object token,
             FinishedInputEventCallback callback, Handler handler) {
         synchronized (mH) {
-            if (mCurrentInputMethodSession != null) {
+            if (isImeSessionAvailableLocked()) {
                 if (event instanceof KeyEvent) {
                     KeyEvent keyEvent = (KeyEvent)event;
                     if (keyEvent.getAction() == KeyEvent.ACTION_DOWN
@@ -3064,7 +3053,7 @@ public final class InputMethodManager {
                 }
 
                 if (DEBUG) {
-                    Log.v(TAG, "DISPATCH INPUT EVENT: " + mCurrentInputMethodSession);
+                    Log.v(TAG, "DISPATCH INPUT EVENT: " + mCurBindState.mImeSession);
                 }
 
                 PendingEvent p = obtainPendingEventLocked(
@@ -3600,8 +3589,8 @@ public final class InputMethodManager {
                 + " mBindSequence=" + mBindSequence
                 + " mCurId=" + mCurId);
         p.println("  mFullscreenMode=" + mFullscreenMode);
-        if (mCurrentInputMethodSession != null) {
-            p.println("  mCurMethod=" + mCurrentInputMethodSession);
+        if (isImeSessionAvailableLocked()) {
+            p.println("  mCurMethod=" + mCurBindState.mImeSession);
         } else {
             p.println("  mCurMethod= null");
         }
@@ -3677,6 +3666,31 @@ public final class InputMethodManager {
         }
     }
 
+    private static final class BindState {
+        /**
+         * Encapsulates IPCs to the currently connected InputMethodService.
+         */
+        @Nullable
+        final IInputMethodSessionInvoker mImeSession;
+
+        /**
+         * As reported by {@link InputBindResult}. This value is determined by
+         * {@link com.android.internal.R.styleable#InputMethod_suppressesSpellChecking}.
+         */
+        final boolean mIsInputMethodSuppressingSpellChecker;
+
+        BindState(@NonNull InputBindResult inputBindResult) {
+            mImeSession = IInputMethodSessionInvoker.createOrNull(inputBindResult.method);
+            mIsInputMethodSuppressingSpellChecker =
+                    inputBindResult.isInputMethodSuppressingSpellChecker;
+        }
+    }
+
+    @GuardedBy("mH")
+    private boolean isImeSessionAvailableLocked() {
+        return mCurBindState != null && mCurBindState.mImeSession != null;
+    }
+
     private static String dumpViewInfo(@Nullable final View view) {
         if (view == null) {
             return "null";
@@ -3726,7 +3740,7 @@ public final class InputMethodManager {
      */
     @GuardedBy("mH")
     public void dumpDebug(ProtoOutputStream proto, @Nullable byte[] icProto) {
-        if (mCurrentInputMethodSession == null) {
+        if (!isImeSessionAvailableLocked()) {
             return;
         }
 
