@@ -57,6 +57,8 @@ import java.util.Set;
  * NotificationManagerService helper for handling snoozed notifications.
  */
 public class SnoozeHelper {
+    static final int CONCURRENT_SNOOZE_LIMIT = 500;
+
     private static final String TAG = "SnoozeHelper";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final String INDENT = "    ";
@@ -89,6 +91,13 @@ public class SnoozeHelper {
         mAm = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mCallback = callback;
         mUserProfiles = userProfiles;
+    }
+
+    protected boolean canSnooze(int numberToSnooze) {
+        if ((mPackages.size() + numberToSnooze) > CONCURRENT_SNOOZE_LIMIT) {
+            return false;
+        }
+        return true;
     }
 
     protected boolean isSnoozed(int userId, String pkg, String key) {
