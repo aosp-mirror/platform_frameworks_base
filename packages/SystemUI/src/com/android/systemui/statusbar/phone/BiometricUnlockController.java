@@ -448,7 +448,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
         // During wake and unlock, we need to draw black before waking up to avoid abrupt
         // brightness changes due to display state transitions.
-        boolean alwaysOnEnabled = mDozeParameters.getAlwaysOn();
         Runnable wakeUp = ()-> {
             if (!wasDeviceInteractive) {
                 if (DEBUG_BIO_WAKELOCK) {
@@ -659,7 +658,10 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             mLatencyTracker.onActionCancel(action);
         }
 
-        if (biometricSourceType == BiometricSourceType.FINGERPRINT
+        if (!mVibratorHelper.hasVibrator()
+                && (!mUpdateMonitor.isDeviceInteractive() || mUpdateMonitor.isDreaming())) {
+            startWakeAndUnlock(MODE_SHOW_BOUNCER);
+        } else if (biometricSourceType == BiometricSourceType.FINGERPRINT
                 && mUpdateMonitor.isUdfpsSupported()) {
             long currUptimeMillis = SystemClock.uptimeMillis();
             if (currUptimeMillis - mLastFpFailureUptimeMillis < mConsecutiveFpFailureThreshold) {
