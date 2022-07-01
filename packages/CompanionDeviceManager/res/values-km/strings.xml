@@ -39,7 +39,7 @@
     <string name="profile_name_generic" msgid="6851028682723034988">"ឧបករណ៍"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"អនុញ្ញាត"</string>
-    <string name="consent_no" msgid="2640796915611404382">"កុំអនុញ្ញាត"</string>
+    <string name="consent_no" msgid="2640796915611404382">"មិនអនុញ្ញាត"</string>
     <string name="consent_back" msgid="2560683030046918882">"ថយក្រោយ"</string>
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"ផ្ទេរការអនុញ្ញាតកម្មវិធីទៅនាឡិការបស់អ្នក"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"ដើម្បីជួយឱ្យការរៀបចំនាឡិការបស់អ្នកកាន់តែងាយស្រួល កម្មវិធីដែលបានដំឡើងនៅលើនាឡិការបស់អ្នកអំឡុងពេលរៀបចំនឹងប្រើការអនុញ្ញាតដូចគ្នានឹងទូរសព្ទរបស់អ្នកដែរ។\n\n ការអនុញ្ញាតទាំងនេះអាចរួមបញ្ចូលសិទ្ធិចូលប្រើទីតាំង និងមីក្រូហ្វូនរបស់នាឡិកាអ្នក។"</string>
