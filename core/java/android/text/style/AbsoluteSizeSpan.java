@@ -130,4 +130,10 @@ public class AbsoluteSizeSpan extends MetricAffectingSpan implements ParcelableS
             ds.setTextSize(mSize);
         }
     }
+
+
+    @Override
+    public String toString() {
+        return "AbsoluteSizeSpan{size=" + getSize() + ", isDip=" + getDip() + '}';
+    }
 }

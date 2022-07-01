@@ -77,4 +77,9 @@ public class StrikethroughSpan extends CharacterStyle
     public void updateDrawState(@NonNull TextPaint ds) {
         ds.setStrikeThruText(true);
     }
+
+    @Override
+    public String toString() {
+        return "StrikethroughSpan{}";
+    }
 }

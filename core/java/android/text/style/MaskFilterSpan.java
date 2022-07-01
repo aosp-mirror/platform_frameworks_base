@@ -56,4 +56,9 @@ public class MaskFilterSpan extends CharacterStyle implements UpdateAppearance {
     public void updateDrawState(TextPaint ds) {
         ds.setMaskFilter(mFilter);
     }
+
+    @Override
+    public String toString() {
+        return "MaskFilterSpan{filter=" + getMaskFilter() + '}';
+    }
 }

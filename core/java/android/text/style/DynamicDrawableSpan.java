@@ -189,5 +189,13 @@ public abstract class DynamicDrawableSpan extends ReplacementSpan {
 
         return d;
     }
+
+    @Override
+    public String toString() {
+        return "DynamicDrawableSpan{"
+                + "verticalAlignment=" + getVerticalAlignment()
+                + ", drawable=" + getDrawable()
+                + '}';
+    }
 }
 
