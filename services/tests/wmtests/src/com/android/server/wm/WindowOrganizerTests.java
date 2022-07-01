@@ -30,7 +30,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
-import static android.view.InsetsState.ITYPE_LOCAL_NAVIGATION_BAR_1;
+import static android.view.InsetsState.ITYPE_TOP_GENERIC_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -762,11 +762,11 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.addRectInsetsProvider(navigationBarInsetsReceiverTask.mRemoteToken
                         .toWindowContainerToken(), navigationBarInsetsProviderRect,
-                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+                new int[]{ITYPE_TOP_GENERIC_OVERLAY});
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
 
         assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSourceProviders
-                .valueAt(0).getSource().getType()).isEqualTo(ITYPE_LOCAL_NAVIGATION_BAR_1);
+                .valueAt(0).getSource().getType()).isEqualTo(ITYPE_TOP_GENERIC_OVERLAY);
     }
 
     @Test
@@ -782,12 +782,12 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.addRectInsetsProvider(navigationBarInsetsReceiverTask.mRemoteToken
                         .toWindowContainerToken(), navigationBarInsetsProviderRect,
-                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+                new int[]{ITYPE_TOP_GENERIC_OVERLAY});
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
 
         final WindowContainerTransaction wct2 = new WindowContainerTransaction();
         wct2.removeInsetsProvider(navigationBarInsetsReceiverTask.mRemoteToken
-                .toWindowContainerToken(), new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+                .toWindowContainerToken(), new int[]{ITYPE_TOP_GENERIC_OVERLAY});
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct2);
 
         assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSourceProviders.size()).isEqualTo(0);
