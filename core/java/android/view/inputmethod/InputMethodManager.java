@@ -496,9 +496,13 @@ public final class InputMethodManager {
      * Sequence number of this binding, as returned by the server.
      */
     int mBindSequence = -1;
+
     /**
      * ID of the method we are bound to.
+     *
+     * @deprecated New code should use {@code mCurBindState.mImeId}.
      */
+    @Deprecated
     @UnsupportedAppUsage
     String mCurId;
 
@@ -925,7 +929,7 @@ public final class InputMethodManager {
                         setInputChannelLocked(res.channel);
                         mCurMethod = res.method; // for @UnsupportedAppUsage
                         mCurBindState = new BindState(res);
-                        mCurId = res.id;
+                        mCurId = res.id; // for @UnsupportedAppUsage
                         mBindSequence = res.sequence;
                         mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
                     }
@@ -1657,7 +1661,7 @@ public final class InputMethodManager {
         setInputChannelLocked(null);
         // We only reset sequence number for input method, but not accessibility.
         mBindSequence = -1;
-        mCurId = null;
+        mCurId = null; // for @UnsupportedAppUsage
         mCurMethod = null; // for @UnsupportedAppUsage
         mCurBindState = null;
     }
@@ -2443,7 +2447,7 @@ public final class InputMethodManager {
                         }
                     }
                 }
-                mCurId = res.id;
+                mCurId = res.id; // for @UnsupportedAppUsage
             } else if (res.channel != null && res.channel != mCurChannel) {
                 res.channel.dispose();
             }
@@ -3057,7 +3061,7 @@ public final class InputMethodManager {
                 }
 
                 PendingEvent p = obtainPendingEventLocked(
-                        event, token, mCurId, callback, handler);
+                        event, token, mCurBindState.mImeId, callback, handler);
                 if (mMainLooper.isCurrentThread()) {
                     // Already running on the IMM thread so we can send the event immediately.
                     return sendInputEventOnMainLooperLocked(p);
@@ -3144,7 +3148,8 @@ public final class InputMethodManager {
                 return DISPATCH_IN_PROGRESS;
             }
 
-            Log.w(TAG, "Unable to send input event to IME: " + mCurId + " dropping: " + event);
+            Log.w(TAG, "Unable to send input event to IME: " + getImeIdLocked()
+                    + " dropping: " + event);
         }
         return DISPATCH_NOT_HANDLED;
     }
@@ -3587,7 +3592,7 @@ public final class InputMethodManager {
         p.println("  mActive=" + mActive
                 + " mRestartOnNextWindowFocus=" + mRestartOnNextWindowFocus
                 + " mBindSequence=" + mBindSequence
-                + " mCurId=" + mCurId);
+                + " mCurImeId=" + getImeIdLocked());
         p.println("  mFullscreenMode=" + mFullscreenMode);
         if (isImeSessionAvailableLocked()) {
             p.println("  mCurMethod=" + mCurBindState.mImeSession);
@@ -3679,16 +3684,28 @@ public final class InputMethodManager {
          */
         final boolean mIsInputMethodSuppressingSpellChecker;
 
+        /**
+         * As reported by {@link InputBindResult}. This value indicates the bound input method ID.
+         */
+        @Nullable
+        final String mImeId;
+
         BindState(@NonNull InputBindResult inputBindResult) {
             mImeSession = IInputMethodSessionInvoker.createOrNull(inputBindResult.method);
             mIsInputMethodSuppressingSpellChecker =
                     inputBindResult.isInputMethodSuppressingSpellChecker;
+            mImeId = inputBindResult.id;
         }
     }
 
     @GuardedBy("mH")
     private boolean isImeSessionAvailableLocked() {
         return mCurBindState != null && mCurBindState.mImeSession != null;
+    }
+
+    @GuardedBy("mH")
+    private String getImeIdLocked() {
+        return mCurBindState != null ? mCurBindState.mImeId : null;
     }
 
     private static String dumpViewInfo(@Nullable final View view) {
@@ -3747,7 +3764,7 @@ public final class InputMethodManager {
         proto.write(DISPLAY_ID, mDisplayId);
         final long token = proto.start(INPUT_METHOD_MANAGER);
         synchronized (mH) {
-            proto.write(CUR_ID, mCurId);
+            proto.write(CUR_ID, mCurBindState.mImeId);
             proto.write(FULLSCREEN_MODE, mFullscreenMode);
             proto.write(ACTIVE, mActive);
             proto.write(SERVED_CONNECTING, mServedConnecting);
