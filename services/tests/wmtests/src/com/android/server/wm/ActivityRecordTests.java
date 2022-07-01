@@ -2002,7 +2002,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                     anyInt() /* viewVisibility */, anyInt() /* displayId */,
                     any() /* requestedVisibilities */, any() /* outInputChannel */,
                     any() /* outInsetsState */, any() /* outActiveControls */,
-                    any() /* outAttachedFrame */);
+                    any() /* outAttachedFrame */, any() /* outSizeCompatScale */);
             mAtm.mWindowManager.mStartingSurfaceController
                     .createTaskSnapshotSurface(activity, snapshot);
         } catch (RemoteException ignored) {

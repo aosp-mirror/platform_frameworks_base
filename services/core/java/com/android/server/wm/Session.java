@@ -198,28 +198,31 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame) {
+            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
                 UserHandle.getUserId(mUid), requestedVisibilities, outInputChannel, outInsetsState,
-                outActiveControls, outAttachedFrame);
+                outActiveControls, outAttachedFrame, outSizeCompatScale);
     }
 
     @Override
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, int userId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame) {
+            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId, userId,
                 requestedVisibilities, outInputChannel, outInsetsState, outActiveControls,
-                outAttachedFrame);
+                outAttachedFrame, outSizeCompatScale);
     }
 
     @Override
     public int addToDisplayWithoutInputChannel(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, InsetsState outInsetsState, Rect outAttachedFrame) {
+            int viewVisibility, int displayId, InsetsState outInsetsState, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
                 UserHandle.getUserId(mUid), mDummyRequestedVisibilities, null /* outInputChannel */,
-                outInsetsState, mDummyControls, outAttachedFrame);
+                outInsetsState, mDummyControls, outAttachedFrame, outSizeCompatScale);
     }
 
     @Override
