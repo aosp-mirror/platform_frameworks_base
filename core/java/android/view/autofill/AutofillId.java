@@ -74,6 +74,10 @@ public final class AutofillId implements Parcelable {
 
     /** @hide */
     @NonNull
+    public static final AutofillId NO_AUTOFILL_ID = new AutofillId(0);
+
+    /** @hide */
+    @NonNull
     @TestApi
     public static AutofillId withoutSession(@NonNull AutofillId id) {
         final int flags = id.mFlags & ~FLAG_HAS_SESSION;
