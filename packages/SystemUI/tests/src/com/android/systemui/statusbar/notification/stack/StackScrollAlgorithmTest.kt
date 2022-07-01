@@ -15,6 +15,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -163,5 +164,179 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         stackScrollAlgorithm.updateViewWithShelf(expandableView, expandableViewState, shelfStart)
         assertFalse(expandableViewState.hidden)
+    }
+
+    @Test
+    fun maybeUpdateHeadsUpIsVisible_endVisible_true() {
+        val expandableViewState = ExpandableViewState()
+        expandableViewState.headsUpIsVisible = false
+
+        stackScrollAlgorithm.maybeUpdateHeadsUpIsVisible(expandableViewState,
+                /* isShadeExpanded= */ true,
+                /* mustStayOnScreen= */ true,
+                /* isViewEndVisible= */ true,
+                /* viewEnd= */ 0f,
+                /* maxHunY= */ 10f)
+
+        assertTrue(expandableViewState.headsUpIsVisible)
+    }
+
+    @Test
+    fun maybeUpdateHeadsUpIsVisible_endHidden_false() {
+        val expandableViewState = ExpandableViewState()
+        expandableViewState.headsUpIsVisible = true
+
+        stackScrollAlgorithm.maybeUpdateHeadsUpIsVisible(expandableViewState,
+                /* isShadeExpanded= */ true,
+                /* mustStayOnScreen= */ true,
+                /* isViewEndVisible= */ true,
+                /* viewEnd= */ 10f,
+                /* maxHunY= */ 0f)
+
+        assertFalse(expandableViewState.headsUpIsVisible)
+    }
+
+    @Test
+    fun maybeUpdateHeadsUpIsVisible_shadeClosed_noUpdate() {
+        val expandableViewState = ExpandableViewState()
+        expandableViewState.headsUpIsVisible = true
+
+        stackScrollAlgorithm.maybeUpdateHeadsUpIsVisible(expandableViewState,
+                /* isShadeExpanded= */ false,
+                /* mustStayOnScreen= */ true,
+                /* isViewEndVisible= */ true,
+                /* viewEnd= */ 10f,
+                /* maxHunY= */ 1f)
+
+        assertTrue(expandableViewState.headsUpIsVisible)
+    }
+
+    @Test
+    fun maybeUpdateHeadsUpIsVisible_notHUN_noUpdate() {
+        val expandableViewState = ExpandableViewState()
+        expandableViewState.headsUpIsVisible = true
+
+        stackScrollAlgorithm.maybeUpdateHeadsUpIsVisible(expandableViewState,
+                /* isShadeExpanded= */ true,
+                /* mustStayOnScreen= */ false,
+                /* isViewEndVisible= */ true,
+                /* viewEnd= */ 10f,
+                /* maxHunY= */ 1f)
+
+        assertTrue(expandableViewState.headsUpIsVisible)
+    }
+
+    @Test
+    fun maybeUpdateHeadsUpIsVisible_topHidden_noUpdate() {
+        val expandableViewState = ExpandableViewState()
+        expandableViewState.headsUpIsVisible = true
+
+        stackScrollAlgorithm.maybeUpdateHeadsUpIsVisible(expandableViewState,
+                /* isShadeExpanded= */ true,
+                /* mustStayOnScreen= */ true,
+                /* isViewEndVisible= */ false,
+                /* viewEnd= */ 10f,
+                /* maxHunY= */ 1f)
+
+        assertTrue(expandableViewState.headsUpIsVisible)
+    }
+
+    @Test
+    fun clampHunToTop_viewYGreaterThanQqs_viewYUnchanged() {
+        val expandableViewState = ExpandableViewState()
+        expandableViewState.yTranslation = 50f
+
+        stackScrollAlgorithm.clampHunToTop(/* quickQsOffsetHeight= */ 10f,
+                /* stackTranslation= */ 0f,
+                /* collapsedHeight= */ 1f, expandableViewState)
+
+        // qqs (10 + 0) < viewY (50)
+        assertEquals(50f, expandableViewState.yTranslation)
+    }
+
+    @Test
+    fun clampHunToTop_viewYLessThanQqs_viewYChanged() {
+        val expandableViewState = ExpandableViewState()
+        expandableViewState.yTranslation = -10f
+
+        stackScrollAlgorithm.clampHunToTop(/* quickQsOffsetHeight= */ 10f,
+                /* stackTranslation= */ 0f,
+                /* collapsedHeight= */ 1f, expandableViewState)
+
+        // qqs (10 + 0) > viewY (-10)
+        assertEquals(10f, expandableViewState.yTranslation)
+    }
+
+
+    @Test
+    fun clampHunToTop_viewYFarAboveVisibleStack_heightCollapsed() {
+        val expandableViewState = ExpandableViewState()
+        expandableViewState.height = 20
+        expandableViewState.yTranslation = -100f
+
+        stackScrollAlgorithm.clampHunToTop(/* quickQsOffsetHeight= */ 10f,
+                /* stackTranslation= */ 0f,
+                /* collapsedHeight= */ 10f, expandableViewState)
+
+        // newTranslation = max(10, -100) = 10
+        // distToRealY = 10 - (-100f) = 110
+        // height = max(20 - 110, 10f)
+        assertEquals(10, expandableViewState.height)
+    }
+
+    @Test
+    fun clampHunToTop_viewYNearVisibleStack_heightTallerThanCollapsed() {
+        val expandableViewState = ExpandableViewState()
+        expandableViewState.height = 20
+        expandableViewState.yTranslation = 5f
+
+        stackScrollAlgorithm.clampHunToTop(/* quickQsOffsetHeight= */ 10f,
+                /* stackTranslation= */ 0f,
+                /* collapsedHeight= */ 10f, expandableViewState)
+
+        // newTranslation = max(10, 5) = 10
+        // distToRealY = 10 - 5 = 5
+        // height = max(20 - 5, 10) = 15
+        assertEquals(15, expandableViewState.height)
+    }
+
+    @Test
+    fun computeCornerRoundnessForPinnedHun_stackBelowScreen_round() {
+        val currentRoundness = stackScrollAlgorithm.computeCornerRoundnessForPinnedHun(
+                /* hostViewHeight= */ 100f,
+                /* stackY= */ 110f,
+                /* viewMaxHeight= */ 20f,
+                /* originalCornerRoundness= */ 0f)
+        assertEquals(1f, currentRoundness)
+    }
+
+    @Test
+    fun computeCornerRoundnessForPinnedHun_stackAboveScreenBelowPinPoint_halfRound() {
+        val currentRoundness = stackScrollAlgorithm.computeCornerRoundnessForPinnedHun(
+                /* hostViewHeight= */ 100f,
+                /* stackY= */ 90f,
+                /* viewMaxHeight= */ 20f,
+                /* originalCornerRoundness= */ 0f)
+        assertEquals(0.5f, currentRoundness)
+    }
+
+    @Test
+    fun computeCornerRoundnessForPinnedHun_stackAbovePinPoint_notRound() {
+        val currentRoundness = stackScrollAlgorithm.computeCornerRoundnessForPinnedHun(
+                /* hostViewHeight= */ 100f,
+                /* stackY= */ 0f,
+                /* viewMaxHeight= */ 20f,
+                /* originalCornerRoundness= */ 0f)
+        assertEquals(0f, currentRoundness)
+    }
+
+    @Test
+    fun computeCornerRoundnessForPinnedHun_originallyRoundAndStackAbovePinPoint_round() {
+        val currentRoundness = stackScrollAlgorithm.computeCornerRoundnessForPinnedHun(
+                /* hostViewHeight= */ 100f,
+                /* stackY= */ 0f,
+                /* viewMaxHeight= */ 20f,
+                /* originalCornerRoundness= */ 1f)
+        assertEquals(1f, currentRoundness)
     }
 }
