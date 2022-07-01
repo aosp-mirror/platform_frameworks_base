@@ -2475,9 +2475,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
-    @Nullable
-    InputBindResult attachNewAccessibilityLocked(@StartInputReason int startInputReason,
-            boolean initial, int id) {
+    private void attachNewAccessibilityLocked(@StartInputReason int startInputReason,
+            boolean initial) {
         if (!mBoundToAccessibility) {
             AccessibilityManagerInternal.get().bindInput();
             mBoundToAccessibility = true;
@@ -2486,8 +2485,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // TODO(b/187453053): grantImplicitAccess to accessibility services access? if so, need to
         //  record accessibility services uid.
 
-        final AccessibilitySessionState accessibilitySession =
-                mCurClient.mAccessibilitySessions.get(id);
         // We don't start input when session for a11y is created. We start input when
         // input method start input, a11y manager service is always on.
         if (startInputReason != StartInputReason.SESSION_CREATED_BY_ACCESSIBILITY) {
@@ -2495,19 +2492,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             AccessibilityManagerInternal.get().startInput(mCurRemoteAccessibilityInputConnection,
                     mCurEditorInfo, !initial /* restarting */);
         }
-
-        if (accessibilitySession != null) {
-            final SessionState session = mCurClient.curSession;
-            IInputMethodSession imeSession = session == null ? null : session.session;
-            final SparseArray<IAccessibilityInputMethodSession> accessibilityInputMethodSessions =
-                    createAccessibilityInputMethodSessions(mCurClient.mAccessibilitySessions);
-            return new InputBindResult(
-                    InputBindResult.ResultCode.SUCCESS_WITH_ACCESSIBILITY_SESSION,
-                    imeSession, accessibilityInputMethodSessions, null,
-                    getCurIdLocked(), getSequenceNumberLocked(), mCurVirtualDisplayToScreenMatrix,
-                    false);
-        }
-        return null;
     }
 
     private SparseArray<IAccessibilityInputMethodSession> createAccessibilityInputMethodSessions(
@@ -2617,7 +2601,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // we can always attach to accessibility because AccessibilityManagerService is
                 // always on.
                 attachNewAccessibilityLocked(startInputReason,
-                        (startInputFlags & StartInputFlags.INITIAL_CONNECTION) != 0, -1);
+                        (startInputFlags & StartInputFlags.INITIAL_CONNECTION) != 0);
                 return attachNewInputLocked(startInputReason,
                         (startInputFlags & StartInputFlags.INITIAL_CONNECTION) != 0);
             }
@@ -2796,8 +2780,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 method, session, channel);
                         InputBindResult res = attachNewInputLocked(
                                 StartInputReason.SESSION_CREATED_BY_IME, true);
-                        attachNewAccessibilityLocked(StartInputReason.SESSION_CREATED_BY_IME,
-                                true, -1);
+                        attachNewAccessibilityLocked(StartInputReason.SESSION_CREATED_BY_IME, true);
                         if (res.method != null) {
                             mCurClient.client.onBindMethod(res);
                         }
@@ -5449,9 +5432,21 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     mCurClient.mAccessibilitySessions.put(accessibilityConnectionId,
                             new AccessibilitySessionState(mCurClient, accessibilityConnectionId,
                                     session));
-                    InputBindResult res = attachNewAccessibilityLocked(
-                            StartInputReason.SESSION_CREATED_BY_ACCESSIBILITY, true,
-                            accessibilityConnectionId);
+
+                    attachNewAccessibilityLocked(StartInputReason.SESSION_CREATED_BY_ACCESSIBILITY,
+                            true);
+
+                    final SessionState sessionState = mCurClient.curSession;
+                    final IInputMethodSession imeSession = sessionState == null
+                            ? null : sessionState.session;
+                    final SparseArray<IAccessibilityInputMethodSession>
+                            accessibilityInputMethodSessions =
+                                    createAccessibilityInputMethodSessions(
+                                            mCurClient.mAccessibilitySessions);
+                    final InputBindResult res = new InputBindResult(
+                            InputBindResult.ResultCode.SUCCESS_WITH_ACCESSIBILITY_SESSION,
+                            imeSession, accessibilityInputMethodSessions, null, getCurIdLocked(),
+                            getSequenceNumberLocked(), mCurVirtualDisplayToScreenMatrix, false);
                     mCurClient.client.onBindAccessibilityService(res, accessibilityConnectionId);
                 }
             }
