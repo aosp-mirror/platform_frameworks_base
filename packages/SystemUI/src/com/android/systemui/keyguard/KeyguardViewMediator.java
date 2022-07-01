@@ -836,9 +836,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     private final ActivityLaunchAnimator.Controller mOccludeAnimationController =
             new ActivityLaunchAnimator.Controller() {
                 @Override
-                public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {
-                    setOccluded(true /* occluded */, false /* animate */);
-                }
+                public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {}
 
                 @Override
                 public void onLaunchAnimationCancelled() {
@@ -924,6 +922,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                         RemoteAnimationTarget[] wallpapers,
                         RemoteAnimationTarget[] nonApps,
                         IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
+                    Log.d(TAG, "UnoccludeAnimator#onAnimationStart. Set occluded = false.");
                     setOccluded(false /* isOccluded */, true /* animate */);
 
                     if (apps == null || apps.length == 0 || apps[0] == null) {
@@ -1669,6 +1668,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
      * Notify us when the keyguard is occluded by another window
      */
     public void setOccluded(boolean isOccluded, boolean animate) {
+        Log.d(TAG, "setOccluded(" + isOccluded + ")");
+
         Trace.beginSection("KeyguardViewMediator#setOccluded");
         if (DEBUG) Log.d(TAG, "setOccluded " + isOccluded);
         mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_TRANSITION_FROM_AOD);
@@ -1699,6 +1700,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
      */
     private void handleSetOccluded(boolean isOccluded, boolean animate) {
         Trace.beginSection("KeyguardViewMediator#handleSetOccluded");
+        Log.d(TAG, "handleSetOccluded(" + isOccluded + ")");
         synchronized (KeyguardViewMediator.this) {
             if (mHiding && isOccluded) {
                 // We're in the process of going away but WindowManager wants to show a
@@ -3188,16 +3190,18 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             // internal state to reflect that immediately, vs. waiting for the launch animator to
             // begin. Otherwise, calls to setShowingLocked, etc. will not know that we're about to
             // be occluded and might re-show the keyguard.
+            Log.d(TAG, "OccludeAnimator#onAnimationStart. Set occluded = true.");
             setOccluded(true /* isOccluded */, false /* animate */);
         }
 
         @Override
         public void onAnimationCancelled(boolean isKeyguardOccluded) throws RemoteException {
             super.onAnimationCancelled(isKeyguardOccluded);
-            setOccluded(isKeyguardOccluded /* occluded */, false /* animate */);
 
             Log.d(TAG, "Occlude animation cancelled by WM. "
-                    + "Setting occluded state to: " + mOccluded);
+                    + "Setting occluded state to: " + isKeyguardOccluded);
+            setOccluded(isKeyguardOccluded /* occluded */, false /* animate */);
+
         }
     }
 }
