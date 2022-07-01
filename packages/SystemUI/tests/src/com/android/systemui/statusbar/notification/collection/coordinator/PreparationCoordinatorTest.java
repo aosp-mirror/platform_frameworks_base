@@ -463,7 +463,8 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         }
 
         @Override
-        public void abortInflation(@NonNull NotificationEntry entry) {
+        public boolean abortInflation(@NonNull NotificationEntry entry) {
+            return false;
         }
 
         public InflationCallback getInflateCallback(NotificationEntry entry) {

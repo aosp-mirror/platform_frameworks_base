@@ -476,11 +476,13 @@ public final class NotificationEntry extends ListEntry {
     /**
      * Abort all existing inflation tasks
      */
-    public void abortTask() {
+    public boolean abortTask() {
         if (mRunningTask != null) {
             mRunningTask.abort();
             mRunningTask = null;
+            return true;
         }
+        return false;
     }
 
     public void setInflationTask(InflationTask abortableTask) {

@@ -363,9 +363,11 @@ public class PreparationCoordinator implements Coordinator {
     }
 
     private void abortInflation(NotificationEntry entry, String reason) {
-        mLogger.logInflationAborted(entry, reason);
-        mNotifInflater.abortInflation(entry);
-        mInflatingNotifs.remove(entry);
+        final boolean taskAborted = mNotifInflater.abortInflation(entry);
+        final boolean wasInflating = mInflatingNotifs.remove(entry);
+        if (taskAborted || wasInflating) {
+            mLogger.logInflationAborted(entry, reason);
+        }
     }
 
     private void onInflationFinished(NotificationEntry entry, NotifViewController controller) {
