@@ -34,7 +34,7 @@ import android.widget.TextView;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.statusbar.charging.ChargingRippleView;
+import com.android.systemui.ripple.RippleView;
 
 import java.text.NumberFormat;
 
@@ -46,7 +46,7 @@ public class WirelessChargingLayout extends FrameLayout {
     private static final long RIPPLE_ANIMATION_DURATION = 1500;
     private static final int SCRIM_COLOR = 0x4C000000;
     private static final int SCRIM_FADE_DURATION = 300;
-    private ChargingRippleView mRippleView;
+    private RippleView mRippleView;
 
     public WirelessChargingLayout(Context context) {
         super(context);
