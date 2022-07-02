@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.charging
+package com.android.systemui.biometrics
 
 import android.graphics.PointF
 import android.graphics.RuntimeShader
