@@ -348,18 +348,14 @@ class BluetoothRouteProvider {
 
     private void addActiveRoute(BluetoothRouteInfo btRoute) {
         if (btRoute == null) {
-            if (DEBUG) {
-                Log.d(TAG, " btRoute is null");
-            }
+            Slog.w(TAG, "addActiveRoute: btRoute is null");
             return;
         }
         if (DEBUG) {
             Log.d(TAG, "Adding active route: " + btRoute.route);
         }
         if (mActiveRoutes.contains(btRoute)) {
-            if (DEBUG) {
-                Log.d(TAG, " btRoute is already added.");
-            }
+            Slog.w(TAG, "addActiveRoute: btRoute is already added.");
             return;
         }
         setRouteConnectionState(btRoute, STATE_CONNECTED);
@@ -392,6 +388,12 @@ class BluetoothRouteProvider {
     private void addActiveDevices(BluetoothDevice device) {
         // Let the given device be the first active device
         BluetoothRouteInfo activeBtRoute = mBluetoothRoutes.get(device.getAddress());
+        // This could happen if ACTION_ACTIVE_DEVICE_CHANGED is sent before
+        // ACTION_CONNECTION_STATE_CHANGED is sent.
+        if (activeBtRoute == null) {
+            activeBtRoute = createBluetoothRoute(device);
+            mBluetoothRoutes.put(device.getAddress(), activeBtRoute);
+        }
         addActiveRoute(activeBtRoute);
 
         // A bluetooth route with the same route ID should be added.
