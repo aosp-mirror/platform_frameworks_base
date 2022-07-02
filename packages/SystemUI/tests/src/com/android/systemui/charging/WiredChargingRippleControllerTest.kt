@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.charging
+package com.android.systemui.charging
 
 import android.testing.AndroidTestingRunner
 import android.view.View
@@ -24,6 +24,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.ripple.RippleView
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -50,7 +51,7 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
     @Mock private lateinit var batteryController: BatteryController
     @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var configurationController: ConfigurationController
-    @Mock private lateinit var rippleView: ChargingRippleView
+    @Mock private lateinit var rippleView: RippleView
     @Mock private lateinit var windowManager: WindowManager
     @Mock private lateinit var uiEventLogger: UiEventLogger
     private val systemClock = FakeSystemClock()

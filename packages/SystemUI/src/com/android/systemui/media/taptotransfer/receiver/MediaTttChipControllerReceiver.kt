@@ -16,8 +16,10 @@
 
 package com.android.systemui.media.taptotransfer.receiver
 
+import android.annotation.SuppressLint
 import android.app.StatusBarManager
 import android.content.Context
+import android.graphics.PointF
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.MediaRoute2Info
@@ -29,6 +31,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
+import androidx.core.graphics.ColorUtils
+import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -72,9 +76,15 @@ class MediaTttChipControllerReceiver @Inject constructor(
     powerManager,
     R.layout.media_ttt_chip_receiver
 ) {
+    @SuppressLint("WrongConstant") // We're allowed to use LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
     override val windowLayoutParams = commonWindowLayoutParams.apply {
-        height = getWindowHeight()
         gravity = Gravity.BOTTOM.or(Gravity.CENTER_HORIZONTAL)
+        // Params below are needed for the ripple to work correctly
+        width = WindowManager.LayoutParams.MATCH_PARENT
+        height = WindowManager.LayoutParams.MATCH_PARENT
+        layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        fitInsetsTypes = 0 // Ignore insets from all system bars
+        flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
     }
 
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
@@ -149,7 +159,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
                 .alpha(1f)
                 .setDuration(5.frames)
                 .start()
-
+        startRipple(chipView.requireViewById(R.id.ripple))
     }
 
     override fun getIconSize(isAppIcon: Boolean): Int? =
@@ -161,15 +171,43 @@ class MediaTttChipControllerReceiver @Inject constructor(
             }
         )
 
-    private fun getWindowHeight(): Int {
-        return context.resources.getDimensionPixelSize(R.dimen.media_ttt_icon_size_receiver) +
-                // Make the window large enough to accommodate the animation amount
-                getTranslationAmount()
-    }
-
     /** Returns the amount that the chip will be translated by in its intro animation. */
     private fun getTranslationAmount(): Int {
         return context.resources.getDimensionPixelSize(R.dimen.media_ttt_receiver_vert_translation)
+    }
+
+    private fun startRipple(rippleView: ReceiverChipRippleView) {
+        if (rippleView.rippleInProgress) {
+            // Skip if ripple is still playing
+            return
+        }
+        rippleView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewDetachedFromWindow(view: View?) {}
+
+            override fun onViewAttachedToWindow(view: View?) {
+                if (view == null) {
+                    return
+                }
+                val attachedRippleView = view as ReceiverChipRippleView
+                layoutRipple(attachedRippleView)
+                attachedRippleView.startRipple()
+                attachedRippleView.removeOnAttachStateChangeListener(this)
+            }
+        })
+    }
+
+    private fun layoutRipple(rippleView: ReceiverChipRippleView) {
+        val windowBounds = windowManager.currentWindowMetrics.bounds
+        val height = windowBounds.height()
+        val width = windowBounds.width()
+
+        rippleView.radius = height / 5f
+        // Center the ripple on the bottom of the screen in the middle.
+        rippleView.origin = PointF(/* x= */ width / 2f, /* y= */ height.toFloat())
+
+        val color = Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColorAccent)
+        val colorWithAlpha = ColorUtils.setAlphaComponent(color, 70)
+        rippleView.setColor(colorWithAlpha)
     }
 }
 

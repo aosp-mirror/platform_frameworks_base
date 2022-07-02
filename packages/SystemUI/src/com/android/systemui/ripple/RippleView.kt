@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.charging
+package com.android.systemui.ripple
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -30,9 +30,10 @@ import android.view.View
 private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.3f
 
 /**
- * Expanding ripple effect that shows when charging begins.
+ * A generic expanding ripple effect. To trigger the ripple expansion, set [radius] and [origin],
+ * then call [startRipple].
  */
-class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
+open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private val rippleShader = RippleShader()
     private val defaultColor: Int = 0xffffffff.toInt()
     private val ripplePaint = Paint()
@@ -74,9 +75,9 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
         }
         val animator = ValueAnimator.ofFloat(0f, 1f)
         animator.duration = duration
-        animator.addUpdateListener { animator ->
-            val now = animator.currentPlayTime
-            val progress = animator.animatedValue as Float
+        animator.addUpdateListener { updateListener ->
+            val now = updateListener.currentPlayTime
+            val progress = updateListener.animatedValue as Float
             rippleShader.progress = progress
             rippleShader.distortionStrength = 1 - progress
             rippleShader.time = now.toFloat()
@@ -92,8 +93,18 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
         rippleInProgress = true
     }
 
+    /** Set the color to be used for the ripple. */
     fun setColor(color: Int) {
         rippleShader.color = color
+    }
+
+    /**
+     * Set whether the ripple should remain filled as the ripple expands.
+     *
+     * See [RippleShader.rippleFill].
+     */
+    fun setRippleFill(rippleFill: Boolean) {
+        rippleShader.rippleFill = rippleFill
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -107,6 +118,6 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
         // animation implementation in the ripple shader.
         val maskRadius = (1 - (1 - rippleShader.progress) * (1 - rippleShader.progress) *
                 (1 - rippleShader.progress)) * radius * 2
-        canvas?.drawCircle(origin.x, origin.y, maskRadius, ripplePaint)
+        canvas.drawCircle(origin.x, origin.y, maskRadius, ripplePaint)
     }
 }

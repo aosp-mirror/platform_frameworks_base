@@ -12,12 +12,12 @@ import com.android.systemui.statusbar.policy.AccessibilityController
 import com.android.systemui.statusbar.policy.FlashlightController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.tuner.TunerService
+import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.Executor
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -51,6 +51,5 @@ class KeyguardBottomAreaTest : SysuiTestCase() {
                 null, false) as KeyguardBottomAreaView
 
         other.initFrom(mKeyguardBottomArea)
-        other.launchVoiceAssist()
     }
 }

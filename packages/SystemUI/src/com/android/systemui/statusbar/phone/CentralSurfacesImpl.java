@@ -139,6 +139,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.camera.CameraIntents;
+import com.android.systemui.charging.WiredChargingRippleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -197,7 +198,6 @@ import com.android.systemui.statusbar.PowerButtonReveal;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.charging.WiredChargingRippleController;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
@@ -1285,8 +1285,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
             backdrop.setScaleY(scale);
         });
 
-        mNotificationPanelViewController.setUserSetupComplete(mUserSetup);
-
         // Set up the quick settings tile panel
         final View container = mNotificationShadeWindowView.findViewById(R.id.qs_frame);
         if (container != null) {
@@ -1761,6 +1759,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
                     // activity is exited.
                     if (mKeyguardStateController.isShowing()
                             && !mKeyguardStateController.isKeyguardGoingAway()) {
+                        Log.d(TAG, "Setting occluded = true in #startActivity.");
                         mKeyguardViewMediator.setOccluded(true /* isOccluded */,
                                 true /* animate */);
                     }
@@ -3024,8 +3023,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     @Override
     public boolean isInLaunchTransition() {
-        return mNotificationPanelViewController.isLaunchTransitionRunning()
-                || mNotificationPanelViewController.isLaunchTransitionFinished();
+        return mNotificationPanelViewController.isLaunchTransitionFinished();
     }
 
     /**
@@ -3057,11 +3055,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             mCommandQueue.appTransitionStarting(mDisplayId, SystemClock.uptimeMillis(),
                     LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION, true);
         };
-        if (mNotificationPanelViewController.isLaunchTransitionRunning()) {
-            mNotificationPanelViewController.setLaunchTransitionEndRunnable(hideRunnable);
-        } else {
-            hideRunnable.run();
-        }
+        hideRunnable.run();
     }
 
     private void cancelAfterLaunchTransitionRunnables() {
@@ -3070,7 +3064,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
         }
         mLaunchTransitionEndRunnable = null;
         mLaunchTransitionCancelRunnable = null;
-        mNotificationPanelViewController.setLaunchTransitionEndRunnable(null);
     }
 
     /**
@@ -3499,24 +3492,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
     }
 
     @Override
-    public void onCameraHintStarted() {
-        mFalsingCollector.onCameraHintStarted();
-        mKeyguardIndicationController.showTransientIndication(R.string.camera_hint);
-    }
-
-    @Override
-    public void onVoiceAssistHintStarted() {
-        mFalsingCollector.onLeftAffordanceHintStarted();
-        mKeyguardIndicationController.showTransientIndication(R.string.voice_hint);
-    }
-
-    @Override
-    public void onPhoneHintStarted() {
-        mFalsingCollector.onLeftAffordanceHintStarted();
-        mKeyguardIndicationController.showTransientIndication(R.string.phone_hint);
-    }
-
-    @Override
     public void onTrackingStopped(boolean expand) {
     }
 
@@ -3700,8 +3675,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             mWakeUpCoordinator.setFullyAwake(true);
             mWakeUpCoordinator.setWakingUp(false);
             if (mLaunchCameraWhenFinishedWaking) {
-                mNotificationPanelViewController.launchCamera(
-                        false /* animate */, mLastCameraLaunchSource);
+                mNotificationPanelViewController.launchCamera(mLastCameraLaunchSource);
                 mLaunchCameraWhenFinishedWaking = false;
             }
             if (mLaunchEmergencyActionWhenFinishedWaking) {
@@ -4342,9 +4316,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
                 mUserSetup = userSetup;
                 if (!mUserSetup) {
                     animateCollapseQuickSettings();
-                }
-                if (mNotificationPanelViewController != null) {
-                    mNotificationPanelViewController.setUserSetupComplete(mUserSetup);
                 }
                 updateQsExpansionEnabled();
             }
