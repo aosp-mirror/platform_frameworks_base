@@ -484,8 +484,6 @@ public abstract class PanelViewController {
 
     protected abstract boolean shouldGestureWaitForTouchSlop();
 
-    protected abstract boolean shouldGestureIgnoreXTouchSlop(float x, float y);
-
     protected void onTrackingStopped(boolean expand) {
         mTracking = false;
         mCentralSurfaces.onTrackingStopped(expand);
@@ -1333,7 +1331,7 @@ public abstract class PanelViewController {
 
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 mGestureWaitForTouchSlop = shouldGestureWaitForTouchSlop();
-                mIgnoreXTouchSlop = isFullyCollapsed() || shouldGestureIgnoreXTouchSlop(x, y);
+                mIgnoreXTouchSlop = true;
             }
 
             switch (event.getActionMasked()) {
