@@ -24,8 +24,7 @@ import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.VisibleForTesting;
-
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.R;
@@ -65,6 +64,9 @@ public class StackScrollAlgorithm {
     private int mPinnedZTranslationExtra;
     private float mNotificationScrimPadding;
     private int mMarginBottom;
+    private float mQuickQsOffsetHeight;
+    private float mSmallCornerRadius;
+    private float mLargeCornerRadius;
 
     public StackScrollAlgorithm(
             Context context,
@@ -74,10 +76,10 @@ public class StackScrollAlgorithm {
     }
 
     public void initView(Context context) {
-        initConstants(context);
+        updateResources(context);
     }
 
-    private void initConstants(Context context) {
+    private void updateResources(Context context) {
         Resources res = context.getResources();
         mPaddingBetweenElements = res.getDimensionPixelSize(
                 R.dimen.notification_divider_height);
@@ -93,6 +95,9 @@ public class StackScrollAlgorithm {
                 R.dimen.notification_section_divider_height_lockscreen);
         mNotificationScrimPadding = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
         mMarginBottom = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
+        mQuickQsOffsetHeight = SystemBarUtils.getQuickQsOffsetHeight(context);
+        mSmallCornerRadius = res.getDimension(R.dimen.notification_corner_radius_small);
+        mLargeCornerRadius = res.getDimension(R.dimen.notification_corner_radius);
     }
 
     /**
@@ -441,6 +446,15 @@ public class StackScrollAlgorithm {
         return false;
     }
 
+    @VisibleForTesting
+    void maybeUpdateHeadsUpIsVisible(ExpandableViewState viewState, boolean isShadeExpanded,
+            boolean mustStayOnScreen, boolean topVisible, float viewEnd, float hunMax) {
+
+        if (isShadeExpanded && mustStayOnScreen && topVisible) {
+            viewState.headsUpIsVisible = viewEnd < hunMax;
+        }
+    }
+
     // TODO(b/172289889) polish shade open from HUN
     /**
      * Populates the {@link ExpandableViewState} for a single child.
@@ -474,14 +488,6 @@ public class StackScrollAlgorithm {
                     : ShadeInterpolation.getContentAlpha(expansion);
         }
 
-        if (ambientState.isShadeExpanded() && view.mustStayOnScreen()
-                && viewState.yTranslation >= 0) {
-            // Even if we're not scrolled away we're in view and we're also not in the
-            // shelf. We can relax the constraints and let us scroll off the top!
-            float end = viewState.yTranslation + viewState.height + ambientState.getStackY();
-            viewState.headsUpIsVisible = end < ambientState.getMaxHeadsUpTranslation();
-        }
-
         final float expansionFraction = getExpansionFractionWithoutShelf(
                 algorithmState, ambientState);
 
@@ -497,8 +503,15 @@ public class StackScrollAlgorithm {
             algorithmState.mCurrentExpandedYPosition += gap;
         }
 
+        // Must set viewState.yTranslation _before_ use.
+        // Incoming views have yTranslation=0 by default.
         viewState.yTranslation = algorithmState.mCurrentYPosition;
 
+        maybeUpdateHeadsUpIsVisible(viewState, ambientState.isShadeExpanded(),
+                view.mustStayOnScreen(), /* topVisible */ viewState.yTranslation >= 0,
+                /* viewEnd */ viewState.yTranslation + viewState.height + ambientState.getStackY(),
+                /* hunMax */ ambientState.getMaxHeadsUpTranslation()
+        );
         if (view instanceof FooterView) {
             final boolean shadeClosed = !ambientState.isShadeExpanded();
             final boolean isShelfShowing = algorithmState.firstViewInShelf != null;
@@ -682,7 +695,8 @@ public class StackScrollAlgorithm {
                 if (row.mustStayOnScreen() && !childState.headsUpIsVisible
                         && !row.showingPulsing()) {
                     // Ensure that the heads up is always visible even when scrolled off
-                    clampHunToTop(ambientState, row, childState);
+                    clampHunToTop(mQuickQsOffsetHeight, ambientState.getStackTranslation(),
+                            row.getCollapsedHeight(), childState);
                     if (isTopEntry && row.isAboveShelf()) {
                         // the first hun can't get off screen.
                         clampHunToMaxTranslation(ambientState, row, childState);
@@ -719,27 +733,62 @@ public class StackScrollAlgorithm {
         }
     }
 
-    private void clampHunToTop(AmbientState ambientState, ExpandableNotificationRow row,
-            ExpandableViewState childState) {
-        float newTranslation = Math.max(ambientState.getTopPadding()
-                + ambientState.getStackTranslation(), childState.yTranslation);
-        childState.height = (int) Math.max(childState.height - (newTranslation
-                - childState.yTranslation), row.getCollapsedHeight());
-        childState.yTranslation = newTranslation;
+    /**
+     * When shade is open and we are scrolled to the bottom of notifications,
+     * clamp incoming HUN in its collapsed form, right below qs offset.
+     * Transition pinned collapsed HUN to full height when scrolling back up.
+     */
+    @VisibleForTesting
+    void clampHunToTop(float quickQsOffsetHeight, float stackTranslation, float collapsedHeight,
+            ExpandableViewState viewState) {
+
+        final float newTranslation = Math.max(quickQsOffsetHeight + stackTranslation,
+                viewState.yTranslation);
+
+        // Transition from collapsed pinned state to fully expanded state
+        // when the pinned HUN approaches its actual location (when scrolling back to top).
+        final float distToRealY = newTranslation - viewState.yTranslation;
+        viewState.height = (int) Math.max(viewState.height - distToRealY, collapsedHeight);
+        viewState.yTranslation = newTranslation;
     }
 
+    // Pin HUN to bottom of expanded QS
+    // while the rest of notifications are scrolled offscreen.
     private void clampHunToMaxTranslation(AmbientState ambientState, ExpandableNotificationRow row,
             ExpandableViewState childState) {
-        float newTranslation;
         float maxHeadsUpTranslation = ambientState.getMaxHeadsUpTranslation();
-        float maxShelfPosition = ambientState.getInnerHeight() + ambientState.getTopPadding()
+        final float maxShelfPosition = ambientState.getInnerHeight() + ambientState.getTopPadding()
                 + ambientState.getStackTranslation();
         maxHeadsUpTranslation = Math.min(maxHeadsUpTranslation, maxShelfPosition);
-        float bottomPosition = maxHeadsUpTranslation - row.getCollapsedHeight();
-        newTranslation = Math.min(childState.yTranslation, bottomPosition);
+
+        final float bottomPosition = maxHeadsUpTranslation - row.getCollapsedHeight();
+        final float newTranslation = Math.min(childState.yTranslation, bottomPosition);
         childState.height = (int) Math.min(childState.height, maxHeadsUpTranslation
                 - newTranslation);
         childState.yTranslation = newTranslation;
+
+        // Animate pinned HUN bottom corners to and from original roundness.
+        final float originalCornerRadius =
+                row.isLastInSection() ? 1f : (mSmallCornerRadius / mLargeCornerRadius);
+        final float roundness = computeCornerRoundnessForPinnedHun(mHostView.getHeight(),
+                ambientState.getStackY(), getMaxAllowedChildHeight(row), originalCornerRadius);
+        row.setBottomRoundness(roundness, /* animate= */ false);
+    }
+
+    @VisibleForTesting
+    float computeCornerRoundnessForPinnedHun(float hostViewHeight, float stackY,
+            float viewMaxHeight, float originalCornerRadius) {
+
+        // Compute y where corner roundness should be in its original unpinned state.
+        // We use view max height because the pinned collapsed HUN expands to max height
+        // when it becomes unpinned.
+        final float originalRoundnessY = hostViewHeight - viewMaxHeight;
+
+        final float distToOriginalRoundness = Math.max(0f, stackY - originalRoundnessY);
+        final float progressToPinnedRoundness = Math.min(1f,
+                distToOriginalRoundness / viewMaxHeight);
+
+        return MathUtils.lerp(originalCornerRadius, 1f, progressToPinnedRoundness);
     }
 
     protected int getMaxAllowedChildHeight(View child) {

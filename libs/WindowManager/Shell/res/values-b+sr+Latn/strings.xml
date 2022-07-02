@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Oblačić"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Upravljajte"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Oblačić je odbačen."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Dodirnite da biste restartovali aplikaciju i prešli u režim celog ekrana."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Dodirnite da biste restartovali ovu aplikaciju radi boljeg prikaza."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Imate problema sa kamerom?\nDodirnite da biste ponovo uklopili"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Problem nije rešen?\nDodirnite da biste vratili"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nemate problema sa kamerom? Dodirnite da biste odbacili."</string>

@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"బబుల్"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"మేనేజ్ చేయండి"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"బబుల్ విస్మరించబడింది."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"ఈ యాప్‌ను రీస్టార్ట్ చేయడానికి ట్యాప్ చేసి, ఆపై పూర్తి స్క్రీన్‌లోకి వెళ్లండి."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"మెరుగైన వీక్షణ కోసం ఈ యాప్‌ను రీస్టార్ట్ చేయడానికి ట్యాప్ చేయండి."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"కెమెరా సమస్యలు ఉన్నాయా?\nరీఫిట్ చేయడానికి ట్యాప్ చేయండి"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"దాని సమస్యను పరిష్కరించలేదా?\nపూర్వస్థితికి మార్చడానికి ట్యాప్ చేయండి"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"కెమెరా సమస్యలు లేవా? తీసివేయడానికి ట్యాప్ చేయండి."</string>

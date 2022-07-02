@@ -246,6 +246,22 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertEquals(otherWindowInitialZoom, wallpaperWindow.mWallpaperZoomOut, .01f);
     }
 
+    @Test
+    public void testUpdateWallpaperTarget() {
+        final DisplayContent dc = mDisplayContent;
+        final WindowState homeWin = createWallpaperTargetWindow(dc);
+        final WindowState appWin = createWindow(null, TYPE_BASE_APPLICATION, "app");
+        final RecentsAnimationController recentsController = mock(RecentsAnimationController.class);
+        doReturn(true).when(recentsController).isWallpaperVisible(eq(appWin));
+        mWm.setRecentsAnimationController(recentsController);
+
+        dc.mWallpaperController.adjustWallpaperWindows();
+        assertEquals(appWin, dc.mWallpaperController.getWallpaperTarget());
+        // The wallpaper target is gone, so it should adjust to the next target.
+        appWin.removeImmediately();
+        assertEquals(homeWin, dc.mWallpaperController.getWallpaperTarget());
+    }
+
     /**
      * Tests that the windowing mode of the wallpaper window must always be fullscreen.
      */
