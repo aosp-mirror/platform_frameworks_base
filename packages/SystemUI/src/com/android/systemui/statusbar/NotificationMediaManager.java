@@ -36,7 +36,6 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.AsyncTask;
 import android.os.Trace;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -44,7 +43,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.Interpolators;
@@ -56,9 +54,6 @@ import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.SmartspaceMediaData;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -112,11 +107,9 @@ public class NotificationMediaManager implements Dumpable {
     }
 
     private final NotificationVisibilityProvider mVisibilityProvider;
-    private final NotificationEntryManager mEntryManager;
     private final MediaDataManager mMediaDataManager;
     private final NotifPipeline mNotifPipeline;
     private final NotifCollection mNotifCollection;
-    private final boolean mUsingNotifPipeline;
 
     @Nullable
     private Lazy<NotificationShadeWindowController> mNotificationShadeWindowController;
@@ -180,12 +173,10 @@ public class NotificationMediaManager implements Dumpable {
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             NotificationVisibilityProvider visibilityProvider,
-            NotificationEntryManager notificationEntryManager,
             MediaArtworkProcessor mediaArtworkProcessor,
             KeyguardBypassController keyguardBypassController,
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
-            NotifPipelineFlags notifPipelineFlags,
             @Main DelayableExecutor mainExecutor,
             MediaDataManager mediaDataManager,
             DumpManager dumpManager) {
@@ -197,19 +188,12 @@ public class NotificationMediaManager implements Dumpable {
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mVisibilityProvider = visibilityProvider;
-        mEntryManager = notificationEntryManager;
         mMainExecutor = mainExecutor;
         mMediaDataManager = mediaDataManager;
         mNotifPipeline = notifPipeline;
         mNotifCollection = notifCollection;
 
-        if (!notifPipelineFlags.isNewPipelineEnabled()) {
-            setupNEM();
-            mUsingNotifPipeline = false;
-        } else {
-            setupNotifPipeline();
-            mUsingNotifPipeline = true;
-        }
+        setupNotifPipeline();
 
         dumpManager.registerDumpable(this);
     }
@@ -273,79 +257,6 @@ public class NotificationMediaManager implements Dumpable {
         });
     }
 
-    private void setupNEM() {
-        mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
-
-            @Override
-            public void onPendingEntryAdded(NotificationEntry entry) {
-                mMediaDataManager.onNotificationAdded(entry.getKey(), entry.getSbn());
-            }
-
-            @Override
-            public void onPreEntryUpdated(NotificationEntry entry) {
-                mMediaDataManager.onNotificationAdded(entry.getKey(), entry.getSbn());
-            }
-
-            @Override
-            public void onEntryInflated(NotificationEntry entry) {
-                findAndUpdateMediaNotifications();
-            }
-
-            @Override
-            public void onEntryReinflated(NotificationEntry entry) {
-                findAndUpdateMediaNotifications();
-            }
-
-            @Override
-            public void onEntryRemoved(
-                    @NonNull NotificationEntry entry,
-                    @Nullable NotificationVisibility visibility,
-                    boolean removedByUser,
-                    int reason) {
-                removeEntry(entry);
-            }
-        });
-
-        // Pending entries are never inflated, and will never generate a call to onEntryRemoved().
-        // This can happen when notifications are added and canceled before inflation. Add this
-        // separate listener for cleanup, since media inflation occurs onPendingEntryAdded().
-        mEntryManager.addCollectionListener(new NotifCollectionListener() {
-            @Override
-            public void onEntryCleanUp(@NonNull NotificationEntry entry) {
-                removeEntry(entry);
-            }
-        });
-
-        mMediaDataManager.addListener(new MediaDataManager.Listener() {
-            @Override
-            public void onMediaDataLoaded(@NonNull String key,
-                    @Nullable String oldKey, @NonNull MediaData data, boolean immediately,
-                    int receivedSmartspaceCardLatency, boolean isSsReactivated) {
-            }
-
-            @Override
-            public void onSmartspaceMediaDataLoaded(@NonNull String key,
-                    @NonNull SmartspaceMediaData data, boolean shouldPrioritize) {
-
-            }
-
-            @Override
-            public void onMediaDataRemoved(@NonNull String key) {
-                NotificationEntry entry = mEntryManager.getPendingOrActiveNotif(key);
-                if (entry != null) {
-                    // TODO(b/160713608): "removing" this notification won't happen and
-                    //  won't send the 'deleteIntent' if the notification is ongoing.
-                    mEntryManager.performRemoveNotification(entry.getSbn(),
-                            getDismissedByUserStats(entry),
-                            NotificationListenerService.REASON_CANCEL);
-                }
-            }
-
-            @Override
-            public void onSmartspaceMediaDataRemoved(@NonNull String key, boolean immediately) {}
-        });
-    }
-
     private DismissedByUserStats getDismissedByUserStats(NotificationEntry entry) {
         return new DismissedByUserStats(
                 NotificationStats.DISMISSAL_SHADE, // Add DISMISSAL_MEDIA?
@@ -401,22 +312,10 @@ public class NotificationMediaManager implements Dumpable {
         if (mMediaNotificationKey == null) {
             return null;
         }
-        if (mUsingNotifPipeline) {
-            return Optional.ofNullable(mNotifPipeline.getEntry(mMediaNotificationKey))
-                .map(entry -> entry.getIcons().getShelfIcon())
-                .map(StatusBarIconView::getSourceIcon)
-                .orElse(null);
-        } else {
-            synchronized (mEntryManager) {
-                NotificationEntry entry = mEntryManager
-                    .getActiveNotificationUnfiltered(mMediaNotificationKey);
-                if (entry == null || entry.getIcons().getShelfIcon() == null) {
-                    return null;
-                }
-
-                return entry.getIcons().getShelfIcon().getSourceIcon();
-            }
-        }
+        return Optional.ofNullable(mNotifPipeline.getEntry(mMediaNotificationKey))
+            .map(entry -> entry.getIcons().getShelfIcon())
+            .map(StatusBarIconView::getSourceIcon)
+            .orElse(null);
     }
 
     public void addCallback(MediaListener callback) {
@@ -431,21 +330,9 @@ public class NotificationMediaManager implements Dumpable {
 
     public void findAndUpdateMediaNotifications() {
         boolean metaDataChanged;
-        if (mUsingNotifPipeline) {
-            // TODO(b/169655907): get the semi-filtered notifications for current user
-            Collection<NotificationEntry> allNotifications = mNotifPipeline.getAllNotifs();
-            metaDataChanged = findPlayingMediaNotification(allNotifications);
-        } else {
-            synchronized (mEntryManager) {
-                Collection<NotificationEntry> allNotifications = mEntryManager.getAllNotifs();
-                metaDataChanged = findPlayingMediaNotification(allNotifications);
-            }
-
-            if (metaDataChanged) {
-                mEntryManager.updateNotifications("NotificationMediaManager - metaDataChanged");
-            }
-
-        }
+        // TODO(b/169655907): get the semi-filtered notifications for current user
+        Collection<NotificationEntry> allNotifications = mNotifPipeline.getAllNotifs();
+        metaDataChanged = findPlayingMediaNotification(allNotifications);
         dispatchUpdateMediaMetaData(metaDataChanged, true /* allowEnterAnimation */);
     }
 

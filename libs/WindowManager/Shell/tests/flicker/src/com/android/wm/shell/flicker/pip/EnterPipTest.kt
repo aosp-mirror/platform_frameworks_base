@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -76,11 +75,6 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
                 pipApp.clickEnterPipButton(wmHelper)
             }
         }
-
-    /** {@inheritDoc}  */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     /**
      * Checks [pipApp] window remains visible throughout the animation

@@ -79,11 +79,6 @@ class ExitPipViaExpandButtonClickTest(
         }
 
     /** {@inheritDoc}  */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
-
-    /** {@inheritDoc}  */
     @FlakyTest(bugId = 197726610)
     @Test
     override fun pipLayerExpands() = super.pipLayerExpands()

@@ -462,6 +462,12 @@ class TransitionController {
         }, true /* traverseTopToBottom */);
     }
 
+    /** @see Transition#mStatusBarTransitionDelay */
+    void setStatusBarTransitionDelay(long delay) {
+        if (mCollectingTransition == null) return;
+        mCollectingTransition.mStatusBarTransitionDelay = delay;
+    }
+
     /** @see Transition#setOverrideAnimation */
     void setOverrideAnimation(TransitionInfo.AnimationOptions options,
             @Nullable IRemoteCallback startCallback, @Nullable IRemoteCallback finishCallback) {
@@ -600,13 +606,14 @@ class TransitionController {
         }
     }
 
-    void dispatchLegacyAppTransitionStarting(TransitionInfo info) {
+    void dispatchLegacyAppTransitionStarting(TransitionInfo info, long statusBarTransitionDelay) {
         final boolean keyguardGoingAway = info.isKeyguardGoingAway();
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
             // TODO(shell-transitions): handle (un)occlude transition.
             mLegacyListeners.get(i).onAppTransitionStartingLocked(keyguardGoingAway,
                     false /* keyguardOcclude */, 0 /* durationHint */,
-                    SystemClock.uptimeMillis(), AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
+                    SystemClock.uptimeMillis() + statusBarTransitionDelay,
+                    AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
         }
     }
 

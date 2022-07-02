@@ -116,7 +116,7 @@ public class PipUtils {
         if (taskId <= 0) return null;
         try {
             return ActivityTaskManager.getService().getTaskSnapshot(
-                    taskId, isLowResolution);
+                    taskId, isLowResolution, false /* takeSnapshotIfNeeded */);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get task snapshot, taskId=" + taskId, e);
             return null;

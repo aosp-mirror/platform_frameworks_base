@@ -683,6 +683,7 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(ime.mToken.inTransition());
         assertTrue(task.inTransition());
         assertTrue(asyncRotationController.isTargetToken(decorToken));
+        assertTrue(asyncRotationController.shouldFreezeInsetsPosition(navBar));
 
         screenDecor.setOrientationChanging(false);
         // Status bar finishes drawing before the start transaction. Its fade-in animation will be
