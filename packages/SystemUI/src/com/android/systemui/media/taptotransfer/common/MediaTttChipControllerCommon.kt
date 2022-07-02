@@ -54,7 +54,7 @@ import com.android.systemui.util.view.ViewUtil
 abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
     internal val context: Context,
     internal val logger: MediaTttLogger,
-    private val windowManager: WindowManager,
+    internal val windowManager: WindowManager,
     private val viewUtil: ViewUtil,
     @Main private val mainExecutor: DelayableExecutor,
     private val accessibilityManager: AccessibilityManager,

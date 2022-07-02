@@ -21,6 +21,12 @@
     android:layout_height="wrap_content"
     >
 
+    <com.android.systemui.media.taptotransfer.receiver.ReceiverChipRippleView
+        android:id="@+id/ripple"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+
     <com.android.internal.widget.CachingIconView
         android:id="@+id/app_icon"
         android:layout_width="@dimen/media_ttt_icon_size_receiver"
