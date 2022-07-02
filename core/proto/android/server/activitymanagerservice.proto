@@ -266,6 +266,9 @@ message MemInfoDumpProto {
                 optional int32 lookaside_b = 4;
                 // Statement cache stats: hits/misses/cachesize
                 optional string cache = 5;
+                optional int32 cache_hits = 6;
+                optional int32 cache_misses = 7;
+                optional int32 cache_size = 8;
             }
             repeated Database databases = 4;
         }

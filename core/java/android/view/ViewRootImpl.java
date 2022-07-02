@@ -604,6 +604,8 @@ public final class ViewRootImpl implements ViewParent,
      */
     private boolean mCheckIfCanDraw = false;
 
+    private boolean mDrewOnceForSync = false;
+
     int mSyncSeqId = 0;
     int mLastSyncSeqId = 0;
 
@@ -3003,6 +3005,9 @@ public final class ViewRootImpl implements ViewParent,
                     reportNextDraw();
                     mSyncBuffer = true;
                     isSyncRequest = true;
+                    if (!cancelDraw) {
+                        mDrewOnceForSync = false;
+                    }
                 }
 
                 final boolean surfaceControlChanged =
@@ -3524,9 +3529,11 @@ public final class ViewRootImpl implements ViewParent,
 
         mCheckIfCanDraw = isSyncRequest || cancelDraw;
 
-        boolean cancelAndRedraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || cancelDraw;
+        boolean cancelAndRedraw =
+                mAttachInfo.mTreeObserver.dispatchOnPreDraw() || (cancelDraw && mDrewOnceForSync);
         if (!cancelAndRedraw) {
             createSyncIfNeeded();
+            mDrewOnceForSync = true;
         }
 
         if (!isViewVisible) {

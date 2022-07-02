@@ -24,10 +24,12 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
+import android.util.Log;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
@@ -104,6 +106,51 @@ public class SQLiteDatabasePerfTest {
                 assertEquals(1.1 * index, cursor.getDouble(3), 0.0000001d);
             }
         }
+    }
+
+    @Test
+    public void testSelectCacheMissRate() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+
+        insertT1TestDataSet();
+
+        ArrayList<String> queryPool = new ArrayList<>();
+        queryPool.add("SELECT _ID, COL_A, COL_B, COL_C FROM T1 WHERE _ID=?");
+        queryPool.add("SELECT _ID FROM T1 WHERE _ID=?");
+        queryPool.add("SELECT COL_A FROM T1 WHERE _ID=?");
+        queryPool.add("SELECT COL_B FROM T1 WHERE _ID=?");
+        queryPool.add("SELECT COL_C FROM T1 WHERE _ID=?");
+        queryPool.add("SELECT _ID, COL_A FROM T1 WHERE _ID=?");
+        queryPool.add("SELECT _ID, COL_B FROM T1 WHERE _ID=?");
+        queryPool.add("SELECT _ID, COL_C FROM T1 WHERE _ID=?");
+        queryPool.add("SELECT COL_A, COL_B FROM T1 WHERE _ID=?");
+        queryPool.add("SELECT COL_A, COL_C FROM T1 WHERE _ID=?");
+        queryPool.add("SELECT COL_B, COL_C FROM T1 WHERE _ID=?");
+        while (state.keepRunning()) {
+            Random rnd = new Random(0);
+
+            int queries = 1000;
+            for (int iQuery = 0; iQuery < queries; ++iQuery) {
+                int queryIndex = rnd.nextInt(queryPool.size());
+                int index = rnd.nextInt(DEFAULT_DATASET_SIZE);
+
+                try (Cursor cursor = mDatabase.rawQuery(
+                             queryPool.get(queryIndex), new String[] {String.valueOf(index)})) {
+                    assertTrue(cursor.moveToNext());
+                }
+            }
+        }
+
+        Log.d("testSelectMemory",
+                "cacheMissRate: " + mDatabase.getStatementCacheMissRate()
+                        + "Total Statements: " + mDatabase.getTotalPreparedStatements()
+                        + ". Misses: " + mDatabase.getTotalStatementCacheMisses());
+
+        // Make sure caching is working and our miss rate should definitely be less than 100%
+        // however, we would expect this number to be actually closer to 0.
+        assertTrue(mDatabase.getStatementCacheMissRate() < 1);
+        mDatabase.close();
+        mContext.deleteDatabase(DB_NAME);
     }
 
     @Test

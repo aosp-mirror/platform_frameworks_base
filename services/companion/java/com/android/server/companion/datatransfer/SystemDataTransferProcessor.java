@@ -25,6 +25,7 @@ import static android.content.ComponentName.createRelative;
 import static com.android.server.companion.Utils.prepareForIpc;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
@@ -191,20 +192,9 @@ public class SystemDataTransferProcessor {
             // TODO: refactor to work with streams of data
             mPermissionControllerManager.getRuntimePermissionBackup(UserHandle.of(userId),
                     mExecutor, backup -> {
-                        Future<?> result = mTransportManager
+                        Future<?> future = mTransportManager
                                 .requestPermissionRestore(associationId, backup);
-                        try {
-                            result.get(15, TimeUnit.SECONDS);
-                            try {
-                                callback.onResult();
-                            } catch (RemoteException ignored) {
-                            }
-                        } catch (Exception e) {
-                            try {
-                                callback.onError(e.getMessage());
-                            } catch (RemoteException ignored) {
-                            }
-                        }
+                        translateFutureToCallback(future, callback);
                     });
         } finally {
             Binder.restoreCallingIdentity(callingIdentityToken);
@@ -222,6 +212,26 @@ public class SystemDataTransferProcessor {
                     message, user);
         } finally {
             Binder.restoreCallingIdentity(callingIdentityToken);
+        }
+    }
+
+    private static void translateFutureToCallback(@NonNull Future<?> future,
+            @Nullable ISystemDataTransferCallback callback) {
+        try {
+            future.get(15, TimeUnit.SECONDS);
+            try {
+                if (callback != null) {
+                    callback.onResult();
+                }
+            } catch (RemoteException ignored) {
+            }
+        } catch (Exception e) {
+            try {
+                if (callback != null) {
+                    callback.onError(e.getMessage());
+                }
+            } catch (RemoteException ignored) {
+            }
         }
     }
 

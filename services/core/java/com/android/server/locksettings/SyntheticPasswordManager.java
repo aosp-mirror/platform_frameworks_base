@@ -129,7 +129,7 @@ public class SyntheticPasswordManager {
     private static final int PASSWORD_TOKEN_LENGTH = 32;
     private static final String TAG = "SyntheticPasswordManager";
 
-    private static final byte[] PERSONALISATION_SECDISCARDABLE = "secdiscardable-transform".getBytes();
+    private static final byte[] PERSONALIZATION_SECDISCARDABLE = "secdiscardable-transform".getBytes();
     private static final byte[] PERSONALIZATION_KEY_STORE_PASSWORD = "keystore-password".getBytes();
     private static final byte[] PERSONALIZATION_USER_GK_AUTH = "user-gk-authentication".getBytes();
     private static final byte[] PERSONALIZATION_SP_GK_AUTH = "sp-gk-authentication".getBytes();
@@ -138,11 +138,11 @@ public class SyntheticPasswordManager {
     private static final byte[] PERSONALIZATION_SP_SPLIT = "sp-split".getBytes();
     private static final byte[] PERSONALIZATION_PASSWORD_HASH = "pw-hash".getBytes();
     private static final byte[] PERSONALIZATION_E0 = "e0-encryption".getBytes();
-    private static final byte[] PERSONALISATION_WEAVER_PASSWORD = "weaver-pwd".getBytes();
-    private static final byte[] PERSONALISATION_WEAVER_KEY = "weaver-key".getBytes();
-    private static final byte[] PERSONALISATION_WEAVER_TOKEN = "weaver-token".getBytes();
+    private static final byte[] PERSONALIZATION_WEAVER_PASSWORD = "weaver-pwd".getBytes();
+    private static final byte[] PERSONALIZATION_WEAVER_KEY = "weaver-key".getBytes();
+    private static final byte[] PERSONALIZATION_WEAVER_TOKEN = "weaver-token".getBytes();
     private static final byte[] PERSONALIZATION_PASSWORD_METRICS = "password-metrics".getBytes();
-    private static final byte[] PERSONALISATION_CONTEXT =
+    private static final byte[] PERSONALIZATION_CONTEXT =
         "android-synthetic-password-personalization-context".getBytes();
 
     static class AuthenticationResult {
@@ -199,9 +199,9 @@ public class SyntheticPasswordManager {
         private byte[] deriveSubkey(byte[] personalization) {
             if (mVersion == SYNTHETIC_PASSWORD_VERSION_V3) {
                 return (new SP800Derive(mSyntheticPassword))
-                    .withContext(personalization, PERSONALISATION_CONTEXT);
+                    .withContext(personalization, PERSONALIZATION_CONTEXT);
             } else {
-                return SyntheticPasswordCrypto.personalisedHash(personalization,
+                return SyntheticPasswordCrypto.personalizedHash(personalization,
                         mSyntheticPassword);
             }
         }
@@ -278,7 +278,7 @@ public class SyntheticPasswordManager {
          * AuthenticationToken.mSyntheticPassword for details on what each block means.
          */
         private void recreate(byte[] escrowSplit0, byte[] escrowSplit1) {
-            mSyntheticPassword = bytesToHex(SyntheticPasswordCrypto.personalisedHash(
+            mSyntheticPassword = bytesToHex(SyntheticPasswordCrypto.personalizedHash(
                     PERSONALIZATION_SP_SPLIT, escrowSplit0, escrowSplit1));
         }
 
@@ -920,7 +920,7 @@ public class SyntheticPasswordManager {
         if (isWeaverAvailable()) {
             tokenData.weaverSecret = secureRandom(mWeaverConfig.valueSize);
             tokenData.secdiscardableOnDisk = SyntheticPasswordCrypto.encrypt(tokenData.weaverSecret,
-                            PERSONALISATION_WEAVER_TOKEN, secdiscardable);
+                            PERSONALIZATION_WEAVER_TOKEN, secdiscardable);
         } else {
             tokenData.secdiscardableOnDisk = secdiscardable;
             tokenData.weaverSecret = null;
@@ -1163,7 +1163,7 @@ public class SyntheticPasswordManager {
                 return result;
             }
             secdiscardable = SyntheticPasswordCrypto.decrypt(response.getGatekeeperHAT(),
-                    PERSONALISATION_WEAVER_TOKEN, secdiscardable);
+                    PERSONALIZATION_WEAVER_TOKEN, secdiscardable);
         }
         byte[] applicationId = transformUnderSecdiscardable(token, secdiscardable);
         result.authToken = unwrapSyntheticPasswordBlob(handle, type, applicationId, 0L, userId);
@@ -1329,8 +1329,8 @@ public class SyntheticPasswordManager {
     }
 
     private byte[] transformUnderWeaverSecret(byte[] data, byte[] secret) {
-        byte[] weaverSecret = SyntheticPasswordCrypto.personalisedHash(
-                PERSONALISATION_WEAVER_PASSWORD, secret);
+        byte[] weaverSecret = SyntheticPasswordCrypto.personalizedHash(
+                PERSONALIZATION_WEAVER_PASSWORD, secret);
         byte[] result = new byte[data.length + weaverSecret.length];
         System.arraycopy(data, 0, result, 0, data.length);
         System.arraycopy(weaverSecret, 0, result, data.length, weaverSecret.length);
@@ -1338,8 +1338,8 @@ public class SyntheticPasswordManager {
     }
 
     private byte[] transformUnderSecdiscardable(byte[] data, byte[] rawSecdiscardable) {
-        byte[] secdiscardable = SyntheticPasswordCrypto.personalisedHash(
-                PERSONALISATION_SECDISCARDABLE, rawSecdiscardable);
+        byte[] secdiscardable = SyntheticPasswordCrypto.personalizedHash(
+                PERSONALIZATION_SECDISCARDABLE, rawSecdiscardable);
         byte[] result = new byte[data.length + secdiscardable.length];
         System.arraycopy(data, 0, result, 0, data.length);
         System.arraycopy(secdiscardable, 0, result, data.length, secdiscardable.length);
@@ -1459,11 +1459,11 @@ public class SyntheticPasswordManager {
     }
 
     private byte[] passwordTokenToGkInput(byte[] token) {
-        return SyntheticPasswordCrypto.personalisedHash(PERSONALIZATION_USER_GK_AUTH, token);
+        return SyntheticPasswordCrypto.personalizedHash(PERSONALIZATION_USER_GK_AUTH, token);
     }
 
     private byte[] passwordTokenToWeaverKey(byte[] token) {
-        byte[] key = SyntheticPasswordCrypto.personalisedHash(PERSONALISATION_WEAVER_KEY, token);
+        byte[] key = SyntheticPasswordCrypto.personalizedHash(PERSONALIZATION_WEAVER_KEY, token);
         if (key.length < mWeaverConfig.keySize) {
             throw new IllegalArgumentException("weaver key length too small");
         }

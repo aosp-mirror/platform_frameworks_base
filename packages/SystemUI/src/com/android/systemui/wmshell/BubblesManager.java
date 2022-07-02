@@ -21,14 +21,10 @@ import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
 import static android.provider.Settings.Secure.NOTIFICATION_BUBBLES;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
-import static android.service.notification.NotificationListenerService.REASON_CANCEL;
-import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
-import static android.service.notification.NotificationListenerService.REASON_CLICK;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 import static android.service.notification.NotificationStats.DISMISSAL_BUBBLE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
-import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -55,7 +51,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
@@ -63,9 +58,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -114,7 +107,6 @@ public class BubblesManager implements Dumpable {
     private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final NotificationLockscreenUserManager mNotifUserManager;
     private final NotificationGroupManagerLegacy mNotificationGroupManager;
-    private final NotificationEntryManager mNotificationEntryManager;
     private final CommonNotifCollection mCommonNotifCollection;
     private final NotifPipeline mNotifPipeline;
     private final Executor mSysuiMainExecutor;
@@ -142,11 +134,9 @@ public class BubblesManager implements Dumpable {
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
             NotificationGroupManagerLegacy groupManager,
-            NotificationEntryManager entryManager,
             CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
-            NotifPipelineFlags notifPipelineFlags,
             DumpManager dumpManager,
             Executor sysuiMainExecutor) {
         if (bubblesOptional.isPresent()) {
@@ -163,11 +153,9 @@ public class BubblesManager implements Dumpable {
                     zenModeController,
                     notifUserManager,
                     groupManager,
-                    entryManager,
                     notifCollection,
                     notifPipeline,
                     sysUiState,
-                    notifPipelineFlags,
                     dumpManager,
                     sysuiMainExecutor);
         } else {
@@ -189,11 +177,9 @@ public class BubblesManager implements Dumpable {
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
             NotificationGroupManagerLegacy groupManager,
-            NotificationEntryManager entryManager,
             CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
-            NotifPipelineFlags notifPipelineFlags,
             DumpManager dumpManager,
             Executor sysuiMainExecutor) {
         mContext = context;
@@ -205,7 +191,6 @@ public class BubblesManager implements Dumpable {
         mNotificationInterruptStateProvider = interruptionStateProvider;
         mNotifUserManager = notifUserManager;
         mNotificationGroupManager = groupManager;
-        mNotificationEntryManager = entryManager;
         mCommonNotifCollection = notifCollection;
         mNotifPipeline = notifPipeline;
         mSysuiMainExecutor = sysuiMainExecutor;
@@ -215,11 +200,7 @@ public class BubblesManager implements Dumpable {
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE))
                 : statusBarService;
 
-        if (notifPipelineFlags.isNewPipelineEnabled()) {
-            setupNotifPipeline();
-        } else {
-            setupNEM();
-        }
+        setupNotifPipeline();
 
         dumpManager.registerDumpable(TAG, this);
 
@@ -436,141 +417,6 @@ public class BubblesManager implements Dumpable {
             }
         };
         mBubbles.setSysuiProxy(mSysuiProxy);
-    }
-
-    private void setupNEM() {
-        mNotificationEntryManager.addNotificationEntryListener(
-                new NotificationEntryListener() {
-                    @Override
-                    public void onPendingEntryAdded(NotificationEntry entry) {
-                        BubblesManager.this.onEntryAdded(entry);
-                    }
-
-                    @Override
-                    public void onPreEntryUpdated(NotificationEntry entry) {
-                        BubblesManager.this.onEntryUpdated(entry);
-                    }
-
-                    @Override
-                    public void onEntryRemoved(
-                            NotificationEntry entry,
-                            @Nullable NotificationVisibility visibility,
-                            boolean removedByUser,
-                            int reason) {
-                        BubblesManager.this.onEntryRemoved(entry);
-                    }
-
-                    @Override
-                    public void onNotificationRankingUpdated(RankingMap rankingMap) {
-                        BubblesManager.this.onRankingUpdate(rankingMap);
-                    }
-
-                    @Override
-                    public void onNotificationChannelModified(
-                            String pkgName,
-                            UserHandle user,
-                            NotificationChannel channel,
-                            int modificationType) {
-                        BubblesManager.this.onNotificationChannelModified(pkgName,
-                                user,
-                                channel,
-                                modificationType);
-                    }
-                });
-
-        // The new pipeline takes care of this as a NotifDismissInterceptor BubbleCoordinator
-        mNotificationEntryManager.addNotificationRemoveInterceptor(
-                (key, entry, dismissReason) -> {
-                    final boolean isClearAll = dismissReason == REASON_CANCEL_ALL;
-                    final boolean isUserDismiss = dismissReason == REASON_CANCEL
-                            || dismissReason == REASON_CLICK;
-                    final boolean isAppCancel = dismissReason == REASON_APP_CANCEL
-                            || dismissReason == REASON_APP_CANCEL_ALL;
-                    final boolean isSummaryCancel =
-                            dismissReason == REASON_GROUP_SUMMARY_CANCELED;
-
-                    // Need to check for !appCancel here because the notification may have
-                    // previously been dismissed & entry.isRowDismissed would still be true
-                    boolean userRemovedNotif =
-                            (entry != null && entry.isRowDismissed() && !isAppCancel)
-                                    || isClearAll || isUserDismiss || isSummaryCancel;
-
-                    if (userRemovedNotif) {
-                        return handleDismissalInterception(entry);
-                    }
-                    return false;
-                });
-
-        mNotificationGroupManager.registerGroupChangeListener(
-                new NotificationGroupManagerLegacy.OnGroupChangeListener() {
-                    @Override
-                    public void onGroupSuppressionChanged(
-                            NotificationGroupManagerLegacy.NotificationGroup group,
-                            boolean suppressed) {
-                        // More notifications could be added causing summary to no longer
-                        // be suppressed -- in this case need to remove the key.
-                        final String groupKey = group.summary != null
-                                ? group.summary.getSbn().getGroupKey()
-                                : null;
-                        if (!suppressed && groupKey != null) {
-                            mBubbles.removeSuppressedSummaryIfNecessary(groupKey, null, null);
-                        }
-                    }
-                });
-
-        addNotifCallback(new NotifCallback() {
-            @Override
-            public void removeNotification(NotificationEntry entry,
-                    DismissedByUserStats dismissedByUserStats, int reason) {
-                mNotificationEntryManager.performRemoveNotification(entry.getSbn(),
-                        dismissedByUserStats, reason);
-            }
-
-            @Override
-            public void invalidateNotifications(String reason) {
-                mNotificationEntryManager.updateNotifications(reason);
-            }
-
-            @Override
-            public void maybeCancelSummary(NotificationEntry entry) {
-                // Check if removed bubble has an associated suppressed group summary that needs
-                // to be removed now.
-                final String groupKey = entry.getSbn().getGroupKey();
-                mBubbles.removeSuppressedSummaryIfNecessary(groupKey, (summaryKey) -> {
-                    final NotificationEntry summary =
-                            mNotificationEntryManager.getActiveNotificationUnfiltered(summaryKey);
-                    if (summary != null) {
-                        mNotificationEntryManager.performRemoveNotification(
-                                summary.getSbn(),
-                                getDismissedByUserStats(summary, false),
-                                UNDEFINED_DISMISS_REASON);
-                    }
-                }, mSysuiMainExecutor);
-
-                // Check if we still need to remove the summary from NoManGroup because the summary
-                // may not be in the mBubbleData.mSuppressedGroupKeys list and removed above.
-                // For example:
-                // 1. Bubbled notifications (group) is posted to shade and are visible bubbles
-                // 2. User expands bubbles so now their respective notifications in the shade are
-                // hidden, including the group summary
-                // 3. User removes all bubbles
-                // 4. We expect all the removed bubbles AND the summary (note: the summary was
-                // never added to the suppressedSummary list in BubbleData, so we add this check)
-                NotificationEntry summary = mNotificationGroupManager.getLogicalGroupSummary(entry);
-                if (summary != null) {
-                    ArrayList<NotificationEntry> summaryChildren =
-                            mNotificationGroupManager.getLogicalChildren(summary.getSbn());
-                    boolean isSummaryThisNotif = summary.getKey().equals(entry.getKey());
-                    if (!isSummaryThisNotif && (summaryChildren == null
-                            || summaryChildren.isEmpty())) {
-                        mNotificationEntryManager.performRemoveNotification(
-                                summary.getSbn(),
-                                getDismissedByUserStats(summary, false),
-                                UNDEFINED_DISMISS_REASON);
-                    }
-                }
-            }
-        });
     }
 
     private void setupNotifPipeline() {

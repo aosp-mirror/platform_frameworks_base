@@ -1161,17 +1161,17 @@ public final class CompanionDeviceManager {
         public void stop() {
             mStopped = true;
 
-            IoUtils.closeQuietly(mRemoteIn);
-            IoUtils.closeQuietly(mRemoteOut);
-            IoUtils.closeQuietly(mLocalIn);
-            IoUtils.closeQuietly(mLocalOut);
-
             try {
                 mService.detachSystemDataTransport(mContext.getPackageName(),
                         mContext.getUserId(), mAssociationId);
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, "Failed to detach transport", e);
             }
+
+            IoUtils.closeQuietly(mRemoteIn);
+            IoUtils.closeQuietly(mRemoteOut);
+            IoUtils.closeQuietly(mLocalIn);
+            IoUtils.closeQuietly(mLocalOut);
         }
 
         /**

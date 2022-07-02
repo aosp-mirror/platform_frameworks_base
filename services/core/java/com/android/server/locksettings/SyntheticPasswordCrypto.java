@@ -99,8 +99,8 @@ public class SyntheticPasswordCrypto {
         return outputStream.toByteArray();
     }
 
-    public static byte[] encrypt(byte[] keyBytes, byte[] personalisation, byte[] message) {
-        byte[] keyHash = personalisedHash(personalisation, keyBytes);
+    public static byte[] encrypt(byte[] keyBytes, byte[] personalization, byte[] message) {
+        byte[] keyHash = personalizedHash(personalization, keyBytes);
         SecretKeySpec key = new SecretKeySpec(Arrays.copyOf(keyHash, AES_KEY_LENGTH),
                 KeyProperties.KEY_ALGORITHM_AES);
         try {
@@ -113,8 +113,8 @@ public class SyntheticPasswordCrypto {
         }
     }
 
-    public static byte[] decrypt(byte[] keyBytes, byte[] personalisation, byte[] ciphertext) {
-        byte[] keyHash = personalisedHash(personalisation, keyBytes);
+    public static byte[] decrypt(byte[] keyBytes, byte[] personalization, byte[] ciphertext) {
+        byte[] keyHash = personalizedHash(personalization, keyBytes);
         SecretKeySpec key = new SecretKeySpec(Arrays.copyOf(keyHash, AES_KEY_LENGTH),
                 KeyProperties.KEY_ALGORITHM_AES);
         try {
@@ -220,17 +220,17 @@ public class SyntheticPasswordCrypto {
         }
     }
 
-    protected static byte[] personalisedHash(byte[] personalisation, byte[]... message) {
+    protected static byte[] personalizedHash(byte[] personalization, byte[]... message) {
         try {
             final int PADDING_LENGTH = 128;
             MessageDigest digest = MessageDigest.getInstance("SHA-512");
-            if (personalisation.length > PADDING_LENGTH) {
-                throw new IllegalArgumentException("Personalisation too long");
+            if (personalization.length > PADDING_LENGTH) {
+                throw new IllegalArgumentException("Personalization too long");
             }
             // Personalize the hash
             // Pad it to the block size of the hash function
-            personalisation = Arrays.copyOf(personalisation, PADDING_LENGTH);
-            digest.update(personalisation);
+            personalization = Arrays.copyOf(personalization, PADDING_LENGTH);
+            digest.update(personalization);
             for (byte[] data : message) {
                 digest.update(data);
             }

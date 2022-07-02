@@ -131,6 +131,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         when(mKeyguardBypassController.onBiometricAuthenticated(any(), anyBoolean()))
                 .thenReturn(true);
         when(mAuthController.isUdfpsFingerDown()).thenReturn(false);
+        when(mVibratorHelper.hasVibrator()).thenReturn(true);
         mDependency.injectTestDependency(NotificationMediaManager.class, mMediaManager);
         mBiometricUnlockController = new BiometricUnlockController(mDozeScrimController,
                 mKeyguardViewMediator, mScrimController, mShadeController,
@@ -422,5 +423,36 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mBiometricUnlockController.mWakefulnessObserver.onFinishedGoingToSleep();
         verify(mHandler).post(captor.capture());
         captor.getValue().run();
+    }
+
+    @Test
+    public void onFPFailureNoHaptics_notDeviceInteractive_showBouncer() {
+        // GIVEN no vibrator and the screen is off
+        when(mVibratorHelper.hasVibrator()).thenReturn(false);
+        when(mUpdateMonitor.isDeviceInteractive()).thenReturn(false);
+        when(mUpdateMonitor.isDreaming()).thenReturn(false);
+
+        // WHEN FP fails
+        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
+
+        // after device is finished waking up
+        mBiometricUnlockController.mWakefulnessObserver.onFinishedWakingUp();
+
+        // THEN show the bouncer
+        verify(mStatusBarKeyguardViewManager).showBouncer(true);
+    }
+
+    @Test
+    public void onFPFailureNoHaptics_dreaming_showBouncer() {
+        // GIVEN no vibrator and device is dreaming
+        when(mVibratorHelper.hasVibrator()).thenReturn(false);
+        when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
+        when(mUpdateMonitor.isDreaming()).thenReturn(true);
+
+        // WHEN FP fails
+        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
+
+        // THEN show the bouncer
+        verify(mStatusBarKeyguardViewManager).showBouncer(true);
     }
 }

@@ -112,4 +112,25 @@ public class DrawableMarginSpan implements LeadingMarginSpan, LineHeightSpan {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return "DrawableMarginSpan{drawable=" + mDrawable + ", padding=" + mPad + '}';
+    }
+
+    /**
+     * Returns the drawable used.
+     * @return a drawable
+     */
+    @NonNull public Drawable getDrawable() {
+        return mDrawable;
+    }
+
+    /**
+     * Returns a distance between the drawable and text in pixel.
+     * @return a distance pixel from the text
+     */
+    @Px public int getPadding() {
+        return mPad;
+    }
 }

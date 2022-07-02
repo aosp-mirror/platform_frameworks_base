@@ -116,10 +116,6 @@ open class SetRequestedOrientationWhilePinnedTest(
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
-
     @Presubmit
     @Test
     fun pipWindowInsideDisplay() {
