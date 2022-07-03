@@ -564,8 +564,10 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Sets the vibration pattern for notifications posted to this channel. If the provided
-     * pattern is valid (non-null, non-empty), will {@link #enableVibration(boolean)} enable
-     * vibration} as well. Otherwise, vibration will be disabled.
+     * pattern is valid (non-null, non-empty), will enable vibration on this channel
+     * (equivalent to calling {@link #enableVibration(boolean)} with {@code true}).
+     * Otherwise, vibration will be disabled unless {@link #enableVibration(boolean)} is
+     * used with {@code true}, in which case the default vibration will be used.
      *
      * Only modifiable before the channel is submitted to
      * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
