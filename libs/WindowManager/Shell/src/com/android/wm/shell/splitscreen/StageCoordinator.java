@@ -456,10 +456,10 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
 
             @Override
-            public void onAnimationCancelled() {
+            public void onAnimationCancelled(boolean isKeyguardOccluded) {
                 onRemoteAnimationFinishedOrCancelled(evictWct);
                 try {
-                    adapter.getRunner().onAnimationCancelled();
+                    adapter.getRunner().onAnimationCancelled(isKeyguardOccluded);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error starting remote animation", e);
                 }
