@@ -34,8 +34,8 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"স্বয়ং-ঘূৰ্ণন স্ক্ৰীন"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ত প্ৰৱেশ কৰিবলৈ <xliff:g id="APPLICATION">%1$s</xliff:g>ক অনুমতি দিবনে?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g>ক <xliff:g id="USB_DEVICE">%2$s</xliff:g> এক্সেছ কৰিবলৈ অনুমতি দিবনে?\nএই এপ্‌টোক ৰেকর্ড কৰাৰ অনুমতি দিয়া হোৱা নাই কিন্তু ই এই ইউএছবি ডিভাইচটোৰ জৰিয়তে অডিঅ\' ৰেকর্ড কৰিব পাৰে।"</string>
-    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g>ক <xliff:g id="USB_DEVICE">%2$s</xliff:g>ত প্ৰৱেশ কৰিবলৈ অনুমতি দিবনে?"</string>
-    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ক ব্যৱহাৰ কৰিবলৈ <xliff:g id="APPLICATION">%1$s</xliff:g>ক খুলিবনে?"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g>ক <xliff:g id="USB_DEVICE">%2$s</xliff:g> এক্সেছ কৰিবলৈ অনুমতি দিবনে?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> নিয়ন্ত্ৰণ কৰিবলৈ <xliff:g id="APPLICATION">%1$s</xliff:g> খুলিবনে?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"এই এপ্‌টোক ৰেকর্ড কৰাৰ অনুমতি দিয়া হোৱা নাই কিন্তু ই এই ইউএছবি ডিভাইচটোৰ জৰিয়তে অডিঅ\' ৰেকর্ড কৰিব পাৰে। এইটো ডিভাইচৰ সৈতে <xliff:g id="APPLICATION">%1$s</xliff:g> ব্যৱহাৰ কৰিলে কল, জাননী আৰু এলাৰ্ম শুনাটো অৱৰুদ্ধ হ’ব পাৰে।"</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"এইটো ডিভাইচৰ সৈতে <xliff:g id="APPLICATION">%1$s</xliff:g> ব্যৱহাৰ কৰিলে কল, জাননী আৰু এলাৰ্ম শুনাটো অৱৰুদ্ধ হ’ব পাৰে।"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g>ক <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ত প্ৰৱেশ কৰিবলৈ অনুমতি দিবনে?"</string>
@@ -78,6 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"স্ক্ৰীণশ্বট আকৌ ল\'বলৈ চেষ্টা কৰক"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"স্ক্ৰীনশ্বট ছেভ কৰিব নোৱাৰি"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"এপটোৱে বা আপোনাৰ প্ৰতিষ্ঠানে স্ক্ৰীণশ্বট ল\'বলৈ অনুমতি নিদিয়ে"</string>
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"স্ক্ৰীনশ্বট লোৱাটো আপোনাৰ আইটি প্ৰশাসকে অৱৰোধ কৰিছে"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"সম্পাদনা কৰক"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"স্ক্ৰীনশ্বট সম্পাদনা কৰক"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"স্ক্ৰীনশ্বট শ্বেয়াৰ কৰক"</string>
@@ -312,6 +313,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"খুলিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"খুলিবলৈ আনলক কৰক চিহ্নটোত টিপক"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"মুখাৱয়বৰ জৰিয়তে আনলক কৰা হৈছে। খুলিবলৈ আনলক কৰক চিহ্নটোত টিপক।"</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"বাওঁফাললৈ নিয়ক"</item>
+    <item msgid="5558598599408514296">"তললৈ নিয়ক"</item>
+    <item msgid="4844142668312841831">"সোঁফাললৈ নিয়ক"</item>
+    <item msgid="5640521437931460125">"ওপৰলৈ নিয়ক"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"পুনৰ চেষ্টা কৰিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ব্যৱহাৰ কৰিবলৈ আনলক কৰক"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"এই ডিভাইচটো আপোনাৰ প্ৰতিষ্ঠানৰ"</string>
@@ -365,20 +372,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"এই ডিভাইচটোৰ গৰাকী আপোনাৰ প্ৰতিষ্ঠান আৰু ই নেটৱৰ্কৰ ট্ৰেফিক নিৰীক্ষণ কৰিব পাৰে"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"এই ডিভাইচটোৰ গৰাকী <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> আৰু এইটোৱে নেটৱৰ্কৰ ট্ৰেফিক নিৰীক্ষণ কৰিব পাৰে"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>এ প্ৰদান কৰিছে"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"এই ডিভাইচটো আপোনাৰ প্ৰতিষ্ঠানৰ আৰু এইটো <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ সৈতে সংযুক্ত হৈ আছে"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ৰ আৰু এইটো <xliff:g id="VPN_APP">%2$s</xliff:g>ৰ সৈতে সংযুক্ত হৈ আছে"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"এই ডিভাইচটো আপোনাৰ প্ৰতিষ্ঠানৰ আৰু এইটো <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ৰ আৰু এইটো <xliff:g id="VPN_APP">%2$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"এই ডিভাইচটো আপোনাৰ প্ৰতিষ্ঠানৰ"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ৰ"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"এই ডিভাইচটো আপোনাৰ প্ৰতিষ্ঠানৰ আৰু এইটো VPNসমূহৰ সৈতে সংযুক্ত হৈ আছে"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ৰ আৰু এইটো VPNসমূহৰ সৈতে সংযুক্ত হৈ আছে"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"এই ডিভাইচটো আপোনাৰ প্ৰতিষ্ঠানৰ আৰু এইটো ভিপিএনৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ৰ আৰু এইটো ভিপিএনৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"আপোনাৰ প্ৰতিষ্ঠানে আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলৰ নেটৱৰ্ক ট্ৰেফিক পৰ্যবেক্ষণ কৰিব পাৰে"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>এ আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলৰ নেটৱৰ্ক ট্ৰেফিক পৰ্যবেক্ষণ কৰিব পাৰে"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"কৰ্মস্থানৰ প্ৰ’ফাইলৰ নেটৱৰ্কৰ কাৰ্যকলাপ আপোনাৰ আইটি প্ৰশাসকৰ বাবে দৃশ্যমান হয়"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"নেটৱৰ্ক নিৰীক্ষণ কৰা হ\'ব পাৰে"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"এই ডিভাইচটো VPNসমূহৰ সৈতে সংযুক্ত হৈ আছে"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"আপোনাৰ কৰ্মস্থানৰ প্ৰ’ফাইলটো <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ সৈতে সংযুক্ত হৈ আছে"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"আপোনাৰ ব্যক্তিগত প্ৰ’ফাইলটো <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ সৈতে সংযুক্ত হৈ আছে"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"এই ডিভাইচটো <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ সৈতে সংযুক্ত হৈ আছে"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"এই ডিভাইচটো ভিপিএনৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"আপোনাৰ কৰ্মস্থানৰ এপ্‌সমূহ <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"আপোনাৰ ব্যক্তিগত এপ্‌সমূহ <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"এই ডিভাইচটো <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>এ প্ৰদান কৰিছে"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ডিভাইচৰ পৰিচালনা"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"ভিপিএন"</string>
@@ -394,10 +401,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"এই ডিভাইচটোত এটা প্ৰমাণপত্ৰ সম্পৰ্কীয় কৰ্তৃপক্ষ ইনষ্টল কৰা হৈছে। আপোনাৰ সুৰক্ষিত নেটৱৰ্কৰ ট্ৰেফিক পৰ্যবেক্ষণ বা সংশোধন কৰা হ\'ব পাৰে।"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"আপোনাৰ প্ৰশাসকে নেটৱৰ্ক লগিং অন কৰিছে, যিয়ে আপোনাৰ ডিভাইচটোত নেটৱৰ্ক ট্ৰেফিক পৰ্যবেক্ষণ কৰে।"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"আপোনাৰ প্ৰশাসকে নেটৱৰ্ক লগিং অন কৰিছে, যিয়ে আপোনাৰ কৰ্মস্থানৰ প্ৰ’ফাইলত ট্ৰেফিক নিৰীক্ষণ কৰে কিন্তু আপোনাৰ ব্যক্তিগত প্ৰ’ফাইলত নকৰে।"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"আপুনি <xliff:g id="VPN_APP">%1$s</xliff:g>ৰে সংযুক্ত হৈ আছে যিয়ে আপোনাৰ ইমেইল, এপ্ আৰু ৱেবছাইটকে ধৰি নেটৱর্কৰ কাৰ্যকলাপ পৰ্যবেক্ষণ কৰিব পাৰে।"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"আপুনি <xliff:g id="VPN_APP_0">%1$s</xliff:g> আৰু <xliff:g id="VPN_APP_1">%2$s</xliff:g>ৰে সংযুক্ত হৈ আছে, যিয়ে আপোনাৰ ইমেইল, এপ্ আৰু ৱেবছাইটকে ধৰি নেটৱর্কৰ কাৰ্যকলাপ পৰ্যবেক্ষণ কৰিব পাৰে।"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"আপুনি <xliff:g id="VPN_APP">%1$s</xliff:g>ৰে সংযুক্ত হৈ আছে যিয়ে আপোনাৰ ইমেইল, এপ্ আৰু ৱেবছাইটকে ধৰি নেটৱর্কৰ কাৰ্যকলাপ পৰ্যবেক্ষণ কৰিব পাৰে।"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"আপোনাৰ ব্যক্তিগত প্ৰ\'ফাইলটো <xliff:g id="VPN_APP">%1$s</xliff:g>ৰে সংযুক্ত হৈ আছে, যিয়ে আপোনাৰ ইমেইল, এপ্ আৰু ৱেবছাইটকে ধৰি নেটৱর্কৰ কাৰ্যকলাপ পৰ্যবেক্ষণ কৰিব পাৰে।"</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"এই ডিভাইচটো <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে। ইমেইল আৰু ব্ৰাউজিঙৰ ডেটাকে ধৰি আপোনাৰ নেটৱৰ্ক সম্পৰ্কীয় কাৰ্যকলাপ আপোনাৰ আইটি প্ৰশাসকে দেখা পায়।"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"এই ডিভাইচটো <xliff:g id="VPN_APP_0">%1$s</xliff:g> আৰু <xliff:g id="VPN_APP_1">%2$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে। ইমেইল আৰু ব্ৰাউজিঙৰ ডেটাকে ধৰি আপোনাৰ নেটৱৰ্ক সম্পৰ্কীয় কাৰ্যকলাপ আপোনাৰ আইটি প্ৰশাসকে দেখা পায়।"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"আপোনাৰ কৰ্মস্থানৰ এপ্‌সমূহ <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে। ইমেইল আৰু ব্ৰাউজিঙৰ ডেটাকে ধৰি আপুনি কৰ্মস্থানৰ এপ্‌সমূহত কৰা নেটৱৰ্ক সম্পৰ্কীয় কাৰ্যকলাপ আপোনাৰ আইটি প্ৰশাসক আৰু ভিপিএন প্ৰদানকাৰীয়ে দেখা পায়।"</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"আপোনাৰ ব্যক্তিগত এপ্‌সমূহ <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে। ইমেইল আৰু ব্ৰাউজিঙৰ ডেটাকে ধৰি আপোনাৰ নেটৱৰ্ক সম্পৰ্কীয় কাৰ্যকলাপ আপোনাৰ ভিপিএন প্ৰদানকাৰীয়ে দেখা পায়।"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN ছেটিং খোলক"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"এই ডিভাইচটো আপোনাৰ অভিভাৱকে পৰিচালনা কৰে। আপোনাৰ অভিভাৱকে আপুনি ব্যৱহাৰ কৰা এপ্‌, আপোনাৰ অৱস্থান আৰু আপুনি ডিভাইচত অতিবাহিত কৰা সময়ৰ দৰে তথ্য চাব আৰু পৰিচালনা কৰিব পাৰে।"</string>
@@ -458,7 +465,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"ৱালেট"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"আপোনাৰ ফ’নটোৰে দ্ৰুত তথা অধিক সুৰক্ষিত ক্ৰয় কৰিবলৈ ছেট আপ পাওক"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"আটাইবোৰ দেখুৱাওক"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"এখন কাৰ্ড যোগ দিয়ক"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"খুলিবলৈ টিপক"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"আপডে’ট কৰি থকা হৈছে"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ব্যৱহাৰ কৰিবলৈ আনলক কৰক"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"আপোনাৰ কাৰ্ড লাভ কৰোঁতে এটা সমস্যা হৈছে, অনুগ্ৰহ কৰি পাছত পুনৰ চেষ্টা কৰক"</string>
@@ -545,7 +552,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"বাওঁফালে"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"সোঁফালে"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"স্ক্ৰীণৰ মাজত"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"টেব"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"স্পেচ"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"এণ্টাৰ"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"বেকস্পেচ"</string>
@@ -718,6 +725,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"বেটাৰী শেষ হোৱাৰ সম্ভাৱনা থাকিলে অন কৰক"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"নালাগে, ধন্যবাদ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI হীপ ডাম্প কৰক"</string>
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"ব্যৱহাৰ হৈ আছে"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"এপ্লিকেশ্বনসমূহে আপোনাৰ <xliff:g id="TYPES_LIST">%s</xliff:g> ব্যৱহাৰ কৰি আছে।"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" আৰু "</string>
@@ -731,6 +739,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"Camera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"অৱস্থান"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"মাইক্ৰ\'ফ\'ন"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"স্ক্ৰীন ৰেকৰ্ডিং"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"কোনো শিৰোনাম নাই"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ষ্টেণ্ডবাই"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"বিবৰ্ধন ৱিণ্ড’"</string>
@@ -815,7 +824,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ত প্লে’ কৰিবলৈ ওচৰলৈ যাওক"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ইয়াত খেলিবলৈ <xliff:g id="DEVICENAME">%1$s</xliff:g>ৰ আৰু ওচৰলৈ যাওক"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ত প্লে কৰি থকা হৈছে"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"এই ফ’নটোত প্লে কৰি থকা হৈছে"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"কিবা ভুল হ’ল। পুনৰ চেষ্টা কৰক।"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"সক্ৰিয় নহয়, এপ্‌টো পৰীক্ষা কৰক"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"বিচাৰি পোৱা নগ’ল"</string>
@@ -836,6 +844,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"এই ছেশ্বনটো কাষ্ট কৰিবলৈ, অনুগ্ৰহ কৰি এপ্‌টো খোলক"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"অজ্ঞাত এপ্"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"কাষ্ট বন্ধ কৰক"</string>
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"অডিঅ\' আউটপুটৰ বাবে উপলব্ধ ডিভাইচ।"</string>
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ভলিউম"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"সম্প্ৰচাৰ কৰাটোৱে কেনেকৈ কাম কৰে"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"সম্প্ৰচাৰ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"সমিল ব্লুটুথ ডিভাইচৰ সৈতে আপোনাৰ নিকটৱৰ্তী স্থানত থকা লোকসকলে আপুনি সম্প্ৰচাৰ কৰা মিডিয়াটো শুনিব পাৰে"</string>
@@ -843,6 +853,10 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"সম্প্ৰচাৰ নাম"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"পাছৱৰ্ড"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"ছেভ কৰক"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"আৰম্ভ কৰা হৈছে…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"সম্প্ৰচাৰ কৰিব নোৱাৰি"</string>
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ছেভ কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰক।"</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ছেভ কৰিব নোৱাৰি।"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"বিল্ডৰ নম্বৰ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ক্লিপব’ৰ্ডলৈ বিল্ডৰ নম্বৰ প্ৰতিলিপি কৰা হ’ল।"</string>
     <string name="basic_status" msgid="2315371112182658176">"বাৰ্তালাপ খোলক"</string>
@@ -911,20 +925,30 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"টাইল যোগ দিয়ক"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"টাইল যোগ নিদিব"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ব্যৱহাৰকাৰী বাছনি কৰক"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> টা এপ্‌ সক্ৰিয় হৈ আছে</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> টা এপ্‌ সক্ৰিয় হৈ আছে</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"নতুন তথ্য"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"সক্ৰিয় এপ্‌"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"এই এপ্‌সমূহ সক্ৰিয় আৰু আনকি আপুনি এইসমূহ ব্যৱহাৰ নকৰাৰ সময়তো চলি থাকে। ই সেইসমূহৰ কাৰ্য্যক্ষমতা উন্নত কৰে, কিন্তু ই বেটাৰীৰ জীৱনকালতো প্ৰভাৱ পেলাব পাৰে।"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"বন্ধ কৰক"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"বন্ধ হ’ল"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"হ’ল"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"প্ৰতিলিপি কৰা হ’ল"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g>ৰ পৰা"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"প্ৰতিলিপি কৰা UI অগ্ৰাহ্য কৰক"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"প্ৰতিলিপি কৰা পাঠ অগ্ৰাহ্য কৰক"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"প্ৰতিলিপি কৰা পাঠ সম্পাদনা কৰক"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"প্ৰতিলিপি কৰা প্ৰতিচ্ছবি সম্পাদনা কৰক"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"নিকটৱৰ্তী ডিভাইচলৈ পঠাওক"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"চাবলৈ টিপক"</string>
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"পাঠ প্ৰতিলিপি কৰা হ’ল"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"প্ৰতিচ্ছবি প্ৰতিলিপি কৰা হ’ল"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"সমল প্ৰতিলিপি কৰা হ’ল"</string>
+    <string name="clipboard_editor" msgid="2971197550401892843">"ক্লিপব’ৰ্ড সম্পাদক"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"ক্লিপব’ৰ্ড"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"প্ৰতিচ্ছবিৰ পূৰ্বদৰ্শন"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"সম্পাদনা কৰক"</string>
     <string name="add" msgid="81036585205287996">"যোগ দিয়ক"</string>
     <string name="manage_users" msgid="1823875311934643849">"ব্যৱহাৰকাৰী পৰিচালনা কৰক"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"এই জাননীটোৱে টানি আনি এৰাৰ পৰা বিভাজিত স্ক্ৰীন সমৰ্থন নকৰে।"</string>
