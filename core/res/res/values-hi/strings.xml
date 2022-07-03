@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"केबी"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"एमबी"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"जीबी"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;शीर्षक-रहित&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(कोई फ़ोन नंबर नहीं)"</string>
@@ -305,12 +300,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"अपने कैलेंडर को ऐक्सेस करें"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"मैसेज (एसएमएस)"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"मैसेज (एसएमएस) भेजें और देखें"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"फ़ाइलें और दस्तावेज़"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"अपने डिवाइस पर मौजूद फ़ाइलें और दस्तावेज़ ऐक्सेस करने की अनुमति दें"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"संगीत और अन्य ऑडियो"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"आपके डिवाइस पर मौजूद, ऑडियो फ़ाइलों का ऐक्सेस"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"फ़ोटो और वीडियो"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"आपके डिवाइस पर मौजूद, इमेज और वीडियो फ़ाइलों का ऐक्सेस"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"फ़ाइलें"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"अपने डिवाइस में मौजूद फ़ाइलों का ऐक्सेस दें"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"संगीत और ऑडियो को ऐक्सेस करने की अनुमति"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"आपके डिवाइस पर संगीत और ऑडियो को ऐक्सेस करने की अनुमति"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"फ़ोटो और वीडियो को ऐक्सेस करने की अनुमति"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"आपके डिवाइस पर फ़ोटो और वीडियो को ऐक्सेस करने की अनुमति"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"माइक्रोफ़ोन"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ऑडियो रिकॉर्ड करें"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"शारीरिक गतिविधि"</string>
@@ -328,7 +323,7 @@
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"सूचनाएं"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"सूचनाएं दिखाएं"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"विंडो का कॉन्टेंट वापस पाएं"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"उस विंडो की सामग्री की जाँच करें, जिसका आप इस्तेमाल कर रहे हैं."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"विंडो पर नज़र आ रहे कॉन्टेंट की जांच करें."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"छूकर, किसी चीज़ से जुड़ी जानकारी सुनने की सुविधा चालू करें"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"जिन चीज़ों पर आप टैप करेंगे उन्हें ज़ोर से बोला जाएगा और स्क्रीन को जेस्चर के ज़रिए एक्सप्लोर किया जा सकेगा."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"अपने लिखे हुए लेख पर गौर करें"</string>
@@ -1926,7 +1921,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"फ़िलहाल <xliff:g id="APP_NAME_0">%1$s</xliff:g> उपलब्ध नहीं है. इसे <xliff:g id="APP_NAME_1">%2$s</xliff:g> के ज़रिए प्रबंधित किया जाता है."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ज़्यादा जानें"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ऐप्लिकेशन पर लगी रोक हटाएं"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन चालू करना चाहते हैं?"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन चालू करने हैं?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"अपने ऑफ़िस के काम से जुड़े ऐप्लिकेशन और सूचनाओं का ऐक्सेस पाएं"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"चालू करें"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ऐप्लिकेशन उपलब्ध नहीं है"</string>
@@ -2044,7 +2039,7 @@
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"फिर से न दिखाएं"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाना चाहता है"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"बदलाव करें"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कॉल और सूचनाओं के लिए डिवाइस वाइब्रेट हाेगा"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कॉल और सूचनाओं आने पर डिवाइस वाइब्रेट हाेगा"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"कॉल और सूचनाओं के लिए डिवाइस म्यूट रहेगा"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"सिस्टम में हुए बदलाव"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"परेशान न करें"</string>
@@ -2053,7 +2048,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"परेशान न करें की सुविधा बदल गई है"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"टैप करके देखें कि किन चीज़ों पर रोक लगाई गई है."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"सूचना सेटिंग देखें"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13 में जो ऐप्लिकेशन इंस्टॉल किए जाएंगे, उन्हें आपको सूचनाएं भेजने के लिए अनुमति लेनी होगी. पहले से इंस्टॉल किए गए ऐप्लिकेशन को दी गई अनुमति बदलने के लिए टैप करें."</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 में जो ऐप्लिकेशन इंस्टॉल किए जाएंगे, उन्हें आपको सूचनाएं भेजने के लिए अनुमति लेनी होगी. पहले से इंस्टॉल किए गए ऐप्लिकेशन को दी गई अनुमति बदलने के लिए टैप करें."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"बाद में याद दिलाएं"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"बंद करें"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"सिस्टम"</string>
@@ -2274,14 +2269,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> का अनुवाद किया गया."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"मैसेज का <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> से <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> में अनुवाद किया गया."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"बैकग्राउंड में हो रही गतिविधि"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"कोई ऐप्लिकेशन, तेज़ी से बैटरी खर्च कर रहा है"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"कोई ऐप्लिकेशन अब भी चालू है"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> बैकग्राउंड में चल रहा है. \'बैटरी खर्च को मैनेज करें\' पर टैप करें."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> से, आपके डिवाइस की बैटरी लाइफ़ पर असर पड़ सकता है. चालू ऐप्लिकेशन देखने के लिए टैप करें."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"चालू ऐप्लिकेशन देखें"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> से फ़ोन के कैमरे को ऐक्सेस नहीं किया जा सकता"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> से टैबलेट के कैमरे को ऐक्सेस नहीं किया जा सकता"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"सिस्टम की भाषा"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"सिस्टम डिफ़ॉल्ट"</string>
 </resources>

@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;ନାମହୀନ&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(କୌଣସି ଫୋନ୍ ନମ୍ବର ନାହିଁ)"</string>
@@ -305,12 +300,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ଆପଣଙ୍କ କ୍ୟାଲେଣ୍ଡର୍‍ ଆକ୍ସେସ୍‍ କରେ"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS ମେସେଜ୍‍ ପଠାନ୍ତୁ ଓ ଦେଖନ୍ତୁ"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ଫାଇଲ ଏବଂ ଡକ୍ୟୁମେଣ୍ଟଗୁଡ଼ିକ"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଥିବା ଫାଇଲ ଏବଂ ଡକ୍ୟୁମେଣ୍ଟଗୁଡ଼ିକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"ମ୍ୟୁଜିକ ଓ ଅନ୍ୟ ଅଡିଓ"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଅଡିଓ ଫାଇଲଗୁଡ଼ିକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ଫଟୋ ଓ ଭିଡିଓଗୁଡ଼ିକ"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଇମେଜ ଏବଂ ଭିଡିଓ ଫାଇଲଗୁଡ଼ିକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ଫାଇଲଗୁଡ଼ିକ"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଥିବା ଫାଇଲଗୁଡ଼ିକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"ମ୍ୟୁଜିକ ଏବଂ ଅଡିଓ"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ଆପଣଙ୍କ ଡିଭାଇସରେ ମ୍ୟୁଜିକ ଏବଂ ଅଡିଓକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ଫଟୋ ଏବଂ ଭିଡିଓଗୁଡ଼ିକ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଫଟୋ ଏବଂ ଭିଡିଓଗୁଡ଼ିକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ମାଇକ୍ରୋଫୋନ୍"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ଅଡିଓ ରେକର୍ଡ କରେ"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ଶାରୀରିକ କାର୍ଯ୍ୟକଳାପ"</string>
@@ -638,7 +633,7 @@
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ଅତ୍ୟଧିକ ଉଜ୍ଵଳ। କମ୍ ଉଜ୍ବଳକରଣରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ଅତ୍ୟଧିକ ଅନ୍ଧକାର। ଉଜ୍ବଳ ଲାଇଟ୍ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"ଫୋନ୍‌କୁ ଟିକେ ଦୂରକୁ ନିଅନ୍ତୁ।"</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"ଫୋନ୍‌କୁ ପାଖକୁ ଆଣନ୍ତୁ।"</string>
+    <string name="face_acquired_too_far" msgid="5098567726427173896">"ଫୋନକୁ ପାଖକୁ ଆଣନ୍ତୁ।"</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"ଫୋନ୍‌କୁ ଉପରକୁ ଉଠାନ୍ତୁ।"</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"ଫୋନ୍‌କୁ ତଳକୁ ନିଅନ୍ତୁ।"</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"ବାମ ପଟକୁ ଫୋନ୍ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
@@ -1678,12 +1673,12 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ଚାଲୁ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ଚାଲୁ ଅଛି"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ବନ୍ଦ ଅଛି"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>କୁ ଆପଣଙ୍କ ଡିଭାଇସର ସମ୍ପୂର୍ଣ୍ଣ ନିୟନ୍ତ୍ରଣର ଅନୁମତି ଦେବେ?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ଆପଣଙ୍କ ଡିଭାଇସର ସମ୍ପୂର୍ଣ୍ଣ ନିୟନ୍ତ୍ରଣ କରିବାକୁ <xliff:g id="SERVICE">%1$s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ଯେଉଁ ଆପ୍ସ ଆପଣଙ୍କୁ ଆକ୍ସେସିବିଲିଟୀ ଆବଶ୍ୟକତାରେ ସହାୟତା କରେ, ସେହି ଆପ୍ସ ପାଇଁ ସମ୍ପୂର୍ଣ୍ଣ ନିୟନ୍ତ୍ରଣ ଉପଯୁକ୍ତ ଅଟେ, କିନ୍ତୁ ଅଧିକାଂଶ ଆପ୍ସ ପାଇଁ ଉପଯୁକ୍ତ ନୁହେଁ।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ଭ୍ୟୁ ଏବଂ ସ୍କ୍ରିନ୍‍ ନିୟନ୍ତ୍ରଣ"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ଏହା ସ୍କ୍ରିନ୍‍ର ସମସ୍ତ ବିଷୟବସ୍ତୁ ପଢ଼ିପାରେ ଏବଂ ଅନ୍ୟ ଆପ୍ସରେ ବିଷୟବସ୍ତୁ ପ୍ରଦର୍ଶନ କରିପାରେ।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ଦେଖନ୍ତୁ ଏବଂ କାର୍ଯ୍ୟ ସମ୍ପାଦନ କରନ୍ତୁ"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ଏହା କୌଣସି ଆପ୍‍ କିମ୍ବା ହାର୍ଡୱେର୍‍ ସେନ୍ସର୍‍ ସହ ଆପଣଙ୍କର ପାରସ୍ପରିକ ଆଦାନପ୍ରଦାନକୁ ଟ୍ରାକ୍‍ କରିପାରେ ଏବଂ ଆପଣଙ୍କ ତରଫରୁ ଆପ୍ସ ସହ ପରିଚିତ ହୋଇପାରେ।"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ଏହା କୌଣସି ଆପ କିମ୍ବା ହାର୍ଡୱେର ସେନ୍ସର ସହ ଆପଣଙ୍କର ଇଣ୍ଟେରାକ୍ସନକୁ ଟ୍ରାକ କରିପାରେ ଏବଂ ଆପଣଙ୍କ ତରଫରୁ ଆପ୍ସ ସହ ଇଣ୍ଟରାକ୍ଟ କରିପାରେ।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ଅନୁମତି"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ଅଗ୍ରାହ୍ୟ"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ଏକ ଫିଚର୍ ବ୍ୟବହାର କରିବା ଆରମ୍ଭ କରିବାକୁ ଏହାକୁ ଟାପ୍ କରନ୍ତୁ:"</string>
@@ -2053,7 +2048,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"’ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ’ ବଦଳିଯାଇଛି"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"କ’ଣ ଅବରୋଧ ହୋଇଛି ଯାଞ୍ଚ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ବିଜ୍ଞପ୍ତି ସେଟିଂସକୁ ସମୀକ୍ଷା କରନ୍ତୁ"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13ରେ, ଆପଣ ଇନଷ୍ଟଲ କରୁଥିବା ଆପ୍ସ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ପଠାଇବା ପାଇଁ ଆପଣଙ୍କ ଅନୁମତି ଆବଶ୍ୟକ କରେ। ପୂର୍ବରୁ ଥିବା ଆପ୍ସ ପାଇଁ ଏହି ଅନୁମତିକୁ ପରିବର୍ତ୍ତନ କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13ଠାରୁ, ଆପଣ ଇନଷ୍ଟଲ କରୁଥିବା ଆପ୍ସ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ପଠାଇବା ପାଇଁ ଆପଣଙ୍କ ଅନୁମତି ଆବଶ୍ୟକ କରେ। ପୂର୍ବରୁ ଥିବା ଆପ୍ସ ପାଇଁ ଏହି ଅନୁମତିକୁ ପରିବର୍ତ୍ତନ କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ମୋତେ ପରେ ରିମାଇଣ୍ଡ କର"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ସିଷ୍ଟମ୍‌"</string>
@@ -2132,7 +2127,7 @@
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ବ୍ୟକ୍ତିଗତ"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ୱାର୍କ"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ବ୍ୟକ୍ତିଗତ ଭ୍ୟୁ"</string>
-    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"କାର୍ଯ୍ୟସ୍ଥଳୀ ସମ୍ବନ୍ଧିତ ଭ୍ୟୁ"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ୱାର୍କ ଭ୍ୟୁ"</string>
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"ଆପଣଙ୍କ IT ଆଡମିନଙ୍କ ଦ୍ୱାରା ବ୍ଲକ୍ କରାଯାଇଛି"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"ଏହି ବିଷୟବସ୍ତୁ ୱାର୍କ ଆପଗୁଡ଼ିକରେ ସେୟାର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ଏହି ବିଷୟବସ୍ତୁ ୱାର୍କ ଆପଗୁଡ଼ିକରେ ଖୋଲାଯାଇପାରିବ ନାହିଁ"</string>
@@ -2274,14 +2269,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ଅନୁବାଦ କରାଯାଇଛି।"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"ମେସେଜ୍, <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>ରୁ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>କୁ ଅନୁବାଦ କରାଯାଇଛି।"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"ଏକ ଆପ ବ୍ୟାଟେରୀର ଚାର୍ଜ ଶୀଘ୍ର ସମାପ୍ତ କରୁଛି"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"ଏକ ଆପ ଏବେ ବି ସକ୍ରିୟ ଅଛି"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> ପୃଷ୍ଠପଟରେ ଚାଲୁଛି। ବ୍ୟାଟେରୀ ବ୍ୟବହାର ପରିଚାଳନା କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> ବ୍ୟାଟେରୀ ଲାଇଫକୁ ପ୍ରଭାବିତ କରିପାରେ। ସକ୍ରିୟ ଆପ୍ସକୁ ସମୀକ୍ଷା କରିବା ପାଇଁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ସକ୍ରିୟ ଆପଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରୁ ଫୋନର କ୍ୟାମେରାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରୁ ଟାବଲେଟର କ୍ୟାମେରାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"ସିଷ୍ଟମ ଭାଷା"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"ସିଷ୍ଟମ ଡିଫଲ୍ଟ"</string>
 </resources>

@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"ბაიტი"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"კბაიტი"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"მბაიტი"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"გბაიტი"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"ტბაიტი"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"უსათაურო"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(ტელეფონის ნომრის გარეშე)"</string>
@@ -305,12 +300,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"თქვენს კალენდარზე წვდომა"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS შეტყობინებების გაგზავნა და ნახვა"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ფაილები და დოკუმენტები"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"თქვენს მოწყობილობაზე ფაილებსა და დოკუმენტებზე წვდომა"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"მუსიკა და სხვა აუდიო ფაილები"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"თქვენს მოწყობილობაზე აუდიო ფაილებზე წვდომა"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ფოტოები და ვიდეოები"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"თქვენს მოწყობილობაზე სურათის ფაილებსა და ვიდეო ფაილებზე წვდომა"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ფაილები"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"ფაილებზე წვდომა თქვენს მოწყობილობაში"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"მუსიკა და აუდიო"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"იქონიეთ წვდომა მუსიკასა და აუდიოზე თქვენს მოწყობილობაზე"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ფოტოები და ვიდეოები"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"იქონიეთ წვდომა ფოტოებსა და ვიდეოებზე თქვენს მოწყობილობაზე"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"მიკროფონი"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"აუდიოს ჩაწერა"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ფიზიკური აქტივობა"</string>
@@ -2040,7 +2035,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"გსურთ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>-ს მიანიჭოთ მოწყობილობის ყველა ჟურნალზე წვდომა?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ერთჯერადი წვდომის დაშვება"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"არ დაიშვას"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"მოწყობილობის ჟურნალში იწერება, რა ხდება ამ მოწყობილობაზე. აპებს შეუძლია ამ ჟურნალების გამოყენება პრობლემების აღმოსაჩენად და მოსაგვარებლად.\n\nზოგი ჟურნალი შეიძლება სენსიტიური ინფორმაციის მატარებელი იყოს, ამიტომაც მოწყობილობის ყველა ჟურნალზე წვდომა მხოლოდ სანდო აპებს მიანიჭეთ. \n\nთუ ამ აპს მოწყობილობის ყველა ჟურნალზე წვდომას არ მიანიჭებთ, მას მაინც ექნება წვდომა თქვენს ჟურნალებზე. თქვენი მოწყობილობის მწარმოებელს მაინც შეეძლება თქვენი მოწყობილობის ზოგიერთ ჟურნალსა თუ ინფორმაციაზე წვდომა. შეიტყვეთ მეტი"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"მოწყობილობის ჟურნალში იწერება, რა ხდება ამ მოწყობილობაზე. აპებს შეუძლია ამ ჟურნალების გამოყენება პრობლემების აღმოსაჩენად და მოსაგვარებლად.\n\nზოგი ჟურნალი შეიძლება სენსიტიური ინფორმაციის მატარებელი იყოს, ამიტომაც მოწყობილობის ყველა ჟურნალზე წვდომა მხოლოდ სანდო აპებს მიანიჭეთ. \n\nთუ ამ აპს მოწყობილობის ყველა ჟურნალზე წვდომას არ მიანიჭებთ, მას მაინც ექნება წვდომა საკუთარ ჟურნალებზე. თქვენი მოწყობილობის მწარმოებელს მაინც შეეძლება თქვენი მოწყობილობის ზოგიერთ ჟურნალსა თუ ინფორმაციაზე წვდომა. შეიტყვეთ მეტი"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"აღარ გამოჩნდეს"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>-ს სურს, გაჩვენოთ <xliff:g id="APP_2">%2$s</xliff:g>-ის ფრაგმენტები"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"რედაქტირება"</string>
@@ -2053,7 +2048,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„არ შემაწუხოთ“ რეჟიმი შეცვლილია"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"შეეხეთ იმის სანახავად, თუ რა არის დაბლოკილი."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"შეტყობინების პარამეტრების შემოწმება"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13-ზე შეტყობინებების გასაგზავნად საჭიროა თქვენ მიერ დაინსტალირებული აპებისთვის ნებართვის მინიჭება. არსებული აპებისთვის ამ ნებართვის შესაცვლელად შეეხეთ."</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13-ზე შეტყობინებების გასაგზავნად საჭიროა თქვენ მიერ დაინსტალირებული აპებისთვის ნებართვის მინიჭება. არსებული აპებისთვის ამ ნებართვის შესაცვლელად შეეხეთ."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"შემახსენე მოგვიან."</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"უარყოფა"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"სისტემა"</string>
@@ -2281,5 +2276,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"აქტიური აპების შემოწმება"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ტელეფონის კამერაზე წვდომა ვერ მოხერხდა თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ტაბლეტის კამერაზე წვდომა ვერ მოხერხდა თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"სისტემის ენა"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"სისტემის ნაგულისხმევი"</string>
 </resources>

@@ -20,12 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="202579285008794431">"B."</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
+    <string name="byteShort" msgid="202579285008794431">"B"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Tidak bertajuk&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Tiada nombor telefon)"</string>
@@ -297,7 +292,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistem Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Beralih ke profil peribadi"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Beralih ke profil kerja"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kenalan"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"mengakses kenalan anda"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokasi"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"mengakses lokasi peranti ini"</string>
@@ -305,12 +300,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"mengakses kalendar"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"menghantar dan melihat mesej SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fail &amp; dokumen"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"akses fail dan dokumen pada peranti anda"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muzik &amp; audio lain"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"berikan akses fail audio pada peranti anda"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Foto &amp; video"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"berikan akses imej dan fail video pada peranti anda"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Fail"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"akses fail pada peranti anda"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzik dan audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"akses muzik dan audio pada peranti anda"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foto dan video"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"akses foto dan video pada peranti anda"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"rakam audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Aktiviti fizikal"</string>
@@ -1476,7 +1471,7 @@
     <string name="sync_binding_label" msgid="469249309424662147">"Penyegerakan"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Kebolehaksesan"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Kertas dinding"</string>
-    <string name="chooser_wallpaper" msgid="3082405680079923708">"Tukar kertas dinding"</string>
+    <string name="chooser_wallpaper" msgid="3082405680079923708">"Tukar hiasan latar"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Pendengar pemberitahuan"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"Pendengar VR"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Pembekal keadaan"</string>
@@ -1683,7 +1678,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengawal skrin"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ciri ini boleh membaca semua kandungan pada skrin dan memaparkan kandungan di atas apl lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Lihat dan laksanakan tindakan"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Tindakan ini boleh menjejak interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ciri ini boleh menjejak interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Benarkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketik ciri untuk mula menggunakan ciri itu:"</string>
@@ -2038,7 +2033,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"BUKA JUGA"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Apl berbahaya dikesan"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Benarkan <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> mengakses semua log peranti?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Benarkan akses sekali"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Benarkan akses satu kali"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Jangan benarkan"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Log peranti merekodkan perkara yang berlaku pada peranti anda. Apl dapat menggunakan log ini untuk menemukan dan membetulkan isu.\n\nSesetengah log mungkin mengandungi maklumat sensitif, jadi benarkan apl yang anda percaya sahaja untuk mengakses semua log peranti. \n\nJika anda tidak membenarkan apl ini mengakses semua log peranti, apl masih boleh mengakses log sendiri. Pengilang peranti anda mungkin masih boleh mengakses sesetengah log atau maklumat pada peranti anda. Ketahui lebih lanjut"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Jangan tunjuk lagi"</string>
@@ -2053,7 +2048,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Jangan Ganggu telah berubah"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Ketik untuk menyemak item yang disekat."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Semak tetapan pemberitahuan"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Dalam Android 13, apl yang anda pasang memerlukan kebenaran anda untuk menghantar pemberitahuan. Ketik untuk menukar kebenaran ini bagi apl sedia ada."</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Bermula dengan Android 13, apl yang anda pasang memerlukan kebenaran anda untuk menghantar pemberitahuan. Ketik untuk menukar kebenaran ini bagi apl sedia ada."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ingatkan saya nanti"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Ketepikan"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
@@ -2281,5 +2276,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Semak apl aktif"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Tidak dapat mengakses kamera telefon daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Tidak dapat mengakses kamera tablet daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Bahasa sistem"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Lalai sistem"</string>
 </resources>

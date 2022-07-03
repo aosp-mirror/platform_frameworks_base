@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Adsız&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Telefon numarası yok)"</string>
@@ -305,12 +300,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"takviminize erişme"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS mesajları gönderme ve görüntüleme"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Dosyalar ve dokümanlar"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"cihazınızdaki dosyalara ve dokümanlara erişme"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Müzik ve diğer sesler"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"cihazınızdaki ses dosyalarına erişme"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotoğraflar ve videolar"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"cihazınızdaki resim ve video dosyalarına erişme"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Dosyalar"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"cihazınızdaki dosyalara erişme"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Müzik ve ses"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"cihazınızdaki müziklere ve seslere erişme"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotoğraflar ve videolar"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"cihazınızdaki fotoğraflara ve videolara erişme"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ses kaydetme"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fiziksel aktivite"</string>
@@ -626,7 +621,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Yüz Tanıma Kilidi"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Yüz Tanıma Kilidi sorunu"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Yüz modelinizi silmek için dokunup ardından yüzünüzü yeniden ekleyin"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Yüz Tanıma Kilidi\'ni kurma"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Yüz Tanıma Kilidi\'ni kurun"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonunuza bakarak kilidini açın"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Yüz Tanıma Kilidi\'ni kullanmak için Ayarlar &gt; Gizlilik bölümünden "<b>"Kamera erişimi"</b>"\'ni açın"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Kilidi açmak için daha fazla yöntem ayarlayın"</string>
@@ -2053,7 +2048,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Rahatsız Etmeyin modu değişti"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nelerin engellendiğini kontrol etmek için dokunun."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Bildirim ayarlarını inceleyin"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13\'te yüklediğiniz uygulamaların bildirim göndermek için izninize ihtiyacı vardır. Mevcut uygulamalarda bu izni değiştirmek için dokunun."</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13\'te başlayarak yüklediğiniz uygulamaların bildirim gönderebilmesi için izniniz gereklidir. Mevcut uygulamalarda bu izni değiştirmek için dokunun."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Sonra hatırlat"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Kapat"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
@@ -2067,11 +2062,11 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Bu bildirimin önem derecesi yükseltildi. Geri bildirimde bulunmak için dokunun."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Bu bildirimin önem derecesi düşürüldü. Geri bildirimde bulunmak için dokunun."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Gelişmiş bildirimler"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Önerilen işlemler ve yanıtlar artık gelişmiş bildirimler tarafından sağlanıyor. Android Uyarlamalı Bildirimler artık desteklenmiyor."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Önerilen işlemler ve yanıtlar artık gelişmiş bildirimler tarafından sağlanıyor. Android Uyarlanabilir Bildirimler artık desteklenmiyor."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Tamam"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Kapat"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Daha fazla bilgi"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Gelişmiş bildirimler, Android 12\'de Android Uyarlamalı Bildirimler\'in yerini aldı. Bu özellik, önerilen işlem ve yanıtları gösterir ve bildirimlerinizi organize eder.\n\nGelişmiş bildirimler, kişiler ve mesajlar gibi kişisel bilgiler dahil olmak üzere tüm bildirim içeriklerine erişebilir. Bu özellik ayrıca bildirimleri kapatabilir veya telefon aramalarını yanıtlamak ve Rahatsız Etmeyin modunu kontrol etmek gibi işlemlerle bildirimlere yanıt verebilir."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Gelişmiş bildirimler, Android 12\'de Android Uyarlanabilir Bildirimler\'in yerini aldı. Bu özellik, önerilen işlem ve yanıtları gösterir ve bildirimlerinizi organize eder.\n\nGelişmiş bildirimler, kişiler ve mesajlar gibi kişisel bilgiler dahil olmak üzere tüm bildirim içeriklerine erişebilir. Bu özellik ayrıca bildirimleri kapatabilir veya telefon aramalarını yanıtlamak ve Rahatsız Etmeyin modunu kontrol etmek gibi işlemlerle bildirimlere yanıt verebilir."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutin Modu bilgi bildirimi"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pil normal şarjdan önce bitebilir"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Pilin ömrünü uzatmak için Pil Tasarrufu etkinleştirildi"</string>
@@ -2274,14 +2269,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Çevrildi."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mesajın, <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>-<xliff:g id="TO_LANGUAGE">%2$s</xliff:g> çevirisi yapıldı."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Arka Plan Etkinliği"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Bir uygulama, pili hızlı tüketiyor"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Hâlâ etkin olan bir uygulama var"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> arka planda çalışıyor. Pil kullanımını yönetmek için dokunun."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> uygulaması pil ömrünü etkileyebilir. Etkin uygulamaları incelemek için dokunun."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Etkin uygulamaları kontrol edin"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan telefonun kamerasına erişilemiyor"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan tabletin kamerasına erişilemiyor"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Sistem dili"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Sistem varsayılanı"</string>
 </resources>
