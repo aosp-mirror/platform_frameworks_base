@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.charging
+package com.android.systemui.ripple
 
 import android.graphics.PointF
 import android.graphics.RuntimeShader
@@ -148,7 +148,7 @@ class RippleShader internal constructor() : RuntimeShader(SHADER) {
             val fadeOutNoise = subProgress(0.4f, 1f, value)
             var fadeOutRipple = 0f
             var fadeCircle = 0f
-            if (shouldFadeOutRipple) {
+            if (!rippleFill) {
                 fadeCircle = subProgress(0f, 0.2f, value)
                 fadeOutRipple = subProgress(0.3f, 1f, value)
             }
@@ -202,5 +202,9 @@ class RippleShader internal constructor() : RuntimeShader(SHADER) {
             setFloatUniform("in_pixelDensity", value)
         }
 
-    var shouldFadeOutRipple: Boolean = true
+    /**
+     * True if the ripple should stayed filled in as it expands to give a filled-in circle effect.
+     * False for a ring effect.
+     */
+    var rippleFill: Boolean = false
 }
