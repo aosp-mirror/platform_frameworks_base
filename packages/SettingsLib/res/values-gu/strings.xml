@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ઑડિયો: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ઑડિયો"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"શ્રવણ યંત્રો"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ઑડિયો"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"શ્રવણ યંત્રો સાથે કનેક્ટ કરેલું છે"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO સાથે કનેક્ટેડ છે"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ઑડિયોથી કનેક્ટેડ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"મીડિયા ઑડિઓ સાથે કનેક્ટ કર્યુ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ફોન ઑડિઓ સાથે કનેક્ટ થયાં"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ફાઇલ સ્થાનાંતરણ સેવાથી કનેક્ટ થયાં"</string>
@@ -146,7 +146,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ઇનપુટ માટે ઉપયોગ કરો"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"શ્રવણ યંત્રો માટે ઉપયોગ કરો"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO માટે ઉપયોગ કરો"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"જોડી"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"જોડી કરો"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"જોડી કરો"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"રદ કરો"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"એ કનેક્ટ કરેલ હોય ત્યારે જોડાણ બનાવવાથી તમારા સંપર્કો અને કૉલ ઇતિહાસનો અ‍ૅક્સેસ મળે છે."</string>
@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"પ્રતિબંધિત પ્રોફાઇલ"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"નવા વપરાશકર્તાને ઉમેરીએ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"તમે વધારાના વપરાશકર્તાઓ બનાવીને અન્ય લોકો સાથે આ ડિવાઇસને શેર કરી શકો છો. દરેક વપરાશકર્તા પાસે તેમની પોતાની સ્પેસ છે, જેને તેઓ ઍપ, વૉલપેપર, વગેરે સાથે કસ્ટમાઇઝ કરી શકે છે. વપરાશકર્તાઓ પ્રત્યેક વ્યક્તિને અસર કરતી હોય તેવી ડિવાઇસ સેટિંગ જેમ કે વાઇ-ફાઇને પણ સમાયોજિત કરી શકે છે.\n\nજ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમની સ્પેસ સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા અન્ય બધા વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે. નવા વપરાશકર્તાને ઍક્સેસિબિલિટી સેટિંગ અને સેવાઓ ટ્રાન્સફર ન પણ થાય."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ અપ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે એપ્લિકેશન્સને અપડેટ કરી શકે છે."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ અપ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"અત્યારે જ વપરાશકર્તાને સેટ અપ કરીએ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ખાતરી કરો કે વ્યક્તિ ડિવાઇસ લેવા અને તેમના સ્થાનનું સેટ અપ કરવા માટે ઉપલબ્ધ છે"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"હવે પ્રોફાઇલ સેટ કરીએ?"</string>
@@ -652,11 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"સ્ક્રીન ચાલુ કરો"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"સ્ક્રીન ચાલુ કરવાની મંજૂરી આપો"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ઍપને સ્ક્રીન ચાલુ કરવાની મંજૂરી આપો. જો મંજૂરી આપી હોય, તો ઍપ તમારા સ્પષ્ટ હેતુ વિના કોઈપણ સમયે સ્ક્રીન ચાલુ કરી શકે છે."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR કોડ સ્કૅન કરો"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"સાંભળવાનું શરૂ કરવા માટે, QR કોડને નીચે ફ્રેમની મધ્યમાં લાવો"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"આ QR કોડ માન્ય ફૉર્મેટમાં નથી"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> બ્રોડકાસ્ટ કરવાનું રોકીએ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"જો તમે <xliff:g id="SWITCHAPP">%1$s</xliff:g> બ્રોડકાસ્ટ કરો અથવા આઉટપુટ બદલો, તો તમારું હાલનું બ્રોડકાસ્ટ બંધ થઈ જશે"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> બ્રોડકાસ્ટ કરો"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"આઉટપુટ બદલો"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"પાછળના પૂર્વાનુમાનિત ઍનિમેશન્સ"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"પાછળના પૂર્વાનુમાનિત સંકેત માટે સિસ્ટમ ઍનિમેશન ચાલુ કરો."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"આ સેટિંગ પૂર્વાનુમાનિત સંકેત ઍનિમેશન માટે સિસ્ટમ ઍનિમેશન ચાલુ કરે છે. તેના માટે દરેક ઍપ માટે મેનિફેસ્ટ ફાઇલમાં enableOnBackInvokedCallbackને true પર સેટ કરવાની જરૂર પડે છે."</string>
 </resources>

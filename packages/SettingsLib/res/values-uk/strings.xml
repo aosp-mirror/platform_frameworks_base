@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-аудіо: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-аудіо"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Слухові апарати"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Підключено до слухових апаратів"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Підключено до LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Підключено до LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Підключено до аудіоджерела"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Підключено до звуку телеф."</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Підключ. до сервера передачі файлів"</string>
@@ -589,7 +589,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Не вдалося створити користувача"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Не вдалося створити гостя"</string>
     <string name="user_nickname" msgid="262624187455825083">"Псевдонім"</string>
-    <string name="user_add_user" msgid="7876449291500212468">"Додати користувача"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Додати ​користувача"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Додати гостя"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Видалити гостя"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Скинути сеанс у режимі \"Гість\""</string>
@@ -652,15 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Увімкнення екрана"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дозволити ввімкнення екрана"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозвольте додатку вмикати екран. Якщо ви надасте цей дозвіл, додаток зможе будь-коли вмикати екран пристрою навіть без вашого явного наміру."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Сканування QR-коду"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Щоб почати слухати аудіо, наведіть камеру на QR-код нижче"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Недійсний формат QR-коду"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_title (5392738488989777074) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_sub_title (268234802198852753) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_switch_app (5749813313369517812) -->
-    <skip />
-    <!-- no translation found for bt_le_audio_broadcast_dialog_different_output (2638402023060391333) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Зупинити трансляцію з додатка <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Якщо ви зміните додаток (<xliff:g id="SWITCHAPP">%1$s</xliff:g>) або аудіовихід, поточну трансляцію буде припинено"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Змінити додаток для трансляції на <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Змінити аудіовихід"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Анімації з підказками для жесту \"Назад\""</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Увімкніть системну анімацію з підказками для жесту \"Назад\"."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Якщо вибрати це налаштування, для жесту \"Назад\" відображатиметься анімація з підказками. У файлі маніфесту атрибуту enableOnBackInvokedCallback додатка потрібно присвоїти значення true."</string>
 </resources>

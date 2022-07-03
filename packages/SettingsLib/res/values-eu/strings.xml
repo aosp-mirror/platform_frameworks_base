@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Kalitate handiko audioa: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Kalitate handiko audioa"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Audifonoak"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Audifonoetara konektatuta"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Konektatu LE_AUDIO-ra"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE audio-ra konektatuta"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Euskarriaren audiora konektatuta"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Telefonoaren audiora konektatuta"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Fitxategi-transferentziako zerbitzarira konektatuta"</string>
@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Utzi"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Gailuak parekatzen badituzu, batetik besteko kontaktuak eta deien historia atzitu ahal izango dituzu."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Ezin izan da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin parekatu."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Ezin izan da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin parekatu PIN edo pasakode okerra idatzi delako."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Ezin izan da parekatu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin, PIN edo pasakode okerra idatzi delako."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Ezin da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin komunikatu."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuak bikotetzea ukatu du."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Ordenagailua"</string>
@@ -338,7 +338,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Egiaztatu USB bidezko aplik."</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Egiaztatu ADB/ADT bidez instalatutako aplikazioak portaera kaltegarriak atzemateko"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth bidezko gailuak izenik gabe (MAC helbideak soilik) erakutsiko dira"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Bluetooth bidezko bolumen absolutuaren eginbidea desgaitu egiten du urruneko gailuetan arazoak hautematen badira; esaterako, bolumena ozenegia bada edo ezin bada kontrolatu"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Bluetooth bidezko bolumen absolutuaren eginbidea desgaitu egiten du urruneko gailuetan arazoak hautematen badira; esaterako, bolumena ozenegia bada edo kontrolatu ezin bada"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche eginbide sorta gaitzen du."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Konexioak hobetzeko eginbidea gaitzen du."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Tokiko terminala"</string>
@@ -446,7 +446,7 @@
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Ikusmen-monokromia"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Daltonismoa (gorri-berdeak)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopia (gorri-berdeak)"</string>
-    <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanopia (urdin-horia)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalia (urdin-horia)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Koloreen zuzenketa"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Baliteke koloreen zuzenketa lagungarria izatea hauek egin nahi dituzunean:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Koloreak zehaztasun handiagoz ikusi.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Koloreak kendu, arreta gal ez dezazun.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> hobespena gainjarri zaio"</string>
@@ -569,7 +569,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Erabiltzailea"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profil murriztua"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Beste erabiltzaile bat gehitu nahi duzu?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Gailu hau beste pertsona batzuekin partekatzeko, sortu erabiltzaile gehiago. Erabiltzaile bakoitzak bere eremua izango du eta, bertan, aplikazioak, horma-papera eta antzekoak pertsonalizatu ahal izango ditu. Horrez gain, erabiltzaile guztiei eragin diezaieketen ezarpen batzuk ere doi daitezke; adibidez, wifi-konexioarena.\n\nErabiltzaile bat gehitzen duzunean, pertsona horrek berak konfiguratu beharko du bere eremua.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak. Baliteke erabilerraztasun-ezarpenak eta -zerbitzuak ez transferitzea erabiltzaile berriei."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Gailu hau beste pertsona batzuekin partekatzeko, sortu erabiltzaile gehiago. Erabiltzaile bakoitzak bere eremua izango du eta, bertan, aplikazioak, horma-papera eta antzekoak pertsonalizatu ahal izango ditu. Horrez gain, agian erabiltzaile guztiei eragingo dieten ezarpen batzuk ere doi daitezke; adibidez, wifi-konexioarena.\n\nErabiltzaile bat gehitzen duzunean, pertsona horrek berak konfiguratu beharko du bere eremua.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak. Baliteke erabilerraztasun-ezarpenak eta -zerbitzuak ez transferitzea erabiltzaile berriei."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Erabiltzaile bat gehitzen duzunean, erabiltzaile horrek bere eremua konfiguratu beharko du.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Erabiltzailea konfiguratu?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Ziurtatu pertsona horrek gailua hartu eta bere eremua konfigura dezakeela"</string>
@@ -590,7 +590,7 @@
     <string name="add_guest_failed" msgid="8074548434469843443">"Ezin izan da sortu beste gonbidatu bat"</string>
     <string name="user_nickname" msgid="262624187455825083">"Goitizena"</string>
     <string name="user_add_user" msgid="7876449291500212468">"Gehitu erabiltzaile bat"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Gehitu gonbidatua"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Gehitu gonbidatu bat"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Kendu gonbidatua"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Berrezarri gonbidatuentzako saioa"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Gonbidatuentzako saioa berrezarri nahi duzu?"</string>
@@ -615,7 +615,7 @@
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Operadorearen sarea aldatzen"</string>
     <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
     <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
-    <string name="data_connection_cdma" msgid="9098161966701934334">"1X"</string>
+    <string name="data_connection_cdma" msgid="9098161966701934334">"1×"</string>
     <string name="data_connection_gprs" msgid="1251945769006770189">"GPRS"</string>
     <string name="data_connection_3_5g" msgid="4298721462047921400">"H"</string>
     <string name="data_connection_3_5g_plus" msgid="6683055858295918170">"H+"</string>
@@ -652,11 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Piztu pantaila"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Eman pantaila pizteko baimena"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Eman pantaila pizteko baimena aplikazioei. Baimena emanez gero, aplikazioek edonoiz piztu ahal izango dute pantaila, zuk halako asmorik izan ez arren."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Eskaneatu QR kodea"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Entzuten hasteko, zentratu beheko QR kodea"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR kodearen formatuak ez du balio"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren audioa igortzeari utzi nahi diozu?"</string>
-    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> aplikazioaren audioa igortzen baduzu, edo audio-irteera aldatzen baduzu, une hartako igorpena eten egingo da"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> aplikazioaren audioa igortzen edo audio-irteera aldatzen baduzu, une hartako igorpena etengo da"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Igorri <xliff:g id="SWITCHAPP">%1$s</xliff:g> aplikazioaren audioa"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Aldatu audio-irteera"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Atzera egiteko keinuaren animazio-igarleak"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Gaitu atzera egiteko keinuaren sistemaren animazio-igarleak."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Atzera egiteko keinuaren sistemaren animazio-igarleak gaitzen ditu ezarpenak. enableOnBackInvokedCallback-ek egiazko gisa ezarrita egon behar du aplikazio bakoitzaren manifestu-fitxategian."</string>
 </resources>

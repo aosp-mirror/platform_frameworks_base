@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ses: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ses"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"İşitme Cihazları"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"İşitme Cihazlarına Bağlandı"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO\'ya bağlandı"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE Audio\'ya bağlandı"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Medya sesine bağlanıldı"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Telefon sesine bağlandı"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Dosya aktarım sunucusuna bağlandı"</string>
@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"İptal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Eşleme işlemi, bağlantı kurulduğunda kişilerinize ve çağrı geçmişine erişim izni verir."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN veya parola yanlış olduğundan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN veya parola yanlış olduğundan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile iletişim kurulamıyor."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Eşleme <xliff:g id="DEVICE_NAME">%1$s</xliff:g> tarafından reddedildi."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Bilgisayar"</string>
@@ -367,7 +367,7 @@
     <string name="show_screen_updates" msgid="2078782895825535494">"Yüzey güncellemelerini göster"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Güncellenirken tüm pencere yüzeylerini yakıp söndür"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Görünüm güncellemelerini göster"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Çizim yapılırken görünümleri pencerede çiz"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Çizildiğinde pencerelerin içini yakıp söndür"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Donanım katmanı güncellemelerini göster"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Güncellenirken donanım katmanlarını yeşil renkte yanıp söndür"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU fazla çizim hatasını ayıkla"</string>
@@ -569,7 +569,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Kullanıcı"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Kısıtlı profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Yeni kullanıcı eklensin mi?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Ek kullanıcılar oluşturarak bu cihazı başkalarıyla paylaşabilirsiniz. Her kullanıcının uygulamalarla, duvar kağıdıyla ve başka ayarlarla özelleştirebileceği kendi alanı olur. Kullanıcılar ayrıca kablosuz ağ gibi herkesi etkileyen cihaz ayarlarını değiştirebilirler.\n\nYeni bir kullanıcı eklediğinizde, ilgili kişinin kendi alanını ayarlaması gerekir.\n\nHer kullanıcı diğer tüm kullanıcılar için uygulamaları güncelleyebilir."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Ek kullanıcılar oluşturarak bu cihazı başkalarıyla paylaşabilirsiniz. Her kullanıcının uygulamalarla, duvar kağıdıyla ve başka ayarlarla özelleştirebileceği kendi alanı olur. Kullanıcılar ayrıca kablosuz ağ gibi herkesi etkileyen cihaz ayarlarını değiştirebilirler.\n\nYeni bir kullanıcı eklediğinizde, ilgili kişinin kendi alanını ayarlaması gerekir.\n\nHer kullanıcı diğer tüm kullanıcılar için uygulamaları güncelleyebilir. Erişilebilirlik ayarları ve hizmetleri yeni kullanıcıya aktarılamayabilir."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Yeni bir kullanıcı eklediğinizde, bu kişinin kendi alanını ayarlaması gerekir.\n\nHerhangi bir kullanıcı, diğer tüm kullanıcılar için uygulamaları güncelleyebilir."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Kullanıcı şimdi ayarlansın mı?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"İlgili kişinin cihazı almak ve kendi alanını ayarlamak için müsait olduğundan emin olun"</string>
@@ -594,7 +594,7 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Misafir oturumunu kaldır"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Misafir oturumunu sıfırla"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Misafir oturumu sıfırlansın mı?"</string>
-    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Konuk çıkarılsın mı?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Misafir oturumu kaldırılsın mı?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Sıfırla"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Kaldır"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Misafir oturumu sıfırlanıyor…"</string>
@@ -644,7 +644,7 @@
     <string name="dream_complication_title_weather" msgid="598609151677172783">"Hava durumu"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Hava Kalitesi"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Yayın Bilgisi"</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Profil fotoğrafı seç"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Profil fotoğrafı seçin"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Varsayılan kullanıcı simgesi"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fiziksel klavye"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Klavye düzenini seçin"</string>
@@ -652,11 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ekranı aç"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Ekranı açmaya izin ver"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Bir uygulamanın ekranı açmasına izin verin. İzin verildiğinde, uygulama sizin belirgin niyetiniz olmadan istediği zaman ekranı açabilir."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR kodunu tara"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Dinlemeye başlamak için aşağıdaki QR kodunu ortalayın"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR kodu geçerli bir biçim değil"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulamasında anons durdurulsun mu?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapar veya çıkışı değiştirirseniz mevcut anonsunuz duraklatılır"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapın"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Çıkışı değiştirme"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Tahmine dayalı geri hareketi animasyonları"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Tahmine dayalı geri hareketi için sistem animasyonlarını etkinleştirin"</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Bu ayar, tahmine dayalı hareket animasyonu için sistem animasyonlarını etkinleştirir. Her uygulamanın manifest dosyasında enableOnBackInvokedCallback\'in doğru değerine ayarlanması gerekir."</string>
 </resources>

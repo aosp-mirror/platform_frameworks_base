@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"အဆက်အသွယ်ဖြတ်တောက်သည်"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"ချိတ်ဆက်နေသည်"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"တွဲချိတ်ပါ"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"တွဲချိတ်နေသည်…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ (ဖုန်းမရှိပါ)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ (မီဒီယာ မရှိပါ)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> ချိတ်ဆက်ပြီးပြီ (မက်ဆေ့ဂျ် သုံး၍မရပါ)"</string>
@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD အသံ- <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD အသံ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"နားကြားကိရိယာ"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE အသံ"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"နားကြားကိရိယာနှင့် ချိတ်ဆက်ပြီးပါပြီ"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO နှင့် ချိတ်ဆက်ထားသည်"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE အသံနှင့် ချိတ်ဆက်ထားသည်"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"မီဒီယာအသံအား ချိတ်ဆက်ရန်"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ဖုန်းအသံအား ချိတ်ဆက်ရန်"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ဖိုင်လွှဲပြောင်းမည့်ဆာဗာနှင့် ချိတ်ဆက်ထားပြီး"</string>
@@ -183,8 +183,8 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"အသုံးပြုသူ- <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"မူရင်းအချို့ သတ်မှတ်ပြီး"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"မူရင်း သတ်မှတ်မထားပါ။"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"စာသားမှစကားပြောပြောင်း ဆက်တင်များ"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"စာသားမှ စကားပြောသို့ အထွက်"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"စာ-မှ-စကားပြောင်းခြင်း ဆက်တင်များ"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"စာ-မှ-စကားသို့ အထွက်"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"စကားပြောနှုန်း"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"စာတမ်းအားပြောဆိုသော အမြန်နှုန်း"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"အသံအနိမ့်အမြင့်"</string>
@@ -198,7 +198,7 @@
     <string name="tts_install_data_title" msgid="1829942496472751703">"အသံဒေတာများကို ထည့်သွင်းခြင်း"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"စကားသံပေါင်းစပ်မှုအတွက်လိုအပ်သောအသံဒေတာအား ထည့်သွင်းမည်"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"ဤစကားသံပေါင်းစပ်စနစ်အားအသုံးပြုရာရာတွင် သင့်ကိုယ်ရေးအချက်အလက်များဖြစ်သော စကားဝှက်များနှင့် ကရက်ဒစ်ကတ်နံပါတ်စသည်တို့အပါအဝင် သင်ပြောဆိုသောစာသားများအားလုံးကို ရယူသွားမည်ဖြစ်သည်။ ဤစနစ်သည် <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> မှ လာပါသည်။ ဤစကားသံပေါင်းစပ်စနစ်ကို အသုံးပြုမလား။"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"ဤဘာသာစကားသည် စာသားမှ အသံထွက်ရန် အလုပ်လုပ်သော ကွန်ရက်ချိတ်ဆက်မှု လိုအပ်သည်။"</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"ဤဘာသာစကားသည် စာ-မှ-စကား ပြောင်းရန် အလုပ်လုပ်သော ကွန်ရက်ချိတ်ဆက်မှု လိုအပ်သည်။"</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"ဤသည်မှာ အသံတုလုပ်ခြင်း ၏ နမူနာတစ်ခုဖြစ်သည်။"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"လက်ရှိဘာသာစကားအခြေအနေ"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> သည်အပြည့်အ၀ အထောက်အကူပြုသည်။"</string>
@@ -448,8 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (အနီ-အစိမ်း)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (အပြာ-အဝါ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"အရောင်ပြင်ဆင်မှု"</string>
-    <!-- syntax error in translation for accessibility_display_daltonizer_preference_subtitle (1522101114585266455) org.xmlpull.v1.XmlPullParserException: expected: /string read: li (position:END_TAG </li>@1:326 in     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"အရောင် အမှန်ပြင်ခြင်းသည် အောက်ပါတို့အတွက် အသုံးဝင်နိုင်သည်-&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;အရောင်များကို ပိုမိုမှန်ကန်စွာ ကြည့်ရှုခြင်း&lt;/li&gt; &lt;li&gt;&amp;nbsp;အာရုံစိုက်နိုင်ရန် အရောင်များ ဖယ်ရှားခြင်း</li> </ol>"</string>
-)  -->
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"အရောင် အမှန်ပြင်ခြင်းသည် အောက်ပါတို့အတွက် အသုံးဝင်နိုင်သည်-&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;အရောင်များကို ပိုမိုမှန်ကန်စွာ ကြည့်ရှုခြင်း&amp;lt&lt;/li&gt; &lt;li&gt;&amp;nbsp;အာရုံစိုက်နိုင်ရန် အရောင်များ ဖယ်ရှားခြင်း&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ခန့် ကျန်သည်"</string>
@@ -653,11 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ဖန်သားပြင် ဖွင့်ခြင်း"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ဖန်သားပြင် ဖွင့်ခွင့်ပြုရန်"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"အက်ပ်ကို ဖန်သားပြင် ဖွင့်ခွင့်ပြုနိုင်သည်။ ခွင့်ပြုထားပါက အက်ပ်သည် သင့်ထံမှ တိကျသောရည်ရွယ်ချက်မလိုဘဲ ဖန်သားပြင်ကို အချိန်မရွေး ဖွင့်နိုင်မည်။"</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR ကုဒ်ကို စကင်ဖတ်ရန်"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"စတင်နားဆင်ရန် အောက်ရှိ QR ကုဒ်ကို အလယ်တွင်ထားပါ"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR ကုဒ်သည် မှန်ကန်သောဖော်မက် မဟုတ်ပါ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> ထုတ်လွှင့်ခြင်းကို ရပ်မလား။"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ကို ထုတ်လွှင့်သောအခါ (သို့) အထွက်ကို ပြောင်းသောအခါ သင့်လက်ရှိထုတ်လွှင့်ခြင်း ရပ်သွားမည်"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ထုတ်လွှင့်ခြင်း"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"အထွက်ကို ပြောင်းခြင်း"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"နောက်ခလုတ်၏ ရှေ့ပြေးလှုပ်ရှားသက်ဝင်ပုံ"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"နောက်ခလုတ်ရှေ့ပြေးအတွက် စနစ်လှုပ်ရှားသက်ဝင်ပုံများကို ဖွင့်ပါသည်။"</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ဤဆက်တင်သည် လက်ဟန် ရှေ့ပြေးလှုပ်ရှားသက်ဝင်ပုံအတွက် စနစ်လှုပ်ရှားသက်ဝင်ပုံများကို ဖွင့်ပါသည်။ အက်ပ်တစ်ခုစီ၏ ဆက်တင်အတွက် enableOnBackInvokedCallback ကို မန်နီးဖက်စ် (manifest) ဖိုင်၌ ဖွင့်ထားရန်လိုအပ်သည်။"</string>
 </resources>
