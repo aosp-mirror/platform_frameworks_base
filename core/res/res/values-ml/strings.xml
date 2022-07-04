@@ -1013,7 +1013,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"ഈ പേജിൽ തുടരുക"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nഈ പേജിൽ നിന്നും നാവിഗേറ്റുചെയ്‌തു പോകണമെന്ന് തീർച്ചയാണോ?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"സ്ഥിരീകരിക്കുക"</string>
-    <string name="double_tap_toast" msgid="7065519579174882778">"നുറുങ്ങ്: സൂം ഇൻ ചെയ്യാനും സൂം ഔട്ട് ചെയ്യാനും ഇരട്ട-ടാപ്പുചെയ്യുക."</string>
+    <string name="double_tap_toast" msgid="7065519579174882778">"നുറുങ്ങ്: സൂം ഇൻ ചെയ്യാനും സൂം ഔട്ട് ചെയ്യാനും ഡബിൾ ടാപ്പ് ചെയ്യുക."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"ഓട്ടോഫിൽ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"ഓട്ടോഫിൽ സജ്ജീകരിക്കുക"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ഉപയോഗിച്ച് സ്വമേധയാ പൂരിപ്പിക്കുക"</string>

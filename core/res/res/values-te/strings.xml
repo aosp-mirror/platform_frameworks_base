@@ -1136,7 +1136,7 @@
     <string name="copyUrl" msgid="6229645005987260230">"URLని కాపీ చేయి"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"వచనాన్ని ఎంచుకోండి"</string>
     <string name="undo" msgid="3175318090002654673">"చర్య రద్దు చేయి"</string>
-    <string name="redo" msgid="7231448494008532233">"చర్యను పునరావృతం చేయి"</string>
+    <string name="redo" msgid="7231448494008532233">"చర్యను రిపీట్‌ చేయి"</string>
     <string name="autofill" msgid="511224882647795296">"ఆటోఫిల్"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"వచన ఎంపిక"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"నిఘంటువుకు జోడించు"</string>
@@ -1642,7 +1642,7 @@
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"చెల్లని పిన్‌ కోడ్."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4 నుండి 8 సంఖ్యలు ఉండే పిన్‌ను టైప్ చేయండి."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK కోడ్ 8 సంఖ్యలు ఉండాలి."</string>
-    <string name="kg_invalid_puk" msgid="4809502818518963344">"సరైన PUK కోడ్‌ను మళ్లీ నమోదు చేయండి. పునరావృత ప్రయత్నాల వలన సిమ్ శాశ్వతంగా నిలిపివేయబడుతుంది."</string>
+    <string name="kg_invalid_puk" msgid="4809502818518963344">"సరైన PUK కోడ్‌ను మళ్లీ నమోదు చేయండి. రిపీట్ ప్రయత్నాల వలన సిమ్ శాశ్వతంగా నిలిపివేయబడుతుంది."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"పిన్‌ కోడ్‌లు సరిపోలలేదు"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"చాలా ఎక్కువ ఆకృతి ప్రయత్నాలు చేశారు"</string>
     <string name="kg_login_instructions" msgid="3619844310339066827">"అన్‌లాక్ చేయడానికి, మీ Google ఖాతాతో సైన్ ఇన్ చేయండి."</string>
