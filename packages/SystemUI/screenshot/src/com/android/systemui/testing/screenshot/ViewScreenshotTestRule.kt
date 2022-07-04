@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.testing.screenshot
 
 import android.app.Activity
@@ -11,21 +27,35 @@ import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
+import platform.test.screenshot.DeviceEmulationRule
+import platform.test.screenshot.DeviceEmulationSpec
+import platform.test.screenshot.MaterialYouColorsRule
+import platform.test.screenshot.ScreenshotTestRule
+import platform.test.screenshot.getEmulatedDevicePathConfig
 
-/** A rule for View screenshot diff tests. */
-class ViewScreenshotTestRule(testSpec: ScreenshotTestSpec) : TestRule {
+/** A rule for View screenshot diff unit tests. */
+class ViewScreenshotTestRule(emulationSpec: DeviceEmulationSpec) : TestRule {
+    private val colorsRule = MaterialYouColorsRule()
+    private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
+    private val screenshotRule =
+        ScreenshotTestRule(
+            SystemUIGoldenImagePathManager(getEmulatedDevicePathConfig(emulationSpec))
+        )
     private val activityRule = ActivityScenarioRule(ScreenshotActivity::class.java)
-    private val screenshotRule = ScreenshotTestRule(testSpec)
-
-    private val delegate = RuleChain.outerRule(screenshotRule).around(activityRule)
+    private val delegateRule =
+        RuleChain.outerRule(colorsRule)
+            .around(deviceEmulationRule)
+            .around(screenshotRule)
+            .around(activityRule)
+    private val matcher = UnitTestBitmapMatcher
 
     override fun apply(base: Statement, description: Description): Statement {
-        return delegate.apply(base, description)
+        return delegateRule.apply(base, description)
     }
 
     /**
      * Compare the content of the view provided by [viewProvider] with the golden image identified
-     * by [goldenIdentifier] in the context of [testSpec].
+     * by [goldenIdentifier] in the context of [emulationSpec].
      */
     fun screenshotTest(
         goldenIdentifier: String,
@@ -46,13 +76,17 @@ class ViewScreenshotTestRule(testSpec: ScreenshotTestSpec) : TestRule {
             // Check that the content is what we expected.
             val content = activity.requireViewById<ViewGroup>(android.R.id.content)
             assertEquals(1, content.childCount)
-            screenshotRule.screenshotTest(goldenIdentifier, content.getChildAt(0))
+            screenshotRule.assertBitmapAgainstGolden(
+                content.getChildAt(0).drawIntoBitmap(),
+                goldenIdentifier,
+                matcher
+            )
         }
     }
 
     /**
      * Compare the content of the dialog provided by [dialogProvider] with the golden image
-     * identified by [goldenIdentifier] in the context of [testSpec].
+     * identified by [goldenIdentifier] in the context of [emulationSpec].
      */
     fun dialogScreenshotTest(
         goldenIdentifier: String,
@@ -81,7 +115,11 @@ class ViewScreenshotTestRule(testSpec: ScreenshotTestSpec) : TestRule {
             // Check that the content is what we expected.
             val dialog = dialog ?: error("dialog is null")
             try {
-                screenshotRule.screenshotTest(goldenIdentifier, dialog.window.decorView)
+                screenshotRule.assertBitmapAgainstGolden(
+                    dialog.window.decorView.drawIntoBitmap(),
+                    goldenIdentifier,
+                    matcher,
+                )
             } finally {
                 dialog.dismiss()
             }
