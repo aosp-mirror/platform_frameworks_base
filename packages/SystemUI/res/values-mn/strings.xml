@@ -192,11 +192,11 @@
     <string name="accessibility_compatibility_zoom_example" msgid="2617218726091234073">"Жижгээс том дэлгэцрүү өсгөх."</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth холбогдсон."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7195823280221275929">"Bluetooth тасрав."</string>
-    <string name="accessibility_no_battery" msgid="3789287732041910804">"Батерей байхгүй."</string>
-    <string name="accessibility_battery_one_bar" msgid="8868347318237585329">"Батерей нэг баганатай."</string>
-    <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Батерей хоёр баганатай."</string>
-    <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Батерей гурван баганатай."</string>
-    <string name="accessibility_battery_full" msgid="1480463938961288494">"Батерей дүүрэн."</string>
+    <string name="accessibility_no_battery" msgid="3789287732041910804">"Батарей байхгүй."</string>
+    <string name="accessibility_battery_one_bar" msgid="8868347318237585329">"Батарей нэг баганатай."</string>
+    <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Батарей хоёр баганатай."</string>
+    <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Батарей гурван баганатай."</string>
+    <string name="accessibility_battery_full" msgid="1480463938961288494">"Батарей дүүрэн."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Батарейн хувь тодорхойгүй байна."</string>
     <string name="accessibility_wifi_name" msgid="4863440268606851734">"<xliff:g id="WIFI">%s</xliff:g>-тай холбогдсон."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>-тай холбогдсон."</string>
@@ -229,7 +229,7 @@
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN асаалттай байна."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"SIM карт байхгүй."</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Тэжээлийн дэлгэрэнгүй мэдээллийг нээх"</string>
-    <string name="accessibility_battery_level" msgid="5143715405241138822">"Батерей <xliff:g id="NUMBER">%d</xliff:g> хувьтай."</string>
+    <string name="accessibility_battery_level" msgid="5143715405241138822">"Батарей <xliff:g id="NUMBER">%d</xliff:g> хувьтай."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Батарей <xliff:g id="PERCENTAGE">%1$s</xliff:g> хувьтай байна. Таны хэрэглээнд тулгуурлан ойролцоогоор <xliff:g id="TIME">%2$s</xliff:g> үлдсэн"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Батарейг цэнэглэж байна, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"Системийн тохиргоо."</string>
@@ -257,7 +257,7 @@
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wifi унтраасан."</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wifi асаасан."</string>
     <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"Мобайл <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"Батерей <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"Батарей <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"Нислэгийн горим идэвхгүй."</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"Нислэгийн горим идэвхтэй."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"Нислэгийн горимыг унтраасан."</string>
@@ -337,7 +337,7 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> төхөөрөмж)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"Bluetooth унтраалттай"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Хослуулсан төхөөрөмж байхгүй"</string>
-    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> батерей"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> батарей"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Чихэвч"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Оролт"</string>
@@ -390,7 +390,7 @@
     <string name="quick_settings_done" msgid="2163641301648855793">"Дууссан"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Хаах"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Холбогдсон"</string>
-    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Холбогдсон, батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Холбогдсон, батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Холбогдож байна..."</string>
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Модем болгох"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Сүлжээний цэг"</string>
@@ -985,7 +985,7 @@
     <string name="qs_dnd_keep" msgid="3829697305432866434">"Хадгалах"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Солих"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Цаана ажиллаж буй апп"</string>
-    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Батерей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
+    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Батарей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Мобайл датаг унтраах уу?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Та <xliff:g id="CARRIER">%s</xliff:g>-р дата эсвэл интернэтэд хандах боломжгүй болно. Интернэтэд зөвхөн Wi-Fi-р холбогдох боломжтой болно."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"таны оператор компани"</string>
