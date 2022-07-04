@@ -57,6 +57,7 @@ import android.view.WindowInsetsController.Behavior;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
@@ -357,7 +358,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     @Override
     public void onSystemBarAttributesChanged(int displayId, int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme, int behavior,
-            InsetsVisibilities requestedVisibilities, String packageName) {
+            InsetsVisibilities requestedVisibilities, String packageName,
+            LetterboxDetails[] letterboxDetails) {
         mOverviewProxyService.onSystemBarAttributesChanged(displayId, behavior);
         boolean nbModeChanged = false;
         if (mAppearance != appearance) {

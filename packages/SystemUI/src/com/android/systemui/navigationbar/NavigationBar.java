@@ -105,6 +105,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Gefingerpoken;
@@ -1069,7 +1070,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     @Override
     public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName) {
+            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName,
+            LetterboxDetails[] letterboxDetails) {
         if (displayId != mDisplayId) {
             return;
         }

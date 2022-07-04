@@ -32,6 +32,7 @@ import android.view.animation.AccelerateInterpolator;
 import androidx.lifecycle.Observer;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
@@ -144,7 +145,7 @@ public class LightsOutNotifController extends ViewController<View> {
         public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
                 @Behavior int behavior, InsetsVisibilities requestedVisibilities,
-                String packageName) {
+                String packageName, LetterboxDetails[] letterboxDetails) {
             if (displayId != mDisplayId) {
                 return;
             }

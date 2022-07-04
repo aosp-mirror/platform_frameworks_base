@@ -45,6 +45,7 @@ import android.view.WindowInsetsController.Behavior;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
@@ -464,7 +465,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     @Override
     public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName) {
+            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName,
+            LetterboxDetails[] letterboxDetails) {
         if (displayId != mDisplayId) {
             return;
         }

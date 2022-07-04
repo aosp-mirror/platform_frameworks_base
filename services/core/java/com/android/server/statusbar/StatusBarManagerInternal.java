@@ -27,6 +27,7 @@ import android.view.InsetsVisibilities;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
 import com.android.server.notification.NotificationDelegate;
 
@@ -133,7 +134,8 @@ public interface StatusBarManagerInternal {
     /** @see com.android.internal.statusbar.IStatusBar#onSystemBarAttributesChanged */
     void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName);
+            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName,
+            LetterboxDetails[] letterboxDetails);
 
     /** @see com.android.internal.statusbar.IStatusBar#showTransient */
     void showTransient(int displayId, @InternalInsetsType int[] types,
