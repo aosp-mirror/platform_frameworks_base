@@ -3332,6 +3332,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         int callingUid = Binder.getCallingUid();
         enforceOwnerRights(snapshot, ownerPackage, callingUid);
+
+        // Verifying that current calling uid should be able to add {@link CrossProfileIntentFilter}
+        // for source and target user
+        mUserManager.enforceCrossProfileIntentFilterAccess(sourceUserId, targetUserId, callingUid,
+                /* addCrossProfileIntentFilter */ true);
+
         PackageManagerServiceUtils.enforceShellRestriction(mInjector.getUserManagerInternal(),
                 UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
         if (intentFilter.countActions() == 0) {
@@ -3340,7 +3346,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
         synchronized (mLock) {
             CrossProfileIntentFilter newFilter = new CrossProfileIntentFilter(intentFilter,
-                    ownerPackage, targetUserId, flags);
+                    ownerPackage, targetUserId, flags, mUserManager
+                    .getCrossProfileIntentFilterAccessControl(sourceUserId, targetUserId));
             CrossProfileIntentResolver resolver =
                     mSettings.editCrossProfileIntentResolverLPw(sourceUserId);
             ArrayList<CrossProfileIntentFilter> existing = resolver.findFilters(intentFilter);
@@ -4554,7 +4561,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 ArraySet<CrossProfileIntentFilter> set =
                         new ArraySet<>(resolver.filterSet());
                 for (CrossProfileIntentFilter filter : set) {
-                    if (filter.getOwnerPackage().equals(ownerPackage)) {
+                    //Only remove if calling user is allowed based on access control of
+                    // {@link CrossProfileIntentFilter}
+                    if (filter.getOwnerPackage().equals(ownerPackage)
+                            && mUserManager.isCrossProfileIntentFilterAccessible(sourceUserId,
+                            filter.mTargetUserId, /* addCrossProfileIntentFilter */ false)) {
                         resolver.removeFilter(filter);
                     }
                 }

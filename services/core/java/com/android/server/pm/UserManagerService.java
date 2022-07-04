@@ -1866,6 +1866,103 @@ public class UserManagerService extends IUserManager.Stub {
         return mLocalService.exists(userId);
     }
 
+    /**
+     * Returns user's {@link  CrossProfileIntentFilter.AccessControlLevel}, which is derived from
+     * {@link UserTypeDetails}. If user does not have defined their access control level,
+     * returns default {@link CrossProfileIntentFilter#ACCESS_LEVEL_ALL}
+     */
+    private @CrossProfileIntentFilter.AccessControlLevel int
+                getCrossProfileIntentFilterAccessControl(@UserIdInt int userId) {
+        final UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
+        return userTypeDetails != null ? userTypeDetails.getCrossProfileIntentFilterAccessControl()
+                : CrossProfileIntentFilter.ACCESS_LEVEL_ALL;
+    }
+
+    /**
+     * Verifies if calling user is allowed to access {@link CrossProfileIntentFilter} between given
+     * source and target user.
+     * @param sourceUserId userId for which CrossProfileIntentFilter would be configured
+     * @param targetUserId target user where we can resolve given intent filter
+     * @param callingUid user accessing api
+     * @param addCrossProfileIntentFilter if the operation is addition or not.
+     * @throws SecurityException is calling user is not allowed to access.
+     */
+    public void enforceCrossProfileIntentFilterAccess(
+            int sourceUserId, int targetUserId,
+            int callingUid, boolean addCrossProfileIntentFilter) {
+        if (!isCrossProfileIntentFilterAccessible(sourceUserId, targetUserId,
+                addCrossProfileIntentFilter)) {
+            throw new SecurityException("CrossProfileIntentFilter cannot be accessed by user "
+                    + callingUid);
+        }
+    }
+
+    /**
+     * Checks if {@link CrossProfileIntentFilter} can be accessed by calling user for given source
+     * and target user. There are following rules of access
+     * 1. For {@link CrossProfileIntentFilter#ACCESS_LEVEL_ALL},
+     *  irrespective of user we would allow access(addition/modification/removal)
+     * 2. For {@link CrossProfileIntentFilter#ACCESS_LEVEL_SYSTEM},
+     *  only system/root user would be able to access(addition/modification/removal)
+     * 3. For {@link CrossProfileIntentFilter#ACCESS_LEVEL_SYSTEM_ADD_ONLY},
+     *  only system/root user would be able to add but not modify/remove. Once added, it cannot be
+     *  modified or removed
+     * @param sourceUserId userId for which CrossProfileIntentFilter would be configured
+     * @param targetUserId target user where we can resolve given intent filter
+     * @param addCrossProfileIntentFilter if the operation is addition or not.
+     * @return true if {@link CrossProfileIntentFilter} can be accessed by calling user
+     */
+    public boolean isCrossProfileIntentFilterAccessible(int sourceUserId, int targetUserId,
+            boolean addCrossProfileIntentFilter) {
+        int effectiveAccessControl =
+                getCrossProfileIntentFilterAccessControl(sourceUserId, targetUserId);
+
+        /*
+        For {@link CrossProfileIntentFilter#ACCESS_LEVEL_SYSTEM}, if accessing user is not
+        system or root disallowing access to {@link CrossProfileIntentFilter}
+         */
+        if (CrossProfileIntentFilter.ACCESS_LEVEL_SYSTEM == effectiveAccessControl
+                && !PackageManagerServiceUtils.isSystemOrRoot()) {
+            return false;
+        }
+
+        /*
+        For {@link CrossProfileIntentFilter#ACCESS_LEVEL_SYSTEM_ADD_ONLY}, allowing only
+        system user to add {@link CrossProfileIntentFilter}. All users(including system) are
+        disallowed to modify/remove.
+         */
+        if (CrossProfileIntentFilter.ACCESS_LEVEL_SYSTEM_ADD_ONLY == effectiveAccessControl
+                && (!addCrossProfileIntentFilter || !PackageManagerServiceUtils.isSystemOrRoot())) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Returns {@link CrossProfileIntentFilter.AccessControlLevel}
+     * that should be assigned to {@link CrossProfileIntentFilter}
+     * computed from source user's and target user's
+     * {@link CrossProfileIntentFilter.AccessControlLevel}.
+     * The Access Level is configured per {@link CrossProfileIntentFilter} and its property of edge
+     * between source and target user e.g. for all {@link CrossProfileIntentFilter}s configured
+     * between Primary user and Clone profile should have access level of
+     * {@link CrossProfileIntentFilter#ACCESS_LEVEL_SYSTEM} which is driven by highest
+     * access value from source or target. The higher value means higher restrictions.
+     * @param sourceUserId userId of source user for whom CrossProfileIntentFilter will be stored
+     * @param targetUserId userId of target user for whom Cross Profile access would be allowed
+     * @return least privileged {@link CrossProfileIntentFilter.AccessControlLevel} from source or
+     * target user.
+     */
+    public @CrossProfileIntentFilter.AccessControlLevel int
+                getCrossProfileIntentFilterAccessControl(int sourceUserId, int targetUserId) {
+        int sourceAccessControlLevel,
+                targetAccessControlLevel, effectiveAccessControl;
+        sourceAccessControlLevel = getCrossProfileIntentFilterAccessControl(sourceUserId);
+        targetAccessControlLevel = getCrossProfileIntentFilterAccessControl(targetUserId);
+        effectiveAccessControl = Math.max(sourceAccessControlLevel, targetAccessControlLevel);
+        return effectiveAccessControl;
+    }
+
     @Override
     public void setUserName(@UserIdInt int userId, String name) {
         checkManageUsersPermission("rename users");
