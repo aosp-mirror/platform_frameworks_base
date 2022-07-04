@@ -114,7 +114,8 @@ class OverlayWindow(private val context: Context) {
         pw.println("    rootView=$rootView")
         for (i in 0 until rootView.childCount) {
             val child = rootView.getChildAt(i)
-            pw.println("    child[$i]=$child")
+            val provider = viewProviderMap[child.id]?.second
+            pw.println("    child[$i]=$child $provider")
         }
     }
 }
