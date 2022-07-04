@@ -208,6 +208,8 @@ public class WindowInfo implements Parcelable {
             mTransformMatrix[i] = 0;
         }
         mMagnificationSpec.clear();
+        title = null;
+        accessibilityIdOfAnchor = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<WindowInfo> CREATOR =
