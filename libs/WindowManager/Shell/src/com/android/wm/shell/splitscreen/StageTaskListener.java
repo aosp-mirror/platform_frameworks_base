@@ -17,12 +17,12 @@
 package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.annotation.CallSuper;
@@ -40,6 +40,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SurfaceUtils;
@@ -61,12 +62,6 @@ import java.util.function.Predicate;
  */
 class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = StageTaskListener.class.getSimpleName();
-
-    protected static final int[] CONTROLLED_ACTIVITY_TYPES = {ACTIVITY_TYPE_STANDARD};
-    protected static final int[] CONTROLLED_WINDOWING_MODES =
-            {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED};
-    protected static final int[] CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE =
-            {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED, WINDOWING_MODE_MULTI_WINDOW};
 
     /** Callback interface for listening to changes in a split-screen stage. */
     public interface StageListenerCallbacks {
@@ -212,12 +207,15 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             }
             mRootTaskInfo = taskInfo;
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
-            if (!taskInfo.supportsMultiWindow) {
-                // Leave split screen if the task no longer supports multi window.
+            if (!taskInfo.supportsMultiWindow
+                    || !ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType())
+                    || !ArrayUtils.contains(CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
+                    taskInfo.getWindowingMode())) {
+                // Leave split screen if the task no longer supports multi window or have
+                // uncontrolled task.
                 mCallbacks.onNoLongerSupportMultiWindow();
                 return;
             }
-
             mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
             mCallbacks.onChildTaskStatusChanged(taskInfo.taskId, true /* present */,
                     taskInfo.isVisible);

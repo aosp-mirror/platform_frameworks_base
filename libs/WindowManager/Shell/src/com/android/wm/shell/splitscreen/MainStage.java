@@ -16,6 +16,9 @@
 
 package com.android.wm.shell.splitscreen;
 
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
+
 import android.content.Context;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
@@ -74,10 +77,10 @@ class MainStage extends StageTaskListener {
         if (mRootTaskInfo == null) return;
         final WindowContainerToken rootToken = mRootTaskInfo.token;
         wct.reparentTasks(
-                        rootToken,
-                        null /* newParent */,
-                        CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
-                        CONTROLLED_ACTIVITY_TYPES,
-                        toTop);
+                rootToken,
+                null /* newParent */,
+                null /* windowingModes */,
+                null /* activityTypes */,
+                toTop);
     }
 }

@@ -47,8 +47,8 @@ class SideStage extends StageTaskListener {
         wct.reparentTasks(
                 mRootTaskInfo.token,
                 null /* newParent */,
-                CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
-                CONTROLLED_ACTIVITY_TYPES,
+                null /* windowingModes */,
+                null /* activityTypes */,
                 toTop);
         return true;
     }

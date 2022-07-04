@@ -1235,8 +1235,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         + " task=" + task);
                 return false;
             }
-            if (!ArrayUtils.contains(hop.getActivityTypes(), task.getActivityType())
-                    || !ArrayUtils.contains(hop.getWindowingModes(), task.getWindowingMode())) {
+            if (!ArrayUtils.isEmpty(hop.getActivityTypes())
+                    && !ArrayUtils.contains(hop.getActivityTypes(), task.getActivityType())) {
+                return false;
+            }
+            if (!ArrayUtils.isEmpty(hop.getWindowingModes())
+                    && !ArrayUtils.contains(hop.getWindowingModes(), task.getWindowingMode())) {
                 return false;
             }
             if (isLockTaskModeViolation(finalNewParent, task, isInLockTaskMode)) {
