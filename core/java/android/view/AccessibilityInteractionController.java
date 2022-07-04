@@ -21,6 +21,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_A
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_REQUESTED_KEY;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 
+import android.annotation.NonNull;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -959,29 +960,6 @@ public final class AccessibilityInteractionController {
                 && mViewRootImpl.mAttachInfo.mLeashedParentAccessibilityViewId == View.NO_ID);
     }
 
-    private void applyAppScaleAndMagnificationSpecIfNeeded(AccessibilityNodeInfo info,
-            MagnificationSpec spec) {
-        if (info == null) {
-            return;
-        }
-
-        final float applicationScale = mViewRootImpl.mAttachInfo.mApplicationScale;
-        if (!shouldApplyAppScaleAndMagnificationSpec(applicationScale, spec)) {
-            return;
-        }
-        Rect boundsInParent = mTempRect;
-
-        info.getBoundsInParent(boundsInParent);
-        if (applicationScale != 1.0f) {
-            boundsInParent.scale(applicationScale);
-        }
-        if (spec != null) {
-            boundsInParent.scale(spec.scale);
-            // boundsInParent must not be offset.
-        }
-        info.setBoundsInParent(boundsInParent);
-    }
-
     private boolean shouldApplyAppScaleAndMagnificationSpec(float appScale,
             MagnificationSpec spec) {
         return (appScale != 1.0f || (spec != null && !spec.isNop()));
@@ -1002,7 +980,6 @@ public final class AccessibilityInteractionController {
         // Transform view bounds from window coordinates to screen coordinates.
         transformBoundsWithScreenMatrix(info, matrixValues);
         adjustIsVisibleToUserIfNeeded(info, interactiveRegion, spec);
-        applyAppScaleAndMagnificationSpecIfNeeded(info, spec);
     }
 
 
@@ -1042,10 +1019,7 @@ public final class AccessibilityInteractionController {
             return;
         }
         transformMatrix.mapRect(transformedBounds);
-        // Offset 0.5f to round after casting.
-        transformedBounds.offset(0.5f, 0.5f);
-        boundInScreen.set((int) (transformedBounds.left), (int) transformedBounds.top,
-                (int) transformedBounds.right, (int) transformedBounds.bottom);
+        roundRectFToRect(transformedBounds, boundInScreen);
         info.setBoundsInScreen(boundInScreen);
         // Scale text locations if they are present
         if (info.hasExtras()) {
@@ -1063,6 +1037,26 @@ public final class AccessibilityInteractionController {
                 }
             }
         }
+        applyTransformMatrixToBoundsInParentIfNeeded(info, transformMatrix);
+    }
+
+    private void applyTransformMatrixToBoundsInParentIfNeeded(AccessibilityNodeInfo info,
+            Matrix transformMatrix) {
+        final float[] screenMatrixValues = new float[9];
+        transformMatrix.getValues(screenMatrixValues);
+        final Matrix scaleMatrix = new Matrix();
+        scaleMatrix.setScale(screenMatrixValues[Matrix.MSCALE_X],
+                screenMatrixValues[Matrix.MSCALE_X]);
+        if (scaleMatrix.isIdentity()) {
+            return;
+        }
+        Rect boundsInParent = mTempRect;
+        final RectF transformedBounds = mTempRectF;
+        info.getBoundsInParent(boundsInParent);
+        transformedBounds.set(boundsInParent);
+        scaleMatrix.mapRect(transformedBounds);
+        roundRectFToRect(transformedBounds, boundsInParent);
+        info.setBoundsInParent(boundsInParent);
     }
 
     private void updateInfosForViewportAndReturnFindNodeResult(List<AccessibilityNodeInfo> infos,
@@ -1211,6 +1205,12 @@ public final class AccessibilityInteractionController {
             return true;
         }
         return false;
+    }
+
+    private static void roundRectFToRect(@NonNull  RectF sourceRectF, @NonNull Rect outRect) {
+        // Offset 0.5f to round after casting.
+        outRect.set((int) (sourceRectF.left + 0.5), (int) (sourceRectF.top + 0.5),
+                (int) (sourceRectF.right + 0.5), (int) (sourceRectF.bottom + 0.5));
     }
 
     /**
