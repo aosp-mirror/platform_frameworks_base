@@ -738,8 +738,9 @@ class Task extends TaskFragment {
                     "removeTask:" + reason + " deferring removing taskId=" + mTaskId);
             return;
         }
+        final boolean isLeafTask = isLeafTask();
         removeImmediately(reason);
-        if (isLeafTask()) {
+        if (isLeafTask) {
             mAtmService.getTaskChangeNotificationController().notifyTaskRemoved(mTaskId);
 
             final TaskDisplayArea taskDisplayArea = getDisplayArea();
