@@ -207,25 +207,30 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun animatesInvisibleViews() {
+        rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
+        rootView.visibility = View.INVISIBLE
+
+        val success = ViewHierarchyAnimator.animate(rootView)
+        // Change all bounds.
+        rootView.layout(0 /* l */, 15 /* t */, 70 /* r */, 80 /* b */)
+
+        assertTrue(success)
+        assertNotNull(rootView.getTag(R.id.tag_animator))
+        // The initial values should be those of the previous layout.
+        checkBounds(rootView, l = 10, t = 10, r = 50, b = 50)
+        endAnimation(rootView)
+        assertNull(rootView.getTag(R.id.tag_animator))
+        // The end values should be those of the latest layout.
+        checkBounds(rootView, l = 0, t = 15, r = 70, b = 80)
+    }
+
+    @Test
     fun animatesAppearingViewsFromStartToEnd() {
         // Starting GONE.
         rootView.visibility = View.GONE
         rootView.layout(0 /* l */, 50 /* t */, 50 /* r */, 100 /* b */)
         var success = ViewHierarchyAnimator.animateAddition(rootView)
-        rootView.visibility = View.VISIBLE
-        rootView.layout(0 /* l */, 100 /* t */, 100 /* r */, 200 /* b */)
-
-        assertTrue(success)
-        assertNotNull(rootView.getTag(R.id.tag_animator))
-        checkBounds(rootView, l = 50, t = 150, r = 50, b = 150)
-        endAnimation(rootView)
-        assertNull(rootView.getTag(R.id.tag_animator))
-        checkBounds(rootView, l = 0, t = 100, r = 100, b = 200)
-
-        // Starting INVISIBLE.
-        rootView.visibility = View.INVISIBLE
-        rootView.layout(0 /* l */, 50 /* t */, 50 /* r */, 100 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(rootView)
         rootView.visibility = View.VISIBLE
         rootView.layout(0 /* l */, 100 /* t */, 100 /* r */, 200 /* b */)
 
@@ -937,7 +942,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun doesNotAnimateInvisibleViews() {
+    fun doesNotAnimateGoneViews() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
         // GONE
@@ -948,15 +953,6 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         assertFalse(success)
         assertNull(rootView.getTag(R.id.tag_animator))
         checkBounds(rootView, l = 0, t = 15, r = 55, b = 80)
-
-        // INVISIBLE.
-        rootView.visibility = View.INVISIBLE
-        success = ViewHierarchyAnimator.animate(rootView)
-        rootView.layout(0 /* l */, 20 /* t */, 10 /* r */, 50 /* b */)
-
-        assertFalse(success)
-        assertNull(rootView.getTag(R.id.tag_animator))
-        checkBounds(rootView, l = 0, t = 20, r = 10, b = 50)
     }
 
     @Test

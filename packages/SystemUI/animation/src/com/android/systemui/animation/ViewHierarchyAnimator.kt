@@ -106,7 +106,7 @@ class ViewHierarchyAnimator {
             ephemeral: Boolean
         ): Boolean {
             if (
-                !isVisible(
+                !occupiesSpace(
                     rootView.visibility,
                     rootView.left,
                     rootView.top,
@@ -177,7 +177,7 @@ class ViewHierarchyAnimator {
             fadeInInterpolator: Interpolator = DEFAULT_FADE_IN_INTERPOLATOR
         ): Boolean {
             if (
-                isVisible(
+                occupiesSpace(
                     rootView.visibility,
                     rootView.left,
                     rootView.top,
@@ -295,7 +295,7 @@ class ViewHierarchyAnimator {
 
                     (view.getTag(R.id.tag_animator) as? ObjectAnimator)?.cancel()
 
-                    if (!isVisible(view.visibility, left, top, right, bottom)) {
+                    if (!occupiesSpace(view.visibility, left, top, right, bottom)) {
                         setBound(view, Bound.LEFT, left)
                         setBound(view, Bound.TOP, top)
                         setBound(view, Bound.RIGHT, right)
@@ -362,7 +362,7 @@ class ViewHierarchyAnimator {
             duration: Long = DEFAULT_DURATION
         ): Boolean {
             if (
-                !isVisible(
+                !occupiesSpace(
                     rootView.visibility,
                     rootView.left,
                     rootView.top,
@@ -530,17 +530,17 @@ class ViewHierarchyAnimator {
         }
 
         /**
-         * Returns whether the given [visibility] and bounds are consistent with a view being
-         * currently visible on screen.
+         * Returns whether the given [visibility] and bounds are consistent with a view being a
+         * contributing part of the hierarchy.
          */
-        private fun isVisible(
+        private fun occupiesSpace(
             visibility: Int,
             left: Int,
             top: Int,
             right: Int,
             bottom: Int
         ): Boolean {
-            return visibility == View.VISIBLE && left != right && top != bottom
+            return visibility != View.GONE && left != right && top != bottom
         }
 
         /**
