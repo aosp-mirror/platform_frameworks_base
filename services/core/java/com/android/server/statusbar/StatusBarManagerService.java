@@ -96,6 +96,7 @@ import com.android.internal.statusbar.ISessionListener;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.IUndoMediaTransferCallback;
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -596,13 +597,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
                 @Behavior int behavior, InsetsVisibilities requestedVisibilities,
-                String packageName) {
+                String packageName, LetterboxDetails[] letterboxDetails) {
             getUiState(displayId).setBarAttributes(appearance, appearanceRegions,
-                    navbarColorManagedByIme, behavior, requestedVisibilities, packageName);
+                    navbarColorManagedByIme, behavior, requestedVisibilities, packageName,
+                    letterboxDetails);
             if (mBar != null) {
                 try {
                     mBar.onSystemBarAttributesChanged(displayId, appearance, appearanceRegions,
-                            navbarColorManagedByIme, behavior, requestedVisibilities, packageName);
+                            navbarColorManagedByIme, behavior, requestedVisibilities, packageName,
+                            letterboxDetails);
                 } catch (RemoteException ex) { }
             }
         }
@@ -1204,17 +1207,20 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         private int mImeBackDisposition = 0;
         private boolean mShowImeSwitcher = false;
         private IBinder mImeToken = null;
+        private LetterboxDetails[] mLetterboxDetails;
 
         private void setBarAttributes(@Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
                 @Behavior int behavior, InsetsVisibilities requestedVisibilities,
-                String packageName) {
+                String packageName,
+                LetterboxDetails[] letterboxDetails) {
             mAppearance = appearance;
             mAppearanceRegions = appearanceRegions;
             mNavbarColorManagedByIme = navbarColorManagedByIme;
             mBehavior = behavior;
             mRequestedVisibilities = requestedVisibilities;
             mPackageName = packageName;
+            mLetterboxDetails = letterboxDetails;
         }
 
         private void showTransient(@InternalInsetsType int[] types) {
@@ -1341,7 +1347,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                     state.mImeBackDisposition, state.mShowImeSwitcher,
                     gatherDisableActionsLocked(mCurrentUserId, 2), state.mImeToken,
                     state.mNavbarColorManagedByIme, state.mBehavior, state.mRequestedVisibilities,
-                    state.mPackageName, transientBarTypes);
+                    state.mPackageName, transientBarTypes, state.mLetterboxDetails);
         }
     }
 
