@@ -297,6 +297,16 @@ class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun testLayoutParams_hasDimbehindWindowFlag() {
+        val layoutParams = AuthContainerView.getLayoutParams(windowToken, "")
+        val lpFlags = layoutParams.flags
+        val lpDimAmount = layoutParams.dimAmount
+
+        assertThat((lpFlags and WindowManager.LayoutParams.FLAG_DIM_BEHIND) != 0).isTrue()
+        assertThat(lpDimAmount).isGreaterThan(0f)
+    }
+
+    @Test
     fun testLayoutParams_excludesImeInsets() {
         val layoutParams = AuthContainerView.getLayoutParams(windowToken, "")
         assertThat((layoutParams.fitInsetsTypes and WindowInsets.Type.ime()) == 0).isTrue()
