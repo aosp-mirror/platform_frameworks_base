@@ -2125,8 +2125,9 @@ public final class BroadcastQueue {
         // app just because it's stopped at a breakpoint.
         final boolean debugging = (r.curApp != null && r.curApp.isDebugging());
 
+        long timeoutDurationMs = now - r.receiverTime;
         Slog.w(TAG, "Timeout of broadcast " + r + " - receiver=" + r.receiver
-                + ", started " + (now - r.receiverTime) + "ms ago");
+                + ", started " + timeoutDurationMs + "ms ago");
         r.receiverTime = now;
         if (!debugging) {
             r.anrCount++;
@@ -2158,7 +2159,9 @@ public final class BroadcastQueue {
         }
 
         if (app != null) {
-            anrMessage = "Broadcast of " + r.intent.toString();
+            anrMessage =
+                    "Broadcast of " + r.intent.toString() + ", waited " + timeoutDurationMs
+                            + "ms";
         }
 
         if (mPendingBroadcast == r) {
