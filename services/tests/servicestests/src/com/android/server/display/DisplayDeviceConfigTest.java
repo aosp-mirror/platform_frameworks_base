@@ -86,6 +86,8 @@ public final class DisplayDeviceConfigTest {
                 0.0f);
         assertEquals(mDisplayDeviceConfig.getScreenBrighteningMinThreshold(), 0.001, 0.000001f);
         assertEquals(mDisplayDeviceConfig.getScreenDarkeningMinThreshold(), 0.002, 0.000001f);
+        assertEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLightDebounce(), 2000);
+        assertEquals(mDisplayDeviceConfig.getAutoBrightnessDarkeningLightDebounce(), 1000);
 
         // Todo(brup): Add asserts for BrightnessThrottlingData, DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
@@ -109,6 +111,10 @@ public final class DisplayDeviceConfigTest {
                 +           "<nits>800.0</nits>\n"
                 +       "</point>\n"
                 +   "</screenBrightnessMap>\n"
+                +   "<autoBrightness>\n"
+                +       "<brighteningLightDebounceMillis>2000</brighteningLightDebounceMillis>\n"
+                +       "<darkeningLightDebounceMillis>1000</darkeningLightDebounceMillis>\n"
+                +   "</autoBrightness>\n"
                 +   "<highBrightnessMode enabled=\"true\">\n"
                 +       "<transitionPoint>0.62</transitionPoint>\n"
                 +       "<minimumLux>10000</minimumLux>\n"
