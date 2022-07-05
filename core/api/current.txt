@@ -53240,11 +53240,11 @@ package android.view.inputmethod {
   public final class InputMethodManager {
     method public void dispatchKeyEventFromInputMethod(@Nullable android.view.View, @NonNull android.view.KeyEvent);
     method public void displayCompletions(android.view.View, android.view.inputmethod.CompletionInfo[]);
-    method public android.view.inputmethod.InputMethodSubtype getCurrentInputMethodSubtype();
-    method public java.util.List<android.view.inputmethod.InputMethodInfo> getEnabledInputMethodList();
-    method public java.util.List<android.view.inputmethod.InputMethodSubtype> getEnabledInputMethodSubtypeList(android.view.inputmethod.InputMethodInfo, boolean);
-    method public java.util.List<android.view.inputmethod.InputMethodInfo> getInputMethodList();
-    method public android.view.inputmethod.InputMethodSubtype getLastInputMethodSubtype();
+    method @Nullable public android.view.inputmethod.InputMethodSubtype getCurrentInputMethodSubtype();
+    method @NonNull public java.util.List<android.view.inputmethod.InputMethodInfo> getEnabledInputMethodList();
+    method @NonNull public java.util.List<android.view.inputmethod.InputMethodSubtype> getEnabledInputMethodSubtypeList(@Nullable android.view.inputmethod.InputMethodInfo, boolean);
+    method @NonNull public java.util.List<android.view.inputmethod.InputMethodInfo> getInputMethodList();
+    method @Nullable public android.view.inputmethod.InputMethodSubtype getLastInputMethodSubtype();
     method public java.util.Map<android.view.inputmethod.InputMethodInfo,java.util.List<android.view.inputmethod.InputMethodSubtype>> getShortcutInputMethodsAndSubtypes();
     method @Deprecated public void hideSoftInputFromInputMethod(android.os.IBinder, int);
     method public boolean hideSoftInputFromWindow(android.os.IBinder, int);
@@ -53260,12 +53260,12 @@ package android.view.inputmethod {
     method @Deprecated public boolean isWatchingCursor(android.view.View);
     method public void restartInput(android.view.View);
     method public void sendAppPrivateCommand(android.view.View, String, android.os.Bundle);
-    method @Deprecated public void setAdditionalInputMethodSubtypes(String, android.view.inputmethod.InputMethodSubtype[]);
+    method @Deprecated public void setAdditionalInputMethodSubtypes(@NonNull String, @NonNull android.view.inputmethod.InputMethodSubtype[]);
     method @Deprecated @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean setCurrentInputMethodSubtype(android.view.inputmethod.InputMethodSubtype);
     method @Deprecated public void setInputMethod(android.os.IBinder, String);
     method @Deprecated public void setInputMethodAndSubtype(@NonNull android.os.IBinder, String, android.view.inputmethod.InputMethodSubtype);
     method @Deprecated public boolean shouldOfferSwitchingToNextInputMethod(android.os.IBinder);
-    method public void showInputMethodAndSubtypeEnabler(String);
+    method public void showInputMethodAndSubtypeEnabler(@Nullable String);
     method public void showInputMethodPicker();
     method public boolean showSoftInput(android.view.View, int);
     method public boolean showSoftInput(android.view.View, int, android.os.ResultReceiver);
