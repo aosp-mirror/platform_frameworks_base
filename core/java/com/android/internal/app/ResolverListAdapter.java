@@ -265,6 +265,7 @@ public class ResolverListAdapter extends BaseAdapter {
             return mResolverListController.getResolversForIntent(
                             /* shouldGetResolvedFilter= */ true,
                             mResolverListCommunicator.shouldGetActivityMetadata(),
+                            mResolverListCommunicator.shouldGetOnlyDefaultActivities(),
                             mIntents);
         }
     }
@@ -727,6 +728,7 @@ public class ResolverListAdapter extends BaseAdapter {
     protected List<ResolvedComponentInfo> getResolversForUser(UserHandle userHandle) {
         return mResolverListController.getResolversForIntentAsUser(true,
                 mResolverListCommunicator.shouldGetActivityMetadata(),
+                mResolverListCommunicator.shouldGetOnlyDefaultActivities(),
                 mIntents, userHandle);
     }
 
@@ -819,6 +821,12 @@ public class ResolverListAdapter extends BaseAdapter {
         boolean useLayoutWithDefault();
 
         boolean shouldGetActivityMetadata();
+
+        /**
+         * @return true to filter only apps that can handle
+         *     {@link android.content.Intent#CATEGORY_DEFAULT} intents
+         */
+        default boolean shouldGetOnlyDefaultActivities() { return true; };
 
         Intent getTargetIntent();
 
