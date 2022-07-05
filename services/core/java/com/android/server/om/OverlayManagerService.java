@@ -942,7 +942,7 @@ public final class OverlayManagerService extends SystemService {
                         final FabricatedOverlayInternal fabricated =
                                 request.extras.getParcelable(
                                         OverlayManagerTransaction.Request.BUNDLE_FABRICATED_OVERLAY
-                                );
+                                , android.os.FabricatedOverlayInternal.class);
                         Objects.requireNonNull(fabricated,
                                 "no fabricated overlay attached to request");
                         return mImpl.registerFabricatedOverlay(fabricated);

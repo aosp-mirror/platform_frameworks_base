@@ -7693,7 +7693,7 @@ public class AppOpsManager {
                     request.mOpNames, request.mHistoryFlags, request.mFilter,
                     request.mBeginTimeMillis, request.mEndTimeMillis, request.mFlags,
                     new RemoteCallback((result) -> {
-                final HistoricalOps ops = result.getParcelable(KEY_HISTORICAL_OPS);
+                final HistoricalOps ops = result.getParcelable(KEY_HISTORICAL_OPS, android.app.AppOpsManager.HistoricalOps.class);
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     executor.execute(() -> callback.accept(ops));
@@ -7733,7 +7733,7 @@ public class AppOpsManager {
                     request.mAttributionTag, request.mOpNames, request.mHistoryFlags,
                     request.mFilter, request.mBeginTimeMillis, request.mEndTimeMillis,
                     request.mFlags, new RemoteCallback((result) -> {
-                final HistoricalOps ops = result.getParcelable(KEY_HISTORICAL_OPS);
+                final HistoricalOps ops = result.getParcelable(KEY_HISTORICAL_OPS, android.app.AppOpsManager.HistoricalOps.class);
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     executor.execute(() -> callback.accept(ops));

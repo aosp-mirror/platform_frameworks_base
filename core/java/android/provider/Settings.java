@@ -3168,7 +3168,7 @@ public final class Settings {
                             synchronized (NameValueCache.this) {
                                 if (needsGenerationTracker) {
                                     MemoryIntArray array = b.getParcelable(
-                                            CALL_METHOD_TRACK_GENERATION_KEY);
+                                            CALL_METHOD_TRACK_GENERATION_KEY, android.util.MemoryIntArray.class);
                                     final int index = b.getInt(
                                             CALL_METHOD_GENERATION_INDEX_KEY, -1);
                                     if (array != null && index >= 0) {
@@ -3354,7 +3354,7 @@ public final class Settings {
 
                 // All flags for the namespace
                 Map<String, String> flagsToValues =
-                        (HashMap) b.getSerializable(Settings.NameValueTable.VALUE);
+                        (HashMap) b.getSerializable(Settings.NameValueTable.VALUE, java.util.HashMap.class);
                 // Only the flags requested by the caller
                 if (!names.isEmpty()) {
                     for (Map.Entry<String, String> flag : flagsToValues.entrySet()) {
@@ -3369,7 +3369,7 @@ public final class Settings {
                 synchronized (NameValueCache.this) {
                     if (needsGenerationTracker) {
                         MemoryIntArray array = b.getParcelable(
-                                CALL_METHOD_TRACK_GENERATION_KEY);
+                                CALL_METHOD_TRACK_GENERATION_KEY, android.util.MemoryIntArray.class);
                         final int index = b.getInt(
                                 CALL_METHOD_GENERATION_INDEX_KEY, -1);
                         if (array != null && index >= 0) {

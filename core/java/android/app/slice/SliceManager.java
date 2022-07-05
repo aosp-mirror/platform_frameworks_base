@@ -231,7 +231,7 @@ public class SliceManager {
                 extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
                 final Bundle res = provider.call(
                         SliceProvider.METHOD_GET_DESCENDANTS, null, extras);
-                return res.getParcelableArrayList(SliceProvider.EXTRA_SLICE_DESCENDANTS);
+                return res.getParcelableArrayList(SliceProvider.EXTRA_SLICE_DESCENDANTS, android.net.Uri.class);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to get slice descendants", e);
@@ -264,7 +264,7 @@ public class SliceManager {
             if (res == null) {
                 return null;
             }
-            return res.getParcelable(SliceProvider.EXTRA_SLICE);
+            return res.getParcelable(SliceProvider.EXTRA_SLICE, android.app.slice.Slice.class);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
@@ -323,7 +323,7 @@ public class SliceManager {
             if (res == null) {
                 return null;
             }
-            return res.getParcelable(SliceProvider.EXTRA_SLICE);
+            return res.getParcelable(SliceProvider.EXTRA_SLICE, android.net.Uri.class);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
@@ -403,7 +403,7 @@ public class SliceManager {
             if (res == null) {
                 return null;
             }
-            return res.getParcelable(SliceProvider.EXTRA_SLICE);
+            return res.getParcelable(SliceProvider.EXTRA_SLICE, android.app.slice.Slice.class);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.

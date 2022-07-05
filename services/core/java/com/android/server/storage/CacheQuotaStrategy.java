@@ -207,7 +207,7 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     public void onResult(Bundle data) {
         final List<CacheQuotaHint> processedRequests =
                 data.getParcelableArrayList(
-                        CacheQuotaService.REQUEST_LIST_KEY);
+                        CacheQuotaService.REQUEST_LIST_KEY, android.app.usage.CacheQuotaHint.class);
         pushProcessedQuotas(processedRequests);
         writeXmlToFile(processedRequests);
     }

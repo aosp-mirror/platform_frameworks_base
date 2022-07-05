@@ -917,7 +917,7 @@ public final class MediaSession {
         public boolean onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
             if (mSession != null && mHandler != null
                     && Intent.ACTION_MEDIA_BUTTON.equals(mediaButtonIntent.getAction())) {
-                KeyEvent ke = mediaButtonIntent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                KeyEvent ke = mediaButtonIntent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, android.view.KeyEvent.class);
                 if (ke != null && ke.getAction() == KeyEvent.ACTION_DOWN) {
                     PlaybackState state = mSession.mPlaybackState;
                     long validActions = state == null ? 0 : state.getActions();

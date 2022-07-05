@@ -195,7 +195,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
                 return false;
             }
             DownloadRequest request = intent.getParcelableExtra(
-                    MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST);
+                    MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST, android.telephony.mbms.DownloadRequest.class);
             String expectedTokenFileName = request.getHash() + DOWNLOAD_TOKEN_SUFFIX;
             File expectedTokenFile = new File(
                     MbmsUtils.getEmbmsTempFileDirForService(context, request.getFileServiceId()),
@@ -236,7 +236,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
 
     private void moveDownloadedFile(Context context, Intent intent) {
         DownloadRequest request = intent.getParcelableExtra(
-                MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST);
+                MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST, android.telephony.mbms.DownloadRequest.class);
         Intent intentForApp = request.getIntentForApp();
         if (intentForApp == null) {
             Log.i(LOG_TAG, "Malformed app notification intent");
@@ -256,7 +256,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
             return;
         }
 
-        Uri finalTempFile = intent.getParcelableExtra(VendorUtils.EXTRA_FINAL_URI);
+        Uri finalTempFile = intent.getParcelableExtra(VendorUtils.EXTRA_FINAL_URI, android.net.Uri.class);
         if (!verifyTempFilePath(context, request.getFileServiceId(), finalTempFile)) {
             Log.w(LOG_TAG, "Download result specified an invalid temp file " + finalTempFile);
             setResultCode(RESULT_DOWNLOAD_FINALIZATION_ERROR);
@@ -264,7 +264,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         }
 
         FileInfo completedFileInfo =
-                (FileInfo) intent.getParcelableExtra(MbmsDownloadSession.EXTRA_MBMS_FILE_INFO);
+                (FileInfo) intent.getParcelableExtra(MbmsDownloadSession.EXTRA_MBMS_FILE_INFO, android.telephony.mbms.FileInfo.class);
         Path appSpecifiedDestination = FileSystems.getDefault().getPath(
                 request.getDestinationUri().getPath());
 
@@ -288,13 +288,13 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
 
     private void cleanupPostMove(Context context, Intent intent) {
         DownloadRequest request = intent.getParcelableExtra(
-                MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST);
+                MbmsDownloadSession.EXTRA_MBMS_DOWNLOAD_REQUEST, android.telephony.mbms.DownloadRequest.class);
         if (request == null) {
             Log.w(LOG_TAG, "Intent does not include a DownloadRequest. Ignoring.");
             return;
         }
 
-        List<Uri> tempFiles = intent.getParcelableArrayListExtra(VendorUtils.EXTRA_TEMP_LIST);
+        List<Uri> tempFiles = intent.getParcelableArrayListExtra(VendorUtils.EXTRA_TEMP_LIST, android.net.Uri.class);
         if (tempFiles == null) {
             return;
         }
@@ -318,7 +318,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
             return;
         }
         int fdCount = intent.getIntExtra(VendorUtils.EXTRA_FD_COUNT, 0);
-        List<Uri> pausedList = intent.getParcelableArrayListExtra(VendorUtils.EXTRA_PAUSED_LIST);
+        List<Uri> pausedList = intent.getParcelableArrayListExtra(VendorUtils.EXTRA_PAUSED_LIST, android.net.Uri.class);
 
         if (fdCount == 0 && (pausedList == null || pausedList.size() == 0)) {
             Log.i(LOG_TAG, "No temp files actually requested. Ending.");
@@ -417,7 +417,7 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         String serviceId = intent.getStringExtra(VendorUtils.EXTRA_SERVICE_ID);
         File tempFileDir = MbmsUtils.getEmbmsTempFileDirForService(context, serviceId);
         final List<Uri> filesInUse =
-                intent.getParcelableArrayListExtra(VendorUtils.EXTRA_TEMP_FILES_IN_USE);
+                intent.getParcelableArrayListExtra(VendorUtils.EXTRA_TEMP_FILES_IN_USE, android.net.Uri.class);
         File[] filesToDelete = tempFileDir.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {

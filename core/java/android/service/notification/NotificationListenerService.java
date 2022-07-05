@@ -1379,7 +1379,7 @@ public abstract class NotificationListenerService extends Service {
     private void maybePopulatePeople(Notification notification) {
         if (getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.P) {
             ArrayList<Person> people = notification.extras.getParcelableArrayList(
-                    Notification.EXTRA_PEOPLE_LIST);
+                    Notification.EXTRA_PEOPLE_LIST, android.app.Person.class);
             if (people != null && people.isEmpty()) {
                 int size = people.size();
                 String[] peopleArray = new String[size];

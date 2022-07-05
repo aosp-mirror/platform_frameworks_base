@@ -155,7 +155,7 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION.equals(intent.getAction())) {
-                final Uri conditionId = intent.getParcelableExtra(EXTRA_CONDITION_ID);
+                final Uri conditionId = intent.getParcelableExtra(EXTRA_CONDITION_ID, android.net.Uri.class);
                 final boolean alarm = ZenModeConfig.isValidCountdownToAlarmConditionId(conditionId);
                 final long time = ZenModeConfig.tryParseCountdownConditionId(conditionId);
                 if (DEBUG) Slog.d(TAG, "Countdown condition fired: " + conditionId);

@@ -65,7 +65,7 @@ public final class ThumbnailTemplate extends ControlTemplate {
     ThumbnailTemplate(Bundle b) {
         super(b);
         mActive = b.getBoolean(KEY_ACTIVE);
-        mThumbnail = b.getParcelable(KEY_ICON);
+        mThumbnail = b.getParcelable(KEY_ICON, android.graphics.drawable.Icon.class);
         mContentDescription = b.getCharSequence(KEY_CONTENT_DESCRIPTION, "");
     }
 

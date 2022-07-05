@@ -219,8 +219,8 @@ public class SuspendedAppActivity extends AlertActivity
         }
         mSuspendedPackage = intent.getStringExtra(EXTRA_SUSPENDED_PACKAGE);
         mSuspendingPackage = intent.getStringExtra(EXTRA_SUSPENDING_PACKAGE);
-        mSuppliedDialogInfo = intent.getParcelableExtra(EXTRA_DIALOG_INFO);
-        mOnUnsuspend = intent.getParcelableExtra(EXTRA_UNSUSPEND_INTENT);
+        mSuppliedDialogInfo = intent.getParcelableExtra(EXTRA_DIALOG_INFO, android.content.pm.SuspendDialogInfo.class);
+        mOnUnsuspend = intent.getParcelableExtra(EXTRA_UNSUSPEND_INTENT, android.content.IntentSender.class);
         if (mSuppliedDialogInfo != null) {
             try {
                 mSuspendingAppResources = createContextAsUser(

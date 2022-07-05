@@ -140,7 +140,7 @@ public final class AlternativeSpans implements Parcelable {
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
         List<AlternativeSpan> spans = new ArrayList<>();
-        in.readParcelableList(spans, AlternativeSpan.class.getClassLoader());
+        in.readParcelableList(spans, AlternativeSpan.class.getClassLoader(), android.speech.AlternativeSpan.class);
 
         this.mSpans = spans;
         com.android.internal.util.AnnotationValidations.validate(

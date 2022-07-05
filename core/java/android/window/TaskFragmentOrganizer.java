@@ -220,7 +220,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
                 @NonNull IBinder errorCallbackToken, @NonNull Bundle exceptionBundle) {
             mExecutor.execute(() -> TaskFragmentOrganizer.this.onTaskFragmentError(
                     errorCallbackToken,
-                    (Throwable) exceptionBundle.getSerializable(KEY_ERROR_CALLBACK_EXCEPTION)));
+                    (Throwable) exceptionBundle.getSerializable(KEY_ERROR_CALLBACK_EXCEPTION, java.lang.Throwable.class)));
         }
 
         @Override

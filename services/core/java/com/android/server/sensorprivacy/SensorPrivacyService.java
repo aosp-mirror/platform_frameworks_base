@@ -282,7 +282,7 @@ public final class SensorPrivacyService extends SystemService {
                 public void onReceive(Context context, Intent intent) {
                     setToggleSensorPrivacy(
                             ((UserHandle) intent.getParcelableExtra(
-                                    Intent.EXTRA_USER)).getIdentifier(), OTHER,
+                                    Intent.EXTRA_USER, android.os.UserHandle.class)).getIdentifier(), OTHER,
                             intent.getIntExtra(EXTRA_SENSOR, UNKNOWN), false);
                 }
             }, new IntentFilter(ACTION_DISABLE_TOGGLE_SENSOR_PRIVACY),

@@ -62,7 +62,7 @@ public class ChooseAccountActivity extends Activity {
                         .SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         mAccounts = getIntent().getParcelableArrayExtra(AccountManager.KEY_ACCOUNTS);
         mAccountManagerResponse =
-                getIntent().getParcelableExtra(AccountManager.KEY_ACCOUNT_MANAGER_RESPONSE);
+                getIntent().getParcelableExtra(AccountManager.KEY_ACCOUNT_MANAGER_RESPONSE, android.accounts.AccountManagerResponse.class);
 
         // KEY_ACCOUNTS is a required parameter
         if (mAccounts == null) {

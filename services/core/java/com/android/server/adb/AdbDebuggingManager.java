@@ -649,7 +649,7 @@ public class AdbDebuggingManager {
                 } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
                     // We only care about wifi type connections
                     NetworkInfo networkInfo = (NetworkInfo) intent.getParcelableExtra(
-                            WifiManager.EXTRA_NETWORK_INFO);
+                            WifiManager.EXTRA_NETWORK_INFO, android.net.NetworkInfo.class);
                     if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                         // Check for network disconnect
                         if (!networkInfo.isConnected()) {

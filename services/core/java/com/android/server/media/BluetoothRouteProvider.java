@@ -500,7 +500,7 @@ class BluetoothRouteProvider {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, android.bluetooth.BluetoothDevice.class);
 
             BluetoothEventReceiver receiver = mEventReceiverMap.get(action);
             if (receiver != null) {

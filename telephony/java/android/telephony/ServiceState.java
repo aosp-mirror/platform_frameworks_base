@@ -1445,7 +1445,7 @@ public class ServiceState implements Parcelable {
      */
     @UnsupportedAppUsage
     private void setFromNotifierBundle(Bundle m) {
-        ServiceState ssFromBundle = m.getParcelable(EXTRA_SERVICE_STATE);
+        ServiceState ssFromBundle = m.getParcelable(EXTRA_SERVICE_STATE, android.telephony.ServiceState.class);
         if (ssFromBundle != null) {
             copyFrom(ssFromBundle);
         }

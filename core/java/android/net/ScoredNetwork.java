@@ -299,7 +299,7 @@ public class ScoredNetwork implements Parcelable {
     public int calculateBadge(int rssi) {
         if (attributes != null && attributes.containsKey(ATTRIBUTES_KEY_BADGING_CURVE)) {
             RssiCurve badgingCurve =
-                    attributes.getParcelable(ATTRIBUTES_KEY_BADGING_CURVE);
+                    attributes.getParcelable(ATTRIBUTES_KEY_BADGING_CURVE, android.net.RssiCurve.class);
             return badgingCurve.lookupScore(rssi);
         }
 

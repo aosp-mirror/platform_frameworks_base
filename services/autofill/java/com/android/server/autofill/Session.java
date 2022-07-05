@@ -395,7 +395,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     Slog.v(TAG, "mDelayedFillBroadcastReceiver delayed fill action received");
                     synchronized (mLock) {
                         int requestId = intent.getIntExtra(EXTRA_REQUEST_ID, 0);
-                        FillResponse response = intent.getParcelableExtra(EXTRA_FILL_RESPONSE);
+                        FillResponse response = intent.getParcelableExtra(EXTRA_FILL_RESPONSE, android.service.autofill.FillResponse.class);
                         mAssistReceiver.processDelayedFillLocked(requestId, response);
                     }
                 }
@@ -559,7 +559,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
 
-            final AssistStructure structure = resultData.getParcelable(ASSIST_KEY_STRUCTURE);
+            final AssistStructure structure = resultData.getParcelable(ASSIST_KEY_STRUCTURE, android.app.assist.AssistStructure.class);
             if (structure == null) {
                 Slog.e(TAG, "No assist structure - app might have crashed providing it");
                 return;
@@ -1811,7 +1811,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     void setAuthenticationResultForAugmentedAutofillLocked(Bundle data, int authId) {
         final Dataset dataset = (data == null) ? null :
-                data.getParcelable(AutofillManager.EXTRA_AUTHENTICATION_RESULT);
+                data.getParcelable(AutofillManager.EXTRA_AUTHENTICATION_RESULT, android.service.autofill.Dataset.class);
         if (sDebug) {
             Slog.d(TAG, "Auth result for augmented autofill: sessionId=" + id
                     + ", authId=" + authId + ", dataset=" + dataset);
@@ -2251,7 +2251,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 logContextCommitted(null, null, saveDialogNotShowReason, commitReason);
                 return;
             }
-            final Scores scores = result.getParcelable(EXTRA_SCORES);
+            final Scores scores = result.getParcelable(EXTRA_SCORES, android.service.autofill.AutofillFieldClassificationService.Scores.class);
             if (scores == null) {
                 Slog.w(TAG, "No field classification score on " + result);
                 return;

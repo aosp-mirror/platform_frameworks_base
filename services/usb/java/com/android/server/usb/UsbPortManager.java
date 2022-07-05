@@ -1156,7 +1156,7 @@ public class UsbPortManager {
             switch (msg.what) {
                 case MSG_UPDATE_PORTS: {
                     Bundle b = msg.getData();
-                    ArrayList<RawPortInfo> PortInfo = b.getParcelableArrayList(PORT_INFO);
+                    ArrayList<RawPortInfo> PortInfo = b.getParcelableArrayList(PORT_INFO, com.android.server.usb.hal.port.RawPortInfo.class);
                     synchronized (mLock) {
                         updatePortsLocked(null, PortInfo);
                     }

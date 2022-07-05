@@ -500,7 +500,7 @@ public class ResolverActivity extends Activity implements
         // this happens, we check for it here and set the current profile's tab.
         int selectedProfile = getCurrentProfile();
         UserHandle intentUser = getIntent().hasExtra(EXTRA_CALLING_USER)
-                ? getIntent().getParcelableExtra(EXTRA_CALLING_USER)
+                ? getIntent().getParcelableExtra(EXTRA_CALLING_USER, android.os.UserHandle.class)
                 : getUser();
         if (!getUser().equals(intentUser)) {
             if (getPersonalProfileUserHandle().equals(intentUser)) {

@@ -3034,7 +3034,7 @@ public final class Parcel {
         switch (code) {
             case EX_PARCELABLE:
                 if (readInt() > 0) {
-                    return (Exception) readParcelable(Parcelable.class.getClassLoader());
+                    return (Exception) readParcelable(Parcelable.class.getClassLoader(), java.lang.Exception.class);
                 } else {
                     return new RuntimeException(msg + " [missing Parcelable]");
                 }

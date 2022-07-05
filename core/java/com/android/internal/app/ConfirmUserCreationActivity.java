@@ -62,7 +62,7 @@ public class ConfirmUserCreationActivity extends AlertActivity
         mAccountName = intent.getStringExtra(UserManager.EXTRA_USER_ACCOUNT_NAME);
         mAccountType = intent.getStringExtra(UserManager.EXTRA_USER_ACCOUNT_TYPE);
         mAccountOptions = (PersistableBundle)
-                intent.getParcelableExtra(UserManager.EXTRA_USER_ACCOUNT_OPTIONS);
+                intent.getParcelableExtra(UserManager.EXTRA_USER_ACCOUNT_OPTIONS, android.os.PersistableBundle.class);
 
         mUserManager = getSystemService(UserManager.class);
 

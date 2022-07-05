@@ -213,7 +213,7 @@ public final class WindowManagerImpl implements WindowManager {
             @Override
             public void send(int resultCode, Bundle resultData) throws RemoteException {
                 List<KeyboardShortcutGroup> result =
-                        resultData.getParcelableArrayList(PARCEL_KEY_SHORTCUTS_ARRAY);
+                        resultData.getParcelableArrayList(PARCEL_KEY_SHORTCUTS_ARRAY, android.view.KeyboardShortcutGroup.class);
                 receiver.onKeyboardShortcutsReceived(result);
             }
         };
