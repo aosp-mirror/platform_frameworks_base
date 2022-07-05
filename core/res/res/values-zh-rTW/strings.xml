@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;未命名&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(沒有電話號碼)"</string>
@@ -305,12 +300,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"存取你的日曆"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"簡訊"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"傳送及查看簡訊"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"檔案與文件"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"存取裝置上的檔案與文件"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"音樂和其他音訊"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"存取裝置上的音訊檔案"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"相片和影片"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"存取裝置上的圖片和影片檔案"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"檔案"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"存取裝置上的檔案"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"音樂和音訊"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"存取裝置上的音樂和音訊"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"相片和影片"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"存取裝置上的相片和影片"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"麥克風"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"錄音"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"體能活動"</string>
@@ -594,7 +589,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"改用其他指紋"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"太亮"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"請試著調整"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"每次掃描時請稍微變更手指的位置"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"每次掃描時請稍微改變手指的位置"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"指紋辨識失敗"</string>
@@ -2038,9 +2033,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"仍要開啟"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"偵測到有害應用程式"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"要允許「<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>」存取所有裝置記錄嗎？"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"允許存取一次"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"允許一次性存取"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"不允許"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"系統會透過裝置記錄記下裝置上的活動。應用程式可以根據這些記錄找出問題並進行修正。\n\n某些記錄可能含有機密資訊，因此請勿讓不信任的應用程式存取所有裝置記錄。\n\n即使你不允許這個應用程式存取所有裝置記錄，這個應用程式仍能存取自己的記錄，而且裝置製造商或許仍可存取裝置的某些記錄或資訊。瞭解詳情"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"裝置記錄會記下裝置上的活動。應用程式可以根據這些記錄找出問題並進行修正。\n\n由於某些記錄可能含有機密資訊，建議只讓信任的應用程式存取所有裝置記錄。\n\n如果你不允許這個應用程式存取所有裝置記錄，這個應用程式仍可存取屬於自己的記錄，而裝置製造商也或許還是可以存取裝置的某些記錄或資訊。瞭解詳情"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"不要再顯示"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」想要顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的區塊"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編輯"</string>
@@ -2053,7 +2048,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"「零打擾」設定已變更"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"輕觸即可查看遭封鎖的項目。"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"查看通知設定"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"在 Android 13 中，你安裝的應用程式必須獲得授權，才能傳送通知。輕觸即可變更現有應用程式的這項權限。"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"從 Android 13 開始，你安裝的應用程式必須獲得授權，才能傳送通知。輕觸即可為現有應用程式變更這項權限。"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"稍後提醒我"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"關閉"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"系統"</string>
@@ -2274,14 +2269,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"已翻譯<xliff:g id="MESSAGE">%1$s</xliff:g>。"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"訊息內容已從<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>翻成<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>。"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"背景活動"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"某個應用程式正在耗用大量電力"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"某個應用程式目前仍在運作"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"「<xliff:g id="APP">%1$s</xliff:g>」正在背景運作。輕觸即可管理電池用量。"</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"「<xliff:g id="APP">%1$s</xliff:g>」應用程式可能會影響電池續航力。輕觸即可查看使用中的應用程式。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的應用程式"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取手機的相機"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取平板電腦的相機"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"系統語言"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"系統預設"</string>
 </resources>

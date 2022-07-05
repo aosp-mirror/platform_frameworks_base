@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Nomsiz&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Telefon raqami yo‘q)"</string>
@@ -305,12 +300,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"taqvimingizga kirish"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS xabarlarni yuborish va ko‘rish"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fayl va hujjatlar"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"qurilmangizdagi fayl va hujjatlarga kirish"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musiqa va boshqa audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"qurilmangizdagi audio fayllarga kirish"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Suratlar va videolar"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"qurilmangizdagi rasm va video fayllarga kirish"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Fayllar"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"qurilmangizdagi fayllarga kirish"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musiqa va audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"qurilmadagi musiqa va audioga ruxsat"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Video va suratlar"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"qurilmadagi rasm va videolarga ruxsat"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ovoz yozib olish"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Jismoniy harakatlar"</string>
@@ -1378,7 +1373,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"BAHAM KO‘RISH"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RAD ETISH"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Matn kiritish usulini tanlang"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Jismoniy klaviatura ulanganida ekranda chiqib turadi"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Tashqi klaviatura ulanganida ekranda chiqib turadi"</string>
     <string name="hardware" msgid="1800597768237606953">"Virtual klaviatura"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Tashqi klaviaturani sozlash"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Til va sxemani belgilash uchun bosing"</string>
@@ -2037,7 +2032,7 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"O‘CHIRIB TASHLASH"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"BARIBIR OCHILSIN"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Zararli ilova aniqlandi"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ilovasiga qurilmadagi barcha jurnal qaydlariga ruxsat berilsinmi?"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ilovasining qurilmadagi barcha jurnallarga kirishiga ruxsat berilsinmi?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Bir matalik foydalanishga ruxsat berish"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Rad etish"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Qurilma jurnaliga qurilma bilan yuz bergan hodisalar qaydlari yoziladi. Ilovalar bu jurnal qaydlari yordamida muammolarni topishi va bartaraf qilishi mumkin.\n\nAyrim jurnal qaydlarida maxfiy axborotlar yozilishi mumkin, shu sababli qurilmadagi barcha jurnal qaydlariga ruxsatni faqat ishonchli ilovalarga bering. \n\nBu ilovaga qurilmadagi barcha jurnal qaydlariga ruxsat berilmasa ham, u oʻzining jurnalini ocha oladi. Qurilma ishlab chiqaruvchisi ham ayrim jurnallar yoki qurilma haqidagi axborotlarni ocha oladi. Batafsil"</string>
@@ -2053,7 +2048,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Bezovta qilinmasin rejimi sozlamalari o‘zgartirildi"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nimalar bloklanganini tekshirish uchun bosing"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Bildirishnoma sozlamalarini tekshiring"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"Android 13 versiyasida oʻrnatiladigan ilovalar bildirishnoma yuborishiga ruxsat talab etiladi. Mavjud ilovalar uchun bu ruxsatni oʻzgartirish uchun bosing."</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 versiyasidan boshlab, oʻrnatiladigan ilovalar bildirishnoma yuborish uchun sizdan ruxsat oladi. Mavjud ilovalarda ushbu ruxsatni oʻzgartirish uchun bosing."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Keyinroq eslatilsin"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Yopish"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Tizim"</string>
@@ -2281,5 +2276,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Faol ilovalarni tekshiring"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> qurilmasidan telefonning kamerasiga kirish imkonsiz"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> qurilmasidan planshetning kamerasiga kirish imkonsiz"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Tizim tili"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Tizim standarti"</string>
 </resources>

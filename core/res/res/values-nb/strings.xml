@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Uten navn&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Mangler telefonnummer)"</string>
@@ -93,7 +88,7 @@
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Status for mobildata"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS-meldinger"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Talepostmeldinger"</string>
-    <string name="notification_channel_wfc" msgid="9048240466765169038">"Wi-Fi-anrop"</string>
+    <string name="notification_channel_wfc" msgid="9048240466765169038">"Wifi-anrop"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"SIM-status"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"SIM-status er satt til høy prioritet"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"Motpart ba om TTY-modus FULL"</string>
@@ -122,25 +117,25 @@
     <string name="roamingText11" msgid="5245687407203281407">"Roaming-banner på"</string>
     <string name="roamingText12" msgid="673537506362152640">"Roaming-banner av"</string>
     <string name="roamingTextSearching" msgid="5323235489657753486">"Leter etter tjeneste"</string>
-    <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Kunne ikke konfigurere Wi-Fi-anrop"</string>
+    <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Kunne ikke konfigurere wifi-anrop"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"For å ringe og sende meldinger over Wi-Fi, må du først be operatøren om å konfigurere denne tjenesten. Deretter slår du på Wi-Fi-anrop igjen fra Innstillinger. (Feilkode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"For å ringe og sende meldinger over Wi-Fi, må du først be operatøren om å konfigurere denne tjenesten. Deretter slår du på wifi-anrop igjen fra Innstillinger. (Feilkode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="4795145070505729156">"Problem med å registrere Wi-Fi-anrop med operatøren din: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+    <item msgid="4795145070505729156">"Problem med å registrere wifi-anrop med operatøren din: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
     <!-- no translation found for wfcSpnFormat_spn (2982505428519096311) -->
     <skip />
-    <string name="wfcSpnFormat_spn_wifi_calling" msgid="3165949348000906194">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi-anrop"</string>
-    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"<xliff:g id="SPN">%s</xliff:g>-Wi-Fi-anrop"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="3165949348000906194">"<xliff:g id="SPN">%s</xliff:g> Wifi-anrop"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"<xliff:g id="SPN">%s</xliff:g>-Wifi-anrop"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="4895315549916165700">"WLAN-anrop"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="255919245825481510">"<xliff:g id="SPN">%s</xliff:g> WLAN-anrop"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="7232899594327126970">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
-    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Wi-Fi-anrop | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Wifi-anrop | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="6865214948822061486">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Wi-Fi-anrop"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Wifi-anrop"</string>
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
-    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi-anrop"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wifi-anrop"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Av"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Ring via Wi-Fi"</string>
@@ -171,7 +166,7 @@
     <string name="httpErrorBadUrl" msgid="754447723314832538">"Kunne ikke åpne siden fordi nettadressen er ugyldig."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"Fikk ikke tilgang til filen."</string>
     <string name="httpErrorFileNotFound" msgid="5191433324871147386">"Fant ikke den forespurte filen."</string>
-    <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"For mange forespørsler blir behandlet. Prøv igjen senere."</string>
+    <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"For mange forespørsler blir behandlet. Prøv på nytt senere."</string>
     <string name="notification_title" msgid="5783748077084481121">"Påloggingsfeil for <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="2341041749565687871">"Synkronisering"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"Kan ikke synkronisere"</string>
@@ -305,12 +300,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"åpne kalenderen din"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"sende og lese SMS-meldinger"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Filer og dokumenter"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"åpne filer og dokumenter på enheten din"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musikk og annen lyd"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"få tilgang til lydfiler på enheten"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Bilder og videoer"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"få tilgang til bilder og videofiler på enheten"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Filer"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"bruke filer på enheten"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musikk og lyd"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"bruke musikk og lyd på enheten"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Bilder og videoer"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"bruke bilder og videoer på enheten"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ta opp lyd"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fysisk aktivitet"</string>
@@ -609,7 +604,7 @@
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingeravtrykk-operasjonen ble avbrutt av brukeren."</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"For mange forsøk. Prøv på nytt senere."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"For mange forsøk. Fingeravtrykkssensoren er slått av."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Prøv igjen."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Prøv på nytt."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ingen fingeravtrykk er registrert."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Denne enheten har ikke fingeravtrykkssensor."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensoren er midlertidig slått av."</string>
@@ -634,7 +629,7 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Opplåsing med fingeravtrykk"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Kan ikke bruke fingeravtrykkssensoren"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Gå til en reparasjonsleverandør."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Kunne ikke ta opp nøyaktige ansiktsdata Prøv igjen"</string>
+    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Kunne ikke ta opp nøyaktige ansiktsdata Prøv på nytt"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"For lyst. Prøv svakere belysning."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"For mørkt. Prøv sterkere belysning."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Flytt telefonen lengre unna"</string>
@@ -647,7 +642,7 @@
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Hold ansiktet ditt rett foran telefonen."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"For mye bevegelse. Hold telefonen stødig."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Registrer ansiktet ditt på nytt."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Kan ikke gjenkjenne ansiktet lenger. Prøv igjen."</string>
+    <string name="face_acquired_too_different" msgid="4699657338753282542">"Kan ikke gjenkjenne ansiktet lenger. Prøv på nytt."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"For likt – endre posituren din."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Vri hodet ditt litt mindre."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Vri hodet litt mindre."</string>
@@ -661,10 +656,10 @@
     <string name="face_error_no_space" msgid="5649264057026021723">"Kan ikke lagre nye ansiktsdata. Slett gamle data først."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Ansikt-operasjonen ble avbrutt."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Ansiktslås ble avbrutt av brukeren"</string>
-    <string name="face_error_lockout" msgid="7864408714994529437">"For mange forsøk. Prøv igjen senere."</string>
+    <string name="face_error_lockout" msgid="7864408714994529437">"For mange forsøk. Prøv på nytt senere."</string>
     <string name="face_error_lockout_permanent" msgid="3277134834042995260">"For mange forsøk. Ansiktslås er slått av."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"For mange forsøk. Skriv inn skjermlås i stedet."</string>
-    <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kan ikke bekrefte ansiktet. Prøv igjen."</string>
+    <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kan ikke bekrefte ansiktet. Prøv på nytt."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Du har ikke konfigurert ansiktslås"</string>
     <string name="face_error_hw_not_present" msgid="7940978724978763011">"Ansiktslås støttes ikke på denne enheten"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensoren er midlertidig slått av."</string>
@@ -952,7 +947,7 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"Du har foretatt <xliff:g id="NUMBER">%d</xliff:g> mislykkede opplåsinger av nettbrettet. Nettbrettet blir nå tilbakestilt til fabrikkinnstillingene."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"Du har prøvd å låse opp Android TV-enheten din <xliff:g id="NUMBER">%d</xliff:g> ganger. Android TV-enheten din tilbakestilles nå til fabrikkstandard."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"Du har foretatt <xliff:g id="NUMBER">%d</xliff:g> mislykkede opplåsinger av telefonen. Telefonen blir nå tilbakestilt til fabrikkinnstillingene."</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"Prøv igjen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"Prøv på nytt om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Har du glemt mønsteret?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Opplåsing av konto"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"For mange forsøk på tegning av mønster"</string>
@@ -1036,9 +1031,9 @@
     <string name="permlab_readHistoryBookmarks" msgid="9102293913842539697">"lese nettbokmerkene og nettloggen din"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"Lar appen lese loggen for alle nettadressene nettleseren har besøkt, og alle bokmerkene i nettleseren. Vær oppmerksom på at denne tillatelsen kanskje ikke benyttes av tredjepartsnettlesere eller andre apper med mulighet for nettsurfing."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"skrive nettbokmerker og nettlogg"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"Lar appen endre nettleserens logg eller bokmerker lagret på nettbrettet ditt. Dette kan føre til at appen sletter eller endrer nettleserdata. Vær oppmerksom på at denne tillatelsen kanskje ikke benyttes av tredjepartsnettlesere eller andre apper med mulighet for nettsurfing."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"Lar appen endre nettleserens logg eller bokmerker som er lagret på Android TV-enheten din. Dette kan føre til at appen sletter eller endrer nettleserdata. Vær oppmerksom på at denne tillatelsen kanskje ikke benyttes av tredjepartsnettlesere eller andre apper med mulighet for nettsurfing."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"Lar appen endre nettleserens logg eller bokmerker lagret på telefonen din. Dette kan føre til at appen sletter eller endrer nettleserdata. Vær oppmerksom på at denne tillatelsen kanskje ikke benyttes av tredjepartsnettlesere eller andre apper med mulighet for nettsurfing."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"Lar appen endre nettleserens logg eller bokmerker lagret på nettbrettet ditt. Dette kan føre til at appen sletter eller endrer nettlesingsdata. Vær oppmerksom på at denne tillatelsen kanskje ikke benyttes av tredjepartsnettlesere eller andre apper med mulighet for nettsurfing."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"Lar appen endre nettleserens logg eller bokmerker som er lagret på Android TV-enheten din. Dette kan føre til at appen sletter eller endrer nettlesingsdata. Vær oppmerksom på at denne tillatelsen kanskje ikke benyttes av tredjepartsnettlesere eller andre apper med mulighet for nettsurfing."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"Lar appen endre nettleserens logg eller bokmerker lagret på telefonen din. Dette kan føre til at appen sletter eller endrer nettlesingsdata. Vær oppmerksom på at denne tillatelsen kanskje ikke benyttes av tredjepartsnettlesere eller andre apper med mulighet for nettsurfing."</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"stille alarm"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"Lar appen stille inn alarmen for en installert alarmklokke-app. Enkelte alarmklokke-apper implementerer kanskje ikke denne funksjonen."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"legge til talepost"</string>
@@ -1887,7 +1882,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS-forespørsel endret til USSD-forespørsel"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Endret til ny SS-forespørsel"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Varsel om nettfisking"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Arbeidsprofil"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Jobbprofil"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Varslet"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Bekreftet"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Vis"</string>
@@ -2053,7 +2048,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ikke forstyrr er endret"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Trykk for å sjekke hva som er blokkert."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Gjennomgå varslingsinnstillingene"</string>
-    <string name="review_notification_settings_text" msgid="5696497037817525074">"I Android 13 må apper du installerer, få tillatelse til å sende varsler. Trykk for å endre denne tillatelsen for eksisterende apper."</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Fra og med Android 13 må apper du installerer, få tillatelse til å sende varsler. Trykk for å endre denne tillatelsen for eksisterende apper."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Påminn meg senere"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Lukk"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
@@ -2274,14 +2269,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> er oversatt."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Meldingen er oversatt fra <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> til <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktivitet i bakgrunnen"</string>
-    <!-- no translation found for notification_title_abusive_bg_apps (994230770856147656) -->
-    <skip />
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"En app bruker batteri"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"En app er fremdeles aktiv"</string>
-    <!-- no translation found for notification_content_abusive_bg_apps (5296898075922695259) -->
-    <skip />
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> kjører i bakgrunnen. Trykk for å administrere batteribruken."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> kan påvirke batterilevetiden. Trykk for å gjennomgå aktive apper."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Sjekk aktive apper"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Det er ikke mulig å få tilgang til telefonkameraet fra <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Det er ikke mulig å få tilgang til kameraet på nettbrettet fra <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Systemspråk"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Systemstandard"</string>
 </resources>
