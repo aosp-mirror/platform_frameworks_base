@@ -64,6 +64,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IUndoMediaTransferCallback;
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.GcUtils;
 import com.android.internal.view.AppearanceRegion;
@@ -359,7 +360,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
                 @Behavior int behavior, InsetsVisibilities requestedVisibilities,
-                String packageName) { }
+                String packageName, LetterboxDetails[] letterboxDetails) { }
 
         /**
          * @see IStatusBar#showTransient(int, int[], boolean).
@@ -1087,7 +1088,8 @@ public class CommandQueue extends IStatusBar.Stub implements
     @Override
     public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName) {
+            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName,
+            LetterboxDetails[] letterboxDetails) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.argi1 = displayId;
@@ -1097,6 +1099,7 @@ public class CommandQueue extends IStatusBar.Stub implements
             args.argi4 = behavior;
             args.arg2 = requestedVisibilities;
             args.arg3 = packageName;
+            args.arg4 = letterboxDetails;
             mHandler.obtainMessage(MSG_SYSTEM_BAR_CHANGED, args).sendToTarget();
         }
     }
@@ -1558,7 +1561,8 @@ public class CommandQueue extends IStatusBar.Stub implements
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).onSystemBarAttributesChanged(args.argi1, args.argi2,
                                 (AppearanceRegion[]) args.arg1, args.argi3 == 1, args.argi4,
-                                (InsetsVisibilities) args.arg2, (String) args.arg3);
+                                (InsetsVisibilities) args.arg2, (String) args.arg3,
+                                (LetterboxDetails[]) args.arg4);
                     }
                     args.recycle();
                     break;

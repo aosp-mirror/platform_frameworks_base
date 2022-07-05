@@ -145,6 +145,7 @@ import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.view.AppearanceRegion;
@@ -2399,7 +2400,7 @@ public class DisplayPolicy {
         mLastStatusBarAppearanceRegions = statusBarAppearanceRegions;
         callStatusBarSafely(statusBar -> statusBar.onSystemBarAttributesChanged(displayId,
                 appearance, statusBarAppearanceRegions, isNavbarColorManagedByIme, behavior,
-                requestedVisibilities, focusedApp));
+                requestedVisibilities, focusedApp, new LetterboxDetails[]{}));
     }
 
     private void callStatusBarSafely(Consumer<StatusBarManagerInternal> consumer) {
