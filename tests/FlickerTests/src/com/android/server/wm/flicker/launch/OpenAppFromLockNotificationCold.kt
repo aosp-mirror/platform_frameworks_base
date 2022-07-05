@@ -143,6 +143,12 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appWindowIsTopWindowAtEnd() =
+        super.appWindowIsTopWindowAtEnd()
+
     companion object {
         /**
          * Creates the test configurations.

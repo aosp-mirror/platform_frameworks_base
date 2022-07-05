@@ -67,6 +67,12 @@ open class OpenAppFromNotificationCold(testSpec: FlickerTestParameter) :
     @Postsubmit
     override fun appLayerBecomesVisible() = appLayerBecomesVisible_coldStart()
 
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appWindowIsTopWindowAtEnd() =
+        super.appWindowIsTopWindowAtEnd()
+
     companion object {
         /**
          * Creates the test configurations.
