@@ -23,14 +23,12 @@ import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
-import android.app.UserSwitchObserver;
 import android.app.WaitResult;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.PackageManager;
@@ -50,6 +48,8 @@ import android.view.WindowManagerGlobal;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.util.FunctionalUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -115,6 +115,7 @@ public class UserLifecycleTests {
     private ArrayList<Integer> mUsersToRemove;
     private boolean mHasManagedUserFeature;
     private BroadcastWaiter mBroadcastWaiter;
+    private UserSwitchWaiter mUserSwitchWaiter;
 
     private final BenchmarkRunner mRunner = new BenchmarkRunner();
     @Rule
@@ -132,7 +133,9 @@ public class UserLifecycleTests {
         mBroadcastWaiter = new BroadcastWaiter(context, TAG, TIMEOUT_IN_SECOND,
                 Intent.ACTION_USER_STARTED,
                 Intent.ACTION_MEDIA_MOUNTED,
-                Intent.ACTION_USER_UNLOCKED);
+                Intent.ACTION_USER_UNLOCKED,
+                Intent.ACTION_USER_STOPPED);
+        mUserSwitchWaiter = new UserSwitchWaiter(TAG, TIMEOUT_IN_SECOND);
         removeAnyPreviousTestUsers();
         if (mAm.getCurrentUser() != UserHandle.USER_SYSTEM) {
             Log.w(TAG, "WARNING: Tests are being run from user " + mAm.getCurrentUser()
@@ -175,8 +178,9 @@ public class UserLifecycleTests {
 
             // Don't use this.startUserInBackgroundAndWaitForUnlock() since only waiting until
             // ACTION_USER_STARTED.
-            mIam.startUserInBackground(userId);
-            waitForBroadcast(Intent.ACTION_USER_STARTED, userId);
+            runThenWaitForBroadcasts(userId, () -> {
+                mIam.startUserInBackground(userId);
+            }, Intent.ACTION_USER_STARTED);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
@@ -197,8 +201,9 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
-            mIam.startUserInBackground(userId);
-            waitForBroadcast(Intent.ACTION_USER_STARTED, userId);
+            runThenWaitForBroadcasts(userId, () -> {
+                mIam.startUserInBackground(userId);
+            }, Intent.ACTION_USER_STARTED);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
@@ -259,8 +264,9 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
-            mAm.switchUser(testUser);
-            waitForBroadcast(Intent.ACTION_USER_UNLOCKED, testUser);
+            runThenWaitForBroadcasts(testUser, () -> {
+                mAm.switchUser(testUser);
+            }, Intent.ACTION_USER_UNLOCKED);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
@@ -296,10 +302,10 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createUserNoFlags();
-            mIam.startUserInBackground(userId);
 
-            waitForBroadcast(Intent.ACTION_USER_STARTED, userId);
-            waitForBroadcast(Intent.ACTION_MEDIA_MOUNTED, userId);
+            runThenWaitForBroadcasts(userId, ()-> {
+                mIam.startUserInBackground(userId);
+            }, Intent.ACTION_USER_STARTED, Intent.ACTION_MEDIA_MOUNTED);
 
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
@@ -320,13 +326,12 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
             final int userId = createUserNoFlags();
-            final CountDownLatch latch = new CountDownLatch(1);
-            registerUserSwitchObserver(null, latch, userId);
-            mRunner.resumeTiming();
-            Log.i(TAG, "Starting timer");
 
-            mAm.switchUser(userId);
-            waitForLatch("Failed to achieve onLockedBootComplete for user " + userId, latch);
+            mUserSwitchWaiter.runThenWaitUntilBootCompleted(userId, () -> {
+                mRunner.resumeTiming();
+                Log.i(TAG, "Starting timer");
+                mAm.switchUser(userId);
+            }, () -> fail("Failed to achieve onLockedBootComplete for user " + userId));
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
@@ -343,34 +348,22 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
             final int userId = createUserWithFlags(UserInfo.FLAG_EPHEMERAL | UserInfo.FLAG_DEMO);
-            switchUser(userId);
-            waitForBroadcast(Intent.ACTION_MEDIA_MOUNTED, userId);
+            runThenWaitForBroadcasts(userId, () -> {
+                switchUser(userId);
+            }, Intent.ACTION_MEDIA_MOUNTED);
 
-            final CountDownLatch latch = new CountDownLatch(1);
-            InstrumentationRegistry.getContext().registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (Intent.ACTION_USER_STOPPED.equals(intent.getAction()) && intent.getIntExtra(
-                            Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL) == userId) {
-                        latch.countDown();
-                    }
-                }
-            }, new IntentFilter(Intent.ACTION_USER_STOPPED));
-            final CountDownLatch switchLatch = new CountDownLatch(1);
-            registerUserSwitchObserver(switchLatch, null, startUser);
-            mRunner.resumeTiming();
-            Log.i(TAG, "Starting timer");
+            mUserSwitchWaiter.runThenWaitUntilSwitchCompleted(startUser, () -> {
+                mRunner.resumeTiming();
+                Log.i(TAG, "Starting timer");
 
-            mAm.switchUser(startUser);
-            waitForLatch("Failed to achieve ACTION_USER_STOPPED for user " + userId, latch);
+                runThenWaitForBroadcasts(userId, () -> {
+                    mAm.switchUser(startUser);
+                }, Intent.ACTION_USER_STOPPED);
 
-            mRunner.pauseTiming();
-            Log.i(TAG, "Stopping timer");
-            try {
-                switchLatch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Thread interrupted unexpectedly while waiting for switch.", e);
-            }
+                mRunner.pauseTiming();
+                Log.i(TAG, "Stopping timer");
+            }, null);
+
             removeUser(userId);
             mRunner.resumeTimingForNextIteration();
         }
@@ -547,8 +540,9 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createManagedProfile();
-            startUserInBackgroundAndWaitForUnlock(userId);
-            waitForBroadcast(Intent.ACTION_MEDIA_MOUNTED, userId);
+            runThenWaitForBroadcasts(userId, () -> {
+                startUserInBackgroundAndWaitForUnlock(userId);
+            }, Intent.ACTION_MEDIA_MOUNTED);
 
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
@@ -667,15 +661,11 @@ public class UserLifecycleTests {
      * If lack of success should fail the test, use {@link #switchUser(int)} instead.
      */
     private boolean switchUserNoCheck(int userId) throws RemoteException {
-        final CountDownLatch latch = new CountDownLatch(1);
-        registerUserSwitchObserver(latch, null, userId);
-        mAm.switchUser(userId);
-        try {
-            return latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Log.e(TAG, "Thread interrupted unexpectedly.", e);
-            return false;
-        }
+        final boolean[] success = {true};
+        mUserSwitchWaiter.runThenWaitUntilSwitchCompleted(userId, () -> {
+            mAm.switchUser(userId);
+        }, () -> success[0] = false);
+        return success[0];
     }
 
     private void stopUser(int userId, boolean force) throws RemoteException {
@@ -704,9 +694,9 @@ public class UserLifecycleTests {
         final int origUser = mAm.getCurrentUser();
         // First, create and switch to testUser, waiting for its ACTION_USER_UNLOCKED
         final int testUser = createUserNoFlags();
-        mAm.switchUser(testUser);
-        waitForBroadcast(Intent.ACTION_USER_UNLOCKED, testUser);
-        waitForBroadcast(Intent.ACTION_MEDIA_MOUNTED, testUser);
+        runThenWaitForBroadcasts(testUser, () -> {
+            mAm.switchUser(testUser);
+        }, Intent.ACTION_USER_UNLOCKED, Intent.ACTION_MEDIA_MOUNTED);
 
         // Second, switch back to origUser, waiting merely for switchUser() to finish
         switchUser(origUser);
@@ -756,26 +746,6 @@ public class UserLifecycleTests {
                 result.result == ActivityManager.START_SUCCESS);
     }
 
-    private void registerUserSwitchObserver(final CountDownLatch switchLatch,
-            final CountDownLatch bootCompleteLatch, final int userId) throws RemoteException {
-        ActivityManager.getService().registerUserSwitchObserver(
-                new UserSwitchObserver() {
-                    @Override
-                    public void onUserSwitchComplete(int newUserId) throws RemoteException {
-                        if (switchLatch != null && userId == newUserId) {
-                            switchLatch.countDown();
-                        }
-                    }
-
-                    @Override
-                    public void onLockedBootComplete(int newUserId) {
-                        if (bootCompleteLatch != null && userId == newUserId) {
-                            bootCompleteLatch.countDown();
-                        }
-                    }
-                }, TAG);
-    }
-
     private class ProgressWaiter extends IProgressListener.Stub {
         private final CountDownLatch mFinishedLatch = new CountDownLatch(1);
 
@@ -803,12 +773,21 @@ public class UserLifecycleTests {
     /**
      * Waits TIMEOUT_IN_SECOND for the broadcast to be received, otherwise declares the given error.
      * It only works for the broadcasts provided in {@link #mBroadcastWaiter}'s instantiation above.
-     * @param action action of the broadcast, i.e. {@link Intent#ACTION_USER_STARTED}
-     * @param userId sendingUserId of the broadcast. See {@link BroadcastReceiver#getSendingUserId}
+     * @param userId userId associated with the broadcast. It is {@link Intent#EXTRA_USER_HANDLE}
+     *               or in case that is null, then it is {@link BroadcastReceiver#getSendingUserId}.
+     * @param runnable function to be run after clearing any possible previously received broadcasts
+     *                 and before waiting for the new broadcasts. This function should typically do
+     *                 something to trigger broadcasts to be sent. Like starting or stopping a user.
+     * @param actions actions of the broadcasts, i.e. {@link Intent#ACTION_USER_STARTED}.
+     *                If multiple actions are provided, they will be waited in given order.
      */
-    private void waitForBroadcast(String action, int userId) {
-        attestTrue("Failed to achieve " + action + " for user " + userId,
-                mBroadcastWaiter.waitActionForUser(action, userId));
+    private void runThenWaitForBroadcasts(int userId, FunctionalUtils.ThrowingRunnable runnable,
+            String... actions) {
+        final String unreceivedAction =
+                mBroadcastWaiter.runThenWaitForBroadcasts(userId, runnable, actions);
+
+        attestTrue("Failed to achieve " + unreceivedAction + " for user " + userId,
+                unreceivedAction == null);
     }
 
     /** Waits TIMEOUT_IN_SECOND for the latch to complete, otherwise declares the given error. */
@@ -874,10 +853,14 @@ public class UserLifecycleTests {
         }
     }
 
+    private void fail(@NonNull String message) {
+        Log.e(TAG, "Test failed on iteration #" + mRunner.getIteration() + ": " + message);
+        mRunner.markAsFailed(new AssertionError(message));
+    }
+
     private void attestTrue(@NonNull String message, boolean assertion) {
         if (!assertion) {
-            Log.e(TAG, "Test failed on iteration #" + mRunner.getIteration() + ": " + message);
-            mRunner.markAsFailed(new AssertionError(message));
+            fail(message);
         }
     }
 
