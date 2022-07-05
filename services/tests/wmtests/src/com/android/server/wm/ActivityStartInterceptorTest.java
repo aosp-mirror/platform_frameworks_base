@@ -192,7 +192,7 @@ public class ActivityStartInterceptorTest {
                 .thenReturn(PLATFORM_PACKAGE_NAME);
 
         // THEN calling intercept returns true
-        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null));
 
         // THEN the returned intent is the admin support intent
         assertEquals(ADMIN_SUPPORT_INTENT, mInterceptor.mIntent);
@@ -203,7 +203,7 @@ public class ActivityStartInterceptorTest {
         final String suspendingPackage = "com.test.suspending.package";
         final SuspendDialogInfo dialogInfo = suspendPackage(suspendingPackage);
         // THEN calling intercept returns true
-        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null));
 
         // Check intent parameters
         assertEquals(dialogInfo,
@@ -234,7 +234,7 @@ public class ActivityStartInterceptorTest {
                 TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_DEFAULT))
                 .thenReturn(false);
 
-        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null));
 
         assertTrue(BlockedAppActivity.createIntent(TEST_USER_ID, TEST_PACKAGE_NAME)
                 .filterEquals(mInterceptor.mIntent));
@@ -246,7 +246,7 @@ public class ActivityStartInterceptorTest {
         when(mUserManager.isQuietModeEnabled(eq(UserHandle.of(TEST_USER_ID)))).thenReturn(true);
 
         // THEN calling intercept returns true
-        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null,  null, 0, 0, null));
 
         // THEN the returned intent is the quiet mode intent
         assertTrue(UnlaunchableAppActivity.createInQuietModeDialogIntent(TEST_USER_ID)
@@ -260,7 +260,7 @@ public class ActivityStartInterceptorTest {
         when(mUserManager.isQuietModeEnabled(eq(UserHandle.of(TEST_USER_ID)))).thenReturn(true);
 
         // THEN calling intercept returns true
-        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null));
 
         // THEN the returned intent is the quiet mode intent
         assertTrue(UnlaunchableAppActivity.createInQuietModeDialogIntent(TEST_USER_ID)
@@ -273,7 +273,7 @@ public class ActivityStartInterceptorTest {
         when(mAmInternal.shouldConfirmCredentials(TEST_USER_ID)).thenReturn(true);
 
         // THEN calling intercept returns true
-        mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null);
+        mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null);
 
         // THEN the returned intent is the quiet mode intent
         assertTrue(CONFIRM_CREDENTIALS_INTENT.filterEquals(mInterceptor.mIntent));
@@ -286,7 +286,7 @@ public class ActivityStartInterceptorTest {
                 .thenReturn("This app is bad");
 
         // THEN calling intercept returns true
-        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null));
 
         // THEN the returned intent is the harmful app warning intent
         assertEquals(HarmfulAppWarningActivity.class.getName(),
@@ -298,7 +298,7 @@ public class ActivityStartInterceptorTest {
         // GIVEN that none of the interception conditions are met
 
         // THEN calling intercept returns false
-        assertFalse(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+        assertFalse(mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null));
     }
 
     public void addMockInterceptorCallback(
@@ -323,7 +323,7 @@ public class ActivityStartInterceptorTest {
                 new Intent("android.test.foo"),
                 ActivityOptions.makeBasic().setLaunchDisplayId(3));
 
-        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null));
         assertEquals("android.test.foo", mInterceptor.mIntent.getAction());
         assertEquals(3, mInterceptor.mActivityOptions.getLaunchDisplayId());
     }
@@ -332,7 +332,7 @@ public class ActivityStartInterceptorTest {
     public void testInterceptionCallback_singleCallbackReturnsNull() {
         addMockInterceptorCallback(null, null);
 
-        assertFalse(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+        assertFalse(mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null));
     }
 
     @Test
@@ -340,7 +340,7 @@ public class ActivityStartInterceptorTest {
         addMockInterceptorCallback(null, null);
         addMockInterceptorCallback(new Intent("android.test.second"), null);
 
-        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null));
         assertEquals("android.test.second", mInterceptor.mIntent.getAction());
     }
 
