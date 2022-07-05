@@ -54,6 +54,7 @@ LANG_TO_SCRIPT = {
     'or': 'Orya',
     'pa': 'Guru',
     'pt': 'Latn',
+    'pl': 'Latn',
     'ru': 'Latn',
     'sk': 'Latn',
     'sl': 'Latn',
