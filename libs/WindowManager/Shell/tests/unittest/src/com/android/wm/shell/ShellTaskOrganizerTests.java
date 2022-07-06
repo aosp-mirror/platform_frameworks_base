@@ -46,6 +46,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
 import android.window.TaskAppearedInfo;
@@ -137,10 +138,22 @@ public class ShellTaskOrganizerTests {
     }
 
     @Test
-    public void registerOrganizer_sendRegisterTaskOrganizer() throws RemoteException {
+    public void testRegisterOrganizer_sendRegisterTaskOrganizer() throws RemoteException {
         mOrganizer.registerOrganizer();
 
         verify(mTaskOrganizerController).registerTaskOrganizer(any(ITaskOrganizer.class));
+    }
+
+    @Test
+    public void testTaskLeashReleasedAfterVanished() throws RemoteException {
+        RunningTaskInfo taskInfo = createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW);
+        SurfaceControl taskLeash = new SurfaceControl.Builder(new SurfaceSession())
+                .setName("task").build();
+        mOrganizer.registerOrganizer();
+        mOrganizer.onTaskAppeared(taskInfo, taskLeash);
+        assertTrue(taskLeash.isValid());
+        mOrganizer.onTaskVanished(taskInfo);
+        assertTrue(!taskLeash.isValid());
     }
 
     @Test
