@@ -350,7 +350,7 @@ public class Binder implements IBinder {
     }
 
     /**
-     * Reset the identity of the incoming IPC on the current thread. This can
+     * Reset the kernel binder identity of the incoming IPC on the current thread. This can
      * be useful if, while handling an incoming call, you will be calling
      * on interfaces of other objects that may be local to your process and
      * need to do permission checks on the calls coming into them (so they
@@ -369,7 +369,7 @@ public class Binder implements IBinder {
     public static final native long clearCallingIdentity();
 
     /**
-     * Restore the identity of the incoming IPC on the current thread
+     * Restore the kernel binder identity of the incoming IPC on the current thread
      * back to a previously identity that was returned by {@link
      * #clearCallingIdentity}.
      *
