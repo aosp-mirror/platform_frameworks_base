@@ -473,9 +473,13 @@ final class InstallPackageHelper {
                 mApexManager.registerApkInApex(pkg);
             }
 
-            // Add the package's KeySets to the global KeySetManagerService
-            KeySetManagerService ksms = mPm.mSettings.getKeySetManagerService();
-            ksms.addScannedPackageLPw(pkg);
+            // Don't add keysets for APEX as their package settings are not persisted and will
+            // result in orphaned keysets.
+            if ((scanFlags & SCAN_AS_APEX) == 0) {
+                // Add the package's KeySets to the global KeySetManagerService
+                KeySetManagerService ksms = mPm.mSettings.getKeySetManagerService();
+                ksms.addScannedPackageLPw(pkg);
+            }
 
             final Computer snapshot = mPm.snapshotComputer();
             mPm.mComponentResolver.addAllComponents(pkg, chatty, mPm.mSetupWizardPackage, snapshot);
