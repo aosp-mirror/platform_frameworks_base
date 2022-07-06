@@ -575,7 +575,7 @@
     <string name="user_setup_dialog_message" msgid="269931619868102841">"مطمئن شوید شخص در دسترس است تا دستگاه را بگیرد و فضایش را تنظیم کند"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"اکنون نمایه را تنظیم می‌کنید؟"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"اکنون تنظیم شود"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"اکنون نه"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"حالا نه"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"افزودن"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"کاربر جدید"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"نمایه جدید"</string>
