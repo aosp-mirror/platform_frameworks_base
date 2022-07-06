@@ -39,6 +39,6 @@ java_test_host {
     ],
     test_suites: [
         "device-tests",
-        "mts-core",
+        "mts-mainline-infra",
     ],
 }
