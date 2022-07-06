@@ -145,4 +145,28 @@ public class ObservableServiceConnectionTest extends SysuiTestCase {
         connection.unbind();
         verify(mContext, never()).unbindService(eq(connection));
     }
+
+    @Test
+    public void testUnbind() {
+        ObservableServiceConnection<Foo> connection = new ObservableServiceConnection<>(mContext,
+                mIntent, mExecutor, mTransformer);
+        connection.addCallback(mCallback);
+        connection.onServiceDisconnected(mComponentName);
+
+        // Disconnects before binds should be ignored.
+        verify(mCallback, never()).onDisconnected(eq(connection), anyInt());
+
+        when(mContext.bindService(eq(mIntent), anyInt(), eq(mExecutor), eq(connection)))
+                .thenReturn(true);
+        connection.bind();
+
+        mExecutor.runAllReady();
+
+        connection.unbind();
+
+        mExecutor.runAllReady();
+
+        verify(mCallback).onDisconnected(eq(connection),
+                eq(ObservableServiceConnection.DISCONNECT_REASON_UNBIND));
+    }
 }

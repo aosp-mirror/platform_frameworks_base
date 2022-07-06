@@ -72,6 +72,11 @@ public class PersistentConnectionManager<T> {
 
         @Override
         public void onDisconnected(ObservableServiceConnection connection, int reason) {
+            // Do not attempt to reconnect if we were manually unbound
+            if (reason == ObservableServiceConnection.DISCONNECT_REASON_UNBIND) {
+                return;
+            }
+
             if (mSystemClock.currentTimeMillis() - mStartTime > mMinConnectionDuration) {
                 initiateConnectionAttempt();
             } else {
