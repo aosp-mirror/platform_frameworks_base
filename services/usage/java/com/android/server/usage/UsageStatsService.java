@@ -2377,10 +2377,9 @@ public class UsageStatsService extends SystemService implements
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CHANGE_APP_IDLE_STATE)
         @Override
         public void setAppStandbyBucket(String packageName, int bucket, int userId) {
-            getContext().enforceCallingPermission(Manifest.permission.CHANGE_APP_IDLE_STATE,
-                    "No permission to change app standby state");
 
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
@@ -2426,10 +2425,9 @@ public class UsageStatsService extends SystemService implements
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CHANGE_APP_IDLE_STATE)
         @Override
         public void setAppStandbyBuckets(ParceledListSlice appBuckets, int userId) {
-            getContext().enforceCallingPermission(Manifest.permission.CHANGE_APP_IDLE_STATE,
-                    "No permission to change app standby state");
 
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
@@ -2477,12 +2475,10 @@ public class UsageStatsService extends SystemService implements
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE)
         @Override
         public void setEstimatedLaunchTime(String packageName, long estimatedLaunchTime,
                 int userId) {
-            getContext().enforceCallingPermission(
-                    Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE,
-                    "No permission to change app launch estimates");
 
             final long token = Binder.clearCallingIdentity();
             try {
@@ -2493,11 +2489,9 @@ public class UsageStatsService extends SystemService implements
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE)
         @Override
         public void setEstimatedLaunchTimes(ParceledListSlice estimatedLaunchTimes, int userId) {
-            getContext().enforceCallingPermission(
-                    Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE,
-                    "No permission to change app launch estimates");
 
             final long token = Binder.clearCallingIdentity();
             try {
