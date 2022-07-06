@@ -22,7 +22,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.service.notification.NotificationListenerService;
-import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -39,9 +38,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -80,7 +76,6 @@ public class NotificationLogger implements StateListener {
     private final Executor mUiBgExecutor;
     private final NotifLiveDataStore mNotifLiveDataStore;
     private final NotificationVisibilityProvider mVisibilityProvider;
-    private final NotificationEntryManager mEntryManager;
     private final NotifPipeline mNotifPipeline;
     private final NotificationPanelLogger mNotificationPanelLogger;
     private final ExpansionStateLogger mExpansionStateLogger;
@@ -220,10 +215,8 @@ public class NotificationLogger implements StateListener {
      */
     public NotificationLogger(NotificationListener notificationListener,
             @UiBackground Executor uiBgExecutor,
-            NotifPipelineFlags notifPipelineFlags,
             NotifLiveDataStore notifLiveDataStore,
             NotificationVisibilityProvider visibilityProvider,
-            NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
             StatusBarStateController statusBarStateController,
             ExpansionStateLogger expansionStateLogger,
@@ -232,7 +225,6 @@ public class NotificationLogger implements StateListener {
         mUiBgExecutor = uiBgExecutor;
         mNotifLiveDataStore = notifLiveDataStore;
         mVisibilityProvider = visibilityProvider;
-        mEntryManager = entryManager;
         mNotifPipeline = notifPipeline;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -241,36 +233,7 @@ public class NotificationLogger implements StateListener {
         // Not expected to be destroyed, don't need to unsubscribe
         statusBarStateController.addCallback(this);
 
-        if (notifPipelineFlags.isNewPipelineEnabled()) {
-            registerNewPipelineListener();
-        } else {
-            registerLegacyListener();
-        }
-    }
-
-    private void registerLegacyListener() {
-        mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
-            @Override
-            public void onEntryRemoved(
-                    NotificationEntry entry,
-                    NotificationVisibility visibility,
-                    boolean removedByUser,
-                    int reason) {
-                mExpansionStateLogger.onEntryRemoved(entry.getKey());
-            }
-
-            @Override
-            public void onPreEntryUpdated(NotificationEntry entry) {
-                mExpansionStateLogger.onEntryUpdated(entry.getKey());
-            }
-
-            @Override
-            public void onInflationError(
-                    StatusBarNotification notification,
-                    Exception exception) {
-                logNotificationError(notification, exception);
-            }
-        });
+        registerNewPipelineListener();
     }
 
     private void registerNewPipelineListener() {
@@ -330,26 +293,6 @@ public class NotificationLogger implements StateListener {
         synchronized (mDozingLock) {
             mDozing = dozing;
             maybeUpdateLoggingStatus();
-        }
-    }
-
-    /**
-     * Logs Notification inflation error
-     */
-    private void logNotificationError(
-            StatusBarNotification notification,
-            Exception exception) {
-        try {
-            mBarService.onNotificationError(
-                    notification.getPackageName(),
-                    notification.getTag(),
-                    notification.getId(),
-                    notification.getUid(),
-                    notification.getInitialPid(),
-                    exception.getMessage(),
-                    notification.getUserId());
-        } catch (RemoteException ex) {
-            // The end is nigh.
         }
     }
 

@@ -103,7 +103,6 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(true);
         when(mNotifLiveDataStore.getActiveNotifList()).thenReturn(mActiveNotifEntries);
 
         mEntry = new NotificationEntryBuilder()
@@ -278,10 +277,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
             super(
                     notificationListener,
                     uiBgExecutor,
-                    notifPipelineFlags,
                     notifLiveDataStore,
                     visibilityProvider,
-                    entryManager,
                     notifPipeline,
                     statusBarStateController,
                     expansionStateLogger,
