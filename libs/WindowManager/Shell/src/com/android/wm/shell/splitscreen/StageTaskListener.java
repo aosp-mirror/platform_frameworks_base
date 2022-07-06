@@ -242,6 +242,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         if (mRootTaskInfo.taskId == taskId) {
             mCallbacks.onRootTaskVanished();
             mRootTaskInfo = null;
+            mRootLeash = null;
             mSyncQueue.runInSync(t -> {
                 t.remove(mDimLayer);
                 mSplitDecorManager.release(t);
