@@ -90,7 +90,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"دستگاه توسط سرپرست سیستم قفل شده است"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"دستگاه به‌صورت دستی قفل شده است"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"شناسایی نشد"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"‏برای استفاده از «قفل‌گشایی با چهره»، "<b>"دسترسی به دوربین"</b>" را در «تنظیمات &gt; حریم‌خصوصی» روشن کنید"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"‏برای استفاده از «قفل‌گشایی با چهره»، "<b>"دسترسی به دوربین"</b>" را در «تنظیمات &gt; حریم خصوصی» روشن کنید"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">پین سیم‌کارت را وارد کنید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش دیگری باقی مانده است.</item>
       <item quantity="other">پین سیم‌کارت را وارد کنید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش دیگری باقی مانده است.</item>
