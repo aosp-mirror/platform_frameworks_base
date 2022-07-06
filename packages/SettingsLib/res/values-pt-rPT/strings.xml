@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Áudio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Áudio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparelhos auditivos"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Ligado a aparelhos auditivos"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Ligado a LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Ligado a LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Ligado ao áudio de multimédia"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Ligado ao áudio do telefone"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Ligado ao servidor de transferência de ficheiros"</string>
@@ -184,7 +184,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Algumas predefinições definidas"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Nenhuma predefinição definida"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Definições de texto para voz"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Saída de síntese de voz"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Saída de conversão de texto em voz"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Taxa de voz"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Velocidade a que o texto é falado"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Tonalidade"</string>
@@ -194,12 +194,12 @@
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Idioma não selecionado"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Define a voz do idioma específico para o texto lido"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Ouvir um exemplo"</string>
-    <string name="tts_play_example_summary" msgid="634044730710636383">"Reproduzir uma breve demonstração de síntese de voz"</string>
+    <string name="tts_play_example_summary" msgid="634044730710636383">"Reproduzir uma breve demonstração de conversão de texto em voz"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instalar dados de voz"</string>
-    <string name="tts_install_data_summary" msgid="3608874324992243851">"Instalar os dados de voz necessários para a síntese de voz"</string>
+    <string name="tts_install_data_summary" msgid="3608874324992243851">"Instalar os dados de voz necessários para a conversão de texto em voz"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Este motor de síntese de discurso pode permitir a recolha de todo o texto que será falado, incluindo dados pessoais, como palavras-passe e números de cartão de crédito. O serviço é fornecido com o motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Permitir a utilização deste motor de síntese de discurso?"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"Este idioma requer uma ligação de rede ativa para uma saída de síntese de voz."</string>
-    <string name="tts_default_sample_string" msgid="6388016028292967973">"Exemplo de síntese de voz."</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"Este idioma requer uma ligação de rede ativa para uma saída de conversão de texto em voz."</string>
+    <string name="tts_default_sample_string" msgid="6388016028292967973">"Exemplo de conversão de texto em voz."</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Estado do idioma predefinido"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> é totalmente suportado"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> necessita de ligação de rede"</string>
@@ -569,7 +569,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Utilizador"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restrito"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Adicionar novo utilizador?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Pode partilhar este dispositivo com outras pessoas ao criar utilizadores adicionais. Cada utilizador possui o seu próprio espaço, que pode ser personalizado com aplicações, imagens de fundo, etc. Os utilizadores também podem ajustar as definições do dispositivo, como o Wi‑Fi, que afetam os restantes utilizadores.\n\nAo adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores. Os serviços e as definições de acessibilidade podem não ser transferidos para o novo utilizador."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Pode partilhar este dispositivo com outras pessoas ao criar utilizadores adicionais. Cada utilizador possui o seu próprio espaço, que pode ser personalizado com apps, imagens de fundo, etc. Os utilizadores também podem ajustar as definições do dispositivo, como o Wi‑Fi, que afetam os restantes utilizadores.\n\nAo adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores. Os serviços e as definições de acessibilidade podem não ser transferidos para o novo utilizador."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurar o utilizador agora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Certifique-se de que a pessoa está disponível para levar o dispositivo e configurar o seu espaço"</string>
@@ -652,11 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ative o ecrã"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir a ativação do ecrã"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permita que uma app ative o ecrã. Se a autorização for concedida, a app pode ativar o ecrã em qualquer altura sem a sua intenção explícita."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Leia o código QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Para começar a ouvir, centre o código QR abaixo"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"O código QR não é um formato válido"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Interromper a transmissão da app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se transmitir a app <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou alterar a saída, a sua transmissão atual é interrompida"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmita a app <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Altere a saída"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animações de gestos para voltar preditivos"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ative as animações do sistema para gestos para voltar preditivos."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Esta definição ativa animações do sistema para a animação de gestos preditivos. Requer a definição do atributo enableOnBackInvokedCallback por app como verdadeiro no ficheiro de manifesto."</string>
 </resources>

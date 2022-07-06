@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"এইচ্ছডি অডি\'অ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"এইচ্ছডি অডিঅ’"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"শ্ৰৱণ যন্ত্ৰ"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE অডিঅ’"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"শ্ৰৱণ যন্ত্ৰলৈ সংযোগ কৰা হৈছে"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIOৰ সৈতে সংযোগ কৰক"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE অডিঅ’ৰ সৈতে সংযোগ কৰক"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"মিডিয়া অডিঅ’লৈ সংযোগ হৈছে"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ফ’ন অডিঅ\'ৰ লগত সংযোগ কৰা হ’ল"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ফাইল ট্ৰান্সফাৰ ছাৰ্ভাৰৰ সৈতে সংযোজিত হৈ আছে"</string>
@@ -400,9 +400,9 @@
     <string name="app_process_limit_title" msgid="8361367869453043007">"নেপথ্যত চলা প্ৰক্ৰিয়াৰ সীমা"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"নেপথ্য এএনআৰবোৰ দেখুৱাওক"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"নেপথ্য এপসমূহৰ বাবে এপে সঁহাৰি দিয়া নাই ডায়ল\'গ প্ৰদৰ্শন কৰক"</string>
-    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"জাননী চ্চেনেলৰ সকীয়নিসমূহ দেখুৱাওক"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"জাননী চেনেলৰ সকীয়নিবোৰ দেখুৱাওক"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"কোনো এপে বৈধ চেনেল নোহোৱাকৈ কোনো জাননী প\'ষ্ট কৰিলে স্ক্ৰীনত সকীয়নি প্ৰদৰ্শন হয়"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"বাহ্যিক সঞ্চয়াগাৰত এপক বলেৰে অনুমতি দিয়ক"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"বাহ্যিক ষ্ট\'ৰেজত এপক বলেৰে অনুমতি দিয়ক"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"মেনিফেষ্টৰ মান যিয়েই নহওক, বাহ্যিক ষ্ট’ৰেজত লিখিবলৈ যিকোনো এপক উপযুক্ত কৰি তোলে"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"বলেৰে কাৰ্যকলাপসমূহৰ আকাৰ সলনি কৰিব পৰা কৰক"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"মেনিফেষ্টৰ মান যিয়েই নহওক, মাল্টি-ৱিণ্ডৰ বাবে আটাইবোৰ কাৰ্যকলাপৰ আকাৰ সলনি কৰিব পৰা কৰক।"</string>
@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"সীমিত প্ৰ\'ফাইল"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"নতুন ব্যৱহাৰকাৰী যোগ কৰিবনে?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"আপুনি অতিৰিক্ত ব্যৱহাৰকাৰীক যোগ কৰি এই ডিভাইচটো অন্য় ব্য়ক্তিৰ সৈতে শ্বেয়াৰ কৰিব পাৰে। প্ৰতিজন ব্যৱহাৰকাৰীৰ বাবে নিজাকৈ ঠাই আছে যাক তেওঁলোকে এপ্, ৱালপেপাৰ আৰু অন্য়ান্য় বস্তুৰ বাবে নিজৰ উপযোগিতা অনুযায়ী ব্যৱহাৰ কৰিব পাৰে। ব্যৱহাৰকাৰীসকলে সকলোকে প্ৰভাৱান্বিত কৰা ৱাই-ফাইৰ নিচিনা ডিভাইচৰ ছেটিং সাল-সলনি কৰিবও পাৰে।\n\nআপুনি যেতিয়া কোনো নতুন ব্যৱহাৰকাৰীক যোগ কৰে সেই ব্য়ক্তিজনে নিজেই নিজৰ বাবে ঠাই ছেট আপ কৰিব লাগিব।\n\nসকলো ব্যৱহাৰকাৰীয়ে অন্য় ব্যৱহাৰকাৰীৰ বাবে এপ্‌সমূহ আপডে’ট কৰিব পাৰে। সাধ্য় সুবিধাসমূহৰ ছেটিং আৰু সেৱাসমূহ নতুন ব্যৱহাৰকাৰীলৈ স্থানান্তৰ নহ\'বও পাৰে।"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"আপুনি যেতিয়া এজন নতুন ব্যৱহাৰকাৰী যোগ কৰে, তেওঁ নিজৰ ঠাই ছেট আপ কৰা প্ৰয়োজন।\n\nযিকোনো ব্যৱহাৰকাৰীয়ে সকলো ব্যৱহাৰকাৰীৰ বাবে এপ্ আপডে\'ট কৰিব পাৰে।"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"আপুনি যেতিয়া এজন নতুন ব্যৱহাৰকাৰী যোগ কৰে, তেওঁ নিজৰ ঠাই ছেট আপ কৰাৰ প্ৰয়োজন।\n\nযিকোনো ব্যৱহাৰকাৰীয়ে অন্য সকলো ব্যৱহাৰকাৰীৰ বাবে এপ্ আপডে\'ট কৰিব পাৰে।"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ব্যৱহাৰকাৰী এতিয়া ছেট আপ কৰিবনে?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ডিভাইচটো লৈ নিজৰ ঠাই ছেটআপ কৰিবলৈ নতুন ব্যৱহাৰকাৰী উপলব্ধ থকাটো নিশ্চিত কৰক"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"এতিয়া প্ৰ\'ফাইল ছেট আপ কৰিবনে?"</string>
@@ -590,7 +590,7 @@
     <string name="add_guest_failed" msgid="8074548434469843443">"নতুন অতিথি সৃষ্টি কৰিব পৰা নগ’ল"</string>
     <string name="user_nickname" msgid="262624187455825083">"উপনাম"</string>
     <string name="user_add_user" msgid="7876449291500212468">"ব্যৱহাৰকাৰী যোগ দিয়ক"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"অতিথি যোগ কৰক"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"অতিথি যোগ দিয়ক"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"অতিথি আঁতৰাওক"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"অতিথিৰ ছেশ্বন ৰিছেট কৰক"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"অতিথিৰ ছেশ্বন ৰিছেট কৰিবনে?"</string>
@@ -652,11 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"স্ক্ৰীন অন কৰক"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"স্ক্ৰীনখন অন কৰিবলৈ অনুমতি দিয়ক"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"এপ্‌টোক স্ক্ৰীনখন অন কৰিবলৈ অনুমতি দিয়ক। যদি অনুমতি দিয়া হয়, এপ্‌টোৱে আপোনাৰ স্পষ্ট উদ্দেশ্য অবিহনেও যিকোনো সময়তে স্ক্ৰীনখন অন কৰিব পাৰে।"</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"কিউআৰ ক’ডটো স্কেন কৰক"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"শুনিবলৈ আৰম্ভ কৰিবলৈ, তলৰ মাজৰ অংশত কিউআৰ ক’ডটো ৰাখক"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"কিউআৰ ক’ডটো মান্য ফৰ্মেটৰ নহয়"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ সম্প্ৰচাৰ কৰা বন্ধ কৰিবনে?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"যদি আপুনি <xliff:g id="SWITCHAPP">%1$s</xliff:g>ৰ সম্প্ৰচাৰ কৰে অথবা আউটপুট সলনি কৰে, তেন্তে, আপোনাৰ বৰ্তমানৰ সম্প্ৰচাৰ বন্ধ হৈ যাব"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> সম্প্ৰচাৰ কৰক"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"আউটপুট সলনি কৰক"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"প্ৰেডিক্টিভ বেক এনিমেশ্বন"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"প্ৰেডিক্টিভ বেকৰ বাবে ছিষ্টেম এনিমেশ্বন সক্ষম কৰক।"</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"এই ছেটিংটোৱে প্ৰেডিক্টিভ বেক এনিমেশ্বনৰ বাবে ছিষ্টেম এনিমেশ্বন সক্ষম কৰে। ইয়াৰ বাবে মেনিফেষ্ট ফাইলত প্ৰতি এপত enableOnBackInvokedCallback সত্য বুলি ছেট কৰাৰ প্ৰয়োজন।"</string>
 </resources>

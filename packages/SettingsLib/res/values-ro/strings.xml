@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"În curs de deconectare..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Se conectează..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"V-ați conectat la <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Se conectează…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Se asociază…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Conectat (fără telefon) la <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Conectat (fără conținut media) la <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Conectat (fără acces la mesaje) la <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparate auditive"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Conectat la aparatul auditiv"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Conectat la LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Conectat la LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Conectat la profilul pentru conținut media audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Conectat la componenta audio a telefonului"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Conectat la serverul de transfer de fișiere"</string>
@@ -184,7 +184,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Unele valori prestabilite sunt configurate"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Nu este configurată nicio valoare prestabilită"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Setări redare vocală a textului"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Transformarea textului în vorbire"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Rezultatul redării vocale a textului"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Ritmul vorbirii"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Viteza cu care este vorbit textul"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Înălțime"</string>
@@ -652,11 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Activați ecranul"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permiteți activarea ecranului"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permiteți unei aplicații să activeze ecranul. Dacă acordați permisiunea, aplicația poate să activeze oricând ecranul, fără intenția dvs. explicită."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Scanați codul QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Pentru a începe să ascultați, centrați codul QR de mai jos"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Codul QR nu are un format valid"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Opriți difuzarea <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Dacă difuzați <xliff:g id="SWITCHAPP">%1$s</xliff:g> sau schimbați rezultatul, difuzarea actuală se va opri"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Difuzați <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Schimbați rezultatul"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animații pentru gestul înapoi predictiv"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Activați animațiile de sistem pentru gestul înapoi predictiv."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Această setare activează animațiile de sistem pentru animația gesturilor predictive. Necesită setarea valorii true în cazul atributului enableOnBackInvokedCallback pentru fiecare aplicație în fișierul manifest."</string>
 </resources>

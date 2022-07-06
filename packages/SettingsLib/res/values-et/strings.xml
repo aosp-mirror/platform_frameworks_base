@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-heli: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-heli"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Kuuldeaparaadid"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Kuuldeaparaatidega ühendatud"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Ühendatud üksusega LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Ühendatud üksusega LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Ühendatud meediumiheliga"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Ühendatud telefoniheliga"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Ühendatud failiedastuse serveriga"</string>
@@ -589,7 +589,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Uue kasutaja loomine ebaõnnestus"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Uue külalise loomine ei õnnestunud"</string>
     <string name="user_nickname" msgid="262624187455825083">"Hüüdnimi"</string>
-    <string name="user_add_user" msgid="7876449291500212468">"Kasutaja lisamine"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Lisa kasutaja"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Lisa külaline"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Eemalda külaline"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Lähtesta külastajaseanss"</string>
@@ -652,11 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ekraani sisselülitamine"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Luba ekraani sisselülitamine"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Rakendusel lubatakse ekraan sisse lülitada. Kui annate loa, võib rakendus ekraani igal ajal sisse lülitada ilma teie sõnaselge kavatsuseta."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR-koodi skannimine"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Kuulamise alustamiseks paigutage QR-kood allpool keskele"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-kood ei ole sobilik vorming"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Kas peatada rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> ülekandmine?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Kui kannate rakendust <xliff:g id="SWITCHAPP">%1$s</xliff:g> üle või muudate väljundit, peatatakse teie praegune ülekanne"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Rakenduse <xliff:g id="SWITCHAPP">%1$s</xliff:g> ülekandmine"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Väljundi muutmine"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Tagasiliigutuse prognoosi animatsioon"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Lubage süsteemi animatsioonid, et näha prognoositud tagasiliigutusi."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"See seade võimaldab süsteemi animatsioonidel prognoosida tagasiliigutusi. See nõuab manifestifailis rakendusepõhise atribuudi enableOnBackInvokedCallback määramist tõeseks."</string>
 </resources>

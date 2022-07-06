@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"ສຽງ HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"ສຽງ HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ອຸປະກອນຊ່ວຍຟັງ"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"ສຽງ LE"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"ເຊື່ອມຕໍ່ຫາອຸປະກອນຊ່ວຍຟັງແລ້ວ"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"ເຊື່ອມຕໍ່ຫາ LE_AUDIO ແລ້ວ"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"ເຊື່ອມຕໍ່ຫາສຽງ LE ແລ້ວ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"ເຊື່ອມຕໍ່ກັບສື່ດ້ານສຽງແລ້ວ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ເຊື່ອມຕໍ່ກັບສຽງໂທລະສັບແລ້ວ"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ເຊື່ອມຕໍ່ກັບເຊີບເວີໂອນຍ້າຍໄຟລ໌ແລ້ວ"</string>
@@ -175,7 +175,7 @@
     <string name="data_usage_ota" msgid="7984667793701597001">"ການອັບເດດລະບົບ"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"ການປ່ອຍສັນຍານຜ່ານ USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"ຮັອດສະປອດເຄື່ອນທີ່"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ປ່ອຍສັນຍານຜ່ານ Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ການປ່ອຍສັນຍານດ້ວຍ Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"ການປ່ອຍສັນຍານ"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"ການປ່ອຍສັນຍານ &amp; ຮັອດສະປອດເຄື່ອນທີ່"</string>
     <string name="managed_user_title" msgid="449081789742645723">"ແອັບເຮັດວຽກທັງໝົດ"</string>
@@ -225,7 +225,7 @@
     <string name="choose_profile" msgid="343803890897657450">"ເລືອກໂປຣໄຟລ໌"</string>
     <string name="category_personal" msgid="6236798763159385225">"​ສ່ວນ​ໂຕ"</string>
     <string name="category_work" msgid="4014193632325996115">"​ບ່ອນ​ເຮັດ​ວຽກ"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"ໂຕເລືອກນັກພັດທະນາ"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"ຕົວເລືອກນັກພັດທະນາ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ເປີດໃຊ້ຕົວເລືອກນັກພັດທະນາ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ຕັ້ງຄ່າໂຕເລືອກສຳລັບການພັດທະນາແອັບຯ"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ໂຕເລືອກສຳລັບນັກພັດທະນາບໍ່ສາມາດໃຊ້ໄດ້ກັບຜູ່ໃຊ້ນີ້"</string>
@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"ໂປຣໄຟລ໌ທີ່ຖືກຈຳກັດ"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"ເພີ່ມຜູ້ໃຊ້ໃໝ່ບໍ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ທ່ານສາມາດໃຊ້ອຸປະກອນນີ້ຮ່ວມກັບຄົນອື່ນໄດ້ໂດຍການສ້າງຜູ້ໃຊ້ເພີ່ມເຕີມ. ຜູ້ໃຊ້ແຕ່ລະຄົນຈະມີພື້ນທີ່ຂອງຕົວເອງ, ເຊິ່ງເຂົາເຈົ້າສາມາດປັບແຕ່ງແອັບ, ຮູບພື້ນຫຼັງ ແລະ ອື່ນໆໄດ້. ຜູ້ໃຊ້ຕ່າງໆ ສາມາດປັບແຕ່ງການຕັ້ງຄ່າອຸປະກອນໄດ້ ເຊັ່ນ: Wi‑Fi ທີ່ມີຜົນກະທົບທຸກຄົນ.\n\nເມື່ອທ່ານເພີ່ມຜູ້ໃຊ້ໃໝ່, ບຸກຄົນນັ້ນຈະຕ້ອງຕັ້ງຄ່າພື້ນທີ່ຂອງເຂົາເຈົ້າກ່ອນ.\n\nຜູ້ໃຊ້ໃດກໍຕາມສາມາດອັບເດດແອັບສຳລັບຜູ້ໃຊ້ຄົນອື່ນທັງໝົດໄດ້. ການຕັ້ງຄ່າການຊ່ວຍເຂົ້າເຖິງອາດບໍ່ຖືກໂອນຍ້າຍໄປໃຫ້ຜູ້ໃຊ້ໃໝ່."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ້​ໃຊ້​ໃໝ່, ຜູ້​ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ້​ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບຯສຳ​ລັບ​ຜູ້​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ້​ໃຊ້​ໃໝ່, ຜູ້​ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ້​ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບສຳ​ລັບ​ຜູ້​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ຕັ້ງຄ່າຜູ້ໃຊ້ຕອນນີ້ບໍ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ກວດ​ສອບ​ໃຫ້​ແນ່​ໃຈ​ວ່າ​ບຸກ​ຄົນ​ດັ່ງ​ກ່າວ​ສາ​ມາດ​ຮັບ​ອຸ​ປະ​ກອນ​ ແລະ ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ຂອງ​ພວກ​ເຂົາ​ໄດ້"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ຕັ້ງຄ່າໂປຣໄຟລ໌ດຽວນີ້?"</string>
@@ -652,11 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ເປີດໜ້າຈໍ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ອະນຸຍາດໃຫ້ເປີດໜ້າຈໍ"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ອະນຸຍາດໃຫ້ແອັບເປີດໜ້າຈໍໄດ້. ຫາກອະນຸມັດ, ແອັບຈະສາມາດເປີດໜ້າຈໍຕອນໃດກໍໄດ້ໂດຍທີ່ທ່ານບໍ່ຕ້ອງມີເຈດຕະນາຢ່າງຈະແຈ້ງ."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"ສະແກນລະຫັດ QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ເພື່ອເລີ່ມການຟັງ, ໃຫ້ວາງລະຫັດ QR ທາງລຸ່ມນີ້ໄວ້ທາງກາງ"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"ຮູບແບບລະຫັດ QR ບໍ່ຖືກຕ້ອງ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"ຢຸດການອອກອາກາດ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ຫາກທ່ານອອກອາກາດ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ຫຼື ປ່ຽນເອົ້າພຸດ, ການອອກອາກາດປັດຈຸບັນຂອງທ່ານຈະຢຸດ"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"ອອກອາກາດ <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ປ່ຽນເອົ້າພຸດ"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"ອະນິເມຊັນກັບຫຼັງແບບຄາດເດົາ"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"ເປີດການນຳໃຊ້ອະນິເມຊັນລະບົບສຳລັບການກັບຫຼັງແບບຄາດເດົາ."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ການຕັ້ງຄ່ານີ້ຈະເປີດການນຳໃຊ້ອະນິເມຊັນລະບົບສຳລັບອະນິເມຊັນທ່າທາງແບບຄາດເດົາ. ມັນຕ້ອງໃຊ້ການຕັ້ງຄ່າຕໍ່ແອັບ enableOnBackInvokedCallback ເປັນ true ໃນໄຟລ໌ manifest."</string>
 </resources>

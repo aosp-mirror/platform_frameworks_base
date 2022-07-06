@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Desconectando…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Estableciendo conexión…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Conectado<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Vinculando…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Emparejando…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Conectado a <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (sin audio de teléfono)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Conectado (sin audio multimedia) a <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Conectado a <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (sin acceso a mensajes)"</string>
@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Audífonos"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"Le Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Conectado a audífonos"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Conectado a LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Conectado a LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Conectado al audio del medio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Conectado al audio del teléfono"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Conectado con el servidor de transferencia de archivos"</string>
@@ -507,7 +507,7 @@
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Lo más grande posible"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Personalizado (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Menú"</string>
-    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Escribe una contraseña para restablecer estado de fábrica en modo demostración"</string>
+    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Escribe una contraseña para restablecer estado de fábrica en modo Demo"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Siguiente"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Contraseña obligatoria"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Métodos de introducción de texto activos"</string>
@@ -529,7 +529,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmas y recordatorios"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permitir la programación de alarmas y recordatorios"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmas y recordatorios"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permite que esta aplicación programe alarmas y otras acciones que se llevan a cabo a una hora determinada. Esto hace que la aplicación siga activa en segundo plano, lo que puede usar más batería.\n\nSi este permiso está desactivado, no funcionarán las alarmas ni los eventos que se activan a una hora determinada que programe esta aplicación."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permite que esta aplicación programe alarmas y otras acciones que se llevan a cabo a una hora determinada. Esto hace que la aplicación pueda seguir activa en segundo plano, lo que puede usar más batería.\n\nSi este permiso está desactivado, no funcionarán las alarmas ni los eventos que se activan a una hora determinada que programe esta aplicación."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programar, alarma, recordatorio, reloj"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activar"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activar el modo No molestar"</string>
@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restringido"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"¿Añadir nuevo usuario?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Puedes compartir este dispositivo si creas más usuarios. Cada uno tendrá su propio espacio y podrá personalizarlo con aplicaciones, un fondo de pantalla y mucho más. Los usuarios también pueden ajustar opciones del dispositivo, como la conexión Wi‑Fi, que afectan a todos los usuarios.\n\nCuando añadas un usuario, tendrá que configurar su espacio.\n\nCualquier usuario puede actualizar aplicaciones de todos los usuarios. Es posible que no se transfieran los servicios y opciones de accesibilidad al nuevo usuario."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Al añadir un usuario nuevo, este debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Al añadir un nuevo usuario, dicha persona debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"¿Configurar usuario ahora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Asegúrate de que la persona está disponible en este momento para usar el dispositivo y configurar su espacio."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"¿Quieres configurar un perfil ahora?"</string>
@@ -652,11 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Encender pantalla"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir encender la pantalla"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permite que una aplicación encienda la pantalla. Si das este permiso, la aplicación puede encender la pantalla en cualquier momento sin que se lo pidas."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Escanear código QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Para empezar a escuchar, centra el código QR aquí abajo"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"El formato del código QR no es válido"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"¿Dejar de emitir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si emites <xliff:g id="SWITCHAPP">%1$s</xliff:g> o cambias la salida, tu emisión actual se detendrá"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitir <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Cambiar salida"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animaciones para acciones de retorno predictivas"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Habilitar animaciones del sistema para acciones de retorno predictivas."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Este ajuste habilita animaciones del sistema para acciones gestuales predictivas. Exige definir el valor de enableOnBackInvokedCallback en \"verdadero\" para cada aplicación en el archivo de manifiesto."</string>
 </resources>

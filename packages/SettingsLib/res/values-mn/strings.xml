@@ -100,13 +100,13 @@
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Холбогдсон (медиа байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Холбогдсон (мессежийн хандалт байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Холбогдсон (утас эсвэл медиа байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Холбогдсон, батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Холбогдсон (утас байхгүй), батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Холбогдсон (медиа байхгүй), батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Холбогдсон (утас эсвэл медиа байхгүй), батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Идэвхтэй, батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Холбогдсон, батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Холбогдсон (утас байхгүй), батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Холбогдсон (медиа байхгүй), батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Холбогдсон (утас эсвэл медиа байхгүй), батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Идэвхтэй, батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Идэвхтэй, Зүүн: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Баруун: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level" msgid="2893696778200201555">"Батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level" msgid="2893696778200201555">"Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Зүүн: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Баруун: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Идэвхтэй"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Идэвхтэй, зөвхөн зүүн тал"</string>
@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD аудио: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD аудио"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Сонсголын төхөөрөмж"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_АУДИО"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE аудио"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Сонсголын төхөөрөмжтэй холбосон"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_АУДИОНД холбогдлоо"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE аудионд холбогдсон"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Медиа аудиод холбогдсон"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Утасны аудид холбогдсон"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Файл дамжуулах серверт холбогдсон"</string>
@@ -569,7 +569,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Хэрэглэгч"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Хязгаарлагдсан профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Шинэ хэрэглэгч нэмэх үү?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Та нэмэлт хэрэглэгч үүсгэх замаар бусад хүмүүстэй энэ төхөөрөмжийг хуваалцаж болно. Хэрэглэгч тус бүр апп, дэлгэцийн зураг болон бусад зүйлээ өөрчлөх боломжтой хувийн орон зайтай байдаг. Түүнчлэн хэрэглэгч нь бүх хэрэглэгчид нөлөөлөх боломжтой Wi-Fi зэрэг төхөөрөмжийн тохиргоог өөрчлөх боломжтой.\n\nХэрэв та шинэ хэрэглэгч нэмэх бол тухайн хүн хувийн орон зайгаа бүрдүүлэх ёстой.\n\nХэрэглэгч бүр бусад бүх хэрэглэгчийн өмнөөс апп шинэчилж болно. Хүртээмжийн тохиргоо болон үйлчилгээг шинэ хэрэглэгчид шилжүүлэх боломжгүй байж болзошгүй."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Та нэмэлт хэрэглэгч үүсгэх замаар бусад хүмүүстэй энэ төхөөрөмжийг хуваалцаж болно. Хэрэглэгч тус бүр апп, дэлгэцийн зураг болон бусад зүйлээ өөрчлөх боломжтой хувийн орон зайтай байна. Түүнчлэн хэрэглэгч нь бүх хэрэглэгчид нөлөөлөх боломжтой Wi-Fi зэрэг төхөөрөмжийн тохиргоог өөрчлөх боломжтой.\n\nХэрэв та шинэ хэрэглэгч нэмэх бол тухайн хүн хувийн орон зайгаа бүрдүүлэх ёстой.\n\nХэрэглэгч бүр бусад бүх хэрэглэгчийн өмнөөс апп шинэчилж болно. Хандалтын тохиргоо болон үйлчилгээг шинэ хэрэглэгчид шилжүүлэх боломжгүй байж болзошгүй."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Хэрэглэгчийг одоо тохируулах уу?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Хэрэглэгч төхөөрөмжийг авч өөрийн профайлыг тохируулах боломжтой эсэхийг шалгана уу"</string>
@@ -652,11 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Дэлгэцийг асаах"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дэлгэцийг асаахыг зөвшөөрнө үү"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Аппад дэлгэцийг асаахыг зөвшөөрнө үү. Зөвшөөрсөн тохиолдолд тухайн апп таны тодорхой оролцоогүйгээр ямар ч үед дэлгэцийг асааж болно."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR код скан хийх"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Сонсож эхлэхийн тулд доорх QR кодыг голлуулаарай"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR код буруу форматтай байна"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g>-г нэвтрүүлэхээ зогсоох уу?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Хэрэв та <xliff:g id="SWITCHAPP">%1$s</xliff:g>-г нэвтрүүлсэн эсвэл гаралтыг өөрчилсөн бол таны одоогийн нэвтрүүлэлтийг зогсооно"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g>-г нэвтрүүлэх"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Гаралтыг өөрчлөх"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Таамаглах боломжтой буцаах анимаци"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Таамаглах боломжтой буцаах зангаанд системийн анимацийг идэвхжүүлнэ үү."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Энэ тохиргоо нь таамаглах боломжтой зангааны анимацид системийн анимацийг идэвхжүүлнэ. Үүнд апп бүрд тодорхойлогч файлл enableOnBackInvokedCallback-г үнэн болгож тохируулахыг шаардана."</string>
 </resources>

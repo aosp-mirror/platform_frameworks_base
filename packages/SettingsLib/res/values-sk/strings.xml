@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Prebieha odpájanie..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Prebieha pripájanie…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Pripojené k zariadeniu <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Párovanie..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Páruje sa..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Pripojené k zariadeniu <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (bez telefónu)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Pripojené k zariadeniu <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (bez médií)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Pripojené k <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (bez prístupu k správam)"</string>
@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD zvuk: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD zvuk"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Načúvadlá"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Pripojené k načúvadlám"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Pripojené k profilu LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Pripojené k systému LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Pripojené ku zvukovému médiu"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Pripojené ku zvuku telefónu"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Pripojené na server pre prenos údajov"</string>
@@ -280,7 +280,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikácia bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Podrobné denníky Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pribrzdiť vyhľadávanie sietí Wi‑Fi"</string>
-    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Randomizácia dočasnej adresy MAC siete Wi‑Fi"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Randomizovať dočasnú adresu MAC siete Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobilné dáta ponechať vždy aktívne"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardvérová akcelerácia tetheringu"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Zobrazovať zariadenia Bluetooth bez názvov"</string>
@@ -381,7 +381,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Zobraziť vo výstrižku ohraničenie, okraje a pod."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Rozloženie sprava doľava"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Vynútiť pre všetky jazyky rozloženie obrazovky sprava doľava"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Povolenie rozmazania na úrovni okna"</string>
+    <string name="window_blurs" msgid="6831008984828425106">"Povoliť rozmazanie na úrovni okna"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Vynútiť 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Povoliť 4x MSAA v aplikáciách OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Ladiť operácie s neobdĺžnikovými výstrižkami"</string>
@@ -403,9 +403,9 @@
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Zobraziť hlásenia kanála upozornení"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Zobrazovať na obrazovke varovné hlásenie, keď aplikácia zverejní upozornenie bez platného kanála"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Vynútiť povolenie aplikácií na externom úložisku"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Umožňuje zapísať akúkoľvek aplikáciu do externého úložiska bez ohľadu na hodnoty v manifeste"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Umožniť zapísať akúkoľvek aplikáciu do externého úložiska bez ohľadu na hodnoty v manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Vynútiť možnosť zmeny veľkosti aktivít"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Veľkosti všetkých aktivít bude možné zmeniť na niekoľko okien (bez ohľadu na hodnoty manifestu)."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Umožniť zmeniť veľkosť všetkých aktivít na niekoľko okien (bez ohľadu na hodnoty manifestu)"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Povoliť okná s voľným tvarom"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Povoliť podporu pre experimentálne okná s voľným tvarom"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Heslo pre zálohy v počítači"</string>
@@ -451,7 +451,7 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Úprava farieb môže byť užitočná, keď chcete:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;zobrazovať farby presnejšie;&lt;/li&gt; &lt;li&gt;&amp;nbsp;odstrániť farby, aby ste sa mohli sústrediť.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Prekonané predvoľbou <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="8264199158671531431">"Zostáva približne <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="8264199158671531431">"Ešte približne <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Zostáva približne <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Zostáva približne <xliff:g id="TIME_REMAINING">%1$s</xliff:g> – závisí to od intenzity využitia"</string>
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"Zostáva približne <xliff:g id="TIME_REMAINING">%1$s</xliff:g> – závisí to od intenzity využitia (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -652,11 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Zapínanie obrazovky"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Povolenie zapínania obrazovky"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Povoľte aplikácii zapínať obrazovku. Ak to urobíte, aplikácia bude môcť kedykoľvek zapínať obrazovku, a to aj vtedy, keď to nebudete mať v úmysle."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Naskenovanie QR kódu"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Ak chcete začať počúvať, umiestnite QR kód do stredu nižšie"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR kód nie je platný formát"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Chcete zastaviť vysielanie aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ak vysielate aplikáciu <xliff:g id="SWITCHAPP">%1$s</xliff:g> alebo zmeníte výstup, aktuálne vysielanie bude zastavené"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Vysielanie aplikácie <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Zmena výstupu"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Prediktívne animácie gesta Späť"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Povoľte animácie v systéme pre prediktívne gesto Späť"</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Toto nastavenie povoľuje animácie v systéme na účely prediktívnej animácie gest. Vyžaduje nastavenie povolenia enableOnBackInvokedCallback na pravdu v súbore manifestu konkrétnej aplikácie."</string>
 </resources>
