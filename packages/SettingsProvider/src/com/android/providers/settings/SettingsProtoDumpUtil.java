@@ -2358,6 +2358,12 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.PowerMenuPrivacy.SHOW);
         p.end(powerMenuPrivacyToken);
 
+        final long extraLowPowerModeToken = p.start(SecureSettingsProto.EXTRA_LOW_POWER_MODE);
+        dumpSetting(s, p,
+                Settings.Secure.EXTRA_AUTOMATIC_POWER_SAVE_MODE,
+                SecureSettingsProto.ExtraLowPowerMode.EXTRA_AUTOMATIC_POWER_SAVE_MODE);
+        p.end(extraLowPowerModeToken);
+
         final long printServiceToken = p.start(SecureSettingsProto.PRINT_SERVICE);
         dumpSetting(s, p,
                 Settings.Secure.PRINT_SERVICE_SEARCH_URI,
