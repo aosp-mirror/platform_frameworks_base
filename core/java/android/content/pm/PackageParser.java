@@ -2580,8 +2580,7 @@ public class PackageParser {
                 final Permission perm = checkDuplicatePerm.get(name);
                 if (isMalformedDuplicate(permissionDefinition, perm)) {
                     // Fix for b/213323615
-                    EventLog.writeEvent(0x534e4554, "213323615",
-                            "The package " + pkg.packageName + " seems malicious");
+                    EventLog.writeEvent(0x534e4554, "213323615");
                     return true;
                 }
                 checkDuplicatePerm.put(name, permissionDefinition);
