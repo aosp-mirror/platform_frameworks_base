@@ -150,15 +150,16 @@ constructor(
     fun showFromDialog(
         dialog: Dialog,
         animateFrom: Dialog,
+        cuj: DialogCuj? = null,
         animateBackgroundBoundsChange: Boolean = false
     ) {
         val view =
             openedDialogs.firstOrNull { it.dialog == animateFrom }?.dialogContentWithBackground
                 ?: throw IllegalStateException(
                     "The animateFrom dialog was not animated using " +
-                        "DialogLaunchAnimator.showFrom(View|Dialog)"
-                )
-        showFromView(dialog, view, animateBackgroundBoundsChange = animateBackgroundBoundsChange)
+                        "DialogLaunchAnimator.showFrom(View|Dialog)")
+        showFromView(
+            dialog, view, animateBackgroundBoundsChange = animateBackgroundBoundsChange, cuj = cuj)
     }
 
     /**
