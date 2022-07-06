@@ -43,12 +43,14 @@ public final class RegisterStatusBarResult implements Parcelable {
     public final InsetsVisibilities mRequestedVisibilities;
     public final String mPackageName;
     public final int[] mTransientBarTypes;
+    public final LetterboxDetails[] mLetterboxDetails;
 
     public RegisterStatusBarResult(ArrayMap<String, StatusBarIcon> icons, int disabledFlags1,
             int appearance, AppearanceRegion[] appearanceRegions, int imeWindowVis,
             int imeBackDisposition, boolean showImeSwitcher, int disabledFlags2, IBinder imeToken,
             boolean navbarColorManagedByIme, int behavior, InsetsVisibilities requestedVisibilities,
-            String packageName, @NonNull int[] transientBarTypes) {
+            String packageName, @NonNull int[] transientBarTypes,
+            LetterboxDetails[] letterboxDetails) {
         mIcons = new ArrayMap<>(icons);
         mDisabledFlags1 = disabledFlags1;
         mAppearance = appearance;
@@ -63,6 +65,7 @@ public final class RegisterStatusBarResult implements Parcelable {
         mRequestedVisibilities = requestedVisibilities;
         mPackageName = packageName;
         mTransientBarTypes = transientBarTypes;
+        mLetterboxDetails = letterboxDetails;
     }
 
     @Override
@@ -86,6 +89,7 @@ public final class RegisterStatusBarResult implements Parcelable {
         dest.writeTypedObject(mRequestedVisibilities, 0);
         dest.writeString(mPackageName);
         dest.writeIntArray(mTransientBarTypes);
+        dest.writeParcelableArray(mLetterboxDetails, flags);
     }
 
     /**
@@ -112,10 +116,13 @@ public final class RegisterStatusBarResult implements Parcelable {
                             source.readTypedObject(InsetsVisibilities.CREATOR);
                     final String packageName = source.readString();
                     final int[] transientBarTypes = source.createIntArray();
+                    final LetterboxDetails[] letterboxDetails =
+                            source.readParcelableArray(null, LetterboxDetails.class);
                     return new RegisterStatusBarResult(icons, disabledFlags1, appearance,
                             appearanceRegions, imeWindowVis, imeBackDisposition, showImeSwitcher,
                             disabledFlags2, imeToken, navbarColorManagedByIme, behavior,
-                            requestedVisibilities, packageName, transientBarTypes);
+                            requestedVisibilities, packageName, transientBarTypes,
+                            letterboxDetails);
                 }
 
                 @Override

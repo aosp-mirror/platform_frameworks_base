@@ -265,6 +265,10 @@
     <style name="Animation.ShutdownUi" parent="@android:style/Animation.Toast">
     </style>
 
+    <style name="Theme.SystemUI.MediaProjectionAppSelector"
+        parent="@*android:style/Theme.DeviceDefault.Chooser">
+    </style>
+
     <!-- Standard animations for hiding and showing the status bar. -->
 
     <style name="Theme.SystemUI" parent="@*android:style/Theme.DeviceDefault.SystemUI">
