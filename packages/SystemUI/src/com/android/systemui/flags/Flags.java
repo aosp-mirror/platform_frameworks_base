@@ -205,7 +205,7 @@ public class Flags {
     // 1100 - windowing
     @Keep
     public static final SysPropBooleanFlag WM_ENABLE_SHELL_TRANSITIONS =
-            new SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", false);
+            new SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", true);
 
     /**
      * b/170163464: animate bubbles expanded view collapse with home gesture

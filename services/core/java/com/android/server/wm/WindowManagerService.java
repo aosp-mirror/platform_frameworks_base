@@ -419,7 +419,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @see #ENABLE_SHELL_TRANSITIONS
      */
     public static final boolean sEnableShellTransitions =
-            SystemProperties.getBoolean(ENABLE_SHELL_TRANSITIONS, false);
+            SystemProperties.getBoolean(ENABLE_SHELL_TRANSITIONS, true);
 
     /**
      * Allows a fullscreen windowing mode activity to launch in its desired orientation directly
