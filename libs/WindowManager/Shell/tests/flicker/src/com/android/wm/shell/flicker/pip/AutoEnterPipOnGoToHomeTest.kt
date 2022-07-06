@@ -16,25 +16,28 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.RequiresDevice
+import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.Assume
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test entering pip from an app via [onUserLeaveHint] and by navigating to home.
+ * Test entering pip from an app via auto-enter property when navigating to home.
  *
- * To run this test: `atest WMShellFlickerTests:EnterPipOnUserLeaveHintTest`
+ * To run this test: `atest WMShellFlickerTests:AutoEnterPipOnGoToHomeTest`
  *
  * Actions:
  *     Launch an app in full screen
- *     Select "Via code behind" radio button
+ *     Select "Auto-enter PiP" radio button
  *     Press Home button or swipe up to go Home and put [pipApp] in pip mode
  *
  * Notes:
@@ -48,8 +51,10 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Postsubmit
 @Group3
-class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest(testSpec) {
+class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(testSpec) {
+    protected val taplInstrumentation = LauncherInstrumentation()
     /**
      * Defines the transition used to run the test
      */
@@ -59,51 +64,53 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
             setup {
                 eachRun {
                     pipApp.launchViaIntent(wmHelper)
-                    pipApp.enableEnterPipOnUserLeaveHint()
+                    pipApp.enableAutoEnterForPipActivity()
                 }
             }
             teardown {
                 eachRun {
+                    // close gracefully so that onActivityUnpinned() can be called before force exit
+                    pipApp.closePipWindow(wmHelper)
                     pipApp.exit(wmHelper)
                 }
             }
             transitions {
-                tapl.goHome()
+                taplInstrumentation.goHome()
             }
         }
 
-    override fun pipAppLayerAlwaysVisible() {
-        if (!testSpec.isGesturalNavigation) super.pipAppLayerAlwaysVisible() else {
-            // pip layer in gesture nav will disappear during transition
-            testSpec.assertLayers {
-                this.isVisible(pipApp.component)
-                    .then().isInvisible(pipApp.component)
-                    .then().isVisible(pipApp.component)
+    override fun pipLayerReduces() {
+        val layerName = pipApp.component.toLayerName()
+        testSpec.assertLayers {
+            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+            pipLayerList.zipWithNext { previous, current ->
+                current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
             }
         }
     }
 
-    override fun pipLayerReduces() {
-        // in gestural nav the pip enters through alpha animation
+    /**
+     * Checks that [pipApp] window is animated towards default position in right bottom corner
+     */
+    @Test
+    fun pipLayerMovesTowardsRightBottomCorner() {
+        // in gestural nav the swipe makes PiP first go upwards
         Assume.assumeFalse(testSpec.isGesturalNavigation)
-        super.pipLayerReduces()
+        val layerName = pipApp.component.toLayerName()
+        testSpec.assertLayers {
+            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+            // Pip animates towards the right bottom corner, but because it is being resized at the
+            // same time, it is possible it shrinks first quickly below the default position and get
+            // moved up after that in just few last frames
+            pipLayerList.zipWithNext { previous, current ->
+                current.visibleRegion.isToTheRightBottom(previous.visibleRegion.region, 3)
+            }
+        }
     }
 
     override fun focusChanges() {
         // in gestural nav the focus goes to different activity on swipe up
         Assume.assumeFalse(testSpec.isGesturalNavigation)
         super.focusChanges()
-    }
-
-    override fun pipLayerRemainInsideVisibleBounds() {
-        if (!testSpec.isGesturalNavigation) super.pipLayerRemainInsideVisibleBounds() else {
-            // pip layer in gesture nav will disappear during transition
-            testSpec.assertLayersStart {
-                this.visibleRegion(pipApp.component).coversAtMost(displayBounds)
-            }
-            testSpec.assertLayersEnd {
-                this.visibleRegion(pipApp.component).coversAtMost(displayBounds)
-            }
-        }
     }
 }
