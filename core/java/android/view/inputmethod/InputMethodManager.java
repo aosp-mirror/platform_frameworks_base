@@ -1004,7 +1004,6 @@ public final class InputMethodManager {
                                 }
                             }
                         }
-                        mBindSequence = res.sequence;
                     }
                     startInputInner(StartInputReason.BOUND_ACCESSIBILITY_SESSION_TO_IMMS, null,
                             0, 0, 0);
