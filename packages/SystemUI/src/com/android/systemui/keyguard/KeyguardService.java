@@ -405,6 +405,8 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void setOccluded(boolean isOccluded, boolean animate) {
+            Log.d(TAG, "setOccluded(" + isOccluded + ")");
+
             Trace.beginSection("KeyguardService.mBinder#setOccluded");
             checkPermission();
             mKeyguardViewMediator.setOccluded(isOccluded, animate);
