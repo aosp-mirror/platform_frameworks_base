@@ -399,8 +399,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             final int taskId = data.getInt(ASSIST_TASK_ID);
             final IBinder activityId = data.getBinder(ASSIST_ACTIVITY_ID);
             final Bundle assistData = data.getBundle(ASSIST_KEY_DATA);
-            final AssistStructure structure = data.getParcelable(ASSIST_KEY_STRUCTURE);
-            final AssistContent content = data.getParcelable(ASSIST_KEY_CONTENT);
+            final AssistStructure structure = data.getParcelable(ASSIST_KEY_STRUCTURE, android.app.assist.AssistStructure.class);
+            final AssistContent content = data.getParcelable(ASSIST_KEY_CONTENT, android.app.assist.AssistContent.class);
             int uid = -1;
             if (assistData != null) {
                 uid = assistData.getInt(Intent.EXTRA_ASSIST_UID, -1);

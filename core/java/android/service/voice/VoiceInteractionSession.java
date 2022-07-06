@@ -1547,7 +1547,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                     list = Collections.emptyList();
                 } else {
                     final ParceledListSlice<DirectAction> pls = result.getParcelable(
-                            DirectAction.KEY_ACTIONS_LIST);
+                            DirectAction.KEY_ACTIONS_LIST, android.content.pm.ParceledListSlice.class);
                     if (pls != null) {
                         final List<DirectAction> receivedList = pls.getList();
                         list = (receivedList != null) ? receivedList : Collections.emptyList();

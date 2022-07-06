@@ -76,7 +76,7 @@ public final class GlobalKeyIntent {
             return null;
         }
 
-        final KeyEvent event = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+        final KeyEvent event = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, android.view.KeyEvent.class);
         final boolean fromNonInteractive =
                 intent.getBooleanExtra(EXTRA_BEGAN_FROM_NON_INTERACTIVE, false);
         return new GlobalKeyIntent(intent.getComponent(), event, fromNonInteractive);

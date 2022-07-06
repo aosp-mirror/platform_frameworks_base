@@ -125,7 +125,7 @@ public class CallLayout extends FrameLayout {
      */
     @RemotableViewMethod
     public void setData(Bundle extras) {
-        setUser(extras.getParcelable(Notification.EXTRA_CALL_PERSON));
+        setUser(extras.getParcelable(Notification.EXTRA_CALL_PERSON, android.app.Person.class));
         updateCallLayout();
     }
 

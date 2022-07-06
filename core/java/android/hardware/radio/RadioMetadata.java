@@ -384,7 +384,7 @@ public final class RadioMetadata implements Parcelable {
     public Bitmap getBitmap(String key) {
         Bitmap bmp = null;
         try {
-            bmp = mBundle.getParcelable(key);
+            bmp = mBundle.getParcelable(key, android.graphics.Bitmap.class);
         } catch (Exception e) {
             // ignore, value was not a bitmap
             Log.w(TAG, "Failed to retrieve a key as Bitmap.", e);
@@ -419,7 +419,7 @@ public final class RadioMetadata implements Parcelable {
     public Clock getClock(String key) {
         Clock clock = null;
         try {
-            clock = mBundle.getParcelable(key);
+            clock = mBundle.getParcelable(key, android.hardware.radio.RadioMetadata.Clock.class);
         } catch (Exception e) {
             // ignore, value was not a clock.
             Log.w(TAG, "Failed to retrieve a key as Clock.", e);

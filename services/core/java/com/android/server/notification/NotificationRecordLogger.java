@@ -399,7 +399,7 @@ public interface NotificationRecordLogger {
         private int getNumPeople(@Nullable Bundle extras) {
             if (extras != null) {
                 ArrayList<Person> people = extras.getParcelableArrayList(
-                        Notification.EXTRA_PEOPLE_LIST);
+                        Notification.EXTRA_PEOPLE_LIST, android.app.Person.class);
                 if (people != null && !people.isEmpty()) {
                     return people.size();
                 }

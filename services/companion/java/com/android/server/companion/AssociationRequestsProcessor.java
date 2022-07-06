@@ -300,10 +300,10 @@ class AssociationRequestsProcessor {
                 return;
             }
 
-            final AssociationRequest request = data.getParcelable(EXTRA_ASSOCIATION_REQUEST);
+            final AssociationRequest request = data.getParcelable(EXTRA_ASSOCIATION_REQUEST, android.companion.AssociationRequest.class);
             final IAssociationRequestCallback callback = IAssociationRequestCallback.Stub
                     .asInterface(data.getBinder(EXTRA_APPLICATION_CALLBACK));
-            final ResultReceiver resultReceiver = data.getParcelable(EXTRA_RESULT_RECEIVER);
+            final ResultReceiver resultReceiver = data.getParcelable(EXTRA_RESULT_RECEIVER, android.os.ResultReceiver.class);
 
             requireNonNull(request);
             requireNonNull(callback);
@@ -313,7 +313,7 @@ class AssociationRequestsProcessor {
             if (request.isSelfManaged()) {
                 macAddress = null;
             } else {
-                macAddress = data.getParcelable(EXTRA_MAC_ADDRESS);
+                macAddress = data.getParcelable(EXTRA_MAC_ADDRESS, android.net.MacAddress.class);
                 requireNonNull(macAddress);
             }
 

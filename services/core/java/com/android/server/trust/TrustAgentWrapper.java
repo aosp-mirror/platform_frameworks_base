@@ -132,7 +132,7 @@ public class TrustAgentWrapper {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ComponentName component = intent.getParcelableExtra(EXTRA_COMPONENT_NAME);
+            ComponentName component = intent.getParcelableExtra(EXTRA_COMPONENT_NAME, android.content.ComponentName.class);
             if (TRUST_EXPIRED_ACTION.equals(intent.getAction())
                     && mName.equals(component)) {
                 mHandler.removeMessages(MSG_TRUST_TIMEOUT);

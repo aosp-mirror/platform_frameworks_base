@@ -2590,9 +2590,9 @@ public abstract class AccessibilityService extends Service {
                     return;
                 }
                 final HardwareBuffer hardwareBuffer =
-                        result.getParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER);
+                        result.getParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER, android.hardware.HardwareBuffer.class);
                 final ParcelableColorSpace colorSpace =
-                        result.getParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE);
+                        result.getParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, android.graphics.ParcelableColorSpace.class);
                 final ScreenshotResult screenshot = new ScreenshotResult(hardwareBuffer,
                         colorSpace.getColorSpace(),
                         result.getLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP));

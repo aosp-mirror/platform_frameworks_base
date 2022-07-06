@@ -2450,7 +2450,7 @@ public class AccountManager {
                     onError(ERROR_CODE_INVALID_RESPONSE, "null bundle returned");
                     return;
                 }
-                Intent intent = bundle.getParcelable(KEY_INTENT);
+                Intent intent = bundle.getParcelable(KEY_INTENT, android.content.Intent.class);
                 if (intent != null && mActivity != null) {
                     // since the user provided an Activity we will silently start intents
                     // that we see

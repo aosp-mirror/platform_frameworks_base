@@ -31893,7 +31893,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         RemoteCallback remoteCallback = new RemoteCallback(result ->
                 executor.execute(() -> {
-                    DisplayHash displayHash = result.getParcelable(EXTRA_DISPLAY_HASH);
+                    DisplayHash displayHash = result.getParcelable(EXTRA_DISPLAY_HASH, android.view.displayhash.DisplayHash.class);
                     int errorCode = result.getInt(EXTRA_DISPLAY_HASH_ERROR_CODE,
                             DISPLAY_HASH_ERROR_UNKNOWN);
                     if (displayHash != null) {

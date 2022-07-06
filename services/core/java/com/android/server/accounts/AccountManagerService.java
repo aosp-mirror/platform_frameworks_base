@@ -3090,7 +3090,7 @@ public class AccountManagerService
                             }
                         }
 
-                        Intent intent = result.getParcelable(AccountManager.KEY_INTENT);
+                        Intent intent = result.getParcelable(AccountManager.KEY_INTENT, android.content.Intent.class);
                         if (intent != null && notifyOnAuthFailure && !customTokens) {
                             /*
                              * Make sure that the supplied intent is owned by the authenticator
@@ -3516,7 +3516,7 @@ public class AccountManagerService
             mNumResults++;
             Intent intent = null;
             if (result != null
-                    && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
+                    && (intent = result.getParcelable(AccountManager.KEY_INTENT, android.content.Intent.class)) != null) {
                 if (!checkKeyIntent(
                         Binder.getCallingUid(),
                         intent)) {
@@ -5048,7 +5048,7 @@ public class AccountManagerService
                 }
             }
             if (result != null
-                    && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
+                    && (intent = result.getParcelable(AccountManager.KEY_INTENT, android.content.Intent.class)) != null) {
                 if (!checkKeyIntent(
                         Binder.getCallingUid(),
                         intent)) {

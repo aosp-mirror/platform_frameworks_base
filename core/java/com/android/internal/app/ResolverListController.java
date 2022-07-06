@@ -110,17 +110,19 @@ public class ResolverListController {
     public List<ResolverActivity.ResolvedComponentInfo> getResolversForIntent(
             boolean shouldGetResolvedFilter,
             boolean shouldGetActivityMetadata,
+            boolean shouldGetOnlyDefaultActivities,
             List<Intent> intents) {
         return getResolversForIntentAsUser(shouldGetResolvedFilter, shouldGetActivityMetadata,
-                intents, mUserHandle);
+                shouldGetOnlyDefaultActivities, intents, mUserHandle);
     }
 
     public List<ResolverActivity.ResolvedComponentInfo> getResolversForIntentAsUser(
             boolean shouldGetResolvedFilter,
             boolean shouldGetActivityMetadata,
+            boolean shouldGetOnlyDefaultActivities,
             List<Intent> intents,
             UserHandle userHandle) {
-        int baseFlags = PackageManager.MATCH_DEFAULT_ONLY
+        int baseFlags = (shouldGetOnlyDefaultActivities ? PackageManager.MATCH_DEFAULT_ONLY : 0)
                 | PackageManager.MATCH_DIRECT_BOOT_AWARE
                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                 | (shouldGetResolvedFilter ? PackageManager.GET_RESOLVED_FILTER : 0)

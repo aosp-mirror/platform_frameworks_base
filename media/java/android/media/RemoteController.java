@@ -407,7 +407,7 @@ import java.util.List;
             mEditableKeys = editableKeys;
 
             mEditorArtwork = (Bitmap) metadata.getParcelable(
-                    String.valueOf(MediaMetadataEditor.BITMAP_KEY_ARTWORK));
+                    String.valueOf(MediaMetadataEditor.BITMAP_KEY_ARTWORK), android.graphics.Bitmap.class);
             if (mEditorArtwork != null) {
                 cleanupBitmapFromBundle(MediaMetadataEditor.BITMAP_KEY_ARTWORK);
             }

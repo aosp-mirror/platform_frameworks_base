@@ -251,7 +251,7 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
 
         final CountDownLatch latch = new CountDownLatch(1);
         mService.calculateScore(algorithm, value1, value2, new RemoteCallback((result) -> {
-            final Scores scores = result.getParcelable(EXTRA_SCORES);
+            final Scores scores = result.getParcelable(EXTRA_SCORES, android.service.autofill.AutofillFieldClassificationService.Scores.class);
             if (scores == null) {
                 pw.println("no score");
             } else {

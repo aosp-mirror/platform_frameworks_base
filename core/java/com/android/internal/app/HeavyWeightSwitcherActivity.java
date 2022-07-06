@@ -66,7 +66,7 @@ public class HeavyWeightSwitcherActivity extends Activity {
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         
-        mStartIntent = (IntentSender)getIntent().getParcelableExtra(KEY_INTENT);
+        mStartIntent = (IntentSender)getIntent().getParcelableExtra(KEY_INTENT, android.content.IntentSender.class);
         mHasResult = getIntent().getBooleanExtra(KEY_HAS_RESULT, false);
         mCurApp = getIntent().getStringExtra(KEY_CUR_APP);
         mCurTask = getIntent().getIntExtra(KEY_CUR_TASK, 0);

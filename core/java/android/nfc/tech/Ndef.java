@@ -161,7 +161,7 @@ public final class Ndef extends BasicTagTechnology {
         if (extras != null) {
             mMaxNdefSize = extras.getInt(EXTRA_NDEF_MAXLENGTH);
             mCardState = extras.getInt(EXTRA_NDEF_CARDSTATE);
-            mNdefMsg = extras.getParcelable(EXTRA_NDEF_MSG);
+            mNdefMsg = extras.getParcelable(EXTRA_NDEF_MSG, android.nfc.NdefMessage.class);
             mNdefType = extras.getInt(EXTRA_NDEF_TYPE);
         } else {
             throw new NullPointerException("NDEF tech extras are null.");

@@ -365,7 +365,7 @@ public class MidiService extends IMidiManager.Stub {
             mServiceInfo = serviceInfo;
             mUid = uid;
             mBluetoothDevice = (BluetoothDevice)deviceInfo.getProperties().getParcelable(
-                    MidiDeviceInfo.PROPERTY_BLUETOOTH_DEVICE);;
+                    MidiDeviceInfo.PROPERTY_BLUETOOTH_DEVICE, android.bluetooth.BluetoothDevice.class);;
             setDeviceServer(server);
         }
 
@@ -745,7 +745,7 @@ public class MidiService extends IMidiManager.Stub {
 
                     Log.d(TAG, "BLE Device");
                     BluetoothDevice btDevice =
-                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, android.bluetooth.BluetoothDevice.class);
                     dumpUuids(btDevice);
 
                     // See if there are any service UUIDs and if so do any of them indicate a
@@ -764,7 +764,7 @@ public class MidiService extends IMidiManager.Stub {
                 {
                     Log.d(TAG, "ACTION_ACL_DISCONNECTED");
                     BluetoothDevice btDevice =
-                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, android.bluetooth.BluetoothDevice.class);
                     // We DO know at this point if we are disconnecting a MIDI device, so
                     // don't bother if we are not.
                     if (isBLEMIDIDevice(btDevice)) {
@@ -793,7 +793,7 @@ public class MidiService extends IMidiManager.Stub {
                 {
                     Log.d(TAG, "ACTION_UUID");
                     BluetoothDevice btDevice =
-                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, android.bluetooth.BluetoothDevice.class);
                     dumpUuids(btDevice);
                     if (isBLEMIDIDevice(btDevice)) {
                         Log.d(TAG, "BT MIDI DEVICE");
@@ -1165,7 +1165,7 @@ public class MidiService extends IMidiManager.Stub {
         BluetoothDevice bluetoothDevice = null;
         if (type == MidiDeviceInfo.TYPE_BLUETOOTH) {
             bluetoothDevice = (BluetoothDevice)properties.getParcelable(
-                    MidiDeviceInfo.PROPERTY_BLUETOOTH_DEVICE);
+                    MidiDeviceInfo.PROPERTY_BLUETOOTH_DEVICE, android.bluetooth.BluetoothDevice.class);
             device = mBluetoothDevices.get(bluetoothDevice);
             if (device != null) {
                 device.setDeviceInfo(deviceInfo);

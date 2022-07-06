@@ -906,12 +906,12 @@ public class SignalStrength implements Parcelable {
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private void setFromNotifierBundle(Bundle m) {
-        mCdma = m.getParcelable("Cdma");
-        mGsm = m.getParcelable("Gsm");
-        mWcdma = m.getParcelable("Wcdma");
-        mTdscdma = m.getParcelable("Tdscdma");
-        mLte = m.getParcelable("Lte");
-        mNr = m.getParcelable("Nr");
+        mCdma = m.getParcelable("Cdma", android.telephony.CellSignalStrengthCdma.class);
+        mGsm = m.getParcelable("Gsm", android.telephony.CellSignalStrengthGsm.class);
+        mWcdma = m.getParcelable("Wcdma", android.telephony.CellSignalStrengthWcdma.class);
+        mTdscdma = m.getParcelable("Tdscdma", android.telephony.CellSignalStrengthTdscdma.class);
+        mLte = m.getParcelable("Lte", android.telephony.CellSignalStrengthLte.class);
+        mNr = m.getParcelable("Nr", android.telephony.CellSignalStrengthNr.class);
     }
 
     /**

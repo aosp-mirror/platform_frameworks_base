@@ -1179,11 +1179,11 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         }
 
         if (ACTION_PASSWORD_CHANGED.equals(action)) {
-            onPasswordChanged(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+            onPasswordChanged(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER, android.os.UserHandle.class));
         } else if (ACTION_PASSWORD_FAILED.equals(action)) {
-            onPasswordFailed(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+            onPasswordFailed(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER, android.os.UserHandle.class));
         } else if (ACTION_PASSWORD_SUCCEEDED.equals(action)) {
-            onPasswordSucceeded(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+            onPasswordSucceeded(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER, android.os.UserHandle.class));
         } else if (ACTION_DEVICE_ADMIN_ENABLED.equals(action)) {
             onEnabled(context, intent);
         } else if (ACTION_DEVICE_ADMIN_DISABLE_REQUESTED.equals(action)) {
@@ -1195,12 +1195,12 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         } else if (ACTION_DEVICE_ADMIN_DISABLED.equals(action)) {
             onDisabled(context, intent);
         } else if (ACTION_PASSWORD_EXPIRING.equals(action)) {
-            onPasswordExpiring(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+            onPasswordExpiring(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER, android.os.UserHandle.class));
         } else if (ACTION_PROFILE_PROVISIONING_COMPLETE.equals(action)) {
             onProfileProvisioningComplete(context, intent);
         } else if (ACTION_CHOOSE_PRIVATE_KEY_ALIAS.equals(action)) {
             int uid = intent.getIntExtra(EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID, -1);
-            Uri uri = intent.getParcelableExtra(EXTRA_CHOOSE_PRIVATE_KEY_URI);
+            Uri uri = intent.getParcelableExtra(EXTRA_CHOOSE_PRIVATE_KEY_URI, android.net.Uri.class);
             String alias = intent.getStringExtra(EXTRA_CHOOSE_PRIVATE_KEY_ALIAS);
             String chosenAlias = onChoosePrivateKeyAlias(context, intent, uid, uri, alias);
             setResultData(chosenAlias);
@@ -1228,22 +1228,22 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             int networkLogsCount = intent.getIntExtra(EXTRA_NETWORK_LOGS_COUNT, 0);
             onNetworkLogsAvailable(context, intent, batchToken, networkLogsCount);
         } else if (ACTION_USER_ADDED.equals(action)) {
-            onUserAdded(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+            onUserAdded(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER, android.os.UserHandle.class));
         } else if (ACTION_USER_REMOVED.equals(action)) {
-            onUserRemoved(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+            onUserRemoved(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER, android.os.UserHandle.class));
         } else if (ACTION_USER_STARTED.equals(action)) {
-            onUserStarted(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+            onUserStarted(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER, android.os.UserHandle.class));
         } else if (ACTION_USER_STOPPED.equals(action)) {
-            onUserStopped(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+            onUserStopped(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER, android.os.UserHandle.class));
         } else if (ACTION_USER_SWITCHED.equals(action)) {
-            onUserSwitched(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+            onUserSwitched(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER, android.os.UserHandle.class));
         } else if (ACTION_TRANSFER_OWNERSHIP_COMPLETE.equals(action)) {
             PersistableBundle bundle =
-                    intent.getParcelableExtra(EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE);
+                    intent.getParcelableExtra(EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE, android.os.PersistableBundle.class);
             onTransferOwnershipComplete(context, bundle);
         } else if (ACTION_AFFILIATED_PROFILE_TRANSFER_OWNERSHIP_COMPLETE.equals(action)) {
             onTransferAffiliatedProfileOwnershipComplete(context,
-                    intent.getParcelableExtra(Intent.EXTRA_USER));
+                    intent.getParcelableExtra(Intent.EXTRA_USER, android.os.UserHandle.class));
         } else if (ACTION_OPERATION_SAFETY_STATE_CHANGED.equals(action)) {
             onOperationSafetyStateChanged(context, intent);
         } else if (ACTION_COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED.equals(action)) {

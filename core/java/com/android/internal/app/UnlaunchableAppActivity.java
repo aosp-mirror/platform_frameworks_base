@@ -62,7 +62,7 @@ public class UnlaunchableAppActivity extends Activity
         Intent intent = getIntent();
         mReason = intent.getIntExtra(EXTRA_UNLAUNCHABLE_REASON, -1);
         mUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
-        mTarget = intent.getParcelableExtra(Intent.EXTRA_INTENT);
+        mTarget = intent.getParcelableExtra(Intent.EXTRA_INTENT, android.content.IntentSender.class);
 
         if (mUserId == UserHandle.USER_NULL) {
             Log.wtf(TAG, "Invalid user id: " + mUserId + ". Stopping.");

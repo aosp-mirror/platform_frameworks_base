@@ -18000,7 +18000,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Slogf.i(LOG_TAG, "Account removed from the primary user.");
             } else {
                 // TODO(174768447): Revisit start activity logic.
-                final Intent removeIntent = result.getParcelable(AccountManager.KEY_INTENT);
+                final Intent removeIntent = result.getParcelable(AccountManager.KEY_INTENT, android.content.Intent.class);
                 removeIntent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 if (removeIntent != null) {
                     Slogf.i(LOG_TAG, "Starting activity to remove account");

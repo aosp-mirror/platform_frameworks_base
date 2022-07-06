@@ -1001,7 +1001,7 @@ public class EuiccManager {
     public void startResolutionActivity(Activity activity, int requestCode, Intent resultIntent,
             PendingIntent callbackIntent) throws IntentSender.SendIntentException {
         PendingIntent resolutionIntent =
-                resultIntent.getParcelableExtra(EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_INTENT);
+                resultIntent.getParcelableExtra(EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_INTENT, android.app.PendingIntent.class);
         if (resolutionIntent == null) {
             throw new IllegalArgumentException("Invalid result intent");
         }
@@ -1032,7 +1032,7 @@ public class EuiccManager {
         if (!isEnabled()) {
             PendingIntent callbackIntent =
                     resolutionIntent.getParcelableExtra(
-                            EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT);
+                            EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT, android.app.PendingIntent.class);
             if (callbackIntent != null) {
                 sendUnavailableError(callbackIntent);
             }

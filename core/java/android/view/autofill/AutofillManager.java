@@ -944,7 +944,7 @@ public final class AutofillManager {
             return;
         }
         synchronized (mLock) {
-            mLastAutofilledData = savedInstanceState.getParcelable(LAST_AUTOFILLED_DATA_TAG);
+            mLastAutofilledData = savedInstanceState.getParcelable(LAST_AUTOFILLED_DATA_TAG, android.view.autofill.ParcelableMap.class);
 
             if (isActiveLocked()) {
                 Log.w(TAG, "New session was started before onCreate()");

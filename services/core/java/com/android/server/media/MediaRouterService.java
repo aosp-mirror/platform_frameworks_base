@@ -956,7 +956,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED)) {
-                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, android.bluetooth.BluetoothDevice.class);
                 synchronized (mLock) {
                     mActiveBluetoothDevice = btDevice;
                     mGlobalBluetoothA2dpOn = btDevice != null;

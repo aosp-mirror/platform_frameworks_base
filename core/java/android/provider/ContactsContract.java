@@ -8448,7 +8448,7 @@ public final class ContactsContract {
             Bundle response = contentResolver.call(ContactsContract.AUTHORITY_URI,
                     ContactsContract.SimContacts.QUERY_SIM_ACCOUNTS_METHOD,
                     null, null);
-            List<SimAccount> result = response.getParcelableArrayList(KEY_SIM_ACCOUNTS);
+            List<SimAccount> result = response.getParcelableArrayList(KEY_SIM_ACCOUNTS, android.provider.ContactsContract.SimAccount.class);
 
             if (result == null) {
                 result = new ArrayList<>();
@@ -8821,7 +8821,7 @@ public final class ContactsContract {
         public static Account getDefaultAccount(@NonNull ContentResolver resolver) {
             Bundle response = resolver.call(ContactsContract.AUTHORITY_URI,
                     QUERY_DEFAULT_ACCOUNT_METHOD, null, null);
-            return response.getParcelable(KEY_DEFAULT_ACCOUNT);
+            return response.getParcelable(KEY_DEFAULT_ACCOUNT, android.accounts.Account.class);
         }
 
         /**
