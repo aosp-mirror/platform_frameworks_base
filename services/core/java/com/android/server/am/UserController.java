@@ -3003,8 +3003,8 @@ class UserController implements Handler.Callback {
             synchronized (mService) {
                 return mService.broadcastIntentLocked(null, null, null, intent, resolvedType,
                         resultTo, resultCode, resultData, resultExtras, requiredPermissions, null,
-                        appOp, bOptions, ordered, sticky, callingPid, callingUid, realCallingUid,
-                        realCallingPid, userId);
+                        null, appOp, bOptions, ordered, sticky, callingPid, callingUid,
+                        realCallingUid, realCallingPid, userId);
             }
         }
 
