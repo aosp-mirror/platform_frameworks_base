@@ -265,7 +265,7 @@ class InsetsPolicy {
             state = originalState;
         }
         state = adjustVisibilityForIme(target, state, state == originalState);
-        return adjustInsetsForRoundedCorners(target, state, state == originalState);
+        return adjustInsetsForRoundedCorners(target.mToken, state, state == originalState);
     }
 
     InsetsState adjustInsetsForWindow(WindowState target, InsetsState originalState) {
@@ -290,7 +290,8 @@ class InsetsPolicy {
         final InsetsState originalState = mDisplayContent.getInsetsPolicy()
                 .enforceInsetsPolicyForTarget(type, WINDOWING_MODE_FULLSCREEN, alwaysOnTop,
                         mStateController.getRawInsetsState());
-        return adjustVisibilityForTransientTypes(originalState);
+        InsetsState state = adjustVisibilityForTransientTypes(originalState);
+        return adjustInsetsForRoundedCorners(token, state, state == originalState);
     }
 
     /**
@@ -465,15 +466,19 @@ class InsetsPolicy {
         return originalState;
     }
 
-    private InsetsState adjustInsetsForRoundedCorners(WindowState w, InsetsState originalState,
+    private InsetsState adjustInsetsForRoundedCorners(WindowToken token, InsetsState originalState,
             boolean copyState) {
-        final Task task = w.getTask();
-        if (task != null && !task.getWindowConfiguration().tasksAreFloating()) {
-            // Use task bounds to calculating rounded corners if the task is not floating.
-            final Rect roundedCornerFrame = new Rect(task.getBounds());
-            final InsetsState state = copyState ? new InsetsState(originalState) : originalState;
-            state.setRoundedCornerFrame(roundedCornerFrame);
-            return state;
+        if (token != null) {
+            final ActivityRecord activityRecord = token.asActivityRecord();
+            final Task task = activityRecord != null ? activityRecord.getTask() : null;
+            if (task != null && !task.getWindowConfiguration().tasksAreFloating()) {
+                // Use task bounds to calculating rounded corners if the task is not floating.
+                final Rect roundedCornerFrame = new Rect(task.getBounds());
+                final InsetsState state = copyState ? new InsetsState(originalState)
+                        : originalState;
+                state.setRoundedCornerFrame(roundedCornerFrame);
+                return state;
+            }
         }
         return originalState;
     }

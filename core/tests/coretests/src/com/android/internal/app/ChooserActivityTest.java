@@ -266,6 +266,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         final IChooserWrapper activity = (IChooserWrapper) mActivityRule.launchActivity(
@@ -289,6 +290,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, "chooser test"));
@@ -309,6 +311,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -327,6 +330,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -350,6 +354,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -378,6 +383,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -403,6 +409,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -422,6 +429,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -478,6 +486,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
@@ -518,6 +527,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
@@ -550,6 +560,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -585,6 +596,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -649,6 +661,7 @@ public class ChooserActivityTest {
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
                 Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
         when(ChooserActivityOverrideData.getInstance().resolverListController.getLastChosen())
                 .thenReturn(resolvedComponentInfos.get(0).getResolveInfoAt(0));
@@ -688,6 +701,7 @@ public class ChooserActivityTest {
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
                 Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         final IChooserWrapper activity = (IChooserWrapper)
@@ -720,6 +734,7 @@ public class ChooserActivityTest {
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
             Mockito.anyBoolean(),
             Mockito.anyBoolean(),
+            Mockito.anyBoolean(),
             Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         final ChooserActivity activity =
@@ -745,6 +760,7 @@ public class ChooserActivityTest {
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
+            Mockito.anyBoolean(),
             Mockito.anyBoolean(),
             Mockito.anyBoolean(),
             Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
@@ -774,6 +790,7 @@ public class ChooserActivityTest {
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
+                Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
@@ -844,6 +861,7 @@ public class ChooserActivityTest {
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
+                Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
@@ -922,6 +940,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -956,6 +975,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -995,6 +1015,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1091,6 +1112,7 @@ public class ChooserActivityTest {
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
             Mockito.anyBoolean(),
             Mockito.anyBoolean(),
+            Mockito.anyBoolean(),
             Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -1122,6 +1144,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1157,6 +1180,7 @@ public class ChooserActivityTest {
                     .getResolversForIntent(
                             Mockito.anyBoolean(),
                             Mockito.anyBoolean(),
+                            Mockito.anyBoolean(),
                             Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -1189,6 +1213,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -1216,6 +1241,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1250,6 +1276,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
@@ -1282,6 +1309,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1321,6 +1349,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1365,6 +1394,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
@@ -1407,6 +1437,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1483,6 +1514,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1566,6 +1598,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         // Create direct share target
@@ -1636,6 +1669,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1743,6 +1777,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -2060,6 +2095,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
@@ -2140,6 +2176,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -2229,6 +2266,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
@@ -2296,6 +2334,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -2446,6 +2485,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         Intent sendIntent = createSendTextIntent();
@@ -2473,6 +2513,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -2526,6 +2567,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -2663,6 +2705,7 @@ public class ChooserActivityTest {
                 createResolvedComponentsForTest(4);
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
@@ -3057,6 +3100,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         when(
@@ -3066,6 +3110,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(workResolvedComponentInfos));
         when(
@@ -3073,6 +3118,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .workResolverListController
                         .getResolversForIntentAsUser(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class),
@@ -3129,6 +3175,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
