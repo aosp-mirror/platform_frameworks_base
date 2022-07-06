@@ -1042,6 +1042,9 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /* package */ void denyClientAuthState(int contextHubId, String packageName, long nanoAppId) {
+        Log.i(TAG, "Denying " + packageName + " access to " + Long.toHexString(nanoAppId)
+                + " on context hub # " + contextHubId);
+
         mClientManager.forEachClientOfHub(contextHubId, client -> {
             if (client.getPackageName().equals(packageName)) {
                 client.updateNanoAppAuthState(
