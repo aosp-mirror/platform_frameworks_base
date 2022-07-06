@@ -76,7 +76,6 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class NotifPipeline @Inject constructor(
-    notifPipelineFlags: NotifPipelineFlags,
     private val mNotifCollection: NotifCollection,
     private val mShadeListBuilder: ShadeListBuilder,
     private val mRenderStageManager: RenderStageManager
@@ -106,8 +105,6 @@ class NotifPipeline @Inject constructor(
     override fun getEntry(key: String): NotificationEntry? {
         return mNotifCollection.getEntry(key)
     }
-
-    val isNewPipelineEnabled: Boolean = notifPipelineFlags.isNewPipelineEnabled()
 
     /**
      * Registers a lifetime extender. Lifetime extenders can cause notifications that have been

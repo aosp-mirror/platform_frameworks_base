@@ -60,7 +60,6 @@ class ViewConfigCoordinatorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        whenever(pipeline.isNewPipelineEnabled).thenReturn(true)
         whenever(pipeline.allNotifs).thenReturn(listOf(entry))
         whenever(entry.row).thenReturn(row)
         coordinator = ViewConfigCoordinator(
