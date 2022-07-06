@@ -1110,7 +1110,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private void setCentralSurfaces(CentralSurfaces centralSurfaces) {
         // TODO: this can be injected.
         mCentralSurfaces = centralSurfaces;
-        mKeyguardBottomArea.setCentralSurfaces(mCentralSurfaces);
     }
 
     public void updateResources() {
@@ -1283,11 +1282,11 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void initBottomArea() {
-        mKeyguardBottomArea.setCentralSurfaces(mCentralSurfaces);
-        mKeyguardBottomArea.setFalsingManager(mFalsingManager);
-        mKeyguardBottomArea.initWallet(mQuickAccessWalletController);
-        mKeyguardBottomArea.initControls(mControlsComponent);
-        mKeyguardBottomArea.initQRCodeScanner(mQRCodeScannerController);
+        mKeyguardBottomArea.init(
+                mFalsingManager,
+                mQuickAccessWalletController,
+                mControlsComponent,
+                mQRCodeScannerController);
     }
 
     @VisibleForTesting
