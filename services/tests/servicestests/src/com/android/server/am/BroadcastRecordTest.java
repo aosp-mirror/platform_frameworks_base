@@ -185,6 +185,7 @@ public class BroadcastRecordTest {
                 null /* resolvedType */,
                 null /* requiredPermissions */,
                 null /* excludedPermissions */,
+                null /* excludedPackages */,
                 0 /* appOp */,
                 null /* options */,
                 new ArrayList<>(receivers), // Make a copy to not affect the original list.

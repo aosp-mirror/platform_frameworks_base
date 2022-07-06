@@ -868,6 +868,11 @@ static void nativeSetFixedTransformHint(JNIEnv* env, jclass clazz, jlong transac
     transaction->setFixedTransformHint(ctrl, transformHint);
 }
 
+static void nativeSanitize(JNIEnv* env, jclass clazz, jlong transactionObj) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    transaction->sanitize();
+}
+
 static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
     const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
     jlongArray array = env->NewLongArray(displayIds.size());
@@ -2002,6 +2007,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetTransformHint },
     {"nativeSetTrustedOverlay", "(JJZ)V",
             (void*)nativeSetTrustedOverlay },
+    {"nativeSanitize", "(J)V",
+            (void*) nativeSanitize }
         // clang-format on
 };
 
