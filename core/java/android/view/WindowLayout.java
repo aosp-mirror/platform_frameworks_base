@@ -16,8 +16,6 @@
 
 package android.view;
 
-import static android.view.Gravity.DISPLAY_CLIP_HORIZONTAL;
-import static android.view.Gravity.DISPLAY_CLIP_VERTICAL;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -275,17 +273,9 @@ public class WindowLayout {
             Gravity.applyDisplay(attrs.gravity, outDisplayFrame, outFrame);
         }
 
-        if (extendedByCutout && !displayCutoutSafe.contains(outFrame)) {
-            mTempRect.set(outFrame);
-
-            // Move the frame into displayCutoutSafe.
-            final int clipFlags = DISPLAY_CLIP_VERTICAL | DISPLAY_CLIP_HORIZONTAL;
-            Gravity.applyDisplay(attrs.gravity & ~clipFlags, displayCutoutSafe,
+        if (extendedByCutout) {
+            extendFrameByCutout(attrs.gravity, displayCutoutSafe, outDisplayFrame, outFrame,
                     mTempRect);
-
-            if (mTempRect.intersect(outDisplayFrame)) {
-                outFrame.union(mTempRect);
-            }
         }
 
         if (DEBUG) Log.d(TAG, "computeFrames " + attrs.getTitle()
@@ -299,6 +289,21 @@ public class WindowLayout {
                 + " attrs=" + attrs
                 + " state=" + state
                 + " requestedVisibilities=" + requestedVisibilities);
+    }
+
+    public static void extendFrameByCutout(int gravity, Rect displayCutoutSafe,
+            Rect displayFrame, Rect inOutFrame, Rect tempRect) {
+        if (displayCutoutSafe.contains(inOutFrame)) {
+            return;
+        }
+        tempRect.set(inOutFrame);
+
+        // Move the frame into displayCutoutSafe.
+        Gravity.applyDisplay(0 /* gravity */, displayCutoutSafe, tempRect);
+
+        if (tempRect.intersect(displayFrame)) {
+            inOutFrame.union(tempRect);
+        }
     }
 
     public static void computeSurfaceSize(WindowManager.LayoutParams attrs, Rect maxBounds,
