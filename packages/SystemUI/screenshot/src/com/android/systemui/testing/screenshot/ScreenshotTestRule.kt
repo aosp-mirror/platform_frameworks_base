@@ -20,6 +20,7 @@ import android.app.UiModeManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.os.Build
 import android.os.UserHandle
 import android.view.Display
 import android.view.View
@@ -32,6 +33,7 @@ import platform.test.screenshot.GoldenImagePathManager
 import platform.test.screenshot.PathConfig
 import platform.test.screenshot.PathElementNoContext
 import platform.test.screenshot.ScreenshotTestRule
+import platform.test.screenshot.matchers.MSSIMMatcher
 import platform.test.screenshot.matchers.PixelPerfectMatcher
 
 /**
@@ -55,7 +57,11 @@ class ScreenshotTestRule(private val testSpec: ScreenshotTestSpec) : TestRule {
                 currentDisplay?.name ?: error("currentDisplay is null")
             },
         )
-    private val defaultMatcher = PixelPerfectMatcher()
+    private val matcher = if (shouldUsePerfectMatching()) {
+        PixelPerfectMatcher()
+    } else {
+        MSSIMMatcher()
+    }
 
     private val screenshotRule =
         ScreenshotTestRule(
@@ -66,6 +72,17 @@ class ScreenshotTestRule(private val testSpec: ScreenshotTestSpec) : TestRule {
                 },
             )
         )
+
+    private fun shouldUsePerfectMatching(): Boolean {
+        // Different CPU architectures can sometimes end up rendering differently, so we can't do
+        // pixel-perfect matching on different architectures using the same golden. Given that our
+        // presubmits are run on cf_x86_64_phone, our goldens should be perfectly matched on the
+        // x86_64 architecture and use the Structural Similarity Index on others.
+        // TODO(b/237511747): Run our screenshot presubmit tests on arm64 instead so that we can
+        // do pixel perfect matching both at presubmit time and at development time with actual
+        // devices.
+        return Build.CPU_ABI == "x86_64"
+    }
 
     override fun apply(base: Statement, description: Description): Statement {
         // The statement which call beforeTest() before running the test and afterTest() afterwards.
@@ -147,7 +164,7 @@ class ScreenshotTestRule(private val testSpec: ScreenshotTestSpec) : TestRule {
         // device to assertBitmapAgainstGolden instead?
         currentDisplay = testSpec.display
         currentGoldenIdentifier = goldenIdentifier
-        screenshotRule.assertBitmapAgainstGolden(bitmap, identifierWithSpec, defaultMatcher)
+        screenshotRule.assertBitmapAgainstGolden(bitmap, identifierWithSpec, matcher)
         currentDisplay = null
         currentGoldenIdentifier = goldenIdentifier
     }

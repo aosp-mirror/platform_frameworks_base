@@ -43,6 +43,7 @@ import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.lowlightclock.LowLightClockController;
+import com.android.systemui.media.dagger.MediaProjectionModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarComponent;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
@@ -119,6 +120,7 @@ import dagger.Provides;
             FalsingModule.class,
             FlagsModule.class,
             LogModule.class,
+            MediaProjectionModule.class,
             PeopleHubModule.class,
             PluginModule.class,
             PrivacyModule.class,
