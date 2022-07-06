@@ -20,6 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"Lagring av innstillinger"</string>
-    <string name="wifi_softap_config_change" msgid="5688373762357941645">"Innstillingene for Wi-Fi-sone er endret"</string>
+    <string name="wifi_softap_config_change" msgid="5688373762357941645">"Innstillingene for wifi-sone er endret"</string>
     <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"Trykk for å se detaljer"</string>
 </resources>
