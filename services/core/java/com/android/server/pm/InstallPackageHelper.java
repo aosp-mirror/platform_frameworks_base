@@ -3476,7 +3476,8 @@ final class InstallPackageHelper {
             Throwable throwable = parseResult.throwable;
             ApexInfo ai = parsingApexInfo.get(parseResult.scanFile);
             int newParseFlags = parseFlags;
-            int newScanFlags = scanFlags | SCAN_AS_APEX;
+            int newScanFlags = scanFlags | SCAN_AS_APEX
+                    | mPm.getSystemPackageScanFlags(parseResult.scanFile);
             if (!ai.isFactory) {
                 newParseFlags &= ~ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
                 newScanFlags |= SCAN_NEW_INSTALL;
