@@ -1760,6 +1760,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
                     // activity is exited.
                     if (mKeyguardStateController.isShowing()
                             && !mKeyguardStateController.isKeyguardGoingAway()) {
+                        Log.d(TAG, "Setting occluded = true in #startActivity.");
                         mKeyguardViewMediator.setOccluded(true /* isOccluded */,
                                 true /* animate */);
                     }
