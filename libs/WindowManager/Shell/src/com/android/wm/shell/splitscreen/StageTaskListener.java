@@ -200,11 +200,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        if (!taskInfo.supportsMultiWindow) {
-            // Leave split screen if the task no longer supports multi window.
-            mCallbacks.onNoLongerSupportMultiWindow();
-            return;
-        }
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
             // Inflates split decor view only when the root task is visible.
             if (mRootTaskInfo.isVisible != taskInfo.isVisible) {
@@ -217,6 +212,12 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             }
             mRootTaskInfo = taskInfo;
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
+            if (!taskInfo.supportsMultiWindow) {
+                // Leave split screen if the task no longer supports multi window.
+                mCallbacks.onNoLongerSupportMultiWindow();
+                return;
+            }
+
             mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
             mCallbacks.onChildTaskStatusChanged(taskInfo.taskId, true /* present */,
                     taskInfo.isVisible);
