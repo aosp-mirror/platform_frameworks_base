@@ -304,14 +304,15 @@ public class LockSettingsStorageTests {
     public void testFileLocation_Owner() {
         LockSettingsStorage storage = new LockSettingsStorage(InstrumentationRegistry.getContext());
 
-        assertEquals("/data/system/gatekeeper.profile.key", storage.getChildProfileLockFile(0));
+        assertEquals(new File("/data/system/gatekeeper.profile.key"),
+                storage.getChildProfileLockFile(0));
     }
 
     @Test
     public void testFileLocation_SecondaryUser() {
         LockSettingsStorage storage = new LockSettingsStorage(InstrumentationRegistry.getContext());
 
-        assertEquals("/data/system/users/1/gatekeeper.profile.key",
+        assertEquals(new File("/data/system/users/1/gatekeeper.profile.key"),
                 storage.getChildProfileLockFile(1));
     }
 
@@ -319,7 +320,7 @@ public class LockSettingsStorageTests {
     public void testFileLocation_ProfileToSecondary() {
         LockSettingsStorage storage = new LockSettingsStorage(InstrumentationRegistry.getContext());
 
-        assertEquals("/data/system/users/2/gatekeeper.profile.key",
+        assertEquals(new File("/data/system/users/2/gatekeeper.profile.key"),
                 storage.getChildProfileLockFile(2));
     }
 
@@ -327,7 +328,7 @@ public class LockSettingsStorageTests {
     public void testFileLocation_ProfileToOwner() {
         LockSettingsStorage storage = new LockSettingsStorage(InstrumentationRegistry.getContext());
 
-        assertEquals("/data/system/users/3/gatekeeper.profile.key",
+        assertEquals(new File("/data/system/users/3/gatekeeper.profile.key"),
                 storage.getChildProfileLockFile(3));
     }
 
