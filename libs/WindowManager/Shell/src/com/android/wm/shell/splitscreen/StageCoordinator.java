@@ -1022,7 +1022,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         mRootTaskInfo = null;
-        mRootTaskLeash = null;
     }
 
 
