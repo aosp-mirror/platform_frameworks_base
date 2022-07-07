@@ -1343,8 +1343,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void onDisplayChange(int displayId, int fromRotation, int toRotation,
             @Nullable DisplayAreaInfo newDisplayAreaInfo, WindowContainerTransaction wct) {
         if (!mMainStage.isActive()) return;
-        // Only do this when shell transition
-        if (!ENABLE_SHELL_TRANSITIONS) return;
 
         mDisplayLayout.rotateTo(mContext.getResources(), toRotation);
         mSplitLayout.rotateTo(toRotation, mDisplayLayout.stableInsets());
