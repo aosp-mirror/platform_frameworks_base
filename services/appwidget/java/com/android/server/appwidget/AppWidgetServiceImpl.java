@@ -1109,10 +1109,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             registerForBroadcastsLocked(provider, getWidgetIds(provider.widgets));
 
             saveGroupStateAsync(userId);
-
-            if (DEBUG) {
-                Slog.i(TAG, "Bound widget " + appWidgetId + " to provider " + provider.id);
-            }
+            Slog.i(TAG, "Bound widget " + appWidgetId + " to provider " + provider.id);
         }
 
         return true;
@@ -4196,6 +4193,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         IAppWidgetHost callbacks;
         boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
 
+        private static final boolean DEBUG = true;
+
+        private static final String TAG = "AppWidgetServiceHost";
+
         int tag = TAG_UNDEFINED; // for use while saving state (the index)
         // Sequence no for the last update successfully sent. This is updated whenever a
         // widget update is successfully sent to the host callbacks. As all new/undelivered updates
@@ -4266,6 +4267,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             final SparseArray<String> uids = new SparseArray<>();
             for (int i = widgets.size() - 1; i >= 0; i--) {
                 final Widget widget = widgets.get(i);
+                if (widget.provider == null) {
+                    if (DEBUG) {
+                        Slog.e(TAG, "Widget with no provider " + widget.toString());
+                    }
+                }
                 final ProviderId providerId = widget.provider.id;
                 uids.put(providerId.uid, providerId.componentName.getPackageName());
             }
