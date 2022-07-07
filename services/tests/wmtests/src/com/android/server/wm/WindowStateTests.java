@@ -1003,6 +1003,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
         // Verify the IME insets is visible on app, but not for app2 during app task switching.
+        mDisplayContent.computeImeTargetIfNeeded(app.mActivityRecord);
         assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
         assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
