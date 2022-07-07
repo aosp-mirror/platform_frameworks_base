@@ -11608,34 +11608,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_ENABLE_SYSTEM_APP)));
 
-        synchronized (getLockObject()) {
-            final boolean isDemo = isCurrentUserDemo();
-            int userId = caller.getUserId();
-            long id = mInjector.binderClearCallingIdentity();
-            try {
-                if (VERBOSE_LOG) {
-                    Slogf.v(LOG_TAG, "installing " + packageName + " for " + userId);
-                }
-
-                Preconditions.checkArgument(isDemo || isSystemApp(mIPackageManager, packageName,
-                        getProfileParentId(userId)), "Only system apps can be enabled this way");
-
-                // Install the app.
-                mIPackageManager.installExistingPackageAsUser(packageName, userId,
-                        PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
-                        PackageManager.INSTALL_REASON_POLICY, null);
-                if (isDemo) {
-                    // Ensure the app is also ENABLED for demo users.
-                    mIPackageManager.setApplicationEnabledSetting(packageName,
-                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                            PackageManager.DONT_KILL_APP, userId, "DevicePolicyManager");
-                }
-            } catch (RemoteException re) {
-                // shouldn't happen
-                Slogf.wtf(LOG_TAG, "Failed to install " + packageName, re);
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
+        final boolean isDemo = isCurrentUserDemo();
+        int userId = caller.getUserId();
+        long id = mInjector.binderClearCallingIdentity();
+        try {
+            if (VERBOSE_LOG) {
+                Slogf.v(LOG_TAG, "installing " + packageName + " for " + userId);
             }
+
+            Preconditions.checkArgument(isDemo || isSystemApp(mIPackageManager, packageName,
+                    getProfileParentId(userId)), "Only system apps can be enabled this way");
+
+            // Install the app.
+            mIPackageManager.installExistingPackageAsUser(packageName, userId,
+                    PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                    PackageManager.INSTALL_REASON_POLICY, null);
+            if (isDemo) {
+                // Ensure the app is also ENABLED for demo users.
+                mIPackageManager.setApplicationEnabledSetting(packageName,
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                        PackageManager.DONT_KILL_APP, userId, "DevicePolicyManager");
+            }
+        } catch (RemoteException re) {
+            // shouldn't happen
+            Slogf.wtf(LOG_TAG, "Failed to install " + packageName, re);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.ENABLE_SYSTEM_APP)
@@ -11653,45 +11651,43 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_ENABLE_SYSTEM_APP)));
 
         int numberOfAppsInstalled = 0;
-        synchronized (getLockObject()) {
-            long id = mInjector.binderClearCallingIdentity();
-            try {
-                final int parentUserId = getProfileParentId(caller.getUserId());
-                List<ResolveInfo> activitiesToEnable = mIPackageManager
-                        .queryIntentActivities(intent,
-                                intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                                PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                                parentUserId)
-                        .getList();
+        long id = mInjector.binderClearCallingIdentity();
+        try {
+            final int parentUserId = getProfileParentId(caller.getUserId());
+            List<ResolveInfo> activitiesToEnable = mIPackageManager
+                    .queryIntentActivities(intent,
+                            intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                            parentUserId)
+                    .getList();
 
-                if (VERBOSE_LOG) {
-                    Slogf.d(LOG_TAG, "Enabling system activities: " + activitiesToEnable);
-                }
-                if (activitiesToEnable != null) {
-                    for (ResolveInfo info : activitiesToEnable) {
-                        if (info.activityInfo != null) {
-                            String packageName = info.activityInfo.packageName;
-                            if (isSystemApp(mIPackageManager, packageName, parentUserId)) {
-                                numberOfAppsInstalled++;
-                                mIPackageManager.installExistingPackageAsUser(packageName,
-                                        caller.getUserId(),
-                                        PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
-                                        PackageManager.INSTALL_REASON_POLICY, null);
-                            } else {
-                                Slogf.d(LOG_TAG, "Not enabling " + packageName + " since is not a"
-                                        + " system app");
-                            }
+            if (VERBOSE_LOG) {
+                Slogf.d(LOG_TAG, "Enabling system activities: " + activitiesToEnable);
+            }
+            if (activitiesToEnable != null) {
+                for (ResolveInfo info : activitiesToEnable) {
+                    if (info.activityInfo != null) {
+                        String packageName = info.activityInfo.packageName;
+                        if (isSystemApp(mIPackageManager, packageName, parentUserId)) {
+                            numberOfAppsInstalled++;
+                            mIPackageManager.installExistingPackageAsUser(packageName,
+                                    caller.getUserId(),
+                                    PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                                    PackageManager.INSTALL_REASON_POLICY, null);
+                        } else {
+                            Slogf.d(LOG_TAG, "Not enabling " + packageName + " since is not a"
+                                    + " system app");
                         }
                     }
                 }
-            } catch (RemoteException e) {
-                // shouldn't happen
-                Slogf.wtf(LOG_TAG, "Failed to resolve intent for: " + intent);
-                return 0;
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
             }
+        } catch (RemoteException e) {
+            // shouldn't happen
+            Slogf.wtf(LOG_TAG, "Failed to resolve intent for: " + intent);
+            return 0;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.ENABLE_SYSTEM_APP_WITH_INTENT)
