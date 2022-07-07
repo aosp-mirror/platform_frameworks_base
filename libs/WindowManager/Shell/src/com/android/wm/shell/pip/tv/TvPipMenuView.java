@@ -266,7 +266,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         }
     }
 
-    void onPipTransitionFinished() {
+    void onPipTransitionFinished(boolean isTvPipExpanded) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: onPipTransitionFinished()", TAG);
 
@@ -276,6 +276,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                 .setDuration(mResizeAnimationDuration / 2)
                 .setInterpolator(TvPipInterpolators.ENTER)
                 .start();
+
+        setIsExpanded(isTvPipExpanded);
 
         // Update buttons.
         if (mSwitchingOrientation) {

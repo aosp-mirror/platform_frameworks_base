@@ -200,7 +200,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     void notifyPipAnimating(boolean animating) {
         mPipMenuView.setEduTextActive(!animating);
         if (!animating) {
-            mPipMenuView.onPipTransitionFinished();
+            mPipMenuView.onPipTransitionFinished(mTvPipBoundsState.isTvPipExpanded());
         }
     }
 
@@ -267,7 +267,6 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     void updateExpansionState() {
         mPipMenuView.setExpandedModeEnabled(mTvPipBoundsState.isTvExpandedPipSupported()
                 && mTvPipBoundsState.getDesiredTvExpandedAspectRatio() != 0);
-        mPipMenuView.setIsExpanded(mTvPipBoundsState.isTvPipExpanded());
     }
 
     private Rect calculateMenuSurfaceBounds(Rect pipBounds) {
