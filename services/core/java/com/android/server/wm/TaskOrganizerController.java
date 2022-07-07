@@ -527,12 +527,11 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 mService.mRootWindowContainer.forAllTasks((task) -> {
                     boolean returnTask = !task.mCreatedByOrganizer;
                     task.updateTaskOrganizerState(returnTask /* skipTaskAppeared */);
-                    // It is possible for the task to not yet have a surface control, so ensure that
-                    // the update succeeded in setting the organizer for the task before returning
-                    if (task.isOrganized() && returnTask) {
-                        SurfaceControl taskLeash = state.addTaskWithoutCallback(task,
+                    if (returnTask) {
+                        SurfaceControl outSurfaceControl = state.addTaskWithoutCallback(task,
                                 "TaskOrganizerController.registerTaskOrganizer");
-                        taskInfos.add(new TaskAppearedInfo(task.getTaskInfo(), taskLeash));
+                        taskInfos.add(
+                                new TaskAppearedInfo(task.getTaskInfo(), outSurfaceControl));
                     }
                 });
             };
