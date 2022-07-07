@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.phone;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.fail;
@@ -44,6 +46,7 @@ import android.app.WallpaperManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
@@ -997,6 +1000,22 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         setDeviceState(FOLD_STATE_UNFOLDED);
 
         verify(mStatusBarStateController, never()).setLeaveOpenOnKeyguardHide(true);
+    }
+
+    @Test
+    public void startActivityDismissingKeyguard_isShowingandIsOccluded() {
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(true);
+        mCentralSurfaces.startActivityDismissingKeyguard(
+                new Intent(),
+                /* onlyProvisioned = */false,
+                /* dismissShade = */false);
+        verify(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any(Runnable.class));
+        ArgumentCaptor<OnDismissAction> onDismissActionCaptor =
+                ArgumentCaptor.forClass(OnDismissAction.class);
+        verify(mStatusBarKeyguardViewManager)
+                .dismissWithAction(onDismissActionCaptor.capture(), any(Runnable.class), eq(true));
+        assertThat(onDismissActionCaptor.getValue().onDismiss()).isFalse();
     }
 
     private void setDeviceState(int state) {
