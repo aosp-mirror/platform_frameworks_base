@@ -73,7 +73,6 @@ import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_W
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_QUOTA;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_WINDOW;
-import static com.android.server.alarm.AlarmManagerService.Constants.KEY_CRASH_NON_CLOCK_APPS;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_EXACT_ALARM_DENY_LIST;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LAZY_BATCHING;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LISTENER_TIMEOUT;
@@ -2424,7 +2423,6 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void alarmClockBinderCallWithoutPermission() throws RemoteException {
-        setDeviceConfigBoolean(KEY_CRASH_NON_CLOCK_APPS, true);
         mockChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION, true);
 
         mockScheduleExactAlarmState(true, false, MODE_ERRORED);
@@ -2593,7 +2591,6 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void exactBinderCallsWithoutPermissionWithoutAllowlist() throws RemoteException {
-        setDeviceConfigBoolean(KEY_CRASH_NON_CLOCK_APPS, true);
         mockChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION, true);
 
         mockScheduleExactAlarmState(true, false, MODE_ERRORED);
