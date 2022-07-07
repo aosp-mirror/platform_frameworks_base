@@ -909,6 +909,11 @@ public class InsetsState implements Parcelable {
             if (source == null && otherSource == null) {
                 continue;
             }
+            if (excludeInvisibleImeFrames && i == ITYPE_IME
+                    && ((source == null && !otherSource.isVisible())
+                            || (otherSource == null && !source.isVisible()))) {
+                continue;
+            }
             if (source == null || otherSource == null) {
                 return false;
             }
