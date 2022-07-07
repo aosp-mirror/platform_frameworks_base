@@ -344,10 +344,18 @@ class LockSettingsStorage extends WatchableImpl {
     private void deleteFile(File path) {
         synchronized (mFileWriteLock) {
             if (path.exists()) {
+                // Zeroize the file to try to make its contents unrecoverable.  This is *not*
+                // guaranteed to be effective, and in fact it usually isn't, but it doesn't hurt.
+                try (RandomAccessFile raf = new RandomAccessFile(path, "rws")) {
+                    final int fileSize = (int) raf.length();
+                    raf.write(new byte[fileSize]);
+                } catch (Exception e) {
+                    Slog.w(TAG, "Failed to zeroize " + path, e);
+                }
                 path.delete();
+                dispatchChange(this);
                 mCache.putFile(path, null);
             }
-            dispatchChange(this);
         }
     }
 
@@ -387,19 +395,7 @@ class LockSettingsStorage extends WatchableImpl {
     }
 
     public void deleteSyntheticPasswordState(int userId, long handle, String name) {
-        File path = getSyntheticPasswordStateFileForUser(userId, handle, name);
-        if (path.exists()) {
-            try (RandomAccessFile raf = new RandomAccessFile(path, "rws")) {
-                final int fileSize = (int) raf.length();
-                raf.write(new byte[fileSize]);
-            } catch (Exception e) {
-                Slog.w(TAG, "Failed to zeroize " + path, e);
-            } finally {
-                path.delete();
-                dispatchChange(this);
-            }
-            mCache.putFile(path, null);
-        }
+        deleteFile(getSyntheticPasswordStateFileForUser(userId, handle, name));
     }
 
     public Map<Integer, List<Long>> listSyntheticPasswordHandlesForAllUsers(String stateName) {
