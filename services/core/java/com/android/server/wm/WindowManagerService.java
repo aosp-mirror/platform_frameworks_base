@@ -8916,11 +8916,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 // Retrieve the DisplayInfo across all possible display layouts.
-                return List.copyOf(mPossibleDisplayInfoMapper.getPossibleDisplayInfos(displayId));
+                return mPossibleDisplayInfoMapper.getPossibleDisplayInfos(displayId);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    List<DisplayInfo> getPossibleDisplayInfoLocked(int displayId) {
+        // Retrieve the DisplayInfo for all possible rotations across all possible display
+        // layouts.
+        return mPossibleDisplayInfoMapper.getPossibleDisplayInfos(displayId);
     }
 
     /**
