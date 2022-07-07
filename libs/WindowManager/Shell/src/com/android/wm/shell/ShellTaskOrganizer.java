@@ -530,11 +530,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             }
 
             final int taskId = taskInfo.taskId;
-            final TaskAppearedInfo appearedInfo = mTasks.get(taskId);
-            final TaskListener listener = getTaskListener(appearedInfo.getTaskInfo());
-            if (appearedInfo.getLeash() != null) {
-                appearedInfo.getLeash().release();
-            }
+            final TaskListener listener = getTaskListener(mTasks.get(taskId).getTaskInfo());
             mTasks.remove(taskId);
             if (listener != null) {
                 listener.onTaskVanished(taskInfo);
