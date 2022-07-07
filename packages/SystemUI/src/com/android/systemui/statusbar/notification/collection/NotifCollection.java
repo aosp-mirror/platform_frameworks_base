@@ -578,12 +578,10 @@ public class NotifCollection implements Dumpable {
                     // TODO: (b/145659174) update the sbn's overrideGroupKey in
                     //  NotificationEntry.setRanking instead of here once we fully migrate to the
                     //  NewNotifPipeline
-                    if (mNotifPipelineFlags.isNewPipelineEnabled()) {
-                        final String newOverrideGroupKey = ranking.getOverrideGroupKey();
-                        if (!Objects.equals(entry.getSbn().getOverrideGroupKey(),
-                                newOverrideGroupKey)) {
-                            entry.getSbn().setOverrideGroupKey(newOverrideGroupKey);
-                        }
+                    final String newOverrideGroupKey = ranking.getOverrideGroupKey();
+                    if (!Objects.equals(entry.getSbn().getOverrideGroupKey(),
+                            newOverrideGroupKey)) {
+                        entry.getSbn().setOverrideGroupKey(newOverrideGroupKey);
                     }
                 } else {
                     if (currentEntriesWithoutRankings == null) {

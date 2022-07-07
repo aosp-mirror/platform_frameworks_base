@@ -128,15 +128,16 @@ class UserSwitchDialogController @VisibleForTesting constructor(
         private val animateFrom: Dialog,
         private val dialogLaunchAnimator: DialogLaunchAnimator
     ) : DialogInterface by animateFrom, DialogShower {
-        override fun showDialog(dialog: Dialog) {
+        override fun showDialog(dialog: Dialog, cuj: DialogCuj) {
             dialogLaunchAnimator.showFromDialog(
                 dialog,
-                animateFrom = animateFrom
+                animateFrom = animateFrom,
+                cuj
             )
         }
     }
 
     interface DialogShower : DialogInterface {
-        fun showDialog(dialog: Dialog)
+        fun showDialog(dialog: Dialog, cuj: DialogCuj)
     }
 }

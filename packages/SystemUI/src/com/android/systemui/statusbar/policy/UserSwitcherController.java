@@ -68,6 +68,7 @@ import com.android.systemui.GuestResetOrExitSessionReceiver;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
+import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.BroadcastSender;
@@ -115,6 +116,9 @@ public class UserSwitcherController implements Dumpable {
 
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
     private static final long MULTI_USER_JOURNEY_TIMEOUT = 20000l;
+
+    private static final String INTERACTION_JANK_ADD_NEW_USER_TAG = "add_new_user";
+    private static final String INTERACTION_JANK_EXIT_GUEST_MODE_TAG = "exit_guest_mode";
 
     protected final Context mContext;
     protected final UserTracker mUserTracker;
@@ -597,7 +601,9 @@ public class UserSwitcherController implements Dumpable {
         }
         mExitGuestDialog = new ExitGuestDialog(mContext, id, isGuestEphemeral, targetId);
         if (dialogShower != null) {
-            dialogShower.showDialog(mExitGuestDialog);
+            dialogShower.showDialog(mExitGuestDialog, new DialogCuj(
+                    InteractionJankMonitor.CUJ_USER_DIALOG_OPEN,
+                    INTERACTION_JANK_EXIT_GUEST_MODE_TAG));
         } else {
             mExitGuestDialog.show();
         }
@@ -609,7 +615,11 @@ public class UserSwitcherController implements Dumpable {
         }
         mAddUserDialog = new AddUserDialog(mContext);
         if (dialogShower != null) {
-            dialogShower.showDialog(mAddUserDialog);
+            dialogShower.showDialog(mAddUserDialog,
+                    new DialogCuj(
+                            InteractionJankMonitor.CUJ_USER_DIALOG_OPEN,
+                            INTERACTION_JANK_ADD_NEW_USER_TAG
+                    ));
         } else {
             mAddUserDialog.show();
         }
