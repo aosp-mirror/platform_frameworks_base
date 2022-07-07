@@ -89,7 +89,6 @@ public class KeyguardBottomAreaView extends FrameLayout {
 
     private ActivityStarter mActivityStarter;
     private KeyguardStateController mKeyguardStateController;
-    private CentralSurfaces mCentralSurfaces;
     private FalsingManager mFalsingManager;
 
     private boolean mDozing;
@@ -139,9 +138,38 @@ public class KeyguardBottomAreaView extends FrameLayout {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    public void initFrom(KeyguardBottomAreaView oldBottomArea) {
-        setCentralSurfaces(oldBottomArea.mCentralSurfaces);
+    /** Initializes the {@link KeyguardBottomAreaView} with the given dependencies */
+    public void init(
+            FalsingManager falsingManager,
+            QuickAccessWalletController controller,
+            ControlsComponent controlsComponent,
+            QRCodeScannerController qrCodeScannerController) {
+        mFalsingManager = falsingManager;
+        mQuickAccessWalletController = controller;
+        mQuickAccessWalletController.setupWalletChangeObservers(
+                mCardRetriever, WALLET_PREFERENCE_CHANGE, DEFAULT_PAYMENT_APP_CHANGE);
+        mQuickAccessWalletController.updateWalletPreference();
+        mQuickAccessWalletController.queryWalletCards(mCardRetriever);
+        updateWalletVisibility();
 
+        mControlsComponent = controlsComponent;
+        mControlsComponent.getControlsListingController().ifPresent(
+                c -> c.addCallback(mListingCallback));
+
+        mQRCodeScannerController = qrCodeScannerController;
+        mQRCodeScannerController.registerQRCodeScannerChangeObservers(
+                QRCodeScannerController.DEFAULT_QR_CODE_SCANNER_CHANGE,
+                QRCodeScannerController.QR_CODE_SCANNER_PREFERENCE_CHANGE);
+        updateQRCodeButtonVisibility();
+
+        updateAffordanceColors();
+    }
+
+    /**
+     * Initializes this instance of {@link KeyguardBottomAreaView} based on the given instance of
+     * another {@link KeyguardBottomAreaView}
+     */
+    public void initFrom(KeyguardBottomAreaView oldBottomArea) {
         // if it exists, continue to use the original ambient indication container
         // instead of the newly inflated one
         if (mAmbientIndicationArea != null) {
@@ -268,10 +296,6 @@ public class KeyguardBottomAreaView extends FrameLayout {
         updateAffordanceColors();
     }
 
-    public void setCentralSurfaces(CentralSurfaces centralSurfaces) {
-        mCentralSurfaces = centralSurfaces;
-    }
-
     private void updateWalletVisibility() {
         if (mDozing
                 || mQuickAccessWalletController == null
@@ -332,7 +356,7 @@ public class KeyguardBottomAreaView extends FrameLayout {
         return false;
     }
 
-    public void startFinishDozeAnimation() {
+    private void startFinishDozeAnimation() {
         long delay = 0;
         if (mWalletButton.getVisibility() == View.VISIBLE) {
             startFinishDozeAnimationElement(mWalletButton, delay);
@@ -415,38 +439,6 @@ public class KeyguardBottomAreaView extends FrameLayout {
         return insets;
     }
 
-    /** Set the falsing manager */
-    public void setFalsingManager(FalsingManager falsingManager) {
-        mFalsingManager = falsingManager;
-    }
-
-    /**
-     * Initialize the wallet feature, only enabling if the feature is enabled within the platform.
-     */
-    public void initWallet(
-            QuickAccessWalletController controller) {
-        mQuickAccessWalletController = controller;
-        mQuickAccessWalletController.setupWalletChangeObservers(
-                mCardRetriever, WALLET_PREFERENCE_CHANGE, DEFAULT_PAYMENT_APP_CHANGE);
-        mQuickAccessWalletController.updateWalletPreference();
-        mQuickAccessWalletController.queryWalletCards(mCardRetriever);
-
-        updateWalletVisibility();
-        updateAffordanceColors();
-    }
-
-    /**
-     * Initialize the qr code scanner feature, controlled by QRCodeScannerController.
-     */
-    public void initQRCodeScanner(QRCodeScannerController qrCodeScannerController) {
-        mQRCodeScannerController = qrCodeScannerController;
-        mQRCodeScannerController.registerQRCodeScannerChangeObservers(
-                QRCodeScannerController.DEFAULT_QR_CODE_SCANNER_CHANGE,
-                QRCodeScannerController.QR_CODE_SCANNER_PREFERENCE_CHANGE);
-        updateQRCodeButtonVisibility();
-        updateAffordanceColors();
-    }
-
     private void updateQRCodeButtonVisibility() {
         if (mQuickAccessWalletController != null
                 && mQuickAccessWalletController.isWalletEnabled()) {
@@ -500,17 +492,6 @@ public class KeyguardBottomAreaView extends FrameLayout {
         mWalletButton.setBackgroundTintList(bgColor);
         mControlsButton.setBackgroundTintList(bgColor);
         mQRCodeScannerButton.setBackgroundTintList(bgColor);
-    }
-
-    /**
-      * Initialize controls via the ControlsComponent
-      */
-    public void initControls(ControlsComponent controlsComponent) {
-        mControlsComponent = controlsComponent;
-        mControlsComponent.getControlsListingController().ifPresent(
-                c -> c.addCallback(mListingCallback));
-
-        updateAffordanceColors();
     }
 
     private void onWalletClick(View v) {

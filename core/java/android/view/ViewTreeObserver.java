@@ -43,6 +43,7 @@ public final class ViewTreeObserver {
     // Recursive listeners use CopyOnWriteArrayList
     private CopyOnWriteArrayList<OnWindowFocusChangeListener> mOnWindowFocusListeners;
     private CopyOnWriteArrayList<OnWindowAttachListener> mOnWindowAttachListeners;
+    private CopyOnWriteArrayList<OnWindowVisibilityChangeListener> mOnWindowVisibilityListeners;
     private CopyOnWriteArrayList<OnGlobalFocusChangeListener> mOnGlobalFocusListeners;
     @UnsupportedAppUsage
     private CopyOnWriteArrayList<OnTouchModeChangeListener> mOnTouchModeChangeListeners;
@@ -103,6 +104,21 @@ public final class ViewTreeObserver {
          * losing focus.
          */
         public void onWindowFocusChanged(boolean hasFocus);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the view hierarchy's window
+     * visibility changes.
+     *
+     * @hide
+     */
+    public interface OnWindowVisibilityChangeListener {
+        /**
+         * Callback method to be invoked when the window visibility changes in the view tree.
+         *
+         * @param visibility The new visibility of the window.
+         */
+        void onWindowVisibilityChanged(@View.Visibility int visibility);
     }
 
     /**
@@ -386,6 +402,14 @@ public final class ViewTreeObserver {
             }
         }
 
+        if (observer.mOnWindowVisibilityListeners != null) {
+            if (mOnWindowVisibilityListeners != null) {
+                mOnWindowVisibilityListeners.addAll(observer.mOnWindowVisibilityListeners);
+            } else {
+                mOnWindowVisibilityListeners = observer.mOnWindowVisibilityListeners;
+            }
+        }
+
         if (observer.mOnGlobalFocusListeners != null) {
             if (mOnGlobalFocusListeners != null) {
                 mOnGlobalFocusListeners.addAll(observer.mOnGlobalFocusListeners);
@@ -540,6 +564,49 @@ public final class ViewTreeObserver {
     }
 
     /**
+     * Register a callback to be invoked when the window visibility changes.
+     *
+     * @param listener The callback to add
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     *
+     * @hide
+     */
+    public void addOnWindowVisibilityChangeListener(
+            @NonNull OnWindowVisibilityChangeListener listener) {
+        checkIsAlive();
+
+        if (mOnWindowVisibilityListeners == null) {
+            mOnWindowVisibilityListeners =
+                new CopyOnWriteArrayList<OnWindowVisibilityChangeListener>();
+        }
+
+        mOnWindowVisibilityListeners.add(listener);
+    }
+
+    /**
+     * Remove a previously installed window visibility callback.
+     *
+     * @param victim The callback to remove
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     *
+     * @see #addOnWindowVisibilityChangeListener(
+     * android.view.ViewTreeObserver.OnWindowVisibilityChangeListener)
+     *
+     * @hide
+     */
+    public void removeOnWindowVisibilityChangeListener(
+            @NonNull OnWindowVisibilityChangeListener victim) {
+        checkIsAlive();
+        if (mOnWindowVisibilityListeners == null) {
+            return;
+        }
+
+        mOnWindowVisibilityListeners.remove(victim);
+    }
+
+    /*
      * Register a callback to be invoked when the focus state within the view tree changes.
      *
      * @param listener The callback to add
@@ -1021,6 +1088,23 @@ public final class ViewTreeObserver {
         if (listeners != null && listeners.size() > 0) {
             for (OnWindowFocusChangeListener listener : listeners) {
                 listener.onWindowFocusChanged(hasFocus);
+            }
+        }
+    }
+
+    /**
+     * Notifies registered listeners that window visibility has changed.
+     */
+    void dispatchOnWindowVisibilityChange(int visibility) {
+        // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
+        // perform the dispatching. The iterator is a safe guard against listeners that
+        // could mutate the list by calling the various add/remove methods. This prevents
+        // the array from being modified while we iterate it.
+        final CopyOnWriteArrayList<OnWindowVisibilityChangeListener> listeners =
+                mOnWindowVisibilityListeners;
+        if (listeners != null && listeners.size() > 0) {
+            for (OnWindowVisibilityChangeListener listener : listeners) {
+                listener.onWindowVisibilityChanged(visibility);
             }
         }
     }

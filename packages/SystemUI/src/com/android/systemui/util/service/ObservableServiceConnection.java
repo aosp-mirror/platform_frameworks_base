@@ -155,11 +155,6 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
      * Disconnect from the service if bound.
      */
     public void unbind() {
-        if (!mBoundCalled) {
-            return;
-        }
-        mBoundCalled = false;
-        mContext.unbindService(this);
         onDisconnected(DISCONNECT_REASON_UNBIND);
     }
 
@@ -210,12 +205,15 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
             Log.d(TAG, "onDisconnected:" + reason);
         }
 
+        // If not bound or already unbound, do not proceed setting reason, unbinding, and
+        // notifying
         if (!mBoundCalled) {
             return;
         }
 
+        mBoundCalled = false;
         mLastDisconnectReason = Optional.of(reason);
-        unbind();
+        mContext.unbindService(this);
         mProxy = null;
 
         applyToCallbacksLocked(callback-> callback.onDisconnected(this,

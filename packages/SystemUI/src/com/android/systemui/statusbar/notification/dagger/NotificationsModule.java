@@ -226,10 +226,8 @@ public interface NotificationsModule {
     static NotificationLogger provideNotificationLogger(
             NotificationListener notificationListener,
             @UiBackground Executor uiBgExecutor,
-            NotifPipelineFlags notifPipelineFlags,
             NotifLiveDataStore notifLiveDataStore,
             NotificationVisibilityProvider visibilityProvider,
-            NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
             StatusBarStateController statusBarStateController,
             NotificationLogger.ExpansionStateLogger expansionStateLogger,
@@ -237,10 +235,8 @@ public interface NotificationsModule {
         return new NotificationLogger(
                 notificationListener,
                 uiBgExecutor,
-                notifPipelineFlags,
                 notifLiveDataStore,
                 visibilityProvider,
-                entryManager,
                 notifPipeline,
                 statusBarStateController,
                 expansionStateLogger,

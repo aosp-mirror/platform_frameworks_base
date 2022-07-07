@@ -294,11 +294,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
      * @return true if these checks pass, false if the notification should not alert
      */
     private boolean canAlertCommon(NotificationEntry entry) {
-        if (!mFlags.isNewPipelineEnabled() && mNotificationFilter.shouldFilterOut(entry)) {
-            mLogger.logNoAlertingFilteredOut(entry);
-            return false;
-        }
-
         for (int i = 0; i < mSuppressors.size(); i++) {
             if (mSuppressors.get(i).suppressInterruptions(entry)) {
                 mLogger.logNoAlertingSuppressedBy(entry, mSuppressors.get(i), /* awake */ false);

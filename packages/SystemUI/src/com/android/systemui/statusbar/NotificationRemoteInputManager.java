@@ -286,10 +286,6 @@ public class NotificationRemoteInputManager implements Dumpable {
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mRebuilder = rebuilder;
-        if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
-            mRemoteInputListener = createLegacyRemoteInputLifetimeExtender(mainHandler,
-                    notificationEntryManager, smartReplyController);
-        }
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mStatusBarStateController = statusBarStateController;
         mRemoteInputUriController = remoteInputUriController;
@@ -313,34 +309,19 @@ public class NotificationRemoteInputManager implements Dumpable {
                     int reason) {
                 // We're removing the notification, the smart controller can forget about it.
                 mSmartReplyController.stopSending(entry);
-
-                if (removedByUser && entry != null) {
-                    onPerformRemoveNotification(entry, entry.getKey());
-                }
             }
         });
     }
 
     /** Add a listener for various remote input events.  Works with NEW pipeline only. */
     public void setRemoteInputListener(@NonNull RemoteInputListener remoteInputListener) {
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
-            if (mRemoteInputListener != null) {
-                throw new IllegalStateException("mRemoteInputListener is already set");
-            }
-            mRemoteInputListener = remoteInputListener;
-            if (mRemoteInputController != null) {
-                mRemoteInputListener.setRemoteInputController(mRemoteInputController);
-            }
+        if (mRemoteInputListener != null) {
+            throw new IllegalStateException("mRemoteInputListener is already set");
         }
-    }
-
-    @NonNull
-    @VisibleForTesting
-    protected LegacyRemoteInputLifetimeExtender createLegacyRemoteInputLifetimeExtender(
-            Handler mainHandler,
-            NotificationEntryManager notificationEntryManager,
-            SmartReplyController smartReplyController) {
-        return new LegacyRemoteInputLifetimeExtender();
+        mRemoteInputListener = remoteInputListener;
+        if (mRemoteInputController != null) {
+            mRemoteInputListener.setRemoteInputController(mRemoteInputController);
+        }
     }
 
     /** Initializes this component with the provided dependencies. */
@@ -381,12 +362,6 @@ public class NotificationRemoteInputManager implements Dumpable {
                 }
             }
         });
-        if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
-            mSmartReplyController.setCallback((entry, reply) -> {
-                StatusBarNotification newSbn = mRebuilder.rebuildForSendingSmartReply(entry, reply);
-                mEntryManager.updateNotification(newSbn, null /* ranking */);
-            });
-        }
     }
 
     public void addControllerCallback(RemoteInputController.Callback callback) {
@@ -586,19 +561,6 @@ public class NotificationRemoteInputManager implements Dumpable {
             return null;
         }
         return v.findViewWithTag(RemoteInputView.VIEW_TAG);
-    }
-
-    public ArrayList<NotificationLifetimeExtender> getLifetimeExtenders() {
-        // OLD pipeline code ONLY; can assume implementation
-        return ((LegacyRemoteInputLifetimeExtender) mRemoteInputListener).mLifetimeExtenders;
-    }
-
-    @VisibleForTesting
-    void onPerformRemoveNotification(NotificationEntry entry, final String key) {
-        // OLD pipeline code ONLY; can assume implementation
-        ((LegacyRemoteInputLifetimeExtender) mRemoteInputListener)
-                .mKeysKeptForRemoteInputHistory.remove(key);
-        cleanUpRemoteInputForUserRemoval(entry);
     }
 
     /**
