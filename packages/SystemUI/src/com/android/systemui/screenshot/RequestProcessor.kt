@@ -16,51 +16,84 @@
 
 package com.android.systemui.screenshot
 
-import android.net.Uri
-import android.util.Log
-import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
+import android.graphics.Insets
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
-import android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION
 import com.android.internal.util.ScreenshotHelper.HardwareBitmapBundler
 import com.android.internal.util.ScreenshotHelper.ScreenshotRequest
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY
 import java.util.function.Consumer
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * Processes a screenshot request sent from {@link ScreenshotHelper}.
  */
 @SysUISingleton
-internal class RequestProcessor @Inject constructor(
-    private val controller: ScreenshotController,
+class RequestProcessor @Inject constructor(
+    private val capture: ImageCapture,
+    private val policy: ScreenshotPolicy,
+    private val flags: FeatureFlags,
+    /** For the Java Async version, to invoke the callback. */
+    @Application private val mainScope: CoroutineScope
 ) {
-    fun processRequest(
-        request: ScreenshotRequest,
-        onSavedListener: Consumer<Uri>,
-        callback: RequestCallback
-    ) {
+    /**
+     * Inspects the incoming request, returning a potentially modified request depending on policy.
+     *
+     * @param request the request to process
+     */
+    suspend fun process(request: ScreenshotRequest): ScreenshotRequest {
+        var result = request
 
-        if (request.type == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
-            val image = HardwareBitmapBundler.bundleToHardwareBitmap(request.bitmapBundle)
+        // Apply work profile screenshots policy:
+        //
+        // If the focused app belongs to a work profile, transforms a full screen
+        // (or partial) screenshot request to a task snapshot (provided image) screenshot.
 
-            controller.handleImageAsScreenshot(
-                image, request.boundsInScreen, request.insets,
-                request.taskId, request.userId, request.topComponent, onSavedListener, callback
-            )
-            return
+        // Whenever displayContentInfo is fetched, the topComponent is also populated
+        // regardless of the managed profile status.
+
+        if (request.type != TAKE_SCREENSHOT_PROVIDED_IMAGE &&
+            flags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
+        ) {
+
+            val info = policy.findPrimaryContent(policy.getDefaultDisplayId())
+
+            result = if (policy.isManagedProfile(info.userId)) {
+                val image = capture.captureTask(info.taskId)
+                    ?: error("Task snapshot returned a null Bitmap!")
+
+                // Provide the task snapshot as the screenshot
+                ScreenshotRequest(
+                    TAKE_SCREENSHOT_PROVIDED_IMAGE, request.source,
+                    HardwareBitmapBundler.hardwareBitmapToBundle(image),
+                    info.bounds, Insets.NONE, info.taskId, info.userId, info.component
+                )
+            } else {
+                // Create a new request of the same type which includes the top component
+                ScreenshotRequest(request.source, request.type, info.component)
+            }
         }
 
-        when (request.type) {
-            TAKE_SCREENSHOT_FULLSCREEN ->
-                controller.takeScreenshotFullscreen(null, onSavedListener, callback)
-            TAKE_SCREENSHOT_SELECTED_REGION ->
-                controller.takeScreenshotPartial(null, onSavedListener, callback)
-            else -> Log.w(TAG, "Invalid screenshot option: ${request.type}")
-        }
+        return result
     }
 
-    companion object {
-        const val TAG: String = "RequestProcessor"
+    /**
+     * Note: This is for compatibility with existing Java. Prefer the suspending function when
+     * calling from a Coroutine context.
+     *
+     * @param request the request to process
+     * @param callback the callback to provide the processed request, invoked from the main thread
+     */
+    fun processAsync(request: ScreenshotRequest, callback: Consumer<ScreenshotRequest>) {
+        mainScope.launch {
+            val result = process(request)
+            callback.accept(result)
+        }
     }
 }
+
+private const val TAG = "RequestProcessor"

@@ -233,6 +233,7 @@ public class Flags {
     // 1300 - screenshots
 
     public static final UnreleasedFlag SCREENSHOT_REQUEST_PROCESSOR = new UnreleasedFlag(1300);
+    public static final UnreleasedFlag SCREENSHOT_WORK_PROFILE_POLICY = new UnreleasedFlag(1301);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
