@@ -173,7 +173,6 @@ import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
@@ -3412,7 +3411,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void reportPerceptibleAsync(IBinder windowToken, boolean perceptible) {
         Objects.requireNonNull(windowToken, "windowToken must not be null");
-        int uid = Binder.getCallingUid();
         synchronized (ImfLock.class) {
             if (!calledFromValidUserLocked()) {
                 return;
@@ -4694,7 +4692,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @UiThread
     @Override
     public boolean handleMessage(Message msg) {
-        SomeArgs args;
         switch (msg.what) {
             case MSG_SHOW_IM_SUBTYPE_PICKER:
                 final boolean showAuxSubtypes;

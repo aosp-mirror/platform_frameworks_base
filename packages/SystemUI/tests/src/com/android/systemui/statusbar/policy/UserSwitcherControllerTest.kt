@@ -44,6 +44,7 @@ import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.GuestSessionNotification
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.broadcast.BroadcastSender
@@ -72,12 +73,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -362,7 +363,10 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         userSwitcherController.onUserListItemClicked(currentGuestUserRecord, dialogShower)
         assertNotNull(userSwitcherController.mExitGuestDialog)
         testableLooper.processAllMessages()
-        verify(dialogShower).showDialog(userSwitcherController.mExitGuestDialog)
+        verify(dialogShower)
+            .showDialog(
+                userSwitcherController.mExitGuestDialog,
+                DialogCuj(InteractionJankMonitor.CUJ_USER_DIALOG_OPEN, "exit_guest_mode"))
     }
 
     @Test

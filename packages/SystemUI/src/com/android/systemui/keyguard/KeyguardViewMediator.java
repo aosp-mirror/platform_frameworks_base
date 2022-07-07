@@ -2701,7 +2701,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     /** Hides the surface behind the keyguard by re-showing the keyguard/activity lock screen. */
     public void hideSurfaceBehindKeyguard() {
         mSurfaceBehindRemoteAnimationRequested = false;
-
+        mKeyguardStateController.notifyKeyguardGoingAway(false);
         if (mShowing) {
             setShowingLocked(true, true);
         }

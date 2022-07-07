@@ -66,6 +66,7 @@ import java.util.function.Consumer;
 @RunWith(JUnit4.class)
 public class StagedInstallInternalTest {
     private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
+    private static final String REBOOTLESS_APEX_PACKAGE_NAME = "test.apex.rebootless";
     private static final TestApp TEST_APEX_WITH_APK_V2 = new TestApp("TestApexWithApkV2",
             APK_IN_APEX_TESTAPEX_NAME, 2, /*isApex*/true, APK_IN_APEX_TESTAPEX_NAME + "_v2.apex");
     private static final TestApp APEX_WRONG_SHA_V2 = new TestApp(
@@ -592,6 +593,28 @@ public class StagedInstallInternalTest {
                 "INSTALL_FAILED_VERSION_DOWNGRADE", Install.single(apex1));
         Install.single(apex1).setRequestDowngrade().commit();
         assertThat(InstallUtils.getInstalledVersion(packageName)).isEqualTo(1);
+    }
+
+    @Test
+    public void testVendorApex_VerifyFactory() throws Exception {
+        final PackageManager pm =
+                InstrumentationRegistry.getInstrumentation().getContext().getPackageManager();
+        PackageInfo pi = pm.getPackageInfo(REBOOTLESS_APEX_PACKAGE_NAME, PackageManager.MATCH_APEX);
+        assertThat(pi.getLongVersionCode()).isEqualTo(1);
+        assertThat(pi.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR)
+                .isEqualTo(ApplicationInfo.PRIVATE_FLAG_VENDOR);
+        assertThat(pi.applicationInfo.sourceDir).startsWith("/vendor/apex");
+    }
+
+    @Test
+    public void testVendorApex_VerifyData() throws Exception {
+        final PackageManager pm =
+                InstrumentationRegistry.getInstrumentation().getContext().getPackageManager();
+        PackageInfo pi = pm.getPackageInfo(REBOOTLESS_APEX_PACKAGE_NAME, PackageManager.MATCH_APEX);
+        assertThat(pi.getLongVersionCode()).isEqualTo(2);
+        assertThat(pi.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR)
+                .isEqualTo(ApplicationInfo.PRIVATE_FLAG_VENDOR);
+        assertThat(pi.applicationInfo.sourceDir).startsWith("/data/apex");
     }
 
     private IPackageManagerNative getPackageManagerNative() {

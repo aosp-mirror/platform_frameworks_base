@@ -322,10 +322,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         NotificationLogger notificationLogger = new NotificationLogger(
                 mNotificationListener,
                 mUiBgExecutor,
-                mNotifPipelineFlags,
                 mNotifLiveDataStore,
                 mVisibilityProvider,
-                mock(NotificationEntryManager.class),
                 mock(NotifPipeline.class),
                 mStatusBarStateController,
                 mExpansionStateLogger,

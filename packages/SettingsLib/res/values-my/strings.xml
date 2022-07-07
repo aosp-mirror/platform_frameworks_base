@@ -183,8 +183,8 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"အသုံးပြုသူ- <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"မူရင်းအချို့ သတ်မှတ်ပြီး"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"မူရင်း သတ်မှတ်မထားပါ။"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"စာသားမှစကားပြောပြောင်း ဆက်တင်များ"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"စာသားမှ စကားပြောသို့ အထွက်"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"စာ-မှ-စကားပြောင်းခြင်း ဆက်တင်များ"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"စာ-မှ-စကားသို့ အထွက်"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"စကားပြောနှုန်း"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"စာတမ်းအားပြောဆိုသော အမြန်နှုန်း"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"အသံအနိမ့်အမြင့်"</string>
@@ -198,7 +198,7 @@
     <string name="tts_install_data_title" msgid="1829942496472751703">"အသံဒေတာများကို ထည့်သွင်းခြင်း"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"စကားသံပေါင်းစပ်မှုအတွက်လိုအပ်သောအသံဒေတာအား ထည့်သွင်းမည်"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"ဤစကားသံပေါင်းစပ်စနစ်အားအသုံးပြုရာရာတွင် သင့်ကိုယ်ရေးအချက်အလက်များဖြစ်သော စကားဝှက်များနှင့် ကရက်ဒစ်ကတ်နံပါတ်စသည်တို့အပါအဝင် သင်ပြောဆိုသောစာသားများအားလုံးကို ရယူသွားမည်ဖြစ်သည်။ ဤစနစ်သည် <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> မှ လာပါသည်။ ဤစကားသံပေါင်းစပ်စနစ်ကို အသုံးပြုမလား။"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"ဤဘာသာစကားသည် စာသားမှ အသံထွက်ရန် အလုပ်လုပ်သော ကွန်ရက်ချိတ်ဆက်မှု လိုအပ်သည်။"</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"ဤဘာသာစကားသည် စာ-မှ-စကား ပြောင်းရန် အလုပ်လုပ်သော ကွန်ရက်ချိတ်ဆက်မှု လိုအပ်သည်။"</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"ဤသည်မှာ အသံတုလုပ်ခြင်း ၏ နမူနာတစ်ခုဖြစ်သည်။"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"လက်ရှိဘာသာစကားအခြေအနေ"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> သည်အပြည့်အ၀ အထောက်အကူပြုသည်။"</string>

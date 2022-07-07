@@ -928,6 +928,7 @@ public class AppStandbyControllerTests {
     }
 
     @Test
+    @FlakyTest(bugId = 185169504)
     public void testNotificationEvent_quotaBump() throws Exception {
         mInjector.mSettingsBuilder
                 .setBoolean("trigger_quota_bump_on_notification_seen", true);

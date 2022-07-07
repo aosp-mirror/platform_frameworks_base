@@ -63,6 +63,8 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
     private static final String APEXD_TEST_APEX = "apex.apexd_test.apex";
     private static final String FAKE_APEX_SYSTEM_SERVER_APEX = "test_com.android.server.apex";
+    private static final String REBOOTLESS_V1 = "test.rebootless_apex_v1.apex";
+    private static final String REBOOTLESS_V2 = "test.rebootless_apex_v2.apex";
 
     private static final String TEST_VENDOR_APEX_ALLOW_LIST =
             "/vendor/etc/sysconfig/test-vendor-apex-allow-list.xml";
@@ -94,6 +96,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
                 "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
                 "/data/apex/active/" + SHIM_APEX_PACKAGE_NAME + "*.apex",
                 "/system/apex/test.rebootless_apex_v*.apex",
+                "/vendor/apex/test.rebootless_apex_v*.apex",
                 "/data/apex/active/test.apex.rebootless*.apex",
                 "/system/app/TestApp/TestAppAv1.apk",
                 TEST_VENDOR_APEX_ALLOW_LIST);
@@ -137,13 +140,17 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     }
 
     private void pushTestApex(String fileName) throws Exception {
+        pushTestApex(fileName, "system");
+    }
+
+    private void pushTestApex(String fileName, String partition) throws Exception {
         CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
         final File apex = buildHelper.getTestFile(fileName);
         if (!getDevice().isAdbRoot()) {
             getDevice().enableAdbRoot();
         }
         getDevice().remountSystemWritable();
-        assertTrue(getDevice().pushFile(apex, "/system/apex/" + fileName));
+        assertTrue(getDevice().pushFile(apex, "/" + partition + "/apex/" + fileName));
     }
 
     private void pushTestVendorApexAllowList(String installerPackageName) throws Exception {
@@ -495,6 +502,33 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
 
         runPhase("testVendorApexCorrectInstaller_staged");
         runPhase("testVendorApexCorrectInstaller_nonStaged");
+    }
+
+    /**
+     * Tests correctness of {@link android.content.pm.ApplicationInfo} for APEXes on /vendor.
+     */
+    @Test
+    @LargeTest
+    public void testVendorApex_Staged() throws Exception {
+        pushTestApex(REBOOTLESS_V1, "vendor");
+        getDevice().reboot();
+        runPhase("testVendorApex_VerifyFactory");
+        installPackage(REBOOTLESS_V2, "--staged");
+        getDevice().reboot();
+        runPhase("testVendorApex_VerifyData");
+    }
+
+    /**
+     * Tests correctness of {@link android.content.pm.ApplicationInfo} for APEXes on /vendor.
+     */
+    @Test
+    @LargeTest
+    public void testVendorApex_NonStaged() throws Exception {
+        pushTestApex(REBOOTLESS_V1, "vendor");
+        getDevice().reboot();
+        runPhase("testVendorApex_VerifyFactory");
+        installPackage(REBOOTLESS_V2, "--force-non-staged");
+        runPhase("testVendorApex_VerifyData");
     }
 
     @Test

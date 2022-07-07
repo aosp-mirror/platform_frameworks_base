@@ -170,19 +170,27 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
     @Test
     fun testCujSpecificationLogsInteraction() {
         val touchSurface = createTouchSurface()
-        return runOnMainThreadAndWaitForIdleSync {
+        runOnMainThreadAndWaitForIdleSync {
             val dialog = TestDialog(context)
             dialogLaunchAnimator.showFromView(
-                dialog, touchSurface,
-                cuj = DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN)
-            )
+                dialog, touchSurface, cuj = DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN))
         }
 
-        verify(interactionJankMonitor).begin(
-            any()
-        )
-        verify(interactionJankMonitor)
-            .end(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN)
+        verify(interactionJankMonitor).begin(any())
+        verify(interactionJankMonitor).end(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN)
+    }
+
+    @Test
+    fun testShowFromDialogCujSpecificationLogsInteraction() {
+        val firstDialog = createAndShowDialog()
+        runOnMainThreadAndWaitForIdleSync {
+            val dialog = TestDialog(context)
+            dialogLaunchAnimator.showFromDialog(
+                dialog, firstDialog, cuj = DialogCuj(InteractionJankMonitor.CUJ_USER_DIALOG_OPEN))
+            dialog
+        }
+        verify(interactionJankMonitor).begin(any())
+        verify(interactionJankMonitor).end(InteractionJankMonitor.CUJ_USER_DIALOG_OPEN)
     }
 
     private fun createAndShowDialog(): TestDialog {

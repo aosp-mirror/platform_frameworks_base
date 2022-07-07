@@ -487,7 +487,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         mNotificationPanelViewController = new NotificationPanelViewController(
                 mView,
-                mResources,
                 mMainHandler,
                 mLayoutInflater,
                 mFeatureFlags,
@@ -528,8 +527,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mQuickAccessWalletController,
                 mQrCodeScannerController,
                 mRecordingController,
-                mExecutor,
-                mSecureSettings,
                 mLargeScreenShadeHeaderController,
                 mScreenOffAnimationController,
                 mLockscreenGestureLogger,

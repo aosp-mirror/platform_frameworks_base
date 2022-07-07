@@ -202,6 +202,16 @@ class LockSettingsStorage extends WatchableImpl {
     }
 
     @VisibleForTesting
+    boolean isKeyValueCached(String key, int userId) {
+        return mCache.hasKeyValue(key, userId);
+    }
+
+    @VisibleForTesting
+    boolean isUserPrefetched(int userId) {
+        return mCache.isFetched(userId);
+    }
+
+    @VisibleForTesting
     public void removeKey(String key, int userId) {
         removeKey(mOpenHelper.getWritableDatabase(), key, userId);
     }
@@ -762,19 +772,24 @@ class LockSettingsStorage extends WatchableImpl {
         }
     }
 
-    /**
-     * Cache consistency model:
-     * - Writes to storage write directly to the cache, but this MUST happen within the atomic
-     *   section either provided by the database transaction or mWriteLock, such that writes to the
-     *   cache and writes to the backing storage are guaranteed to occur in the same order
+    /*
+     * A cache for the following types of data:
      *
-     * - Reads can populate the cache, but because they are no strong ordering guarantees with
-     *   respect to writes this precaution is taken:
-     *   - The cache is assigned a version number that increases every time the cache is modified.
-     *     Reads from backing storage can only populate the cache if the backing storage
-     *     has not changed since the load operation has begun.
-     *     This guarantees that no read operation can shadow a write to the cache that happens
-     *     after it had begun.
+     *  - Key-value entries from the locksettings database, where the key is the combination of a
+     *    userId and a string key, and the value is a string.
+     *  - File paths to file contents.
+     *  - The per-user "prefetched" flag.
+     *
+     * Cache consistency model:
+     *  - Writes to storage write directly to the cache, but this MUST happen within an atomic
+     *    section either provided by the database transaction or mFileWriteLock, such that writes to
+     *    the cache and writes to the backing storage are guaranteed to occur in the same order.
+     *  - Reads can populate the cache, but because there are no strong ordering guarantees with
+     *    respect to writes the following precaution is taken: The cache is assigned a version
+     *    number that increases every time the backing storage is modified. Reads from backing
+     *    storage can only populate the cache if the backing storage has not changed since the load
+     *    operation has begun. This guarantees that a read operation can't clobber a different value
+     *    that was written to the cache by a concurrent write operation.
      */
     private static class Cache {
         private final ArrayMap<CacheKey, Object> mCache = new ArrayMap<>();
@@ -819,7 +834,7 @@ class LockSettingsStorage extends WatchableImpl {
         }
 
         void setFetched(int userId) {
-            put(CacheKey.TYPE_FETCHED, "isFetched", "true", userId);
+            put(CacheKey.TYPE_FETCHED, "", "true", userId);
         }
 
         boolean isFetched(int userId) {
@@ -828,10 +843,11 @@ class LockSettingsStorage extends WatchableImpl {
 
         private synchronized void remove(int type, String key, int userId) {
             mCache.remove(mCacheKey.set(type, key, userId));
+            mVersion++;
         }
 
         private synchronized void put(int type, String key, Object value, int userId) {
-            // Create a new CachKey here because it may be saved in the map if the key is absent.
+            // Create a new CacheKey here because it may be saved in the map if the key is absent.
             mCache.put(new CacheKey().set(type, key, userId), value);
             mVersion++;
         }
@@ -839,7 +855,9 @@ class LockSettingsStorage extends WatchableImpl {
         private synchronized void putIfUnchanged(int type, String key, Object value, int userId,
                 int version) {
             if (!contains(type, key, userId) && mVersion == version) {
-                put(type, key, value, userId);
+                mCache.put(new CacheKey().set(type, key, userId), value);
+                // Don't increment mVersion, as this method should only be called in cases where the
+                // backing storage isn't being modified.
             }
         }
 

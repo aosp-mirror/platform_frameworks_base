@@ -19,6 +19,7 @@ package com.android.server.locksettings;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -60,7 +61,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * atest FrameworksServicesTests:LockSettingsStorageTests
@@ -137,12 +141,12 @@ public class LockSettingsStorageTests {
     }
 
     @Test
-    public void testKeyValue_Concurrency() {
+    public void testKeyValue_ReadWriteConcurrency() {
         final CountDownLatch latch = new CountDownLatch(1);
         List<Thread> threads = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             final int threadId = i;
-            threads.add(new Thread("testKeyValue_Concurrency_" + i) {
+            threads.add(new Thread("testKeyValue_ReadWriteConcurrency_" + i) {
                 @Override
                 public void run() {
                     try {
@@ -164,12 +168,58 @@ public class LockSettingsStorageTests {
             });
             threads.get(i).start();
         }
-        mStorage.writeKeyValue("key", "initalValue", 0);
+        mStorage.writeKeyValue("key", "initialValue", 0);
         latch.countDown();
         joinAll(threads, 10000);
         assertEquals('5', mStorage.readKeyValue("key", "default", 0).charAt(0));
         mStorage.clearCache();
         assertEquals('5', mStorage.readKeyValue("key", "default", 0).charAt(0));
+    }
+
+    // Test that readKeyValue() doesn't pollute the cache when run concurrently with removeKey().
+    @Test
+    @SuppressWarnings("AssertionFailureIgnored") // intentional try-catch of AssertionError
+    public void testKeyValue_ReadRemoveConcurrency() {
+        final int numThreads = 2;
+        final int numIterations = 50;
+        final CyclicBarrier barrier = new CyclicBarrier(numThreads);
+        final List<Thread> threads = new ArrayList<>();
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        for (int threadId = 0; threadId < numThreads; threadId++) {
+            final boolean isWriter = (threadId == 0);
+            threads.add(new Thread("testKeyValue_ReadRemoveConcurrency_" + threadId) {
+                @Override
+                public void run() {
+                    try {
+                        for (int iter = 0; iter < numIterations; iter++) {
+                            if (isWriter) {
+                                mStorage.writeKeyValue("key", "value", 0);
+                                mStorage.clearCache();
+                            }
+                            barrier.await();
+                            if (isWriter) {
+                                mStorage.removeKey("key", 0);
+                            } else {
+                                mStorage.readKeyValue("key", "default", 0);
+                            }
+                            barrier.await();
+                            try {
+                                assertEquals("default", mStorage.readKeyValue("key", "default", 0));
+                            } catch (AssertionError e) {
+                                failure.compareAndSet(null, e);
+                            }
+                            barrier.await();
+                        }
+                    } catch (InterruptedException | BrokenBarrierException e) {
+                        failure.compareAndSet(null, e);
+                        return;
+                    }
+                }
+            });
+            threads.get(threadId).start();
+        }
+        joinAll(threads, 60000);
+        assertNull(failure.get());
     }
 
     @Test
@@ -232,12 +282,22 @@ public class LockSettingsStorageTests {
 
     @Test
     public void testPrefetch() {
-        mStorage.writeKeyValue("key", "toBeFetched", 0);
+        mStorage.writeKeyValue("key1", "value1", 0);
+        mStorage.writeKeyValue("key2", "value2", 0);
 
         mStorage.clearCache();
+
+        assertFalse(mStorage.isUserPrefetched(0));
+        assertFalse(mStorage.isKeyValueCached("key1", 0));
+        assertFalse(mStorage.isKeyValueCached("key2", 0));
+
         mStorage.prefetchUser(0);
 
-        assertEquals("toBeFetched", mStorage.readKeyValue("key", "default", 0));
+        assertTrue(mStorage.isUserPrefetched(0));
+        assertTrue(mStorage.isKeyValueCached("key1", 0));
+        assertTrue(mStorage.isKeyValueCached("key2", 0));
+        assertEquals("value1", mStorage.readKeyValue("key1", "default", 0));
+        assertEquals("value2", mStorage.readKeyValue("key2", "default", 0));
     }
 
     @Test
