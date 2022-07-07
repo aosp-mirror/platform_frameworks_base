@@ -626,7 +626,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                     }
                 }, mainExecutor, bgExecutor);
 
-        mView.setBackgroundExecutor(bgExecutor);
         mView.setEdgeBackGestureHandler(mEdgeBackGestureHandler);
         mNavBarMode = mNavigationModeController.addListener(mModeChangedListener);
     }
