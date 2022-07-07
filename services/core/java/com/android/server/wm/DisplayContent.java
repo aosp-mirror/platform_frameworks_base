@@ -1035,6 +1035,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mCurrentUniqueDisplayId = display.getUniqueId();
         mOffTokenAcquirer = mRootWindowContainer.mDisplayOffTokenAcquirer;
         mWallpaperController = new WallpaperController(mWmService, this);
+        mWallpaperController.resetLargestDisplay(display);
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
         mSystemGestureExclusionLimit = mWmService.mConstants.mSystemGestureExclusionLimitDp
@@ -3187,6 +3188,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mWmService.mAccessibilityController.onDisplayRemoved(mDisplayId);
             mRootWindowContainer.mTaskSupervisor
                     .getKeyguardController().onDisplayRemoved(mDisplayId);
+            mWallpaperController.resetLargestDisplay(mDisplay);
         } finally {
             mDisplayReady = false;
         }
@@ -5765,6 +5767,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 updateRecording();
             }
         }
+        // Notify wallpaper controller of any size changes.
+        mWallpaperController.resetLargestDisplay(mDisplay);
         // Dispatch pending Configuration to WindowContext if the associated display changes to
         // un-suspended state from suspended.
         if (isSuspendedState(lastDisplayState)
