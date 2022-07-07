@@ -286,9 +286,9 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
     }
 
-    void onResizing(Rect newBounds, SurfaceControl.Transaction t) {
+    void onResizing(Rect newBounds, Rect sideBounds, SurfaceControl.Transaction t) {
         if (mSplitDecorManager != null && mRootTaskInfo != null) {
-            mSplitDecorManager.onResizing(mRootTaskInfo, newBounds, t);
+            mSplitDecorManager.onResizing(mRootTaskInfo, newBounds, sideBounds, t);
         }
     }
 
