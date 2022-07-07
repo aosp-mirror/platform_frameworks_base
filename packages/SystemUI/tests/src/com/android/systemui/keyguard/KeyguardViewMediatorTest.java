@@ -203,6 +203,13 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
     }
 
+    @Test
+    public void testHideSurfaceBehindKeyguardMarksKeyguardNotGoingAway() {
+        mViewMediator.hideSurfaceBehindKeyguard();
+
+        verify(mKeyguardStateController).notifyKeyguardGoingAway(false);
+    }
+
     private void createAndStartViewMediator() {
         mViewMediator = new KeyguardViewMediator(
                 mContext,

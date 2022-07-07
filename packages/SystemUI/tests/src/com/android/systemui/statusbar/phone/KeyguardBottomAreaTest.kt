@@ -42,7 +42,6 @@ class KeyguardBottomAreaTest : SysuiTestCase() {
 
         mKeyguardBottomArea = LayoutInflater.from(mContext).inflate(
                 R.layout.keyguard_bottom_area, null, false) as KeyguardBottomAreaView
-        mKeyguardBottomArea.setCentralSurfaces(mCentralSurfaces)
     }
 
     @Test

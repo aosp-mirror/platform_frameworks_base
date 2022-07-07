@@ -2801,6 +2801,7 @@ public final class ViewRootImpl implements ViewParent,
         if (viewVisibilityChanged) {
             mAttachInfo.mWindowVisibility = viewVisibility;
             host.dispatchWindowVisibilityChanged(viewVisibility);
+            mAttachInfo.mTreeObserver.dispatchOnWindowVisibilityChange(viewVisibility);
             if (viewUserVisibilityChanged) {
                 host.dispatchVisibilityAggregated(viewVisibility == View.VISIBLE);
             }

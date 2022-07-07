@@ -72,9 +72,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         //  pipeline, such as this DataStoreCoordinator which cannot be removed, as it's a critical
         //  glue between the pipeline and parts of SystemUI which depend on pipeline output via the
         //  NotifLiveDataStore.
-        if (notifPipelineFlags.isNewPipelineEnabled()) {
-            mCoordinators.add(dataStoreCoordinator)
-        }
+        mCoordinators.add(dataStoreCoordinator)
 
         // Attach normal coordinators.
         mCoordinators.add(hideLocallyDismissedNotifsCoordinator)
@@ -97,18 +95,14 @@ class NotifCoordinatorsImpl @Inject constructor(
         if (notifPipelineFlags.isSmartspaceDedupingEnabled()) {
             mCoordinators.add(smartspaceDedupingCoordinator)
         }
-        if (notifPipelineFlags.isNewPipelineEnabled()) {
-            mCoordinators.add(headsUpCoordinator)
-            mCoordinators.add(gutsCoordinator)
-            mCoordinators.add(preparationCoordinator)
-            mCoordinators.add(remoteInputCoordinator)
-        }
+        mCoordinators.add(headsUpCoordinator)
+        mCoordinators.add(gutsCoordinator)
+        mCoordinators.add(preparationCoordinator)
+        mCoordinators.add(remoteInputCoordinator)
 
         // Manually add Ordered Sections
         // HeadsUp > FGS > People > Alerting > Silent > Minimized > Unknown/Default
-        if (notifPipelineFlags.isNewPipelineEnabled()) {
-            mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
-        }
+        mOrderedSections.add(headsUpCoordinator.sectioner)
         mOrderedSections.add(appOpsCoordinator.sectioner) // ForegroundService
         mOrderedSections.add(conversationCoordinator.sectioner) // People
         mOrderedSections.add(rankingCoordinator.alertingSectioner) // Alerting
