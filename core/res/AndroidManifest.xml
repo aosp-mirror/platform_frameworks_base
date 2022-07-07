@@ -815,6 +815,10 @@
     <protected-broadcast android:name="android.app.action.PROVISIONING_COMPLETED" />
     <protected-broadcast android:name="android.app.action.LOST_MODE_LOCATION_UPDATE" />
 
+    <!-- Added in U -->
+    <protected-broadcast android:name="android.intent.action.PROFILE_ADDED" />
+    <protected-broadcast android:name="android.intent.action.PROFILE_REMOVED" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
