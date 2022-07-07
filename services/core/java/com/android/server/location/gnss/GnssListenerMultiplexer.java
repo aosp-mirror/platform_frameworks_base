@@ -18,6 +18,7 @@ package com.android.server.location.gnss;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
@@ -33,6 +34,7 @@ import android.os.Process;
 import android.util.ArraySet;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.location.injector.AppForegroundHelper;
 import com.android.server.location.injector.Injector;
@@ -67,21 +69,44 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
      * Registration object for GNSS listeners.
      */
     protected class GnssListenerRegistration extends
-            BinderListenerRegistration<TRequest, TListener> {
+            BinderListenerRegistration<IBinder, TListener> {
+
+        private final TRequest mRequest;
+        private final CallerIdentity mIdentity;
 
         // we store these values because we don't trust the listeners not to give us dupes, not to
         // spam us, and because checking the values may be more expensive
         private boolean mForeground;
         private boolean mPermitted;
 
-        protected GnssListenerRegistration(@Nullable TRequest request,
-                CallerIdentity callerIdentity, TListener listener) {
-            super(request, callerIdentity, listener);
+        protected GnssListenerRegistration(TRequest request, CallerIdentity identity,
+                TListener listener) {
+            super(identity.isMyProcess() ? FgThread.getExecutor() : DIRECT_EXECUTOR, listener);
+            mRequest = request;
+            mIdentity = identity;
+        }
+
+        public final TRequest getRequest() {
+            return mRequest;
+        }
+
+        public final CallerIdentity getIdentity() {
+            return mIdentity;
+        }
+
+        @Override
+        public String getTag() {
+            return TAG;
         }
 
         @Override
         protected GnssListenerMultiplexer<TRequest, TListener, TMergedRegistration> getOwner() {
             return GnssListenerMultiplexer.this;
+        }
+
+        @Override
+        protected IBinder getBinderFromKey(IBinder key) {
+            return key;
         }
 
         /**
@@ -96,31 +121,16 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         @Override
-        protected final void onBinderListenerRegister() {
+        protected void onRegister() {
+            super.onRegister();
+
             mPermitted = mLocationPermissionsHelper.hasLocationPermissions(PERMISSION_FINE,
-                    getIdentity());
-            mForeground = mAppForegroundHelper.isAppForeground(getIdentity().getUid());
-
-            onGnssListenerRegister();
+                    mIdentity);
+            mForeground = mAppForegroundHelper.isAppForeground(mIdentity.getUid());
         }
-
-        @Override
-        protected final void onBinderListenerUnregister() {
-            onGnssListenerUnregister();
-        }
-
-        /**
-         * May be overridden in place of {@link #onBinderListenerRegister()}.
-         */
-        protected void onGnssListenerRegister() {}
-
-        /**
-         * May be overridden in place of {@link #onBinderListenerUnregister()}.
-         */
-        protected void onGnssListenerUnregister() {}
 
         boolean onLocationPermissionsChanged(@Nullable String packageName) {
-            if (packageName == null || getIdentity().getPackageName().equals(packageName)) {
+            if (packageName == null || mIdentity.getPackageName().equals(packageName)) {
                 return onLocationPermissionsChanged();
             }
 
@@ -128,7 +138,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         boolean onLocationPermissionsChanged(int uid) {
-            if (getIdentity().getUid() == uid) {
+            if (mIdentity.getUid() == uid) {
                 return onLocationPermissionsChanged();
             }
 
@@ -137,7 +147,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
 
         private boolean onLocationPermissionsChanged() {
             boolean permitted = mLocationPermissionsHelper.hasLocationPermissions(PERMISSION_FINE,
-                    getIdentity());
+                    mIdentity);
             if (permitted != mPermitted) {
                 mPermitted = permitted;
                 return true;
@@ -147,7 +157,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         boolean onForegroundChanged(int uid, boolean foreground) {
-            if (getIdentity().getUid() == uid && foreground != mForeground) {
+            if (mIdentity.getUid() == uid && foreground != mForeground) {
                 mForeground = foreground;
                 return true;
             }
@@ -158,7 +168,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append(getIdentity());
+            builder.append(mIdentity);
 
             ArraySet<String> flags = new ArraySet<>(2);
             if (!mForeground) {
@@ -171,8 +181,8 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
                 builder.append(" ").append(flags);
             }
 
-            if (getRequest() != null) {
-                builder.append(" ").append(getRequest());
+            if (mRequest != null) {
+                builder.append(" ").append(mRequest);
             }
             return builder.toString();
         }
@@ -216,11 +226,6 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         mAppForegroundHelper = injector.getAppForegroundHelper();
         mLocationManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(LocationManagerInternal.class));
-    }
-
-    @Override
-    public String getTag() {
-        return TAG;
     }
 
     /**
