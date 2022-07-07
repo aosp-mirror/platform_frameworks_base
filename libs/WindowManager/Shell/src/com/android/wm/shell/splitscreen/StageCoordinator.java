@@ -171,6 +171,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final ShellExecutor mMainExecutor;
     private final Optional<RecentTasksController> mRecentTasks;
 
+    private final Rect mTempRect1 = new Rect();
+    private final Rect mTempRect2 = new Rect();
+
     /**
      * A single-top root task which the split divider attached to.
      */
@@ -749,7 +752,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         wct.reorder(mRootTaskInfo.token, false /* onTop */);
         mTaskOrganizer.applyTransaction(wct);
         mSyncQueue.runInSync(t -> {
-            setResizingSplits(false /* resizing */);
             t.setWindowCrop(mMainStage.mRootLeash, null)
                     .setWindowCrop(mSideStage.mRootLeash, null);
             setDividerVisibility(false, t);
@@ -1148,12 +1150,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         mDividerFadeInAnimator.cancel();
                         return;
                     }
+                    mSplitLayout.getRefDividerBounds(mTempRect1);
                     transaction.show(dividerLeash);
                     transaction.setAlpha(dividerLeash, 0);
                     transaction.setLayer(dividerLeash, Integer.MAX_VALUE);
-                    transaction.setPosition(dividerLeash,
-                                    mSplitLayout.getRefDividerBounds().left,
-                                    mSplitLayout.getRefDividerBounds().top);
+                    transaction.setPosition(dividerLeash, mTempRect1.left, mTempRect1.top);
                     transaction.apply();
                 }
 
@@ -1212,7 +1213,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             return;
         }
 
-        setResizingSplits(false /* resizing */);
         final int dismissTop = mainStageToTop ? STAGE_TYPE_MAIN : STAGE_TYPE_SIDE;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         prepareExitSplitScreen(dismissTop, wct);
@@ -1243,10 +1243,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     public void onLayoutSizeChanging(SplitLayout layout) {
         final SurfaceControl.Transaction t = mTransactionPool.acquire();
         t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
-        setResizingSplits(true /* resizing */);
         updateSurfaceBounds(layout, t, true /* applyResizingOffset */);
-        mMainStage.onResizing(getMainStageBounds(), t);
-        mSideStage.onResizing(getSideStageBounds(), t);
+        getMainStageBounds(mTempRect1);
+        getSideStageBounds(mTempRect2);
+        mMainStage.onResizing(mTempRect1, mTempRect2, t);
+        mSideStage.onResizing(mTempRect2, mTempRect1, t);
         t.apply();
         mTransactionPool.release(t);
     }
@@ -1258,7 +1259,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         sendOnBoundsChanged();
         mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t -> {
-            setResizingSplits(false /* resizing */);
             updateSurfaceBounds(layout, t, false /* applyResizingOffset */);
             mMainStage.onResized(t);
             mSideStage.onResized(t);
@@ -1291,16 +1291,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         (layout != null ? layout : mSplitLayout).applySurfaceChanges(t, topLeftStage.mRootLeash,
                 bottomRightStage.mRootLeash, topLeftStage.mDimLayer, bottomRightStage.mDimLayer,
                 applyResizingOffset);
-    }
-
-    void setResizingSplits(boolean resizing) {
-        if (resizing == mResizingSplits) return;
-        try {
-            ActivityTaskManager.getService().setSplitScreenResizing(resizing);
-            mResizingSplits = resizing;
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Error calling setSplitScreenResizing", e);
-        }
     }
 
     @Override
@@ -1384,6 +1374,22 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private Rect getMainStageBounds() {
         return mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT
                 ? mSplitLayout.getBounds2() : mSplitLayout.getBounds1();
+    }
+
+    private void getSideStageBounds(Rect rect) {
+        if (mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT) {
+            mSplitLayout.getBounds1(rect);
+        } else {
+            mSplitLayout.getBounds2(rect);
+        }
+    }
+
+    private void getMainStageBounds(Rect rect) {
+        if (mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT) {
+            mSplitLayout.getBounds2(rect);
+        } else {
+            mSplitLayout.getBounds1(rect);
+        }
     }
 
     /**

@@ -56,6 +56,7 @@ import com.android.wm.shell.common.SurfaceUtils;
 public class SplitDecorManager extends WindowlessWindowManager {
     private static final String TAG = SplitDecorManager.class.getSimpleName();
     private static final String RESIZING_BACKGROUND_SURFACE_NAME = "ResizingBackground";
+    private static final String GAP_BACKGROUND_SURFACE_NAME = "GapBackground";
     private static final long FADE_DURATION = 133;
 
     private final IconProvider mIconProvider;
@@ -67,6 +68,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
     private SurfaceControl mHostLeash;
     private SurfaceControl mIconLeash;
     private SurfaceControl mBackgroundLeash;
+    private SurfaceControl mGapBackgroundLeash;
 
     private boolean mShown;
     private boolean mIsResizing;
@@ -141,6 +143,10 @@ public class SplitDecorManager extends WindowlessWindowManager {
             t.remove(mBackgroundLeash);
             mBackgroundLeash = null;
         }
+        if (mGapBackgroundLeash != null) {
+            t.remove(mGapBackgroundLeash);
+            mGapBackgroundLeash = null;
+        }
         mHostLeash = null;
         mIcon = null;
         mResizingIconView = null;
@@ -150,7 +156,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     /** Showing resizing hint. */
     public void onResizing(ActivityManager.RunningTaskInfo resizingTask, Rect newBounds,
-            SurfaceControl.Transaction t) {
+            Rect sideBounds, SurfaceControl.Transaction t) {
         if (mResizingIconView == null) {
             return;
         }
@@ -174,6 +180,19 @@ public class SplitDecorManager extends WindowlessWindowManager {
                     RESIZING_BACKGROUND_SURFACE_NAME, mSurfaceSession);
             t.setColor(mBackgroundLeash, getResizingBackgroundColor(resizingTask))
                     .setLayer(mBackgroundLeash, Integer.MAX_VALUE - 1);
+        }
+
+        if (mGapBackgroundLeash == null) {
+            final boolean isLandscape = newBounds.height() == sideBounds.height();
+            final int left = isLandscape ? mBounds.width() : 0;
+            final int top = isLandscape ? 0 : mBounds.height();
+            mGapBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
+                    GAP_BACKGROUND_SURFACE_NAME, mSurfaceSession);
+            // Fill up another side bounds area.
+            t.setColor(mGapBackgroundLeash, getResizingBackgroundColor(resizingTask))
+                    .setLayer(mGapBackgroundLeash, Integer.MAX_VALUE - 2)
+                    .setPosition(mGapBackgroundLeash, left, top)
+                    .setWindowCrop(mGapBackgroundLeash, sideBounds.width(), sideBounds.height());
         }
 
         if (mIcon == null && resizingTask.topActivityInfo != null) {
@@ -225,6 +244,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
         }
         if (mShown) {
             startFadeAnimation(false /* show */, true /* isResized */);
+            mShown = false;
         } else {
             // Decor surface is hidden so release it directly.
             releaseDecor(t);
@@ -249,7 +269,9 @@ public class SplitDecorManager extends WindowlessWindowManager {
             @Override
             public void onAnimationStart(@NonNull Animator animation) {
                 if (show) {
-                    animT.show(mBackgroundLeash).show(mIconLeash).apply();
+                    animT.show(mBackgroundLeash).show(mIconLeash).show(mGapBackgroundLeash).apply();
+                } else {
+                    animT.hide(mGapBackgroundLeash).apply();
                 }
             }
 
@@ -278,6 +300,11 @@ public class SplitDecorManager extends WindowlessWindowManager {
         if (mBackgroundLeash != null) {
             t.remove(mBackgroundLeash);
             mBackgroundLeash = null;
+        }
+
+        if (mGapBackgroundLeash != null) {
+            t.remove(mGapBackgroundLeash);
+            mGapBackgroundLeash = null;
         }
 
         if (mIcon != null) {
