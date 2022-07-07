@@ -85,8 +85,6 @@ public class RootDisplayAreaOrganizer extends DisplayAreaOrganizer {
         }
 
         mDisplayAreasInfo.remove(displayId);
-        mLeashes.get(displayId).release();
-        mLeashes.remove(displayId);
     }
 
     @Override
