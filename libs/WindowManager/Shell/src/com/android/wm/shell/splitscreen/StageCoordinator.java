@@ -1534,8 +1534,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     @Override
-    public void onTransitionMerged(@NonNull IBinder transition) {
-        mSplitTransitions.onTransitionMerged(transition);
+    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted) {
+        mSplitTransitions.onTransitionConsumed(transition, aborted);
     }
 
     @Override

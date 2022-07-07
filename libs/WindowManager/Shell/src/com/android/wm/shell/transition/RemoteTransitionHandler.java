@@ -83,7 +83,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     }
 
     @Override
-    public void onTransitionMerged(@NonNull IBinder transition) {
+    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted) {
         mRequestedRemotes.remove(transition);
     }
 
