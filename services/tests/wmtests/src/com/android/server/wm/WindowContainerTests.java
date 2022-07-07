@@ -979,7 +979,7 @@ public class WindowContainerTests extends WindowTestsBase {
                     }
 
                     @Override
-                    public void onAnimationCancelled() {
+                    public void onAnimationCancelled(boolean isKeyguardOccluded) {
                     }
                 }, 0, 0, false);
         adapter.setCallingPidUid(123, 456);
