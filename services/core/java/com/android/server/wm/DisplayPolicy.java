@@ -1576,19 +1576,6 @@ public class DisplayPolicy {
         }
     }
 
-    void updateInsetsSourceFramesExceptIme(DisplayFrames displayFrames) {
-        sTmpClientFrames.attachedFrame = null;
-        for (int i = mInsetsSourceWindowsExceptIme.size() - 1; i >= 0; i--) {
-            final WindowState win = mInsetsSourceWindowsExceptIme.valueAt(i);
-            mWindowLayout.computeFrames(win.mAttrs.forRotation(displayFrames.mRotation),
-                    displayFrames.mInsetsState, displayFrames.mDisplayCutoutSafe,
-                    displayFrames.mUnrestricted, win.getWindowingMode(), UNSPECIFIED_LENGTH,
-                    UNSPECIFIED_LENGTH, win.getRequestedVisibilities(), win.mGlobalScale,
-                    sTmpClientFrames);
-            win.updateSourceFrame(sTmpClientFrames.frame);
-        }
-    }
-
     void onDisplayInfoChanged(DisplayInfo info) {
         mSystemGestures.onDisplayInfoChanged(info);
     }

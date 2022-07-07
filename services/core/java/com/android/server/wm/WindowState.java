@@ -389,7 +389,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * examine the git commit message introducing this comment and variable.2
      */
     int mSyncSeqId = 0;
-    int mLastSeqIdSentToRelayout = 0;
 
     /** The last syncId associated with a prepareSync or 0 when no sync is active. */
     int mPrepareSyncSeqId = 0;
@@ -425,6 +424,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mHaveFrame;
     boolean mObscured;
 
+    int mRelayoutSeq = -1;
     int mLayoutSeq = -1;
 
     /**
@@ -1349,29 +1349,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final WindowFrames windowFrames = mWindowFrames;
         mTmpRect.set(windowFrames.mParentFrame);
 
-        if (LOCAL_LAYOUT) {
-            windowFrames.mCompatFrame.set(clientWindowFrames.frame);
+        windowFrames.mDisplayFrame.set(clientWindowFrames.displayFrame);
+        windowFrames.mParentFrame.set(clientWindowFrames.parentFrame);
+        windowFrames.mFrame.set(clientWindowFrames.frame);
 
-            windowFrames.mFrame.set(clientWindowFrames.frame);
-            windowFrames.mDisplayFrame.set(clientWindowFrames.displayFrame);
-            windowFrames.mParentFrame.set(clientWindowFrames.parentFrame);
-            if (mGlobalScale != 1f) {
-                // The frames sent from the client need to be adjusted to the real coordinate space.
-                windowFrames.mFrame.scale(mGlobalScale);
-                windowFrames.mDisplayFrame.scale(mGlobalScale);
-                windowFrames.mParentFrame.scale(mGlobalScale);
-            }
-        } else {
-            windowFrames.mDisplayFrame.set(clientWindowFrames.displayFrame);
-            windowFrames.mParentFrame.set(clientWindowFrames.parentFrame);
-            windowFrames.mFrame.set(clientWindowFrames.frame);
-
-            windowFrames.mCompatFrame.set(windowFrames.mFrame);
-            if (mInvGlobalScale != 1f) {
-                // Also, the scaled frame that we report to the app needs to be adjusted to be in
-                // its coordinate space.
-                windowFrames.mCompatFrame.scale(mInvGlobalScale);
-            }
+        windowFrames.mCompatFrame.set(windowFrames.mFrame);
+        if (mInvGlobalScale != 1f) {
+            // Also, the scaled frame that we report to the app needs to be adjusted to be in
+            // its coordinate space.
+            windowFrames.mCompatFrame.scale(mInvGlobalScale);
         }
         windowFrames.setParentFrameWasClippedByDisplayCutout(
                 clientWindowFrames.isParentFrameClippedByDisplayCutout);
@@ -1414,13 +1400,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         updateSourceFrame(windowFrames.mFrame);
-
-        if (LOCAL_LAYOUT) {
-            if (!mHaveFrame) {
-                // The first frame should not be considered as moved.
-                updateLastFrames();
-            }
-        }
 
         if (mActivityRecord != null && !mIsChildWindow) {
             mActivityRecord.layoutLetterbox(this);

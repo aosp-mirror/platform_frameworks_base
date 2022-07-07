@@ -2243,11 +2243,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int relayoutWindow(Session session, IWindow client, LayoutParams attrs,
-            int requestedWidth, int requestedHeight, int viewVisibility, int flags,
-            ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
-            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Bundle outSyncIdBundle) {
-        Arrays.fill(outActiveControls, null);
+            int requestedWidth, int requestedHeight, int viewVisibility, int flags, int seq,
+            int lastSyncSeqId, ClientWindowFrames outFrames,
+            MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
+            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls,
+            Bundle outSyncIdBundle) {
+        if (outActiveControls != null) {
+            Arrays.fill(outActiveControls, null);
+        }
         int result = 0;
         boolean configChanged;
         final int pid = Binder.getCallingPid();
@@ -2258,8 +2261,15 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win == null) {
                 return 0;
             }
+            if (win.mRelayoutSeq < seq) {
+                win.mRelayoutSeq = seq;
+            } else if (win.mRelayoutSeq > seq) {
+                return 0;
+            }
 
-            if (win.cancelAndRedraw() && win.mPrepareSyncSeqId <= win.mLastSeqIdSentToRelayout) {
+            if (win.cancelAndRedraw() && win.mPrepareSyncSeqId <= lastSyncSeqId) {
+                // The client has reported the sync draw, but we haven't finished it yet.
+                // Don't let the client perform a non-sync draw at this time.
                 result |= RELAYOUT_RES_CANCEL_AND_REDRAW;
             }
 
@@ -2422,7 +2432,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Create surfaceControl before surface placement otherwise layout will be skipped
             // (because WS.isGoneForLayout() is true when there is no surface.
-            if (shouldRelayout) {
+            if (shouldRelayout && outSurfaceControl != null) {
                 try {
                     result = createSurfaceControl(outSurfaceControl, result, win, winAnimator);
                 } catch (Exception e) {
@@ -2461,22 +2471,25 @@ public class WindowManagerService extends IWindowManager.Stub
                 winAnimator.mEnterAnimationPending = false;
                 winAnimator.mEnteringAnimation = false;
 
-                if (viewVisibility == View.VISIBLE && winAnimator.hasSurface()) {
-                    // We already told the client to go invisible, but the message may not be
-                    // handled yet, or it might want to draw a last frame. If we already have a
-                    // surface, let the client use that, but don't create new surface at this point.
-                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: getSurface");
-                    winAnimator.mSurfaceController.getSurfaceControl(outSurfaceControl);
-                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                } else {
-                    if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Releasing surface in: " + win);
-
-                    try {
-                        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "wmReleaseOutSurface_"
-                                + win.mAttrs.getTitle());
-                        outSurfaceControl.release();
-                    } finally {
+                if (outSurfaceControl != null) {
+                    if (viewVisibility == View.VISIBLE && winAnimator.hasSurface()) {
+                        // We already told the client to go invisible, but the message may not be
+                        // handled yet, or it might want to draw a last frame. If we already have a
+                        // surface, let the client use that, but don't create new surface at this
+                        // point.
+                        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: getSurface");
+                        winAnimator.mSurfaceController.getSurfaceControl(outSurfaceControl);
                         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                    } else {
+                        if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Releasing surface in: " + win);
+
+                        try {
+                            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "wmReleaseOutSurface_"
+                                    + win.mAttrs.getTitle());
+                            outSurfaceControl.release();
+                        } finally {
+                            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                        }
                     }
                 }
 
@@ -2529,20 +2542,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mResizedWhileGone = false;
             }
 
-            win.fillClientWindowFramesAndConfiguration(outFrames, mergedConfiguration,
-                    false /* useLatestConfig */, shouldRelayout);
+            if (outFrames != null && outMergedConfiguration != null) {
+                win.fillClientWindowFramesAndConfiguration(outFrames, outMergedConfiguration,
+                        false /* useLatestConfig */, shouldRelayout);
 
-            // Set resize-handled here because the values are sent back to the client.
-            win.onResizeHandled();
+                // Set resize-handled here because the values are sent back to the client.
+                win.onResizeHandled();
+            }
 
-            outInsetsState.set(win.getCompatInsetsState(), win.isClientLocal());
-            if (DEBUG) {
-                Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
-                        + ", requestedWidth=" + requestedWidth
-                        + ", requestedHeight=" + requestedHeight
-                        + ", viewVisibility=" + viewVisibility
-                        + "\nRelayout returning frame=" + outFrames.frame
-                        + ", surface=" + outSurfaceControl);
+            if (outInsetsState != null) {
+                outInsetsState.set(win.getCompatInsetsState(), win.isClientLocal());
             }
 
             ProtoLog.v(WM_DEBUG_FOCUS, "Relayout of %s: focusMayChange=%b",
@@ -2553,14 +2562,16 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             win.mInRelayout = false;
 
-            if (USE_BLAST_SYNC && win.useBLASTSync() && viewVisibility != View.GONE
-                    && (win.mSyncSeqId > win.mLastSeqIdSentToRelayout)) {
-                win.markRedrawForSyncReported();
-
-                win.mLastSeqIdSentToRelayout = win.mSyncSeqId;
-                outSyncIdBundle.putInt("seqid", win.mSyncSeqId);
-            } else {
-                outSyncIdBundle.putInt("seqid", -1);
+            if (outSyncIdBundle != null) {
+                final int maybeSyncSeqId;
+                if (USE_BLAST_SYNC && win.useBLASTSync() && viewVisibility != View.GONE
+                        && win.mSyncSeqId > lastSyncSeqId) {
+                    maybeSyncSeqId = win.mSyncSeqId;
+                    win.markRedrawForSyncReported();
+                } else {
+                    maybeSyncSeqId = -1;
+                }
+                outSyncIdBundle.putInt("seqid", maybeSyncSeqId);
             }
 
             if (configChanged) {
@@ -2569,7 +2580,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.sendNewConfiguration();
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             }
-            getInsetsSourceControls(win, outActiveControls);
+            if (outActiveControls != null) {
+                getInsetsSourceControls(win, outActiveControls);
+            }
         }
 
         Binder.restoreCallingIdentity(origId);
