@@ -38,6 +38,8 @@ import android.window.WindowContainerTransaction;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 
+import java.util.function.Supplier;
+
 /**
  * Manages a container surface and a windowless window to show window decoration. Responsible to
  * update window decoration window state and layout parameters on task info changes and so that
@@ -53,7 +55,8 @@ import com.android.wm.shell.common.DisplayController;
  *
  * @param <T> The type of the root view
  */
-public class WindowDecoration<T extends View & TaskFocusStateConsumer> implements AutoCloseable {
+public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
+        implements AutoCloseable {
     private static final int[] CAPTION_INSETS_TYPES = { InsetsState.ITYPE_CAPTION_BAR };
 
     /**
@@ -62,6 +65,20 @@ public class WindowDecoration<T extends View & TaskFocusStateConsumer> implement
     final Context mContext;
     final DisplayController mDisplayController;
     final ShellTaskOrganizer mTaskOrganizer;
+    final Supplier<SurfaceControl.Builder> mSurfaceControlBuilderSupplier;
+    final SurfaceControlViewHostFactory mSurfaceControlViewHostFactory;
+    private final DisplayController.OnDisplaysChangedListener mOnDisplaysChangedListener =
+            new DisplayController.OnDisplaysChangedListener() {
+                @Override
+                public void onDisplayAdded(int displayId) {
+                    if (mTaskInfo.displayId != displayId) {
+                        return;
+                    }
+
+                    mDisplayController.removeDisplayWindowListener(this);
+                    relayout(mTaskInfo);
+                }
+            };
 
     RunningTaskInfo mTaskInfo;
     final SurfaceControl mTaskSurface;
@@ -71,7 +88,7 @@ public class WindowDecoration<T extends View & TaskFocusStateConsumer> implement
     SurfaceControl mDecorationContainerSurface;
     SurfaceControl mTaskBackgroundSurface;
 
-    private CaptionWindowManager mCaptionWindowManager;
+    private final CaptionWindowManager mCaptionWindowManager;
     private SurfaceControlViewHost mViewHost;
 
     private final Rect mCaptionInsetsRect = new Rect();
@@ -84,11 +101,25 @@ public class WindowDecoration<T extends View & TaskFocusStateConsumer> implement
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface) {
+        this(context, displayController, taskOrganizer, taskInfo, taskSurface,
+                SurfaceControl.Builder::new, new SurfaceControlViewHostFactory() {});
+    }
+
+    WindowDecoration(
+            Context context,
+            DisplayController displayController,
+            ShellTaskOrganizer taskOrganizer,
+            RunningTaskInfo taskInfo,
+            SurfaceControl taskSurface,
+            Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
+            SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
         mContext = context;
         mDisplayController = displayController;
         mTaskOrganizer = taskOrganizer;
         mTaskInfo = taskInfo;
         mTaskSurface = taskSurface;
+        mSurfaceControlBuilderSupplier = surfaceControlBuilderSupplier;
+        mSurfaceControlViewHostFactory = surfaceControlViewHostFactory;
 
         mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
         mDecorWindowContext = mContext.createConfigurationContext(mTaskInfo.getConfiguration());
@@ -98,6 +129,15 @@ public class WindowDecoration<T extends View & TaskFocusStateConsumer> implement
         mCaptionWindowManager =
                 new CaptionWindowManager(mTaskInfo.getConfiguration(), mTaskSurface);
     }
+
+    /**
+     * Used by {@link WindowDecoration} to trigger a new relayout because the requirements for a
+     * relayout weren't satisfied are satisfied now.
+     *
+     * @param taskInfo The previous {@link RunningTaskInfo} passed into {@link #relayout} or the
+     *                 constructor.
+     */
+    abstract void relayout(RunningTaskInfo taskInfo);
 
     void relayout(RunningTaskInfo taskInfo, int layoutResId, T rootView, float captionHeightDp,
             Rect outsetsDp, float shadowRadiusDp, SurfaceControl.Transaction t,
@@ -110,7 +150,7 @@ public class WindowDecoration<T extends View & TaskFocusStateConsumer> implement
         }
 
         if (!mTaskInfo.isVisible) {
-            close();
+            releaseViews();
             t.hide(mTaskSurface);
             return;
         }
@@ -123,10 +163,14 @@ public class WindowDecoration<T extends View & TaskFocusStateConsumer> implement
         rootView = null; // Clear it just in case we use it accidentally
         final Configuration taskConfig = mTaskInfo.getConfiguration();
         if (oldTaskConfig.densityDpi != taskConfig.densityDpi
+                || mDisplay == null
                 || mDisplay.getDisplayId() != mTaskInfo.displayId) {
-            close();
+            releaseViews();
 
-            mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
+            if (!obtainDisplayOrRegisterListener()) {
+                outResult.mRootView = null;
+                return;
+            }
             mDecorWindowContext = mContext.createConfigurationContext(taskConfig);
             if (layoutResId != 0) {
                 outResult.mRootView =
@@ -141,7 +185,7 @@ public class WindowDecoration<T extends View & TaskFocusStateConsumer> implement
 
         // DecorationContainerSurface
         if (mDecorationContainerSurface == null) {
-            final SurfaceControl.Builder builder = new SurfaceControl.Builder();
+            final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
             mDecorationContainerSurface = builder
                     .setName("Decor container of Task=" + mTaskInfo.taskId)
                     .setContainerLayer()
@@ -168,7 +212,7 @@ public class WindowDecoration<T extends View & TaskFocusStateConsumer> implement
 
         // TaskBackgroundSurface
         if (mTaskBackgroundSurface == null) {
-            final SurfaceControl.Builder builder = new SurfaceControl.Builder();
+            final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
             mTaskBackgroundSurface = builder
                     .setName("Background of Task=" + mTaskInfo.taskId)
                     .setEffectLayer()
@@ -195,7 +239,7 @@ public class WindowDecoration<T extends View & TaskFocusStateConsumer> implement
         lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();
         if (mViewHost == null) {
-            mViewHost = new SurfaceControlViewHost(mDecorWindowContext, mDisplay,
+            mViewHost = mSurfaceControlViewHostFactory.create(mDecorWindowContext, mDisplay,
                     mCaptionWindowManager, true);
             mViewHost.setView(outResult.mRootView, lp);
         } else {
@@ -225,8 +269,22 @@ public class WindowDecoration<T extends View & TaskFocusStateConsumer> implement
                 .show(mTaskSurface);
     }
 
-    @Override
-    public void close() {
+    /**
+     * Obtains the {@link Display} instance for the display ID in {@link #mTaskInfo} if it exists or
+     * registers {@link #mOnDisplaysChangedListener} if it doesn't.
+     *
+     * @return {@code true} if the {@link Display} instance exists; or {@code false} otherwise
+     */
+    private boolean obtainDisplayOrRegisterListener() {
+        mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
+        if (mDisplay == null) {
+            mDisplayController.addDisplayWindowListener(mOnDisplaysChangedListener);
+            return false;
+        }
+        return true;
+    }
+
+    private void releaseViews() {
         if (mViewHost != null) {
             mViewHost.release();
             mViewHost = null;
@@ -241,6 +299,12 @@ public class WindowDecoration<T extends View & TaskFocusStateConsumer> implement
             mTaskBackgroundSurface.release();
             mTaskBackgroundSurface = null;
         }
+    }
+
+    @Override
+    public void close() {
+        mDisplayController.removeDisplayWindowListener(mOnDisplaysChangedListener);
+        releaseViews();
     }
 
     static class RelayoutResult<T extends View & TaskFocusStateConsumer> {
@@ -265,6 +329,13 @@ public class WindowDecoration<T extends View & TaskFocusStateConsumer> implement
         @Override
         public void setConfiguration(Configuration configuration) {
             super.setConfiguration(configuration);
+        }
+    }
+
+    interface SurfaceControlViewHostFactory {
+        default SurfaceControlViewHost create(
+                Context c, Display d, WindowlessWindowManager wmm, boolean useSfChoreographer) {
+            return new SurfaceControlViewHost(c, d, wmm, useSfChoreographer);
         }
     }
 }
