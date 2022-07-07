@@ -45,12 +45,10 @@ import android.app.WindowConfiguration;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipDescription;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.LauncherApps;
-import android.content.pm.ResolveInfo;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -64,19 +62,15 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.InstanceId;
-import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
-import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The policy for handling drag and drop operations to shell.
@@ -269,44 +263,8 @@ public class DragAndDropPolicy {
             mStarter.startShortcut(packageName, id, position, opts, user);
         } else {
             final PendingIntent launchIntent = intent.getParcelableExtra(EXTRA_PENDING_INTENT);
-            mStarter.startIntent(launchIntent, getStartIntentFillInIntent(launchIntent, position),
-                    position, opts);
+            mStarter.startIntent(launchIntent, null /* fillIntent */, position, opts);
         }
-    }
-
-    /**
-     * Returns the fill-in intent to use when starting an app from a drop.
-     */
-    @VisibleForTesting
-    Intent getStartIntentFillInIntent(PendingIntent launchIntent, @SplitPosition int position) {
-        // Get the drag app
-        final List<ResolveInfo> infos = launchIntent.queryIntentComponents(0 /* flags */);
-        final ComponentName dragIntentActivity = !infos.isEmpty()
-                ? infos.get(0).activityInfo.getComponentName()
-                : null;
-
-        // Get the current app (either fullscreen or the remaining app post-drop if in splitscreen)
-        final boolean inSplitScreen = mSplitScreen != null
-                && mSplitScreen.isSplitScreenVisible();
-        final ComponentName currentActivity;
-        if (!inSplitScreen) {
-            currentActivity = mSession.runningTaskInfo != null
-                    ? mSession.runningTaskInfo.baseIntent.getComponent()
-                    : null;
-        } else {
-            final ActivityManager.RunningTaskInfo nonReplacedTaskInfo =
-                    mSplitScreen.getTaskInfo(SplitLayout.reversePosition(position));
-            currentActivity = nonReplacedTaskInfo.baseIntent.getComponent();
-        }
-
-        if (Objects.equals(currentActivity, dragIntentActivity)) {
-            // Only apply MULTIPLE_TASK if we are dragging the same activity
-            final Intent fillInIntent = new Intent();
-            fillInIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Adding MULTIPLE_TASK");
-            return fillInIntent;
-        }
-        return null;
     }
 
     /**

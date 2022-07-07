@@ -34,7 +34,6 @@ import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPL
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
 
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
@@ -57,7 +56,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
@@ -263,62 +261,6 @@ public class DragAndDropPolicyTest {
             assertTrue(mPolicy.getTargetAtLocation(t.hitRegion.left, t.hitRegion.bottom - 1)
                     == t);
         }
-    }
-
-    @Test
-    public void testLaunchMultipleTask_differentActivity() {
-        setRunningTask(mFullscreenAppTask);
-        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
-        Intent fillInIntent = mPolicy.getStartIntentFillInIntent(mock(PendingIntent.class), 0);
-        assertNull(fillInIntent);
-    }
-
-    @Test
-    public void testLaunchMultipleTask_differentActivity_inSplitscreen() {
-        setRunningTask(mFullscreenAppTask);
-        doReturn(true).when(mSplitScreenStarter).isSplitScreenVisible();
-        doReturn(mFullscreenAppTask).when(mSplitScreenStarter).getTaskInfo(anyInt());
-        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
-        Intent fillInIntent = mPolicy.getStartIntentFillInIntent(mock(PendingIntent.class), 0);
-        assertNull(fillInIntent);
-    }
-
-    @Test
-    public void testLaunchMultipleTask_sameActivity() {
-        setRunningTask(mFullscreenAppTask);
-
-        // Replace the mocked drag pending intent and ensure it resolves to the same activity
-        PendingIntent launchIntent = mock(PendingIntent.class);
-        ResolveInfo launchInfo = new ResolveInfo();
-        launchInfo.activityInfo = mFullscreenAppTask.topActivityInfo;
-        doReturn(Collections.singletonList(launchInfo))
-                .when(launchIntent).queryIntentComponents(anyInt());
-        mActivityClipData.getItemAt(0).getIntent().putExtra(ClipDescription.EXTRA_PENDING_INTENT,
-                launchIntent);
-
-        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
-        Intent fillInIntent = mPolicy.getStartIntentFillInIntent(launchIntent, 0);
-        assertTrue((fillInIntent.getFlags() & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) != 0);
-    }
-
-    @Test
-    public void testLaunchMultipleTask_sameActivity_inSplitScreen() {
-        setRunningTask(mFullscreenAppTask);
-
-        // Replace the mocked drag pending intent and ensure it resolves to the same activity
-        PendingIntent launchIntent = mock(PendingIntent.class);
-        ResolveInfo launchInfo = new ResolveInfo();
-        launchInfo.activityInfo = mFullscreenAppTask.topActivityInfo;
-        doReturn(Collections.singletonList(launchInfo))
-                .when(launchIntent).queryIntentComponents(anyInt());
-        mActivityClipData.getItemAt(0).getIntent().putExtra(ClipDescription.EXTRA_PENDING_INTENT,
-                launchIntent);
-
-        doReturn(true).when(mSplitScreenStarter).isSplitScreenVisible();
-        doReturn(mFullscreenAppTask).when(mSplitScreenStarter).getTaskInfo(anyInt());
-        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
-        Intent fillInIntent = mPolicy.getStartIntentFillInIntent(launchIntent, 0);
-        assertTrue((fillInIntent.getFlags() & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) != 0);
     }
 
     private Target filterTargetByType(ArrayList<Target> targets, int type) {
