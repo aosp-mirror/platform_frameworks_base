@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.shade;
 
 import static android.view.WindowInsets.Type.systemBars;
 
@@ -52,6 +52,7 @@ import android.widget.FrameLayout;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 /**
  * Combined keyguard and notification panel view. Also holding backdrop and scrims.

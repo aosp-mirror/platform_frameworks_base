@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.shade;
 
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 
@@ -140,6 +140,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -176,12 +177,35 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
+import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
+import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
+import com.android.systemui.statusbar.phone.KeyguardBottomAreaViewController;
+import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.KeyguardClockPositionAlgorithm;
+import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
+import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
+import com.android.systemui.statusbar.phone.LargeScreenShadeHeaderController;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
+import com.android.systemui.statusbar.phone.PanelView;
+import com.android.systemui.statusbar.phone.PanelViewController;
+import com.android.systemui.statusbar.phone.PhoneStatusBarView;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.phone.TapAgainViewController;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.phone.panelstate.PanelState;
-import com.android.systemui.statusbar.phone.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -1679,10 +1703,15 @@ public final class NotificationPanelViewController extends PanelViewController {
         setQsExpansion(mQsMinExpansionHeight);
     }
 
+    @Override
+    @VisibleForTesting
+    protected void cancelHeightAnimator() {
+        super.cancelHeightAnimator();
+    }
+
     public void cancelAnimation() {
         mView.animate().cancel();
     }
-
 
     /**
      * Animate QS closing by flinging it.
@@ -2977,7 +3006,7 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
-    protected int getMaxPanelHeight() {
+    public int getMaxPanelHeight() {
         int min = mStatusBarMinHeight;
         if (!(mBarState == KEYGUARD)
                 && mNotificationStackScrollLayoutController.getNotGoneChildCount() == 0) {
@@ -3081,7 +3110,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         }
     }
 
-    boolean isPanelExpanded() {
+    public boolean isPanelExpanded() {
         return mPanelExpanded;
     }
 
@@ -4872,6 +4901,16 @@ public final class NotificationPanelViewController extends PanelViewController {
     /** Returns the handler that the status bar should forward touches to. */
     public PhoneStatusBarView.TouchEventHandler getStatusBarTouchEventHandler() {
         return mStatusBarViewTouchEventHandler;
+    }
+
+    @VisibleForTesting
+    StatusBarStateController getStatusBarStateController() {
+        return mStatusBarStateController;
+    }
+
+    @VisibleForTesting
+    boolean isHintAnimationRunning() {
+        return mHintAnimationRunning;
     }
 
     private void onStatusBarWindowStateChanged(@StatusBarManager.WindowVisibleState int state) {
