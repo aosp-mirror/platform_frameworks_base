@@ -209,6 +209,12 @@ open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter) :
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appWindowIsTopWindowAtEnd() =
+        super.appWindowIsTopWindowAtEnd()
+
     companion object {
         /**
          * Creates the test configurations.

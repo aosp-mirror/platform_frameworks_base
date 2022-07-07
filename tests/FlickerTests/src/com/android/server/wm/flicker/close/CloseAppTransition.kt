@@ -191,6 +191,10 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
     @Presubmit
     @Test
     open fun launcherLayerReplacesApp() {
-        testSpec.replacesLayer(testApp.component, LAUNCHER)
+        testSpec.replacesLayer(
+            testApp.component,
+            LAUNCHER,
+            ignoreEntriesWithRotationLayer = testSpec.isLandscapeOrSeascapeAtStart
+        )
     }
 }
