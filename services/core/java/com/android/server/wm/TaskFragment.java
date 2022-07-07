@@ -152,6 +152,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     final RootWindowContainer mRootWindowContainer;
     private final TaskFragmentOrganizerController mTaskFragmentOrganizerController;
 
+    // TODO(b/233177466): Move mMinWidth and mMinHeight to Task and remove usages in TaskFragment
     /**
      * Minimal width of this task fragment when it's resizeable. {@link #INVALID_MIN_SIZE} means it
      * should use the default minimal width.
@@ -533,6 +534,25 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     boolean isAllowedToEmbedActivity(@NonNull ActivityRecord a, int uid) {
         return isAllowedToEmbedActivityInUntrustedMode(a)
                 || isAllowedToEmbedActivityInTrustedMode(a, uid);
+    }
+
+    boolean smallerThanMinDimension(@NonNull ActivityRecord activity) {
+        final Rect taskFragBounds = getBounds();
+        final Task task = getTask();
+        // Don't need to check if the bounds match parent Task bounds because the fallback mechanism
+        // is to reparent the Activity to parent if minimum dimensions are not satisfied.
+        if (task == null || taskFragBounds.equals(task.getBounds())) {
+            return false;
+        }
+        final Point minDimensions = activity.getMinDimensions();
+        if (minDimensions == null) {
+            return false;
+        }
+        final int minWidth = minDimensions.x;
+        final int minHeight = minDimensions.y;
+        final boolean smaller = taskFragBounds.width() < minWidth
+                || taskFragBounds.height() < minHeight;
+        return smaller;
     }
 
     /**
@@ -1755,7 +1775,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mClearedTaskForReuse = false;
         mClearedTaskFragmentForPip = false;
 
-        boolean isAddingActivity = child.asActivityRecord() != null;
+        final ActivityRecord addingActivity = child.asActivityRecord();
+        final boolean isAddingActivity = addingActivity != null;
         final Task task = isAddingActivity ? getTask() : null;
 
         // If this task had any activity before we added this one.
@@ -1780,7 +1801,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 mBackScreenshots.put(r.mActivityComponent.flattenToString(), backBuffer);
             }
             child.asActivityRecord().inHistory = true;
-            task.onDescendantActivityAdded(taskHadActivity, activityType, child.asActivityRecord());
+            task.onDescendantActivityAdded(taskHadActivity, activityType, addingActivity);
         }
     }
 
@@ -2294,7 +2315,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     TaskFragmentInfo getTaskFragmentInfo() {
         List<IBinder> childActivities = new ArrayList<>();
         for (int i = 0; i < getChildCount(); i++) {
-            final WindowContainer wc = getChildAt(i);
+            final WindowContainer<?> wc = getChildAt(i);
             final ActivityRecord ar = wc.asActivityRecord();
             if (mTaskFragmentOrganizerUid != INVALID_UID && ar != null
                     && ar.info.processName.equals(mTaskFragmentOrganizerProcessName)
@@ -2314,7 +2335,31 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 childActivities,
                 positionInParent,
                 mClearedTaskForReuse,
-                mClearedTaskFragmentForPip);
+                mClearedTaskFragmentForPip,
+                calculateMinDimension());
+    }
+
+    /**
+     * Calculates the minimum dimensions that this TaskFragment can be resized.
+     * @see TaskFragmentInfo#getMinimumWidth()
+     * @see TaskFragmentInfo#getMinimumHeight()
+     */
+    Point calculateMinDimension() {
+        final int[] maxMinWidth = new int[1];
+        final int[] maxMinHeight = new int[1];
+
+        forAllActivities(a -> {
+            if (a.finishing) {
+                return;
+            }
+            final Point minDimensions = a.getMinDimensions();
+            if (minDimensions == null) {
+                return;
+            }
+            maxMinWidth[0] = Math.max(maxMinWidth[0], minDimensions.x);
+            maxMinHeight[0] = Math.max(maxMinHeight[0], minDimensions.y);
+        });
+        return new Point(maxMinWidth[0], maxMinHeight[0]);
     }
 
     @Nullable

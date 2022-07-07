@@ -174,7 +174,7 @@ public final class PresentationStatsEventLogger {
 
     public void logAndEndEvent() {
         if (!mEventInternal.isPresent()) {
-            Slog.wtf(null, "Shouldn't be logging AutofillPresentationEventReported again for same "
+            Slog.w(TAG, "Shouldn't be logging AutofillPresentationEventReported again for same "
                     + "event");
             return;
         }

@@ -155,8 +155,8 @@ class MediaDeviceManager @Inject constructor(
         private var playbackType = PLAYBACK_TYPE_UNKNOWN
         private var current: MediaDeviceData? = null
             set(value) {
-                val hasSameId = value?.id != null && value.id == field?.id
-                if (!started || (!hasSameId && value != field)) {
+                val sameWithoutIcon = value != null && value.equalsWithoutIcon(field)
+                if (!started || !sameWithoutIcon) {
                     field = value
                     fgExecutor.execute {
                         processDevice(key, oldKey, value)

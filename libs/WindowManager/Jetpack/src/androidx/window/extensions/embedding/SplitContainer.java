@@ -18,6 +18,8 @@ package androidx.window.extensions.embedding;
 
 import android.annotation.NonNull;
 import android.app.Activity;
+import android.util.Pair;
+import android.util.Size;
 
 /**
  * Client-side descriptor of a split that holds two containers.
@@ -64,6 +66,13 @@ class SplitContainer {
     @NonNull
     SplitRule getSplitRule() {
         return mSplitRule;
+    }
+
+    /** Returns the minimum dimension pair of primary container and secondary container. */
+    @NonNull
+    Pair<Size, Size> getMinDimensionsPair() {
+        return new Pair<>(mPrimaryContainer.getMinDimensions(),
+                mSecondaryContainer.getMinDimensions());
     }
 
     boolean isPlaceholderContainer() {

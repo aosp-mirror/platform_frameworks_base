@@ -926,7 +926,7 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Lägg inte till ruta"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Välj användare"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> apps är aktiva</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> appar är aktiva</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> app är aktiv</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Ny information"</string>
@@ -945,14 +945,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Texten har kopierats"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Bilden har kopierats"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Innehållet har kopierats"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"Redigerare för urklipp"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Urklipp"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Bildförhandsgranskning"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"redigera"</string>
     <string name="add" msgid="81036585205287996">"Lägg till"</string>
     <string name="manage_users" msgid="1823875311934643849">"Hantera användare"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Det går inte att dra den här aviseringen till delad skärm."</string>

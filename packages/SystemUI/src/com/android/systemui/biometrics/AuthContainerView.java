@@ -406,6 +406,15 @@ public class AuthContainerView extends LinearLayout
     }
 
     @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if (!hasWindowFocus) {
+            Log.v(TAG, "Lost window focus, dismissing the dialog");
+            animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
+        }
+    }
+
+    @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
@@ -720,7 +729,7 @@ public class AuthContainerView extends LinearLayout
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL,
                 windowFlags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;

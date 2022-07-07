@@ -16,6 +16,8 @@
 
 package androidx.window.extensions.embedding;
 
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -43,8 +45,6 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TaskFragmentAnimationControllerTest {
-    private static final int TASK_ID = 10;
-
     @Mock
     private TaskFragmentOrganizer mOrganizer;
     private TaskFragmentAnimationController mAnimationController;

@@ -22,6 +22,11 @@
     <application android:debuggable="true" android:largeHeap="true">
         <uses-library android:name="android.test.mock" />
         <uses-library android:name="android.test.runner" />
+
+        <activity android:name="androidx.window.extensions.embedding.MinimumDimensionActivity">
+            <layout android:minWidth="600px"
+                    android:minHeight="1200px"/>
+        </activity>
     </application>
 
     <instrumentation

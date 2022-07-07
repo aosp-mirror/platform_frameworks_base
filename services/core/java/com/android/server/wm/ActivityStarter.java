@@ -89,7 +89,6 @@ import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.WindowConfiguration;
-import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
@@ -369,6 +368,13 @@ class ActivityStarter {
         int filterCallingUid;
         PendingIntentRecord originatingPendingIntent;
         boolean allowBackgroundActivityStart;
+        /**
+         * The error callback token passed in {@link android.window.WindowContainerTransaction}
+         * for TaskFragment operation error handling via
+         * {@link android.window.TaskFragmentOrganizer#onTaskFragmentError(IBinder, Throwable)}.
+         */
+        @Nullable
+        IBinder errorCallbackToken;
 
         /**
          * If set to {@code true}, allows this activity start to look into
@@ -422,6 +428,7 @@ class ActivityStarter {
             filterCallingUid = UserHandle.USER_NULL;
             originatingPendingIntent = null;
             allowBackgroundActivityStart = false;
+            errorCallbackToken = null;
         }
 
         /**
@@ -464,6 +471,7 @@ class ActivityStarter {
             filterCallingUid = request.filterCallingUid;
             originatingPendingIntent = request.originatingPendingIntent;
             allowBackgroundActivityStart = request.allowBackgroundActivityStart;
+            errorCallbackToken = request.errorCallbackToken;
         }
 
         /**
@@ -2889,6 +2897,7 @@ class ActivityStarter {
     private void addOrReparentStartingActivity(@NonNull Task task, String reason) {
         TaskFragment newParent = task;
         if (mInTaskFragment != null) {
+            // TODO(b/234351413): remove remaining embedded Task logic.
             // mInTaskFragment is created and added to the leaf task by task fragment organizer's
             // request. If the task was resolved and different than mInTaskFragment, reparent the
             // task to mInTaskFragment for embedding.
@@ -2915,7 +2924,14 @@ class ActivityStarter {
                 newParent = candidateTf;
             }
         }
-
+        // Start Activity to the Task if mStartActivity's min dimensions are not satisfied.
+        if (newParent.isEmbedded() && newParent.smallerThanMinDimension(mStartActivity)) {
+            reason += " - MinimumDimensionViolation";
+            mService.mWindowOrganizerController.sendMinimumDimensionViolation(
+                    newParent, mStartActivity.getMinDimensions(), mRequest.errorCallbackToken,
+                    reason);
+            newParent = task;
+        }
         if (mStartActivity.getTaskFragment() == null
                 || mStartActivity.getTaskFragment() == newParent) {
             newParent.addChild(mStartActivity, POSITION_TOP);
@@ -3197,6 +3213,11 @@ class ActivityStarter {
 
     ActivityStarter setAllowBackgroundActivityStart(boolean allowBackgroundActivityStart) {
         mRequest.allowBackgroundActivityStart = allowBackgroundActivityStart;
+        return this;
+    }
+
+    ActivityStarter setErrorCallbackToken(@Nullable IBinder errorCallbackToken) {
+        mRequest.errorCallbackToken = errorCallbackToken;
         return this;
     }
 

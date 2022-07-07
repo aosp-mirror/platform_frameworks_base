@@ -24,6 +24,7 @@ package {
 android_test {
     name: "RubidiumPerfTests",
     srcs: ["src/**/*.java"],
+    min_sdk_version: "33",
     static_libs: [
         "androidx.test.rules",
         "androidx.annotation_annotation",

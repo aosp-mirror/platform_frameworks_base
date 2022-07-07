@@ -65,6 +65,12 @@ public class ThumbnailData {
         snapshotId = 0;
     }
 
+    public void recycleBitmap() {
+        if (thumbnail != null) {
+            thumbnail.recycle();
+        }
+    }
+
     private static Bitmap makeThumbnail(TaskSnapshot snapshot) {
         Bitmap thumbnail = null;
         try (final HardwareBuffer buffer = snapshot.getHardwareBuffer()) {

@@ -2794,15 +2794,6 @@ public final class ProcessList {
         }
 
         int N = procs.size();
-        for (int i = 0; i < N; ++i) {
-            final ProcessRecord proc = procs.get(i).first;
-            try {
-                Process.setProcessFrozen(proc.getPid(), proc.uid, true);
-            } catch (Exception e) {
-                Slog.w(TAG, "Unable to freeze " + proc.getPid() + " " + proc.processName);
-            }
-        }
-
         for (int i=0; i<N; i++) {
             final Pair<ProcessRecord, Boolean> proc = procs.get(i);
             removeProcessLocked(proc.first, callerWillRestart, allowRestart || proc.second,

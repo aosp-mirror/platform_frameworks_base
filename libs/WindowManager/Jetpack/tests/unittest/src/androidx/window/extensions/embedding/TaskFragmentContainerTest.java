@@ -16,6 +16,9 @@
 
 package androidx.window.extensions.embedding;
 
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMockTaskFragmentInfo;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
@@ -30,17 +33,13 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
-import android.annotation.NonNull;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.graphics.Point;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentInfo;
-import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -55,7 +54,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -68,8 +66,6 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TaskFragmentContainerTest {
-    private static final int TASK_ID = 10;
-
     @Mock
     private SplitPresenter mPresenter;
     @Mock
@@ -310,19 +306,5 @@ public class TaskFragmentContainerTest {
         doReturn(activityToken).when(activity).getActivityToken();
         doReturn(activity).when(mController).getActivity(activityToken);
         return activity;
-    }
-
-    /** Creates a mock TaskFragmentInfo for the given TaskFragment. */
-    private TaskFragmentInfo createMockTaskFragmentInfo(@NonNull TaskFragmentContainer container,
-            @NonNull Activity activity) {
-        return new TaskFragmentInfo(container.getTaskFragmentToken(),
-                mock(WindowContainerToken.class),
-                new Configuration(),
-                1,
-                true /* isVisible */,
-                Collections.singletonList(activity.getActivityToken()),
-                new Point(),
-                false /* isTaskClearedForReuse */,
-                false /* isTaskFragmentClearedForPip */);
     }
 }

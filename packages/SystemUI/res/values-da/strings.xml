@@ -372,7 +372,7 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Din organisation ejer denne enhed og overvåger muligvis netværkstrafikken"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ejer denne enhed og overvåger muligvis netværkstrafikken"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Denne enhed er leveret af <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Denne enhed tilhører din organisation, og den har forbindelse til nettet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Denne enhed tilhører din organisation, og den har forbindelse til internettet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Denne enhed tilhører <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, og den har forbindelse til nettet via <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Denne enhed tilhører din organisation"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Denne enhed tilhører <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
@@ -382,8 +382,8 @@
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> kan overvåge netværkstrafik på din arbejdsprofil"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Din it-administrator kan se netværksaktivitet på din arbejdsprofil"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Netværket kan være overvåget"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Denne enhed har forbindelse til nettet via VPN-forbindelser"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Dine arbejdsapps har forbindelse til nettet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Denne enhed har forbindelse til internettet via VPN-forbindelser"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Dine arbejdsapps har forbindelse til internettet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Dine personlige apps har forbindelse til internettet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Denne enhed har forbindelse til internettet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Denne enhed er leveret af <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -401,9 +401,9 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Der er installeret et nøglecenter på denne enhed. Din sikre netværkstrafik kan overvåges eller ændres."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Din administrator har aktiveret netværksregistrering, som overvåger trafik på din enhed."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Din administrator har aktiveret netværkslogging, som overvåger trafik på din arbejdsprofil, men ikke på din personlige profil."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Denne enhed har forbindelse til nettet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Din netværksaktivitet, herunder mails og browserdata, er synlig for din it-administrator."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Denne enhed har forbindelse til nettet via <xliff:g id="VPN_APP_0">%1$s</xliff:g> og <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Din netværksaktivitet, herunder mails og browserdata, er synlig for din it-administrator."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Dine arbejdsapps har forbindelse til nettet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Din netværksaktivitet i arbejdsapps, herunder mails og browserdata, er synlig for din it-administrator og VPN-udbyder."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Denne enhed har forbindelse til internettet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Din netværksaktivitet, herunder mails og browserdata, er synlig for din it-administrator."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Denne enhed har forbindelse til internettet via <xliff:g id="VPN_APP_0">%1$s</xliff:g> og <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Din netværksaktivitet, herunder mails og browserdata, er synlig for din it-administrator."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Dine arbejdsapps har forbindelse til internettet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Din netværksaktivitet i arbejdsapps, herunder mails og browserdata, er synlig for din it-administrator og VPN-udbyder."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Dine personlige apps har forbindelse til nettet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Din netværksaktivitet, herunder mails og browserdata, er synlig for din VPN-udbyder."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Åbn VPN-indstillinger"</string>
@@ -945,14 +945,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Teksten blev kopieret"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Billedet blev kopieret"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Indholdet blev kopieret"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"Redigeringsværktøj til udklipsholder"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Udklipsholder"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Forhåndsvisning af billede"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"redigere"</string>
     <string name="add" msgid="81036585205287996">"Tilføj"</string>
     <string name="manage_users" msgid="1823875311934643849">"Administrer brugere"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Denne notifikation kan ikke trækkes til en opdelt skærm."</string>

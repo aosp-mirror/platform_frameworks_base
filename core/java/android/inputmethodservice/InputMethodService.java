@@ -135,6 +135,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.window.CompatOnBackInvokedCallback;
 import android.window.ImeOnBackInvokedDispatcher;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
@@ -350,7 +351,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private RingBuffer<MotionEvent> mPendingEvents;
     private ImeOnBackInvokedDispatcher mImeDispatcher;
     private Boolean mBackCallbackRegistered = false;
-    private final OnBackInvokedCallback mCompatBackCallback = this::compatHandleBack;
+    private final CompatOnBackInvokedCallback mCompatBackCallback = this::compatHandleBack;
 
     /**
      * Returns whether {@link InputMethodService} is responsible for rendering the back button and

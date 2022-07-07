@@ -41,11 +41,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceControl.Transaction;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
+import android.window.SurfaceSyncer;
 
 import com.android.internal.view.SurfaceCallbackHelper;
 
@@ -203,6 +205,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private boolean mAttachedToWindow;
 
     private int mSurfaceFlags = SurfaceControl.HIDDEN;
+
+    private final SurfaceSyncer mSurfaceSyncer = new SurfaceSyncer();
+    private final ArraySet<Integer> mSyncIds = new ArraySet<>();
 
     /**
      * Transaction that should be used from the render thread. This transaction is only thread safe
@@ -1018,7 +1023,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             if (shouldSyncBuffer) {
                                 handleSyncBufferCallback(callbacks, syncBufferTransactionCallback);
                             } else {
-                                redrawNeededAsync(callbacks, this::onDrawFinished);
+                                handleSyncNoBuffer(callbacks);
                             }
                         }
                     }
@@ -1061,13 +1066,44 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     syncBufferCallback.onBufferReady(t);
                     onDrawFinished();
                 }));
+    }
 
+    private void handleSyncNoBuffer(SurfaceHolder.Callback[] callbacks) {
+        final int syncId = mSurfaceSyncer.setupSync(this::onDrawFinished);
+
+        mSurfaceSyncer.addToSync(syncId, syncBufferCallback -> redrawNeededAsync(callbacks,
+                () -> {
+                    syncBufferCallback.onBufferReady(null);
+                    synchronized (mSyncIds) {
+                        mSyncIds.remove(syncId);
+                    }
+                }));
+
+        mSurfaceSyncer.markSyncReady(syncId);
+        synchronized (mSyncIds) {
+            mSyncIds.add(syncId);
+        }
     }
 
     private void redrawNeededAsync(SurfaceHolder.Callback[] callbacks,
             Runnable callbacksCollected) {
         SurfaceCallbackHelper sch = new SurfaceCallbackHelper(callbacksCollected);
         sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void surfaceSyncStarted() {
+        ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot != null) {
+            synchronized (mSyncIds) {
+                for (int syncId : mSyncIds) {
+                    viewRoot.mergeSync(syncId, mSurfaceSyncer);
+                }
+            }
+        }
     }
 
     private static class SyncBufferTransactionCallback {

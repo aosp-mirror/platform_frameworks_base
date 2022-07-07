@@ -196,6 +196,7 @@ import android.view.contentcapture.MainContentCaptureSession;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 import android.window.ClientWindowFrames;
+import android.window.CompatOnBackInvokedCallback;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 import android.window.SurfaceSyncer;
@@ -339,13 +340,12 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * The top level {@link OnBackInvokedDispatcher}.
      */
-    private final WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher =
-            new WindowOnBackInvokedDispatcher();
+    private final WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
     /**
      * Compatibility {@link OnBackInvokedCallback} that dispatches KEYCODE_BACK events
      * to view root for apps using legacy back behavior.
      */
-    private OnBackInvokedCallback mCompatOnBackInvokedCallback;
+    private CompatOnBackInvokedCallback mCompatOnBackInvokedCallback;
 
     /**
      * Callback for notifying about global configuration changes.
@@ -959,6 +959,8 @@ public final class ViewRootImpl implements ViewParent,
         mFastScrollSoundEffectsEnabled = audioManager.areNavigationRepeatSoundEffectsEnabled();
 
         mScrollCaptureRequestTimeout = SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS;
+        mOnBackInvokedDispatcher = new WindowOnBackInvokedDispatcher(
+                context.getApplicationInfo().isOnBackInvokedCallbackEnabled());
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -2019,13 +2021,10 @@ public final class ViewRootImpl implements ViewParent,
                 renderer.setStopped(mStopped);
             }
             if (!mStopped) {
-                // Unnecessary to traverse if the window is not yet visible.
-                if (getHostVisibility() == View.VISIBLE) {
-                    // Make sure that relayoutWindow will be called to get valid surface because
-                    // the previous surface may have been released.
-                    mAppVisibilityChanged = true;
-                    scheduleTraversals();
-                }
+                // Make sure that relayoutWindow will be called to get valid surface because
+                // the previous surface may have been released.
+                mAppVisibilityChanged = true;
+                scheduleTraversals();
             } else {
                 if (renderer != null) {
                     renderer.destroyHardwareResources(mView);
@@ -2048,6 +2047,7 @@ public final class ViewRootImpl implements ViewParent,
         void surfaceCreated(Transaction t);
         void surfaceReplaced(Transaction t);
         void surfaceDestroyed();
+        default void surfaceSyncStarted() {};
     }
 
     private final ArrayList<SurfaceChangedCallback> mSurfaceChangedCallbacks = new ArrayList<>();
@@ -2079,6 +2079,12 @@ public final class ViewRootImpl implements ViewParent,
     private void notifySurfaceDestroyed() {
         for (int i = 0; i < mSurfaceChangedCallbacks.size(); i++) {
             mSurfaceChangedCallbacks.get(i).surfaceDestroyed();
+        }
+    }
+
+    private void notifySurfaceSyncStarted() {
+        for (int i = 0; i < mSurfaceChangedCallbacks.size(); i++) {
+            mSurfaceChangedCallbacks.get(i).surfaceSyncStarted();
         }
     }
 
@@ -2796,10 +2802,6 @@ public final class ViewRootImpl implements ViewParent,
         // Execute enqueued actions on every traversal in case a detached view enqueued an action
         getRunQueue().executeActions(mAttachInfo.mHandler);
 
-        if (mApplyInsetsRequested) {
-            dispatchApplyInsets(host);
-        }
-
         if (mFirst) {
             // make sure touch mode code executes by setting cached value
             // to opposite of the added touch mode.
@@ -2860,6 +2862,18 @@ public final class ViewRootImpl implements ViewParent,
                     lp.softInputMode = (lp.softInputMode & ~SOFT_INPUT_MASK_ADJUST) | resizeMode;
                     params = lp;
                 }
+            }
+        }
+
+        if (mApplyInsetsRequested) {
+            dispatchApplyInsets(host);
+            if (mLayoutRequested) {
+                // Short-circuit catching a new layout request here, so
+                // we don't need to go through two layout passes when things
+                // change due to fitting system windows, which can happen a lot.
+                windowSizeMayChange |= measureHierarchy(host, lp,
+                        mView.getContext().getResources(),
+                        desiredWindowWidth, desiredWindowHeight);
             }
         }
 
@@ -3541,6 +3555,7 @@ public final class ViewRootImpl implements ViewParent,
             Log.d(mTag, "Setup new sync id=" + mSyncId);
         }
         mSurfaceSyncer.addToSync(mSyncId, mSyncTarget);
+        notifySurfaceSyncStarted();
     }
 
     private void notifyContentCatpureEvents() {
@@ -10831,13 +10846,6 @@ public final class ViewRootImpl implements ViewParent,
                 OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCompatOnBackInvokedCallback);
     }
 
-    private void unregisterCompatOnBackInvokedCallback() {
-        if (mCompatOnBackInvokedCallback != null) {
-            mOnBackInvokedDispatcher.unregisterOnBackInvokedCallback(mCompatOnBackInvokedCallback);
-            mCompatOnBackInvokedCallback = null;
-        }
-    }
-
     @Override
     public void setTouchableRegion(Region r) {
         if (r != null) {
@@ -10964,5 +10972,12 @@ public final class ViewRootImpl implements ViewParent,
         if (!mIsInTraversal && !mTraversalScheduled) {
             scheduleTraversals();
         }
+    }
+
+    void mergeSync(int syncId, SurfaceSyncer otherSyncer) {
+        if (!isInLocalSync()) {
+            return;
+        }
+        mSurfaceSyncer.merge(mSyncId, syncId, otherSyncer);
     }
 }

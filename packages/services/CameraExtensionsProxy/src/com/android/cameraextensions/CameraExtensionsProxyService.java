@@ -124,15 +124,21 @@ public class CameraExtensionsProxyService extends Service {
 
     private static final String CAMERA_EXTENSION_VERSION_NAME =
             "androidx.camera.extensions.impl.ExtensionVersionImpl";
-    private static final String LATEST_VERSION = "1.2.0";
+    private static final String LATEST_VERSION = "1.3.0";
+    // No support for the init sequence
     private static final String NON_INIT_VERSION_PREFIX = "1.0";
+    // Support advanced API and latency queries
     private static final String ADVANCED_VERSION_PREFIX = "1.2";
+    // Support for the capture request & result APIs
     private static final String RESULTS_VERSION_PREFIX = "1.3";
+    private static final String[] ADVANCED_VERSION_PREFIXES = {ADVANCED_VERSION_PREFIX,
+            RESULTS_VERSION_PREFIX};
     private static final String[] SUPPORTED_VERSION_PREFIXES = {RESULTS_VERSION_PREFIX,
             ADVANCED_VERSION_PREFIX, "1.1", NON_INIT_VERSION_PREFIX};
     private static final boolean EXTENSIONS_PRESENT = checkForExtensions();
     private static final String EXTENSIONS_VERSION = EXTENSIONS_PRESENT ?
             (new ExtensionVersionImpl()).checkApiVersion(LATEST_VERSION) : null;
+    private static final boolean LATENCY_API_SUPPORTED = checkForLatencyAPI();
     private static final boolean ADVANCED_API_SUPPORTED = checkForAdvancedAPI();
     private static final boolean INIT_API_SUPPORTED = EXTENSIONS_PRESENT &&
             (!EXTENSIONS_VERSION.startsWith(NON_INIT_VERSION_PREFIX));
@@ -143,14 +149,30 @@ public class CameraExtensionsProxyService extends Service {
     private HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
     private CameraManager mCameraManager;
 
-    private static boolean checkForAdvancedAPI() {
-        if (EXTENSIONS_PRESENT && EXTENSIONS_VERSION.startsWith(ADVANCED_VERSION_PREFIX)) {
-            try {
-                return (new ExtensionVersionImpl()).isAdvancedExtenderImplemented();
-            } catch (NoSuchMethodError e) {
-                // This could happen in case device specific extension implementations are using an
-                // older extension API but incorrectly set the extension version.
+    private static boolean checkForLatencyAPI() {
+        if (!EXTENSIONS_PRESENT) {
+            return false;
+        }
+
+        for (String advancedVersions : ADVANCED_VERSION_PREFIXES) {
+            if (EXTENSIONS_VERSION.startsWith(advancedVersions)) {
+                return true;
             }
+        }
+
+        return false;
+    }
+
+    private static boolean checkForAdvancedAPI() {
+        if (!checkForLatencyAPI()) {
+            return false;
+        }
+
+        try {
+            return (new ExtensionVersionImpl()).isAdvancedExtenderImplemented();
+        } catch (NoSuchMethodError e) {
+            // This could happen in case device specific extension implementations are using
+            // an older extension API but incorrectly set the extension version.
         }
 
         return false;
@@ -292,7 +314,7 @@ public class CameraExtensionsProxyService extends Service {
                 if (INIT_API_SUPPORTED) {
                     if (mActiveClients.isEmpty()) {
                         InitializerFuture status = new InitializerFuture();
-                        InitializerImpl.init(EXTENSIONS_VERSION, ctx, new InitializeHandler(status),
+                        InitializerImpl.init(LATEST_VERSION, ctx, new InitializeHandler(status),
                                 new HandlerExecutor(mHandler));
                         boolean initSuccess;
                         try {
@@ -1447,7 +1469,7 @@ public class CameraExtensionsProxyService extends Service {
         @Override
         public LatencyRange getEstimatedCaptureLatencyRange(
                 android.hardware.camera2.extension.Size outputSize) {
-            if (EXTENSIONS_VERSION.startsWith(ADVANCED_VERSION_PREFIX)) {
+            if (LATENCY_API_SUPPORTED) {
                 Size sz = new Size(outputSize.width, outputSize.height);
                 Range<Long> latencyRange = mImageExtender.getEstimatedCaptureLatencyRange(sz);
                 if (latencyRange != null) {

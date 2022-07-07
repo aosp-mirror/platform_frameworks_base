@@ -78,6 +78,8 @@ class DomainVerificationPackageTest {
         private val DOMAIN_4 = "four.$DOMAIN_BASE"
 
         private const val USER_ID = 0
+        private const val USER_ID_SECONDARY = 10
+        private val USER_IDS = listOf(USER_ID, USER_ID_SECONDARY)
     }
 
     private val pkg1 = mockPkgState(PKG_ONE, UUID_ONE, SIGNATURE_ONE)
@@ -811,6 +813,173 @@ class DomainVerificationPackageTest {
         }
 
         assertExpectedState(serviceAfter)
+    }
+
+    @Test
+    fun verifiedUnapproved_unverifiedSelected_approvalCausesUnselect_systemApi() {
+        verifiedUnapproved_unverifiedSelected_approvalCausesUnselect {
+            setDomainVerificationStatus(it.domainSetId, setOf(DOMAIN_1, DOMAIN_2), STATE_SUCCESS)
+        }
+    }
+
+    @Test
+    fun verifiedUnapproved_unverifiedSelected_approvalCausesUnselect_internalApi() {
+        verifiedUnapproved_unverifiedSelected_approvalCausesUnselect {
+            setDomainVerificationStatusInternal(it.packageName, STATE_SUCCESS,
+                    ArraySet(setOf(DOMAIN_1, DOMAIN_2)))
+        }
+    }
+
+    private fun verifiedUnapproved_unverifiedSelected_approvalCausesUnselect(
+            setStatusBlock: DomainVerificationService.(PackageStateInternal) -> Unit
+    ) {
+        /*
+            Domains tested:
+                1: Becomes verified in package 1, but package 1 disabled in secondary user, only
+                    disables selection for package 2 in main user
+                2: Becomes verified in package 1, unselected by package 2, remains unselected
+                3: Is autoVerify, but unverified, selected by package 2, remains selected
+                4: Non-autoVerify, selected by package 2, remains selected
+         */
+
+        val pkg1 = mockPkgState(
+            PKG_ONE,
+            UUID_ONE,
+            SIGNATURE_ONE,
+            autoVerifyDomains = listOf(DOMAIN_1, DOMAIN_2, DOMAIN_3),
+            otherDomains = listOf(DOMAIN_4)
+        )
+        val pkg2 = mockPkgState(
+            PKG_TWO,
+            UUID_TWO,
+            SIGNATURE_TWO,
+            autoVerifyDomains = emptyList(),
+            otherDomains = listOf(DOMAIN_1, DOMAIN_2, DOMAIN_3, DOMAIN_4)
+        )
+
+        val service = makeService(pkg1, pkg2)
+        service.addPackage(pkg1)
+        service.addPackage(pkg2)
+
+        // Approve domain 1, 3, and 4 for package 2 for both users
+        USER_IDS.forEach {
+            assertThat(
+                service.setDomainVerificationUserSelection(
+                    UUID_TWO,
+                    setOf(DOMAIN_1, DOMAIN_3, DOMAIN_4),
+                    true,
+                    it
+                )
+            ).isEqualTo(DomainVerificationManager.STATUS_OK)
+        }
+
+        // But disable the owner package link handling in the secondary user
+        service.setDomainVerificationLinkHandlingAllowed(pkg1.packageName, false,
+            USER_ID_SECONDARY
+        )
+
+        service.assertState(
+            pkg1,
+            verifyState = listOf(
+                DOMAIN_1 to STATE_NO_RESPONSE,
+                DOMAIN_2 to STATE_NO_RESPONSE,
+                DOMAIN_3 to STATE_NO_RESPONSE,
+            ),
+            userState2LinkHandlingAllowed = false
+        )
+
+        service.assertState(
+            pkg2,
+            verifyState = null,
+            userState1DomainState1 = DOMAIN_STATE_SELECTED,
+            userState1DomainState3 = DOMAIN_STATE_SELECTED,
+            userState1DomainState4 = DOMAIN_STATE_SELECTED,
+            userState2DomainState1 = DOMAIN_STATE_SELECTED,
+            userState2DomainState3 = DOMAIN_STATE_SELECTED,
+            userState2DomainState4 = DOMAIN_STATE_SELECTED,
+        )
+
+        // Verify the owner package
+        service.setStatusBlock(pkg1)
+
+        // Assert that package 1 is now verified, but link handling disabled in secondary user
+        service.assertState(
+            pkg1,
+            verifyState = listOf(
+                DOMAIN_1 to STATE_SUCCESS,
+                DOMAIN_2 to STATE_SUCCESS,
+                DOMAIN_3 to STATE_NO_RESPONSE,
+            ),
+            userState1DomainState1 = DOMAIN_STATE_VERIFIED,
+            userState1DomainState2 = DOMAIN_STATE_VERIFIED,
+            userState1DomainState3 = DOMAIN_STATE_NONE,
+            userState1DomainState4 = DOMAIN_STATE_NONE,
+            userState2LinkHandlingAllowed = false,
+            userState2DomainState1 = DOMAIN_STATE_VERIFIED,
+            userState2DomainState2 = DOMAIN_STATE_VERIFIED,
+            userState2DomainState3 = DOMAIN_STATE_NONE,
+            userState2DomainState4 = DOMAIN_STATE_NONE,
+        )
+
+        // Assert package 2 maintains selected in user where package 1 had link handling disabled
+        service.assertState(
+            pkg2,
+            verifyState = null,
+            userState1DomainState1 = DOMAIN_STATE_NONE,
+            userState1DomainState3 = DOMAIN_STATE_SELECTED,
+            userState1DomainState4 = DOMAIN_STATE_SELECTED,
+            userState2DomainState1 = DOMAIN_STATE_SELECTED,
+            userState2DomainState3 = DOMAIN_STATE_SELECTED,
+            userState2DomainState4 = DOMAIN_STATE_SELECTED,
+        )
+    }
+
+    fun DomainVerificationService.assertState(
+        pkg: PackageStateInternal,
+        verifyState: List<Pair<String, Int>>?,
+        userState1LinkHandlingAllowed: Boolean = true,
+        userState1DomainState1: Int = DOMAIN_STATE_NONE,
+        userState1DomainState2: Int = DOMAIN_STATE_NONE,
+        userState1DomainState3: Int = DOMAIN_STATE_NONE,
+        userState1DomainState4: Int = DOMAIN_STATE_NONE,
+        userState2LinkHandlingAllowed: Boolean = true,
+        userState2DomainState1: Int = DOMAIN_STATE_NONE,
+        userState2DomainState2: Int = DOMAIN_STATE_NONE,
+        userState2DomainState3: Int = DOMAIN_STATE_NONE,
+        userState2DomainState4: Int = DOMAIN_STATE_NONE,
+    ) {
+        if (verifyState == null) {
+            // If no auto verify domains, the info itself will be null
+            assertThat(getDomainVerificationInfo(pkg.packageName)).isNull()
+        } else {
+            getInfo(pkg.packageName).run {
+                assertThat(hostToStateMap).containsExactlyEntriesIn(verifyState.associate { it })
+            }
+        }
+
+        getUserState(pkg.packageName, USER_ID).run {
+            assertThat(isLinkHandlingAllowed).isEqualTo(userState1LinkHandlingAllowed)
+            assertThat(hostToStateMap).containsExactlyEntriesIn(
+                mapOf(
+                    DOMAIN_1 to userState1DomainState1,
+                    DOMAIN_2 to userState1DomainState2,
+                    DOMAIN_3 to userState1DomainState3,
+                    DOMAIN_4 to userState1DomainState4,
+                )
+            )
+        }
+
+        getUserState(pkg.packageName, USER_ID_SECONDARY).run {
+            assertThat(isLinkHandlingAllowed).isEqualTo(userState2LinkHandlingAllowed)
+            assertThat(hostToStateMap).containsExactlyEntriesIn(
+                mapOf(
+                    DOMAIN_1 to userState2DomainState1,
+                    DOMAIN_2 to userState2DomainState2,
+                    DOMAIN_3 to userState2DomainState3,
+                    DOMAIN_4 to userState2DomainState4,
+                )
+            )
+        }
     }
 
     private fun DomainVerificationService.getInfo(pkgName: String) =

@@ -265,12 +265,12 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     override fun onStateChanged(newState: Int) {
-        if (screenOffAnimationController.overrideNotificationsFullyDozingOnKeyguard() &&
-            state == StatusBarState.KEYGUARD &&
-            newState == StatusBarState.SHADE) {
-            // If we're animating the screen off and going from KEYGUARD back to SHADE, the
-            // animation was cancelled and we are unlocking. Override the doze amount to 0f (not
-            // dozing) so that the notifications are no longer hidden.
+        if (state == StatusBarState.SHADE && newState == StatusBarState.SHADE) {
+            // The SHADE -> SHADE transition is only possible as part of cancelling the screen-off
+            // animation (e.g. by fingerprint unlock).  This is done because the system is in an
+            // undefined state, so it's an indication that we should do state cleanup. We override
+            // the doze amount to 0f (not dozing) so that the notifications are no longer hidden.
+            // See: UnlockedScreenOffAnimationController.onFinishedWakingUp()
             setDozeAmount(0f, 0f)
         }
 

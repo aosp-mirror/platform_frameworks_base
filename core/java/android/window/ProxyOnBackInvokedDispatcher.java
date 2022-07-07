@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
+import android.window.WindowOnBackInvokedDispatcher.Checker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,11 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     private final Object mLock = new Object();
     private OnBackInvokedDispatcher mActualDispatcher = null;
     private ImeOnBackInvokedDispatcher mImeDispatcher;
+    private final Checker mChecker;
+
+    public ProxyOnBackInvokedDispatcher(boolean applicationCallBackEnabled) {
+        mChecker = new Checker(applicationCallBackEnabled);
+    }
 
     @Override
     public void registerOnBackInvokedCallback(
@@ -58,11 +64,9 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             Log.v(TAG, String.format("Proxy register %s. mActualDispatcher=%s", callback,
                     mActualDispatcher));
         }
-        if (priority < 0) {
-            throw new IllegalArgumentException("Application registered OnBackInvokedCallback "
-                    + "cannot have negative priority. Priority: " + priority);
+        if (mChecker.checkApplicationCallbackRegistration(priority, callback)) {
+            registerOnBackInvokedCallbackUnchecked(callback, priority);
         }
-        registerOnBackInvokedCallbackUnchecked(callback, priority);
     }
 
     @Override
