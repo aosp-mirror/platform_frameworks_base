@@ -200,7 +200,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
     }
 
     private void handleMediaProjectionStoppedLocked(IBinder appToken) {
-        VirtualDisplayDevice device = mVirtualDisplayDevices.remove(appToken);
+        VirtualDisplayDevice device = mVirtualDisplayDevices.get(appToken);
         if (device != null) {
             Slog.i(TAG, "Virtual display device released because media projection stopped: "
                     + device.mName);
