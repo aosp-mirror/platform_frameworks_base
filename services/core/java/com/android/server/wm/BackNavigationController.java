@@ -112,6 +112,7 @@ class BackNavigationController {
         RemoteAnimationTarget topAppTarget = null;
         int prevTaskId;
         int prevUserId;
+        boolean prepareAnimation;
 
         BackNavigationInfo.Builder infoBuilder = new BackNavigationInfo.Builder();
         synchronized (wmService.mGlobalLock) {
@@ -257,7 +258,8 @@ class BackNavigationController {
                     BackNavigationInfo.typeToString(backType));
 
             // For now, we only animate when going home.
-            boolean prepareAnimation = backType == BackNavigationInfo.TYPE_RETURN_TO_HOME
+            prepareAnimation = backType == BackNavigationInfo.TYPE_RETURN_TO_HOME
+                    && requestAnimation
                     // Only create a new leash if no leash has been created.
                     // Otherwise return null for animation target to avoid conflict.
                     && !removedWindowContainer.hasCommittedReparentToAnimationLeash();
@@ -292,7 +294,7 @@ class BackNavigationController {
             }
 
             // Special handling for back to home animation
-            if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME && requestAnimation
+            if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME && prepareAnimation
                     && prevTask != null) {
                 currentTask.mBackGestureStarted = true;
                 // Make launcher show from behind by marking its top activity as visible and
@@ -347,7 +349,7 @@ class BackNavigationController {
             Task finalTask = currentTask;
             RemoteCallback onBackNavigationDone = new RemoteCallback(result -> onBackNavigationDone(
                     result, finalRemovedWindowContainer, finalBackType, finalTask,
-                    finalprevActivity, requestAnimation));
+                    finalprevActivity, prepareAnimation));
             infoBuilder.setOnBackNavigationDone(onBackNavigationDone);
         }
 
@@ -381,14 +383,14 @@ class BackNavigationController {
 
     private void onBackNavigationDone(
             Bundle result, WindowContainer<?> windowContainer, int backType,
-            Task task, ActivityRecord prevActivity, boolean requestAnimation) {
+            Task task, ActivityRecord prevActivity, boolean prepareAnimation) {
         SurfaceControl surfaceControl = windowContainer.getSurfaceControl();
         boolean triggerBack = result != null && result.getBoolean(
                 BackNavigationInfo.KEY_TRIGGER_BACK);
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "onBackNavigationDone backType=%s, "
                 + "task=%s, prevActivity=%s", backType, task, prevActivity);
 
-        if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME && requestAnimation) {
+        if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME && prepareAnimation) {
             if (triggerBack) {
                 if (surfaceControl != null && surfaceControl.isValid()) {
                     // When going back to home, hide the task surface before it is re-parented to
