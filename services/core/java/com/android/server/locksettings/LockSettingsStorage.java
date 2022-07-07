@@ -44,7 +44,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.LockPatternUtils.CredentialType;
 import com.android.server.LocalServices;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.utils.WatchableImpl;
@@ -107,39 +106,6 @@ class LockSettingsStorage extends WatchableImpl {
     private final Object mFileWriteLock = new Object();
 
     private PersistentDataBlockManagerInternal mPersistentDataBlockManagerInternal;
-
-    @VisibleForTesting
-    public static class CredentialHash {
-
-        private CredentialHash(byte[] hash, @CredentialType int type) {
-            if (type != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
-                if (hash == null) {
-                    throw new IllegalArgumentException("Empty hash for CredentialHash");
-                }
-            } else /* type == LockPatternUtils.CREDENTIAL_TYPE_NONE */ {
-                if (hash != null) {
-                    throw new IllegalArgumentException(
-                            "None type CredentialHash should not have hash");
-                }
-            }
-            this.hash = hash;
-            this.type = type;
-        }
-
-        static CredentialHash create(byte[] hash, int type) {
-            if (type == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
-                throw new IllegalArgumentException("Bad type for CredentialHash");
-            }
-            return new CredentialHash(hash, type);
-        }
-
-        static CredentialHash createEmptyHash() {
-            return new CredentialHash(null, LockPatternUtils.CREDENTIAL_TYPE_NONE);
-        }
-
-        byte[] hash;
-        @CredentialType int type;
-    }
 
     public LockSettingsStorage(Context context) {
         mContext = context;

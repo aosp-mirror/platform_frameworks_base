@@ -900,14 +900,13 @@ public class RecoverableKeyStoreManager {
     /**
      * This function can only be used inside LockSettingsService.
      *
-     * @param storedHashType from {@code CredentialHash}
-     * @param credential - unencrypted byte array. Password length should be at most 16 symbols
-     *     {@code mPasswordMaxLength}
-     * @param userId for user who just unlocked the device.
+     * @param credentialType the type of credential, as defined in {@code LockPatternUtils}
+     * @param credential the credential, encoded as a byte array
+     * @param userId the ID of the user to whom the credential belongs
      * @hide
      */
     public void lockScreenSecretAvailable(
-            int storedHashType, @NonNull byte[] credential, int userId) {
+            int credentialType, @NonNull byte[] credential, int userId) {
         // So as not to block the critical path unlocking the phone, defer to another thread.
         try {
             mExecutorService.schedule(KeySyncTask.newInstance(
@@ -916,7 +915,7 @@ public class RecoverableKeyStoreManager {
                     mSnapshotStorage,
                     mListenersStorage,
                     userId,
-                    storedHashType,
+                    credentialType,
                     credential,
                     /*credentialUpdated=*/ false),
                     SYNC_DELAY_MILLIS,
@@ -934,13 +933,13 @@ public class RecoverableKeyStoreManager {
     /**
      * This function can only be used inside LockSettingsService.
      *
-     * @param storedHashType from {@code CredentialHash}
-     * @param credential - unencrypted byte array
-     * @param userId for the user whose lock screen credentials were changed.
+     * @param credentialType the type of the new credential, as defined in {@code LockPatternUtils}
+     * @param credential the new credential, encoded as a byte array
+     * @param userId the ID of the user whose credential was changed
      * @hide
      */
     public void lockScreenSecretChanged(
-            int storedHashType,
+            int credentialType,
             @Nullable byte[] credential,
             int userId) {
         // So as not to block the critical path unlocking the phone, defer to another thread.
@@ -951,7 +950,7 @@ public class RecoverableKeyStoreManager {
                     mSnapshotStorage,
                     mListenersStorage,
                     userId,
-                    storedHashType,
+                    credentialType,
                     credential,
                     /*credentialUpdated=*/ true),
                     SYNC_DELAY_MILLIS,

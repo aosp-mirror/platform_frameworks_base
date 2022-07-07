@@ -122,7 +122,7 @@ public class KeySyncTask implements Runnable {
      * @param recoverableKeyStoreDb Database where the keys are stored.
      * @param userId The uid of the user whose profile has been unlocked.
      * @param credentialType The type of credential as defined in {@code LockPatternUtils}
-     * @param credential The credential, encoded as a {@link String}.
+     * @param credential The credential, encoded as a byte array
      * @param credentialUpdated signals weather credentials were updated.
      * @param platformKeyManager platform key manager
      * @param testOnlyInsecureCertificateHelper utility class used for end-to-end tests
