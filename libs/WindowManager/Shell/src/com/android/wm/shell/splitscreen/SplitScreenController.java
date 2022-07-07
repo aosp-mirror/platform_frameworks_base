@@ -434,15 +434,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     RemoteAnimationTarget[] onStartingSplitLegacy(RemoteAnimationTarget[] apps) {
-        try {
-            return reparentSplitTasksForAnimation(apps, false /*splitExpectedToBeVisible*/);
-        } finally {
-            for (RemoteAnimationTarget appTarget : apps) {
-                if (appTarget.leash != null) {
-                    appTarget.leash.release();
-                }
-            }
-        }
+        return reparentSplitTasksForAnimation(apps, false /*splitExpectedToBeVisible*/);
     }
 
     private RemoteAnimationTarget[] reparentSplitTasksForAnimation(RemoteAnimationTarget[] apps,
