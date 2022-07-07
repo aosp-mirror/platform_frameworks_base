@@ -59,8 +59,8 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapRegionDecoder;
 import android.graphics.Color;
+import android.graphics.ImageDecoder;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.display.DisplayManager;
@@ -193,6 +193,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     static final String WALLPAPER_LOCK_ORIG = "wallpaper_lock_orig";
     static final String WALLPAPER_LOCK_CROP = "wallpaper_lock";
     static final String WALLPAPER_INFO = "wallpaper_info.xml";
+    private static final String RECORD_FILE = "decode_record";
+    private static final String RECORD_LOCK_FILE = "decode_lock_record";
 
     // All the various per-user state files we need to be aware of
     private static final String[] sPerUserFiles = new String[] {
@@ -674,8 +676,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
 
                 if (DEBUG) {
-                    // This is just a quick estimation, may be smaller than it is.
-                    long estimateSize = options.outWidth * options.outHeight * 4;
+                    long estimateSize = (long) options.outWidth * options.outHeight * 4;
                     Slog.v(TAG, "Null crop of new wallpaper, estimate size="
                             + estimateSize + ", success=" + success);
                 }
@@ -684,9 +685,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 FileOutputStream f = null;
                 BufferedOutputStream bos = null;
                 try {
-                    BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(
-                            wallpaper.wallpaperFile.getAbsolutePath(), false);
-
                     // This actually downsamples only by powers of two, but that's okay; we do
                     // a proper scaling blit later.  This is to minimize transient RAM use.
                     // We calculate the largest power-of-two under the actual ratio rather than
@@ -740,8 +738,24 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         Slog.v(TAG, "  maxTextureSize=" + GLHelper.getMaxTextureSize());
                     }
 
-                    Bitmap cropped = decoder.decodeRegion(cropHint, options);
-                    decoder.recycle();
+                    //Create a record file and will delete if ImageDecoder work well.
+                    final String recordName =
+                            (wallpaper.wallpaperFile.getName().equals(WALLPAPER)
+                                    ? RECORD_FILE : RECORD_LOCK_FILE);
+                    final File record = new File(getWallpaperDir(wallpaper.userId), recordName);
+                    record.createNewFile();
+                    Slog.v(TAG, "record path =" + record.getPath()
+                            + ", record name =" + record.getName());
+
+                    final ImageDecoder.Source srcData =
+                            ImageDecoder.createSource(wallpaper.wallpaperFile);
+                    final int sampleSize = scale;
+                    Bitmap cropped = ImageDecoder.decodeBitmap(srcData, (decoder, info, src) -> {
+                        decoder.setTargetSampleSize(sampleSize);
+                        decoder.setCrop(estimateCrop);
+                    });
+
+                    record.delete();
 
                     if (cropped == null) {
                         Slog.e(TAG, "Could not decode new wallpaper");
@@ -1779,6 +1793,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     new UserSwitchObserver() {
                         @Override
                         public void onUserSwitching(int newUserId, IRemoteCallback reply) {
+                            errorCheck(newUserId);
                             switchUser(newUserId, reply);
                         }
                     }, TAG);
@@ -1816,11 +1831,51 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     @Override
     public void onBootPhase(int phase) {
+        // If someone set too large jpg file as wallpaper, system_server may be killed by lmk in
+        // generateCrop(), so we create a file in generateCrop() before ImageDecoder starts working
+        // and delete this file after ImageDecoder finishing. If the specific file exists, that
+        // means ImageDecoder can't handle the original wallpaper file, in order to avoid
+        // system_server restart again and again and rescue party will trigger factory reset,
+        // so we reset default wallpaper in case system_server is trapped into a restart loop.
+        errorCheck(UserHandle.USER_SYSTEM);
+
         if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
             systemReady();
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             switchUser(UserHandle.USER_SYSTEM, null);
         }
+    }
+
+    private static final HashMap<Integer, String> sWallpaperType = new HashMap<Integer, String>() {
+        {
+            put(FLAG_SYSTEM, RECORD_FILE);
+            put(FLAG_LOCK, RECORD_LOCK_FILE);
+        }
+    };
+
+    private void errorCheck(int userID) {
+        sWallpaperType.forEach((type, filename) -> {
+            final File record = new File(getWallpaperDir(userID), filename);
+            if (record.exists()) {
+                Slog.w(TAG, "User:" + userID + ", wallpaper tyep = " + type
+                        + ", wallpaper fail detect!! reset to default wallpaper");
+                clearWallpaperData(userID, type);
+                record.delete();
+            }
+        });
+    }
+
+    private void clearWallpaperData(int userID, int wallpaperType) {
+        final WallpaperData wallpaper = new WallpaperData(userID, getWallpaperDir(userID),
+                (wallpaperType == FLAG_LOCK) ? WALLPAPER_LOCK_ORIG : WALLPAPER,
+                (wallpaperType == FLAG_LOCK) ? WALLPAPER_LOCK_CROP : WALLPAPER_CROP);
+        if (wallpaper.sourceExists()) {
+            wallpaper.wallpaperFile.delete();
+        }
+        if (wallpaper.cropExists()) {
+            wallpaper.cropFile.delete();
+        }
+
     }
 
     @Override
@@ -2210,6 +2265,19 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             WallpaperData wallpaper = getWallpaperSafeLocked(userId, FLAG_SYSTEM);
             if (padding.left < 0 || padding.top < 0 || padding.right < 0 || padding.bottom < 0) {
                 throw new IllegalArgumentException("padding must be positive: " + padding);
+            }
+
+            int maxSize = getMaximumSizeDimension(displayId);
+
+            final int paddingWidth = padding.left + padding.right;
+            final int paddingHeight = padding.top + padding.bottom;
+            if (paddingWidth > maxSize) {
+                throw new IllegalArgumentException("padding width " + paddingWidth
+                        + " exceeds max width " + maxSize);
+            }
+            if (paddingHeight > maxSize) {
+                throw new IllegalArgumentException("padding height " + paddingHeight
+                        + " exceeds max height " + maxSize);
             }
 
             final DisplayData wpdData = getDisplayDataOrCreate(displayId);
