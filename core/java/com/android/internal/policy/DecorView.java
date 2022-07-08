@@ -1440,8 +1440,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             int size, boolean verticalBar, boolean seascape, int sideMargin, boolean animate,
             boolean force, WindowInsetsController controller) {
         state.present = state.attributes.isPresent(
-                        controller.isRequestedVisible(state.attributes.insetsType),
-                        mWindow.getAttributes().flags, force);
+                (controller.isRequestedVisible(state.attributes.insetsType)
+                        || mLastShouldAlwaysConsumeSystemBars),
+                mWindow.getAttributes().flags, force);
         boolean show = state.attributes.isVisible(state.present, color,
                 mWindow.getAttributes().flags, force);
         boolean showView = show && !isResizing() && !mHasCaption && size > 0;

@@ -49,7 +49,6 @@ import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.NOBODY_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_IME;
-import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
@@ -2539,21 +2538,6 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    public void testStuckExitingWindow() {
-        final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
-                "closingWindow");
-        closingWindow.mAnimatingExit = true;
-        closingWindow.mRemoveOnExit = true;
-        closingWindow.mActivityRecord.commitVisibility(
-                false /* visible */, true /* performLayout */);
-
-        // We pretended that we were running an exit animation, but that should have been cleared up
-        // by changing visibility of ActivityRecord
-        closingWindow.removeIfPossible();
-        assertTrue(closingWindow.mRemoved);
-    }
-
-    @Test
     public void testSetOrientation() {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity.setVisible(true);
@@ -3149,6 +3133,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         mDisplayContent.mOpeningApps.clear();
         app.mActivityRecord.commitVisibility(false, false);
         app.mActivityRecord.onWindowsGone();
+        mDisplayContent.computeImeTargetIfNeeded(app.mActivityRecord);
 
         assertTrue(app.mActivityRecord.mLastImeShown);
         assertTrue(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);

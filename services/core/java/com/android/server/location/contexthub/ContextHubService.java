@@ -1183,11 +1183,11 @@ public class ContextHubService extends IContextHubService.Stub {
             }
         } else {
             Log.d(TAG, "BT adapter not available. Defaulting to disabled");
-            if (mIsBtMainEnabled) {
+            if (forceUpdate || mIsBtMainEnabled) {
                 mIsBtMainEnabled = false;
                 mContextHubWrapper.onBtMainSettingChanged(mIsBtMainEnabled);
             }
-            if (mIsBtScanningEnabled) {
+            if (forceUpdate || mIsBtScanningEnabled) {
                 mIsBtScanningEnabled = false;
                 mContextHubWrapper.onBtScanningSettingChanged(mIsBtScanningEnabled);
             }
