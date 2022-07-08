@@ -1020,7 +1020,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private int mExitAnimId, mEnterAnimId;
 
     /** The display that the rotation animation is applying to. */
-    private int mFrozenDisplayId;
+    private int mFrozenDisplayId = INVALID_DISPLAY;
 
     /** Skip repeated ActivityRecords initialization. Note that AppWindowsToken's version of this
      * is a long initialized to Long.MIN_VALUE so that it doesn't match this value on startup. */
@@ -5968,10 +5968,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void makeWindowFreezingScreenIfNeededLocked(WindowState w) {
-        // If the screen is currently frozen or off, then keep
-        // it frozen/off until this window draws at its new
-        // orientation.
-        if (!w.mToken.okToDisplay() && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
+        // If the screen is currently frozen, then keep it frozen until this window draws at its
+        // new orientation.
+        if (mFrozenDisplayId != INVALID_DISPLAY && mFrozenDisplayId == w.getDisplayId()
+                && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             ProtoLog.v(WM_DEBUG_ORIENTATION, "Changing surface while display frozen: %s", w);
             w.setOrientationChanging(true);
             if (mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_NONE) {

@@ -200,6 +200,44 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return outBounds;
     }
 
+    /** Gets bounds of the primary split with screen based coordinate on the param Rect. */
+    public void getBounds1(Rect rect) {
+        rect.set(mBounds1);
+    }
+
+    /** Gets bounds of the primary split with parent based coordinate on the param Rect. */
+    public void getRefBounds1(Rect rect) {
+        getBounds1(rect);
+        rect.offset(-mRootBounds.left, -mRootBounds.top);
+    }
+
+    /** Gets bounds of the secondary split with screen based coordinate on the param Rect. */
+    public void getBounds2(Rect rect) {
+        rect.set(mBounds2);
+    }
+
+    /** Gets bounds of the secondary split with parent based coordinate on the param Rect. */
+    public void getRefBounds2(Rect rect) {
+        getBounds2(rect);
+        rect.offset(-mRootBounds.left, -mRootBounds.top);
+    }
+
+    /** Gets root bounds of the whole split layout on the param Rect. */
+    public void getRootBounds(Rect rect) {
+        rect.set(mRootBounds);
+    }
+
+    /** Gets bounds of divider window with screen based coordinate on the param Rect. */
+    public void getDividerBounds(Rect rect) {
+        rect.set(mDividerBounds);
+    }
+
+    /** Gets bounds of divider window with parent based coordinate on the param Rect. */
+    public void getRefDividerBounds(Rect rect) {
+        getDividerBounds(rect);
+        rect.offset(-mRootBounds.left, -mRootBounds.top);
+    }
+
     /** Returns leash of the current divider bar. */
     @Nullable
     public SurfaceControl getDividerLeash() {
@@ -560,8 +598,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 t.setPosition(leash, distX, distY);
                 t.setWindowCrop(leash, width, height);
             } else {
-                final int offsetX = width - start.width();
-                final int offsetY = height - start.height();
+                final int offsetX = width - tempStart.width();
+                final int offsetY = height - tempStart.height();
                 t.setPosition(leash, distX + offsetX, distY + offsetY);
                 mTempRect.set(0, 0, width, height);
                 mTempRect.offsetTo(-offsetX, -offsetY);
@@ -610,15 +648,15 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             boolean applyResizingOffset) {
         final SurfaceControl dividerLeash = getDividerLeash();
         if (dividerLeash != null) {
-            mTempRect.set(getRefDividerBounds());
+            getRefDividerBounds(mTempRect);
             t.setPosition(dividerLeash, mTempRect.left, mTempRect.top);
             // Resets layer of divider bar to make sure it is always on top.
             t.setLayer(dividerLeash, Integer.MAX_VALUE);
         }
-        mTempRect.set(getRefBounds1());
+        getRefBounds1(mTempRect);
         t.setPosition(leash1, mTempRect.left, mTempRect.top)
                 .setWindowCrop(leash1, mTempRect.width(), mTempRect.height());
-        mTempRect.set(getRefBounds2());
+        getRefBounds2(mTempRect);
         t.setPosition(leash2, mTempRect.left, mTempRect.top)
                 .setWindowCrop(leash2, mTempRect.width(), mTempRect.height());
 
