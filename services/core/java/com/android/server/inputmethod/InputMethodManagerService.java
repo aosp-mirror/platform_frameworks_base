@@ -1484,7 +1484,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         Intent intent = new Intent(ACTION_SHOW_INPUT_METHOD_PICKER)
                 .setPackage(mContext.getPackageName());
-        mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+        mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent,
+                PendingIntent.FLAG_IMMUTABLE);
 
         mShowOngoingImeSwitcherForPhones = false;
 
@@ -2176,7 +2177,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCurIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                 com.android.internal.R.string.input_method_binding_label);
         mCurIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
-                mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS), 0));
+                mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
+                PendingIntent.FLAG_IMMUTABLE));
 
         if (bindCurrentInputMethodServiceLocked(mCurIntent, this, IME_CONNECTION_BIND_FLAGS)) {
             mLastBindTime = SystemClock.uptimeMillis();
