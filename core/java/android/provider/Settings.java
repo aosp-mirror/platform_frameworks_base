@@ -11998,7 +11998,23 @@ public final class Settings {
         public static final String NITZ_NETWORK_DISCONNECT_RETENTION =
                 "nitz_network_disconnect_retention";
 
-        /** Preferred NTP server. {@hide} */
+        /**
+         * The preferred NTP server. This setting overrides Android's static xml configuration when
+         * present and valid.
+         *
+         * <p>The legacy form is the NTP server name as a string.
+         * <p>Newer code should use the form: ntp://{server name}[:port] (the standard NTP port,
+         * 123, is used if not specified).
+         *
+         * <p>For example, the following examples are valid:
+         * <ul>
+         *     <li>time.android.com</li>
+         *     <li>ntp://time.android.com</li>
+         *     <li>ntp://time.android.com:123</li>
+         * </ul>
+         *
+         * @hide
+         */
         @Readable
         public static final String NTP_SERVER = "ntp_server";
         /** Timeout in milliseconds to wait for NTP server. {@hide} */
