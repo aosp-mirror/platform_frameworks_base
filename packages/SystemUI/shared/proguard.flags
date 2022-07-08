@@ -1,0 +1,4 @@
+# Retain signatures of TypeToken and its subclasses for gson usage in ClockRegistry
+-keepattributes Signature
+-keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
+-keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
