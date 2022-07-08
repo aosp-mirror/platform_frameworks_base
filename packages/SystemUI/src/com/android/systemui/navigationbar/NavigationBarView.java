@@ -88,6 +88,7 @@ import com.android.wm.shell.pip.Pip;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /** */
@@ -96,6 +97,8 @@ public class NavigationBarView extends FrameLayout {
     final static String TAG = "NavBarView";
 
     final static boolean ALTERNATE_CAR_MODE_UI = false;
+
+    private Executor mBgExecutor;
 
     // The current view is one of mHorizontal or mVertical depending on the current configuration
     View mCurrentView = null;
@@ -347,6 +350,10 @@ public class NavigationBarView extends FrameLayout {
     public void setOnVerticalChangedListener(OnVerticalChangedListener onVerticalChangedListener) {
         mOnVerticalChangedListener = onVerticalChangedListener;
         notifyVerticalChangedListener(mIsVertical);
+    }
+
+    public void setBackgroundExecutor(Executor bgExecutor) {
+        mBgExecutor = bgExecutor;
     }
 
     public void setTouchHandler(Gefingerpoken touchHandler) {
@@ -768,8 +775,8 @@ public class NavigationBarView extends FrameLayout {
         updateSlippery();
         reloadNavIcons();
         updateNavButtonIcons();
-        WindowManagerWrapper.getInstance().setNavBarVirtualKeyHapticFeedbackEnabled(
-                !mShowSwipeUpUi);
+        mBgExecutor.execute(() -> WindowManagerWrapper.getInstance()
+                .setNavBarVirtualKeyHapticFeedbackEnabled(!mShowSwipeUpUi));
         getHomeButton().setAccessibilityDelegate(
                 mShowSwipeUpUi ? mQuickStepAccessibilityDelegate : null);
     }
