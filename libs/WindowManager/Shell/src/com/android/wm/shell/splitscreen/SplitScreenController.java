@@ -18,6 +18,9 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
@@ -58,7 +61,9 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -74,6 +79,7 @@ import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.transition.LegacyTransitions;
@@ -95,7 +101,7 @@ import java.util.concurrent.Executor;
  */
 // TODO(b/198577848): Implement split screen flicker test to consolidate CUJ of split screen.
 public class SplitScreenController implements DragAndDropPolicy.Starter,
-        RemoteCallable<SplitScreenController> {
+        RemoteCallable<SplitScreenController>, ShellTaskOrganizer.FocusListener {
     private static final String TAG = SplitScreenController.class.getSimpleName();
 
     static final int EXIT_REASON_UNKNOWN = 0;
@@ -143,6 +149,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     // outside the bounds of the roots by being reparented into a higher level fullscreen container
     private SurfaceControl mSplitTasksContainerLayer;
 
+    private ActivityManager.RunningTaskInfo mFocusingTaskInfo;
+
     public SplitScreenController(ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, Context context,
             RootTaskDisplayAreaOrganizer rootTDAOrganizer,
@@ -164,6 +172,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mLogger = new SplitscreenEventLogger();
         mIconProvider = iconProvider;
         mRecentTasksOptional = recentTasks;
+        mTaskOrganizer.addFocusListener(this);
     }
 
     public SplitScreen asSplitScreen() {
@@ -178,6 +187,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     @Override
     public ShellExecutor getRemoteCallExecutor() {
         return mMainExecutor;
+    }
+
+    @Override
+    public void onFocusTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        mFocusingTaskInfo = taskInfo;
     }
 
     public void onOrganizerRegistered() {
@@ -341,13 +355,20 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options,
                     null /* wct */);
 
-            // Flag this as a no-user-action launch to prevent sending user leaving event to the
-            // current top activity since it's going to be put into another side of the split. This
-            // prevents the current top activity from going into pip mode due to user leaving event.
             if (fillInIntent == null) {
                 fillInIntent = new Intent();
             }
+            // Flag this as a no-user-action launch to prevent sending user leaving event to the
+            // current top activity since it's going to be put into another side of the split. This
+            // prevents the current top activity from going into pip mode due to user leaving event.
             fillInIntent.addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
+
+            // Flag with MULTIPLE_TASK if this is launching the same activity into both sides of the
+            // split.
+            if (isLaunchingAdjacently(intent.getIntent(), position)) {
+                fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
+            }
 
             intent.send(mContext, 0, fillInIntent, null /* onFinished */, null /* handler */,
                     null /* requiredPermission */, options);
@@ -358,6 +379,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     private void startIntentLegacy(PendingIntent intent, @Nullable Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options) {
+        boolean startSameActivityAdjacently = isLaunchingAdjacently(intent.getIntent(), position);
+
         final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         mStageCoordinator.prepareEvictChildTasks(position, evictWct);
 
@@ -368,14 +391,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     IRemoteAnimationFinishedCallback finishedCallback,
                     SurfaceControl.Transaction t) {
                 if (apps == null || apps.length == 0) {
-                    final ActivityManager.RunningTaskInfo pairedTaskInfo =
-                            getTaskInfo(SplitLayout.reversePosition(position));
-                    final ComponentName pairedActivity = pairedTaskInfo != null
-                            ? pairedTaskInfo.baseIntent.getComponent() : null;
-                    final ComponentName intentActivity = intent.getIntent() != null
-                            ? intent.getIntent().getComponent() : null;
-
-                    if (Objects.equals(pairedActivity, intentActivity)) {
+                    if (startSameActivityAdjacently) {
                         // Switch split position if dragging the same activity to another side.
                         setSideStagePosition(SplitLayout.reversePosition(
                                 mStageCoordinator.getSideStagePosition()));
@@ -417,9 +433,45 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             fillInIntent = new Intent();
         }
         fillInIntent.addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
+        if (startSameActivityAdjacently) {
+            fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
+        }
 
         wct.sendPendingIntent(intent, fillInIntent, options);
         mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
+    }
+
+    /** Returns {@code true} if it's launching the same component on both sides of the split. */
+    @VisibleForTesting
+    boolean isLaunchingAdjacently(@Nullable Intent startIntent,
+            @SplitPosition int position) {
+        if (startIntent == null) {
+            return false;
+        }
+
+        final ComponentName launchingActivity = startIntent.getComponent();
+        if (launchingActivity == null) {
+            return false;
+        }
+
+        if (isSplitScreenVisible()) {
+            final ActivityManager.RunningTaskInfo pairedTaskInfo =
+                    getTaskInfo(SplitLayout.reversePosition(position));
+            final ComponentName pairedActivity = pairedTaskInfo != null
+                    ? pairedTaskInfo.baseIntent.getComponent() : null;
+            return Objects.equals(launchingActivity, pairedActivity);
+        }
+
+        if (mFocusingTaskInfo != null
+                // TODO (b/238032411): have an API to determine whether an activity is valid for
+                //  split screen or not.
+                && mFocusingTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                && mFocusingTaskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD) {
+            return Objects.equals(mFocusingTaskInfo.baseIntent.getComponent(), launchingActivity);
+        }
+
+        return false;
     }
 
     RemoteAnimationTarget[] onGoingToRecentsLegacy(RemoteAnimationTarget[] apps) {

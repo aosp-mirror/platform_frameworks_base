@@ -3212,6 +3212,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     void resetSurfacePositionForAnimationLeash(Transaction t) {
         t.setPosition(mSurfaceControl, 0, 0);
+        if (mSyncState != SYNC_STATE_NONE && t != mSyncTransaction) {
+            // Avoid restoring to old position if the sync transaction is applied later.
+            mSyncTransaction.setPosition(mSurfaceControl, 0, 0);
+        }
         mLastSurfacePosition.set(0, 0);
     }
 

@@ -60,11 +60,11 @@ abstract class OpenAppFromLauncherTransition(testSpec: FlickerTestParameter) :
         testSpec.assertWm {
             this.isAppWindowOnTop(FlickerComponentName.LAUNCHER)
                     .then()
-                    .isAppWindowOnTop(FlickerComponentName.SNAPSHOT, isOptional = true)
-                    .then()
-                    .isAppWindowOnTop(FlickerComponentName.SPLASH_SCREEN, isOptional = true)
-                    .then()
-                    .isAppWindowOnTop(testApp.component)
+                    .isAppWindowOnTop(
+                        testApp.component
+                            .or(FlickerComponentName.SNAPSHOT)
+                            .or(FlickerComponentName.SPLASH_SCREEN)
+                    )
         }
     }
 }

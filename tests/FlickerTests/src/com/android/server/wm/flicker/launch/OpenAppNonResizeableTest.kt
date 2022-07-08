@@ -159,6 +159,11 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
             super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
+    @FlakyTest(bugId = 227143265)
+    @Test
+    override fun appWindowBecomesTopWindow() =
+        super.appWindowBecomesTopWindow()
+
     companion object {
         /**
          * Creates the test configurations.
