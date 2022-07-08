@@ -129,6 +129,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected Handler mMainHandler;
     protected FeatureFlags mFeatureFlags;
     protected WifiStatusTrackerFactory mWifiStatusTrackerFactory;
+    protected MobileSignalControllerFactory mMobileFactory;
 
     protected int mSubId;
 
@@ -224,6 +225,12 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
         mWifiStatusTrackerFactory = new WifiStatusTrackerFactory(
                 mContext, mMockWm, mMockNsm, mMockCm, mMainHandler);
+        mMobileFactory = new MobileSignalControllerFactory(
+                mContext,
+                mCallbackHandler,
+                mCarrierConfigTracker,
+                mFeatureFlags
+        );
 
         mNetworkController = new NetworkControllerImpl(mContext,
                 mMockCm,
@@ -243,6 +250,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mDemoModeController,
                 mCarrierConfigTracker,
                 mWifiStatusTrackerFactory,
+                mMobileFactory,
                 mMainHandler,
                 mFeatureFlags,
                 mock(DumpManager.class),
@@ -637,5 +645,4 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected void assertDataNetworkNameEquals(String expected) {
         assertEquals("Data network name", expected, mNetworkController.getMobileDataNetworkName());
     }
-
 }
