@@ -5485,17 +5485,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private void updateScaleIfNeeded() {
-        if (mIsChildWindow) {
-            // Child window follows parent's scale.
-            return;
-        }
         if (!isVisibleRequested() && !(mIsWallpaper && mToken.isVisible())) {
             // Skip if it is requested to be invisible, but if it is wallpaper, it may be in
             // transition that still needs to update the scale for zoom effect.
             return;
         }
-        float newHScale = mHScale * mGlobalScale * mWallpaperScale;
-        float newVScale = mVScale * mGlobalScale * mWallpaperScale;
+        float globalScale = mGlobalScale;
+        final WindowState parent = getParentWindow();
+        if (parent != null) {
+            // Undo parent's scale because the child surface has inherited scale from parent.
+            globalScale *= parent.mInvGlobalScale;
+        }
+        final float newHScale = mHScale * globalScale * mWallpaperScale;
+        final float newVScale = mVScale * globalScale * mWallpaperScale;
         if (mLastHScale != newHScale || mLastVScale != newVScale) {
             getSyncTransaction().setMatrix(mSurfaceControl, newHScale, 0, 0, newVScale);
             mLastHScale = newHScale;
