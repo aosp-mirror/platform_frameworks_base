@@ -417,8 +417,9 @@ public class ResolverListAdapter extends BaseAdapter {
                     if (ii == null) {
                         continue;
                     }
-                    ActivityInfo ai = ii.resolveActivityInfo(
-                            mPm, 0);
+                    // Because of AIDL bug, resolveActivityInfo can't accept subclasses of Intent.
+                    final Intent rii = (ii.getClass() == Intent.class) ? ii : new Intent(ii);
+                    ActivityInfo ai = rii.resolveActivityInfo(mPm, 0);
                     if (ai == null) {
                         Log.w(TAG, "No activity found for " + ii);
                         continue;
