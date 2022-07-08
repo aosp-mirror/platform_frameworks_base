@@ -83,6 +83,11 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
             TimeDetectorStrategy timeDetectorStrategy =
                     TimeDetectorStrategyImpl.create(context, handler, serviceConfigAccessor);
 
+            // Create and publish the local service for use by internal callers.
+            TimeDetectorInternal internal =
+                    new TimeDetectorInternalImpl(context, handler, timeDetectorStrategy);
+            publishLocalService(TimeDetectorInternal.class, internal);
+
             TimeDetectorService service = new TimeDetectorService(
                     context, handler, serviceConfigAccessor, timeDetectorStrategy);
 
