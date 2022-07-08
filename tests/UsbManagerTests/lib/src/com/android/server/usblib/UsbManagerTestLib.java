@@ -117,6 +117,7 @@ public class UsbManagerTestLib {
         testGetCurrentFunctionsMock_Matched(UsbManager.FUNCTION_PTP);
         testGetCurrentFunctionsMock_Matched(UsbManager.FUNCTION_MIDI);
         testGetCurrentFunctionsMock_Matched(UsbManager.FUNCTION_RNDIS);
+        testGetCurrentFunctionsMock_Matched(UsbManager.FUNCTION_NCM);
     }
 
     public void testSetCurrentFunctions_shouldMatched() {
@@ -125,5 +126,6 @@ public class UsbManagerTestLib {
         testSetCurrentFunctionsMock_Matched(UsbManager.FUNCTION_PTP);
         testSetCurrentFunctionsMock_Matched(UsbManager.FUNCTION_MIDI);
         testSetCurrentFunctionsMock_Matched(UsbManager.FUNCTION_RNDIS);
+        testSetCurrentFunctionsMock_Matched(UsbManager.FUNCTION_NCM);
     }
 }
