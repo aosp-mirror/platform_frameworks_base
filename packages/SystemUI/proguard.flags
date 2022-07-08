@@ -9,8 +9,8 @@
 -keep class com.android.systemui.statusbar.phone.CentralSurfaces
 -keep class com.android.systemui.statusbar.tv.TvStatusBar
 -keep class com.android.systemui.car.CarSystemUIFactory
--keep class com.android.systemui.SystemUIInitializer
--keep class com.android.systemui.tv.TvSystemUIInitializer
+-keep class com.android.systemui.SystemUIFactory
+-keep class com.android.systemui.tv.TvSystemUIFactory
 -keep class * extends com.android.systemui.CoreStartable
 -keep class * implements com.android.systemui.CoreStartable$Injector
 

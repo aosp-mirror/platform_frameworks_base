@@ -26,8 +26,6 @@ import com.android.systemui.statusbar.policy.FlashlightController;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.concurrent.ExecutionException;
-
 @SmallTest
 public class DependencyTest extends SysuiTestCase {
 
@@ -46,12 +44,10 @@ public class DependencyTest extends SysuiTestCase {
     }
 
     @Test
-    public void testInitDependency() throws ExecutionException, InterruptedException {
+    public void testInitDependency() {
         Dependency.clearDependencies();
-        SystemUIInitializer initializer =
-                SystemUIInitializerFactory.createFromConfigNoAssert(mContext);
-        initializer.init(true);
-        Dependency dependency = initializer.getSysUIComponent().createDependency();
+        Dependency dependency =
+                SystemUIFactory.getInstance().getSysUIComponent().createDependency();
         dependency.start();
     }
 }
