@@ -783,7 +783,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 mInFrontAlpha = 0;
             }
 
-            if (mBouncerHiddenFraction != KeyguardBouncer.EXPANSION_HIDDEN) {
+            if (mState == ScrimState.DREAMING
+                    && mBouncerHiddenFraction != KeyguardBouncer.EXPANSION_HIDDEN) {
                 final float interpolatedFraction =
                         BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(
                                 mBouncerHiddenFraction);
