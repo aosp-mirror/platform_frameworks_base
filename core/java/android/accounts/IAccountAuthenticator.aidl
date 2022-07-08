@@ -62,6 +62,7 @@ oneway interface IAccountAuthenticator {
     /**
      * launches an activity that lets the user edit and set the properties for an authenticator
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     @UnsupportedAppUsage
     void editProperties(in IAccountAuthenticatorResponse response, String accountType);
 
@@ -69,6 +70,7 @@ oneway interface IAccountAuthenticator {
      * returns a Bundle where the boolean value BOOLEAN_RESULT_KEY is set if the account has the
      * specified features
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     @UnsupportedAppUsage
     void hasFeatures(in IAccountAuthenticatorResponse response, in Account account, 
         in String[] features);
@@ -76,12 +78,14 @@ oneway interface IAccountAuthenticator {
     /**
      * Gets whether or not the account is allowed to be removed.
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     @UnsupportedAppUsage
     void getAccountRemovalAllowed(in IAccountAuthenticatorResponse response, in Account account);
 
     /**
      * Returns a Bundle containing the required credentials to copy the account across users.
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     void getAccountCredentialsForCloning(in IAccountAuthenticatorResponse response,
             in Account account);
 
@@ -89,6 +93,7 @@ oneway interface IAccountAuthenticator {
      * Uses the Bundle containing credentials from another instance of the authenticator to create
      * a copy of the account on this user.
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     void addAccountFromCredentials(in IAccountAuthenticatorResponse response, in Account account,
             in Bundle accountCredentials);
 
@@ -116,6 +121,7 @@ oneway interface IAccountAuthenticator {
     /**
      * Checks if the credentials of the provided account should be updated.
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     void isCredentialsUpdateSuggested(in IAccountAuthenticatorResponse response, in Account account,
         String statusToken);
 }
