@@ -184,7 +184,7 @@ public final class InputBindResult implements Parcelable {
     /**
      * The accessibility services.
      */
-    public SparseArray<IAccessibilityInputMethodSession> accessibilitySessions;
+    public final SparseArray<IAccessibilityInputMethodSession> accessibilitySessions;
 
     /**
      * The input channel used to send input events to this IME.
