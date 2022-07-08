@@ -34,6 +34,7 @@ import android.view.InsetsVisibilities;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 
 import org.junit.Before;
@@ -45,7 +46,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 
 @SmallTest
-public class DisplayInsetsControllerTest {
+public class DisplayInsetsControllerTest extends ShellTestCase {
 
     private static final int SECOND_DISPLAY = DEFAULT_DISPLAY + 10;
 

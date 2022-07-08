@@ -41,6 +41,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.policy.SystemBarUtils;
+import com.android.wm.shell.ShellTestCase;
 
 import org.junit.After;
 import org.junit.Before;
@@ -54,7 +55,7 @@ import org.mockito.MockitoSession;
  *  atest WMShellUnitTests:DisplayLayoutTest
  */
 @SmallTest
-public class DisplayLayoutTest {
+public class DisplayLayoutTest extends ShellTestCase {
     private MockitoSession mMockitoSession;
 
     @Before

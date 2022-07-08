@@ -57,6 +57,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 
 import org.junit.Before;
@@ -74,7 +75,7 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-public class BackAnimationControllerTest {
+public class BackAnimationControllerTest extends ShellTestCase {
 
     private static final String ANIMATION_ENABLED = "1";
     private final TestShellExecutor mShellExecutor = new TestShellExecutor();

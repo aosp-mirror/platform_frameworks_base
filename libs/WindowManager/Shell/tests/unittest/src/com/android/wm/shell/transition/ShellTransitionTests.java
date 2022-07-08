@@ -79,6 +79,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
@@ -98,7 +99,7 @@ import java.util.ArrayList;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ShellTransitionTests {
+public class ShellTransitionTests extends ShellTestCase {
 
     private final WindowOrganizer mOrganizer = mock(WindowOrganizer.class);
     private final TransactionPool mTransactionPool = mock(TransactionPool.class);

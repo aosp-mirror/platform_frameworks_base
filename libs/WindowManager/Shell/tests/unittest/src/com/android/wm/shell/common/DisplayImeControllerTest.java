@@ -39,6 +39,7 @@ import android.view.SurfaceControl;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.view.IInputMethodManager;
+import com.android.wm.shell.ShellTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +47,7 @@ import org.junit.Test;
 import java.util.concurrent.Executor;
 
 @SmallTest
-public class DisplayImeControllerTest {
+public class DisplayImeControllerTest extends ShellTestCase {
 
     private SurfaceControl.Transaction mT;
     private DisplayImeController.PerDisplay mPerDisplay;

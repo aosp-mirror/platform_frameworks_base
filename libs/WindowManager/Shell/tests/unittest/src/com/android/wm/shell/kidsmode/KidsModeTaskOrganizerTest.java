@@ -44,6 +44,7 @@ import android.window.WindowContainerTransaction;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
@@ -61,7 +62,7 @@ import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class KidsModeTaskOrganizerTest {
+public class KidsModeTaskOrganizerTest extends ShellTestCase {
     @Mock private ITaskOrganizerController mTaskOrganizerController;
     @Mock private Context mContext;
     @Mock private Handler mHandler;

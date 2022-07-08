@@ -73,6 +73,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.launcher3.icons.IconProvider;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
@@ -91,7 +92,7 @@ import java.util.function.IntSupplier;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class StartingSurfaceDrawerTests {
+public class StartingSurfaceDrawerTests extends ShellTestCase {
     @Mock
     private IBinder mBinder;
     @Mock
