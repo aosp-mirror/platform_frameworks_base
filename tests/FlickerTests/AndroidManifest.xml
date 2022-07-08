@@ -43,6 +43,7 @@
     <!-- Allow the test to write directly to /sdcard/ -->
     <application android:requestLegacyExternalStorage="true">
         <uses-library android:name="android.test.runner"/>
+        <uses-library android:name="androidx.window.extensions" android:required="false"/>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

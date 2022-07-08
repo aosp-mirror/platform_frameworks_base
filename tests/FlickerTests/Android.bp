@@ -46,6 +46,7 @@ android_test {
         "launcher-helper-lib",
         "launcher-aosp-tapl",
         "platform-test-annotations",
+        "wm-flicker-window-extensions",
     ],
 }
 
@@ -83,5 +84,21 @@ java_library {
         "flickertestapplib",
         "truth-prebuilt",
         "app-helpers-core",
+        "wm-flicker-window-extensions",
     ],
+}
+
+android_library_import {
+    name: "wm-flicker-window-extensions_nodeps",
+    aars: ["libs/window-extensions-release.aar"],
+    sdk_version: "current",
+}
+
+java_library {
+    name: "wm-flicker-window-extensions",
+    sdk_version: "current",
+    static_libs: [
+        "wm-flicker-window-extensions_nodeps",
+    ],
+    installable: false,
 }
