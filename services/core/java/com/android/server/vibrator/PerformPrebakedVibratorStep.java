@@ -35,11 +35,11 @@ final class PerformPrebakedVibratorStep extends AbstractVibratorStep {
 
     PerformPrebakedVibratorStep(VibrationStepConductor conductor, long startTime,
             VibratorController controller, VibrationEffect.Composed effect, int index,
-            long previousStepVibratorOffTimeout) {
+            long pendingVibratorOffDeadline) {
         // This step should wait for the last vibration to finish (with the timeout) and for the
         // intended step start time (to respect the effect delays).
-        super(conductor, Math.max(startTime, previousStepVibratorOffTimeout), controller, effect,
-                index, previousStepVibratorOffTimeout);
+        super(conductor, Math.max(startTime, pendingVibratorOffDeadline), controller, effect,
+                index, pendingVibratorOffDeadline);
     }
 
     @Override
@@ -50,7 +50,8 @@ final class PerformPrebakedVibratorStep extends AbstractVibratorStep {
             if (!(segment instanceof PrebakedSegment)) {
                 Slog.w(VibrationThread.TAG, "Ignoring wrong segment for a "
                         + "PerformPrebakedVibratorStep: " + segment);
-                return skipToNextSteps(/* segmentsSkipped= */ 1);
+                // Skip this step and play the next one right away.
+                return nextSteps(/* segmentsPlayed= */ 1);
             }
 
             PrebakedSegment prebaked = (PrebakedSegment) segment;
@@ -61,10 +62,11 @@ final class PerformPrebakedVibratorStep extends AbstractVibratorStep {
             }
 
             VibrationEffect fallback = getVibration().getFallback(prebaked.getEffectId());
-            mVibratorOnResult = controller.on(prebaked, getVibration().id);
-            getVibration().stats().reportPerformEffect(mVibratorOnResult, prebaked);
+            long vibratorOnResult = controller.on(prebaked, getVibration().id);
+            handleVibratorOnResult(vibratorOnResult);
+            getVibration().stats().reportPerformEffect(vibratorOnResult, prebaked);
 
-            if (mVibratorOnResult == 0 && prebaked.shouldFallback()
+            if (vibratorOnResult == 0 && prebaked.shouldFallback()
                     && (fallback instanceof VibrationEffect.Composed)) {
                 if (VibrationThread.DEBUG) {
                     Slog.d(VibrationThread.TAG, "Playing fallback for effect "
@@ -72,14 +74,15 @@ final class PerformPrebakedVibratorStep extends AbstractVibratorStep {
                 }
                 AbstractVibratorStep fallbackStep = conductor.nextVibrateStep(startTime, controller,
                         replaceCurrentSegment((VibrationEffect.Composed) fallback),
-                        segmentIndex, previousStepVibratorOffTimeout);
+                        segmentIndex, mPendingVibratorOffDeadline);
                 List<Step> fallbackResult = fallbackStep.play();
                 // Update the result with the fallback result so this step is seamlessly
                 // replaced by the fallback to any outer application of this.
-                mVibratorOnResult = fallbackStep.getVibratorOnDuration();
+                handleVibratorOnResult(fallbackStep.getVibratorOnDuration());
                 return fallbackResult;
             }
 
+            // The next start and off times will be calculated from mVibratorOnResult.
             return nextSteps(/* segmentsPlayed= */ 1);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);

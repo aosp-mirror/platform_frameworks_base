@@ -112,8 +112,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
 
     @Nullable
     AbstractVibratorStep nextVibrateStep(long startTime, VibratorController controller,
-            VibrationEffect.Composed effect, int segmentIndex,
-            long previousStepVibratorOffTimeout) {
+            VibrationEffect.Composed effect, int segmentIndex, long pendingVibratorOffDeadline) {
         if (Build.IS_DEBUGGABLE) {
             expectIsVibrationThread(true);
         }
@@ -123,24 +122,24 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         if (segmentIndex < 0) {
             // No more segments to play, last step is to complete the vibration on this vibrator.
             return new CompleteEffectVibratorStep(this, startTime, /* cancelled= */ false,
-                    controller, previousStepVibratorOffTimeout);
+                    controller, pendingVibratorOffDeadline);
         }
 
         VibrationEffectSegment segment = effect.getSegments().get(segmentIndex);
         if (segment instanceof PrebakedSegment) {
             return new PerformPrebakedVibratorStep(this, startTime, controller, effect,
-                    segmentIndex, previousStepVibratorOffTimeout);
+                    segmentIndex, pendingVibratorOffDeadline);
         }
         if (segment instanceof PrimitiveSegment) {
             return new ComposePrimitivesVibratorStep(this, startTime, controller, effect,
-                    segmentIndex, previousStepVibratorOffTimeout);
+                    segmentIndex, pendingVibratorOffDeadline);
         }
         if (segment instanceof RampSegment) {
             return new ComposePwleVibratorStep(this, startTime, controller, effect, segmentIndex,
-                    previousStepVibratorOffTimeout);
+                    pendingVibratorOffDeadline);
         }
         return new SetAmplitudeVibratorStep(this, startTime, controller, effect, segmentIndex,
-                previousStepVibratorOffTimeout);
+                pendingVibratorOffDeadline);
     }
 
     /** Called when this conductor is going to be started running by the VibrationThread. */

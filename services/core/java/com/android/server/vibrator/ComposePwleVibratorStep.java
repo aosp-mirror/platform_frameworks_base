@@ -41,11 +41,11 @@ final class ComposePwleVibratorStep extends AbstractVibratorStep {
 
     ComposePwleVibratorStep(VibrationStepConductor conductor, long startTime,
             VibratorController controller, VibrationEffect.Composed effect, int index,
-            long previousStepVibratorOffTimeout) {
+            long pendingVibratorOffDeadline) {
         // This step should wait for the last vibration to finish (with the timeout) and for the
         // intended step start time (to respect the effect delays).
-        super(conductor, Math.max(startTime, previousStepVibratorOffTimeout), controller, effect,
-                index, previousStepVibratorOffTimeout);
+        super(conductor, Math.max(startTime, pendingVibratorOffDeadline), controller, effect,
+                index, pendingVibratorOffDeadline);
     }
 
     @Override
@@ -61,7 +61,8 @@ final class ComposePwleVibratorStep extends AbstractVibratorStep {
             if (pwles.isEmpty()) {
                 Slog.w(VibrationThread.TAG, "Ignoring wrong segment for a ComposePwleStep: "
                         + effect.getSegments().get(segmentIndex));
-                return skipToNextSteps(/* segmentsSkipped= */ 1);
+                // Skip this step and play the next one right away.
+                return nextSteps(/* segmentsPlayed= */ 1);
             }
 
             if (VibrationThread.DEBUG) {
@@ -69,9 +70,11 @@ final class ComposePwleVibratorStep extends AbstractVibratorStep {
                         + controller.getVibratorInfo().getId());
             }
             RampSegment[] pwlesArray = pwles.toArray(new RampSegment[pwles.size()]);
-            mVibratorOnResult = controller.on(pwlesArray, getVibration().id);
-            getVibration().stats().reportComposePwle(mVibratorOnResult, pwlesArray);
+            long vibratorOnResult = controller.on(pwlesArray, getVibration().id);
+            handleVibratorOnResult(vibratorOnResult);
+            getVibration().stats().reportComposePwle(vibratorOnResult, pwlesArray);
 
+            // The next start and off times will be calculated from mVibratorOnResult.
             return nextSteps(/* segmentsPlayed= */ pwles.size());
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);

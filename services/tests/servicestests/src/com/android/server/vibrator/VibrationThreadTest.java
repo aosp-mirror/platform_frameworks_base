@@ -574,7 +574,7 @@ public class VibrationThreadTest {
     }
 
     @Test
-    public void vibrate_singleVibratorComposedAndNoCapability_ignoresVibration() throws Exception {
+    public void vibrate_singleVibratorComposedAndNoCapability_ignoresVibration() {
         long vibrationId = 1;
         VibrationEffect effect = VibrationEffect.startComposition()
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
@@ -663,6 +663,47 @@ public class VibrationThreadTest {
                 expectedPrebaked(VibrationEffect.EFFECT_CLICK)),
                 mVibratorProviders.get(VIBRATOR_ID).getEffectSegments(vibrationId));
         assertEquals(expectedAmplitudes(100), mVibratorProviders.get(VIBRATOR_ID).getAmplitudes());
+    }
+
+    @Test
+    public void vibrate_singleVibratorComposedWithFallback_replacedInTheMiddleOfComposition() {
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
+        fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        fakeVibrator.setSupportedPrimitives(
+                VibrationEffect.Composition.PRIMITIVE_CLICK,
+                VibrationEffect.Composition.PRIMITIVE_TICK);
+        fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+
+        long vibrationId = 1;
+        VibrationEffect fallback = VibrationEffect.createOneShot(10, 100);
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
+                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_TICK))
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f)
+                .compose();
+        Vibration vib = createVibration(vibrationId, CombinedVibration.createParallel(effect));
+        vib.addFallback(VibrationEffect.EFFECT_TICK, fallback);
+        startThreadAndDispatcher(vib);
+        waitForCompletion();
+
+        // Use first duration the vibrator is turned on since we cannot estimate the clicks.
+        verify(mManagerHooks).noteVibratorOn(eq(UID), anyLong());
+        verify(mManagerHooks).noteVibratorOff(eq(UID));
+        verify(mControllerCallbacks, times(4)).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
+        assertFalse(mControllers.get(VIBRATOR_ID).isVibrating());
+
+        List<VibrationEffectSegment> segments =
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments(vibrationId);
+        assertTrue("Wrong segments: " + segments, segments.size() >= 4);
+        assertTrue(segments.get(0) instanceof PrebakedSegment);
+        assertTrue(segments.get(1) instanceof PrimitiveSegment);
+        for (int i = 2; i < segments.size() - 1; i++) {
+            // One or more step segments as fallback for the EFFECT_TICK.
+            assertTrue(segments.get(i) instanceof StepSegment);
+        }
+        assertTrue(segments.get(segments.size() - 1) instanceof PrimitiveSegment);
     }
 
     @Test
