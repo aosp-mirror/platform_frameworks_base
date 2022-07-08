@@ -427,6 +427,15 @@ public class TaskInfo {
     }
 
     /**
+     * @return The id of the display this task is associated with.
+     * @hide
+     */
+    @TestApi
+    public int getDisplayId() {
+        return displayId;
+    }
+
+    /**
      * Returns {@code true} if the parameters that are important for task organizers are equal
      * between this {@link TaskInfo} and {@param that}.
      * @hide
