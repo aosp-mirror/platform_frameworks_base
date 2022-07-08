@@ -125,6 +125,13 @@ class CameraGestureHelper @Inject constructor(
             // launched from behind the lock-screen.
             activityStarter.startActivity(intent, false /* dismissShade */)
         }
+
+        // Call this to make sure that the keyguard returns if the app that is being launched
+        // crashes after a timeout.
+        centralSurfaces.startLaunchTransitionTimeout()
+        // Call this to make sure the keyguard is ready to be dismissed once the next intent is
+        // handled by the OS (in our case it is the activity we started right above)
+        centralSurfaces.readyForKeyguardDone()
     }
 
     /**
