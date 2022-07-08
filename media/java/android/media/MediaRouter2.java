@@ -102,6 +102,12 @@ public final class MediaRouter2 {
 
     private final String mPackageName;
 
+    /**
+     * Stores the latest copy of all routes received from {@link MediaRouter2ServiceImpl}, without
+     * any filtering, sorting, or deduplication.
+     *
+     * <p>Uses {@link MediaRoute2Info#getId()} to set each entry's key.
+     */
     @GuardedBy("mLock")
     final Map<String, MediaRoute2Info> mRoutes = new ArrayMap<>();
 
@@ -121,7 +127,22 @@ public final class MediaRouter2 {
 
     final Handler mHandler;
 
+    /**
+     * Stores an auxiliary copy of {@link #mFilteredRoutes} at the time of the last route callback
+     * dispatch. This is only used to determine what callback a route should be assigned to (added,
+     * removed, changed) in {@link #dispatchFilteredRoutesChangedLocked(List)}.
+     */
     private volatile ArrayMap<String, MediaRoute2Info> mPreviousRoutes = new ArrayMap<>();
+
+    /**
+     * Stores the latest copy of exposed routes after filtering, sorting, and deduplication. Can be
+     * accessed through {@link #getRoutes()}.
+     *
+     * <p>This list is a copy of {@link #mRoutes} which has undergone filtering, sorting, and
+     * deduplication using criteria in {@link #mDiscoveryPreference}.
+     *
+     * @see #filterRoutesWithCompositePreferenceLocked(List)
+     */
     private volatile List<MediaRoute2Info> mFilteredRoutes = Collections.emptyList();
     private volatile OnGetControllerHintsListener mOnGetControllerHintsListener;
 
