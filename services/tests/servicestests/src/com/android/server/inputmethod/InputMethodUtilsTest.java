@@ -199,9 +199,6 @@ public class InputMethodUtilsTest {
         final InputMethodSubtype nonAutoEnGB = createFakeInputMethodSubtype("en_GB",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoEnIN = createFakeInputMethodSubtype("en_IN",
-                SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
-                IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
         final InputMethodSubtype nonAutoFrCA = createFakeInputMethodSubtype("fr_CA",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
@@ -656,9 +653,6 @@ public class InputMethodUtilsTest {
         final InputMethodSubtype nonAutoEnUS = createFakeInputMethodSubtype("en_US",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
-        final InputMethodSubtype nonAutoEnGB = createFakeInputMethodSubtype("en_GB",
-                SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
-                IS_ASCII_CAPABLE, IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);
         final InputMethodSubtype nonAutoFil = createFakeInputMethodSubtype("fil",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
                 IS_ASCII_CAPABLE, !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE);

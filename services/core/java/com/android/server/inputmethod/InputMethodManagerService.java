@@ -3169,7 +3169,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         // TODO: Move this clearing calling identity block to setImeWindowStatus after making sure
-        // all updateSystemUi happens on system previlege.
+        // all updateSystemUi happens on system privilege.
         final long ident = Binder.clearCallingIdentity();
         try {
             if (!mCurPerceptible) {
@@ -4180,10 +4180,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
                     false /* onlyCurrentIme */, mMethodMap.get(getSelectedMethodIdLocked()),
                     mCurrentSubtype);
-            if (nextSubtype == null) {
-                return false;
-            }
-            return true;
+            return nextSubtype != null;
         }
     }
 
@@ -6110,25 +6107,26 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         synchronized (ImfLock.class) {
-            final PrintWriter pr = shellCommand.getOutPrintWriter();
             final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
                     mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
-            for (int userId : userIds) {
-                final List<InputMethodInfo> methods = all
-                        ? getInputMethodListLocked(userId, DirectBootAwareness.AUTO)
-                        : getEnabledInputMethodListLocked(userId);
-                if (userIds.length > 1) {
-                    pr.print("User #");
-                    pr.print(userId);
-                    pr.println(":");
-                }
-                for (InputMethodInfo info : methods) {
-                    if (brief) {
-                        pr.println(info.getId());
-                    } else {
-                        pr.print(info.getId());
+            try (PrintWriter pr = shellCommand.getOutPrintWriter()) {
+                for (int userId : userIds) {
+                    final List<InputMethodInfo> methods = all
+                            ? getInputMethodListLocked(userId, DirectBootAwareness.AUTO)
+                            : getEnabledInputMethodListLocked(userId);
+                    if (userIds.length > 1) {
+                        pr.print("User #");
+                        pr.print(userId);
                         pr.println(":");
-                        info.dump(pr::println, "  ");
+                    }
+                    for (InputMethodInfo info : methods) {
+                        if (brief) {
+                            pr.println(info.getId());
+                        } else {
+                            pr.print(info.getId());
+                            pr.println(":");
+                            info.dump(pr::println, "  ");
+                        }
                     }
                 }
             }
@@ -6138,8 +6136,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     /**
      * Handles {@code adb shell ime enable} and {@code adb shell ime disable}.
+     *
      * @param shellCommand {@link ShellCommand} object that is handling this command.
-     * @param enabled {@code true} if the command was {@code adb shell ime enable}.
+     * @param enabled      {@code true} if the command was {@code adb shell ime enable}.
      * @return Exit code of the command.
      */
     @BinderThread
@@ -6148,18 +6147,19 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @NonNull ShellCommand shellCommand, boolean enabled) {
         final int userIdToBeResolved = handleOptionsForCommandsThatOnlyHaveUserOption(shellCommand);
         final String imeId = shellCommand.getNextArgRequired();
-        final PrintWriter out = shellCommand.getOutPrintWriter();
-        final PrintWriter error = shellCommand.getErrPrintWriter();
         boolean hasFailed = false;
-        synchronized (ImfLock.class) {
-            final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
-                    mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
-            for (int userId : userIds) {
-                if (!userHasDebugPriv(userId, shellCommand)) {
-                    continue;
+        try (PrintWriter out = shellCommand.getOutPrintWriter();
+             PrintWriter error = shellCommand.getErrPrintWriter()) {
+            synchronized (ImfLock.class) {
+                final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
+                        mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
+                for (int userId : userIds) {
+                    if (!userHasDebugPriv(userId, shellCommand)) {
+                        continue;
+                    }
+                    hasFailed |= !handleShellCommandEnableDisableInputMethodInternalLocked(
+                            userId, imeId, enabled, out, error);
                 }
-                hasFailed |= !handleShellCommandEnableDisableInputMethodInternalLocked(
-                        userId, imeId, enabled, out, error);
             }
         }
         return hasFailed ? ShellCommandResult.FAILURE : ShellCommandResult.SUCCESS;
@@ -6251,7 +6251,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + " failed due to its unrecognized IME ID.");
             return false;
         }
-
         out.print("Input method ");
         out.print(imeId);
         out.print(": ");
@@ -6264,6 +6263,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     /**
      * Handles {@code adb shell ime set}.
+     *
      * @param shellCommand {@link ShellCommand} object that is handling this command.
      * @return Exit code of the command.
      */
@@ -6272,32 +6272,34 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private int handleShellCommandSetInputMethod(@NonNull ShellCommand shellCommand) {
         final int userIdToBeResolved = handleOptionsForCommandsThatOnlyHaveUserOption(shellCommand);
         final String imeId = shellCommand.getNextArgRequired();
-        final PrintWriter out = shellCommand.getOutPrintWriter();
-        final PrintWriter error = shellCommand.getErrPrintWriter();
         boolean hasFailed = false;
-        synchronized (ImfLock.class) {
-            final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
-                    mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
-            for (int userId : userIds) {
-                if (!userHasDebugPriv(userId, shellCommand)) {
-                    continue;
+        try (PrintWriter out = shellCommand.getOutPrintWriter();
+             PrintWriter error = shellCommand.getErrPrintWriter()) {
+            synchronized (ImfLock.class) {
+                final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
+                        mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
+                for (int userId : userIds) {
+                    if (!userHasDebugPriv(userId, shellCommand)) {
+                        continue;
+                    }
+                    boolean failedToSelectUnknownIme = !switchToInputMethodLocked(imeId,
+                            userId);
+                    if (failedToSelectUnknownIme) {
+                        error.print("Unknown input method ");
+                        error.print(imeId);
+                        error.print(" cannot be selected for user #");
+                        error.println(userId);
+                        // Also print this failure into logcat for better debuggability.
+                        Slog.e(TAG, "\"ime set " + imeId + "\" for user #" + userId
+                                + " failed due to its unrecognized IME ID.");
+                    } else {
+                        out.print("Input method ");
+                        out.print(imeId);
+                        out.print(" selected for user #");
+                        out.println(userId);
+                    }
+                    hasFailed |= failedToSelectUnknownIme;
                 }
-                boolean failedToSelectUnknownIme = !switchToInputMethodLocked(imeId, userId);
-                if (failedToSelectUnknownIme) {
-                    error.print("Unknown input method ");
-                    error.print(imeId);
-                    error.print(" cannot be selected for user #");
-                    error.println(userId);
-                    // Also print this failure into logcat for better debuggability.
-                    Slog.e(TAG, "\"ime set " + imeId + "\" for user #" + userId
-                            + " failed due to its unrecognized IME ID.");
-                } else {
-                    out.print("Input method ");
-                    out.print(imeId);
-                    out.print(" selected for user #");
-                    out.println(userId);
-                }
-                hasFailed |= failedToSelectUnknownIme;
             }
         }
         return hasFailed ? ShellCommandResult.FAILURE : ShellCommandResult.SUCCESS;
@@ -6311,70 +6313,72 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     @ShellCommandResult
     private int handleShellCommandResetInputMethod(@NonNull ShellCommand shellCommand) {
-        final PrintWriter out = shellCommand.getOutPrintWriter();
         final int userIdToBeResolved = handleOptionsForCommandsThatOnlyHaveUserOption(shellCommand);
         synchronized (ImfLock.class) {
-            final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
-                    mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
-            for (int userId : userIds) {
-                if (!userHasDebugPriv(userId, shellCommand)) {
-                    continue;
-                }
-                final String nextIme;
-                final List<InputMethodInfo> nextEnabledImes;
-                if (userId == mSettings.getCurrentUserId()) {
-                    hideCurrentInputLocked(mCurFocusedWindow, 0, null,
-                            SoftInputShowHideReason.HIDE_RESET_SHELL_COMMAND);
-                    mBindingController.unbindCurrentMethod();
-                    // Reset the current IME
-                    resetSelectedInputMethodAndSubtypeLocked(null);
-                    // Also reset the settings of the current IME
-                    mSettings.putSelectedInputMethod(null);
-                    // Disable all enabled IMEs.
-                    for (InputMethodInfo inputMethodInfo :
-                            mSettings.getEnabledInputMethodListLocked()) {
-                        setInputMethodEnabledLocked(inputMethodInfo.getId(), false);
+            try (PrintWriter out = shellCommand.getOutPrintWriter()) {
+                final int[] userIds = InputMethodUtils.resolveUserId(userIdToBeResolved,
+                        mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
+                for (int userId : userIds) {
+                    if (!userHasDebugPriv(userId, shellCommand)) {
+                        continue;
                     }
-                    // Re-enable with default enabled IMEs.
-                    for (InputMethodInfo imi : InputMethodInfoUtils.getDefaultEnabledImes(
-                            mContext, mMethodList)) {
-                        setInputMethodEnabledLocked(imi.getId(), true);
+                    final String nextIme;
+                    final List<InputMethodInfo> nextEnabledImes;
+                    if (userId == mSettings.getCurrentUserId()) {
+                        hideCurrentInputLocked(mCurFocusedWindow, 0, null,
+                                SoftInputShowHideReason.HIDE_RESET_SHELL_COMMAND);
+                        mBindingController.unbindCurrentMethod();
+                        // Reset the current IME
+                        resetSelectedInputMethodAndSubtypeLocked(null);
+                        // Also reset the settings of the current IME
+                        mSettings.putSelectedInputMethod(null);
+                        // Disable all enabled IMEs.
+                        for (InputMethodInfo inputMethodInfo :
+                                mSettings.getEnabledInputMethodListLocked()) {
+                            setInputMethodEnabledLocked(inputMethodInfo.getId(), false);
+                        }
+                        // Re-enable with default enabled IMEs.
+                        for (InputMethodInfo imi : InputMethodInfoUtils.getDefaultEnabledImes(
+                                mContext, mMethodList)) {
+                            setInputMethodEnabledLocked(imi.getId(), true);
+                        }
+                        updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
+                        InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
+                                getPackageManagerForUser(mContext, mSettings.getCurrentUserId()),
+                                mSettings.getEnabledInputMethodListLocked());
+                        nextIme = mSettings.getSelectedInputMethod();
+                        nextEnabledImes = mSettings.getEnabledInputMethodListLocked();
+                    } else {
+                        final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+                        final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
+                        final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
+                                new ArrayMap<>();
+                        AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+                        queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
+                                methodMap, methodList, DirectBootAwareness.AUTO);
+                        final InputMethodSettings settings = new InputMethodSettings(
+                                mContext.getResources(), mContext.getContentResolver(), methodMap,
+                                userId, false);
+
+                        nextEnabledImes = InputMethodInfoUtils.getDefaultEnabledImes(mContext,
+                                methodList);
+                        nextIme = InputMethodInfoUtils.getMostApplicableDefaultIME(
+                                nextEnabledImes).getId();
+
+                        // Reset enabled IMEs.
+                        settings.putEnabledInputMethodsStr("");
+                        nextEnabledImes.forEach(
+                                imi -> settings.appendAndPutEnabledInputMethodLocked(
+                                        imi.getId(), false));
+
+                        // Reset selected IME.
+                        settings.putSelectedInputMethod(nextIme);
+                        settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
                     }
-                    updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
-                    InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
-                            getPackageManagerForUser(mContext, mSettings.getCurrentUserId()),
-                            mSettings.getEnabledInputMethodListLocked());
-                    nextIme = mSettings.getSelectedInputMethod();
-                    nextEnabledImes = mSettings.getEnabledInputMethodListLocked();
-                } else {
-                    final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
-                    final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
-                    final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
-                            new ArrayMap<>();
-                    AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
-                    queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                            methodMap, methodList, DirectBootAwareness.AUTO);
-                    final InputMethodSettings settings = new InputMethodSettings(
-                            mContext.getResources(), mContext.getContentResolver(), methodMap,
-                            userId, false);
-
-                    nextEnabledImes = InputMethodInfoUtils.getDefaultEnabledImes(mContext,
-                            methodList);
-                    nextIme = InputMethodInfoUtils.getMostApplicableDefaultIME(
-                            nextEnabledImes).getId();
-
-                    // Reset enabled IMEs.
-                    settings.putEnabledInputMethodsStr("");
-                    nextEnabledImes.forEach(imi -> settings.appendAndPutEnabledInputMethodLocked(
-                            imi.getId(), false));
-
-                    // Reset selected IME.
-                    settings.putSelectedInputMethod(nextIme);
-                    settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
+                    out.println("Reset current and enabled IMEs for user #" + userId);
+                    out.println("  Selected: " + nextIme);
+                    nextEnabledImes.forEach(ime -> out.println("   Enabled: " + ime.getId()));
                 }
-                out.println("Reset current and enabled IMEs for user #" + userId);
-                out.println("  Selected: " + nextIme);
-                nextEnabledImes.forEach(ime -> out.println("   Enabled: " + ime.getId()));
             }
         }
         return ShellCommandResult.SUCCESS;
@@ -6389,23 +6393,26 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @ShellCommandResult
     private int handleShellCommandTraceInputMethod(@NonNull ShellCommand shellCommand) {
         final String cmd = shellCommand.getNextArgRequired();
-        final PrintWriter pw = shellCommand.getOutPrintWriter();
-        switch (cmd) {
-            case "start":
-                ImeTracing.getInstance().startTrace(pw);
-                break;  // proceed to the next step to update the IME client processes.
-            case "stop":
-                ImeTracing.getInstance().stopTrace(pw);
-                break;  // proceed to the next step to update the IME client processes.
-            case "save-for-bugreport":
-                ImeTracing.getInstance().saveForBugreport(pw);
-                return ShellCommandResult.SUCCESS;  // no need to update the IME client processes.
-            default:
-                pw.println("Unknown command: " + cmd);
-                pw.println("Input method trace options:");
-                pw.println("  start: Start tracing");
-                pw.println("  stop: Stop tracing");
-                return ShellCommandResult.FAILURE;  // no need to update the IME client processes.
+        try (PrintWriter pw = shellCommand.getOutPrintWriter()) {
+            switch (cmd) {
+                case "start":
+                    ImeTracing.getInstance().startTrace(pw);
+                    break;  // proceed to the next step to update the IME client processes.
+                case "stop":
+                    ImeTracing.getInstance().stopTrace(pw);
+                    break;  // proceed to the next step to update the IME client processes.
+                case "save-for-bugreport":
+                    ImeTracing.getInstance().saveForBugreport(pw);
+                    // no need to update the IME client processes.
+                    return ShellCommandResult.SUCCESS;
+                default:
+                    pw.println("Unknown command: " + cmd);
+                    pw.println("Input method trace options:");
+                    pw.println("  start: Start tracing");
+                    pw.println("  stop: Stop tracing");
+                    // no need to update the IME client processes.
+                    return ShellCommandResult.FAILURE;
+            }
         }
         boolean isImeTraceEnabled = ImeTracing.getInstance().isEnabled();
         ArrayMap<IBinder, ClientState> clients;
