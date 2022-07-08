@@ -36,7 +36,7 @@ import org.junit.runners.Parameterized
  * Actions:
  *     Launch an app in full screen
  *     Select "Via code behind" radio button
- *     Press Home button to put [pipApp] in pip mode
+ *     Press Home button or swipe up to go Home and put [pipApp] in pip mode
  *
  * Notes:
  *     1. All assertions are inherited from [EnterPipTest]

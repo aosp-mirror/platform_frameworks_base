@@ -817,7 +817,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 if (parent.isAllowedToEmbedActivity(activity) != EMBEDDING_ALLOWED) {
                     final Throwable exception = new SecurityException(
-                            "The task fragment is not trusted to embed the given activity.");
+                            "The task fragment is not allowed to embed the given activity.");
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                     break;
                 }
@@ -825,11 +825,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     final Throwable exception = new SecurityException("The reparented activity is"
                             + " not in the same Task as the target TaskFragment.");
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
-                    break;
-                }
-                if (parent.smallerThanMinDimension(activity)) {
-                    sendMinimumDimensionViolation(parent, activity.getMinDimensions(),
-                            errorCallbackToken, "reparentActivityToTask");
                     break;
                 }
 
@@ -1673,10 +1668,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             // We are reparenting activities to a new embedded TaskFragment, this operation is only
             // allowed if the new parent is trusted by all reparent activities.
             final boolean isEmbeddingDisallowed = oldParent.forAllActivities(activity ->
-                    newParentTF.isAllowedToEmbedActivity(activity) == EMBEDDING_ALLOWED);
+                    newParentTF.isAllowedToEmbedActivity(activity) != EMBEDDING_ALLOWED);
             if (isEmbeddingDisallowed) {
                 final Throwable exception = new SecurityException(
-                        "The new parent is not trusted to embed the activities.");
+                        "The new parent is not allowed to embed the activities.");
                 sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                 return;
             }
@@ -1691,14 +1686,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             final Throwable exception = new SecurityException(
                     "The new parent is not in the same Task as the old parent.");
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
-            return;
-        }
-        final Point minDimensions = oldParent.calculateMinDimension();
-        final Rect newParentBounds = newParentTF.getBounds();
-        if (newParentBounds.width() < minDimensions.x
-                || newParentBounds.height() < minDimensions.y) {
-            sendMinimumDimensionViolation(newParentTF, minDimensions, errorCallbackToken,
-                    "reparentTaskFragment");
             return;
         }
         while (oldParent.hasChild()) {

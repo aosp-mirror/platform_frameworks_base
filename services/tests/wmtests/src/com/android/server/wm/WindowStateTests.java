@@ -720,6 +720,17 @@ public class WindowStateTests extends WindowTestsBase {
         outWaitingForDrawn.clear();
         invisibleApp.requestDrawIfNeeded(outWaitingForDrawn);
         assertTrue(outWaitingForDrawn.isEmpty());
+
+        // Drawn state should not be changed for insets change when screen is off.
+        spyOn(mWm.mPolicy);
+        doReturn(false).when(mWm.mPolicy).isScreenOn();
+        makeWindowVisibleAndDrawn(startingApp);
+        startingApp.getConfiguration().orientation = 0; // Reset to be the same as last reported.
+        startingApp.getWindowFrames().setInsetsChanged(true);
+        startingApp.updateResizingWindowIfNeeded();
+        assertTrue(mWm.mResizingWindows.contains(startingApp));
+        assertTrue(startingApp.isDrawn());
+        assertFalse(startingApp.getOrientationChanging());
     }
 
     @UseTestDisplay(addWindows = W_ABOVE_ACTIVITY)
@@ -992,6 +1003,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
         // Verify the IME insets is visible on app, but not for app2 during app task switching.
+        mDisplayContent.computeImeTargetIfNeeded(app.mActivityRecord);
         assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
         assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
