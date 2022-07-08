@@ -144,8 +144,7 @@ class MediaHierarchyManager @Inject constructor(
                     animatedFraction)
                 // When crossfading, let's keep the bounds at the right location during fading
                 boundsProgress = if (animationCrossFadeProgress < 0.5f) 0.0f else 1.0f
-                currentAlpha = calculateAlphaFromCrossFade(animationCrossFadeProgress,
-                    instantlyShowAtEnd = false)
+                currentAlpha = calculateAlphaFromCrossFade(animationCrossFadeProgress)
             } else {
                 // If we're not crossfading, let's interpolate from the start alpha to 1.0f
                 currentAlpha = MathUtils.lerp(animationStartAlpha, 1.0f, animatedFraction)
@@ -276,7 +275,7 @@ class MediaHierarchyManager @Inject constructor(
             if (value >= 0) {
                 updateTargetState()
                 // Setting the alpha directly, as the below call will use it to update the alpha
-                carouselAlpha = calculateAlphaFromCrossFade(field, instantlyShowAtEnd = true)
+                carouselAlpha = calculateAlphaFromCrossFade(field)
                 applyTargetStateIfNotAnimating()
             }
         }
@@ -414,18 +413,10 @@ class MediaHierarchyManager @Inject constructor(
      * @param crossFadeProgress The current cross fade progress. 0.5f means it's just switching
      * between the start and the end location and the content is fully faded, while 0.75f means
      * that we're halfway faded in again in the target state.
-     *
-     * @param instantlyShowAtEnd should the view be instantly shown at the end. This is needed
-     * to avoid fadinging in when the target was hidden anyway.
      */
-    private fun calculateAlphaFromCrossFade(
-        crossFadeProgress: Float,
-        instantlyShowAtEnd: Boolean
-    ): Float {
+    private fun calculateAlphaFromCrossFade(crossFadeProgress: Float): Float {
         if (crossFadeProgress <= 0.5f) {
             return 1.0f - crossFadeProgress / 0.5f
-        } else if (instantlyShowAtEnd) {
-            return 1.0f
         } else {
             return (crossFadeProgress - 0.5f) / 0.5f
         }
