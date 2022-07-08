@@ -91,7 +91,8 @@ public class HapticGenerator extends AudioEffect implements AutoCloseable {
     }
 
     /**
-     * Enable or disable the effect.
+     * Enable or disable the effect. The effect can only be enabled if the caller has the
+     * {@link android.Manifest.permission#VIBRATE} permission.
      *
      * @param enabled the requested enable state
      * @return {@link #SUCCESS} in case of success, {@link #ERROR_INVALID_OPERATION}
