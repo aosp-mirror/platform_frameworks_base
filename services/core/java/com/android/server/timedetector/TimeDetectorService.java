@@ -29,15 +29,18 @@ import android.app.timedetector.ITimeDetectorService;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
+import android.app.timedetector.TimePoint;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
+import android.util.NtpTrustedTime;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -49,6 +52,7 @@ import com.android.server.timezonedetector.CallerIdentityInjector;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.time.DateTimeException;
 import java.util.Objects;
 
 /**
@@ -93,6 +97,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
     @NonNull private final CallerIdentityInjector mCallerIdentityInjector;
     @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
     @NonNull private final TimeDetectorStrategy mTimeDetectorStrategy;
+    @NonNull private final NtpTrustedTime mNtpTrustedTime;
 
     /**
      * Holds the listeners. The key is the {@link IBinder} associated with the listener, the value
@@ -107,19 +112,21 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
             @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull TimeDetectorStrategy timeDetectorStrategy) {
         this(context, handler, serviceConfigAccessor, timeDetectorStrategy,
-                CallerIdentityInjector.REAL);
+                CallerIdentityInjector.REAL, NtpTrustedTime.getInstance(context));
     }
 
     @VisibleForTesting
     public TimeDetectorService(@NonNull Context context, @NonNull Handler handler,
             @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull TimeDetectorStrategy timeDetectorStrategy,
-            @NonNull CallerIdentityInjector callerIdentityInjector) {
+            @NonNull CallerIdentityInjector callerIdentityInjector,
+            @NonNull NtpTrustedTime ntpTrustedTime) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
         mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
         mTimeDetectorStrategy = Objects.requireNonNull(timeDetectorStrategy);
         mCallerIdentityInjector = Objects.requireNonNull(callerIdentityInjector);
+        mNtpTrustedTime = Objects.requireNonNull(ntpTrustedTime);
 
         // Wire up a change listener so that ITimeZoneDetectorListeners can be notified when
         // the configuration changes for any reason.
@@ -305,6 +312,19 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         Objects.requireNonNull(timeSignal);
 
         mHandler.post(() -> mTimeDetectorStrategy.suggestExternalTime(timeSignal));
+    }
+
+    @Override
+    public TimePoint latestNetworkTime() {
+        // TODO(b/222295093): Return the latest network time from mTimeDetectorStrategy once we can
+        //  be sure that all uses of NtpTrustedTime results in a suggestion being made to the time
+        //  detector. mNtpTrustedTime can be removed once this happens.
+        NtpTrustedTime.TimeResult ntpResult = mNtpTrustedTime.getCachedTimeResult();
+        if (ntpResult != null) {
+            return new TimePoint(ntpResult.getTimeMillis(), ntpResult.getElapsedRealtimeMillis());
+        } else {
+            throw new ParcelableException(new DateTimeException("Missing network time fix"));
+        }
     }
 
     @Override
