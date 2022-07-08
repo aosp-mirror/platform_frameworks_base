@@ -1836,8 +1836,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mAppDataHelper = new AppDataHelper(this);
         mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper);
         mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper);
-        mInitAppsHelper = new InitAppsHelper(this, mApexManager, mInstallPackageHelper,
-                mInjector.getSystemPartitions());
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
                 mAppDataHelper);
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
@@ -1957,6 +1955,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 PackageManagerServiceUtils.logCriticalInfo(Log.INFO, "Upgrading from "
                         + ver.fingerprint + " to " + PackagePartitions.FINGERPRINT);
             }
+
+            mInitAppsHelper = new InitAppsHelper(this, mApexManager, mInstallPackageHelper,
+                mInjector.getSystemPartitions());
 
             // when upgrading from pre-M, promote system app permissions from install to runtime
             mPromoteSystemApps =
