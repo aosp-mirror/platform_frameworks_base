@@ -168,7 +168,7 @@ public class Flags {
     // 1000 - dock
     public static final BooleanFlag SIMULATE_DOCK_THROUGH_CHARGING =
             new BooleanFlag(1000, true);
-    public static final BooleanFlag DOCK_SETUP_ENABLED = new BooleanFlag(1001, false);
+    public static final BooleanFlag DOCK_SETUP_ENABLED = new BooleanFlag(1001, true);
 
 
     // 1100 - windowing
