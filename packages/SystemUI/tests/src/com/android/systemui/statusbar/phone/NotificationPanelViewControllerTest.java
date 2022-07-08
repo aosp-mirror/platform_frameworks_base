@@ -483,7 +483,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mPanelEventsEmitter = new NotificationPanelViewController.PanelEventsEmitter();
 
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
-                mResources,
                 mMainHandler,
                 mLayoutInflater,
                 mFeatureFlags,
@@ -524,8 +523,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mQuickAccessWalletController,
                 mQrCodeScannerController,
                 mRecordingController,
-                mExecutor,
-                mSecureSettings,
                 mLargeScreenShadeHeaderController,
                 mScreenOffAnimationController,
                 mLockscreenGestureLogger,
