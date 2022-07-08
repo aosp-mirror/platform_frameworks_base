@@ -128,9 +128,10 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
 
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            applyBoundsAndOffsets(
-                    displayAreaInfo.token, mDisplayAreaMap.get(displayAreaInfo.token), wct, t);
+            final SurfaceControl leash = mDisplayAreaMap.get(displayAreaInfo.token);
+            applyBoundsAndOffsets(displayAreaInfo.token, leash, wct, t);
             applyTransaction(wct, t);
+            leash.release();
             mDisplayAreaMap.remove(displayAreaInfo.token);
         }
     }
