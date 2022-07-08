@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -51,7 +51,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Postsubmit
+@FlakyTest(bugId = 238367575)
 @Group3
 class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(testSpec) {
     protected val taplInstrumentation = LauncherInstrumentation()
