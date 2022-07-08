@@ -36,6 +36,8 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.transition.Transitions;
 
 /**
  * View model for the window decoration with a caption and shadows. Works with
@@ -49,6 +51,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
     private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
     private final SyncTransactionQueue mSyncQueue;
+
+    private FreeformTaskTransitionStarter mTransitionStarter;
 
     public CaptionWindowDecorViewModel(
             Context context,
@@ -67,8 +71,16 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
     }
 
     @Override
+    public void setFreeformTaskTransitionStarter(FreeformTaskTransitionStarter transitionStarter) {
+        mTransitionStarter = transitionStarter;
+    }
+
+    @Override
     public CaptionWindowDecoration createWindowDecoration(
-            ActivityManager.RunningTaskInfo taskInfo, SurfaceControl taskSurface) {
+            ActivityManager.RunningTaskInfo taskInfo,
+            SurfaceControl taskSurface,
+            SurfaceControl.Transaction startT,
+            SurfaceControl.Transaction finishT) {
         final CaptionWindowDecoration windowDecoration = new CaptionWindowDecoration(
                 mContext,
                 mDisplayController,
@@ -83,16 +95,37 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
                 new CaptionTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setDragResizeCallback(taskPositioner);
-        onTaskInfoChanged(taskInfo, windowDecoration);
+        setupWindowDecorationForTransition(taskInfo, startT, finishT, windowDecoration);
+        setupCaptionColor(taskInfo, windowDecoration);
         return windowDecoration;
+    }
+
+    @Override
+    public CaptionWindowDecoration adoptWindowDecoration(AutoCloseable windowDecor) {
+        return (windowDecor instanceof CaptionWindowDecoration)
+                ? (CaptionWindowDecoration) windowDecor
+                : null;
     }
 
     @Override
     public void onTaskInfoChanged(RunningTaskInfo taskInfo, CaptionWindowDecoration decoration) {
         decoration.relayout(taskInfo);
 
+        setupCaptionColor(taskInfo, decoration);
+    }
+
+    private void setupCaptionColor(RunningTaskInfo taskInfo, CaptionWindowDecoration decoration) {
         int statusBarColor = taskInfo.taskDescription.getStatusBarColor();
         decoration.setCaptionColor(statusBarColor);
+    }
+
+    @Override
+    public void setupWindowDecorationForTransition(
+            RunningTaskInfo taskInfo,
+            SurfaceControl.Transaction startT,
+            SurfaceControl.Transaction finishT,
+            CaptionWindowDecoration decoration) {
+        decoration.relayout(taskInfo, startT, finishT);
     }
 
     private class CaptionTouchEventListener implements
@@ -105,7 +138,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
         private int mDragPointerId = -1;
 
         private CaptionTouchEventListener(
-                RunningTaskInfo taskInfo, DragResizeCallback dragResizeCallback) {
+                RunningTaskInfo taskInfo,
+                DragResizeCallback dragResizeCallback) {
             mTaskId = taskInfo.taskId;
             mTaskToken = taskInfo.token;
             mDragResizeCallback = dragResizeCallback;
@@ -113,7 +147,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
 
         @Override
         public void onClick(View v) {
-            int id = v.getId();
+            final int id = v.getId();
             if (id == R.id.close_window) {
                 mActivityTaskManager.removeTask(mTaskId);
             } else if (id == R.id.maximize_window) {
@@ -129,7 +163,11 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
                 if (targetWindowingMode == WINDOWING_MODE_FULLSCREEN) {
                     wct.setBounds(mTaskToken, null);
                 }
-                mSyncQueue.queue(wct);
+                if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+                    mTransitionStarter.startWindowingModeTransition(targetWindowingMode, wct);
+                } else {
+                    mSyncQueue.queue(wct);
+                }
             }
         }
 

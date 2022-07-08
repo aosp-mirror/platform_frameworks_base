@@ -98,6 +98,12 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** Transition type for dismissing split-screen. */
     public static final int TRANSIT_SPLIT_DISMISS = TRANSIT_FIRST_CUSTOM + 7;
 
+    /** Transition type for freeform to maximize transition. */
+    public static final int TRANSIT_MAXIMIZE = WindowManager.TRANSIT_FIRST_CUSTOM + 8;
+
+    /** Transition type for maximize to freeform transition. */
+    public static final int TRANSIT_RESTORE_FROM_MAXIMIZE = WindowManager.TRANSIT_FIRST_CUSTOM + 9;
+
     private final WindowOrganizer mOrganizer;
     private final Context mContext;
     private final ShellExecutor mMainExecutor;
