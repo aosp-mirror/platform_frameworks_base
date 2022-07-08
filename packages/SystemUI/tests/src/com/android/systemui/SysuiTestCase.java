@@ -76,10 +76,9 @@ public abstract class SysuiTestCase {
 
     @Before
     public void SysuiSetup() throws Exception {
-        SystemUIInitializer initializer =
-                SystemUIInitializerFactory.createFromConfigNoAssert(mContext);
-        initializer.init(true);
-        mDependency = new TestableDependency(initializer.getSysUIComponent().createDependency());
+        SystemUIFactory.createFromConfig(mContext, true);
+        mDependency = new TestableDependency(
+                SystemUIFactory.getInstance().getSysUIComponent().createDependency());
         Dependency.setInstance(mDependency);
         mFakeBroadcastDispatcher = new FakeBroadcastDispatcher(mContext, mock(Looper.class),
                 mock(Executor.class), mock(DumpManager.class),
