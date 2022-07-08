@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui;
@@ -22,8 +22,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.dagger.DaggerGlobalRootComponent;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
@@ -31,66 +29,47 @@ import com.android.systemui.util.InitializationChecker;
 import com.android.wm.shell.dagger.WMShellConcurrencyModule;
 import com.android.wm.shell.transition.ShellTransitions;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-import javax.inject.Provider;
-
 /**
- * Class factory to provide customizable SystemUI components.
+ * Initializer that stands up SystemUI.
+ *
+ * Implementations should override {@link #getGlobalRootComponentBuilder()} to fill in their own
+ * Dagger root component.
  */
-public class SystemUIFactory {
+public abstract class SystemUIInitializer {
     private static final String TAG = "SystemUIFactory";
 
-    static SystemUIFactory mFactory;
+    private final Context mContext;
+
     private GlobalRootComponent mRootComponent;
     private WMComponent mWMComponent;
     private SysUIComponent mSysUIComponent;
     private InitializationChecker mInitializationChecker;
 
-    public static <T extends SystemUIFactory> T getInstance() {
-        return (T) mFactory;
+    public SystemUIInitializer(Context context) {
+        mContext = context;
     }
 
-    public static void createFromConfig(Context context) {
-        createFromConfig(context, false);
+    protected abstract GlobalRootComponent.Builder getGlobalRootComponentBuilder();
+
+    /**
+     * Prepares the SysUIComponent builder before it is built.
+     * @param sysUIBuilder the builder provided by the root component's getSysUIComponent() method
+     * @param wm the built WMComponent from the root component's getWMComponent() method
+     */
+    protected SysUIComponent.Builder prepareSysUIComponentBuilder(
+            SysUIComponent.Builder sysUIBuilder, WMComponent wm) {
+        return sysUIBuilder;
     }
 
-    @VisibleForTesting
-    public static void createFromConfig(Context context, boolean fromTest) {
-        if (mFactory != null) {
-            return;
-        }
-
-        final String clsName = context.getString(R.string.config_systemUIFactoryComponent);
-        if (clsName == null || clsName.length() == 0) {
-            throw new RuntimeException("No SystemUIFactory component configured");
-        }
-
-        try {
-            Class<?> cls = null;
-            cls = context.getClassLoader().loadClass(clsName);
-            mFactory = (SystemUIFactory) cls.newInstance();
-            mFactory.init(context, fromTest);
-        } catch (Throwable t) {
-            Log.w(TAG, "Error creating SystemUIFactory component: " + clsName, t);
-            throw new RuntimeException(t);
-        }
-    }
-
-    @VisibleForTesting
-    static void cleanup() {
-        mFactory = null;
-    }
-
-    public SystemUIFactory() {}
-
-    @VisibleForTesting
-    public void init(Context context, boolean fromTest)
-            throws ExecutionException, InterruptedException {
+    /**
+     * Starts the initialization process. This stands up the Dagger graph.
+     */
+    public void init(boolean fromTest) throws ExecutionException, InterruptedException {
         mRootComponent = getGlobalRootComponentBuilder()
-                .context(context)
+                .context(mContext)
                 .instrumentationTest(fromTest)
                 .build();
 
@@ -98,7 +77,7 @@ public class SystemUIFactory {
         boolean initializeComponents = mInitializationChecker.initializeComponents();
 
         // Stand up WMComponent
-        setupWmComponent(context);
+        setupWmComponent(mContext);
         if (initializeComponents) {
             // Only initialize when not starting from tests since this currently initializes some
             // components that shouldn't be run in the test environment
@@ -188,20 +167,6 @@ public class SystemUIFactory {
         }
     }
 
-    /**
-     * Prepares the SysUIComponent builder before it is built.
-     * @param sysUIBuilder the builder provided by the root component's getSysUIComponent() method
-     * @param wm the built WMComponent from the root component's getWMComponent() method
-     */
-    protected SysUIComponent.Builder prepareSysUIComponentBuilder(
-            SysUIComponent.Builder sysUIBuilder, WMComponent wm) {
-        return sysUIBuilder;
-    }
-
-    protected GlobalRootComponent.Builder getGlobalRootComponentBuilder() {
-        return DaggerGlobalRootComponent.builder();
-    }
-
     public GlobalRootComponent getRootComponent() {
         return mRootComponent;
     }
@@ -215,23 +180,9 @@ public class SystemUIFactory {
     }
 
     /**
-     * Returns the list of {@link CoreStartable} components that should be started at startup.
-     */
-    public Map<Class<?>, Provider<CoreStartable>> getStartableComponents() {
-        return mSysUIComponent.getStartables();
-    }
-
-    /**
      * Returns the list of additional system UI components that should be started.
      */
     public String getVendorComponent(Resources resources) {
         return resources.getString(R.string.config_systemUIVendorServiceComponent);
-    }
-
-    /**
-     * Returns the list of {@link CoreStartable} components that should be started per user.
-     */
-    public Map<Class<?>, Provider<CoreStartable>> getStartableComponentsPerUser() {
-        return mSysUIComponent.getPerUserStartables();
     }
 }

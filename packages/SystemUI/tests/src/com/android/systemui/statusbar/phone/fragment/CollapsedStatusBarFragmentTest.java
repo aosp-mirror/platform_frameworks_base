@@ -44,6 +44,7 @@ import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogcatEchoTracker;
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DisableFlagsLogger;
@@ -112,6 +113,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     @Before
     public void setup() {
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
+        mDependency.injectMockDependency(DarkIconDispatcher.class);
     }
 
     @Test
