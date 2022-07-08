@@ -530,7 +530,8 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             }
 
             final int taskId = taskInfo.taskId;
-            final TaskListener listener = getTaskListener(mTasks.get(taskId).getTaskInfo());
+            final TaskAppearedInfo appearedInfo = mTasks.get(taskId);
+            final TaskListener listener = getTaskListener(appearedInfo.getTaskInfo());
             mTasks.remove(taskId);
             if (listener != null) {
                 listener.onTaskVanished(taskInfo);
@@ -540,6 +541,10 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             notifyCompatUI(taskInfo, null /* taskListener */);
             // Notify the recent tasks that a task has been removed
             mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskRemoved(taskInfo));
+
+            if (appearedInfo.getLeash() != null) {
+                appearedInfo.getLeash().release();
+            }
         }
     }
 
