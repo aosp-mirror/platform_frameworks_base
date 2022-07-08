@@ -46,7 +46,6 @@ import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDO
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
-import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR;
 import static android.provider.Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -652,7 +651,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // Whether the system should use BLAST for ViewRootImpl
     final boolean mUseBLAST;
     // Whether to enable BLASTSyncEngine Transaction passing.
-    final boolean mUseBLASTSync = true;
+    static final boolean USE_BLAST_SYNC = true;
 
     final BLASTSyncEngine mSyncEngine;
 
@@ -787,8 +786,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES);
         private final Uri mDevEnableNonResizableMultiWindowUri = Settings.Global.getUriFor(
                 DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW);
-        private final Uri mRenderShadowsInCompositorUri = Settings.Global.getUriFor(
-                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR);
         private final Uri mDisplaySettingsPathUri = Settings.Global.getUriFor(
                 DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH);
         private final Uri mMaximumObscuringOpacityForTouchUri = Settings.Global.getUriFor(
@@ -1050,8 +1047,11 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mWindowsChanged = false;
 
     public interface WindowChangeListener {
-        public void windowsChanged();
-        public void focusChanged();
+        /** Notify on windows changed */
+        void windowsChanged();
+
+        /** Notify on focus changed */
+        void focusChanged();
     }
 
     final HighRefreshRateDenylist mHighRefreshRateDenylist;
@@ -2128,7 +2128,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void clearTouchableRegion(Session session, IWindow client) {
-        int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -2546,7 +2545,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             win.mInRelayout = false;
 
-            if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE
+            if (USE_BLAST_SYNC && win.useBLASTSync() && viewVisibility != View.GONE
                     && (win.mSyncSeqId > win.mLastSeqIdSentToRelayout)) {
                 win.markRedrawForSyncReported();
 
@@ -4319,7 +4318,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mDisplayChangeController = controller;
             }
         } catch (RemoteException e) {
-            throw new RuntimeException("Unable to set rotation controller");
+            throw new RuntimeException("Unable to set rotation controller", e);
         }
     }
 
@@ -5638,7 +5637,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public boolean useBLASTSync() {
-        return mUseBLASTSync;
+        return USE_BLAST_SYNC;
     }
 
     @Override
@@ -6498,12 +6497,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {
+    private void dumpPolicyLocked(PrintWriter pw, String[] args) {
         pw.println("WINDOW MANAGER POLICY STATE (dumpsys window policy)");
         mPolicy.dump("    ", pw, args);
     }
 
-    private void dumpAnimatorLocked(PrintWriter pw, String[] args, boolean dumpAll) {
+    private void dumpAnimatorLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER ANIMATOR STATE (dumpsys window animator)");
         mAnimator.dumpLocked(pw, "    ", dumpAll);
     }
@@ -6529,7 +6528,7 @@ public class WindowManagerService extends IWindowManager.Stub
         pw.println(ProtoLogImpl.getSingleInstance().getStatus());
     }
 
-    private void dumpSessionsLocked(PrintWriter pw, boolean dumpAll) {
+    private void dumpSessionsLocked(PrintWriter pw) {
         pw.println("WINDOW MANAGER SESSIONS (dumpsys window sessions)");
         for (int i=0; i<mSessions.size(); i++) {
             Session s = mSessions.valueAt(i);
@@ -6594,7 +6593,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
-        if (mForceRemoves != null && mForceRemoves.size() > 0) {
+        if (mForceRemoves != null && !mForceRemoves.isEmpty()) {
             pw.println();
             pw.println("  Windows force removing:");
             for (int i=mForceRemoves.size()-1; i>=0; i--) {
@@ -6609,7 +6608,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
-        if (mDestroySurface.size() > 0) {
+        if (!mDestroySurface.isEmpty()) {
             pw.println();
             pw.println("  Windows waiting to destroy their surface:");
             for (int i=mDestroySurface.size()-1; i>=0; i--) {
@@ -6626,7 +6625,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
-        if (mResizingWindows.size() > 0) {
+        if (!mResizingWindows.isEmpty()) {
             pw.println();
             pw.println("  Windows waiting to resize:");
             for (int i=mResizingWindows.size()-1; i>=0; i--) {
@@ -6733,8 +6732,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private boolean dumpWindows(PrintWriter pw, String name, String[] args, int opti,
-            boolean dumpAll) {
+    private boolean dumpWindows(PrintWriter pw, String name, boolean dumpAll) {
         final ArrayList<WindowState> windows = new ArrayList();
         if ("apps".equals(name) || "visible".equals(name) || "visible-apps".equals(name)) {
             final boolean appsOnly = name.contains("apps");
@@ -6757,7 +6755,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (windows.size() <= 0) {
+        if (windows.isEmpty()) {
             return false;
         }
 
@@ -6888,17 +6886,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             } else if ("policy".equals(cmd) || "p".equals(cmd)) {
                 synchronized (mGlobalLock) {
-                    dumpPolicyLocked(pw, args, true);
+                    dumpPolicyLocked(pw, args);
                 }
                 return;
             } else if ("animator".equals(cmd) || "a".equals(cmd)) {
                 synchronized (mGlobalLock) {
-                    dumpAnimatorLocked(pw, args, true);
+                    dumpAnimatorLocked(pw, true);
                 }
                 return;
             } else if ("sessions".equals(cmd) || "s".equals(cmd)) {
                 synchronized (mGlobalLock) {
-                    dumpSessionsLocked(pw, true);
+                    dumpSessionsLocked(pw);
                 }
                 return;
             } else if ("displays".equals(cmd) || "d".equals(cmd)) {
@@ -6945,7 +6943,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             } else {
                 // Dumping a single name?
-                if (!dumpWindows(pw, cmd, args, opti, dumpAll)) {
+                if (!dumpWindows(pw, cmd, dumpAll)) {
                     pw.println("Bad window command, or no windows match: " + cmd);
                     pw.println("Use -h for help.");
                 }
@@ -6965,17 +6963,17 @@ public class WindowManagerService extends IWindowManager.Stub
             if (dumpAll) {
                 pw.println(separator);
             }
-            dumpPolicyLocked(pw, args, dumpAll);
+            dumpPolicyLocked(pw, args);
             pw.println();
             if (dumpAll) {
                 pw.println(separator);
             }
-            dumpAnimatorLocked(pw, args, dumpAll);
+            dumpAnimatorLocked(pw, dumpAll);
             pw.println();
             if (dumpAll) {
                 pw.println(separator);
             }
-            dumpSessionsLocked(pw, dumpAll);
+            dumpSessionsLocked(pw);
             pw.println();
             if (dumpAll) {
                 pw.println(separator);
