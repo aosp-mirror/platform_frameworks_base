@@ -35,6 +35,8 @@ import android.window.TaskSnapshot;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.ShellTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +49,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
-public class TaskStackListenerImplTest {
+public class TaskStackListenerImplTest extends ShellTestCase {
 
     @Mock
     private IActivityTaskManager mActivityTaskManager;

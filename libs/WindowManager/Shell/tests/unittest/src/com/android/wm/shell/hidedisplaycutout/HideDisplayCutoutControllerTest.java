@@ -19,7 +19,6 @@ package com.android.wm.shell.hidedisplaycutout;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
-import android.platform.test.annotations.Presubmit;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
@@ -27,6 +26,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.Before;
@@ -35,11 +35,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@Presubmit
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class HideDisplayCutoutControllerTest {
+public class HideDisplayCutoutControllerTest extends ShellTestCase {
     private TestableContext mContext = new TestableContext(
             InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
 
