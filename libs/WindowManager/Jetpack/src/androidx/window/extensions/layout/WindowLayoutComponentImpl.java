@@ -25,8 +25,7 @@ import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
 import android.annotation.Nullable;
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.AppTask;
+import android.app.ActivityClient;
 import android.app.Application;
 import android.app.WindowConfiguration;
 import android.content.Context;
@@ -34,7 +33,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.ArrayMap;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.window.common.CommonFoldingFeature;
@@ -179,57 +177,49 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private List<DisplayFeature> getDisplayFeatures(
             @NonNull Activity activity, List<CommonFoldingFeature> storedFeatures) {
         List<DisplayFeature> features = new ArrayList<>();
-        int displayId = activity.getDisplay().getDisplayId();
-        if (displayId != DEFAULT_DISPLAY) {
-            Log.w(TAG, "This sample doesn't support display features on secondary displays");
-            return features;
-        } else if (isTaskInMultiWindowMode(activity)) {
-            // It is recommended not to report any display features in multi-window mode, since it
-            // won't be possible to synchronize the display feature positions with window movement.
-            return features;
-        } else {
-            for (CommonFoldingFeature baseFeature : storedFeatures) {
-                Integer state = convertToExtensionState(baseFeature.getState());
-                if (state == null) {
-                    continue;
-                }
-                Rect featureRect = baseFeature.getRect();
-                rotateRectToDisplayRotation(displayId, featureRect);
-                transformToWindowSpaceRect(activity, featureRect);
-
-                if (!isRectZero(featureRect)) {
-                    // TODO(b/228641877) Remove guarding if when fixed.
-                    features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
-                }
-            }
+        if (!shouldReportDisplayFeatures(activity)) {
             return features;
         }
+
+        int displayId = activity.getDisplay().getDisplayId();
+        for (CommonFoldingFeature baseFeature : storedFeatures) {
+            Integer state = convertToExtensionState(baseFeature.getState());
+            if (state == null) {
+                continue;
+            }
+            Rect featureRect = baseFeature.getRect();
+            rotateRectToDisplayRotation(displayId, featureRect);
+            transformToWindowSpaceRect(activity, featureRect);
+
+            if (!isRectZero(featureRect)) {
+                // TODO(b/228641877): Remove guarding when fixed.
+                features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
+            }
+        }
+        return features;
     }
 
     /**
-     * Checks whether the task associated with the activity is in multi-window. If task info is not
-     * available it defaults to {@code true}.
+     * Checks whether display features should be reported for the activity.
+     * TODO(b/238948678): Support reporting display features in all windowing modes.
      */
-    private boolean isTaskInMultiWindowMode(@NonNull Activity activity) {
-        final ActivityManager am = activity.getSystemService(ActivityManager.class);
-        if (am == null) {
-            return true;
+    private boolean shouldReportDisplayFeatures(@NonNull Activity activity) {
+        int displayId = activity.getDisplay().getDisplayId();
+        if (displayId != DEFAULT_DISPLAY) {
+            // Display features are not supported on secondary displays.
+            return false;
         }
-
-        final List<AppTask> appTasks = am.getAppTasks();
-        final int taskId = activity.getTaskId();
-        AppTask task = null;
-        for (AppTask t : appTasks) {
-            if (t.getTaskInfo().taskId == taskId) {
-                task = t;
-                break;
-            }
+        final int taskWindowingMode = ActivityClient.getInstance().getTaskWindowingMode(
+                activity.getActivityToken());
+        if (taskWindowingMode == -1) {
+            // If we cannot determine the task windowing mode for any reason, it is likely that we
+            // won't be able to determine its position correctly as well. DisplayFeatures' bounds
+            // in this case can't be computed correctly, so we should skip.
+            return false;
         }
-        if (task == null) {
-            // The task might be removed on the server already.
-            return true;
-        }
-        return WindowConfiguration.inMultiWindowMode(task.getTaskInfo().getWindowingMode());
+        // It is recommended not to report any display features in multi-window mode, since it
+        // won't be possible to synchronize the display feature positions with window movement.
+        return !WindowConfiguration.inMultiWindowMode(taskWindowingMode);
     }
 
     /**
