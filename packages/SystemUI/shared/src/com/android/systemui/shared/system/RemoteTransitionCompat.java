@@ -427,18 +427,14 @@ public class RemoteTransitionCompat implements Parcelable {
                     mPipTransaction = null;
                 }
             }
-            // Release surface references now. This is apparently to free GPU
-            // memory while doing quick operations (eg. during CTS).
-            for (int i = 0; i < mLeashMap.size(); ++i) {
-                if (mLeashMap.keyAt(i) == mLeashMap.valueAt(i)) continue;
-                t.remove(mLeashMap.valueAt(i));
-            }
             try {
                 mFinishCB.onTransitionFinished(wct.isEmpty() ? null : wct, t);
             } catch (RemoteException e) {
                 Log.e("RemoteTransitionCompat", "Failed to call animation finish callback", e);
                 t.apply();
             }
+            // Only release the non-local created surface references. The animator is responsible
+            // for releasing the leashes created by local.
             for (int i = 0; i < mInfo.getChanges().size(); ++i) {
                 mInfo.getChanges().get(i).getLeash().release();
             }
