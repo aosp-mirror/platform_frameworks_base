@@ -403,7 +403,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private boolean shouldDispatchToLauncher(int backType) {
         return backType == BackNavigationInfo.TYPE_RETURN_TO_HOME
                 && mBackToLauncherCallback != null
-                && mEnableAnimations.get();
+                && mEnableAnimations.get()
+                && mBackNavigationInfo != null
+                && mBackNavigationInfo.getDepartingAnimationTarget() != null;
     }
 
     private static void dispatchOnBackStarted(IOnBackInvokedCallback callback) {

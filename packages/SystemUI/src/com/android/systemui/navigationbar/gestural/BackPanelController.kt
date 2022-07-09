@@ -321,7 +321,10 @@ class BackPanelController private constructor(
                 velocityTracker = null
             }
             MotionEvent.ACTION_CANCEL -> {
-                updateArrowState(GestureState.CANCELLED)
+                // Receiving a CANCEL implies that something else intercepted
+                // the gesture, i.e., the user did not cancel their gesture.
+                // Therefore, disappear immediately, with minimum fanfare.
+                updateArrowState(GestureState.GONE)
                 velocityTracker = null
             }
         }
