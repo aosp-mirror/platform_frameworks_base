@@ -18,13 +18,13 @@ package com.android.wm.shell.tasksurfacehelper;
 
 import static org.mockito.Mockito.verify;
 
-import android.platform.test.annotations.Presubmit;
 import android.testing.AndroidTestingRunner;
 import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.Before;
@@ -33,10 +33,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@Presubmit
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class TaskSurfaceHelperControllerTest {
+public class TaskSurfaceHelperControllerTest extends ShellTestCase {
     private TaskSurfaceHelperController mTaskSurfaceHelperController;
     @Mock
     private ShellTaskOrganizer mMockTaskOrganizer;

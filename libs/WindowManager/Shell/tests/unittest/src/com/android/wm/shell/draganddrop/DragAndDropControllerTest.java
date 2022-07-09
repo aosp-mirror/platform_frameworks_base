@@ -44,6 +44,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -61,7 +62,7 @@ import java.util.Optional;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class DragAndDropControllerTest {
+public class DragAndDropControllerTest extends ShellTestCase {
 
     @Mock
     private Context mContext;
