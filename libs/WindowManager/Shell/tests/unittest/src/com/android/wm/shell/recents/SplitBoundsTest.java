@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.util.SplitBounds;
 
 import org.junit.Before;
@@ -17,7 +18,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class SplitBoundsTest {
+public class SplitBoundsTest extends ShellTestCase {
     private static final int DEVICE_WIDTH = 100;
     private static final int DEVICE_LENGTH = 200;
     private static final int DIVIDER_SIZE = 20;
