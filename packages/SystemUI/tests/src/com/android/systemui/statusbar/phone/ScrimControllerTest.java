@@ -1553,6 +1553,15 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimInFront.shouldBlendWithMainColor());
     }
 
+    @Test
+    public void applyState_unlocked_bouncerShowing() {
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.setBouncerHiddenFraction(0.99f);
+        mScrimController.setRawPanelExpansionFraction(0f);
+        finishAnimationsImmediately();
+        assertScrimAlpha(mScrimBehind, 0);
+    }
+
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {
         mScrimController.setRawPanelExpansionFraction(expansion);
         finishAnimationsImmediately();

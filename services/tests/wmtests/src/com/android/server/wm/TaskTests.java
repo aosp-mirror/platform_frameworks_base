@@ -691,7 +691,8 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord.CompatDisplayInsets compatInsets =
                 new ActivityRecord.CompatDisplayInsets(
                         display, activity, /* fixedOrientationBounds= */ null);
-        task.computeConfigResourceOverrides(inOutConfig, parentConfig, compatInsets);
+        task.computeConfigResourceOverrides(
+                inOutConfig, parentConfig, compatInsets, /* areBoundsLetterboxed */ true);
 
         assertEquals(largerLandscapeBounds, inOutConfig.windowConfiguration.getAppBounds());
         final float density = parentConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
