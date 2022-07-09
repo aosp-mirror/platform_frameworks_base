@@ -44,6 +44,7 @@ import android.util.Size;
 import android.view.DisplayInfo;
 import android.window.WindowContainerToken;
 
+import com.android.wm.shell.MockSurfaceControlHelper;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
@@ -246,7 +247,8 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         mPipBoundsState.setDisplayLayout(new DisplayLayout(info,
                 mContext.getResources(), true, true));
         mSpiedPipTaskOrganizer.setOneShotAnimationType(PipAnimationController.ANIM_TYPE_ALPHA);
-        mSpiedPipTaskOrganizer.setSurfaceControlTransactionFactory(PipDummySurfaceControlTx::new);
+        mSpiedPipTaskOrganizer.setSurfaceControlTransactionFactory(
+                MockSurfaceControlHelper::createMockSurfaceControlTransaction);
         doNothing().when(mSpiedPipTaskOrganizer).enterPipWithAlphaAnimation(any(), anyLong());
         doNothing().when(mSpiedPipTaskOrganizer).scheduleAnimateResizePip(any(), anyInt(), any());
     }

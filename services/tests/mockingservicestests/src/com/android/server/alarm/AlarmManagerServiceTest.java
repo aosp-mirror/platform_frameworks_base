@@ -721,6 +721,25 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
+    public void testAlarmBroadcastOption() throws Exception {
+        final long triggerTime = mNowElapsedTest + 5000;
+        final PendingIntent alarmPi = getNewMockPendingIntent();
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, triggerTime, alarmPi);
+
+        mNowElapsedTest = mTestTimer.getElapsed();
+        mTestTimer.expire();
+
+        final ArgumentCaptor<PendingIntent.OnFinished> onFinishedCaptor =
+                ArgumentCaptor.forClass(PendingIntent.OnFinished.class);
+        final ArgumentCaptor<Bundle> optionsCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(alarmPi).send(eq(mMockContext), eq(0), any(Intent.class),
+                onFinishedCaptor.capture(), any(Handler.class), isNull(),
+                optionsCaptor.capture());
+        assertTrue(optionsCaptor.getValue()
+                .getBoolean(BroadcastOptions.KEY_ALARM_BROADCAST, false));
+    }
+
+    @Test
     public void testUpdateConstants() {
         setDeviceConfigLong(KEY_MIN_FUTURITY, 5);
         setDeviceConfigLong(KEY_MIN_INTERVAL, 10);

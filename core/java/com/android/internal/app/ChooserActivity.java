@@ -30,6 +30,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.SharedElementCallback;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionManager;
@@ -101,7 +102,10 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Space;
@@ -197,6 +201,8 @@ public class ChooserActivity extends ResolverActivity implements
     private static final String PLURALS_COUNT = "count";
     private static final String PLURALS_FILE_NAME = "file_name";
 
+    private static final String IMAGE_EDITOR_SHARED_ELEMENT = "screenshot_preview_image";
+
     private boolean mIsAppPredictorComponentAvailable;
     private Map<ChooserTarget, AppTarget> mDirectShareAppTargetCache;
     private Map<ChooserTarget, ShortcutInfo> mDirectShareShortcutInfoCache;
@@ -249,6 +255,11 @@ public class ChooserActivity extends ResolverActivity implements
                     DEFAULT_IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP);
 
     private static final int DEFAULT_LIST_VIEW_UPDATE_DELAY_MS = 125;
+
+    private static final int URI_PERMISSION_INTENT_FLAGS = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+            | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION;
 
     @VisibleForTesting
     int mListViewUpdateDelayMs = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -304,6 +315,8 @@ public class ChooserActivity extends ResolverActivity implements
             new EnterTransitionAnimationDelegate();
 
     private boolean mRemoveSharedElements = false;
+
+    private View mContentView = null;
 
     private class ContentPreviewCoordinator {
         private static final int IMAGE_FADE_IN_MILLIS = 150;
@@ -990,6 +1003,7 @@ public class ChooserActivity extends ResolverActivity implements
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume: " + getComponentName().flattenToShortString());
+        maybeCancelFinishAnimation();
     }
 
     @Override
@@ -1085,6 +1099,10 @@ public class ChooserActivity extends ResolverActivity implements
         final ComponentName cn = getEditSharingComponent();
 
         final Intent resolveIntent = new Intent(originalIntent);
+        // Retain only URI permission grant flags if present. Other flags may prevent the scene
+        // transition animation from running (i.e FLAG_ACTIVITY_NO_ANIMATION,
+        // FLAG_ACTIVITY_NEW_TASK, FLAG_ACTIVITY_NEW_DOCUMENT) but also not needed.
+        resolveIntent.setFlags(originalIntent.getFlags() & URI_PERMISSION_INTENT_FLAGS);
         resolveIntent.setComponent(cn);
         resolveIntent.setAction(Intent.ACTION_EDIT);
         String originalAction = originalIntent.getAction();
@@ -1113,7 +1131,6 @@ public class ChooserActivity extends ResolverActivity implements
         dri.setDisplayIcon(getDrawable(R.drawable.ic_screenshot_edit));
         return dri;
     }
-
 
     @VisibleForTesting
     protected TargetInfo getNearbySharingTarget(Intent originalIntent) {
@@ -1217,13 +1234,28 @@ public class ChooserActivity extends ResolverActivity implements
                             "",
                             -1,
                             false);
+                    View firstImgView = getFirstVisibleImgPreviewView();
                     // Action bar is user-independent, always start as primary
-                    safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
-                    finish();
+                    if (firstImgView == null) {
+                        safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
+                        finish();
+                    } else {
+                        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
+                                this, firstImgView, IMAGE_EDITOR_SHARED_ELEMENT);
+                        safelyStartActivityAsUser(
+                                ti, getPersonalProfileUserHandle(), options.toBundle());
+                        startFinishAnimation();
+                    }
                 }
         );
         b.setId(R.id.chooser_edit_button);
         return b;
+    }
+
+    @Nullable
+    private View getFirstVisibleImgPreviewView() {
+        View firstImage = findViewById(R.id.content_preview_image_1_large);
+        return firstImage != null && firstImage.isVisibleToUser() ? firstImage : null;
     }
 
     private void addActionButton(ViewGroup parent, Button b) {
@@ -1570,6 +1602,14 @@ public class ChooserActivity extends ResolverActivity implements
     private void incrementNumSheetExpansions() {
         getPreferences(Context.MODE_PRIVATE).edit().putInt(PREF_NUM_SHEET_EXPANSIONS,
                 getNumSheetExpansions() + 1).apply();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (maybeCancelFinishAnimation()) {
+            finish();
+        }
     }
 
     @Override
@@ -2900,6 +2940,30 @@ public class ChooserActivity extends ResolverActivity implements
                 .setSubtype(previewType));
     }
 
+    private void startFinishAnimation() {
+        View rootView = findRootView();
+        rootView.startAnimation(new FinishAnimation(this, rootView));
+    }
+
+    private boolean maybeCancelFinishAnimation() {
+        View rootView = findRootView();
+        Animation animation = rootView.getAnimation();
+        if (animation instanceof FinishAnimation) {
+            boolean hasEnded = animation.hasEnded();
+            animation.cancel();
+            rootView.clearAnimation();
+            return !hasEnded;
+        }
+        return false;
+    }
+
+    private View findRootView() {
+        if (mContentView == null) {
+            mContentView = findViewById(android.R.id.content);
+        }
+        return mContentView;
+    }
+
     abstract static class ViewHolderBase extends RecyclerView.ViewHolder {
         private int mViewType;
 
@@ -3997,6 +4061,66 @@ public class ChooserActivity extends ResolverActivity implements
                 int oldTop, int oldRight, int oldBottom) {
             v.removeOnLayoutChangeListener(this);
             startPostponedEnterTransition();
+        }
+    }
+
+    /**
+     * Used in combination with the scene transition when launching the image editor
+     */
+    private static class FinishAnimation extends AlphaAnimation implements
+            Animation.AnimationListener {
+        private Activity mActivity;
+        private View mRootView;
+        private final float mFromAlpha;
+
+        FinishAnimation(Activity activity, View rootView) {
+            super(rootView.getAlpha(), 0.0f);
+            mActivity = activity;
+            mRootView = rootView;
+            mFromAlpha = rootView.getAlpha();
+            setInterpolator(new LinearInterpolator());
+            long duration = activity.getWindow().getTransitionBackgroundFadeDuration();
+            setDuration(duration);
+            // The scene transition animation looks better when it's not overlapped with this
+            // fade-out animation thus the delay.
+            // It is most likely that the image editor will cause this activity to stop and this
+            // animation will be cancelled in the background without running (i.e. we'll animate
+            // only when this activity remains partially visible after the image editor launch).
+            setStartOffset(duration);
+            super.setAnimationListener(this);
+        }
+
+        @Override
+        public void setAnimationListener(AnimationListener listener) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void cancel() {
+            mRootView.setAlpha(mFromAlpha);
+            cleanup();
+            super.cancel();
+        }
+
+        @Override
+        public void onAnimationStart(Animation animation) {
+        }
+
+        @Override
+        public void onAnimationEnd(Animation animation) {
+            if (mActivity != null) {
+                mActivity.finish();
+                cleanup();
+            }
+        }
+
+        @Override
+        public void onAnimationRepeat(Animation animation) {
+        }
+
+        private void cleanup() {
+            mActivity = null;
+            mRootView = null;
         }
     }
 

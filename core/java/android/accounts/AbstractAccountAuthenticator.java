@@ -290,10 +290,10 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void editProperties(IAccountAuthenticatorResponse response,
                 String accountType) throws RemoteException {
-            checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.editProperties(
                     new AccountAuthenticatorResponse(response), accountType);
@@ -305,10 +305,10 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void hasFeatures(IAccountAuthenticatorResponse response,
                 Account account, String[] features) throws RemoteException {
-            checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.hasFeatures(
                     new AccountAuthenticatorResponse(response), account, features);
@@ -320,10 +320,10 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void getAccountRemovalAllowed(IAccountAuthenticatorResponse response,
                 Account account) throws RemoteException {
-            checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.getAccountRemovalAllowed(
                     new AccountAuthenticatorResponse(response), account);
@@ -335,10 +335,10 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void getAccountCredentialsForCloning(IAccountAuthenticatorResponse response,
                 Account account) throws RemoteException {
-            checkBinderPermission();
             try {
                 final Bundle result =
                         AbstractAccountAuthenticator.this.getAccountCredentialsForCloning(
@@ -351,11 +351,11 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void addAccountFromCredentials(IAccountAuthenticatorResponse response,
                 Account account,
                 Bundle accountCredentials) throws RemoteException {
-            checkBinderPermission();
             try {
                 final Bundle result =
                         AbstractAccountAuthenticator.this.addAccountFromCredentials(
@@ -465,12 +465,12 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void isCredentialsUpdateSuggested(
                 IAccountAuthenticatorResponse response,
                 Account account,
                 String statusToken) throws RemoteException {
-            checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this
                         .isCredentialsUpdateSuggested(

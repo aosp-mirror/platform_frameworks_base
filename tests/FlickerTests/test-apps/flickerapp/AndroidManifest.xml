@@ -15,12 +15,14 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-     package="com.android.server.wm.flicker.testapp">
+    package="com.android.server.wm.flicker.testapp">
 
     <uses-sdk android:minSdkVersion="29"
          android:targetSdkVersion="29"/>
     <application android:allowBackup="false"
          android:supportsRtl="true">
+        <uses-library android:name="androidx.window.extensions" android:required="false"/>
+
         <activity android:name=".SimpleActivity"
              android:taskAffinity="com.android.server.wm.flicker.testapp.SimpleActivity"
              android:theme="@style/CutoutShortEdges"
@@ -163,5 +165,33 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ActivityEmbeddingMainActivity"
+            android:label="ActivityEmbedding Main"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ActivityEmbeddingPlaceholderPrimaryActivity"
+            android:label="ActivityEmbedding Placeholder Primary"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".ActivityEmbeddingPlaceholderSecondaryActivity"
+            android:label="ActivityEmbedding Placeholder Secondary"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="false"/>
     </application>
 </manifest>

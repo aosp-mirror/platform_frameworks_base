@@ -473,9 +473,13 @@ final class InstallPackageHelper {
                 mApexManager.registerApkInApex(pkg);
             }
 
-            // Add the package's KeySets to the global KeySetManagerService
-            KeySetManagerService ksms = mPm.mSettings.getKeySetManagerService();
-            ksms.addScannedPackageLPw(pkg);
+            // Don't add keysets for APEX as their package settings are not persisted and will
+            // result in orphaned keysets.
+            if ((scanFlags & SCAN_AS_APEX) == 0) {
+                // Add the package's KeySets to the global KeySetManagerService
+                KeySetManagerService ksms = mPm.mSettings.getKeySetManagerService();
+                ksms.addScannedPackageLPw(pkg);
+            }
 
             final Computer snapshot = mPm.snapshotComputer();
             mPm.mComponentResolver.addAllComponents(pkg, chatty, mPm.mSetupWizardPackage, snapshot);
@@ -3464,8 +3468,9 @@ final class InstallPackageHelper {
         }
         // Sort the list to ensure we always process factory packages first
         Collections.sort(parseResults, (a, b) -> {
-            ApexInfo ai = parsingApexInfo.get(a.scanFile);
-            return ai.isFactory ? -1 : 1;
+            ApexInfo i1 = parsingApexInfo.get(a.scanFile);
+            ApexInfo i2 = parsingApexInfo.get(b.scanFile);
+            return Boolean.compare(i2.isFactory, i1.isFactory);
         });
 
 

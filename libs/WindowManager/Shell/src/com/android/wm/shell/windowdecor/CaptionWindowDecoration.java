@@ -95,6 +95,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mDragResizeCallback = dragResizeCallback;
     }
 
+    @Override
     void relayout(ActivityManager.RunningTaskInfo taskInfo) {
         final int shadowRadiusDp = taskInfo.isFocused
                 ? DECOR_SHADOW_FOCUSED_THICKNESS_IN_DIP : DECOR_SHADOW_UNFOCUSED_THICKNESS_IN_DIP;
@@ -119,8 +120,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         });
 
         if (mResult.mRootView == null) {
-            // This means the task is hidden. Nothing is set up in this case including the
-            // decoration surface.
+            // This means something blocks the window decor from showing, e.g. the task is hidden.
+            // Nothing is set up in this case including the decoration surface.
             return;
         }
         if (oldRootView != mResult.mRootView) {

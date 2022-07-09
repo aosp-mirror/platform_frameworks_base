@@ -87,4 +87,17 @@ public class ActivityOptions {
     public static final ComponentName NOTIFICATION_ACTIVITY_COMPONENT_NAME =
             new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".NotificationActivity");
+
+    public static final String ACTIVITY_EMBEDDING_LAUNCHER_NAME = "ActivityEmbeddingMainActivity";
+    public static final ComponentName ACTIVITY_EMBEDDING_MAIN_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ActivityEmbeddingMainActivity");
+    public static final ComponentName
+            ACTIVITY_EMBEDDING_PLACEHOLDER_PRIMARY_ACTIVITY_COMPONENT_NAME = new ComponentName(
+                    FLICKER_APP_PACKAGE,
+            FLICKER_APP_PACKAGE + ".ActivityEmbeddingPlaceholderPrimaryActivity");
+    public static final ComponentName
+            ACTIVITY_EMBEDDING_PLACEHOLDER_SECONDARY_ACTIVITY_COMPONENT_NAME = new ComponentName(
+                    FLICKER_APP_PACKAGE,
+            FLICKER_APP_PACKAGE + ".ActivityEmbeddingPlaceholderSecondaryActivity");
 }

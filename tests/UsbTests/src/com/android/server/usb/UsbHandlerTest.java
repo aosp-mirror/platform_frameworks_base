@@ -182,6 +182,14 @@ public class UsbHandlerTest {
 
     @SmallTest
     @Test
+    public void setFunctionsNcm() {
+        mUsbHandler.handleMessage(mUsbHandler.obtainMessage(MSG_SET_CURRENT_FUNCTIONS,
+                UsbManager.FUNCTION_NCM));
+        assertNotEquals(mUsbHandler.getEnabledFunctions() & UsbManager.FUNCTION_NCM, 0);
+    }
+
+    @SmallTest
+    @Test
     public void setFunctionsNcmAndRndis() {
         final long rndisPlusNcm = UsbManager.FUNCTION_RNDIS | UsbManager.FUNCTION_NCM;
 

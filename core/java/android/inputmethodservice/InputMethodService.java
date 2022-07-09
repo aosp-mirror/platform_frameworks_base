@@ -2163,13 +2163,13 @@ public class InputMethodService extends AbstractInputMethodService {
             mCandidatesVisibility = vis;
         }
     }
-    
+
     /**
      * Returns the visibility mode (either {@link View#INVISIBLE View.INVISIBLE}
      * or {@link View#GONE View.GONE}) of the candidates view when it is not
      * shown.  The default implementation returns GONE when
      * {@link #isExtractViewShown} returns true,
-     * otherwise VISIBLE.  Be careful if you change this to return GONE in
+     * otherwise INVISIBLE.  Be careful if you change this to return GONE in
      * other situations -- if showing or hiding the candidates view causes
      * your window to resize, this can cause temporary drawing artifacts as
      * the resize takes place.

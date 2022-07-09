@@ -25,11 +25,11 @@ import android.graphics.BLASTBufferQueue;
 import android.graphics.FrameInfo;
 import android.graphics.HardwareRenderer;
 import android.graphics.Picture;
-import android.graphics.Point;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.os.Trace;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
@@ -596,11 +596,18 @@ public final class ThreadedRenderer extends HardwareRenderer {
      */
     void setLightCenter(AttachInfo attachInfo) {
         // Adjust light position for window offsets.
-        final Point displaySize = attachInfo.mPoint;
-        attachInfo.mDisplay.getRealSize(displaySize);
-        final float lightX = displaySize.x / 2f - attachInfo.mWindowLeft;
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        attachInfo.mDisplay.getRealMetrics(displayMetrics);
+        final float lightX = displayMetrics.widthPixels / 2f - attachInfo.mWindowLeft;
         final float lightY = mLightY - attachInfo.mWindowTop;
-        setLightSourceGeometry(lightX, lightY, mLightZ, mLightRadius);
+        // To prevent shadow distortion on larger screens, scale the z position of the light source
+        // relative to the smallest screen dimension.
+        final float zRatio = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels)
+                / (450f * displayMetrics.density);
+        final float zWeightedAdjustment = (zRatio + 2) / 3f;
+        final float lightZ = mLightZ * zWeightedAdjustment;
+
+        setLightSourceGeometry(lightX, lightY, lightZ, mLightRadius);
     }
 
     /**
@@ -849,12 +856,18 @@ public final class ThreadedRenderer extends HardwareRenderer {
         public void setLightCenter(final Display display,
                 final int windowLeft, final int windowTop) {
             // Adjust light position for window offsets.
-            final Point displaySize = new Point();
-            display.getRealSize(displaySize);
-            final float lightX = displaySize.x / 2f - windowLeft;
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            display.getRealMetrics(displayMetrics);
+            final float lightX = displayMetrics.widthPixels / 2f - windowLeft;
             final float lightY = mLightY - windowTop;
+            // To prevent shadow distortion on larger screens, scale the z position of the light
+            // source relative to the smallest screen dimension.
+            final float zRatio = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels)
+                    / (450f * displayMetrics.density);
+            final float zWeightedAdjustment = (zRatio + 2) / 3f;
+            final float lightZ = mLightZ * zWeightedAdjustment;
 
-            setLightSourceGeometry(lightX, lightY, mLightZ, mLightRadius);
+            setLightSourceGeometry(lightX, lightY, lightZ, mLightRadius);
         }
 
         public RenderNode getRootNode() {

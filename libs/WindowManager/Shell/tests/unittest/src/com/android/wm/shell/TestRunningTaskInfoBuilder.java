@@ -25,8 +25,10 @@ import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.view.Display;
 import android.window.IWindowContainerToken;
 import android.window.WindowContainerToken;
 
@@ -38,6 +40,10 @@ public final class TestRunningTaskInfoBuilder {
     private int mParentTaskId = INVALID_TASK_ID;
     private @WindowConfiguration.ActivityType int mActivityType = ACTIVITY_TYPE_STANDARD;
     private @WindowConfiguration.WindowingMode int mWindowingMode = WINDOWING_MODE_UNDEFINED;
+    private int mDisplayId = Display.DEFAULT_DISPLAY;
+    private ActivityManager.TaskDescription.Builder mTaskDescriptionBuilder = null;
+    private final Point mPositionInParent = new Point();
+    private boolean mIsVisible = false;
 
     public static WindowContainerToken createMockWCToken() {
         final IWindowContainerToken itoken = mock(IWindowContainerToken.class);
@@ -68,17 +74,42 @@ public final class TestRunningTaskInfoBuilder {
         return this;
     }
 
+    public TestRunningTaskInfoBuilder setDisplayId(int displayId) {
+        mDisplayId = displayId;
+        return this;
+    }
+
+    public TestRunningTaskInfoBuilder setTaskDescriptionBuilder(
+            ActivityManager.TaskDescription.Builder builder) {
+        mTaskDescriptionBuilder = builder;
+        return this;
+    }
+
+    public TestRunningTaskInfoBuilder setPositionInParent(int x, int y) {
+        mPositionInParent.set(x, y);
+        return this;
+    }
+
+    public TestRunningTaskInfoBuilder setVisible(boolean isVisible) {
+        mIsVisible = isVisible;
+        return this;
+    }
+
     public ActivityManager.RunningTaskInfo build() {
         final ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
-        info.parentTaskId = INVALID_TASK_ID;
         info.taskId = sNextTaskId++;
         info.parentTaskId = mParentTaskId;
+        info.displayId = mDisplayId;
         info.configuration.windowConfiguration.setBounds(mBounds);
         info.configuration.windowConfiguration.setActivityType(mActivityType);
         info.configuration.windowConfiguration.setWindowingMode(mWindowingMode);
         info.token = mToken;
         info.isResizeable = true;
         info.supportsMultiWindow = true;
+        info.taskDescription =
+                mTaskDescriptionBuilder != null ? mTaskDescriptionBuilder.build() : null;
+        info.positionInParent = mPositionInParent;
+        info.isVisible = mIsVisible;
         return info;
     }
 }

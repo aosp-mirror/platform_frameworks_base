@@ -55,18 +55,19 @@ public class NtpTrustedTime implements TrustedTime {
      * @hide
      */
     public static class TimeResult {
-        private final long mTimeMillis;
+        private final long mUnixEpochTimeMillis;
         private final long mElapsedRealtimeMillis;
         private final long mCertaintyMillis;
 
-        public TimeResult(long timeMillis, long elapsedRealtimeMillis, long certaintyMillis) {
-            mTimeMillis = timeMillis;
+        public TimeResult(
+                long unixEpochTimeMillis, long elapsedRealtimeMillis, long certaintyMillis) {
+            mUnixEpochTimeMillis = unixEpochTimeMillis;
             mElapsedRealtimeMillis = elapsedRealtimeMillis;
             mCertaintyMillis = certaintyMillis;
         }
 
         public long getTimeMillis() {
-            return mTimeMillis;
+            return mUnixEpochTimeMillis;
         }
 
         public long getElapsedRealtimeMillis() {
@@ -77,9 +78,11 @@ public class NtpTrustedTime implements TrustedTime {
             return mCertaintyMillis;
         }
 
-        /** Calculates and returns the current time accounting for the age of this result. */
+        /**
+         * Calculates and returns the current Unix epoch time accounting for the age of this result.
+         */
         public long currentTimeMillis() {
-            return mTimeMillis + getAgeMillis();
+            return mUnixEpochTimeMillis + getAgeMillis();
         }
 
         /** Calculates and returns the age of this result. */
@@ -99,7 +102,7 @@ public class NtpTrustedTime implements TrustedTime {
         @Override
         public String toString() {
             return "TimeResult{"
-                    + "mTimeMillis=" + Instant.ofEpochMilli(mTimeMillis)
+                    + "mUnixEpochTimeMillis=" + Instant.ofEpochMilli(mUnixEpochTimeMillis)
                     + ", mElapsedRealtimeMillis=" + Duration.ofMillis(mElapsedRealtimeMillis)
                     + ", mCertaintyMillis=" + mCertaintyMillis
                     + '}';
