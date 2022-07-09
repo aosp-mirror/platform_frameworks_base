@@ -257,4 +257,13 @@ final class IInputMethodManagerInvoker {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    @AnyThread
+    void addVirtualStylusIdForTestSession(IInputMethodClient client) {
+        try {
+            mTarget.addVirtualStylusIdForTestSession(client);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
