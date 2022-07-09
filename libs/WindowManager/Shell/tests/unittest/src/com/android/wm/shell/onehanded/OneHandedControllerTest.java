@@ -48,6 +48,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
@@ -69,6 +70,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     OneHandedState mSpiedTransitionState;
     ShellInit mShellInit;
 
+    @Mock
+    ShellCommandHandler mMockShellCommandHandler;
     @Mock
     ShellController mMockShellController;
     @Mock
@@ -129,6 +132,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         mSpiedOneHandedController = spy(new OneHandedController(
                 mContext,
                 mShellInit,
+                mMockShellCommandHandler,
                 mMockShellController,
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
@@ -149,6 +153,11 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Test
     public void instantiateController_addInitCallback() {
         verify(mShellInit, times(1)).addInitCallback(any(), any());
+    }
+
+    @Test
+    public void instantiateController_registerDumpCallback() {
+        verify(mMockShellCommandHandler, times(1)).addDumpCallback(any(), any());
     }
 
     @Test

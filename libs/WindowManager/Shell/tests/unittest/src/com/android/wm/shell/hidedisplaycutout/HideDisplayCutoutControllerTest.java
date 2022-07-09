@@ -32,6 +32,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
@@ -49,6 +50,8 @@ public class HideDisplayCutoutControllerTest extends ShellTestCase {
             InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
 
     @Mock
+    private ShellCommandHandler mShellCommandHandler;
+    @Mock
     private ShellController mShellController;
     @Mock
     private HideDisplayCutoutOrganizer mMockDisplayAreaOrganizer;
@@ -60,14 +63,19 @@ public class HideDisplayCutoutControllerTest extends ShellTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mShellInit = spy(new ShellInit(mock(ShellExecutor.class)));
-        mHideDisplayCutoutController = new HideDisplayCutoutController(
-                mContext, mShellInit, mShellController, mMockDisplayAreaOrganizer);
+        mHideDisplayCutoutController = new HideDisplayCutoutController(mContext, mShellInit,
+                mShellCommandHandler, mShellController, mMockDisplayAreaOrganizer);
         mShellInit.init();
     }
 
     @Test
     public void instantiateController_addInitCallback() {
         verify(mShellInit, times(1)).addInitCallback(any(), any());
+    }
+
+    @Test
+    public void instantiateController_registerDumpCallback() {
+        verify(mShellCommandHandler, times(1)).addDumpCallback(any(), any());
     }
 
     @Test

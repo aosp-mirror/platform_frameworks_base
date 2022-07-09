@@ -74,6 +74,7 @@ import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.SplitscreenPipMixedHandler;
@@ -249,6 +250,7 @@ public abstract class WMShellModule {
     @DynamicOverride
     static OneHandedController provideOneHandedController(Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             WindowManager windowManager,
             DisplayController displayController,
@@ -258,9 +260,9 @@ public abstract class WMShellModule {
             InteractionJankMonitor jankMonitor,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
-        return OneHandedController.create(context, shellInit, shellController, windowManager,
-                displayController, displayLayout, taskStackListener, jankMonitor, uiEventLogger,
-                mainExecutor, mainHandler);
+        return OneHandedController.create(context, shellInit, shellCommandHandler, shellController,
+                windowManager, displayController, displayLayout, taskStackListener, jankMonitor,
+                uiEventLogger, mainExecutor, mainHandler);
     }
 
     //
@@ -273,6 +275,7 @@ public abstract class WMShellModule {
     static SplitScreenController provideSplitScreenController(
             Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue,
@@ -286,10 +289,10 @@ public abstract class WMShellModule {
             IconProvider iconProvider,
             Optional<RecentTasksController> recentTasks,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new SplitScreenController(context, shellInit, shellController, shellTaskOrganizer,
-                syncQueue, rootTaskDisplayAreaOrganizer, displayController, displayImeController,
-                displayInsetsController, dragAndDropController, transitions, transactionPool,
-                iconProvider, recentTasks, mainExecutor);
+        return new SplitScreenController(context, shellInit, shellCommandHandler, shellController,
+                shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer, displayController,
+                displayImeController, displayInsetsController, dragAndDropController, transitions,
+                transactionPool, iconProvider, recentTasks, mainExecutor);
     }
 
     //
@@ -298,20 +301,29 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static Optional<Pip> providePip(Context context, ShellInit shellInit,
-            ShellController shellController, DisplayController displayController,
-            PipAppOpsListener pipAppOpsListener, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipKeepClearAlgorithm pipKeepClearAlgorithm, PipBoundsState pipBoundsState,
-            PipMotionHelper pipMotionHelper, PipMediaController pipMediaController,
-            PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
+    static Optional<Pip> providePip(Context context,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
+            ShellController shellController,
+            DisplayController displayController,
+            PipAppOpsListener pipAppOpsListener,
+            PipBoundsAlgorithm pipBoundsAlgorithm,
+            PipKeepClearAlgorithm pipKeepClearAlgorithm,
+            PipBoundsState pipBoundsState,
+            PipMotionHelper pipMotionHelper,
+            PipMediaController pipMediaController,
+            PhonePipMenuController phonePipMenuController,
+            PipTaskOrganizer pipTaskOrganizer,
             PipTransitionState pipTransitionState,
-            PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
+            PipTouchHandler pipTouchHandler,
+            PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<OneHandedController> oneHandedController,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return Optional.ofNullable(PipController.create(context, shellInit, shellController,
+        return Optional.ofNullable(PipController.create(
+                context, shellInit, shellCommandHandler, shellController,
                 displayController, pipAppOpsListener, pipBoundsAlgorithm, pipKeepClearAlgorithm,
                 pipBoundsState, pipMotionHelper, pipMediaController, phonePipMenuController,
                 pipTaskOrganizer, pipTransitionState, pipTouchHandler, pipTransitionController,

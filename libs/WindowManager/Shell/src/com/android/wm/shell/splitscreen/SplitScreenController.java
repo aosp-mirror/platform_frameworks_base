@@ -83,6 +83,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
@@ -131,6 +132,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     @Retention(RetentionPolicy.SOURCE)
     @interface ExitReason{}
 
+    private final ShellCommandHandler mShellCommandHandler;
     private final ShellController mShellController;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final SyncTransactionQueue mSyncQueue;
@@ -147,6 +149,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final SplitscreenEventLogger mLogger;
     private final IconProvider mIconProvider;
     private final Optional<RecentTasksController> mRecentTasksOptional;
+    private final SplitScreenShellCommandHandler mSplitScreenShellCommandHandler;
 
     private StageCoordinator mStageCoordinator;
     // Only used for the legacy recents animation from splitscreen to allow the tasks to be animated
@@ -155,6 +158,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public SplitScreenController(Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue,
@@ -168,6 +172,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             IconProvider iconProvider,
             Optional<RecentTasksController> recentTasks,
             ShellExecutor mainExecutor) {
+        mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
@@ -183,6 +188,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mLogger = new SplitscreenEventLogger();
         mIconProvider = iconProvider;
         mRecentTasksOptional = recentTasks;
+        mSplitScreenShellCommandHandler = new SplitScreenShellCommandHandler(this);
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
         //                    override for this controller from the base module
         if (ActivityTaskManager.supportsSplitScreenMultiWindow(context)) {
@@ -200,6 +206,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      */
     @VisibleForTesting
     void onInit() {
+        mShellCommandHandler.addDumpCallback(this::dump, this);
+        mShellCommandHandler.addCommandCallback("splitscreen", mSplitScreenShellCommandHandler,
+                this);
         mShellController.addKeyguardChangeListener(this);
         if (mStageCoordinator == null) {
             // TODO: Multi-display
