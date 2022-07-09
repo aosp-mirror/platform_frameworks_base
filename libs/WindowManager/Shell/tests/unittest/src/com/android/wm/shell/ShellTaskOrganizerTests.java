@@ -77,7 +77,7 @@ import java.util.Optional;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ShellTaskOrganizerTests {
+public class ShellTaskOrganizerTests extends ShellTestCase {
 
     @Mock
     private ITaskOrganizerController mTaskOrganizerController;
