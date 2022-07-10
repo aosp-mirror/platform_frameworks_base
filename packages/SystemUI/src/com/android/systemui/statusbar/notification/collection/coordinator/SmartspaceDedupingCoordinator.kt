@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
 import java.util.concurrent.TimeUnit.SECONDS
@@ -130,7 +131,7 @@ class SmartspaceDedupingCoordinator @Inject constructor(
         }
 
         if (changed) {
-            filter.invalidateList()
+            filter.invalidateList("onNewSmartspaceTargets")
             notificationEntryManager.updateNotifications("Smartspace targets changed")
         }
 
@@ -167,7 +168,7 @@ class SmartspaceDedupingCoordinator @Inject constructor(
             target.cancelTimeoutRunnable = executor.executeDelayed({
                 target.cancelTimeoutRunnable = null
                 target.shouldFilter = true
-                filter.invalidateList()
+                filter.invalidateList("updateAlertException: ${entry.logKey}")
                 notificationEntryManager.updateNotifications("deduping timeout expired")
             }, alertExceptionExpires - now)
         }
@@ -184,7 +185,7 @@ class SmartspaceDedupingCoordinator @Inject constructor(
         isOnLockscreen = newState == StatusBarState.KEYGUARD
 
         if (isOnLockscreen != wasOnLockscreen) {
-            filter.invalidateList()
+            filter.invalidateList("recordStatusBarState: " + StatusBarState.toString(newState))
             // No need to call notificationEntryManager.updateNotifications; something else already
             // does it for us when the keyguard state changes
         }

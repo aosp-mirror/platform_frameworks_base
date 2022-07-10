@@ -17,27 +17,28 @@
 package com.android.systemui.camera
 
 import android.app.ActivityManager
-import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityOptions
-import android.app.ActivityTaskManager
+import android.app.IActivityTaskManager
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
-import android.os.AsyncTask
 import android.os.RemoteException
 import android.os.UserHandle
 import android.util.Log
 import android.view.WindowManager
+import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
-import com.android.systemui.camera.CameraIntents.Companion.isSecureCameraIntent
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.PanelViewController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
@@ -52,8 +53,10 @@ class CameraGestureHelper @Inject constructor(
     private val activityManager: ActivityManager,
     private val activityStarter: ActivityStarter,
     private val activityIntentHelper: ActivityIntentHelper,
+    private val activityTaskManager: IActivityTaskManager,
     private val cameraIntents: CameraIntentsWrapper,
     private val contentResolver: ContentResolver,
+    @Main private val uiExecutor: Executor,
 ) {
     /**
      * Whether the camera application can be launched for the camera launch gesture.
@@ -63,15 +66,15 @@ class CameraGestureHelper @Inject constructor(
             return false
         }
 
-        val resolveInfo: ResolveInfo = packageManager.resolveActivityAsUser(
+        val resolveInfo: ResolveInfo? = packageManager.resolveActivityAsUser(
             getStartCameraIntent(),
             PackageManager.MATCH_DEFAULT_ONLY,
             KeyguardUpdateMonitor.getCurrentUser()
         )
-        val resolvedPackage = resolveInfo.activityInfo?.packageName
+        val resolvedPackage = resolveInfo?.activityInfo?.packageName
         return (resolvedPackage != null &&
                 (statusBarState != StatusBarState.SHADE ||
-                !isForegroundApp(resolvedPackage)))
+                !activityManager.isInForeground(resolvedPackage)))
     }
 
     /**
@@ -85,8 +88,8 @@ class CameraGestureHelper @Inject constructor(
         val wouldLaunchResolverActivity = activityIntentHelper.wouldLaunchResolverActivity(
             intent, KeyguardUpdateMonitor.getCurrentUser()
         )
-        if (isSecureCameraIntent(intent) && !wouldLaunchResolverActivity) {
-            AsyncTask.execute {
+        if (CameraIntents.isSecureCameraIntent(intent) && !wouldLaunchResolverActivity) {
+            uiExecutor.execute {
                 // Normally an activity will set its requested rotation animation on its window.
                 // However when launching an activity causes the orientation to change this is too
                 // late. In these cases, the default animation is used. This doesn't look good for
@@ -98,7 +101,7 @@ class CameraGestureHelper @Inject constructor(
                 activityOptions.rotationAnimationHint =
                     WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS
                 try {
-                    ActivityTaskManager.getService().startActivityAsUser(
+                    activityTaskManager.startActivityAsUser(
                         null,
                         context.basePackageName,
                         context.attributionTag,
@@ -148,16 +151,8 @@ class CameraGestureHelper @Inject constructor(
         }
     }
 
-    /**
-     * Returns `true` if the application with the given package name is running in the foreground;
-     * `false` otherwise
-     */
-    private fun isForegroundApp(packageName: String): Boolean {
-        val tasks: List<RunningTaskInfo> = activityManager.getRunningTasks(1)
-        return tasks.isNotEmpty() && packageName == tasks[0].topActivity.packageName
-    }
-
     companion object {
-        private const val EXTRA_CAMERA_LAUNCH_SOURCE = "com.android.systemui.camera_launch_source"
+        @VisibleForTesting
+        const val EXTRA_CAMERA_LAUNCH_SOURCE = "com.android.systemui.camera_launch_source"
     }
 }
