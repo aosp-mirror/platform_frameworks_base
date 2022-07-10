@@ -16,30 +16,23 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerBuilderProvider
+import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.navBarLayerIsVisible
-import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.Test
 
 /**
  * Base class for app rotation tests
  */
-abstract class RotationTransition(protected val testSpec: FlickerTestParameter) {
+abstract class RotationTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     protected abstract val testApp: StandardAppHelper
 
-    protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-
-    protected open val transition: FlickerBuilder.() -> Unit = {
+    /** {@inheritDoc} */
+    override val transition: FlickerBuilder.() -> Unit = {
         setup {
             eachRun {
                 this.setRotation(testSpec.startRotation)
@@ -55,78 +48,20 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
-    /**
-     * Entry point for the test runner. It will use this method to initialize and cache
-     * flicker executions
-     */
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            transition()
-        }
-    }
-
-    /**
-     * Checks that the navigation bar window is visible and above the app windows in all WM
-     * trace entries
-     */
+    /** {@inheritDoc} */
     @Presubmit
     @Test
-    open fun navBarWindowIsVisible() {
-        testSpec.navBarWindowIsVisible()
-    }
-
-    /**
-     * Checks that the navigation bar layer is visible at the start and end of the transition
-     */
-    @Presubmit
-    @Test
-    open fun navBarLayerIsVisible() {
-        testSpec.navBarLayerIsVisible()
-    }
-
-    /**
-     * Checks the position of the navigation bar at the start and end of the transition
-     */
-    @Presubmit
-    @Test
-    open fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
-
-    /**
-     * Checks that all layers that are visible on the trace, are visible for at least 2
-     * consecutive entries.
-     */
-    @Presubmit
-    @Test
-    open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                ignoreLayers = listOf(ComponentMatcher.SPLASH_SCREEN,
+                ignoreLayers = listOf(
+                    ComponentMatcher.SPLASH_SCREEN,
                     ComponentMatcher.SNAPSHOT,
                     ComponentMatcher("", "SecondaryHomeHandle")
                 )
             )
         }
     }
-
-    /**
-     * Checks that all windows that are visible on the trace, are visible for at least 2
-     * consecutive entries.
-     */
-    @Presubmit
-    @Test
-    open fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        testSpec.assertWm {
-            this.visibleWindowsShownMoreThanOneConsecutiveEntry()
-        }
-    }
-
-    /**
-     * Checks that all parts of the screen are covered during the transition
-     */
-    @Presubmit
-    @Test
-    open fun entireScreenCovered() = testSpec.entireScreenCovered()
 
     /**
      * Checks that [testApp] layer covers the entire screen at the start of the transition
