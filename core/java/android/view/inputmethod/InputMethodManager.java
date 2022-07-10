@@ -2443,6 +2443,17 @@ public final class InputMethodManager {
     }
 
     /**
+     *
+     * @hide
+     */
+    @TestApi
+    public void addVirtualStylusIdForTestSession() {
+        synchronized (mH) {
+            mServiceInvoker.addVirtualStylusIdForTestSession(mClient);
+        }
+    }
+
+    /**
      * An empty method only to avoid crashes of apps that call this method via reflection and do not
      * handle {@link NoSuchMethodException} in a graceful manner.
      *

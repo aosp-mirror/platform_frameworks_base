@@ -66,6 +66,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceId;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy.Target;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -85,7 +86,7 @@ import java.util.HashSet;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class DragAndDropPolicyTest {
+public class DragAndDropPolicyTest extends ShellTestCase {
 
     @Mock
     private Context mContext;

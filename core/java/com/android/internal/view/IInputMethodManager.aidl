@@ -114,4 +114,9 @@ interface IInputMethodManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     boolean isStylusHandwritingAvailableAsUser(int userId);
+
+    /** add virtual stylus id for test Stylus handwriting session **/
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INJECT_EVENTS)")
+    void addVirtualStylusIdForTestSession(in IInputMethodClient client);
 }
