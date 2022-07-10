@@ -44,5 +44,6 @@ class PipKeyboardTestShellTransit(testSpec: FlickerTestParameter) : PipKeyboardT
 
     @Presubmit
     @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
 }

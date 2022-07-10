@@ -73,7 +73,7 @@ class MovePipUpShelfHeightChangeTest(
         get() = buildTransition(eachRun = false) {
             teardown {
                 eachRun {
-                    taplInstrumentation.pressHome()
+                    tapl.pressHome()
                 }
                 test {
                     testApp.exit(wmHelper)
@@ -91,7 +91,8 @@ class MovePipUpShelfHeightChangeTest(
     /** {@inheritDoc}  */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
 
     companion object {
         /**
@@ -104,7 +105,8 @@ class MovePipUpShelfHeightChangeTest(
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0), repetitions = 3)
+                supportedRotations = listOf(Surface.ROTATION_0), repetitions = 3
+            )
         }
     }
 }
