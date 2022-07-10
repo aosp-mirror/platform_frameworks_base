@@ -3203,6 +3203,11 @@ package android.widget {
     method public android.widget.ListView getMenuListView();
   }
 
+  public class RatingBar extends android.widget.AbsSeekBar {
+    field public static final String PLURALS_MAX = "max";
+    field public static final String PLURALS_RATING = "rating";
+  }
+
   public class Spinner extends android.widget.AbsSpinner implements android.content.DialogInterface.OnClickListener {
     method public boolean isPopupShowing();
   }
