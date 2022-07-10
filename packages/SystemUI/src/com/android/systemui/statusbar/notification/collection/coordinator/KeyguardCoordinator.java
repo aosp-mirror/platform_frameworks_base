@@ -38,18 +38,15 @@ public class KeyguardCoordinator implements Coordinator {
     private static final String TAG = "KeyguardCoordinator";
     private final KeyguardNotificationVisibilityProvider mKeyguardNotificationVisibilityProvider;
     private final SectionHeaderVisibilityProvider mSectionHeaderVisibilityProvider;
-    private final SharedCoordinatorLogger mLogger;
     private final StatusBarStateController mStatusBarStateController;
 
     @Inject
     public KeyguardCoordinator(
             KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
             SectionHeaderVisibilityProvider sectionHeaderVisibilityProvider,
-            SharedCoordinatorLogger logger,
             StatusBarStateController statusBarStateController) {
         mKeyguardNotificationVisibilityProvider = keyguardNotificationVisibilityProvider;
         mSectionHeaderVisibilityProvider = sectionHeaderVisibilityProvider;
-        mLogger = logger;
         mStatusBarStateController = statusBarStateController;
     }
 
@@ -78,9 +75,8 @@ public class KeyguardCoordinator implements Coordinator {
     }
 
     private void invalidateListFromFilter(String reason) {
-        mLogger.logKeyguardCoordinatorInvalidated(reason);
         updateSectionHeadersVisibility();
-        mNotifFilter.invalidateList();
+        mNotifFilter.invalidateList(reason);
     }
 
     private void updateSectionHeadersVisibility() {

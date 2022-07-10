@@ -314,60 +314,62 @@ public class ShadeListBuilder implements Dumpable {
                 }
             };
 
-    private void onPreRenderInvalidated(Invalidator invalidator) {
+    private void onPreRenderInvalidated(Invalidator invalidator, @Nullable String reason) {
         Assert.isMainThread();
 
-        mLogger.logPreRenderInvalidated(invalidator.getName(), mPipelineState.getState());
+        mLogger.logPreRenderInvalidated(invalidator, mPipelineState.getState(), reason);
 
         rebuildListIfBefore(STATE_FINALIZING);
     }
 
-    private void onPreGroupFilterInvalidated(NotifFilter filter) {
+    private void onPreGroupFilterInvalidated(NotifFilter filter, @Nullable String reason) {
         Assert.isMainThread();
 
-        mLogger.logPreGroupFilterInvalidated(filter.getName(), mPipelineState.getState());
+        mLogger.logPreGroupFilterInvalidated(filter, mPipelineState.getState(), reason);
 
         rebuildListIfBefore(STATE_PRE_GROUP_FILTERING);
     }
 
-    private void onReorderingAllowedInvalidated(NotifStabilityManager stabilityManager) {
+    private void onReorderingAllowedInvalidated(NotifStabilityManager stabilityManager,
+            @Nullable String reason) {
         Assert.isMainThread();
 
         mLogger.logReorderingAllowedInvalidated(
-                stabilityManager.getName(),
-                mPipelineState.getState());
+                stabilityManager,
+                mPipelineState.getState(),
+                reason);
 
         rebuildListIfBefore(STATE_GROUPING);
     }
 
-    private void onPromoterInvalidated(NotifPromoter promoter) {
+    private void onPromoterInvalidated(NotifPromoter promoter, @Nullable String reason) {
         Assert.isMainThread();
 
-        mLogger.logPromoterInvalidated(promoter.getName(), mPipelineState.getState());
+        mLogger.logPromoterInvalidated(promoter, mPipelineState.getState(), reason);
 
         rebuildListIfBefore(STATE_TRANSFORMING);
     }
 
-    private void onNotifSectionInvalidated(NotifSectioner section) {
+    private void onNotifSectionInvalidated(NotifSectioner section, @Nullable String reason) {
         Assert.isMainThread();
 
-        mLogger.logNotifSectionInvalidated(section.getName(), mPipelineState.getState());
+        mLogger.logNotifSectionInvalidated(section, mPipelineState.getState(), reason);
 
         rebuildListIfBefore(STATE_SORTING);
     }
 
-    private void onFinalizeFilterInvalidated(NotifFilter filter) {
+    private void onFinalizeFilterInvalidated(NotifFilter filter, @Nullable String reason) {
         Assert.isMainThread();
 
-        mLogger.logFinalizeFilterInvalidated(filter.getName(), mPipelineState.getState());
+        mLogger.logFinalizeFilterInvalidated(filter, mPipelineState.getState(), reason);
 
         rebuildListIfBefore(STATE_FINALIZE_FILTERING);
     }
 
-    private void onNotifComparatorInvalidated(NotifComparator comparator) {
+    private void onNotifComparatorInvalidated(NotifComparator comparator, @Nullable String reason) {
         Assert.isMainThread();
 
-        mLogger.logNotifComparatorInvalidated(comparator.getName(), mPipelineState.getState());
+        mLogger.logNotifComparatorInvalidated(comparator, mPipelineState.getState(), reason);
 
         rebuildListIfBefore(STATE_SORTING);
     }
