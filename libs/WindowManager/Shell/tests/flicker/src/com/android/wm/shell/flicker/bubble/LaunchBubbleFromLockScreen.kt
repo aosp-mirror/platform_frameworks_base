@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.bubble
 
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -47,6 +48,7 @@ import org.junit.runners.Parameterized
 @Group4
 class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
 
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
@@ -66,18 +68,25 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
                     ?: error("Unable to obtain WM service")
                 val metricInsets = wm.currentWindowMetrics.windowInsets
                 val insets = metricInsets.getInsetsIgnoringVisibility(
-                        WindowInsets.Type.statusBars()
-                        or WindowInsets.Type.displayCutout())
+                    WindowInsets.Type.statusBars()
+                        or WindowInsets.Type.displayCutout()
+                )
                 device.swipe(100, insets.top + 100, 100, device.displayHeight / 2, 4)
                 device.waitForIdle(2000)
                 instrumentation.uiAutomation.syncInputTransactions()
 
-                val notification = device.wait(Until.findObject(
-                    By.text("BubbleChat")), FIND_OBJECT_TIMEOUT)
+                val notification = device.wait(
+                    Until.findObject(
+                        By.text("BubbleChat")
+                    ), FIND_OBJECT_TIMEOUT
+                )
                 notification?.click() ?: error("Notification not found")
                 instrumentation.uiAutomation.syncInputTransactions()
-                val showBubble = device.wait(Until.findObject(
-                        By.res("com.android.systemui", "bubble_view")), FIND_OBJECT_TIMEOUT)
+                val showBubble = device.wait(
+                    Until.findObject(
+                        By.res("com.android.systemui", "bubble_view")
+                    ), FIND_OBJECT_TIMEOUT
+                )
                 showBubble?.click() ?: error("Bubble notify not found")
                 instrumentation.uiAutomation.syncInputTransactions()
                 val cancelAllBtn = waitAndGetCancelAllBtn()
@@ -102,4 +111,70 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
             this.isVisible(testApp)
         }
     }
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun entireScreenCovered() =
+        super.entireScreenCovered()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisibleAtStartAndEnd() =
+        super.navBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() =
+        super.navBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsAlwaysVisible() =
+        super.navBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() =
+        super.statusBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun taskBarLayerIsVisibleAtStartAndEnd() =
+        super.taskBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun taskBarWindowIsAlwaysVisible() =
+        super.taskBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 }
