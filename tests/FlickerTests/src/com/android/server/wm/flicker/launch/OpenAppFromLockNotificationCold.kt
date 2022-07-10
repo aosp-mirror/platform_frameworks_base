@@ -24,9 +24,12 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.navBarLayerPositionEnd
-import com.android.server.wm.flicker.statusBarLayerPositionEnd
+import com.android.server.wm.flicker.navBarLayerPositionAtEnd
+import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
+import com.android.server.wm.traces.common.ComponentMatcher
+import org.junit.Assume
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -87,35 +90,41 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
     @Test
     override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
 
-    /**
-     * Checks the position of the navigation bar at the start and end of the transition
-     *
-     * Differently from the normal usage of this assertion, check only the final state of the
-     * transition because the display is off at the start and the NavBar is never visible
-     */
-    @Postsubmit
-    @Test
-    override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerPositionEnd()
+    /** {@inheritDoc} */
+    @Ignore("Display is off at the start")
+    override fun navBarLayerPositionAtStartAndEnd() { }
 
     /**
-     * Checks the position of the status bar at the start and end of the transition
-     *
-     * Differently from the normal usage of this assertion, check only the final state of the
-     * transition because the display is off at the start and the NavBar is never visible
+     * Checks the position of the [ComponentMatcher.NAV_BAR] at the end of the transition
      */
     @Postsubmit
     @Test
-    override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerPositionEnd()
+    fun navBarLayerPositionAtEnd() {
+        Assume.assumeFalse(testSpec.isTablet)
+        testSpec.navBarLayerPositionAtEnd()
+    }
+
+    /** {@inheritDoc} */
+    @Ignore("Display is off at the start")
+    override fun statusBarLayerPositionAtStartAndEnd() { }
+
+    /**
+     * Checks the position of the [ComponentMatcher.STATUS_BAR] at the start and end of the
+     * transition
+     */
+    @Postsubmit
+    @Test
+    fun statusBarLayerPositionEnd() = testSpec.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -125,7 +134,7 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -135,7 +144,8 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
     /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit

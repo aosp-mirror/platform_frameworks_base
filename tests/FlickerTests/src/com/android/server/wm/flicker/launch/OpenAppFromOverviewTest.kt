@@ -58,8 +58,9 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) :
-    OpenAppFromLauncherTransition(testSpec) {
+open class OpenAppFromOverviewTest(
+    testSpec: FlickerTestParameter
+) : OpenAppFromLauncherTransition(testSpec) {
 
     /**
      * Defines the transition used to run the test
@@ -77,8 +78,12 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) :
                     wmHelper.StateSyncBuilder()
                         .withHomeActivityVisible()
                         .waitForAndVerify()
-                    // Launcher is always ROTATION_0
-                    tapl.setExpectedRotation(Surface.ROTATION_0)
+                    // By default, launcher doesn't rotate on phones, but rotates on tablets
+                    if (testSpec.isTablet) {
+                        tapl.setExpectedRotation(testSpec.startRotation)
+                    } else {
+                        tapl.setExpectedRotation(Surface.ROTATION_0)
+                    }
                     tapl.workspace.switchToOverview()
                     wmHelper.StateSyncBuilder()
                         .withRecentsActivityVisible()
@@ -97,7 +102,7 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) :
     /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Presubmit
@@ -107,17 +112,17 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) :
     /** {@inheritDoc} */
     @FlakyTest
     @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Presubmit

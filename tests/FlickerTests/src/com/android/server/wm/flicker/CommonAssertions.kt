@@ -112,19 +112,6 @@ fun FlickerTestParameter.taskBarLayerIsVisibleAtStartAndEnd() {
 }
 
 /**
- * Checks that [ComponentMatcher.TASK_BAR] layer is visible at the start and end of the SF
- * trace
- */
-fun FlickerTestParameter.navTaskLayerIsVisibleAtStartAndEnd() {
-    assertLayersStart {
-        this.isVisible(ComponentMatcher.TASK_BAR)
-    }
-    assertLayersEnd {
-        this.isVisible(ComponentMatcher.TASK_BAR)
-    }
-}
-
-/**
  * Checks that [ComponentMatcher.STATUS_BAR] layer is visible at the start and end of the SF
  * trace
  */
