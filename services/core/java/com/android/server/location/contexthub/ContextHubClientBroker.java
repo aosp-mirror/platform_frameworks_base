@@ -41,6 +41,7 @@ import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
@@ -104,7 +105,9 @@ import java.util.function.Supplier;
  * @hide
  */
 public class ContextHubClientBroker extends IContextHubClient.Stub
-        implements IBinder.DeathRecipient, AppOpsManager.OnOpChangedListener {
+        implements IBinder.DeathRecipient,
+                AppOpsManager.OnOpChangedListener,
+                PendingIntent.OnFinished {
     private static final String TAG = "ContextHubClientBroker";
 
     /**
@@ -965,5 +968,21 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         out += "]";
 
         return out;
+    }
+
+    /** Callback that arrives when direct-call message callback delivery completed */
+    @Override
+    public void callbackFinished() {
+        // TODO(b/202447392): pending implementation.
+    }
+
+    @Override
+    public void onSendFinished(
+            PendingIntent pendingIntent,
+            Intent intent,
+            int resultCode,
+            String resultData,
+            Bundle resultExtras) {
+        // TODO(b/202447392): pending implementation.
     }
 }

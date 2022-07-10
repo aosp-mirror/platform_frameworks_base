@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
 import static com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED;
 
 import static java.util.Objects.requireNonNull;
@@ -147,7 +148,8 @@ public class PreparationCoordinator implements Coordinator {
     @Override
     public void attach(NotifPipeline pipeline) {
         mNotifErrorManager.addInflationErrorListener(mInflationErrorListener);
-        mAdjustmentProvider.addDirtyListener(mNotifInflatingFilter::invalidateList);
+        mAdjustmentProvider.addDirtyListener(
+                () -> mNotifInflatingFilter.invalidateList("adjustmentProviderChanged"));
 
         pipeline.addCollectionListener(mNotifCollectionListener);
         // Inflate after grouping/sorting since that affects what views to inflate.
@@ -245,12 +247,13 @@ public class PreparationCoordinator implements Coordinator {
             } catch (RemoteException ex) {
                 // System server is dead, nothing to do about that
             }
-            mNotifInflationErrorFilter.invalidateList();
+            mNotifInflationErrorFilter.invalidateList("onNotifInflationError for " + logKey(entry));
         }
 
         @Override
         public void onNotifInflationErrorCleared(NotificationEntry entry) {
-            mNotifInflationErrorFilter.invalidateList();
+            mNotifInflationErrorFilter.invalidateList(
+                    "onNotifInflationErrorCleared for " + logKey(entry));
         }
     };
 
@@ -360,9 +363,11 @@ public class PreparationCoordinator implements Coordinator {
     }
 
     private void abortInflation(NotificationEntry entry, String reason) {
-        mLogger.logInflationAborted(entry, reason);
-        mNotifInflater.abortInflation(entry);
-        mInflatingNotifs.remove(entry);
+        final boolean taskAborted = mNotifInflater.abortInflation(entry);
+        final boolean wasInflating = mInflatingNotifs.remove(entry);
+        if (taskAborted || wasInflating) {
+            mLogger.logInflationAborted(entry, reason);
+        }
     }
 
     private void onInflationFinished(NotificationEntry entry, NotifViewController controller) {
@@ -371,7 +376,7 @@ public class PreparationCoordinator implements Coordinator {
         mViewBarn.registerViewForEntry(entry, controller);
         mInflationStates.put(entry, STATE_INFLATED);
         mBindEventManager.notifyViewBound(entry);
-        mNotifInflatingFilter.invalidateList();
+        mNotifInflatingFilter.invalidateList("onInflationFinished for " + logKey(entry));
     }
 
     private void freeNotifViews(NotificationEntry entry) {

@@ -374,44 +374,69 @@ public class ContextHubService extends IContextHubService.Stub {
      */
     private IContextHubClientCallback createDefaultClientCallback(int contextHubId) {
         return new IContextHubClientCallback.Stub() {
+            private void finishCallback() {
+                try {
+                    IContextHubClient client = mDefaultClientMap.get(contextHubId);
+                    client.callbackFinished();
+                } catch (RemoteException e) {
+                    Log.e(
+                            TAG,
+                            "RemoteException while finishing callback for hub (ID = "
+                                    + contextHubId
+                                    + ")",
+                            e);
+                }
+            }
+
             @Override
             public void onMessageFromNanoApp(NanoAppMessage message) {
-                int nanoAppHandle = mNanoAppStateManager.getNanoAppHandle(
-                        contextHubId, message.getNanoAppId());
+                int nanoAppHandle =
+                        mNanoAppStateManager.getNanoAppHandle(contextHubId, message.getNanoAppId());
 
                 onMessageReceiptOldApi(
-                        message.getMessageType(), contextHubId, nanoAppHandle,
+                        message.getMessageType(),
+                        contextHubId,
+                        nanoAppHandle,
                         message.getMessageBody());
+
+                finishCallback();
             }
 
             @Override
             public void onHubReset() {
                 byte[] data = {android.hardware.contexthub.V1_0.TransactionResult.SUCCESS};
                 onMessageReceiptOldApi(MSG_HUB_RESET, contextHubId, OS_APP_INSTANCE, data);
+                finishCallback();
             }
 
             @Override
             public void onNanoAppAborted(long nanoAppId, int abortCode) {
+                finishCallback();
             }
 
             @Override
             public void onNanoAppLoaded(long nanoAppId) {
+                finishCallback();
             }
 
             @Override
             public void onNanoAppUnloaded(long nanoAppId) {
+                finishCallback();
             }
 
             @Override
             public void onNanoAppEnabled(long nanoAppId) {
+                finishCallback();
             }
 
             @Override
             public void onNanoAppDisabled(long nanoAppId) {
+                finishCallback();
             }
 
             @Override
             public void onClientAuthorizationChanged(long nanoAppId, int authorization) {
+                finishCallback();
             }
         };
     }
