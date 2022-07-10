@@ -16,27 +16,19 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.app.Instrumentation
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerBuilderProvider
+import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.ImeAppHelper
-import com.android.server.wm.flicker.navBarLayerIsVisible
-import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.flicker.navBarLayerPositionAtStartAndEnd
 import com.android.server.wm.traces.common.ComponentMatcher
-import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,43 +44,33 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group2
-class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
-    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+class CloseImeWindowToAppTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     private val testApp = ImeAppHelper(instrumentation)
 
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            setup {
-                test {
-                    testApp.launchViaIntent(wmHelper)
-                }
-                eachRun {
-                    testApp.openIME(wmHelper)
-                }
+    /** {@inheritDoc} */
+    override val transition: FlickerBuilder.() -> Unit = {
+        setup {
+            test {
+                testApp.launchViaIntent(wmHelper)
             }
-            teardown {
-                test {
-                    testApp.exit(wmHelper)
-                }
+            eachRun {
+                testApp.openIME(wmHelper)
             }
-            transitions {
-                testApp.closeIME(wmHelper)
+        }
+        teardown {
+            test {
+                testApp.exit(wmHelper)
             }
+        }
+        transitions {
+            testApp.closeIME(wmHelper)
         }
     }
 
+    /** {@inheritDoc} */
     @Presubmit
     @Test
-    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
-
-    @Presubmit
-    @Test
-    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
-
-    @Presubmit
-    @Test
-    fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(
                 ComponentMatcher.IME,
@@ -97,51 +79,28 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
         }
     }
 
+    /** {@inheritDoc} */
     @Presubmit
     @Test
-    fun imeAppWindowIsAlwaysVisible() {
-        testSpec.assertWm {
-            this.isAppWindowOnTop(testApp)
-        }
-    }
-
-    @Presubmit
-    @Test
-    fun navBarLayerIsVisible() = testSpec.navBarLayerIsVisible()
-
-    @Presubmit
-    @Test
-    fun statusBarLayerIsVisible() = testSpec.navBarLayerIsVisible()
-
-    @Presubmit
-    @Test
-    fun entireScreenCovered() = testSpec.entireScreenCovered()
-
-    @Presubmit
-    @Test
-    fun navBarLayerRotatesAndScales() {
-        assumeFalse(testSpec.isLandscapeOrSeascapeAtStart)
-        testSpec.navBarLayerRotatesAndScales()
+    override fun navBarLayerPositionAtStartAndEnd() {
+        Assume.assumeFalse(testSpec.isTablet)
+        Assume.assumeFalse(testSpec.isLandscapeOrSeascapeAtStart)
+        testSpec.navBarLayerPositionAtStartAndEnd()
     }
 
     @FlakyTest
     @Test
-    fun navBarLayerRotatesAndScales_Flaky() {
-        assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
-        testSpec.navBarLayerRotatesAndScales()
+    fun navBarLayerPositionAtStartAndEndLandscapeOrSeascapeAtStart() {
+        Assume.assumeFalse(testSpec.isTablet)
+        Assume.assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
+        testSpec.navBarLayerPositionAtStartAndEnd()
     }
 
+    /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
-    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
-
-    @Presubmit
-    @Test
-    fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        testSpec.assertLayers {
-            this.visibleLayersShownMoreThanOneConsecutiveEntry()
-        }
-    }
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
 
     @Presubmit
     @Test
@@ -152,6 +111,14 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
     fun imeAppLayerIsAlwaysVisible() {
         testSpec.assertLayers {
             this.isVisible(testApp)
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun imeAppWindowIsAlwaysVisible() {
+        testSpec.assertWm {
+            this.isAppWindowOnTop(testApp)
         }
     }
 
