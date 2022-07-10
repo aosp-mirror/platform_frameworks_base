@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.notification.collection.render.NodeControl
 import com.android.systemui.statusbar.notification.dagger.IncomingHeader
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider
+import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.statusbar.notification.stack.BUCKET_HEADS_UP
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
@@ -278,8 +279,8 @@ class HeadsUpCoordinator @Inject constructor(
         .firstOrNull()
         ?.let { posted ->
             posted.entry.takeIf { entry ->
-                locationLookupByKey(entry.key) == GroupLocation.Isolated
-                        && entry.sbn.notification.groupAlertBehavior == GROUP_ALERT_SUMMARY
+                locationLookupByKey(entry.key) == GroupLocation.Isolated &&
+                        entry.sbn.notification.groupAlertBehavior == GROUP_ALERT_SUMMARY
             }
         }
 
@@ -512,7 +513,7 @@ class HeadsUpCoordinator @Inject constructor(
     private val mOnHeadsUpChangedListener = object : OnHeadsUpChangedListener {
         override fun onHeadsUpStateChanged(entry: NotificationEntry, isHeadsUp: Boolean) {
             if (!isHeadsUp) {
-                mNotifPromoter.invalidateList()
+                mNotifPromoter.invalidateList("headsUpEnded: ${entry.logKey}")
                 mHeadsUpViewBinder.unbindHeadsUpView(entry)
                 endNotifLifetimeExtensionIfExtended(entry)
             }

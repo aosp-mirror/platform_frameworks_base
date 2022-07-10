@@ -192,11 +192,16 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
                     + "  reorderingAllowed " + wasReorderingAllowed + "->" + mReorderingAllowed
                     + "  when setting " + field + "=" + value);
         }
-        if ((mPipelineRunAllowed && mIsSuppressingPipelineRun)
-                || (mReorderingAllowed && (mIsSuppressingGroupChange
-                        || isSuppressingSectionChange()
-                        || mIsSuppressingEntryReorder))) {
-            mNotifStabilityManager.invalidateList();
+        if (mPipelineRunAllowed && mIsSuppressingPipelineRun) {
+            mNotifStabilityManager.invalidateList("pipeline run suppression ended");
+        } else if (mReorderingAllowed && (mIsSuppressingGroupChange
+                || isSuppressingSectionChange()
+                || mIsSuppressingEntryReorder)) {
+            String reason = "reorder suppression ended for"
+                    + " group=" + mIsSuppressingGroupChange
+                    + " section=" + isSuppressingSectionChange()
+                    + " sort=" + mIsSuppressingEntryReorder;
+            mNotifStabilityManager.invalidateList(reason);
         }
         mVisualStabilityProvider.setReorderingAllowed(mReorderingAllowed);
     }
@@ -241,7 +246,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
                         now + ALLOW_SECTION_CHANGE_TIMEOUT));
 
         if (!wasSectionChangeAllowed) {
-            mNotifStabilityManager.invalidateList();
+            mNotifStabilityManager.invalidateList("temporarilyAllowSectionChanges");
         }
     }
 
