@@ -142,7 +142,7 @@ public class BubbleCoordinator implements Coordinator {
 
         @Override
         public void invalidateNotifications(String reason) {
-            mNotifFilter.invalidateList();
+            mNotifFilter.invalidateList(reason);
         }
 
         @Override

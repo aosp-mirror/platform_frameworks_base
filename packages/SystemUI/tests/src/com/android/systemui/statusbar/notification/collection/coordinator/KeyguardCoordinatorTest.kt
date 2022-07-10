@@ -41,7 +41,6 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
     private val notifPipeline: NotifPipeline = mock()
     private val keyguardNotifVisibilityProvider: KeyguardNotificationVisibilityProvider = mock()
     private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider = mock()
-    private val sharedCoordinatorLogger: SharedCoordinatorLogger = mock()
     private val statusBarStateController: StatusBarStateController = mock()
 
     private lateinit var onStateChangeListener: Consumer<String>
@@ -52,7 +51,6 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
         val keyguardCoordinator = KeyguardCoordinator(
             keyguardNotifVisibilityProvider,
             sectionHeaderVisibilityProvider,
-            sharedCoordinatorLogger,
             statusBarStateController
         )
         keyguardCoordinator.attach(notifPipeline)
