@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.testing.Assert.assertThrows;
 
@@ -531,7 +532,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mWindowOrganizerController.mLaunchTaskFragments
                 .put(mFragmentToken, mTaskFragment);
         mTransaction.reparentActivityToTaskFragment(mFragmentToken, activity.token);
-        doReturn(true).when(mTaskFragment).isAllowedToEmbedActivity(activity);
+        doReturn(EMBEDDING_ALLOWED).when(mTaskFragment).isAllowedToEmbedActivity(activity);
         clearInvocations(mAtm.mRootWindowContainer);
 
         mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
@@ -921,7 +922,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 .setOrganizer(mOrganizer)
                 .setBounds(mTaskFragBounds)
                 .build();
-        doReturn(true).when(mTaskFragment).isAllowedToEmbedActivity(activity);
         mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
         clearInvocations(mAtm.mRootWindowContainer);
 
@@ -956,7 +956,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 .setOrganizer(mOrganizer)
                 .setBounds(mTaskFragBounds)
                 .build();
-        doReturn(true).when(mTaskFragment).isAllowedToEmbedActivity(activity);
         mWindowOrganizerController.mLaunchTaskFragments.put(oldFragToken, oldTaskFrag);
         mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
         clearInvocations(mAtm.mRootWindowContainer);
