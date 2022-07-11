@@ -4280,9 +4280,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         });
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
     @Override
     public void removeImeSurface() {
-        mContext.enforceCallingPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW, null);
         mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE).sendToTarget();
     }
 

@@ -93,6 +93,7 @@ interface IInputMethodManager {
 
     oneway void reportPerceptibleAsync(in IBinder windowToken, boolean perceptible);
 
+    @EnforcePermission("INTERNAL_SYSTEM_WINDOW")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)")
     void removeImeSurface();
