@@ -21,11 +21,15 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUNDS;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createActivityInfoWithMinDimensions;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMockTaskFragmentInfo;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.getSplitBounds;
 import static androidx.window.extensions.embedding.SplitPresenter.POSITION_END;
 import static androidx.window.extensions.embedding.SplitPresenter.POSITION_FILL;
 import static androidx.window.extensions.embedding.SplitPresenter.POSITION_START;
+import static androidx.window.extensions.embedding.SplitPresenter.RESULT_EXPANDED;
+import static androidx.window.extensions.embedding.SplitPresenter.RESULT_EXPAND_FAILED_NO_TF_INFO;
+import static androidx.window.extensions.embedding.SplitPresenter.RESULT_NOT_EXPANDED;
 import static androidx.window.extensions.embedding.SplitPresenter.getBoundsForPosition;
 import static androidx.window.extensions.embedding.SplitPresenter.getMinDimensions;
 import static androidx.window.extensions.embedding.SplitPresenter.shouldShowSideBySide;
@@ -51,6 +55,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 import android.util.Size;
@@ -212,26 +217,31 @@ public class SplitPresenterTest {
                 mPresenter.expandSplitContainerIfNeeded(mTransaction, splitContainer, mActivity,
                         null /* secondaryActivity */, null /* secondaryIntent */));
 
-        mPresenter.expandSplitContainerIfNeeded(mTransaction, splitContainer, mActivity,
-                secondaryActivity, null /* secondaryIntent */);
-
+        assertEquals(RESULT_NOT_EXPANDED, mPresenter.expandSplitContainerIfNeeded(mTransaction,
+                splitContainer, mActivity, secondaryActivity, null /* secondaryIntent */));
         verify(mPresenter, never()).expandTaskFragment(any(), any());
 
         doReturn(createActivityInfoWithMinDimensions()).when(secondaryActivity).getActivityInfo();
+        assertEquals(RESULT_EXPAND_FAILED_NO_TF_INFO, mPresenter.expandSplitContainerIfNeeded(
+                mTransaction, splitContainer, mActivity, secondaryActivity,
+                null /* secondaryIntent */));
 
-        mPresenter.expandSplitContainerIfNeeded(mTransaction, splitContainer, mActivity,
-                secondaryActivity, null /* secondaryIntent */);
+        primaryTf.setInfo(createMockTaskFragmentInfo(primaryTf, mActivity));
+        secondaryTf.setInfo(createMockTaskFragmentInfo(secondaryTf, secondaryActivity));
 
+        assertEquals(RESULT_EXPANDED, mPresenter.expandSplitContainerIfNeeded(mTransaction,
+                splitContainer, mActivity, secondaryActivity, null /* secondaryIntent */));
         verify(mPresenter).expandTaskFragment(eq(mTransaction),
                 eq(primaryTf.getTaskFragmentToken()));
         verify(mPresenter).expandTaskFragment(eq(mTransaction),
                 eq(secondaryTf.getTaskFragmentToken()));
 
         clearInvocations(mPresenter);
-        mPresenter.expandSplitContainerIfNeeded(mTransaction, splitContainer, mActivity,
-                null /* secondaryActivity */, new Intent(ApplicationProvider
-                        .getApplicationContext(), MinimumDimensionActivity.class));
 
+        assertEquals(RESULT_EXPANDED, mPresenter.expandSplitContainerIfNeeded(mTransaction,
+                splitContainer, mActivity, null /* secondaryActivity */,
+                new Intent(ApplicationProvider.getApplicationContext(),
+                        MinimumDimensionActivity.class)));
         verify(mPresenter).expandTaskFragment(eq(mTransaction),
                 eq(primaryTf.getTaskFragmentToken()));
         verify(mPresenter).expandTaskFragment(eq(mTransaction),
@@ -246,6 +256,7 @@ public class SplitPresenterTest {
         doReturn(mActivityResources).when(activity).getResources();
         doReturn(activityConfig).when(mActivityResources).getConfiguration();
         doReturn(new ActivityInfo()).when(activity).getActivityInfo();
+        doReturn(mock(IBinder.class)).when(activity).getActivityToken();
         return activity;
     }
 }
