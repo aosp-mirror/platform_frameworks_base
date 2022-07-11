@@ -247,13 +247,13 @@ public class AuthContainerView extends LinearLayout
                     break;
                 case AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN:
                     mFailedModalities.clear();
-                    mConfig.mCallback.onTryAgainPressed();
+                    mConfig.mCallback.onTryAgainPressed(getRequestId());
                     break;
                 case AuthBiometricView.Callback.ACTION_ERROR:
                     animateAway(AuthDialogCallback.DISMISSED_ERROR);
                     break;
                 case AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL:
-                    mConfig.mCallback.onDeviceCredentialPressed();
+                    mConfig.mCallback.onDeviceCredentialPressed(getRequestId());
                     mHandler.postDelayed(() -> {
                         addCredentialView(false /* animatePanel */, true /* animateContents */);
                     }, mConfig.mSkipAnimation ? 0 : AuthDialog.ANIMATE_CREDENTIAL_START_DELAY_MS);
@@ -371,7 +371,7 @@ public class AuthContainerView extends LinearLayout
 
     void sendEarlyUserCanceled() {
         mConfig.mCallback.onSystemEvent(
-                BiometricConstants.BIOMETRIC_SYSTEM_EVENT_EARLY_USER_CANCEL);
+                BiometricConstants.BIOMETRIC_SYSTEM_EVENT_EARLY_USER_CANCEL, getRequestId());
     }
 
     @Override
@@ -762,7 +762,8 @@ public class AuthContainerView extends LinearLayout
     private void sendPendingCallbackIfNotNull() {
         Log.d(TAG, "pendingCallback: " + mPendingCallbackReason);
         if (mPendingCallbackReason != null) {
-            mConfig.mCallback.onDismissed(mPendingCallbackReason, mCredentialAttestation);
+            mConfig.mCallback.onDismissed(mPendingCallbackReason,
+                    mCredentialAttestation, getRequestId());
             mPendingCallbackReason = null;
         }
     }
@@ -792,7 +793,7 @@ public class AuthContainerView extends LinearLayout
         }
         mContainerState = STATE_SHOWING;
         if (mBiometricView != null) {
-            mConfig.mCallback.onDialogAnimatedIn();
+            mConfig.mCallback.onDialogAnimatedIn(getRequestId());
             mBiometricView.onDialogAnimatedIn();
         }
     }
