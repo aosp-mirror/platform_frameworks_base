@@ -829,8 +829,12 @@ class PhysicsAnimator<T> private constructor (target: T) {
 
     /** Cancels all in progress animations on all properties. */
     fun cancel() {
-        cancelAction(flingAnimations.keys)
-        cancelAction(springAnimations.keys)
+        if (flingAnimations.size > 0) {
+            cancelAction(flingAnimations.keys)
+        }
+        if (springAnimations.size > 0) {
+            cancelAction(springAnimations.keys)
+        }
     }
 
     /** Cancels in progress animations on the provided properties only. */
