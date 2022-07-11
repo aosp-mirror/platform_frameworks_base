@@ -136,12 +136,15 @@ public class ResolverListController {
             int baseFlags) {
         List<ResolverActivity.ResolvedComponentInfo> resolvedComponents = null;
         for (int i = 0, N = intents.size(); i < N; i++) {
-            final Intent intent = intents.get(i);
+            Intent intent = intents.get(i);
             int flags = baseFlags;
             if (intent.isWebIntent()
                         || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
                 flags |= PackageManager.MATCH_INSTANT;
             }
+            // Because of AIDL bug, queryIntentActivitiesAsUser can't accept subclasses of Intent.
+            intent = (intent.getClass() == Intent.class) ? intent : new Intent(
+                    intent);
             final List<ResolveInfo> infos = mpm.queryIntentActivitiesAsUser(intent, flags,
                     userHandle);
             if (infos != null) {
