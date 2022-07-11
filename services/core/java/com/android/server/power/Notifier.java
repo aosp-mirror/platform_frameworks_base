@@ -571,7 +571,8 @@ public class Notifier {
     /**
      * Called when there has been user activity.
      */
-    public void onUserActivity(int displayGroupId, int event, int uid) {
+    public void onUserActivity(int displayGroupId, @PowerManager.UserActivityEvent int event,
+            int uid) {
         if (DEBUG) {
             Slog.d(TAG, "onUserActivity: event=" + event + ", uid=" + uid);
         }
