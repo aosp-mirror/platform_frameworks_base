@@ -109,8 +109,6 @@ public final class ViewTreeObserver {
     /**
      * Interface definition for a callback to be invoked when the view hierarchy's window
      * visibility changes.
-     *
-     * @hide
      */
     public interface OnWindowVisibilityChangeListener {
         /**
@@ -569,8 +567,6 @@ public final class ViewTreeObserver {
      * @param listener The callback to add
      *
      * @throws IllegalStateException If {@link #isAlive()} returns false
-     *
-     * @hide
      */
     public void addOnWindowVisibilityChangeListener(
             @NonNull OnWindowVisibilityChangeListener listener) {
@@ -593,8 +589,6 @@ public final class ViewTreeObserver {
      *
      * @see #addOnWindowVisibilityChangeListener(
      * android.view.ViewTreeObserver.OnWindowVisibilityChangeListener)
-     *
-     * @hide
      */
     public void removeOnWindowVisibilityChangeListener(
             @NonNull OnWindowVisibilityChangeListener victim) {
