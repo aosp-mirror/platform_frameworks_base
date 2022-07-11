@@ -38,7 +38,7 @@
     <string name="helper_summary_computer" msgid="1676407599909474428">"మీ పరికరాల మధ్య యాప్‌లను స్ట్రీమ్ చేయడానికి <xliff:g id="APP_NAME">%1$s</xliff:g> మీ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> తరపున అనుమతిని రిక్వెస్ట్ చేస్తోంది"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"పరికరం"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
-    <string name="consent_yes" msgid="8344487259618762872">"అనుమతించు"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"అనుమతించండి"</string>
     <string name="consent_no" msgid="2640796915611404382">"అనుమతించవద్దు"</string>
     <string name="consent_back" msgid="2560683030046918882">"వెనుకకు"</string>
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"మీ వాచ్‌కు యాప్ అనుమతులను బదిలీ చేయండి"</string>
