@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import android.util.Log;
 import android.os.Debug;
+import android.util.Log;
 
 /**
  * Loads a class, runs the garbage collector, and prints showmap output.
@@ -28,7 +28,7 @@ class LoadClass {
         System.loadLibrary("android_runtime");
 
         if (registerNatives() < 0) {
-            throw new RuntimeException("Error registering natives.");    
+            throw new RuntimeException("Error registering natives.");
         }
 
         Debug.startAllocCounting();
@@ -46,7 +46,7 @@ class LoadClass {
             }
         }
 
-        System.gc();
+        Runtime.getRuntime().gc();
 
         int allocCount = Debug.getGlobalAllocCount();
         int allocSize = Debug.getGlobalAllocSize();
@@ -73,7 +73,7 @@ class LoadClass {
         response.append(',').append(freedCount);
         response.append(',').append(freedSize);
         response.append(',').append(nativeHeapSize);
-        
+
         System.out.println(response.toString());
     }
 
