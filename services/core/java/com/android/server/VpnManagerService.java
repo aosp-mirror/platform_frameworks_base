@@ -769,8 +769,7 @@ public class VpnManagerService extends IVpnManager.Stub {
         }
     };
 
-    @VisibleForTesting
-    void onUserStarted(int userId) {
+    private void onUserStarted(int userId) {
         synchronized (mVpns) {
             Vpn userVpn = mVpns.get(userId);
             if (userVpn != null) {
@@ -854,8 +853,7 @@ public class VpnManagerService extends IVpnManager.Stub {
         }
     }
 
-    @VisibleForTesting
-    void onPackageRemoved(String packageName, int uid, boolean isReplacing) {
+    private void onPackageRemoved(String packageName, int uid, boolean isReplacing) {
         if (TextUtils.isEmpty(packageName) || uid < 0) {
             Log.wtf(TAG, "Invalid package in onPackageRemoved: " + packageName + " | " + uid);
             return;
@@ -878,8 +876,7 @@ public class VpnManagerService extends IVpnManager.Stub {
         }
     }
 
-    @VisibleForTesting
-    void onPackageAdded(String packageName, int uid, boolean isReplacing) {
+    private void onPackageAdded(String packageName, int uid, boolean isReplacing) {
         if (TextUtils.isEmpty(packageName) || uid < 0) {
             Log.wtf(TAG, "Invalid package in onPackageAdded: " + packageName + " | " + uid);
             return;
