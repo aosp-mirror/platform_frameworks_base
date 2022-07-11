@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -54,7 +53,6 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
-@FlakyTest(bugId = 219750830)
 class ExitPipViaExpandButtonClickTest(
     testSpec: FlickerTestParameter
 ) : ExitPipToAppTransition(testSpec) {
@@ -79,11 +77,6 @@ class ExitPipViaExpandButtonClickTest(
                     .waitForAndVerify()
             }
         }
-
-    /** {@inheritDoc}  */
-    @FlakyTest(bugId = 197726610)
-    @Test
-    override fun pipLayerExpands() = super.pipLayerExpands()
 
     companion object {
         /**
