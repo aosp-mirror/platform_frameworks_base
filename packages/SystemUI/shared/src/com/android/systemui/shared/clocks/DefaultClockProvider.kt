@@ -22,7 +22,6 @@ import android.view.LayoutInflater
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.Clock
 import com.android.systemui.plugins.ClockAnimations
-import com.android.systemui.plugins.ClockDarkness
 import com.android.systemui.plugins.ClockEvents
 import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
@@ -84,11 +83,11 @@ class DefaultClock(
         resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale_burmese)
     private val defaultLineSpacing = resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale)
 
-    private fun updateClockColor(clock: AnimatableClockView, darkValue: ClockDarkness) {
-        val color = if (darkValue.isDark) {
-            resources.getColor(android.R.color.system_accent2_600)
-        } else {
+    private fun updateClockColor(clock: AnimatableClockView, isRegionDark: Boolean) {
+        val color = if (isRegionDark) {
             resources.getColor(android.R.color.system_accent1_100)
+        } else {
+            resources.getColor(android.R.color.system_accent2_600)
         }
         clock.setColors(DOZE_COLOR, color)
         clock.animateAppearOnLockscreen()
@@ -117,8 +116,8 @@ class DefaultClock(
 
         override fun onColorPaletteChanged(
                 resources: Resources,
-                smallClockIsDark: ClockDarkness,
-                largeClockIsDark: ClockDarkness
+                smallClockIsDark: Boolean,
+                largeClockIsDark: Boolean
         ) {
             updateClockColor(smallClock, smallClockIsDark)
             updateClockColor(largeClock, largeClockIsDark)
@@ -199,13 +198,17 @@ class DefaultClock(
         clocks.forEach { it.setColors(DOZE_COLOR, DOZE_COLOR) }
     }
 
-    override fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float) {
+    override fun initialize(
+            resources: Resources,
+            dozeFraction: Float,
+            foldFraction: Float
+    ) {
         recomputePadding()
         animations = DefaultClockAnimations(dozeFraction, foldFraction)
         events.onColorPaletteChanged(
                 resources,
-                ClockDarkness.DEFAULT,
-                ClockDarkness.DEFAULT
+                true,
+                true
         )
         events.onTimeTick()
     }

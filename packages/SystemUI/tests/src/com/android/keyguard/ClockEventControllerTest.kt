@@ -107,13 +107,15 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Test
     fun themeChanged_verifyClockPaletteUpdated() {
         clockEventController.clock = clock
+        verify(events).onColorPaletteChanged(any(), any(), any())
+
         clockEventController.registerListeners()
 
         val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
         verify(configurationController).addCallback(capture(captor))
         captor.value.onThemeChanged()
 
-        verify(events).onColorPaletteChanged(any(), any(), any())
+        verify(events, times(2)).onColorPaletteChanged(any(), any(), any())
     }
 
     @Test
@@ -257,6 +259,7 @@ class ClockEventControllerTest : SysuiTestCase() {
 
     @Test
     fun unregisterListeners_validate() {
+        clockEventController.clock = clock
         clockEventController.unregisterListeners()
         verify(broadcastDispatcher).unregisterReceiver(any())
         verify(configurationController).removeCallback(any())
