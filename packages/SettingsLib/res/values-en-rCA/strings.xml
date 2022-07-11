@@ -612,7 +612,7 @@
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Wired headphones"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"On"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Off"</string>
-    <string name="carrier_network_change_mode" msgid="4257621815706644026">"Operator network changing"</string>
+    <string name="carrier_network_change_mode" msgid="4257621815706644026">"Carrier network changing"</string>
     <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
     <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
     <string name="data_connection_cdma" msgid="9098161966701934334">"1X"</string>
