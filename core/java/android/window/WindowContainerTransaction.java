@@ -348,8 +348,10 @@ public final class WindowContainerTransaction implements Parcelable {
      * @param currentParent of the tasks to perform the operation no.
      *                      {@code null} will perform the operation on the display.
      * @param newParent for the tasks. {@code null} will perform the operation on the display.
-     * @param windowingModes of the tasks to reparent.
-     * @param activityTypes of the tasks to reparent.
+     * @param windowingModes of the tasks to reparent. {@code null} ignore this attribute when
+     *                       perform the operation.
+     * @param activityTypes of the tasks to reparent.  {@code null} ignore this attribute when
+     *                      perform the operation.
      * @param onTop When {@code true}, the child goes to the top of parent; otherwise it goes to
      *              the bottom.
      */
