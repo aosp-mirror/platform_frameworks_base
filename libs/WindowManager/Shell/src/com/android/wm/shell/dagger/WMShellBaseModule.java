@@ -38,6 +38,7 @@ import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.TaskViewFactoryController;
 import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.back.BackAnimationController;
 import com.android.wm.shell.bubbles.BubbleController;
@@ -621,6 +622,18 @@ public abstract class WMShellBaseModule {
                 taskViewTransitions);
     }
 
+
+    //
+    // ActivityEmbedding
+    //
+
+    @WMSingleton
+    @Provides
+    static Optional<ActivityEmbeddingController> provideActivityEmbeddingController(
+            Context context, Transitions transitions) {
+        return Optional.of(new ActivityEmbeddingController(context, transitions));
+    }
+
     //
     // Misc
     //
@@ -647,6 +660,7 @@ public abstract class WMShellBaseModule {
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformTaskListener<?>> freeformTaskListener,
             Optional<RecentTasksController> recentTasksOptional,
+            Optional<ActivityEmbeddingController> activityEmbeddingOptional,
             Transitions transitions,
             StartingWindowController startingWindow,
             @ShellMainThread ShellExecutor mainExecutor) {
@@ -664,6 +678,7 @@ public abstract class WMShellBaseModule {
                 unfoldTransitionHandler,
                 freeformTaskListener,
                 recentTasksOptional,
+                activityEmbeddingOptional,
                 transitions,
                 startingWindow,
                 mainExecutor);

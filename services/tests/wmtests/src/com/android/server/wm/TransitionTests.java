@@ -30,6 +30,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.window.TransitionInfo.FLAG_IS_EMBEDDED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
@@ -61,8 +62,10 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.SurfaceControl;
 import android.window.IDisplayAreaOrganizer;
+import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskOrganizer;
 import android.window.ITransitionPlayer;
+import android.window.TaskFragmentOrganizer;
 import android.window.TransitionInfo;
 
 import androidx.test.filters.SmallTest;
@@ -1003,6 +1006,43 @@ public class TransitionTests extends WindowTestsBase {
 
         openTransition.continueTransitionReady();
         assertTrue(openTransition.allReady());
+    }
+
+    @Test
+    public void testIsEmbeddedChange() {
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        final ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        final ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task task = createTask(mDisplayContent);
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
+        final TaskFragment embeddedTf = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(2)
+                .setOrganizer(organizer)
+                .build();
+        final ActivityRecord closingActivity = embeddedTf.getBottomMostActivity();
+        final ActivityRecord openingActivity = embeddedTf.getTopMostActivity();
+        // Start states.
+        changes.put(embeddedTf, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        changes.put(closingActivity, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        changes.put(openingActivity, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        // End states.
+        closingActivity.mVisibleRequested = false;
+        openingActivity.mVisibleRequested = true;
+
+        participants.add(closingActivity);
+        participants.add(openingActivity);
+        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+                participants, changes);
+        final TransitionInfo info = Transition.calculateTransitionInfo(
+                transition.mType, 0 /* flags */, targets, changes, mMockT);
+
+        assertEquals(2, info.getChanges().size());
+        assertTrue((info.getChanges().get(0).getFlags() & FLAG_IS_EMBEDDED) != 0);
+        assertTrue((info.getChanges().get(1).getFlags() & FLAG_IS_EMBEDDED) != 0);
     }
 
     private static void makeTaskOrganized(Task... tasks) {

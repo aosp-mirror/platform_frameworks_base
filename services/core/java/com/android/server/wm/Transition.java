@@ -46,6 +46,7 @@ import static android.view.WindowManager.TransitionType;
 import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
+import static android.window.TransitionInfo.FLAG_IS_EMBEDDED;
 import static android.window.TransitionInfo.FLAG_IS_INPUT_METHOD;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
@@ -1760,6 +1761,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
             if (occludesKeyguard(wc)) {
                 flags |= FLAG_OCCLUDES_KEYGUARD;
+            }
+            if (wc.isEmbedded()) {
+                flags |= FLAG_IS_EMBEDDED;
             }
             return flags;
         }
