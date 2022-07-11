@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import android.media.AudioManager;
 import android.media.session.MediaSessionManager;
+import android.os.PowerExemptionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
@@ -70,6 +71,7 @@ public class MediaOutputGroupDialogTest extends SysuiTestCase {
     private NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
             NearbyMediaDevicesManager.class);
     private final AudioManager mAudioManager = mock(AudioManager.class);
+    private PowerExemptionManager mPowerExemptionManager = mock(PowerExemptionManager.class);
 
     private MediaOutputGroupDialog mMediaOutputGroupDialog;
     private MediaOutputController mMediaOutputController;
@@ -80,7 +82,7 @@ public class MediaOutputGroupDialogTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotificationEntryManager, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager), mAudioManager);
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputGroupDialog = new MediaOutputGroupDialog(mContext, false, mBroadcastSender,
                 mMediaOutputController);

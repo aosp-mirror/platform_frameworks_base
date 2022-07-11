@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.app.Service;
 import android.app.UiModeManager;
 import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.hardware.camera2.CameraManager;
 import android.net.Uri;
@@ -47,7 +48,7 @@ import java.util.List;
  * in a call.  It also provides the user with a means to initiate calls and see a history of calls
  * on their device.  A device is bundled with a system provided default dialer/phone app.  The user
  * may choose a single app to take over this role from the system app.  An app which wishes to
- * fulfill one this role uses the {@link android.app.role.RoleManager} to request that they fill the
+ * fulfill this role uses the {@link android.app.role.RoleManager} to request that they fill the
  * {@link android.app.role.RoleManager#ROLE_DIALER} role.
  * <p>
  * The default phone app provides a user interface while the device is in a call, and the device is
@@ -63,13 +64,23 @@ import java.util.List;
  *     UI, as well as an ongoing call UI.</li>
  * </ul>
  * <p>
- * Note: If the app filling the {@link android.app.role.RoleManager#ROLE_DIALER} crashes during
- * {@link InCallService} binding, the Telecom framework will automatically fall back to using the
- * dialer app pre-loaded on the device.  The system will display a notification to the user to let
- * them know that the app has crashed and that their call was continued using the pre-loaded dialer
- * app.
+ * Note: If the app filling the {@link android.app.role.RoleManager#ROLE_DIALER} returns a
+ * {@code null} {@link InCallService} during binding, the Telecom framework will automatically fall
+ * back to using the dialer app preloaded on the device.  The system will display a notification to
+ * the user to let them know that their call was continued using the preloaded dialer app.  Your
+ * app should never return a {@code null} binding; doing so means it does not fulfil the
+ * requirements of {@link android.app.role.RoleManager#ROLE_DIALER}.
  * <p>
- * The pre-loaded dialer will ALWAYS be used when the user places an emergency call, even if your
+ * Note: If your app fills {@link android.app.role.RoleManager#ROLE_DIALER} and makes changes at
+ * runtime which cause it to no longer fulfil the requirements of this role,
+ * {@link android.app.role.RoleManager} will automatically remove your app from the role and close
+ * your app.  For example, if you use
+ * {@link android.content.pm.PackageManager#setComponentEnabledSetting(ComponentName, int, int)} to
+ * programmatically disable the {@link InCallService} your app declares in its manifest, your app
+ * will no longer fulfil the requirements expected of
+ * {@link android.app.role.RoleManager#ROLE_DIALER}.
+ * <p>
+ * The preloaded dialer will ALWAYS be used when the user places an emergency call, even if your
  * app fills the {@link android.app.role.RoleManager#ROLE_DIALER} role.  To ensure an optimal
  * experience when placing an emergency call, the default dialer should ALWAYS use
  * {@link android.telecom.TelecomManager#placeCall(Uri, Bundle)} to place calls (including
