@@ -122,7 +122,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
@@ -132,11 +132,11 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_SYSTEM_INFO, 0, false);
 
-        assertEquals(View.INVISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
     @Test
@@ -232,7 +232,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
@@ -244,7 +244,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
@@ -255,12 +255,12 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         when(mNotificationPanelViewController.hasCustomClock()).thenReturn(true);
 
         // Make sure they start out as visible
-        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
         assertEquals(View.VISIBLE, getClockView().getVisibility());
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.INVISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
         assertEquals(View.GONE, getClockView().getVisibility());
     }
 
@@ -271,14 +271,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         when(mNotificationPanelViewController.hasCustomClock()).thenReturn(true);
 
         // Make sure they start out as visible
-        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
         assertEquals(View.VISIBLE, getClockView().getVisibility());
 
         fragment.onDozingChanged(true);
 
         // When this callback is triggered, we want to make sure the clock and system info
         // visibilities are recalculated. Since dozing=true, they shouldn't be visible.
-        assertEquals(View.INVISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
         assertEquals(View.GONE, getClockView().getVisibility());
     }
 
@@ -417,7 +417,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         return mFragment.getView().findViewById(R.id.clock);
     }
 
-    private View getSystemIconAreaView() {
-        return mFragment.getView().findViewById(R.id.system_icon_area);
+    private View getEndSideContentView() {
+        return mFragment.getView().findViewById(R.id.status_bar_end_side_content);
     }
 }
