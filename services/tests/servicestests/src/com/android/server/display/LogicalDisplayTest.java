@@ -17,7 +17,11 @@
 package com.android.server.display;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.PropertyInvalidatedCache;
@@ -45,18 +49,21 @@ public class LogicalDisplayTest {
 
     private LogicalDisplay mLogicalDisplay;
     private DisplayDevice mDisplayDevice;
+    private final DisplayDeviceInfo mDisplayDeviceInfo = new DisplayDeviceInfo();
 
     @Before
     public void setUp() {
         // Share classloader to allow package private access.
         System.setProperty("dexmaker.share_classloader", "true");
         mDisplayDevice = mock(DisplayDevice.class);
-        DisplayDeviceInfo displayDeviceInfo = new DisplayDeviceInfo();
-        displayDeviceInfo.width = DISPLAY_WIDTH;
-        displayDeviceInfo.height = DISPLAY_HEIGHT;
-        displayDeviceInfo.flags = DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice);
-        when(mDisplayDevice.getDisplayDeviceInfoLocked()).thenReturn(displayDeviceInfo);
+
+        mDisplayDeviceInfo.copyFrom(new DisplayDeviceInfo());
+        mDisplayDeviceInfo.width = DISPLAY_WIDTH;
+        mDisplayDeviceInfo.height = DISPLAY_HEIGHT;
+        mDisplayDeviceInfo.flags = DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
+        mDisplayDeviceInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
+        when(mDisplayDevice.getDisplayDeviceInfoLocked()).thenReturn(mDisplayDeviceInfo);
 
         // Disable binder caches in this process.
         PropertyInvalidatedCache.disableForTestMode();
@@ -102,5 +109,34 @@ public class LogicalDisplayTest {
         mLogicalDisplay.setDisplayInfoOverrideFromWindowManagerLocked(displayInfo);
         mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
         assertEquals(expectedPosition, mLogicalDisplay.getDisplayPosition());
+    }
+
+    @Test
+    public void testDisplayInputFlags() {
+        SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        verify(t).setDisplayFlags(any(), eq(SurfaceControl.DISPLAY_RECEIVES_INPUT));
+        reset(t);
+
+        mDisplayDeviceInfo.touch = DisplayDeviceInfo.TOUCH_NONE;
+        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        verify(t).setDisplayFlags(any(), eq(0));
+        reset(t);
+
+        mDisplayDeviceInfo.touch = DisplayDeviceInfo.TOUCH_VIRTUAL;
+        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        verify(t).setDisplayFlags(any(), eq(SurfaceControl.DISPLAY_RECEIVES_INPUT));
+        reset(t);
+
+        mLogicalDisplay.setPhase(LogicalDisplay.DISPLAY_PHASE_DISABLED);
+        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        verify(t).setDisplayFlags(any(), eq(0));
+        reset(t);
+
+        mLogicalDisplay.setPhase(LogicalDisplay.DISPLAY_PHASE_ENABLED);
+        mDisplayDeviceInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
+        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        verify(t).setDisplayFlags(any(), eq(SurfaceControl.DISPLAY_RECEIVES_INPUT));
+        reset(t);
     }
 }
