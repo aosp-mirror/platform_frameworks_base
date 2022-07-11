@@ -138,13 +138,6 @@ public class ServiceState implements Parcelable {
      */
     public static final int FREQUENCY_RANGE_MMWAVE = 4;
 
-    private static final List<Integer> FREQUENCY_RANGE_ORDER = Arrays.asList(
-            FREQUENCY_RANGE_UNKNOWN,
-            FREQUENCY_RANGE_LOW,
-            FREQUENCY_RANGE_MID,
-            FREQUENCY_RANGE_HIGH,
-            FREQUENCY_RANGE_MMWAVE);
-
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "DUPLEX_MODE_",
@@ -2105,15 +2098,6 @@ public class ServiceState implements Parcelable {
 
             mNetworkRegistrationInfos.add(new NetworkRegistrationInfo(nri));
         }
-    }
-
-    /**
-     * @hide
-     */
-    public static final int getBetterNRFrequencyRange(int range1, int range2) {
-        return FREQUENCY_RANGE_ORDER.indexOf(range1) > FREQUENCY_RANGE_ORDER.indexOf(range2)
-                ? range1
-                : range2;
     }
 
     /**
