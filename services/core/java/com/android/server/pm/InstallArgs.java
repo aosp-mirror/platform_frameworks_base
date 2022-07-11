@@ -16,19 +16,24 @@
 
 package com.android.server.pm;
 
+import static android.app.AppOpsManager.MODE_DEFAULT;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.DataLoaderType;
 import android.content.pm.IPackageInstallObserver2;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
 import android.os.UserHandle;
 
 import com.android.internal.util.Preconditions;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 
+import java.io.File;
 import java.util.List;
 
-abstract class InstallArgs {
+final class InstallArgs {
+    File mCodeFile;
     /** @see InstallingSession#mOriginInfo */
     final OriginInfo mOriginInfo;
     /** @see InstallingSession#mMoveInfo */
@@ -108,28 +113,21 @@ abstract class InstallArgs {
                 params.mDataLoaderType, params.mPackageSource, params.mPm);
     }
 
-    abstract int copyApk();
-    abstract int doPreInstall(int status);
-
     /**
-     * Rename package into final resting place. All paths on the given
-     * scanned package should be updated to reflect the rename.
+     * Create args that describe an existing installed package. Typically used
+     * when cleaning up old installs, or used as a move source.
      */
-    abstract boolean doRename(int status, ParsedPackage parsedPackage);
-    abstract int doPostInstall(int status, int uid);
-
-    /** @see PackageSettingBase#getPath() */
-    abstract String getCodePath();
-
-    // Need installer lock especially for dex file removal.
-    abstract void cleanUpResourcesLI();
-    abstract boolean doPostDeleteLI(boolean delete);
-
-    protected boolean isEphemeral() {
-        return (mInstallFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
+    InstallArgs(String codePath, String[] instructionSets, PackageManagerService pm) {
+        this(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY,
+                null, null, instructionSets, null, null, null, MODE_DEFAULT, null, 0,
+                SigningDetails.UNKNOWN, PackageManager.INSTALL_REASON_UNKNOWN,
+                PackageManager.INSTALL_SCENARIO_DEFAULT, false, DataLoaderType.NONE,
+                PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED, pm);
+        mCodeFile = (codePath != null) ? new File(codePath) : null;
     }
 
-    UserHandle getUser() {
-        return mUser;
+    /** @see PackageSettingBase#getPath() */
+    String getCodePath() {
+        return (mCodeFile != null) ? mCodeFile.getAbsolutePath() : null;
     }
 }

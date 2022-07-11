@@ -346,9 +346,7 @@ public final class StorageEventHelper extends StorageEventListener {
             for (int i = 0; i < fileToDeleteCount; i++) {
                 File fileToDelete = filesToDelete.get(i);
                 logCriticalInfo(Log.WARN, "Destroying orphaned at " + fileToDelete);
-                synchronized (mPm.mInstallLock) {
-                    mRemovePackageHelper.removeCodePathLI(fileToDelete);
-                }
+                mRemovePackageHelper.removeCodePath(fileToDelete);
             }
         }
     }

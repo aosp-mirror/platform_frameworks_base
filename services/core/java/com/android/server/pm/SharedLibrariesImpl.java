@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
 import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.NonNull;
@@ -258,11 +259,13 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
      * Given the library name, returns a list of shared libraries on all versions.
      * TODO: Remove, this is used for live mutation outside of the defined commit path
      */
-    @GuardedBy("mPm.mLock")
+
     @Override
     public @NonNull WatchedLongSparseArray<SharedLibraryInfo> getSharedLibraryInfos(
             @NonNull String libName) {
-        return mSharedLibraries.get(libName);
+        synchronized (mPm.mLock) {
+            return mSharedLibraries.get(libName);
+        }
     }
 
     @VisibleForTesting
@@ -381,6 +384,11 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
         return false;
     }
 
+    @Nullable SharedLibraryInfo getLatestStaticSharedLibraVersion(@NonNull AndroidPackage pkg) {
+        synchronized (mPm.mLock) {
+            return getLatestStaticSharedLibraVersionLPr(pkg);
+        }
+    }
     /**
      * Given a package of static shared library, returns its shared library info of
      * the latest version.
@@ -389,7 +397,8 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
      * @return The latest version of shared library info.
      */
     @GuardedBy("mPm.mLock")
-    @Nullable SharedLibraryInfo getLatestStaticSharedLibraVersionLPr(@NonNull AndroidPackage pkg) {
+    @Nullable
+    private SharedLibraryInfo getLatestStaticSharedLibraVersionLPr(@NonNull AndroidPackage pkg) {
         WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(
                 pkg.getStaticSharedLibName());
         if (versionedLib == null) {
@@ -524,15 +533,26 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
      * @param changingLibSetting The updating library package setting.
      * @param availablePackages All installed packages and current being installed packages.
      */
-    @GuardedBy("mPm.mLock")
-    void updateSharedLibrariesLPw(@NonNull AndroidPackage pkg, @NonNull PackageSetting pkgSetting,
+    void updateSharedLibraries(@NonNull AndroidPackage pkg, @NonNull PackageSetting pkgSetting,
             @Nullable AndroidPackage changingLib, @Nullable PackageSetting changingLibSetting,
             @NonNull Map<String, AndroidPackage> availablePackages)
             throws PackageManagerException {
         final ArrayList<SharedLibraryInfo> sharedLibraryInfos = collectSharedLibraryInfos(
                 pkg, availablePackages, null /* newLibraries */);
-        executeSharedLibrariesUpdateLPw(pkg, pkgSetting, changingLib, changingLibSetting,
-                sharedLibraryInfos, mPm.mUserManager.getUserIds());
+        synchronized (mPm.mLock) {
+            executeSharedLibrariesUpdateLPw(pkg, pkgSetting, changingLib, changingLibSetting,
+                    sharedLibraryInfos, mPm.mUserManager.getUserIds());
+        }
+    }
+
+    void executeSharedLibrariesUpdate(AndroidPackage pkg,
+            @NonNull PackageSetting pkgSetting, @Nullable AndroidPackage changingLib,
+            @Nullable PackageSetting changingLibSetting,
+            ArrayList<SharedLibraryInfo> usesLibraryInfos, int[] allUsers) {
+        synchronized (mPm.mLock) {
+            executeSharedLibrariesUpdateLPw(pkg, pkgSetting, changingLib, changingLibSetting,
+                    usesLibraryInfos, allUsers);
+        }
     }
 
     /**
@@ -547,7 +567,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
      * @param allUsers All user ids on the device.
      */
     @GuardedBy("mPm.mLock")
-    void executeSharedLibrariesUpdateLPw(AndroidPackage pkg,
+    private void executeSharedLibrariesUpdateLPw(AndroidPackage pkg,
             @NonNull PackageSetting pkgSetting, @Nullable AndroidPackage changingLib,
             @Nullable PackageSetting changingLibSetting,
             ArrayList<SharedLibraryInfo> usesLibraryInfos, int[] allUsers) {
@@ -610,6 +630,31 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
         return false;
     }
 
+    ArrayList<AndroidPackage> commitSharedLibraryChanges(@NonNull AndroidPackage pkg,
+            @NonNull PackageSetting pkgSetting, List<SharedLibraryInfo> allowedSharedLibraryInfos,
+            @NonNull Map<String, AndroidPackage> combinedSigningDetails, int scanFlags) {
+        if (ArrayUtils.isEmpty(allowedSharedLibraryInfos)) {
+            return null;
+        }
+        synchronized (mPm.mLock) {
+            for (SharedLibraryInfo info : allowedSharedLibraryInfos) {
+                commitSharedLibraryInfoLPw(info);
+            }
+            try {
+                // Shared libraries for the package need to be updated.
+                updateSharedLibraries(pkg, pkgSetting, null, null, combinedSigningDetails);
+            } catch (PackageManagerException e) {
+                Slog.e(TAG, "updateSharedLibraries failed: ", e);
+            }
+            // Update all applications that use this library. Skip when booting
+            // since this will be done after all packages are scaned.
+            if ((scanFlags & SCAN_BOOTING) == 0) {
+                return updateAllSharedLibrariesLPw(pkg, pkgSetting, combinedSigningDetails);
+            }
+        }
+        return null;
+    }
+
     /**
      * Update shared library dependencies and code paths for applications that are using the
      * library {@code updatedPkg}. Update all applications if the {@code updatedPkg} is null.
@@ -666,7 +711,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                     }
                 }
                 try {
-                    updateSharedLibrariesLPw(pkg, pkgSetting, changingPkg,
+                    updateSharedLibraries(pkg, pkgSetting, changingPkg,
                             changingPkgSetting, availablePackages);
                 } catch (PackageManagerException e) {
                     // If a system app update or an app and a required lib missing we
@@ -677,9 +722,11 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                     if (!pkg.isSystem() || pkgSetting.getPkgState().isUpdatedSystemApp()) {
                         final int flags = pkgSetting.getPkgState().isUpdatedSystemApp()
                                 ? PackageManager.DELETE_KEEP_DATA : 0;
-                        mDeletePackageHelper.deletePackageLIF(pkg.getPackageName(), null, true,
-                                mPm.mUserManager.getUserIds(), flags, null,
-                                true);
+                        synchronized (mPm.mInstallLock) {
+                            mDeletePackageHelper.deletePackageLIF(pkg.getPackageName(), null, true,
+                                    mPm.mUserManager.getUserIds(), flags, null,
+                                    true);
+                        }
                     }
                     Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
                 }
@@ -711,6 +758,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
      * Add a shared library info to the system. This is invoked when the package is being added or
      * scanned.
      */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @GuardedBy("mPm.mLock")
     void commitSharedLibraryInfoLPw(@NonNull SharedLibraryInfo libraryInfo) {
         final String name = libraryInfo.getName();
@@ -729,45 +777,46 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
     /**
      * Remove a shared library from the system.
      */
-    @GuardedBy("mPm.mLock")
-    boolean removeSharedLibraryLPw(@NonNull String libName, long version) {
-        WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(libName);
-        if (versionedLib == null) {
-            return false;
-        }
-        final int libIdx = versionedLib.indexOfKey(version);
-        if (libIdx < 0) {
-            return false;
-        }
-        SharedLibraryInfo libraryInfo = versionedLib.valueAt(libIdx);
-
-        final Computer snapshot = mPm.snapshotComputer();
-
-        // Remove the shared library overlays from its dependent packages.
-        for (int currentUserId : mPm.mUserManager.getUserIds()) {
-            final List<VersionedPackage> dependents = snapshot.getPackagesUsingSharedLibrary(
-                    libraryInfo, 0, Process.SYSTEM_UID, currentUserId);
-            if (dependents == null) {
-                continue;
+    boolean removeSharedLibrary(@NonNull String libName, long version) {
+        synchronized (mPm.mLock) {
+            WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(libName);
+            if (versionedLib == null) {
+                return false;
             }
-            for (VersionedPackage dependentPackage : dependents) {
-                final PackageSetting ps = mPm.mSettings.getPackageLPr(
-                        dependentPackage.getPackageName());
-                if (ps != null) {
-                    ps.setOverlayPathsForLibrary(libraryInfo.getName(), null, currentUserId);
+            final int libIdx = versionedLib.indexOfKey(version);
+            if (libIdx < 0) {
+                return false;
+            }
+            SharedLibraryInfo libraryInfo = versionedLib.valueAt(libIdx);
+
+            final Computer snapshot = mPm.snapshotComputer();
+
+            // Remove the shared library overlays from its dependent packages.
+            for (int currentUserId : mPm.mUserManager.getUserIds()) {
+                final List<VersionedPackage> dependents = snapshot.getPackagesUsingSharedLibrary(
+                        libraryInfo, 0, Process.SYSTEM_UID, currentUserId);
+                if (dependents == null) {
+                    continue;
+                }
+                for (VersionedPackage dependentPackage : dependents) {
+                    final PackageSetting ps = mPm.mSettings.getPackageLPr(
+                            dependentPackage.getPackageName());
+                    if (ps != null) {
+                        ps.setOverlayPathsForLibrary(libraryInfo.getName(), null, currentUserId);
+                    }
                 }
             }
-        }
 
-        versionedLib.remove(version);
-        if (versionedLib.size() <= 0) {
-            mSharedLibraries.remove(libName);
-            if (libraryInfo.getType() == SharedLibraryInfo.TYPE_STATIC) {
-                mStaticLibsByDeclaringPackage.remove(libraryInfo.getDeclaringPackage()
-                        .getPackageName());
+            versionedLib.remove(version);
+            if (versionedLib.size() <= 0) {
+                mSharedLibraries.remove(libName);
+                if (libraryInfo.getType() == SharedLibraryInfo.TYPE_STATIC) {
+                    mStaticLibsByDeclaringPackage.remove(libraryInfo.getDeclaringPackage()
+                            .getPackageName());
+                }
             }
+            return true;
         }
-        return true;
     }
 
     /**

@@ -23,6 +23,7 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 
+import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
@@ -30,6 +31,11 @@ import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.NonNull;
 import android.content.pm.PackageManager;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageLite;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
+import android.os.Environment;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.incremental.IncrementalManager;
@@ -78,8 +84,17 @@ final class RemovePackageHelper {
         this(pm, new AppDataHelper(pm));
     }
 
+    public void removeCodePath(File codePath) {
+        synchronized (mPm.mInstallLock) {
+            removeCodePathLI(codePath);
+        }
+    }
+
     @GuardedBy("mPm.mInstallLock")
-    public void removeCodePathLI(File codePath) {
+    private void removeCodePathLI(File codePath) {
+        if (codePath == null || !codePath.exists()) {
+            return;
+        }
         if (codePath.isDirectory()) {
             final File codePathParent = codePath.getParentFile();
             final boolean needRemoveParent = codePathParent.getName().startsWith(RANDOM_DIR_PREFIX);
@@ -118,7 +133,14 @@ final class RemovePackageHelper {
         cacher.cleanCachedResult(codePath);
     }
 
-    public void removePackageLI(AndroidPackage pkg, boolean chatty) {
+    public void removePackage(AndroidPackage pkg, boolean chatty) {
+        synchronized (mPm.mInstallLock) {
+            removePackageLI(pkg, chatty);
+        }
+    }
+
+    @GuardedBy("mPm.mInstallLock")
+    private void removePackageLI(AndroidPackage pkg, boolean chatty) {
         // Remove the parent package setting
         PackageStateInternal ps = mPm.snapshotComputer()
                 .getPackageStateInternal(pkg.getPackageName());
@@ -129,6 +151,7 @@ final class RemovePackageHelper {
         }
     }
 
+    @GuardedBy("mPm.mInstallLock")
     private void removePackageLI(String packageName, boolean chatty) {
         if (DEBUG_INSTALL) {
             if (chatty) {
@@ -145,6 +168,7 @@ final class RemovePackageHelper {
         }
     }
 
+    @GuardedBy("mPm.mLock")
     private void cleanPackageDataStructuresLILPw(AndroidPackage pkg, boolean chatty) {
         mPm.mComponentResolver.removeAllComponents(pkg, chatty);
         mPermissionManager.onPackageRemoved(pkg);
@@ -175,7 +199,7 @@ final class RemovePackageHelper {
             final int libraryNamesSize = pkg.getLibraryNames().size();
             for (i = 0; i < libraryNamesSize; i++) {
                 String name = pkg.getLibraryNames().get(i);
-                if (mSharedLibraries.removeSharedLibraryLPw(name, 0)) {
+                if (mSharedLibraries.removeSharedLibrary(name, 0)) {
                     if (DEBUG_REMOVE && chatty) {
                         if (r == null) {
                             r = new StringBuilder(256);
@@ -192,7 +216,7 @@ final class RemovePackageHelper {
 
         // Any package can hold SDK or static shared libraries.
         if (pkg.getSdkLibName() != null) {
-            if (mSharedLibraries.removeSharedLibraryLPw(
+            if (mSharedLibraries.removeSharedLibrary(
                     pkg.getSdkLibName(), pkg.getSdkLibVersionMajor())) {
                 if (DEBUG_REMOVE && chatty) {
                     if (r == null) {
@@ -205,7 +229,7 @@ final class RemovePackageHelper {
             }
         }
         if (pkg.getStaticSharedLibName() != null) {
-            if (mSharedLibraries.removeSharedLibraryLPw(pkg.getStaticSharedLibName(),
+            if (mSharedLibraries.removeSharedLibrary(pkg.getStaticSharedLibName(),
                     pkg.getStaticSharedLibVersion())) {
                 if (DEBUG_REMOVE && chatty) {
                     if (r == null) {
@@ -223,12 +247,20 @@ final class RemovePackageHelper {
         }
     }
 
+    public void removePackageData(final PackageSetting deletedPs, @NonNull int[] allUserHandles,
+            PackageRemovedInfo outInfo, int flags, boolean writeSettings) {
+        synchronized (mPm.mInstallLock) {
+            removePackageDataLIF(deletedPs, allUserHandles, outInfo, flags, writeSettings);
+        }
+    }
+
     /*
      * This method deletes the package from internal data structures. If the DELETE_KEEP_DATA
      * flag is not set, the data directory is removed as well.
      * make sure this flag is set for partially installed apps. If not its meaningless to
      * delete a partially installed application.
      */
+    @GuardedBy("mPm.mInstallLock")
     public void removePackageDataLIF(final PackageSetting deletedPs, @NonNull int[] allUserHandles,
             PackageRemovedInfo outInfo, int flags, boolean writeSettings) {
         String packageName = deletedPs.getPackageName();
@@ -350,6 +382,76 @@ final class RemovePackageHelper {
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
             });
+        }
+    }
+
+    void cleanUpResources(InstallArgs args) {
+        synchronized (mPm.mInstallLock) {
+            cleanUpResourcesLI(args);
+        }
+    }
+
+    // Need installer lock especially for dex file removal.
+    @GuardedBy("mPm.mInstallLock")
+    private void cleanUpResourcesLI(InstallArgs args) {
+        // Try enumerating all code paths before deleting
+        List<String> allCodePaths = Collections.EMPTY_LIST;
+        if (args.mCodeFile != null && args.mCodeFile.exists()) {
+            final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            final ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
+                    input.reset(), args.mCodeFile, /* flags */ 0);
+            if (result.isSuccess()) {
+                // Ignore error; we tried our best
+                allCodePaths = result.getResult().getAllApkPaths();
+            }
+        }
+
+        removeCodePathLI(args.mCodeFile);
+        removeDexFilesLI(allCodePaths, args.mInstructionSets);
+    }
+
+    @GuardedBy("mPm.mInstallLock")
+    private void removeDexFilesLI(List<String> allCodePaths, String[] instructionSets) {
+        if (!allCodePaths.isEmpty()) {
+            if (instructionSets == null) {
+                throw new IllegalStateException("instructionSet == null");
+            }
+            String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
+            for (String codePath : allCodePaths) {
+                for (String dexCodeInstructionSet : dexCodeInstructionSets) {
+                    try {
+                        mPm.mInstaller.rmdex(codePath, dexCodeInstructionSet);
+                    } catch (Installer.InstallerException ignored) {
+                    }
+                }
+            }
+        }
+    }
+
+    void cleanUpForMoveInstall(String volumeUuid, String packageName, String fromCodePath) {
+        final String toPathName = new File(fromCodePath).getName();
+        final File codeFile = new File(Environment.getDataAppDirectory(volumeUuid), toPathName);
+        Slog.d(TAG, "Cleaning up " + packageName + " on " + volumeUuid);
+        final int[] userIds = mPm.mUserManager.getUserIds();
+        synchronized (mPm.mInstallLock) {
+            // Clean up both app data and code
+            // All package moves are frozen until finished
+
+            // We purposefully exclude FLAG_STORAGE_EXTERNAL here, since
+            // this task was only focused on moving data on internal storage.
+            // We don't want ART profiles cleared, because they don't move,
+            // so we would be deleting the only copy (b/149200535).
+            final int flags = FLAG_STORAGE_DE | FLAG_STORAGE_CE
+                    | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES;
+            for (int userId : userIds) {
+                try {
+                    mPm.mInstaller.destroyAppData(volumeUuid, packageName, userId, flags,
+                            0);
+                } catch (Installer.InstallerException e) {
+                    Slog.w(TAG, String.valueOf(e));
+                }
+            }
+            removeCodePathLI(codeFile);
         }
     }
 }
