@@ -44,7 +44,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.LockPatternUtils.CredentialType;
 import com.android.server.LocalServices;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.utils.WatchableImpl;
@@ -71,7 +70,6 @@ class LockSettingsStorage extends WatchableImpl {
 
     private static final String TAG = "LockSettingsStorage";
     private static final String TABLE = "locksettings";
-    private static final boolean DEBUG = false;
 
     private static final String COLUMN_KEY = "name";
     private static final String COLUMN_USERID = "user";
@@ -84,11 +82,10 @@ class LockSettingsStorage extends WatchableImpl {
             COLUMN_KEY, COLUMN_VALUE
     };
 
-    private static final String SYSTEM_DIRECTORY = "/system/";
     private static final String CHILD_PROFILE_LOCK_FILE = "gatekeeper.profile.key";
 
     private static final String REBOOT_ESCROW_FILE = "reboot.escrow.key";
-    private static final String REBOOT_ESCROW_SERVER_BLOB = "reboot.escrow.server.blob.key";
+    private static final String REBOOT_ESCROW_SERVER_BLOB_FILE = "reboot.escrow.server.blob.key";
 
     private static final String SYNTHETIC_PASSWORD_DIRECTORY = "spblob/";
 
@@ -107,39 +104,6 @@ class LockSettingsStorage extends WatchableImpl {
     private final Object mFileWriteLock = new Object();
 
     private PersistentDataBlockManagerInternal mPersistentDataBlockManagerInternal;
-
-    @VisibleForTesting
-    public static class CredentialHash {
-
-        private CredentialHash(byte[] hash, @CredentialType int type) {
-            if (type != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
-                if (hash == null) {
-                    throw new IllegalArgumentException("Empty hash for CredentialHash");
-                }
-            } else /* type == LockPatternUtils.CREDENTIAL_TYPE_NONE */ {
-                if (hash != null) {
-                    throw new IllegalArgumentException(
-                            "None type CredentialHash should not have hash");
-                }
-            }
-            this.hash = hash;
-            this.type = type;
-        }
-
-        static CredentialHash create(byte[] hash, int type) {
-            if (type == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
-                throw new IllegalArgumentException("Bad type for CredentialHash");
-            }
-            return new CredentialHash(hash, type);
-        }
-
-        static CredentialHash createEmptyHash() {
-            return new CredentialHash(null, LockPatternUtils.CREDENTIAL_TYPE_NONE);
-        }
-
-        byte[] hash;
-        @CredentialType int type;
-    }
 
     public LockSettingsStorage(Context context) {
         mContext = context;
@@ -259,13 +223,7 @@ class LockSettingsStorage extends WatchableImpl {
     }
 
     public void removeChildProfileLock(int userId) {
-        if (DEBUG)
-            Slog.e(TAG, "Remove child profile lock for user: " + userId);
-        try {
-            deleteFile(getChildProfileLockFile(userId));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        deleteFile(getChildProfileLockFile(userId));
     }
 
     public void writeChildProfileLock(int userId, byte[] lock) {
@@ -297,39 +255,39 @@ class LockSettingsStorage extends WatchableImpl {
     }
 
     public void writeRebootEscrowServerBlob(byte[] serverBlob) {
-        writeFile(getRebootEscrowServerBlob(), serverBlob);
+        writeFile(getRebootEscrowServerBlobFile(), serverBlob);
     }
 
     public byte[] readRebootEscrowServerBlob() {
-        return readFile(getRebootEscrowServerBlob());
+        return readFile(getRebootEscrowServerBlobFile());
     }
 
     public boolean hasRebootEscrowServerBlob() {
-        return hasFile(getRebootEscrowServerBlob());
+        return hasFile(getRebootEscrowServerBlobFile());
     }
 
     public void removeRebootEscrowServerBlob() {
-        deleteFile(getRebootEscrowServerBlob());
+        deleteFile(getRebootEscrowServerBlobFile());
     }
 
-    private boolean hasFile(String name) {
-        byte[] contents = readFile(name);
+    private boolean hasFile(File path) {
+        byte[] contents = readFile(path);
         return contents != null && contents.length > 0;
     }
 
-    private byte[] readFile(String name) {
+    private byte[] readFile(File path) {
         int version;
         synchronized (mCache) {
-            if (mCache.hasFile(name)) {
-                return mCache.peekFile(name);
+            if (mCache.hasFile(path)) {
+                return mCache.peekFile(path);
             }
             version = mCache.getVersion();
         }
 
-        byte[] stored = null;
-        try (RandomAccessFile raf = new RandomAccessFile(name, "r")) {
-            stored = new byte[(int) raf.length()];
-            raf.readFully(stored, 0, stored.length);
+        byte[] data = null;
+        try (RandomAccessFile raf = new RandomAccessFile(path, "r")) {
+            data = new byte[(int) raf.length()];
+            raf.readFully(data, 0, data.length);
             raf.close();
         } catch (FileNotFoundException suppressed) {
             // readFile() is also called by hasFile() to check the existence of files, in this
@@ -337,8 +295,8 @@ class LockSettingsStorage extends WatchableImpl {
         } catch (IOException e) {
             Slog.e(TAG, "Cannot read file " + e);
         }
-        mCache.putFileIfUnchanged(name, stored, version);
-        return stored;
+        mCache.putFileIfUnchanged(path, data, version);
+        return data;
     }
 
     private void fsyncDirectory(File directory) {
@@ -352,23 +310,21 @@ class LockSettingsStorage extends WatchableImpl {
         }
     }
 
-    private void writeFile(String name, byte[] hash) {
+    private void writeFile(File path, byte[] data) {
         synchronized (mFileWriteLock) {
             RandomAccessFile raf = null;
             try {
-                // Write the hash to file, requiring each write to be synchronized to the
+                // Write the data to the file, requiring each write to be synchronized to the
                 // underlying storage device immediately to avoid data loss in case of power loss.
-                // This also ensures future secdiscard operation on the file succeeds since the
-                // file would have been allocated on flash.
-                raf = new RandomAccessFile(name, "rws");
-                // Truncate the file if pattern is null, to clear the lock
-                if (hash == null || hash.length == 0) {
+                raf = new RandomAccessFile(path, "rws");
+                // Truncate the file if the data is empty.
+                if (data == null || data.length == 0) {
                     raf.setLength(0);
                 } else {
-                    raf.write(hash, 0, hash.length);
+                    raf.write(data, 0, data.length);
                 }
                 raf.close();
-                fsyncDirectory((new File(name)).getAbsoluteFile().getParentFile());
+                fsyncDirectory(path.getParentFile());
             } catch (IOException e) {
                 Slog.e(TAG, "Error writing to file " + e);
             } finally {
@@ -380,74 +336,66 @@ class LockSettingsStorage extends WatchableImpl {
                     }
                 }
             }
-            mCache.putFile(name, hash);
+            mCache.putFile(path, data);
             dispatchChange(this);
         }
     }
 
-    private void deleteFile(String name) {
-        if (DEBUG) Slog.e(TAG, "Delete file " + name);
+    private void deleteFile(File path) {
         synchronized (mFileWriteLock) {
-            File file = new File(name);
-            if (file.exists()) {
-                file.delete();
-                mCache.putFile(name, null);
+            if (path.exists()) {
+                // Zeroize the file to try to make its contents unrecoverable.  This is *not*
+                // guaranteed to be effective, and in fact it usually isn't, but it doesn't hurt.
+                try (RandomAccessFile raf = new RandomAccessFile(path, "rws")) {
+                    final int fileSize = (int) raf.length();
+                    raf.write(new byte[fileSize]);
+                } catch (Exception e) {
+                    Slog.w(TAG, "Failed to zeroize " + path, e);
+                }
+                path.delete();
+                dispatchChange(this);
+                mCache.putFile(path, null);
             }
-            dispatchChange(this);
         }
     }
 
     @VisibleForTesting
-    String getChildProfileLockFile(int userId) {
-        return getLockCredentialFilePathForUser(userId, CHILD_PROFILE_LOCK_FILE);
+    File getChildProfileLockFile(int userId) {
+        return getLockCredentialFileForUser(userId, CHILD_PROFILE_LOCK_FILE);
     }
 
     @VisibleForTesting
-    String getRebootEscrowFile(int userId) {
-        return getLockCredentialFilePathForUser(userId, REBOOT_ESCROW_FILE);
+    File getRebootEscrowFile(int userId) {
+        return getLockCredentialFileForUser(userId, REBOOT_ESCROW_FILE);
     }
 
     @VisibleForTesting
-    String getRebootEscrowServerBlob() {
+    File getRebootEscrowServerBlobFile() {
         // There is a single copy of server blob for all users.
-        return getLockCredentialFilePathForUser(UserHandle.USER_SYSTEM, REBOOT_ESCROW_SERVER_BLOB);
+        return getLockCredentialFileForUser(UserHandle.USER_SYSTEM, REBOOT_ESCROW_SERVER_BLOB_FILE);
     }
 
-    private String getLockCredentialFilePathForUser(int userId, String basename) {
-        String dataSystemDirectory = Environment.getDataDirectory().getAbsolutePath() +
-                        SYSTEM_DIRECTORY;
+    private File getLockCredentialFileForUser(int userId, String fileName) {
         if (userId == 0) {
-            // Leave it in the same place for user 0
-            return dataSystemDirectory + basename;
+            // The files for user 0 are stored directly in /data/system, since this is where they
+            // originally were, and they haven't been moved yet.
+            return new File(Environment.getDataSystemDirectory(), fileName);
         } else {
-            return new File(Environment.getUserSystemDirectory(userId), basename).getAbsolutePath();
+            return new File(Environment.getUserSystemDirectory(userId), fileName);
         }
     }
 
     public void writeSyntheticPasswordState(int userId, long handle, String name, byte[] data) {
         ensureSyntheticPasswordDirectoryForUser(userId);
-        writeFile(getSynthenticPasswordStateFilePathForUser(userId, handle, name), data);
+        writeFile(getSyntheticPasswordStateFileForUser(userId, handle, name), data);
     }
 
     public byte[] readSyntheticPasswordState(int userId, long handle, String name) {
-        return readFile(getSynthenticPasswordStateFilePathForUser(userId, handle, name));
+        return readFile(getSyntheticPasswordStateFileForUser(userId, handle, name));
     }
 
     public void deleteSyntheticPasswordState(int userId, long handle, String name) {
-        String path = getSynthenticPasswordStateFilePathForUser(userId, handle, name);
-        File file = new File(path);
-        if (file.exists()) {
-            try (RandomAccessFile raf = new RandomAccessFile(path, "rws")) {
-                final int fileSize = (int) raf.length();
-                raf.write(new byte[fileSize]);
-            } catch (Exception e) {
-                Slog.w(TAG, "Failed to zeroize " + path, e);
-            } finally {
-                file.delete();
-                dispatchChange(this);
-            }
-            mCache.putFile(path, null);
-        }
+        deleteFile(getSyntheticPasswordStateFileForUser(userId, handle, name));
     }
 
     public Map<Integer, List<Long>> listSyntheticPasswordHandlesForAllUsers(String stateName) {
@@ -481,7 +429,7 @@ class LockSettingsStorage extends WatchableImpl {
 
     @VisibleForTesting
     protected File getSyntheticPasswordDirectoryForUser(int userId) {
-        return new File(Environment.getDataSystemDeDirectory(userId) ,SYNTHETIC_PASSWORD_DIRECTORY);
+        return new File(Environment.getDataSystemDeDirectory(userId), SYNTHETIC_PASSWORD_DIRECTORY);
     }
 
     /** Ensure per-user directory for synthetic password state exists */
@@ -492,12 +440,9 @@ class LockSettingsStorage extends WatchableImpl {
         }
     }
 
-    @VisibleForTesting
-    protected String getSynthenticPasswordStateFilePathForUser(int userId, long handle,
-            String name) {
-        final File baseDir = getSyntheticPasswordDirectoryForUser(userId);
-        final String baseName = formatSimple("%016x.%s", handle, name);
-        return new File(baseDir, baseName).getAbsolutePath();
+    private File getSyntheticPasswordStateFileForUser(int userId, long handle, String name) {
+        String fileName = formatSimple("%016x.%s", handle, name);
+        return new File(getSyntheticPasswordDirectoryForUser(userId), fileName);
     }
 
     public void removeUser(int userId) {
@@ -523,7 +468,7 @@ class LockSettingsStorage extends WatchableImpl {
             // The directory itself will be deleted as part of user deletion operation by the
             // framework, so only need to purge cache here.
             //TODO: (b/34600579) invoke secdiscardable
-            mCache.purgePath(spStateDir.getAbsolutePath());
+            mCache.purgePath(spStateDir);
         } finally {
             db.endTransaction();
         }
@@ -704,7 +649,7 @@ class LockSettingsStorage extends WatchableImpl {
         final UserManager um = UserManager.get(mContext);
         for (UserInfo user : um.getUsers()) {
             File userPath = getSyntheticPasswordDirectoryForUser(user.id);
-            pw.println(String.format("User %d [%s]:", user.id, userPath.getAbsolutePath()));
+            pw.println(String.format("User %d [%s]:", user.id, userPath));
             pw.increaseIndent();
             File[] files = userPath.listFiles();
             if (files != null) {
@@ -817,20 +762,21 @@ class LockSettingsStorage extends WatchableImpl {
             remove(CacheKey.TYPE_KEY_VALUE, key, userId);
         }
 
-        byte[] peekFile(String fileName) {
-            return copyOf((byte[]) peek(CacheKey.TYPE_FILE, fileName, -1 /* userId */));
+        byte[] peekFile(File path) {
+            return copyOf((byte[]) peek(CacheKey.TYPE_FILE, path.toString(), -1 /* userId */));
         }
 
-        boolean hasFile(String fileName) {
-            return contains(CacheKey.TYPE_FILE, fileName, -1 /* userId */);
+        boolean hasFile(File path) {
+            return contains(CacheKey.TYPE_FILE, path.toString(), -1 /* userId */);
         }
 
-        void putFile(String key, byte[] value) {
-            put(CacheKey.TYPE_FILE, key, copyOf(value), -1 /* userId */);
+        void putFile(File path, byte[] data) {
+            put(CacheKey.TYPE_FILE, path.toString(), copyOf(data), -1 /* userId */);
         }
 
-        void putFileIfUnchanged(String key, byte[] value, int version) {
-            putIfUnchanged(CacheKey.TYPE_FILE, key, copyOf(value), -1 /* userId */, version);
+        void putFileIfUnchanged(File path, byte[] data, int version) {
+            putIfUnchanged(CacheKey.TYPE_FILE, path.toString(), copyOf(data), -1 /* userId */,
+                    version);
         }
 
         void setFetched(int userId) {
@@ -888,10 +834,11 @@ class LockSettingsStorage extends WatchableImpl {
             return data != null ? Arrays.copyOf(data, data.length) : null;
         }
 
-        synchronized void purgePath(String path) {
+        synchronized void purgePath(File path) {
+            final String pathStr = path.toString();
             for (int i = mCache.size() - 1; i >= 0; i--) {
                 CacheKey entry = mCache.keyAt(i);
-                if (entry.type == CacheKey.TYPE_FILE && entry.key.startsWith(path)) {
+                if (entry.type == CacheKey.TYPE_FILE && entry.key.startsWith(pathStr)) {
                     mCache.removeAt(i);
                 }
             }
