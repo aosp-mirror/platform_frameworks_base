@@ -577,12 +577,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-1521427940": {
-      "message": "commitVisibility: %s: visible=%b mVisibleRequested=%b",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "-1517908912": {
       "message": "requestScrollCapture: caught exception dispatching to window.token=%s",
       "level": "WARN",
@@ -1512,6 +1506,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
+    "-636553602": {
+      "message": "commitVisibility: %s: visible=%b visibleRequested=%b, isInTransition=%b, runningAnimation=%b, caller=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-635082269": {
       "message": "******** booted=%b msg=%b haveBoot=%b haveApp=%b haveWall=%b wallEnabled=%b haveKeyguard=%b",
