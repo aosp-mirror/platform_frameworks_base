@@ -491,10 +491,10 @@ public class BiometricService extends SystemService {
      * sensor arbitration, threading, etc.
      */
     private final class BiometricServiceWrapper extends IBiometricService.Stub {
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
                 @NonNull String opPackageName) throws RemoteException {
-            checkInternalPermission();
 
             for (BiometricSensor sensor : mSensors) {
                 if (sensor.id == sensorId) {
@@ -506,10 +506,10 @@ public class BiometricService extends SystemService {
             return null;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public List<SensorPropertiesInternal> getSensorProperties(String opPackageName)
                 throws RemoteException {
-            checkInternalPermission();
 
             final List<SensorPropertiesInternal> sensors = new ArrayList<>();
             for (BiometricSensor sensor : mSensors) {
@@ -523,17 +523,17 @@ public class BiometricService extends SystemService {
             return sensors;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public void onReadyForAuthentication(long requestId, int cookie) {
-            checkInternalPermission();
 
             mHandler.post(() -> handleOnReadyForAuthentication(requestId, cookie));
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public long authenticate(IBinder token, long operationId, int userId,
                 IBiometricServiceReceiver receiver, String opPackageName, PromptInfo promptInfo) {
-            checkInternalPermission();
 
             if (token == null || receiver == null || opPackageName == null || promptInfo == null) {
                 Slog.e(TAG, "Unable to authenticate, one or more null arguments");
@@ -561,9 +561,9 @@ public class BiometricService extends SystemService {
             return requestId;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public void cancelAuthentication(IBinder token, String opPackageName, long requestId) {
-            checkInternalPermission();
 
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = token;
@@ -573,10 +573,10 @@ public class BiometricService extends SystemService {
             mHandler.post(() -> handleCancelAuthentication(requestId));
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public int canAuthenticate(String opPackageName, int userId, int callingUserId,
                 @Authenticators.Types int authenticators) {
-            checkInternalPermission();
 
             Slog.d(TAG, "canAuthenticate: User=" + userId
                     + ", Caller=" + callingUserId
@@ -596,9 +596,9 @@ public class BiometricService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
         public boolean hasEnrolledBiometrics(int userId, String opPackageName) {
-            checkInternalPermission();
 
             try {
                 for (BiometricSensor sensor : mSensors) {
@@ -613,11 +613,11 @@ public class BiometricService extends SystemService {
             return false;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
         public synchronized void registerAuthenticator(int id, int modality,
                 @Authenticators.Types int strength,
                 @NonNull IBiometricAuthenticator authenticator) {
-            checkInternalPermission();
 
             Slog.d(TAG, "Registering ID: " + id
                     + " Modality: " + modality
@@ -660,10 +660,10 @@ public class BiometricService extends SystemService {
             mBiometricStrengthController.updateStrengths();
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public void registerEnabledOnKeyguardCallback(
                 IBiometricEnabledOnKeyguardCallback callback, int callingUserId) {
-            checkInternalPermission();
 
             mEnabledOnKeyguardCallbacks.add(new EnabledOnKeyguardCallback(callback));
             try {
@@ -674,17 +674,17 @@ public class BiometricService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public void invalidateAuthenticatorIds(int userId, int fromSensorId,
                 IInvalidationCallback callback) {
-            checkInternalPermission();
 
             InvalidationTracker.start(getContext(), mSensors, userId, fromSensorId, callback);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public long[] getAuthenticatorIds(int callingUserId) {
-            checkInternalPermission();
 
             final List<Long> authenticatorIds = new ArrayList<>();
             for (BiometricSensor sensor : mSensors) {
@@ -712,10 +712,10 @@ public class BiometricService extends SystemService {
             return result;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public void resetLockoutTimeBound(IBinder token, String opPackageName, int fromSensorId,
                 int userId, byte[] hardwareAuthToken) {
-            checkInternalPermission();
 
             // Check originating strength
             if (!Utils.isAtLeastStrength(getSensorForId(fromSensorId).getCurrentStrength(),
@@ -751,9 +751,9 @@ public class BiometricService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public int getCurrentStrength(int sensorId) {
-            checkInternalPermission();
 
             for (BiometricSensor sensor : mSensors) {
                 if (sensor.id == sensorId) {
@@ -764,6 +764,7 @@ public class BiometricService extends SystemService {
             return Authenticators.EMPTY_SET;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public int getCurrentModality(
                 String opPackageName,
@@ -771,7 +772,6 @@ public class BiometricService extends SystemService {
                 int callingUserId,
                 @Authenticators.Types int authenticators) {
 
-            checkInternalPermission();
 
             Slog.d(TAG, "getCurrentModality: User=" + userId
                     + ", Caller=" + callingUserId
@@ -791,9 +791,9 @@ public class BiometricService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public int getSupportedModalities(@Authenticators.Types int authenticators) {
-            checkInternalPermission();
 
             Slog.d(TAG, "getSupportedModalities: Authenticators=" + authenticators);
 

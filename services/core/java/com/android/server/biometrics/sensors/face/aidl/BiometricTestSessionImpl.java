@@ -138,26 +138,26 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         mRandom = new Random();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void setTestHalEnabled(boolean enabled) {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         mProvider.setTestHalEnabled(enabled);
         mSensor.setTestHalEnabled(enabled);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void startEnroll(int userId) {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         mProvider.scheduleEnroll(mSensorId, new Binder(), new byte[69], userId, mReceiver,
                 mContext.getOpPackageName(), new int[0] /* disabledFeatures */,
                 null /* previewSurface */, false /* debugConsent */);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void finishEnroll(int userId) {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         int nextRandomId = mRandom.nextInt();
         while (mEnrollmentIds.contains(nextRandomId)) {
@@ -169,9 +169,9 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
                 .onEnrollmentProgress(nextRandomId, 0 /* remaining */);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void acceptAuthentication(int userId)  {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         // Fake authentication with any of the existing faces
         List<Face> faces = FaceUtils.getInstance(mSensorId)
@@ -185,17 +185,17 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
                 HardwareAuthTokenUtils.toHardwareAuthToken(new byte[69]));
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void rejectAuthentication(int userId)  {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         mSensor.getSessionForUser(userId).getHalSessionCallback().onAuthenticationFailed();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     // TODO(b/178414967): replace with notifyAuthenticationFrame and notifyEnrollmentFrame.
     @Override
     public void notifyAcquired(int userId, int acquireInfo) {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         BaseFrame data = new BaseFrame();
         data.acquiredInfo = (byte) acquireInfo;
@@ -209,17 +209,17 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
                 authenticationFrame);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void notifyError(int userId, int errorCode)  {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         mSensor.getSessionForUser(userId).getHalSessionCallback().onError((byte) errorCode,
                 0 /* vendorCode */);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void cleanupInternalState(int userId)  {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         Slog.d(TAG, "cleanupInternalState: " + userId);
         mProvider.scheduleInternalCleanup(mSensorId, userId, new ClientMonitorCallback() {
