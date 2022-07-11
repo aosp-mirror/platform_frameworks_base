@@ -5045,12 +5045,9 @@ public class UserManagerService extends IUserManager.Stub {
                 Slog.w(LOG_TAG, "Unable to notify AppOpsService of removing user.", e);
             }
 
-            // TODO(b/142482943): Send some sort of broadcast for profiles even if non-managed?
-            if (userData.info.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
-                    && userData.info.isManagedProfile()) {
-                // Send broadcast to notify system that the user removed was a
-                // managed user.
-                sendProfileRemovedBroadcast(userData.info.profileGroupId, userData.info.id);
+            if (userData.info.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
+                sendProfileRemovedBroadcast(userData.info.profileGroupId, userData.info.id,
+                        userData.info.userType);
             }
 
             if (DBG) Slog.i(LOG_TAG, "Stopping user " + userId);
@@ -5277,11 +5274,43 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private void sendProfileRemovedBroadcast(int parentUserId, int removedUserId) {
+    /**
+     * Send {@link Intent#ACTION_PROFILE_REMOVED} broadcast when a user of type
+     * {@link UserInfo#isProfile()} is removed. Additionally sends
+     * {@link Intent#ACTION_MANAGED_PROFILE_REMOVED} broadcast if the profile is of type
+     * {@link UserManager#USER_TYPE_PROFILE_MANAGED}
+     *
+     * <p> {@link Intent#ACTION_PROFILE_REMOVED} is a generalized broadcast for all users of type
+     *     {@link UserInfo#isProfile()} and is sent only to dynamic receivers.
+     *
+     * <p> In contrast, the {@link Intent#ACTION_MANAGED_PROFILE_REMOVED} broadcast is specific to
+     *     {@link UserManager#USER_TYPE_PROFILE_MANAGED} and is sent to both manifest and dynamic
+     *     receivers thus it is still needed as manifest receivers will not be able to listen to
+     *     the aforementioned generalized broadcast.
+     */
+    private void sendProfileRemovedBroadcast(int parentUserId, int removedUserId, String userType) {
+        if (Objects.equals(userType, UserManager.USER_TYPE_PROFILE_MANAGED)) {
+            sendManagedProfileRemovedBroadcast(parentUserId, removedUserId);
+        }
+        sendProfileBroadcastToRegisteredReceivers(
+                new Intent(Intent.ACTION_PROFILE_REMOVED),
+                parentUserId, removedUserId);
+    }
+
+    private void sendProfileBroadcastToRegisteredReceivers(Intent intent,
+            int parentUserId, int userId) {
+        final UserHandle parentHandle = UserHandle.of(parentUserId);
+        intent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId));
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                | Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(intent, parentHandle, /* receiverPermission= */null);
+    }
+
+    private void sendManagedProfileRemovedBroadcast(int parentUserId, int removedUserId) {
         Intent managedProfileIntent = new Intent(Intent.ACTION_MANAGED_PROFILE_REMOVED);
         managedProfileIntent.putExtra(Intent.EXTRA_USER, new UserHandle(removedUserId));
         managedProfileIntent.putExtra(Intent.EXTRA_USER_HANDLE, removedUserId);
-        final UserHandle parentHandle = new UserHandle(parentUserId);
+        final UserHandle parentHandle = UserHandle.of(parentUserId);
         getDevicePolicyManagerInternal().broadcastIntentToManifestReceivers(
                 managedProfileIntent, parentHandle, /* requiresPermission= */ false);
         managedProfileIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
