@@ -17848,6 +17848,47 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
+     * Set an app's background restriction level.
+     * This interface is intended for the shell command to use.
+     */
+    void setBackgroundRestrictionLevel(String packageName, int uid, int userId,
+            @RestrictionLevel int level, int reason, int subReason) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != SYSTEM_UID && callingUid != ROOT_UID && callingUid != SHELL_UID) {
+            throw new SecurityException(
+                    "No permission to change app restriction level");
+        }
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            final int curBucket = mUsageStatsService.getAppStandbyBucket(packageName, userId,
+                    SystemClock.elapsedRealtime());
+            mAppRestrictionController.applyRestrictionLevel(packageName, uid, level,
+                    null /* trackerInfo */, curBucket, true /* allowUpdateBucket */,
+                    reason, subReason);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
+    /**
+     * Get an app's background restriction level.
+     * This interface is intended for the shell command to use.
+     */
+    @RestrictionLevel int getBackgroundRestrictionLevel(String packageName, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != SYSTEM_UID && callingUid != ROOT_UID && callingUid != SHELL_UID) {
+            throw new SecurityException(
+                    "Don't have permission to query app background restriction level");
+        }
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            return mInternal.getRestrictionLevel(packageName, userId);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
+    /**
      * Force the settings cache to be loaded
      */
     void refreshSettingsCache() {
