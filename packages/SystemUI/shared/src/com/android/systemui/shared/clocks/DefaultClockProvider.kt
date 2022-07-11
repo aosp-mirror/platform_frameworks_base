@@ -27,7 +27,6 @@ import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
 import com.android.systemui.plugins.ClockProvider
 import com.android.systemui.shared.R
-import com.android.systemui.shared.regionsampling.RegionDarkness
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
@@ -84,14 +83,11 @@ class DefaultClock(
         resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale_burmese)
     private val defaultLineSpacing = resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale)
 
-    private var smallRegionDarkness = RegionDarkness.DEFAULT
-    private var largeRegionDarkness = RegionDarkness.DEFAULT
-
-    private fun updateClockColor(clock: AnimatableClockView, isRegionDark: RegionDarkness) {
-        val color = if (isRegionDark.isDark) {
-            resources.getColor(android.R.color.system_accent2_100)
+    private fun updateClockColor(clock: AnimatableClockView, isRegionDark: Boolean) {
+        val color = if (isRegionDark) {
+            resources.getColor(android.R.color.system_accent1_100)
         } else {
-            resources.getColor(android.R.color.system_accent1_600)
+            resources.getColor(android.R.color.system_accent2_600)
         }
         clock.setColors(DOZE_COLOR, color)
         clock.animateAppearOnLockscreen()
@@ -120,8 +116,8 @@ class DefaultClock(
 
         override fun onColorPaletteChanged(
                 resources: Resources,
-                smallClockIsDark: RegionDarkness,
-                largeClockIsDark: RegionDarkness
+                smallClockIsDark: Boolean,
+                largeClockIsDark: Boolean
         ) {
             if (smallRegionDarkness != smallClockIsDark) {
                 smallRegionDarkness = smallClockIsDark
@@ -217,8 +213,8 @@ class DefaultClock(
         animations = DefaultClockAnimations(dozeFraction, foldFraction)
         events.onColorPaletteChanged(
                 resources,
-                RegionDarkness.DEFAULT,
-                RegionDarkness.DEFAULT
+                true,
+                true
         )
         events.onTimeTick()
     }
