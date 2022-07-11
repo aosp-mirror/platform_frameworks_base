@@ -209,8 +209,6 @@ class ActivityStarter {
     @VisibleForTesting
     ActivityRecord mMovedToTopActivity;
 
-    private ActivityInfo mNewTaskInfo;
-    private Intent mNewTaskIntent;
     private Task mSourceRootTask;
     private Task mTargetRootTask;
     // The task that the last activity was started into. We currently reset the actual start
@@ -621,8 +619,6 @@ class ActivityStarter {
         mInTaskFragment = starter.mInTaskFragment;
         mAddingToTask = starter.mAddingToTask;
 
-        mNewTaskInfo = starter.mNewTaskInfo;
-        mNewTaskIntent = starter.mNewTaskIntent;
         mSourceRootTask = starter.mSourceRootTask;
 
         mTargetTask = starter.mTargetTask;
@@ -1826,9 +1822,6 @@ class ActivityStarter {
                 voiceSession, voiceInteractor, restrictedBgActivity);
 
         computeLaunchingTaskFlags();
-
-        computeSourceRootTask();
-
         mIntent.setFlags(mLaunchFlags);
 
         boolean dreamStopping = false;
@@ -2479,8 +2472,6 @@ class ActivityStarter {
         mAddingToTaskFragment = null;
         mAddingToTask = false;
 
-        mNewTaskInfo = null;
-        mNewTaskIntent = null;
         mSourceRootTask = null;
 
         mTargetRootTask = null;
@@ -2514,6 +2505,7 @@ class ActivityStarter {
         mOptions = options;
         mCallingUid = r.launchedFromUid;
         mSourceRecord = sourceRecord;
+        mSourceRootTask = mSourceRecord != null ? mSourceRecord.getRootTask() : null;
         mVoiceSession = voiceSession;
         mVoiceInteractor = voiceInteractor;
         mRestrictedBgActivity = restrictedBgActivity;
@@ -2761,39 +2753,6 @@ class ActivityStarter {
         }
     }
 
-    private void computeSourceRootTask() {
-        if (mSourceRecord == null) {
-            mSourceRootTask = null;
-            return;
-        }
-        if (!mSourceRecord.finishing) {
-            mSourceRootTask = mSourceRecord.getRootTask();
-            return;
-        }
-
-        // If the source is finishing, we can't further count it as our source. This is because the
-        // task it is associated with may now be empty and on its way out, so we don't want to
-        // blindly throw it in to that task.  Instead we will take the NEW_TASK flow and try to find
-        // a task for it. But save the task information so it can be used when creating the new task.
-        if ((mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) == 0) {
-            Slog.w(TAG, "startActivity called from finishing " + mSourceRecord
-                    + "; forcing " + "Intent.FLAG_ACTIVITY_NEW_TASK for: " + mIntent);
-            mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
-
-            // It is not guaranteed that the source record will have a task associated with it.
-            // For example, if this method is being called for processing a pending activity
-            // launch, it is possible that the activity has been removed from the task after the
-            // launch was enqueued.
-            final Task sourceTask = mSourceRecord.getTask();
-            if (sourceTask == null || sourceTask.getTopNonFinishingActivity() == null) {
-                mNewTaskInfo = mSourceRecord.info;
-                mNewTaskIntent = sourceTask != null ? sourceTask.intent : null;
-            }
-        }
-        mSourceRecord = null;
-        mSourceRootTask = null;
-    }
-
     /**
      * Decide whether the new activity should be inserted into an existing task. Returns null
      * if not or an ActivityRecord with the task into which the new activity should be added.
@@ -2991,8 +2950,7 @@ class ActivityStarter {
     private void setNewTask(Task taskToAffiliate) {
         final boolean toTop = !mLaunchTaskBehind && !mAvoidMoveToFront;
         final Task task = mTargetRootTask.reuseOrCreateTask(
-                mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
-                mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
+                mStartActivity.info, mIntent, mVoiceSession,
                 mVoiceInteractor, toTop, mStartActivity, mSourceRecord, mOptions);
         task.mTransitionController.collectExistenceChange(task);
         addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask");
