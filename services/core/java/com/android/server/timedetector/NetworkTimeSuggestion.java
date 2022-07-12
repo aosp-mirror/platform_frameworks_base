@@ -118,7 +118,7 @@ public final class NetworkTimeSuggestion {
     public String toString() {
         return "NetworkTimeSuggestion{"
                 + "mUnixEpochTime=" + mUnixEpochTime
-                + "mUncertaintyMillis=" + mUncertaintyMillis
+                + ", mUncertaintyMillis=" + mUncertaintyMillis
                 + ", mDebugInfo=" + mDebugInfo
                 + '}';
     }
