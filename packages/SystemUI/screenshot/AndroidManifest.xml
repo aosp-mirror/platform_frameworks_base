@@ -23,6 +23,4 @@
             android:exported="true"
             android:theme="@style/Theme.SystemUI.Screenshot" />
     </application>
-
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
 </manifest>
