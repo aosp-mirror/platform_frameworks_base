@@ -15,6 +15,11 @@
  */
 package com.android.wm.shell.common.split;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+
 import android.annotation.IntDef;
 
 /** Helper utility class of methods and constants that are available to be imported in Launcher. */
@@ -44,4 +49,10 @@ public class SplitScreenConstants {
     })
     public @interface SplitPosition {
     }
+
+    public static final int[] CONTROLLED_ACTIVITY_TYPES = {ACTIVITY_TYPE_STANDARD};
+    public static final int[] CONTROLLED_WINDOWING_MODES =
+            {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED};
+    public static final int[] CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE =
+            {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED, WINDOWING_MODE_MULTI_WINDOW};
 }

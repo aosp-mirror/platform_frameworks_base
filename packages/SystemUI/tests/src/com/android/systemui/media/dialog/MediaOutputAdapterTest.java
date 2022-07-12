@@ -71,7 +71,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController, mMediaOutputDialog);
+        mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController);
         mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
                 .onCreateViewHolder(new LinearLayout(mContext), 0);
         mSpyMediaOutputSeekbar = spy(mViewHolder.mSeekBar);

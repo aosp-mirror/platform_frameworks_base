@@ -2721,7 +2721,8 @@ public class CentralSurfacesImpl extends CoreStartable implements
     @Override
     public void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
             boolean afterKeyguardGone) {
-        if (mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_ASLEEP
+        if (!action.willRunAnimationOnKeyguard()
+                && mWakefulnessLifecycle.getWakefulness() == WAKEFULNESS_ASLEEP
                 && mKeyguardStateController.canDismissLockScreen()
                 && !mStatusBarStateController.leaveOpenOnKeyguardHide()
                 && mDozeServiceHost.isPulsing()) {
