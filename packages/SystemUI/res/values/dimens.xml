@@ -1179,7 +1179,6 @@
     <item name="shutdown_scrim_behind_alpha" format="float" type="dimen">0.95</item>
 
     <!-- Output switcher panel related dimensions -->
-    <dimen name="media_output_dialog_list_margin">12dp</dimen>
     <dimen name="media_output_dialog_list_max_height">355dp</dimen>
     <dimen name="media_output_dialog_header_album_icon_size">72dp</dimen>
     <dimen name="media_output_dialog_header_back_icon_size">32dp</dimen>
