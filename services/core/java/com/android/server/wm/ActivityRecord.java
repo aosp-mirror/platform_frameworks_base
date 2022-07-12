@@ -224,6 +224,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WIND
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
+import static com.android.server.wm.WindowManagerService.sEnableShellTransitions;
 import static com.android.server.wm.WindowState.LEGACY_POLICY_VISIBILITY;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 
@@ -3149,15 +3150,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mWillCloseOrEnterPip = willCloseOrEnterPip;
     }
 
-    /**
-     * Returns whether this {@link ActivityRecord} is considered closing. Conditions are either
-     * 1. Is this app animating and was requested to be hidden
-     * 2. App is delayed closing since it might enter PIP.
-     */
-    boolean isClosingOrEnteringPip() {
-        return (isAnimating(TRANSITION | PARENTS, ANIMATION_TYPE_APP_TRANSITION)
-                && !mVisibleRequested) || mWillCloseOrEnterPip;
+    boolean willCloseOrEnterPip() {
+        return mWillCloseOrEnterPip;
     }
+
     /**
      * @return Whether AppOps allows this package to enter picture-in-picture.
      */
@@ -5272,12 +5268,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final int windowsCount = mChildren.size();
+        // With Shell-Transition, the activity will running a transition when it is visible.
+        // It won't be included when fromTransition is true means the call from finishTransition.
+        final boolean runningAnimation = sEnableShellTransitions ? visible
+                : isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION);
         for (int i = 0; i < windowsCount; i++) {
-            mChildren.get(i).onAppVisibilityChanged(visible, isAnimating(PARENTS,
-                    ANIMATION_TYPE_APP_TRANSITION));
+            mChildren.get(i).onAppVisibilityChanged(visible, runningAnimation);
         }
         setVisible(visible);
         setVisibleRequested(visible);
+        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "commitVisibility: %s: visible=%b"
+                        + " visibleRequested=%b, isInTransition=%b, runningAnimation=%b, caller=%s",
+                this, isVisible(), mVisibleRequested, isInTransition(), runningAnimation,
+                Debug.getCallers(5));
         if (!visible) {
             stopFreezingScreen(true, true);
         } else {
@@ -5300,9 +5303,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             task.dispatchTaskInfoChangedIfNeeded(false /* force */);
             task = task.getParent().asTask();
         }
-        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                "commitVisibility: %s: visible=%b mVisibleRequested=%b", this,
-                isVisible(), mVisibleRequested);
         final DisplayContent displayContent = getDisplayContent();
         displayContent.getInputMonitor().setUpdateInputWindowsNeededLw();
         if (performLayout) {

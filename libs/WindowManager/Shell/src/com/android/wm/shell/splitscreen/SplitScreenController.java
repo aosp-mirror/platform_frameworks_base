@@ -26,6 +26,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
@@ -64,6 +66,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.util.ArrayUtils;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -225,6 +228,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public boolean isTaskInSplitScreen(int taskId) {
         return isSplitScreenVisible()
                 && mStageCoordinator.getStageOfTask(taskId) != STAGE_TYPE_UNDEFINED;
+    }
+
+    public boolean isValidToEnterSplitScreen(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
+        return taskInfo.supportsMultiWindow
+                && ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType())
+                && ArrayUtils.contains(CONTROLLED_WINDOWING_MODES, taskInfo.getWindowingMode());
     }
 
     public @SplitPosition int getSplitPosition(int taskId) {
@@ -463,11 +472,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             return Objects.equals(launchingActivity, pairedActivity);
         }
 
-        if (mFocusingTaskInfo != null
-                // TODO (b/238032411): have an API to determine whether an activity is valid for
-                //  split screen or not.
-                && mFocusingTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                && mFocusingTaskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD) {
+        if (mFocusingTaskInfo != null && isValidToEnterSplitScreen(mFocusingTaskInfo)) {
             return Objects.equals(mFocusingTaskInfo.baseIntent.getComponent(), launchingActivity);
         }
 

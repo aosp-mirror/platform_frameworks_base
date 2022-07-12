@@ -1588,6 +1588,11 @@ public class LockSettingsService extends ILockSettings.Stub {
             return;
         }
 
+        // Don't send empty credentials on unlock.
+        if (credential.isNone()) {
+            return;
+        }
+
         // A profile with a unified lock screen stores a randomly generated credential, so skip it.
         // Its parent will send credentials for the profile, as it stores the unified lock
         // credential.
@@ -1595,12 +1600,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             return;
         }
 
-        // RecoverableKeyStoreManager expects null for empty credential.
-        final byte[] secret = credential.isNone() ? null : credential.getCredential();
         // Send credentials for the user and any child profiles that share its lock screen.
         for (int profileId : getProfilesWithSameLockScreen(userId)) {
             mRecoverableKeyStoreManager.lockScreenSecretAvailable(
-                    credential.getType(), secret, profileId);
+                    credential.getType(), credential.getCredential(), profileId);
         }
     }
 

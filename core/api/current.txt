@@ -51083,6 +51083,7 @@ package android.view {
     method public void addOnTouchModeChangeListener(android.view.ViewTreeObserver.OnTouchModeChangeListener);
     method public void addOnWindowAttachListener(android.view.ViewTreeObserver.OnWindowAttachListener);
     method public void addOnWindowFocusChangeListener(android.view.ViewTreeObserver.OnWindowFocusChangeListener);
+    method public void addOnWindowVisibilityChangeListener(@NonNull android.view.ViewTreeObserver.OnWindowVisibilityChangeListener);
     method public void dispatchOnDraw();
     method public void dispatchOnGlobalLayout();
     method public boolean dispatchOnPreDraw();
@@ -51098,6 +51099,7 @@ package android.view {
     method public void removeOnTouchModeChangeListener(android.view.ViewTreeObserver.OnTouchModeChangeListener);
     method public void removeOnWindowAttachListener(android.view.ViewTreeObserver.OnWindowAttachListener);
     method public void removeOnWindowFocusChangeListener(android.view.ViewTreeObserver.OnWindowFocusChangeListener);
+    method public void removeOnWindowVisibilityChangeListener(@NonNull android.view.ViewTreeObserver.OnWindowVisibilityChangeListener);
     method public boolean unregisterFrameCommitCallback(@NonNull Runnable);
   }
 
@@ -51132,6 +51134,10 @@ package android.view {
 
   public static interface ViewTreeObserver.OnWindowFocusChangeListener {
     method public void onWindowFocusChanged(boolean);
+  }
+
+  public static interface ViewTreeObserver.OnWindowVisibilityChangeListener {
+    method public void onWindowVisibilityChanged(int);
   }
 
   public abstract class Window {

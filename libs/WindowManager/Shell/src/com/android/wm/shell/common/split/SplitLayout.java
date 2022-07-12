@@ -487,13 +487,25 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private DividerSnapAlgorithm getSnapAlgorithm(Context context, Rect rootBounds,
             @Nullable Rect stableInsets) {
         final boolean isLandscape = isLandscape(rootBounds);
+        final Rect insets = stableInsets != null ? stableInsets : getDisplayInsets(context);
+
+        // Make split axis insets value same as the larger one to avoid bounds1 and bounds2
+        // have difference after split switching for solving issues on non-resizable app case.
+        if (isLandscape) {
+            final int largerInsets = Math.max(insets.left, insets.right);
+            insets.set(largerInsets, insets.top, largerInsets, insets.bottom);
+        } else {
+            final int largerInsets = Math.max(insets.top, insets.bottom);
+            insets.set(insets.left, largerInsets, insets.right, largerInsets);
+        }
+
         return new DividerSnapAlgorithm(
                 context.getResources(),
                 rootBounds.width(),
                 rootBounds.height(),
                 mDividerSize,
                 !isLandscape,
-                stableInsets != null ? stableInsets : getDisplayInsets(context),
+                insets,
                 isLandscape ? DOCKED_LEFT : DOCKED_TOP /* dockSide */);
     }
 

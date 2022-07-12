@@ -42,7 +42,7 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
             MediaOutputController mediaOutputController, UiEventLogger uiEventLogger) {
         super(context, broadcastSender, mediaOutputController);
         mUiEventLogger = uiEventLogger;
-        mAdapter = new MediaOutputAdapter(mMediaOutputController, this);
+        mAdapter = new MediaOutputAdapter(mMediaOutputController);
         if (!aboveStatusbar) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         }
