@@ -6532,6 +6532,12 @@
     <permission android:name="android.permission.MAKE_UID_VISIBLE"
                 android:protectionLevel="signature" />
 
+    <!-- Limits the system as the only handler of the QUERY_PACKAGE_RESTART broadcast
+         @hide -->
+    <permission android:name="android.permission.HANDLE_QUERY_PACKAGE_RESTART"
+                android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.HANDLE_QUERY_PACKAGE_RESTART" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
