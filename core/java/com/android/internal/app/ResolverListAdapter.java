@@ -950,7 +950,7 @@ public class ResolverListAdapter extends BaseAdapter {
         protected void onPostExecute(Drawable d) {
             if (getOtherProfile() == mDisplayResolveInfo) {
                 mResolverListCommunicator.updateProfileViewButton();
-            } else {
+            } else if (!mDisplayResolveInfo.hasDisplayIcon()) {
                 mDisplayResolveInfo.setDisplayIcon(d);
                 mHolder.bindIcon(mDisplayResolveInfo);
                 // Notify in case view is already bound to resolve the race conditions on
