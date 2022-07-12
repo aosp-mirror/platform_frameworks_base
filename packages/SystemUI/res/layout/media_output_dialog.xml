@@ -42,12 +42,35 @@
             android:layout_height="wrap_content"
             android:paddingStart="12dp"
             android:orientation="vertical">
-            <ImageView
-                android:id="@+id/app_source_icon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:importantForAccessibility="no"/>
+                android:orientation="horizontal">
+                <ImageView
+                    android:id="@+id/app_source_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:gravity="center_vertical"
+                    android:importantForAccessibility="no"/>
+
+                <Space
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"/>
+
+                <ImageView
+                    android:id="@+id/broadcast_icon"
+                    android:src="@drawable/settings_input_antenna"
+                    android:contentDescription="@string/broadcasting_description_is_broadcasting"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:padding="12dp"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="gone"/>
+            </LinearLayout>
             <TextView
                 android:id="@+id/header_title"
                 android:layout_width="wrap_content"
