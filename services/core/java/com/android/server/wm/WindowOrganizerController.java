@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.isStartResultSuccessful;
+import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
@@ -43,6 +44,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANI
 import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
+import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -56,6 +58,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
@@ -115,7 +118,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     static final int CONTROLLABLE_CONFIGS = ActivityInfo.CONFIG_WINDOW_CONFIGURATION
             | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE | ActivityInfo.CONFIG_SCREEN_SIZE
             | ActivityInfo.CONFIG_LAYOUT_DIRECTION;
-    static final int CONTROLLABLE_WINDOW_CONFIGS = WindowConfiguration.WINDOW_CONFIG_BOUNDS
+    static final int CONTROLLABLE_WINDOW_CONFIGS = WINDOW_CONFIG_BOUNDS
             | WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
 
     private final ActivityTaskManagerService mService;
@@ -421,7 +424,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     }
                 }
 
-                int containerEffect = applyWindowContainerChange(wc, entry.getValue());
+                int containerEffect = applyWindowContainerChange(wc, entry.getValue(),
+                        t.getErrorCallbackToken());
                 effects |= containerEffect;
 
                 // Lifecycle changes will trigger ensureConfig for everything.
@@ -503,7 +507,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
-    private int applyChanges(WindowContainer container, WindowContainerTransaction.Change change) {
+    private int applyChanges(WindowContainer<?> container,
+            WindowContainerTransaction.Change change, @Nullable IBinder errorCallbackToken) {
         // The "client"-facing API should prevent bad changes; however, just in case, sanitize
         // masks here.
         final int configMask = change.getConfigSetMask() & CONTROLLABLE_CONFIGS;
@@ -511,6 +516,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         int effects = 0;
         final int windowingMode = change.getWindowingMode();
         if (configMask != 0) {
+
+            adjustBoundsForMinDimensionsIfNeeded(container, change, errorCallbackToken);
+
             if (windowingMode > -1 && windowingMode != container.getWindowingMode()) {
                 // Special handling for when we are setting a windowingMode in the same transaction.
                 // Setting the windowingMode is going to call onConfigurationChanged so we don't
@@ -554,6 +562,26 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
         return effects;
+    }
+
+    private void adjustBoundsForMinDimensionsIfNeeded(WindowContainer<?> container,
+            WindowContainerTransaction.Change change, @Nullable IBinder errorCallbackToken) {
+        final TaskFragment taskFragment = container.asTaskFragment();
+        if (taskFragment == null || !taskFragment.isEmbedded()) {
+            return;
+        }
+        if ((change.getWindowSetMask() & WINDOW_CONFIG_BOUNDS) == 0) {
+            return;
+        }
+        final WindowConfiguration winConfig = change.getConfiguration().windowConfiguration;
+        final Rect bounds = winConfig.getBounds();
+        final Point minDimensions = taskFragment.calculateMinDimension();
+        if (bounds.width() < minDimensions.x || bounds.height() < minDimensions.y) {
+            sendMinimumDimensionViolation(taskFragment, minDimensions, errorCallbackToken,
+                    "setBounds:" + bounds);
+            // Sets the bounds to match parent bounds.
+            winConfig.setBounds(new Rect());
+        }
     }
 
     private int applyTaskChanges(Task tr, WindowContainerTransaction.Change c) {
@@ -696,7 +724,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final Bundle activityOptions = hop.getLaunchOptions();
                 final int result = mService.getActivityStartController()
                         .startActivityInTaskFragment(tf, activityIntent, activityOptions,
-                                hop.getCallingActivity(), caller.mUid, caller.mPid);
+                                hop.getCallingActivity(), caller.mUid, caller.mPid,
+                                errorCallbackToken);
                 if (!isStartResultSuccessful(result)) {
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken,
                             convertStartFailureToThrowable(result, activityIntent));
@@ -728,7 +757,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                     break;
                 }
-                if (!parent.isAllowedToEmbedActivity(activity)) {
+                if (parent.isAllowedToEmbedActivity(activity) != EMBEDDING_ALLOWED) {
                     final Throwable exception = new SecurityException(
                             "The task fragment is not trusted to embed the given activity.");
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
@@ -740,6 +769,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                     break;
                 }
+                if (parent.smallerThanMinDimension(activity)) {
+                    sendMinimumDimensionViolation(parent, activity.getMinDimensions(),
+                            errorCallbackToken, "reparentActivityToTask");
+                    break;
+                }
+
                 activity.reparent(parent, POSITION_TOP);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
@@ -953,6 +988,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return effects;
     }
 
+    /** A helper method to send minimum dimension violation error to the client. */
+    private void sendMinimumDimensionViolation(TaskFragment taskFragment, Point minDimensions,
+            IBinder errorCallbackToken, String reason) {
+        if (taskFragment == null || taskFragment.getTaskFragmentOrganizer() == null) {
+            return;
+        }
+        final Throwable exception = new SecurityException("The task fragment's bounds:"
+                + taskFragment.getBounds() + " does not satisfy minimum dimensions:"
+                + minDimensions + " " + reason);
+        sendTaskFragmentOperationFailure(taskFragment.getTaskFragmentOrganizer(),
+                errorCallbackToken, exception);
+    }
+
     /**
      * Post and wait for the result of the activity start to prevent potential deadlock against
      * {@link WindowManagerGlobalLock}.
@@ -1164,14 +1212,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int applyWindowContainerChange(WindowContainer wc,
-            WindowContainerTransaction.Change c) {
+            WindowContainerTransaction.Change c, @Nullable IBinder errorCallbackToken) {
         sanitizeWindowContainer(wc);
         if (wc.asTaskFragment() != null && wc.asTaskFragment().isEmbeddedTaskFragmentInPip()) {
             // No override from organizer for embedded TaskFragment in a PIP Task.
             return 0;
         }
 
-        int effects = applyChanges(wc, c);
+        int effects = applyChanges(wc, c, errorCallbackToken);
 
         if (wc instanceof DisplayArea) {
             effects |= applyDisplayAreaChanges(wc.asDisplayArea(), c);
@@ -1515,8 +1563,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         mLaunchTaskFragments.put(creationParams.getFragmentToken(), taskFragment);
     }
 
-    void reparentTaskFragment(@NonNull TaskFragment oldParent, @Nullable WindowContainer newParent,
-            @Nullable ITaskFragmentOrganizer organizer, @Nullable IBinder errorCallbackToken) {
+    void reparentTaskFragment(@NonNull TaskFragment oldParent,
+            @Nullable WindowContainer<?> newParent, @Nullable ITaskFragmentOrganizer organizer,
+            @Nullable IBinder errorCallbackToken) {
         final TaskFragment newParentTF;
         if (newParent == null) {
             // Use the old parent's parent if the caller doesn't specify the new parent.
@@ -1534,7 +1583,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             // We are reparenting activities to a new embedded TaskFragment, this operation is only
             // allowed if the new parent is trusted by all reparent activities.
             final boolean isEmbeddingDisallowed = oldParent.forAllActivities(activity ->
-                    !newParentTF.isAllowedToEmbedActivity(activity));
+                    newParentTF.isAllowedToEmbedActivity(activity) == EMBEDDING_ALLOWED);
             if (isEmbeddingDisallowed) {
                 final Throwable exception = new SecurityException(
                         "The new parent is not trusted to embed the activities.");
@@ -1552,6 +1601,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             final Throwable exception = new SecurityException(
                     "The new parent is not in the same Task as the old parent.");
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+            return;
+        }
+        final Point minDimensions = oldParent.calculateMinDimension();
+        final Rect newParentBounds = newParentTF.getBounds();
+        if (newParentBounds.width() < minDimensions.x
+                || newParentBounds.height() < minDimensions.y) {
+            sendMinimumDimensionViolation(newParentTF, minDimensions, errorCallbackToken,
+                    "reparentTaskFragment");
             return;
         }
         while (oldParent.hasChild()) {

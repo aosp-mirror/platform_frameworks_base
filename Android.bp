@@ -305,6 +305,7 @@ java_defaults {
         "contacts-provider-platform-compat-config",
     ],
     libs: [
+        "androidx.annotation_annotation",
         "app-compat-annotations",
         "ext",
         "framework-updatable-stubs-module_libs_api",
@@ -325,6 +326,7 @@ java_defaults {
         "soundtrigger_middleware-aidl-java",
         "modules-utils-build",
         "modules-utils-preconditions",
+        "modules-utils-statemachine",
         "modules-utils-synchronous-result-receiver",
         "modules-utils-os",
         "modules-utils-uieventlogger-interface",

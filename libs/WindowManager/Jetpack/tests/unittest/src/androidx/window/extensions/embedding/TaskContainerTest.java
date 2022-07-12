@@ -22,6 +22,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUNDS;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -53,9 +56,6 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TaskContainerTest {
-    private static final int TASK_ID = 10;
-    private static final Rect TASK_BOUNDS = new Rect(0, 0, 600, 1200);
-
     @Mock
     private SplitController mController;
 

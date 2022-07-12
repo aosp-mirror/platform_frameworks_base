@@ -294,8 +294,17 @@ public class TaskStackChangeListeners {
                         Trace.beginSection("onTaskSnapshotChanged");
                         final TaskSnapshot snapshot = (TaskSnapshot) msg.obj;
                         final ThumbnailData thumbnail = new ThumbnailData(snapshot);
+                        boolean snapshotConsumed = false;
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onTaskSnapshotChanged(msg.arg1, thumbnail);
+                            boolean consumed = mTaskStackListeners.get(i).onTaskSnapshotChanged(
+                                    msg.arg1, thumbnail);
+                            snapshotConsumed |= consumed;
+                        }
+                        if (!snapshotConsumed) {
+                            thumbnail.recycleBitmap();
+                            if (snapshot.getHardwareBuffer() != null) {
+                                snapshot.getHardwareBuffer().close();
+                            }
                         }
                         Trace.endSection();
                         break;

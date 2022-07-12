@@ -275,9 +275,15 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
                 }
                 case ON_TASK_SNAPSHOT_CHANGED: {
                     Trace.beginSection("onTaskSnapshotChanged");
+                    final TaskSnapshot snapshot = (TaskSnapshot) msg.obj;
+                    boolean snapshotConsumed = false;
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onTaskSnapshotChanged(msg.arg1,
-                                (TaskSnapshot) msg.obj);
+                        boolean consumed = mTaskStackListeners.get(i).onTaskSnapshotChanged(
+                                msg.arg1, snapshot);
+                        snapshotConsumed |= consumed;
+                    }
+                    if (!snapshotConsumed && snapshot.getHardwareBuffer() != null) {
+                        snapshot.getHardwareBuffer().close();
                     }
                     Trace.endSection();
                     break;

@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Size;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
 
@@ -414,6 +415,11 @@ class TaskFragmentContainer {
         }
     }
 
+    @NonNull
+    Rect getLastRequestedBounds() {
+        return mLastRequestedBounds;
+    }
+
     /**
      * Checks if last requested windowing mode is equal to the provided value.
      */
@@ -437,6 +443,31 @@ class TaskFragmentContainer {
     @NonNull
     TaskContainer getTaskContainer() {
         return mTaskContainer;
+    }
+
+    @Nullable
+    Size getMinDimensions() {
+        if (mInfo == null) {
+            return null;
+        }
+        int maxMinWidth = mInfo.getMinimumWidth();
+        int maxMinHeight = mInfo.getMinimumHeight();
+        for (Activity activity : mPendingAppearedActivities) {
+            final Size minDimensions = SplitPresenter.getMinDimensions(activity);
+            if (minDimensions == null) {
+                continue;
+            }
+            maxMinWidth = Math.max(maxMinWidth, minDimensions.getWidth());
+            maxMinHeight = Math.max(maxMinHeight, minDimensions.getHeight());
+        }
+        if (mPendingAppearedIntent != null) {
+            final Size minDimensions = SplitPresenter.getMinDimensions(mPendingAppearedIntent);
+            if (minDimensions != null) {
+                maxMinWidth = Math.max(maxMinWidth, minDimensions.getWidth());
+                maxMinHeight = Math.max(maxMinHeight, minDimensions.getHeight());
+            }
+        }
+        return new Size(maxMinWidth, maxMinHeight);
     }
 
     @Override

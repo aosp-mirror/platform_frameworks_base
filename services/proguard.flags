@@ -68,6 +68,9 @@
 # TODO(b/210510433): Revisit and consider generating from frameworks/base/core/res/res/values/config.xml.
 -keep,allowoptimization,allowaccessmodification public class com.android.server.notification.** implements com.android.server.notification.NotificationSignalExtractor
 
+# OEM provided DisplayAreaPolicy.Provider defined in frameworks/base/core/res/res/values/config.xml.
+-keep,allowoptimization,allowaccessmodification class com.android.server.wm.** implements com.android.server.wm.DisplayAreaPolicy$Provider
+
 # JNI keep rules
 # TODO(b/210510433): Revisit and fix with @Keep, or consider auto-generating from
 # frameworks/base/services/core/jni/onload.cpp.

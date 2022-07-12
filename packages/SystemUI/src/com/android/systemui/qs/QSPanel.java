@@ -151,15 +151,17 @@ public class QSPanel extends LinearLayout implements Tunable {
         mHorizontalContentContainer.setClipChildren(true);
         mHorizontalContentContainer.setClipToPadding(false);
         // Don't clip on the top, that way, secondary pages tiles can animate up
+        // Clipping coordinates should be relative to this view, not absolute (parent coordinates)
         mHorizontalContentContainer.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                    if (left != oldLeft || right != oldRight || bottom != oldBottom) {
-                        mClippingRect.left = left;
-                        mClippingRect.right = right;
-                        mClippingRect.bottom = bottom;
+                    if ((right - left) != (oldRight - oldLeft)
+                            || ((bottom - top) != (oldBottom - oldTop))) {
+                        mClippingRect.right = right - left;
+                        mClippingRect.bottom = bottom - top;
                         mHorizontalContentContainer.setClipBounds(mClippingRect);
                     }
                 });
+        mClippingRect.left = 0;
         mClippingRect.top = -1000;
         mHorizontalContentContainer.setClipBounds(mClippingRect);
     }
@@ -360,11 +362,11 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected void updatePadding() {
         final Resources res = mContext.getResources();
         int paddingTop = res.getDimensionPixelSize(R.dimen.qs_panel_padding_top);
-        // Bottom padding only when there's a new footer with its height.
+        int paddingBottom = res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
         setPaddingRelative(getPaddingStart(),
                 paddingTop,
                 getPaddingEnd(),
-                getPaddingBottom());
+                paddingBottom);
     }
 
     void addOnConfigurationChangedListener(OnConfigurationChangedListener listener) {

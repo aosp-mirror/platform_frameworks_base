@@ -200,6 +200,7 @@ class NotificationsQSContainerController @Inject constructor(
                 containerPadding = bottomStableInsets
             } else {
                 containerPadding = 0
+                stackScrollMargin = bottomStableInsets + notificationsBottomMargin
             }
         }
         val qsContainerPadding = if (!(isQSCustomizing || isQSDetailShowing)) {

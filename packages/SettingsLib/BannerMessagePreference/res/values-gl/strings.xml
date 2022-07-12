@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_banner_message_dismiss" msgid="5272928723898304168">"Pechar"</string>
+    <string name="accessibility_banner_message_dismiss" msgid="5272928723898304168">"Ignorar"</string>
 </resources>

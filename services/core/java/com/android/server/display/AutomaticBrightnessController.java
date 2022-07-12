@@ -1057,7 +1057,17 @@ class AutomaticBrightnessController {
 
     public void recalculateSplines(boolean applyAdjustment, float[] adjustment) {
         mCurrentBrightnessMapper.recalculateSplines(applyAdjustment, adjustment);
-        updateAutoBrightness(true /*sendUpdate*/, false /*isManuallySet*/);
+
+        // If rbc is turned on, off or there is a change in strength, we want to reset the short
+        // term model. Since the nits range at which brightness now operates has changed due to
+        // RBC/strength change, any short term model based on the previous range should be
+        // invalidated.
+        resetShortTermModel();
+
+        // When rbc is turned on, we want to accommodate this change in the short term model.
+        if (applyAdjustment) {
+            setScreenBrightnessByUser(getAutomaticScreenBrightness());
+        }
     }
 
     private final class AutomaticBrightnessHandler extends Handler {

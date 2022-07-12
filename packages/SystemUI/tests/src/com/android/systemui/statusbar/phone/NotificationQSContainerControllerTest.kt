@@ -206,7 +206,9 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         given(taskbarVisible = false,
                 navigationMode = BUTTONS_NAVIGATION,
                 insets = windowInsets().withStableBottom())
-        then(expectedContainerPadding = 0, expectedQsPadding = STABLE_INSET_BOTTOM)
+        then(expectedContainerPadding = 0,
+                expectedNotificationsMargin = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN,
+                expectedQsPadding = STABLE_INSET_BOTTOM)
     }
 
     @Test

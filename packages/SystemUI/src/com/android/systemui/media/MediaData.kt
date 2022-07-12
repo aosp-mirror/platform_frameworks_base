@@ -216,4 +216,20 @@ data class MediaDeviceData
 
     /** Unique id for this device */
     val id: String? = null
-)
+) {
+    /**
+     * Check whether [MediaDeviceData] objects are equal in all fields except the icon. The icon
+     * is ignored because it can change by reference frequently depending on the device type's
+     * implementation, but this is not usually relevant unless other info has changed
+     */
+    fun equalsWithoutIcon(other: MediaDeviceData?): Boolean {
+        if (other == null) {
+            return false
+        }
+
+        return enabled == other.enabled &&
+            name == other.name &&
+            intent == other.intent &&
+            id == other.id
+    }
+}
