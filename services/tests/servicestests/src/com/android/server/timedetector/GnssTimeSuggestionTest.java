@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package android.app.timedetector;
+package com.android.server.timedetector;
 
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
-import static android.app.timezonedetector.ParcelableTestSupport.roundTripParcelable;
-import static android.app.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
+import static com.android.server.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -53,17 +51,6 @@ public class GnssTimeSuggestionTest {
         one.addDebugInfo("Debug info 1");
         two.addDebugInfo("Debug info 2");
         assertEquals(one, two);
-    }
-
-    @Test
-    public void testParcelable() {
-        GnssTimeSuggestion suggestion = new GnssTimeSuggestion(ARBITRARY_TIME);
-        assertRoundTripParcelable(suggestion);
-
-        // DebugInfo should also be stored (but is not checked by equals()
-        suggestion.addDebugInfo("This is debug info");
-        GnssTimeSuggestion rtSuggestion = roundTripParcelable(suggestion);
-        assertEquals(suggestion.getDebugInfo(), rtSuggestion.getDebugInfo());
     }
 
     @Test(expected = IllegalArgumentException.class)

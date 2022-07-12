@@ -111,12 +111,4 @@ public interface TimeDetector {
      */
     @RequiresPermission(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE)
     boolean suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
-
-    /**
-     * Suggests the time according to a gnss time source.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.SET_TIME)
-    void suggestGnssTime(GnssTimeSuggestion timeSuggestion);
 }

@@ -77,4 +77,20 @@ public class TimeDetectorInternalImplTest {
         TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
         return new NetworkTimeSuggestion(timeValue, 123);
     }
+
+    @Test
+    public void testSuggestGnssTime() throws Exception {
+        GnssTimeSuggestion gnssTimeSuggestion = createGnssTimeSuggestion();
+
+        mTimeDetectorInternal.suggestGnssTime(gnssTimeSuggestion);
+        mTestHandler.assertTotalMessagesEnqueued(1);
+
+        mTestHandler.waitForMessagesToBeProcessed();
+        mFakeTimeDetectorStrategy.verifySuggestGnssTimeCalled(gnssTimeSuggestion);
+    }
+
+    private static GnssTimeSuggestion createGnssTimeSuggestion() {
+        TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
+        return new GnssTimeSuggestion(timeValue);
+    }
 }
