@@ -23,6 +23,10 @@ import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
 import static android.app.WaitResult.launchStateToString;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
+import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_UNDEFINED;
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
+import static android.os.Process.INVALID_UID;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
@@ -350,6 +354,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSetBgAbusiveUids(pw);
                 case "list-bg-exemptions-config":
                     return runListBgExemptionsConfig(pw);
+                case "set-bg-restriction-level":
+                    return runSetBgRestrictionLevel(pw);
+                case "get-bg-restriction-level":
+                    return runGetBgRestrictionLevel(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -3374,6 +3382,79 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private @ActivityManager.RestrictionLevel int restrictionNameToLevel(String name) {
+        String lower = name.toLowerCase();
+        switch (lower) {
+            case "unrestricted":
+                return ActivityManager.RESTRICTION_LEVEL_UNRESTRICTED;
+            case "exempted":
+                return ActivityManager.RESTRICTION_LEVEL_EXEMPTED;
+            case "adaptive_bucket":
+                return ActivityManager.RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
+            case "restricted_bucket":
+                return ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
+            case "background_restricted":
+                return ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
+            case "hibernation":
+                return ActivityManager.RESTRICTION_LEVEL_HIBERNATION;
+            default:
+                return ActivityManager.RESTRICTION_LEVEL_UNKNOWN;
+        }
+    }
+
+    int runSetBgRestrictionLevel(PrintWriter pw) throws RemoteException {
+        int userId = UserHandle.USER_CURRENT;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        String packageName = getNextArgRequired();
+        final String value = getNextArgRequired();
+        final int level = restrictionNameToLevel(value);
+        if (level == ActivityManager.RESTRICTION_LEVEL_UNKNOWN) {
+            pw.println("Error: invalid restriction level");
+            return -1;
+        }
+
+        int uid = INVALID_UID;
+        try {
+            final PackageManager pm = mInternal.mContext.getPackageManager();
+            uid = pm.getPackageUidAsUser(packageName,
+                    PackageManager.PackageInfoFlags.of(MATCH_ANY_USER), userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            pw.println("Error: userId:" + userId + " package:" + packageName + " is not found");
+            return -1;
+        }
+        mInternal.setBackgroundRestrictionLevel(packageName, uid, userId, level,
+                REASON_MAIN_FORCED_BY_USER, REASON_SUB_FORCED_SYSTEM_FLAG_UNDEFINED);
+        return 0;
+    }
+
+    int runGetBgRestrictionLevel(PrintWriter pw) throws RemoteException {
+        int userId = UserHandle.USER_CURRENT;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        final String packageName = getNextArgRequired();
+        final @ActivityManager.RestrictionLevel int level =
+                mInternal.getBackgroundRestrictionLevel(packageName, userId);
+        pw.println(ActivityManager.restrictionLevelToName(level));
+        return 0;
+    }
+
     private Resources getResources(PrintWriter pw) throws RemoteException {
         // system resources does not contain all the device configuration, construct it manually.
         Configuration config = mInterface.getConfiguration();
@@ -3726,6 +3807,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("         Without arguments, it resets to the value defined by platform.");
             pw.println("  set-bg-abusive-uids [uid=percentage][,uid=percentage...]");
             pw.println("         Force setting the battery usage of the given UID.");
+            pw.println("  set-bg-restriction-level [--user <USER_ID>] <PACKAGE> unrestricted|exempted|adaptive_bucket|restricted_bucket|background_restricted|hibernation");
+            pw.println("         Set an app's background restriction level which in turn map to a app standby bucket.");
+            pw.println("  get-bg-restriction-level [--user <USER_ID>] <PACKAGE>");
+            pw.println("         Get an app's background restriction level.");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }
