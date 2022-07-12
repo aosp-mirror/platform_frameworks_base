@@ -263,6 +263,7 @@ TEST(IdmapTests, FabricatedOverlay) {
                   .SetOverlayable("TestResources")
                   .SetResourceValue("integer/int1", Res_value::TYPE_INT_DEC, 2U)
                   .SetResourceValue("string/str1", Res_value::TYPE_REFERENCE, 0x7f010000)
+                  .SetResourceValue("string/str2", Res_value::TYPE_STRING, "foobar")
                   .Build();
 
   ASSERT_TRUE(frro);
@@ -288,12 +289,19 @@ TEST(IdmapTests, FabricatedOverlay) {
   ASSERT_EQ(data->GetTargetEntries().size(), 0U);
   ASSERT_EQ(data->GetOverlayEntries().size(), 0U);
 
+  auto string_pool_data = data->GetStringPoolData();
+  auto string_pool = ResStringPool(string_pool_data.data(), string_pool_data.size(), false);
+
+
   const auto& target_inline_entries = data->GetTargetInlineEntries();
-  ASSERT_EQ(target_inline_entries.size(), 2U);
+  ASSERT_EQ(target_inline_entries.size(), 3U);
   ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[0], R::target::integer::int1,
                              Res_value::TYPE_INT_DEC, 2U);
   ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[1], R::target::string::str1,
                              Res_value::TYPE_REFERENCE, 0x7f010000);
+  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[2], R::target::string::str2,
+                             Res_value::TYPE_STRING,
+                             (uint32_t) (string_pool.indexOfString(u"foobar", 6)).value_or(-1));
 }
 
 TEST(IdmapTests, FailCreateIdmapInvalidName) {

@@ -46,6 +46,7 @@ TEST(FabricatedOverlayTests, SetResourceValue) {
           .SetResourceValue("com.example.target:integer/int1", Res_value::TYPE_INT_DEC, 1U)
           .SetResourceValue("com.example.target.split:integer/int2", Res_value::TYPE_INT_DEC, 2U)
           .SetResourceValue("string/int3", Res_value::TYPE_REFERENCE, 0x7f010000)
+          .SetResourceValue("com.example.target:string/string1", Res_value::TYPE_STRING, "foobar")
           .Build();
   ASSERT_TRUE(overlay);
   auto container = FabricatedOverlayContainer::FromOverlay(std::move(*overlay));
@@ -59,8 +60,9 @@ TEST(FabricatedOverlayTests, SetResourceValue) {
 
   auto pairs = container->GetOverlayData(*info);
   ASSERT_TRUE(pairs);
-  EXPECT_FALSE(pairs->string_pool_data.has_value());
-  ASSERT_EQ(3U, pairs->pairs.size());
+  ASSERT_EQ(4U, pairs->pairs.size());
+  auto string_pool = ResStringPool(pairs->string_pool_data->data.get(),
+                                        pairs->string_pool_data->data_length, false);
 
   auto& it = pairs->pairs[0];
   ASSERT_EQ("com.example.target:integer/int1", it.resource_name);
@@ -77,6 +79,13 @@ TEST(FabricatedOverlayTests, SetResourceValue) {
   ASSERT_EQ(Res_value::TYPE_REFERENCE, entry->data_type);
 
   it = pairs->pairs[2];
+  ASSERT_EQ("com.example.target:string/string1", it.resource_name);
+  entry = std::get_if<TargetValue>(&it.value);
+  ASSERT_NE(nullptr, entry);
+  ASSERT_EQ(Res_value::TYPE_STRING, entry->data_type);
+  ASSERT_EQ(std::string("foobar"), string_pool.string8At(entry->data_value).value_or(""));
+
+  it = pairs->pairs[3];
   ASSERT_EQ("com.example.target.split:integer/int2", it.resource_name);
   entry = std::get_if<TargetValue>(&it.value);
   ASSERT_NE(nullptr, entry);
@@ -104,6 +113,7 @@ TEST(FabricatedOverlayTests, SerializeAndDeserialize) {
       FabricatedOverlay::Builder("com.example.overlay", "SandTheme", "com.example.target")
           .SetOverlayable("TestResources")
           .SetResourceValue("com.example.target:integer/int1", Res_value::TYPE_INT_DEC, 1U)
+          .SetResourceValue("com.example.target:string/string1", Res_value::TYPE_STRING, "foobar")
           .Build();
   ASSERT_TRUE(overlay);
   TemporaryFile tf;
@@ -126,7 +136,9 @@ TEST(FabricatedOverlayTests, SerializeAndDeserialize) {
 
   auto pairs = (*container)->GetOverlayData(*info);
   ASSERT_TRUE(pairs) << pairs.GetErrorMessage();
-  EXPECT_EQ(1U, pairs->pairs.size());
+  EXPECT_EQ(2U, pairs->pairs.size());
+  auto string_pool = ResStringPool(pairs->string_pool_data->data.get(),
+                                        pairs->string_pool_data->data_length, false);
 
   auto& it = pairs->pairs[0];
   ASSERT_EQ("com.example.target:integer/int1", it.resource_name);
@@ -134,6 +146,13 @@ TEST(FabricatedOverlayTests, SerializeAndDeserialize) {
   ASSERT_NE(nullptr, entry);
   EXPECT_EQ(1U, entry->data_value);
   EXPECT_EQ(Res_value::TYPE_INT_DEC, entry->data_type);
+
+  it = pairs->pairs[1];
+  ASSERT_EQ("com.example.target:string/string1", it.resource_name);
+  entry = std::get_if<TargetValue>(&it.value);
+  ASSERT_NE(nullptr, entry);
+  ASSERT_EQ(Res_value::TYPE_STRING, entry->data_type);
+  ASSERT_EQ(std::string("foobar"), string_pool.string8At(entry->data_value).value_or(""));
 }
 
 }  // namespace android::idmap2

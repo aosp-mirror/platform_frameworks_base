@@ -17,8 +17,9 @@
 #include "idmap2/FabricatedOverlay.h"
 
 #include <androidfw/ResourceUtils.h>
+#include <androidfw/StringPool.h>
 #include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <utils/ByteOrder.h>
 #include <zlib.h>
 
@@ -29,6 +30,8 @@
 #include <utility>
 
 namespace android::idmap2 {
+
+constexpr auto kBufferSize = 1024;
 
 namespace {
 bool Read32(std::istream& stream, uint32_t* out) {
@@ -47,8 +50,11 @@ void Write32(std::ostream& stream, uint32_t value) {
 }  // namespace
 
 FabricatedOverlay::FabricatedOverlay(pb::FabricatedOverlay&& overlay,
+                                     std::string&& string_pool_data,
                                      std::optional<uint32_t> crc_from_disk)
-    : overlay_pb_(std::forward<pb::FabricatedOverlay>(overlay)), crc_from_disk_(crc_from_disk) {
+    : overlay_pb_(std::forward<pb::FabricatedOverlay>(overlay)),
+    string_pool_data_(std::move(string_pool_data)),
+    crc_from_disk_(crc_from_disk) {
 }
 
 FabricatedOverlay::Builder::Builder(const std::string& package_name, const std::string& name,
@@ -76,7 +82,11 @@ FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetResourceValue(
 }
 
 Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
-  std::map<std::string, std::map<std::string, std::map<std::string, TargetValue>>> entries;
+  using EntryMap = std::map<std::string, TargetValue>;
+  using TypeMap = std::map<std::string, EntryMap>;
+  using PackageMap = std::map<std::string, TypeMap>;
+  PackageMap package_map;
+  android::StringPool string_pool;
   for (const auto& res_entry : entries_) {
     StringPiece package_substr;
     StringPiece type_name;
@@ -96,11 +106,10 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
       return Error("resource name '%s' missing entry name", res_entry.resource_name.c_str());
     }
 
-    auto package = entries.find(package_name);
-    if (package == entries.end()) {
-      package = entries
-                    .insert(std::make_pair(
-                        package_name, std::map<std::string, std::map<std::string, TargetValue>>()))
+    auto package = package_map.find(package_name);
+    if (package == package_map.end()) {
+      package = package_map
+                    .insert(std::make_pair(package_name, TypeMap()))
                     .first;
     }
 
@@ -108,7 +117,7 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
     if (type == package->second.end()) {
       type =
           package->second
-              .insert(std::make_pair(type_name.to_string(), std::map<std::string, TargetValue>()))
+              .insert(std::make_pair(type_name.to_string(), EntryMap()))
               .first;
     }
 
@@ -127,25 +136,32 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
   overlay_pb.set_target_package_name(target_package_name_);
   overlay_pb.set_target_overlayable(target_overlayable_);
 
-  for (const auto& package : entries) {
+  for (auto& package : package_map) {
     auto package_pb = overlay_pb.add_packages();
     package_pb->set_name(package.first);
 
-    for (const auto& type : package.second) {
+    for (auto& type : package.second) {
       auto type_pb = package_pb->add_types();
       type_pb->set_name(type.first);
 
-      for (const auto& entry : type.second) {
+      for (auto& entry : type.second) {
         auto entry_pb = type_pb->add_entries();
         entry_pb->set_name(entry.first);
         pb::ResourceValue* value = entry_pb->mutable_res_value();
         value->set_data_type(entry.second.data_type);
-        value->set_data_value(entry.second.data_value);
+        if (entry.second.data_type == Res_value::TYPE_STRING) {
+          auto ref = string_pool.MakeRef(entry.second.data_string_value);
+          value->set_data_value(ref.index());
+        } else {
+          value->set_data_value(entry.second.data_value);
+        }
       }
     }
   }
 
-  return FabricatedOverlay(std::move(overlay_pb));
+  android::BigBuffer string_buffer(kBufferSize);
+  android::StringPool::FlattenUtf8(&string_buffer, string_pool, nullptr);
+  return FabricatedOverlay(std::move(overlay_pb), string_buffer.to_string());
 }
 
 Result<FabricatedOverlay> FabricatedOverlay::FromBinaryStream(std::istream& stream) {
@@ -163,48 +179,67 @@ Result<FabricatedOverlay> FabricatedOverlay::FromBinaryStream(std::istream& stre
     return Error("Failed to read fabricated overlay version.");
   }
 
-  if (version != 1) {
+  if (version != 1 && version != 2) {
     return Error("Invalid fabricated overlay version '%u'.", version);
   }
 
   uint32_t crc;
   if (!Read32(stream, &crc)) {
-    return Error("Failed to read fabricated overlay version.");
+    return Error("Failed to read fabricated overlay crc.");
   }
 
   pb::FabricatedOverlay overlay{};
-  if (!overlay.ParseFromIstream(&stream)) {
-    return Error("Failed read fabricated overlay proto.");
+  std::string sp_data;
+  if (version == 2) {
+    uint32_t sp_size;
+    if (!Read32(stream, &sp_size)) {
+      return Error("Failed read string pool size.");
+    }
+    std::string buf(sp_size, '\0');
+    if (!stream.read(buf.data(), sp_size)) {
+      return Error("Failed to read string pool.");
+    }
+    sp_data = buf;
+
+    if (!overlay.ParseFromIstream(&stream)) {
+      return Error("Failed read fabricated overlay proto.");
+    }
+  } else {
+    if (!overlay.ParseFromIstream(&stream)) {
+      return Error("Failed read fabricated overlay proto.");
+    }
   }
 
   // If the proto version is the latest version, then the contents of the proto must be the same
   // when the proto is re-serialized; otherwise, the crc must be calculated because migrating the
   // proto to the latest version will likely change the contents of the fabricated overlay.
-  return FabricatedOverlay(std::move(overlay), version == kFabricatedOverlayCurrentVersion
+  return FabricatedOverlay(std::move(overlay), std::move(sp_data),
+                           version == kFabricatedOverlayCurrentVersion
                                                    ? std::optional<uint32_t>(crc)
                                                    : std::nullopt);
 }
 
 Result<FabricatedOverlay::SerializedData*> FabricatedOverlay::InitializeData() const {
   if (!data_.has_value()) {
-    auto size = overlay_pb_.ByteSizeLong();
-    auto data = std::unique_ptr<uint8_t[]>(new uint8_t[size]);
+    auto pb_size = overlay_pb_.ByteSizeLong();
+    auto pb_data = std::unique_ptr<uint8_t[]>(new uint8_t[pb_size]);
 
     // Ensure serialization is deterministic
-    google::protobuf::io::ArrayOutputStream array_stream(data.get(), size);
+    google::protobuf::io::ArrayOutputStream array_stream(pb_data.get(), pb_size);
     google::protobuf::io::CodedOutputStream output_stream(&array_stream);
     output_stream.SetSerializationDeterministic(true);
     overlay_pb_.SerializeWithCachedSizes(&output_stream);
-    if (output_stream.HadError() || size != output_stream.ByteCount()) {
+    if (output_stream.HadError() || pb_size != output_stream.ByteCount()) {
       return Error("Failed to serialize fabricated overlay.");
     }
 
     // Calculate the crc using the proto data and the version.
-    uint32_t crc = crc32(0L, Z_NULL, 0);
-    crc = crc32(crc, reinterpret_cast<const uint8_t*>(&kFabricatedOverlayCurrentVersion),
+    uint32_t pb_crc = crc32(0L, Z_NULL, 0);
+    pb_crc = crc32(pb_crc, reinterpret_cast<const uint8_t*>(&kFabricatedOverlayCurrentVersion),
                 sizeof(uint32_t));
-    crc = crc32(crc, data.get(), size);
-    data_ = SerializedData{std::move(data), size, crc};
+    pb_crc = crc32(pb_crc, pb_data.get(), pb_size);
+
+    data_ = SerializedData{std::move(pb_data), pb_size, pb_crc, string_pool_data_};
   }
   return &(*data_);
 }
@@ -216,7 +251,7 @@ Result<uint32_t> FabricatedOverlay::GetCrc() const {
   if (!data) {
     return data.GetError();
   }
-  return (*data)->crc;
+  return (*data)->pb_crc;
 }
 
 Result<Unit> FabricatedOverlay::ToBinaryStream(std::ostream& stream) const {
@@ -227,8 +262,13 @@ Result<Unit> FabricatedOverlay::ToBinaryStream(std::ostream& stream) const {
 
   Write32(stream, kFabricatedOverlayMagic);
   Write32(stream, kFabricatedOverlayCurrentVersion);
-  Write32(stream, (*data)->crc);
-  stream.write(reinterpret_cast<const char*>((*data)->data.get()), (*data)->data_size);
+  Write32(stream, (*data)->pb_crc);
+  Write32(stream, (*data)->sp_data.length());
+  stream.write((*data)->sp_data.data(), (*data)->sp_data.length());
+  if (stream.bad()) {
+    return Error("Failed to write string pool data.");
+  }
+  stream.write(reinterpret_cast<const char*>((*data)->pb_data.get()), (*data)->pb_data_size);
   if (stream.bad()) {
     return Error("Failed to write serialized fabricated overlay.");
   }
@@ -295,6 +335,14 @@ Result<OverlayData> FabContainer::GetOverlayData(const OverlayManifestInfo& info
       }
     }
   }
+  const uint32_t string_pool_data_length = overlay_.string_pool_data_.length();
+  result.string_pool_data = OverlayData::InlineStringPoolData{
+      .data = std::unique_ptr<uint8_t[]>(new uint8_t[string_pool_data_length]),
+      .data_length = string_pool_data_length,
+      .string_pool_offset = 0,
+  };
+  memcpy(result.string_pool_data->data.get(), overlay_.string_pool_data_.data(),
+       string_pool_data_length);
   return result;
 }
 

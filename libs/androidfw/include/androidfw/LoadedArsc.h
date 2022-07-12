@@ -314,6 +314,8 @@ class LoadedArsc {
                                           const LoadedIdmap* loaded_idmap = nullptr,
                                           package_property_t property_flags = 0U);
 
+  static std::unique_ptr<LoadedArsc> Load(const LoadedIdmap* loaded_idmap = nullptr);
+
   // Create an empty LoadedArsc. This is used when an APK has no resources.arsc.
   static std::unique_ptr<LoadedArsc> CreateEmpty();
 
@@ -338,6 +340,7 @@ class LoadedArsc {
   LoadedArsc() = default;
   bool LoadTable(
       const Chunk& chunk, const LoadedIdmap* loaded_idmap, package_property_t property_flags);
+  bool LoadStringPool(const LoadedIdmap* loaded_idmap);
 
   std::unique_ptr<ResStringPool> global_string_pool_ = util::make_unique<ResStringPool>();
   std::vector<std::unique_ptr<const LoadedPackage>> packages_;

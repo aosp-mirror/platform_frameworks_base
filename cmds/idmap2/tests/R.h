@@ -41,6 +41,7 @@ namespace R::target {
     constexpr ResourceId policy_system = 0x7f02000c;
     constexpr ResourceId policy_system_vendor = 0x7f02000d;
     constexpr ResourceId str1 = 0x7f02000e;
+    constexpr ResourceId str2 = 0x7f02000f;
     constexpr ResourceId str3 = 0x7f020010;
     constexpr ResourceId str4 = 0x7f020011;
   }  // namespace string

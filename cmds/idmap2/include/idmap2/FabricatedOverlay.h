@@ -66,18 +66,21 @@ struct FabricatedOverlay {
 
  private:
   struct SerializedData {
-    std::unique_ptr<uint8_t[]> data;
-    size_t data_size;
-    uint32_t crc;
-  };
+    std::unique_ptr<uint8_t[]> pb_data;
+    size_t pb_data_size;
+    uint32_t pb_crc;
+    std::string sp_data;
+   };
 
   Result<SerializedData*> InitializeData() const;
   Result<uint32_t> GetCrc() const;
 
   explicit FabricatedOverlay(pb::FabricatedOverlay&& overlay,
+                             std::string&& string_pool_data_,
                              std::optional<uint32_t> crc_from_disk = {});
 
   pb::FabricatedOverlay overlay_pb_;
+  std::string string_pool_data_;
   std::optional<uint32_t> crc_from_disk_;
   mutable std::optional<SerializedData> data_;
 

@@ -196,6 +196,7 @@ TEST(ResourceMappingTests, FabricatedOverlay) {
                   .SetOverlayable("TestResources")
                   .SetResourceValue("integer/int1", Res_value::TYPE_INT_DEC, 2U)
                   .SetResourceValue("string/str1", Res_value::TYPE_REFERENCE, 0x7f010000)
+                  .SetResourceValue("string/str2", Res_value::TYPE_STRING, "foobar")
                   .Build();
 
   ASSERT_TRUE(frro);
@@ -209,9 +210,14 @@ TEST(ResourceMappingTests, FabricatedOverlay) {
 
   ASSERT_TRUE(resources) << resources.GetErrorMessage();
   auto& res = *resources;
-  ASSERT_EQ(res.GetTargetToOverlayMap().size(), 2U);
+  auto string_pool_data = res.GetStringPoolData();
+  auto string_pool = ResStringPool(string_pool_data.data(), string_pool_data.size(), false);
+
+  ASSERT_EQ(res.GetTargetToOverlayMap().size(), 3U);
   ASSERT_EQ(res.GetOverlayToTargetMap().size(), 0U);
   ASSERT_RESULT(MappingExists(res, R::target::string::str1, Res_value::TYPE_REFERENCE, 0x7f010000));
+  ASSERT_RESULT(MappingExists(res, R::target::string::str2, Res_value::TYPE_STRING,
+                              (uint32_t) (string_pool.indexOfString(u"foobar", 6)).value_or(-1)));
   ASSERT_RESULT(MappingExists(res, R::target::integer::int1, Res_value::TYPE_INT_DEC, 2U));
 }
 

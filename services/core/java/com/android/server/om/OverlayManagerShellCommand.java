@@ -306,7 +306,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
         } else {
             final String resourceName = getNextArgRequired();
             final String typeStr = getNextArgRequired();
-            final String strData = getNextArgRequired();
+            final String strData = String.join(" ", peekRemainingArgs());
             addOverlayValue(overlayBuilder, resourceName, typeStr, strData);
         }
 

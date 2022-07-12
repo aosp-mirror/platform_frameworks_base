@@ -141,6 +141,9 @@ std::unique_ptr<ApkAssets> ApkAssets::LoadImpl(std::unique_ptr<Asset> resources_
       return {};
     }
     loaded_arsc = LoadedArsc::Load(data, length, loaded_idmap.get(), property_flags);
+  } else if (loaded_idmap != nullptr &&
+      IsFabricatedOverlay(std::string(loaded_idmap->OverlayApkPath()))) {
+    loaded_arsc = LoadedArsc::Load(loaded_idmap.get());
   } else {
     loaded_arsc = LoadedArsc::CreateEmpty();
   }
