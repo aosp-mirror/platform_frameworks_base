@@ -461,7 +461,8 @@ public class DozeSensorsTest extends SysuiTestCase {
                     /* reportsTouchCoordinate*/ false,
                     /* requiresTouchscreen */ false,
                     /* ignoresSetting */ false,
-                    requiresTouchScreen);
+                    requiresTouchScreen,
+                    /* immediatelyReRegister */ true);
         }
 
         public TriggerSensor createDozeSensor(
@@ -477,7 +478,8 @@ public class DozeSensorsTest extends SysuiTestCase {
                     /* reportsTouchCoordinate*/ false,
                     /* requiresTouchscreen */ false,
                     /* ignoresSetting */ false,
-                    /* requiresTouchScreen */false);
+                    /* requiresTouchScreen */ false,
+                    /* immediatelyReRegister*/ true);
         }
 
         /**
@@ -492,7 +494,8 @@ public class DozeSensorsTest extends SysuiTestCase {
                     /* reportsTouchCoordinate*/ false,
                     /* requiresTouchscreen */ false,
                     /* ignoresSetting */ true,
-                    /* requiresProx */false,
+                    /* requiresProx */ false,
+                    /* immediatelyReRegister */ true,
                     posture);
         }
 
