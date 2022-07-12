@@ -61,6 +61,7 @@ import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.InetSocketAddress;
 import java.time.Instant;
 
 @RunWith(AndroidJUnit4.class)
@@ -405,8 +406,8 @@ public class TimeDetectorServiceTest {
 
     @Test
     public void testLatestNetworkTime() {
-        NtpTrustedTime.TimeResult latestNetworkTime =
-                new NtpTrustedTime.TimeResult(1234L, 54321L, 999);
+        NtpTrustedTime.TimeResult latestNetworkTime = new NtpTrustedTime.TimeResult(
+                1234L, 54321L, 999, InetSocketAddress.createUnresolved("test.timeserver", 123));
         when(mMockNtpTrustedTime.getCachedTimeResult())
                 .thenReturn(latestNetworkTime);
         TimePoint expected = new TimePoint(latestNetworkTime.getTimeMillis(),
