@@ -16,48 +16,76 @@
 
 package android.rubidium.js;
 
+import static com.android.adservices.service.js.JSScriptArgument.arrayArg;
 import static com.android.adservices.service.js.JSScriptArgument.numericArg;
 import static com.android.adservices.service.js.JSScriptArgument.recordArg;
 import static com.android.adservices.service.js.JSScriptArgument.stringArg;
+import static com.android.adservices.service.js.JSScriptArgument.stringArrayArg;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.adservices.service.js.JSScriptArgument;
+import com.android.adservices.service.js.JSScriptArrayArgument;
 import com.android.adservices.service.js.JSScriptEngine;
+import com.android.adservices.service.js.JSScriptRecordArgument;
+import com.android.adservices.service.profiling.JSScriptEngineLogConstants;
+import com.android.adservices.service.profiling.Profiler;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import org.json.JSONArray;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@LargeTest
+/** To run the unit tests for this class, run "atest RubidiumPerfTests:JSScriptEnginePerfTests" */
+@MediumTest
 @RunWith(AndroidJUnit4.class)
 public class JSScriptEnginePerfTests {
     private static final String TAG = JSScriptEnginePerfTests.class.getSimpleName();
-    protected static final Context sContext = ApplicationProvider.getApplicationContext();
-    private final ExecutorService mExecutorService = Executors.newFixedThreadPool(10);
-    private final JSScriptEngine mJSScriptEngine = new JSScriptEngine(sContext);
+    private static final Context sContext = ApplicationProvider.getApplicationContext();
+    private static final ExecutorService sExecutorService = Executors.newFixedThreadPool(10);
+
+    private static JSScriptEngine sJSScriptEngine;
 
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+
+    @Before
+    public void before() throws Exception {
+        Profiler profiler = Profiler.createInstance(JSScriptEngine.TAG);
+        sJSScriptEngine = JSScriptEngine.getInstanceForTesting(sContext, profiler);
+
+        // Warm up the sandbox env.
+        callJSEngine(
+                "function test() { return \"hello world\";" + " }", ImmutableList.of(), "test");
+    }
+
+    @After
+    public void after() {
+        sJSScriptEngine.shutdown();
+    }
 
     @Test
     public void evaluate_helloWorld() throws Exception {
@@ -88,8 +116,7 @@ public class JSScriptEnginePerfTests {
 
         state.resumeTiming();
         while (state.keepRunning()) {
-            callJSEngine(
-                    jsTestFile, ImmutableList.of(adDataArgument), "generateBid");
+            callJSEngine(jsTestFile, ImmutableList.of(adDataArgument), "generateBid");
         }
     }
 
@@ -99,8 +126,7 @@ public class JSScriptEnginePerfTests {
         state.pauseTiming();
 
         InputStream testJsInputStream = sContext.getAssets().open("turtledove_generate_bid.js");
-        String jsTestFile =
-                new String(testJsInputStream.readAllBytes(), StandardCharsets.UTF_8);
+        String jsTestFile = new String(testJsInputStream.readAllBytes(), StandardCharsets.UTF_8);
         // Initialize the environment with one call.
         callJSEngine(jsTestFile, ImmutableList.of(), "generateBid");
 
@@ -110,15 +136,99 @@ public class JSScriptEnginePerfTests {
         }
     }
 
-    private String callJSEngine(
+    @Test
+    public void evaluate_turtledoveSampleGenerateBid_parametrized_10Ads() throws Exception {
+        runParametrizedTurtledoveScript(10);
+    }
+
+    @Test
+    public void evaluate_turtledoveSampleGenerateBid_parametrized_25Ads() throws Exception {
+        runParametrizedTurtledoveScript(25);
+    }
+
+    @Test
+    public void evaluate_turtledoveSampleGenerateBid_parametrized_50Ads() throws Exception {
+        runParametrizedTurtledoveScript(50);
+    }
+
+    @Test
+    public void evaluate_turtledoveSampleGenerateBid_parametrized_75Ads() throws Exception {
+        runParametrizedTurtledoveScript(75);
+    }
+
+    private void runParametrizedTurtledoveScript(int numAds) throws Exception {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        state.pauseTiming();
+        InputStream testJsInputStream =
+                sContext.getAssets().open("turtledove_parametrized_generateBid.js");
+        String jsTestFile = new String(testJsInputStream.readAllBytes(), StandardCharsets.UTF_8);
+
+        state.resumeTiming();
+        while (state.keepRunning()) {
+            int numInterestGroups = 1;
+            String res =
+                    callJSEngine(
+                            sJSScriptEngine,
+                            jsTestFile,
+                            ImmutableList.of(
+                                    buildSampleInterestGroupArg(numInterestGroups, numAds)),
+                            "generateBid");
+
+            // I modified the Turtledove script to have the total execution time
+            // (across all IGs) as the last element in the response array.
+            JSONArray obj = new JSONArray(res);
+            long webviewExecTime = obj.getJSONObject(obj.length() - 1).getLong("generateBidTime");
+            String webviewExecTimeLog =
+                    String.format(
+                            "(%s: %d)",
+                            JSScriptEngineLogConstants.WEBVIEW_EXECUTION_TIME, webviewExecTime);
+            // The listener picks up logs from JSScriptEngine, so simulate logging from there.
+            Log.d("JSScriptEngine", webviewExecTimeLog);
+        }
+    }
+
+    private JSScriptArrayArgument<JSScriptRecordArgument> buildSampleInterestGroupArg(
+            int numCustomAudiences, int numAds) {
+        JSScriptRecordArgument ad =
+                recordArg(
+                        "foo",
+                        ImmutableList.of(
+                                stringArg(
+                                        "renderUrl",
+                                        "https://googleads.g.doubleclick.net/ads/simple-ad.html?adg_id=52836427830&cr_id=310927197297&cv_id=4"),
+                                stringArrayArg(
+                                        "metadata",
+                                        ImmutableList.of(
+                                                "52836427830", "310927197297", "4", "608936333"))));
+
+        JSScriptRecordArgument interestGroupArg =
+                recordArg(
+                        "foo",
+                        stringArg("owner", "https://googleads.g.doubleclick.net/"),
+                        stringArg("name", "1j115753478"),
+                        stringArg("biddingLogicUrl", "https://googleads.g.doubleclick.net/td/bjs"),
+                        stringArg(
+                                "dailyUpdateUrl", "https://googleads.g.doubleclick.net/td/update"),
+                        stringArg(
+                                "trustedBiddingSignalsUrl",
+                                "https://googleads.g.doubleclick.net/td/sjs"),
+                        stringArrayArg(
+                                "trustedBiddingSignalsKeys", ImmutableList.of("1j115753478")),
+                        stringArrayArg("userBiddingSignals", ImmutableList.of()),
+                        new JSScriptArrayArgument("ads", Collections.nCopies(numAds, ad)));
+
+        return arrayArg("foo", Collections.nCopies(numCustomAudiences, interestGroupArg));
+    }
+
+    private static String callJSEngine(
             @NonNull String jsScript,
             @NonNull List<JSScriptArgument> args,
             @NonNull String functionName)
             throws Exception {
-        return callJSEngine(mJSScriptEngine, jsScript, args, functionName);
+        return callJSEngine(sJSScriptEngine, jsScript, args, functionName);
     }
 
-    private String callJSEngine(
+    private static String callJSEngine(
             @NonNull JSScriptEngine jsScriptEngine,
             @NonNull String jsScript,
             @NonNull List<JSScriptArgument> args,
@@ -131,15 +241,15 @@ public class JSScriptEnginePerfTests {
         return futureResult.get();
     }
 
-    private ListenableFuture<String> callJSEngineAsync(
+    private static ListenableFuture<String> callJSEngineAsync(
             @NonNull String jsScript,
             @NonNull List<JSScriptArgument> args,
             @NonNull String functionName,
             @NonNull CountDownLatch resultLatch) {
-        return callJSEngineAsync(mJSScriptEngine, jsScript, args, functionName, resultLatch);
+        return callJSEngineAsync(sJSScriptEngine, jsScript, args, functionName, resultLatch);
     }
 
-    private ListenableFuture<String> callJSEngineAsync(
+    private static ListenableFuture<String> callJSEngineAsync(
             @NonNull JSScriptEngine engine,
             @NonNull String jsScript,
             @NonNull List<JSScriptArgument> args,
@@ -148,7 +258,7 @@ public class JSScriptEnginePerfTests {
         Objects.requireNonNull(engine);
         Objects.requireNonNull(resultLatch);
         ListenableFuture<String> result = engine.evaluate(jsScript, args, functionName);
-        result.addListener(resultLatch::countDown, mExecutorService);
+        result.addListener(resultLatch::countDown, sExecutorService);
         return result;
     }
 }
