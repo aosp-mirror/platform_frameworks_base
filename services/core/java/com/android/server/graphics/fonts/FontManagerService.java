@@ -64,11 +64,10 @@ public final class FontManagerService extends IFontManager.Stub {
     private static final String FONT_FILES_DIR = "/data/fonts/files";
     private static final String CONFIG_XML_FILE = "/data/fonts/config/config.xml";
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.UPDATE_FONTS)
     @RequiresPermission(Manifest.permission.UPDATE_FONTS)
     @Override
     public FontConfig getFontConfig() {
-        getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
-                "UPDATE_FONTS permission required.");
         return getSystemFontConfig();
     }
 
