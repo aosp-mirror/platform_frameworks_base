@@ -32,6 +32,7 @@ java_library_host {
         "auto_service_annotations",
         "lint_api",
     ],
+    kotlincflags: ["-Xjvm-default=all"],
 }
 
 java_test_host {
