@@ -7051,6 +7051,7 @@ package android.app {
     method public void setRunAsMonkey(boolean);
     method public void setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo);
     method public android.graphics.Bitmap takeScreenshot();
+    method @Nullable public android.graphics.Bitmap takeScreenshot(@NonNull android.view.Window);
     method public void waitForIdle(long, long) throws java.util.concurrent.TimeoutException;
     field public static final int FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES = 1; // 0x1
     field public static final int FLAG_DONT_USE_ACCESSIBILITY = 2; // 0x2
