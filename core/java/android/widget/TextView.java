@@ -6440,9 +6440,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setText(CharSequence text, BufferType type) {
         setText(text, type, true, 0);
 
-        if (mCharWrapper != null) {
-            mCharWrapper.mChars = null;
-        }
+        // drop any potential mCharWrappper leaks
+        mCharWrapper = null;
     }
 
     @UnsupportedAppUsage
@@ -6653,11 +6652,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * since the TextView has no way to know that the text
      * has changed and that it needs to invalidate and re-layout.
      *
+     * @throws NullPointerException if text is null
+     * @throws IndexOutOfBoundsException if start or start+len are not in 0 to text.length
+     *
      * @param text char array to be displayed
      * @param start start index in the char array
      * @param len length of char count after {@code start}
      */
-    public final void setText(char[] text, int start, int len) {
+    public final void setText(/* @NonNull */ char[] text, int start, int len) {
         int oldlen = 0;
 
         if (start < 0 || len < 0 || start + len > text.length) {
@@ -13888,16 +13890,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private static class CharWrapper implements CharSequence, GetChars, GraphicsOperations {
+        @NonNull
         private char[] mChars;
         private int mStart, mLength;
 
-        public CharWrapper(char[] chars, int start, int len) {
+        CharWrapper(@NonNull char[] chars, int start, int len) {
             mChars = chars;
             mStart = start;
             mLength = len;
         }
 
-        /* package */ void set(char[] chars, int start, int len) {
+        /* package */ void set(@NonNull char[] chars, int start, int len) {
             mChars = chars;
             mStart = start;
             mLength = len;
