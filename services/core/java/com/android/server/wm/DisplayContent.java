@@ -4811,16 +4811,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Bitmap bitmap = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
         if (bitmap == null) {
             Slog.w(TAG_WM, "Failed to take screenshot");
-            return null;
         }
-
-        // Create a copy of the screenshot that is immutable and backed in ashmem.
-        // This greatly reduces the overhead of passing the bitmap between processes.
-        final Bitmap ret = bitmap.asShared();
-        if (ret != bitmap) {
-            bitmap.recycle();
-        }
-        return ret;
+        return bitmap;
     }
 
     @Override
