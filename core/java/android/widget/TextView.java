@@ -6678,7 +6678,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param start start index in the char array
      * @param len length of char count after {@code start}
      */
-    public final void setText(/* @NonNull */ char[] text, int start, int len) {
+    public final void setText(@NonNull char[] text, int start, int len) {
         int oldlen = 0;
 
         if (start < 0 || len < 0 || start + len > text.length) {
