@@ -353,6 +353,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         }
 
         mIsShowing = false;
+        mDragAnimator.cancel();
         mWindowManager.removeView(this);
 
         setOnApplyWindowInsetsListener(null);
