@@ -19,7 +19,6 @@ package com.android.wm.shell.flicker.helpers
 import android.app.Instrumentation
 import android.content.pm.PackageManager.FEATURE_LEANBACK
 import android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY
-import android.os.SystemProperties
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.util.Log
 import androidx.test.uiautomator.By
@@ -27,13 +26,13 @@ import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.compatibility.common.util.SystemUtil
 import com.android.server.wm.flicker.helpers.StandardAppHelper
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.IComponentMatcher
 import java.io.IOException
 
 abstract class BaseAppHelper(
     instrumentation: Instrumentation,
     launcherName: String,
-    component: FlickerComponentName
+    component: IComponentMatcher
 ) : StandardAppHelper(
     instrumentation,
     launcherName,
@@ -48,7 +47,7 @@ abstract class BaseAppHelper(
         }
 
     val defaultWindowName: String
-        get() = component.toWindowName()
+        get() = toWindowName()
 
     val ui: UiObject2?
         get() = uiDevice.findObject(appSelector)
@@ -59,9 +58,6 @@ abstract class BaseAppHelper(
 
     companion object {
         private const val APP_CLOSE_WAIT_TIME_MS = 3_000L
-
-        fun isShellTransitionsEnabled() =
-                SystemProperties.getBoolean("persist.wm.debug.shell_transit", false)
 
         fun executeShellCommand(instrumentation: Instrumentation, cmd: String) {
             try {

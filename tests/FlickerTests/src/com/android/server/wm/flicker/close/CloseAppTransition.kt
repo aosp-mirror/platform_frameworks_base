@@ -34,7 +34,7 @@ import com.android.server.wm.flicker.replacesLayer
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.common.FlickerComponentName.Companion.LAUNCHER
+import com.android.server.wm.traces.common.ComponentMatcher.Companion.LAUNCHER
 import org.junit.Test
 
 /**
@@ -165,7 +165,7 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
     @Test
     open fun launcherReplacesAppWindowAsTopWindow() {
         testSpec.assertWm {
-            this.isAppWindowOnTop(testApp.component)
+            this.isAppWindowOnTop(testApp)
                     .then()
                     .isAppWindowOnTop(LAUNCHER)
         }
@@ -192,7 +192,7 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
     @Test
     open fun launcherLayerReplacesApp() {
         testSpec.replacesLayer(
-            testApp.component,
+            testApp,
             LAUNCHER,
             ignoreEntriesWithRotationLayer = testSpec.isLandscapeOrSeascapeAtStart
         )

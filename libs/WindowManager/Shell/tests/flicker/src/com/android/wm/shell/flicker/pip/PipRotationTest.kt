@@ -16,9 +16,9 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -101,7 +101,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Test
     fun appLayerRotates_StartingBounds() {
         testSpec.assertLayersStart {
-            visibleRegion(fixedApp.component).coversExactly(screenBoundsStart)
+            visibleRegion(fixedApp).coversExactly(screenBoundsStart)
         }
     }
 
@@ -112,7 +112,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Test
     fun appLayerRotates_EndingBounds() {
         testSpec.assertLayersEnd {
-            visibleRegion(fixedApp.component).coversExactly(screenBoundsEnd)
+            visibleRegion(fixedApp).coversExactly(screenBoundsEnd)
         }
     }
 
@@ -121,7 +121,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
      */
     private fun pipLayerRotates_StartingBounds_internal() {
         testSpec.assertLayersStart {
-            visibleRegion(pipApp.component).coversAtMost(screenBoundsStart)
+            visibleRegion(pipApp).coversAtMost(screenBoundsStart)
         }
     }
 
@@ -141,7 +141,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Test
     fun pipLayerRotates_EndingBounds() {
         testSpec.assertLayersEnd {
-            visibleRegion(pipApp.component).coversAtMost(screenBoundsEnd)
+            visibleRegion(pipApp).coversAtMost(screenBoundsEnd)
         }
     }
 
@@ -153,7 +153,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Test
     fun pipIsAboveFixedAppWindow_Start() {
         testSpec.assertWmStart {
-            isAboveWindow(pipApp.component, fixedApp.component)
+            isAboveWindow(pipApp, fixedApp)
         }
     }
 
@@ -165,7 +165,7 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Test
     fun pipIsAboveFixedAppWindow_End() {
         testSpec.assertWmEnd {
-            isAboveWindow(pipApp.component, fixedApp.component)
+            isAboveWindow(pipApp, fixedApp)
         }
     }
 

@@ -23,7 +23,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.navBarLayerPositionEnd
 import com.android.server.wm.flicker.statusBarLayerPositionEnd
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.Test
 
 /**
@@ -77,17 +77,16 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
         testSpec.assertWm {
             this.hasNoVisibleAppWindow()
                     .then()
-                    .isAppWindowOnTop(FlickerComponentName.SNAPSHOT, isOptional = true)
+                    .isAppWindowOnTop(ComponentMatcher.SNAPSHOT, isOptional = true)
                     .then()
-                    .isAppWindowOnTop(FlickerComponentName.SPLASH_SCREEN, isOptional = true)
+                    .isAppWindowOnTop(ComponentMatcher.SPLASH_SCREEN, isOptional = true)
                     .then()
-                    .isAppWindowOnTop(testApp.component)
+                    .isAppWindowOnTop(testApp)
         }
     }
 
     /**
-     * Checks that the screen is locked at the start of the transition ([colorFadComponent])
-     * layer is visible
+     * Checks that the screen is locked at the start of the transition
      */
     @Presubmit
     @Test
@@ -131,7 +130,7 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     @Test
     override fun statusBarLayerIsVisible() {
         testSpec.assertLayersEnd {
-            this.isVisible(FlickerComponentName.STATUS_BAR)
+            this.isVisible(ComponentMatcher.STATUS_BAR)
         }
     }
 }

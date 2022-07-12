@@ -114,7 +114,7 @@ class OpenImeWindowFromFixedOrientationAppTest(private val testSpec: FlickerTest
     @Postsubmit
     @Test
     fun snapshotStartingWindowLayerCoversExactlyOnApp() {
-        testSpec.snapshotStartingWindowLayerCoversExactlyOnApp(imeTestApp.component)
+        testSpec.snapshotStartingWindowLayerCoversExactlyOnApp(imeTestApp)
     }
 
     companion object {

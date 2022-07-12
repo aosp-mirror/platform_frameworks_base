@@ -53,7 +53,7 @@ open class LaunchBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
     @Test
     open fun testAppIsAlwaysVisible() {
         testSpec.assertLayers {
-            this.isVisible(testApp.component)
+            this.isVisible(testApp)
         }
     }
 }

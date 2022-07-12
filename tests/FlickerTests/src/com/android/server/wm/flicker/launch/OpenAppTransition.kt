@@ -34,7 +34,7 @@ import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.Test
 
 /**
@@ -161,27 +161,27 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
 
     protected fun appLayerBecomesVisible_coldStart() {
         testSpec.assertLayers {
-            this.notContains(testApp.component)
+            this.notContains(testApp)
                     .then()
-                    .isInvisible(testApp.component, isOptional = true)
+                    .isInvisible(testApp, isOptional = true)
                     .then()
-                    .isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
+                    .isVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
                     .then()
-                    .isVisible(FlickerComponentName.SPLASH_SCREEN, isOptional = true)
+                    .isVisible(ComponentMatcher.SPLASH_SCREEN, isOptional = true)
                     .then()
-                    .isVisible(testApp.component)
+                    .isVisible(testApp)
         }
     }
 
     protected fun appLayerBecomesVisible_warmStart() {
         testSpec.assertLayers {
-            this.isInvisible(testApp.component)
+            this.isInvisible(testApp)
                     .then()
-                    .isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
+                    .isVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
                     .then()
-                    .isVisible(FlickerComponentName.SPLASH_SCREEN, isOptional = true)
+                    .isVisible(ComponentMatcher.SPLASH_SCREEN, isOptional = true)
                     .then()
-                    .isVisible(testApp.component)
+                    .isVisible(testApp)
         }
     }
 
@@ -198,23 +198,23 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
 
     protected fun appWindowBecomesVisible_coldStart() {
         testSpec.assertWm {
-            this.notContains(testApp.component)
+            this.notContains(testApp)
                     .then()
-                    .isAppWindowInvisible(testApp.component, isOptional = true)
+                    .isAppWindowInvisible(testApp, isOptional = true)
                     .then()
-                    .isAppWindowVisible(testApp.component)
+                    .isAppWindowVisible(testApp)
         }
     }
 
     protected fun appWindowBecomesVisible_warmStart() {
         testSpec.assertWm {
-            this.isAppWindowInvisible(testApp.component)
+            this.isAppWindowInvisible(testApp)
                     .then()
-                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
+                    .isAppWindowVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
                     .then()
-                    .isAppWindowVisible(FlickerComponentName.SPLASH_SCREEN, isOptional = true)
+                    .isAppWindowVisible(ComponentMatcher.SPLASH_SCREEN, isOptional = true)
                     .then()
-                    .isAppWindowVisible(testApp.component)
+                    .isAppWindowVisible(testApp)
         }
     }
 
@@ -226,12 +226,12 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     @Test
     open fun appWindowBecomesTopWindow() {
         testSpec.assertWm {
-            this.isAppWindowNotOnTop(testApp.component)
+            this.isAppWindowNotOnTop(testApp)
                     .then()
                     .isAppWindowOnTop(
-                        testApp.component
-                            .or(FlickerComponentName.SNAPSHOT)
-                            .or(FlickerComponentName.SPLASH_SCREEN)
+                        testApp
+                            .or(ComponentMatcher.SNAPSHOT)
+                            .or(ComponentMatcher.SPLASH_SCREEN)
                     )
         }
     }
@@ -244,7 +244,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     @Test
     open fun appWindowIsTopWindowAtEnd() {
         testSpec.assertWmEnd {
-            this.isAppWindowOnTop(testApp.component)
+            this.isAppWindowOnTop(testApp)
         }
     }
 }

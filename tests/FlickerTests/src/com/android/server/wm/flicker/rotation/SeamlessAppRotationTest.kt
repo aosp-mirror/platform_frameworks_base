@@ -16,10 +16,10 @@
 
 package com.android.server.wm.flicker.rotation
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.WindowManager
-import android.platform.test.annotations.FlakyTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -27,7 +27,7 @@ import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SeamlessRotationAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -136,7 +136,7 @@ open class SeamlessAppRotationTest(
     @Test
     fun appLayerAlwaysVisible() {
         testSpec.assertLayers {
-            isVisible(testApp.component)
+            isVisible(testApp)
         }
     }
 
@@ -149,33 +149,34 @@ open class SeamlessAppRotationTest(
         testSpec.assertLayers {
             this.invoke("entireScreenCovered") { entry ->
                 entry.entry.displays.map { display ->
-                    entry.visibleRegion(testApp.component).coversExactly(display.layerStackSpace)
+                    entry.visibleRegion(testApp)
+                        .coversExactly(display.layerStackSpace)
                 }
             }
         }
     }
 
     /**
-     * Checks that the [FlickerComponentName.STATUS_BAR] window is invisible during the whole
+     * Checks that the [ComponentMatcher.STATUS_BAR] window is invisible during the whole
      * transition
      */
     @Presubmit
     @Test
     fun statusBarWindowIsAlwaysInvisible() {
         testSpec.assertWm {
-            this.isAboveAppWindowInvisible(FlickerComponentName.STATUS_BAR)
+            this.isAboveAppWindowInvisible(ComponentMatcher.STATUS_BAR)
         }
     }
 
     /**
-     * Checks that the [FlickerComponentName.STATUS_BAR] layer is invisible during the whole
+     * Checks that the [ComponentMatcher.STATUS_BAR] layer is invisible during the whole
      * transition
      */
     @Presubmit
     @Test
     fun statusBarLayerIsAlwaysInvisible() {
         testSpec.assertLayers {
-            this.isInvisible(FlickerComponentName.STATUS_BAR)
+            this.isInvisible(ComponentMatcher.STATUS_BAR)
         }
     }
 

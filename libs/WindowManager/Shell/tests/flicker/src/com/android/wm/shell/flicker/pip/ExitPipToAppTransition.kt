@@ -34,7 +34,7 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     @Presubmit
     @Test
     open fun pipAppWindowRemainInsideVisibleBounds() {
-        testSpec.assertWmVisibleRegion(pipApp.component) {
+        testSpec.assertWmVisibleRegion(pipApp) {
             coversAtMost(displayBounds)
         }
     }
@@ -46,7 +46,7 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     @Presubmit
     @Test
     open fun pipAppLayerRemainInsideVisibleBounds() {
-        testSpec.assertLayersVisibleRegion(pipApp.component) {
+        testSpec.assertLayersVisibleRegion(pipApp) {
             coversAtMost(displayBounds)
         }
     }
@@ -62,11 +62,11 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
             // when the activity is STOPPING, sometimes it becomes invisible in an entry before
             // the window, sometimes in the same entry. This occurs because we log 1x per frame
             // thus we ignore activity here
-            isAppWindowVisible(testApp.component)
-                    .isAppWindowOnTop(pipApp.component)
+            isAppWindowVisible(testApp)
+                    .isAppWindowOnTop(pipApp)
                     .then()
-                    .isAppWindowInvisible(testApp.component)
-                    .isAppWindowVisible(pipApp.component)
+                    .isAppWindowInvisible(testApp)
+                    .isAppWindowVisible(pipApp)
         }
     }
 
@@ -78,11 +78,11 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     @Test
     open fun showBothAppLayersThenHidePip() {
         testSpec.assertLayers {
-            isVisible(testApp.component)
-                    .isVisible(pipApp.component)
+            isVisible(testApp)
+                    .isVisible(pipApp)
                     .then()
-                    .isInvisible(testApp.component)
-                    .isVisible(pipApp.component)
+                    .isInvisible(testApp)
+                    .isVisible(pipApp)
         }
     }
 
@@ -94,8 +94,8 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     @Test
     open fun testPlusPipAppsCoverFullScreenAtStart() {
         testSpec.assertLayersStart {
-            val pipRegion = visibleRegion(pipApp.component).region
-            visibleRegion(testApp.component)
+            val pipRegion = visibleRegion(pipApp).region
+            visibleRegion(testApp)
                     .plus(pipRegion)
                     .coversExactly(displayBounds)
         }
@@ -109,7 +109,7 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     @Test
     open fun pipAppCoversFullScreenAtEnd() {
         testSpec.assertLayersEnd {
-            visibleRegion(pipApp.component).coversExactly(displayBounds)
+            visibleRegion(pipApp).coversExactly(displayBounds)
         }
     }
 
@@ -119,9 +119,8 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     @Presubmit
     @Test
     open fun pipLayerExpands() {
-        val layerName = pipApp.component.toLayerName()
         testSpec.assertLayers {
-            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
                 current.visibleRegion.coversAtLeast(previous.visibleRegion.region)
             }

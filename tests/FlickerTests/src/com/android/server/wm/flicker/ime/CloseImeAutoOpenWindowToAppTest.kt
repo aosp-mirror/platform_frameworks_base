@@ -37,7 +37,7 @@ import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -104,7 +104,7 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
     @Test
     fun imeAppWindowIsAlwaysVisible() {
         testSpec.assertWm {
-            this.isAppWindowOnTop(testApp.component)
+            this.isAppWindowOnTop(testApp)
         }
     }
 
@@ -124,7 +124,7 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
     @Test
     fun imeLayerVisibleStart() {
         testSpec.assertLayersStart {
-            this.isVisible(FlickerComponentName.IME)
+            this.isVisible(ComponentMatcher.IME)
         }
     }
 
@@ -132,7 +132,7 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
     @Test
     fun imeLayerInvisibleEnd() {
         testSpec.assertLayersEnd {
-            this.isInvisible(FlickerComponentName.IME)
+            this.isInvisible(ComponentMatcher.IME)
         }
     }
 
@@ -144,7 +144,7 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
     @Test
     fun imeAppLayerIsAlwaysVisible() {
         testSpec.assertLayers {
-            this.isVisible(testApp.component)
+            this.isVisible(testApp)
         }
     }
 
