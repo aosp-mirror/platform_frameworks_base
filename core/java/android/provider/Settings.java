@@ -16036,6 +16036,18 @@ public final class Settings {
                 "key_chord_power_volume_up";
 
         /**
+         * Record audio from near-field microphone (ie. TV remote)
+         * Allows audio recording regardless of sensor privacy state,
+         * as it is an intentional user interaction: hold-to-talk
+         *
+         * Type: int (0 to disable, 1 to enable)
+         *
+         * @hide
+         */
+        public static final String RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO_ENABLED =
+                "receive_explicit_user_interaction_audio_enabled";
+
+        /**
          * Keyguard should be on the left hand side of the screen, for wide screen layouts.
          *
          * @hide
