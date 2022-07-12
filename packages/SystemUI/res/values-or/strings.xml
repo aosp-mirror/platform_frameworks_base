@@ -127,10 +127,10 @@
     <string name="phone_label" msgid="5715229948920451352">"ଫୋନ୍‌ ଖୋଲନ୍ତୁ"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"ଭଏସ୍‍ ସହାୟକ ଖୋଲନ୍ତୁ"</string>
     <string name="camera_label" msgid="8253821920931143699">"କ୍ୟାମେରା ଖୋଲନ୍ତୁ"</string>
-    <string name="cancel" msgid="1089011503403416730">"ବାତିଲ୍ କରନ୍ତୁ"</string>
+    <string name="cancel" msgid="1089011503403416730">"ବାତିଲ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ନିଶ୍ଚିତ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ପ୍ରାମାଣିକତା ବାତିଲ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ପ୍ରାମାଣିକତା ବାତିଲ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"ଆପଣଙ୍କର ମୁହଁକୁ ପ୍ରମାଣ କରୁଛି"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ମୁହଁ ପ୍ରାମାଣିକତା ହୋଇଛି"</string>
