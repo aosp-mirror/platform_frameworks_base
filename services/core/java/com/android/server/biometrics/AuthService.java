@@ -173,10 +173,10 @@ public class AuthService extends SystemService {
     }
 
     private final class AuthServiceImpl extends IAuthService.Stub {
+        @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
         @Override
         public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
                 @NonNull String opPackageName) throws RemoteException {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
 
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -187,10 +187,10 @@ public class AuthService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
         @Override
         public List<SensorPropertiesInternal> getSensorProperties(String opPackageName)
                 throws RemoteException {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
 
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -202,9 +202,9 @@ public class AuthService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
         @Override
         public String getUiPackage() {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
 
             return getContext().getResources()
                     .getString(R.string.config_biometric_prompt_ui_package);
