@@ -44,6 +44,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANI
 import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
+import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -756,7 +757,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                     break;
                 }
-                if (!parent.isAllowedToEmbedActivity(activity)) {
+                if (parent.isAllowedToEmbedActivity(activity) != EMBEDDING_ALLOWED) {
                     final Throwable exception = new SecurityException(
                             "The task fragment is not trusted to embed the given activity.");
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
@@ -988,7 +989,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     /** A helper method to send minimum dimension violation error to the client. */
-    void sendMinimumDimensionViolation(TaskFragment taskFragment, Point minDimensions,
+    private void sendMinimumDimensionViolation(TaskFragment taskFragment, Point minDimensions,
             IBinder errorCallbackToken, String reason) {
         if (taskFragment == null || taskFragment.getTaskFragmentOrganizer() == null) {
             return;
@@ -1582,7 +1583,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             // We are reparenting activities to a new embedded TaskFragment, this operation is only
             // allowed if the new parent is trusted by all reparent activities.
             final boolean isEmbeddingDisallowed = oldParent.forAllActivities(activity ->
-                    !newParentTF.isAllowedToEmbedActivity(activity));
+                    newParentTF.isAllowedToEmbedActivity(activity) == EMBEDDING_ALLOWED);
             if (isEmbeddingDisallowed) {
                 final Throwable exception = new SecurityException(
                         "The new parent is not trusted to embed the activities.");
