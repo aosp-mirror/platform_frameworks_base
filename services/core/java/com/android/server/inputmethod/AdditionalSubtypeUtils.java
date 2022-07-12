@@ -31,6 +31,8 @@ import android.util.Xml;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
+import libcore.io.IoUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -102,11 +104,11 @@ final class AdditionalSubtypeUtils {
      *
      * @param allSubtypes {@link ArrayMap} from IME ID to additional subtype list. Passing an empty
      *                    map deletes the file.
-     * @param methodMap {@link ArrayMap} from IME ID to {@link InputMethodInfo}.
-     * @param userId The user ID to be associated with.
+     * @param methodMap   {@link ArrayMap} from IME ID to {@link InputMethodInfo}.
+     * @param userId      The user ID to be associated with.
      */
     static void save(ArrayMap<String, List<InputMethodSubtype>> allSubtypes,
-             ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId) {
+            ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId) {
         final File inputMethodDir = getInputMethodDir(userId);
 
         if (allSubtypes.isEmpty()) {
@@ -172,11 +174,13 @@ final class AdditionalSubtypeUtils {
             out.endTag(null, NODE_SUBTYPES);
             out.endDocument();
             subtypesFile.finishWrite(fos);
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             Slog.w(TAG, "Error writing subtypes", e);
             if (fos != null) {
                 subtypesFile.failWrite(fos);
             }
+        } finally {
+            IoUtils.closeQuietly(fos);
         }
     }
 
@@ -189,7 +193,7 @@ final class AdditionalSubtypeUtils {
      *
      * @param allSubtypes {@link ArrayMap} from IME ID to additional subtype list. This parameter
      *                    will be used to return the result.
-     * @param userId The user ID to be associated with.
+     * @param userId      The user ID to be associated with.
      */
     static void load(@NonNull ArrayMap<String, List<InputMethodSubtype>> allSubtypes,
             @UserIdInt int userId) {
