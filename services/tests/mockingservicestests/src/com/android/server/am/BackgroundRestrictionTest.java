@@ -1141,6 +1141,7 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<Long> longRunningFGSWindow = null;
         DeviceConfigSession<Long> longRunningFGSThreshold = null;
         DeviceConfigSession<Boolean> longRunningFGSWithNotification = null;
+        DeviceConfigSession<Boolean> longRunningFGS = null;
 
         try {
             longRunningFGSMonitor = new DeviceConfigSession<>(
@@ -1170,6 +1171,13 @@ public final class BackgroundRestrictionTest {
                     DeviceConfig::getBoolean,
                     ConstantsObserver.DEFAULT_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING);
             longRunningFGSWithNotification.set(true);
+
+            longRunningFGS = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    ConstantsObserver.KEY_BG_PROMPT_FGS_ON_LONG_RUNNING,
+                    DeviceConfig::getBoolean,
+                    ConstantsObserver.DEFAULT_BG_PROMPT_FGS_ON_LONG_RUNNING);
+            longRunningFGS.set(true);
 
             // Basic case
             mAppFGSTracker.onForegroundServiceStateChanged(testPkgName1, testUid1,
@@ -1213,6 +1221,23 @@ public final class BackgroundRestrictionTest {
             mAppFGSTracker.onForegroundServiceStateChanged(testPkgName2, testUid2,
                     testPid2, false);
             checkNotificationGone(testPkgName2, timeout(windowMs), notificationId);
+
+            // Turn OFF the notification.
+            longRunningFGS.set(false);
+            clearInvocations(mInjector.getNotificationManager());
+            mBgRestrictionController.resetRestrictionSettings();
+            // Start the FGS again.
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName2, testUid2,
+                    testPid2, true);
+            // Verify we do NOT have the notification.
+            checkNotificationShown(
+                    new String[] {testPkgName2}, timeout(windowMs * 2).times(0), false);
+            // Stop this FGS
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName2, testUid2,
+                    testPid2, false);
+
+            // Turn it back ON.
+            longRunningFGS.set(true);
 
             // Start over with concurrent cases.
             clearInvocations(mInjector.getNotificationManager());
@@ -1306,6 +1331,7 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(longRunningFGSWindow);
             closeIfNotNull(longRunningFGSThreshold);
             closeIfNotNull(longRunningFGSWithNotification);
+            closeIfNotNull(longRunningFGS);
         }
     }
 
@@ -1332,6 +1358,7 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<Long> mediaPlaybackFGSThreshold = null;
         DeviceConfigSession<Long> locationFGSThreshold = null;
         DeviceConfigSession<Boolean> longRunningFGSWithNotification = null;
+        DeviceConfigSession<Boolean> longRunningFGS = null;
 
         doReturn(testPkgName1).when(mInjector).getPackageName(testPid1);
         doReturn(testPkgName2).when(mInjector).getPackageName(testPid2);
@@ -1378,6 +1405,13 @@ public final class BackgroundRestrictionTest {
                     DeviceConfig::getBoolean,
                     ConstantsObserver.DEFAULT_BG_PROMPT_FGS_WITH_NOTIFICATION_ON_LONG_RUNNING);
             longRunningFGSWithNotification.set(true);
+
+            longRunningFGS = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    ConstantsObserver.KEY_BG_PROMPT_FGS_ON_LONG_RUNNING,
+                    DeviceConfig::getBoolean,
+                    ConstantsObserver.DEFAULT_BG_PROMPT_FGS_ON_LONG_RUNNING);
+            longRunningFGS.set(true);
 
             // Long-running FGS with type "location", but ran for a very short time.
             runTestLongFGSExemptionOnce(testPkgName1, testUid1, testPid1,
@@ -1487,6 +1521,7 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(mediaPlaybackFGSThreshold);
             closeIfNotNull(locationFGSThreshold);
             closeIfNotNull(longRunningFGSWithNotification);
+            closeIfNotNull(longRunningFGS);
         }
     }
 
