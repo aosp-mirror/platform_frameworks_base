@@ -392,12 +392,15 @@ public final class CachedAppOptimizer {
         public long mSumOrigAnonRss;
         public double mMaxCompactEfficiency;
 
+        // Cpu time
+        public long mTotalCpuTimeMillis;
+
         public long getThrottledSome() { return mSomeCompactRequested - mSomeCompactPerformed; }
 
         public long getThrottledFull() { return mFullCompactRequested - mFullCompactPerformed; }
 
-        public void addMemStats(
-                long anonRssSaved, long zramConsumed, long memFreed, long origAnonRss) {
+        public void addMemStats(long anonRssSaved, long zramConsumed, long memFreed,
+                long origAnonRss, long totalCpuTimeMillis) {
             final double compactEfficiency = memFreed / (double) origAnonRss;
             if (compactEfficiency > mMaxCompactEfficiency) {
                 mMaxCompactEfficiency = compactEfficiency;
@@ -406,6 +409,7 @@ public final class CachedAppOptimizer {
             mTotalZramConsumedKBs += zramConsumed;
             mTotalAnonMemFreedKBs += memFreed;
             mSumOrigAnonRss += origAnonRss;
+            mTotalCpuTimeMillis += totalCpuTimeMillis;
         }
 
         public void dump(PrintWriter pw) {
@@ -455,6 +459,9 @@ public final class CachedAppOptimizer {
                         ? (mTotalAnonMemFreedKBs / mFullCompactPerformed)
                         : 0;
                 pw.println("    Avg Anon Mem Freed/Compaction (KB) : " + avgKBsPerProcCompact);
+                double compactionCost =
+                        mTotalCpuTimeMillis / (mTotalAnonMemFreedKBs / 1024.0); // ms/MB
+                pw.println("    Compaction Cost (ms/MB): " + compactionCost);
             }
         }
     }
@@ -606,7 +613,7 @@ public final class CachedAppOptimizer {
                     + " processes.");
             pw.println("Last Compaction per process stats:");
             pw.println("    (ProcessName,Source,DeltaAnonRssKBs,ZramConsumedKBs,AnonMemFreedKBs,"
-                    + "CompactEfficiency)");
+                    + "CompactEfficiency,CompactCost(ms/MB))");
             for (Map.Entry<Integer, SingleCompactionStats> entry :
                     mLastCompactionStats.entrySet()) {
                 SingleCompactionStats stats = entry.getValue();
@@ -615,7 +622,7 @@ public final class CachedAppOptimizer {
             pw.println();
             pw.println("Last 20 Compactions Stats:");
             pw.println("    (ProcessName,Source,DeltaAnonRssKBs,ZramConsumedKBs,AnonMemFreedKBs,"
-                    + "CompactEfficiency)");
+                    + "CompactEfficiency,CompactCost(ms/MB))");
             for (SingleCompactionStats stats : mCompactionStatsHistory) {
                 stats.dump(pw);
             }
@@ -830,6 +837,11 @@ public final class CachedAppOptimizer {
     static private native void compactProcess(int pid, int compactionFlags);
 
     static private native void cancelCompaction();
+
+    /**
+     * Returns the cpu time for the current thread
+     */
+    static private native long threadCpuTimeNs();
 
     /**
      * Retrieves the free swap percentage.
@@ -1466,20 +1478,28 @@ public final class CachedAppOptimizer {
         public long mDeltaAnonRssKBs;
         public long mZramConsumedKBs;
         public long mAnonMemFreedKBs;
+        public float mCpuTimeMillis;
         public long mOrigAnonRss;
 
         SingleCompactionStats(long[] rss, CompactSource source, String processName,
-                long deltaAnonRss, long zramConsumed, long anonMemFreed, long origAnonRss) {
+                long deltaAnonRss, long zramConsumed, long anonMemFreed, long origAnonRss,
+                long cpuTimeMillis) {
             mRssAfterCompaction = rss;
             mSourceType = source;
             mProcessName = processName;
             mDeltaAnonRssKBs = deltaAnonRss;
             mZramConsumedKBs = zramConsumed;
             mAnonMemFreedKBs = anonMemFreed;
+            mCpuTimeMillis = cpuTimeMillis;
             mOrigAnonRss = origAnonRss;
         }
 
         double getCompactEfficiency() { return mAnonMemFreedKBs / (double) mOrigAnonRss; }
+
+        double getCompactCost() {
+            // mCpuTimeMillis / (anonMemFreedKBs/1024) and metric is in (ms/MB)
+            return mCpuTimeMillis / (double) mAnonMemFreedKBs * 1024;
+        }
 
         long[] getRssAfterCompaction() {
             return mRssAfterCompaction;
@@ -1488,7 +1508,7 @@ public final class CachedAppOptimizer {
         void dump(PrintWriter pw) {
             pw.println("    (" + mProcessName + "," + mSourceType.name() + "," + mDeltaAnonRssKBs
                     + "," + mZramConsumedKBs + "," + mAnonMemFreedKBs + "," + getCompactEfficiency()
-                    + ")");
+                    + "," + getCompactCost() + ")");
         }
     }
 
@@ -1734,10 +1754,13 @@ public final class CachedAppOptimizer {
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                                 "Compact " + resolvedAction.name() + ": " + name);
                         long zramUsedKbBefore = getUsedZramMemory();
+                        long startCpuTime = threadCpuTimeNs();
                         mProcessDependencies.performCompaction(resolvedAction, pid);
+                        long endCpuTime = threadCpuTimeNs();
                         long[] rssAfter = mProcessDependencies.getRss(pid);
                         long end = SystemClock.uptimeMillis();
                         long time = end - start;
+                        long deltaCpuTimeNanos = endCpuTime - startCpuTime;
                         long zramUsedKbAfter = getUsedZramMemory();
                         long deltaTotalRss = rssAfter[RSS_TOTAL_INDEX] - rssBefore[RSS_TOTAL_INDEX];
                         long deltaFileRss = rssAfter[RSS_FILE_INDEX] - rssBefore[RSS_FILE_INDEX];
@@ -1754,6 +1777,7 @@ public final class CachedAppOptimizer {
                                 long anonRssSavings = -deltaAnonRss;
                                 long zramConsumed = zramUsedKbAfter - zramUsedKbBefore;
                                 long memFreed = anonRssSavings - zramConsumed;
+                                long totalCpuTimeMillis = deltaCpuTimeNanos / 1000000;
                                 long origAnonRss = rssBefore[RSS_ANON_INDEX];
 
                                 // Negative stats would skew averages and will likely be due to
@@ -1763,13 +1787,13 @@ public final class CachedAppOptimizer {
                                 zramConsumed = zramConsumed > 0 ? zramConsumed : 0;
                                 memFreed = memFreed > 0 ? memFreed : 0;
 
-                                perProcessStats.addMemStats(
-                                        anonRssSavings, zramConsumed, memFreed, origAnonRss);
-                                perSourceStats.addMemStats(
-                                        anonRssSavings, zramConsumed, memFreed, origAnonRss);
+                                perProcessStats.addMemStats(anonRssSavings, zramConsumed, memFreed,
+                                        origAnonRss, totalCpuTimeMillis);
+                                perSourceStats.addMemStats(anonRssSavings, zramConsumed, memFreed,
+                                        origAnonRss, totalCpuTimeMillis);
                                 SingleCompactionStats memStats = new SingleCompactionStats(rssAfter,
                                         compactSource, name, anonRssSavings, zramConsumed, memFreed,
-                                        origAnonRss);
+                                        origAnonRss, totalCpuTimeMillis);
                                 mLastCompactionStats.remove(pid);
                                 mLastCompactionStats.put(pid, memStats);
                                 mCompactionStatsHistory.add(memStats);
