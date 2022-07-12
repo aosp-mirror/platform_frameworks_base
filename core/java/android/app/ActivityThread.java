@@ -274,11 +274,6 @@ public final class ActivityThread extends ClientTransactionHandler
     public static final boolean DEBUG_ORDER = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     /**
-     * If the activity doesn't become idle in time, the timeout will ensure to apply the pending top
-     * process state.
-     */
-    private static final long PENDING_TOP_PROCESS_STATE_TIMEOUT = 1000;
-    /**
      * The delay to release the provider when it has no more references. It reduces the number of
      * transactions for acquiring and releasing provider if the client accesses the provider
      * frequently in a short time.
@@ -367,8 +362,6 @@ public final class ActivityThread extends ClientTransactionHandler
     private final AtomicInteger mNumLaunchingActivities = new AtomicInteger();
     @GuardedBy("mAppThread")
     private int mLastProcessState = PROCESS_STATE_UNKNOWN;
-    @GuardedBy("mAppThread")
-    private int mPendingProcessState = PROCESS_STATE_UNKNOWN;
     ArrayList<WeakReference<AssistStructure>> mLastAssistStructures = new ArrayList<>();
     private int mLastSessionId;
     final ArrayMap<IBinder, CreateServiceData> mServicesData = new ArrayMap<>();
@@ -2384,7 +2377,6 @@ public final class ActivityThread extends ClientTransactionHandler
             if (stopProfiling) {
                 mProfiler.stopProfiling();
             }
-            applyPendingProcessState();
             return false;
         }
     }
@@ -3452,16 +3444,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
             wasCached = isCachedProcessState();
             mLastProcessState = processState;
-            // Defer the top state for VM to avoid aggressive JIT compilation affecting activity
-            // launch time.
-            if (processState == ActivityManager.PROCESS_STATE_TOP
-                    && mNumLaunchingActivities.get() > 0) {
-                mPendingProcessState = processState;
-                mH.postDelayed(this::applyPendingProcessState, PENDING_TOP_PROCESS_STATE_TIMEOUT);
-            } else {
-                mPendingProcessState = PROCESS_STATE_UNKNOWN;
-                updateVmProcessState(processState);
-            }
+            updateVmProcessState(processState);
             if (localLOGV) {
                 Slog.i(TAG, "******************* PROCESS STATE CHANGED TO: " + processState
                         + (fromIpc ? " (from ipc" : ""));
@@ -3493,20 +3476,6 @@ public final class ActivityThread extends ClientTransactionHandler
                 ? VM_PROCESS_STATE_JANK_PERCEPTIBLE
                 : VM_PROCESS_STATE_JANK_IMPERCEPTIBLE;
         VMRuntime.getRuntime().updateProcessState(state);
-    }
-
-    private void applyPendingProcessState() {
-        synchronized (mAppThread) {
-            if (mPendingProcessState == PROCESS_STATE_UNKNOWN) {
-                return;
-            }
-            final int pendingState = mPendingProcessState;
-            mPendingProcessState = PROCESS_STATE_UNKNOWN;
-            // Only apply the pending state if the last state doesn't change.
-            if (pendingState == mLastProcessState) {
-                updateVmProcessState(pendingState);
-            }
-        }
     }
 
     @Override

@@ -25,7 +25,10 @@ import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.AppTask;
 import android.app.Application;
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -183,7 +186,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             return features;
         }
 
-        if (activity.isInMultiWindowMode()) {
+        if (isTaskInMultiWindowMode(activity)) {
             // It is recommended not to report any display features in multi-window mode, since it
             // won't be possible to synchronize the display feature positions with window movement.
             return features;
@@ -207,6 +210,32 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             }
         }
         return features;
+    }
+
+    /**
+     * Checks whether the task associated with the activity is in multi-window. If task info is not
+     * available it defaults to {@code true}.
+     */
+    private boolean isTaskInMultiWindowMode(@NonNull Activity activity) {
+        final ActivityManager am = activity.getSystemService(ActivityManager.class);
+        if (am == null) {
+            return true;
+        }
+
+        final List<AppTask> appTasks = am.getAppTasks();
+        final int taskId = activity.getTaskId();
+        AppTask task = null;
+        for (AppTask t : appTasks) {
+            if (t.getTaskInfo().taskId == taskId) {
+                task = t;
+                break;
+            }
+        }
+        if (task == null) {
+            // The task might be removed on the server already.
+            return true;
+        }
+        return WindowConfiguration.inMultiWindowMode(task.getTaskInfo().getWindowingMode());
     }
 
     /**
