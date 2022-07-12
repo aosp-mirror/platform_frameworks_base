@@ -18,6 +18,9 @@ package com.android.systemui.shared.recents.model;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
+
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.app.TaskInfo;
@@ -30,6 +33,8 @@ import android.view.ViewDebug;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -242,8 +247,10 @@ public class Task {
         ActivityManager.TaskDescription td = taskInfo.taskDescription;
         return new Task(taskKey,
                 td != null ? td.getPrimaryColor() : 0,
-                td != null ? td.getBackgroundColor() : 0,
-                taskInfo.supportsMultiWindow, isLocked, td, taskInfo.topActivity);
+                td != null ? td.getBackgroundColor() : 0, taskInfo.supportsMultiWindow
+                && ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType())
+                && ArrayUtils.contains(CONTROLLED_WINDOWING_MODES, taskInfo.getWindowingMode()),
+                isLocked, td, taskInfo.topActivity);
     }
 
     public Task(TaskKey key) {

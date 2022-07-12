@@ -42,14 +42,11 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     private static final String TAG = "MediaOutputAdapter";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private final MediaOutputDialog mMediaOutputDialog;
     private ViewGroup mConnectedItem;
     private boolean mIncludeDynamicGroup;
 
-    public MediaOutputAdapter(MediaOutputController controller,
-            MediaOutputDialog mediaOutputDialog) {
+    public MediaOutputAdapter(MediaOutputController controller) {
         super(controller);
-        mMediaOutputDialog = mediaOutputDialog;
         setHasStableIds(true);
     }
 
