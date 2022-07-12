@@ -74,6 +74,7 @@ public class EditTextActivity extends Activity
         }
         mEditText.setText(clip.getItemAt(0).getText());
         mEditText.requestFocus();
+        mEditText.setSelection(0);
         mSensitive = clip.getDescription().getExtras() != null
                 && clip.getDescription().getExtras()
                 .getBoolean(ClipDescription.EXTRA_IS_SENSITIVE);
