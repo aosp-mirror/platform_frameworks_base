@@ -96,33 +96,33 @@ class EnterSplitScreenByDragFromNotification(
 
     @Presubmit
     @Test
-    fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp.component)
+    fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp)
 
     @Presubmit
     @Test
     fun secondaryAppLayerBecomesVisible() =
-        testSpec.layerBecomesVisible(sendNotificationApp.component)
+        testSpec.layerBecomesVisible(sendNotificationApp)
 
     @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        testSpec.endRotation, primaryApp.component, false /* splitLeftTop */
+        testSpec.endRotation, primaryApp, false /* splitLeftTop */
     )
 
     @Presubmit
     @Test
     fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisible(
-        testSpec.endRotation, sendNotificationApp.component, true /* splitLeftTop */
+        testSpec.endRotation, sendNotificationApp, true /* splitLeftTop */
     )
 
     @Presubmit
     @Test
-    fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp.component)
+    fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp)
 
     @Presubmit
     @Test
     fun secondaryAppWindowIsVisibleAtEnd() =
-        testSpec.appWindowIsVisibleAtEnd(sendNotificationApp.component)
+        testSpec.appWindowIsVisibleAtEnd(sendNotificationApp)
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

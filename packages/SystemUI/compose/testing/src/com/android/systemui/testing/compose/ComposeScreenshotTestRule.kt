@@ -24,22 +24,37 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import com.android.systemui.compose.theme.SystemUITheme
 import com.android.systemui.testing.screenshot.ScreenshotActivity
-import com.android.systemui.testing.screenshot.ScreenshotTestRule
-import com.android.systemui.testing.screenshot.ScreenshotTestSpec
+import com.android.systemui.testing.screenshot.SystemUIGoldenImagePathManager
+import com.android.systemui.testing.screenshot.UnitTestBitmapMatcher
+import com.android.systemui.testing.screenshot.drawIntoBitmap
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
+import platform.test.screenshot.DeviceEmulationRule
+import platform.test.screenshot.DeviceEmulationSpec
+import platform.test.screenshot.MaterialYouColorsRule
+import platform.test.screenshot.ScreenshotTestRule
+import platform.test.screenshot.getEmulatedDevicePathConfig
 
 /** A rule for Compose screenshot diff tests. */
-class ComposeScreenshotTestRule(testSpec: ScreenshotTestSpec) : TestRule {
+class ComposeScreenshotTestRule(emulationSpec: DeviceEmulationSpec) : TestRule {
+    private val colorsRule = MaterialYouColorsRule()
+    private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
+    private val screenshotRule =
+        ScreenshotTestRule(
+            SystemUIGoldenImagePathManager(getEmulatedDevicePathConfig(emulationSpec))
+        )
     private val composeRule = createAndroidComposeRule<ScreenshotActivity>()
-    private val screenshotRule = ScreenshotTestRule(testSpec)
-
-    private val delegate = RuleChain.outerRule(screenshotRule).around(composeRule)
+    private val delegateRule =
+        RuleChain.outerRule(colorsRule)
+            .around(deviceEmulationRule)
+            .around(screenshotRule)
+            .around(composeRule)
+    private val matcher = UnitTestBitmapMatcher
 
     override fun apply(base: Statement, description: Description): Statement {
-        return delegate.apply(base, description)
+        return delegateRule.apply(base, description)
     }
 
     /**
@@ -69,6 +84,6 @@ class ComposeScreenshotTestRule(testSpec: ScreenshotTestSpec) : TestRule {
         composeRule.waitForIdle()
 
         val view = (composeRule.onRoot().fetchSemanticsNode().root as ViewRootForTest).view
-        screenshotRule.screenshotTest(goldenIdentifier, view)
+        screenshotRule.assertBitmapAgainstGolden(view.drawIntoBitmap(), goldenIdentifier, matcher)
     }
 }

@@ -23,7 +23,7 @@ import android.view.WindowInsets.Type.statusBars
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.IComponentMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import java.util.regex.Pattern
@@ -33,7 +33,7 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
     private val rotation: Int,
     private val imePackageName: String = IME_PACKAGE,
     launcherName: String = ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_LAUNCHER_NAME,
-    component: FlickerComponentName =
+    component: IComponentMatcher =
         ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME.toFlickerComponent()
 ) : ImeAppHelper(instr, launcherName, component) {
     override fun openIME(wmHelper: WindowManagerStateHelper) {

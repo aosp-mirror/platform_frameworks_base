@@ -35,7 +35,7 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -72,12 +72,12 @@ open class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestP
                     this.setRotation(testSpec.startRotation)
                     testApp.launchViaIntent(wmHelper)
                     wmHelper.StateSyncBuilder()
-                        .withFullScreenApp(testApp.component)
+                        .withFullScreenApp(testApp)
                         .waitForAndVerify()
 
                     imeTestApp.launchViaIntent(wmHelper)
                     wmHelper.StateSyncBuilder()
-                        .withFullScreenApp(imeTestApp.component)
+                        .withFullScreenApp(imeTestApp)
                         .waitForAndVerify()
 
                     imeTestApp.openIME(wmHelper)
@@ -101,7 +101,7 @@ open class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestP
                         displayBounds.bounds.width, displayBounds.bounds.height, 50)
 
                 wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(testApp.component)
+                    .withFullScreenApp(testApp)
                     .waitForAndVerify()
                 createTag(TAG_IME_INVISIBLE)
             }
@@ -111,7 +111,7 @@ open class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestP
                 device.swipe(displayBounds.bounds.width, displayBounds.bounds.height,
                         0, displayBounds.bounds.height, 50)
                 wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(imeTestApp.component)
+                    .withFullScreenApp(imeTestApp)
                     .waitForAndVerify()
             }
         }
@@ -120,55 +120,55 @@ open class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestP
     @Test
     fun imeAppWindowVisibility() {
         testSpec.assertWm {
-            isAppWindowVisible(imeTestApp.component)
+            isAppWindowVisible(imeTestApp)
                 .then()
-                .isAppSnapshotStartingWindowVisibleFor(testApp.component, isOptional = true)
+                .isAppSnapshotStartingWindowVisibleFor(testApp, isOptional = true)
                 .then()
-                .isAppWindowVisible(testApp.component)
+                .isAppWindowVisible(testApp)
                 .then()
-                .isAppSnapshotStartingWindowVisibleFor(imeTestApp.component, isOptional = true)
+                .isAppSnapshotStartingWindowVisibleFor(imeTestApp, isOptional = true)
                 .then()
-                .isAppWindowVisible(imeTestApp.component)
+                .isAppWindowVisible(imeTestApp)
         }
     }
 
     @Test
     fun navBarLayerIsVisibleAroundSwitching() {
         testSpec.assertLayersStart {
-            isVisible(FlickerComponentName.NAV_BAR)
+            isVisible(ComponentMatcher.NAV_BAR)
         }
         testSpec.assertLayersEnd {
-            isVisible(FlickerComponentName.NAV_BAR)
+            isVisible(ComponentMatcher.NAV_BAR)
         }
     }
 
     @Test
     fun statusBarLayerIsVisibleAroundSwitching() {
         testSpec.assertLayersStart {
-            isVisible(FlickerComponentName.STATUS_BAR)
+            isVisible(ComponentMatcher.STATUS_BAR)
         }
         testSpec.assertLayersEnd {
-            isVisible(FlickerComponentName.STATUS_BAR)
+            isVisible(ComponentMatcher.STATUS_BAR)
         }
     }
 
     @Test
     fun imeLayerIsVisibleWhenSwitchingToImeApp() {
         testSpec.assertLayersStart {
-            isVisible(FlickerComponentName.IME)
+            isVisible(ComponentMatcher.IME)
         }
         testSpec.assertLayersTag(TAG_IME_VISIBLE) {
-            isVisible(FlickerComponentName.IME)
+            isVisible(ComponentMatcher.IME)
         }
         testSpec.assertLayersEnd {
-            isVisible(FlickerComponentName.IME)
+            isVisible(ComponentMatcher.IME)
         }
     }
 
     @Test
     fun imeLayerIsInvisibleWhenSwitchingToTestApp() {
         testSpec.assertLayersTag(TAG_IME_INVISIBLE) {
-            isInvisible(FlickerComponentName.IME)
+            isInvisible(ComponentMatcher.IME)
         }
     }
 

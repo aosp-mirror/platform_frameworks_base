@@ -149,7 +149,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     }
 
     private fun getWindowRect(wmHelper: WindowManagerStateHelper): Rect {
-        val windowRegion = wmHelper.getWindowRegion(component)
+        val windowRegion = wmHelper.getWindowRegion(this)
         require(!windowRegion.isEmpty) {
             "Unable to find a PIP window in the current state"
         }
@@ -196,7 +196,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         uiDevice.click(expandButtonBounds.centerX(), expandButtonBounds.centerY())
         wmHelper.StateSyncBuilder()
             .withPipGone()
-            .withFullScreenApp(component)
+            .withFullScreenApp(this)
             .waitForAndVerify()
     }
 

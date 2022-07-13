@@ -90,7 +90,7 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
     fun testAppIsVisibleAtEnd() {
         Assume.assumeFalse(isShellTransitionsEnabled)
         testSpec.assertLayersEnd {
-            this.isVisible(testApp.component)
+            this.isVisible(testApp)
         }
     }
 
@@ -99,7 +99,7 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
     fun testAppIsVisibleAtEnd_ShellTransit() {
         Assume.assumeTrue(isShellTransitionsEnabled)
         testSpec.assertLayersEnd {
-            this.isVisible(testApp.component)
+            this.isVisible(testApp)
         }
     }
 }

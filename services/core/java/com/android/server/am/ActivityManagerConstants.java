@@ -196,6 +196,8 @@ final class ActivityManagerConstants extends ContentObserver {
     static final long DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS = 60 * 1000;
     static final boolean DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE = true;
 
+    static final int DEFAULT_MAX_SERVICE_CONNECTIONS_PER_PROCESS = 3000;
+
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
      */
@@ -334,6 +336,9 @@ final class ActivityManagerConstants extends ContentObserver {
 
     private static final String KEY_SERVICE_BIND_ALMOST_PERCEPTIBLE_TIMEOUT_MS =
             "service_bind_almost_perceptible_timeout_ms";
+
+    private static final String KEY_MAX_SERVICE_CONNECTIONS_PER_PROCESS =
+            "max_service_connections_per_process";
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -687,6 +692,12 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     volatile String mComponentAliasOverrides = DEFAULT_COMPONENT_ALIAS_OVERRIDES;
 
+    /**
+     *  The max number of outgoing ServiceConnection a process is allowed to bind to a service
+     *  (or multiple services).
+     */
+    volatile int mMaxServiceConnectionsPerProcess = DEFAULT_MAX_SERVICE_CONNECTIONS_PER_PROCESS;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -989,6 +1000,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_NETWORK_ACCESS_TIMEOUT_MS:
                                 updateNetworkAccessTimeoutMs();
+                                break;
+                            case KEY_MAX_SERVICE_CONNECTIONS_PER_PROCESS:
+                                updateMaxServiceConnectionsPerProcess();
                                 break;
                             default:
                                 break;
@@ -1633,6 +1647,13 @@ final class ActivityManagerConstants extends ContentObserver {
         }
     }
 
+    private void updateMaxServiceConnectionsPerProcess() {
+        mMaxServiceConnectionsPerProcess = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_MAX_SERVICE_CONNECTIONS_PER_PROCESS,
+                DEFAULT_MAX_SERVICE_CONNECTIONS_PER_PROCESS);
+    }
+
     @NeverCompile // Avoid size overhead of debugging code.
     void dump(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER SETTINGS (dumpsys activity settings) "
@@ -1779,6 +1800,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mServiceBindAlmostPerceptibleTimeoutMs);
         pw.print("  "); pw.print(KEY_NETWORK_ACCESS_TIMEOUT_MS);
         pw.print("="); pw.println(mNetworkAccessTimeoutMs);
+        pw.print("  "); pw.print(KEY_MAX_SERVICE_CONNECTIONS_PER_PROCESS);
+        pw.print("="); pw.println(mMaxServiceConnectionsPerProcess);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {

@@ -20,13 +20,13 @@ import android.app.Instrumentation
 import android.support.test.launcherhelper.ILauncherStrategy
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.IComponentMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 
 class ImeStateInitializeHelper @JvmOverloads constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.IME_ACTIVITY_INITIALIZE_LAUNCHER_NAME,
-    component: FlickerComponentName =
+    component: IComponentMatcher =
         ActivityOptions.IME_ACTIVITY_INITIALIZE_COMPONENT_NAME.toFlickerComponent(),
     launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
             .getInstance(instr)

@@ -32,7 +32,7 @@ import com.android.server.wm.flicker.helpers.ImeEditorPopupDialogAppHelper
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.flicker.traces.region.RegionSubject
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -91,12 +91,12 @@ class CloseImeEditorPopupDialogTest(private val testSpec: FlickerTestParameter) 
     @Test
     fun imeLayerAndImeSnapshotVisibleOnScreen() {
         testSpec.assertLayers {
-            this.isVisible(FlickerComponentName.IME)
+            this.isVisible(ComponentMatcher.IME)
                     .then()
-                    .isVisible(FlickerComponentName.IME_SNAPSHOT)
+                    .isVisible(ComponentMatcher.IME_SNAPSHOT)
                     .then()
-                    .isInvisible(FlickerComponentName.IME_SNAPSHOT, isOptional = true)
-                    .isInvisible(FlickerComponentName.IME)
+                    .isInvisible(ComponentMatcher.IME_SNAPSHOT, isOptional = true)
+                    .isInvisible(ComponentMatcher.IME)
         }
     }
 
@@ -107,13 +107,13 @@ class CloseImeEditorPopupDialogTest(private val testSpec: FlickerTestParameter) 
             this.invoke("imeSnapshotAssociatedOnAppVisibleRegion") {
                 val imeSnapshotLayers = it.subjects.filter {
                     subject -> subject.name.contains(
-                        FlickerComponentName.IME_SNAPSHOT.toLayerName()) && subject.isVisible
+                    ComponentMatcher.IME_SNAPSHOT.toLayerName()) && subject.isVisible
                 }
                 if (imeSnapshotLayers.isNotEmpty()) {
                     val visibleAreas = imeSnapshotLayers.mapNotNull { imeSnapshotLayer ->
                         imeSnapshotLayer.layer?.visibleRegion }.toTypedArray()
                     val imeVisibleRegion = RegionSubject.assertThat(visibleAreas, this, timestamp)
-                    val appVisibleRegion = it.visibleRegion(imeTestApp.component)
+                    val appVisibleRegion = it.visibleRegion(imeTestApp)
                     if (imeVisibleRegion.region.isNotEmpty) {
                         imeVisibleRegion.coversAtMost(appVisibleRegion.region)
                     }

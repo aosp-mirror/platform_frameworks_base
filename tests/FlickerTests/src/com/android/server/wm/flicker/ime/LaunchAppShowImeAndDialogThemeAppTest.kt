@@ -32,7 +32,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.FixMethodOrder
@@ -81,31 +81,31 @@ class LaunchAppShowImeAndDialogThemeAppTest(private val testSpec: FlickerTestPar
     }
 
     /**
-     * Checks that [FlickerComponentName.IME] layer becomes visible during the transition
+     * Checks that [ComponentMatcher.IME] layer becomes visible during the transition
      */
     @FlakyTest(bugId = 215884488)
     @Test
     fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible()
 
     /**
-     * Checks that [FlickerComponentName.IME] layer is visible at the end of the transition
+     * Checks that [ComponentMatcher.IME] layer is visible at the end of the transition
      */
     @FlakyTest(bugId = 227142436)
     @Test
     fun imeLayerExistsEnd() {
         testSpec.assertLayersEnd {
-            this.isVisible(FlickerComponentName.IME)
+            this.isVisible(ComponentMatcher.IME)
         }
     }
 
     /**
-     * Checks that [FlickerComponentName.IME_SNAPSHOT] layer is invisible always.
+     * Checks that [ComponentMatcher.IME_SNAPSHOT] layer is invisible always.
      */
     @Presubmit
     @Test
     fun imeSnapshotNotVisible() {
         testSpec.assertLayers {
-            this.isInvisible(FlickerComponentName.IME_SNAPSHOT)
+            this.isInvisible(ComponentMatcher.IME_SNAPSHOT)
         }
     }
 

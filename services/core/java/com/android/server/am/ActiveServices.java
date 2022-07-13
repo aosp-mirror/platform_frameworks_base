@@ -2855,6 +2855,14 @@ public final class ActiveServices {
             return -1;
         }
         ServiceRecord s = res.record;
+        final AppBindRecord b = s.retrieveAppBindingLocked(service, callerApp);
+        final ProcessServiceRecord clientPsr = b.client.mServices;
+        if (clientPsr.numberOfConnections() >= mAm.mConstants.mMaxServiceConnectionsPerProcess) {
+            Slog.w(TAG, "bindService exceeded max service connection number per process, "
+                    + "callerApp:" + callerApp.processName
+                    + " intent:" + service);
+            return 0;
+        }
 
         // The package could be frozen (meaning it's doing surgery), defer the actual
         // binding until the package is unfrozen.
@@ -2905,7 +2913,6 @@ public final class ActiveServices {
             mAm.grantImplicitAccess(callerApp.userId, service,
                     callerApp.uid, UserHandle.getAppId(s.appInfo.uid));
 
-            AppBindRecord b = s.retrieveAppBindingLocked(service, callerApp);
             ConnectionRecord c = new ConnectionRecord(b, activity,
                     connection, flags, clientLabel, clientIntent,
                     callerApp.uid, callerApp.processName, callingPackage, res.aliasComponent);
@@ -2916,7 +2923,6 @@ public final class ActiveServices {
             if (activity != null) {
                 activity.addConnection(c);
             }
-            final ProcessServiceRecord clientPsr = b.client.mServices;
             clientPsr.addConnection(c);
             c.startAssociationIfNeeded();
             if ((c.flags&Context.BIND_ABOVE_CLIENT) != 0) {

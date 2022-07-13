@@ -58,7 +58,7 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
         get() = {
             super.transition(this)
             transitions {
-                val pipRegion = wmHelper.getWindowRegion(pipApp.component).bounds
+                val pipRegion = wmHelper.getWindowRegion(pipApp).bounds
                 val pipCenterX = pipRegion.centerX()
                 val pipCenterY = pipRegion.centerY()
                 val displayCenterX = device.displayWidth / 2
@@ -66,7 +66,7 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
                 // Wait until the other app is no longer visible
                 wmHelper.StateSyncBuilder()
                     .withPipGone()
-                    .withWindowSurfaceDisappeared(pipApp.component)
+                    .withWindowSurfaceDisappeared(pipApp)
                     .withAppTransitionIdle()
                     .waitForAndVerify()
             }

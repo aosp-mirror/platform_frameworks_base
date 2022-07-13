@@ -28,7 +28,6 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
@@ -107,7 +106,7 @@ class EnterPipToOtherOrientationTest(
         }
 
     /**
-     * Checks that the [FlickerComponentName.NAV_BAR] has the correct position at
+     * Checks that the [ComponentMatcher.NAV_BAR] has the correct position at
      * the start and end of the transition
      */
     @FlakyTest
@@ -130,7 +129,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun pipAppWindowIsAlwaysOnTop() {
         testSpec.assertWm {
-            isAppWindowOnTop(pipApp.component)
+            isAppWindowOnTop(pipApp)
         }
     }
 
@@ -141,7 +140,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun testAppWindowInvisibleOnStart() {
         testSpec.assertWmStart {
-            isAppWindowInvisible(testApp.component)
+            isAppWindowInvisible(testApp)
         }
     }
 
@@ -152,7 +151,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun testAppWindowVisibleOnEnd() {
         testSpec.assertWmEnd {
-            isAppWindowVisible(testApp.component)
+            isAppWindowVisible(testApp)
         }
     }
 
@@ -163,7 +162,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun testAppLayerInvisibleOnStart() {
         testSpec.assertLayersStart {
-            isInvisible(testApp.component)
+            isInvisible(testApp)
         }
     }
 
@@ -174,7 +173,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun testAppLayerVisibleOnEnd() {
         testSpec.assertLayersEnd {
-            isVisible(testApp.component)
+            isVisible(testApp)
         }
     }
 
@@ -186,7 +185,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun pipAppLayerCoversFullScreenOnStart() {
         testSpec.assertLayersStart {
-            visibleRegion(pipApp.component).coversExactly(startingBounds)
+            visibleRegion(pipApp).coversExactly(startingBounds)
         }
     }
 
@@ -198,8 +197,8 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun testAppPlusPipLayerCoversFullScreenOnEnd() {
         testSpec.assertLayersEnd {
-            val pipRegion = visibleRegion(pipApp.component).region
-            visibleRegion(testApp.component)
+            val pipRegion = visibleRegion(pipApp).region
+            visibleRegion(testApp)
                 .plus(pipRegion)
                 .coversExactly(endingBounds)
         }

@@ -29,8 +29,6 @@ import android.util.NtpTrustedTime;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.Date;
-
 /**
  * Handles inject NTP time to GNSS.
  *
@@ -194,18 +192,18 @@ class NtpTimeHelper {
             return false;
         }
 
-        long time = ntpResult.getTimeMillis();
-        long timeReference = ntpResult.getElapsedRealtimeMillis();
-        long certainty = ntpResult.getCertaintyMillis();
-
+        long unixEpochTimeMillis = ntpResult.getTimeMillis();
+        long timeReferenceMillis = ntpResult.getElapsedRealtimeMillis();
+        int uncertaintyMillis = ntpResult.getUncertaintyMillis();
         if (DEBUG) {
-            long now = System.currentTimeMillis();
-            Log.d(TAG, "NTP server returned: " + time + " (" + new Date(time) + ")"
-                    + " ntpResult: " + ntpResult + " system time offset: " + (time - now));
+            long currentTimeMillis = System.currentTimeMillis();
+            Log.d(TAG, "NTP server returned: " + unixEpochTimeMillis
+                    + " ntpResult: " + ntpResult
+                    + " system time offset: " + (unixEpochTimeMillis - currentTimeMillis));
         }
 
-        // Ok to cast to int, as can't rollover in practice
-        mHandler.post(() -> mCallback.injectTime(time, timeReference, (int) certainty));
+        mHandler.post(() -> mCallback.injectTime(unixEpochTimeMillis, timeReferenceMillis,
+                uncertaintyMillis));
         return true;
     }
 }

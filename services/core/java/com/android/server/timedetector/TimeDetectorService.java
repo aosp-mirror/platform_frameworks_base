@@ -27,7 +27,6 @@ import android.app.time.TimeConfiguration;
 import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ITimeDetectorService;
 import android.app.timedetector.ManualTimeSuggestion;
-import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.app.timedetector.TimePoint;
 import android.content.Context;
@@ -295,8 +294,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         }
     }
 
-    @Override
-    public void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSignal) {
+    void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSignal) {
         enforceSuggestNetworkTimePermission();
         Objects.requireNonNull(timeSignal);
 

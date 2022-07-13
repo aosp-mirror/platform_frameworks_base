@@ -25,7 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.traces.common.FlickerComponentName.Companion.LAUNCHER
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,7 +69,7 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     @Presubmit
     @Test
     fun pipWindowRemainInsideVisibleBounds() {
-        testSpec.assertWmVisibleRegion(pipApp.component) {
+        testSpec.assertWmVisibleRegion(pipApp) {
             coversAtMost(displayBounds)
         }
     }
@@ -81,7 +81,7 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     @Presubmit
     @Test
     fun pipLayerRemainInsideVisibleBounds() {
-        testSpec.assertLayersVisibleRegion(pipApp.component) {
+        testSpec.assertLayersVisibleRegion(pipApp) {
             coversAtMost(displayBounds)
         }
     }
@@ -93,7 +93,7 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     @Test
     fun pipWindowIsAlwaysVisible() {
         testSpec.assertWm {
-            isAppWindowVisible(pipApp.component)
+            isAppWindowVisible(pipApp)
         }
     }
 
@@ -104,7 +104,7 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     @Test
     fun pipLayerIsAlwaysVisible() {
         testSpec.assertLayers {
-            isVisible(pipApp.component)
+            isVisible(pipApp)
         }
     }
 
@@ -114,9 +114,8 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     @FlakyTest(bugId = 228012337)
     @Test
     fun pipLayerExpands() {
-        val layerName = pipApp.component.toLayerName()
         testSpec.assertLayers {
-            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
                 current.visibleRegion.coversAtLeast(previous.visibleRegion.region)
             }
@@ -126,9 +125,8 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     @Presubmit
     @Test
     fun pipSameAspectRatio() {
-        val layerName = pipApp.component.toLayerName()
         testSpec.assertLayers {
-            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
                 current.visibleRegion.isSameAspectRatio(previous.visibleRegion)
             }
@@ -142,18 +140,18 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     @Test
     fun windowIsAlwaysPinned() {
         testSpec.assertWm {
-            this.invoke("hasPipWindow") { it.isPinned(pipApp.component) }
+            this.invoke("hasPipWindow") { it.isPinned(pipApp) }
         }
     }
 
     /**
-     * Checks [LAUNCHER] layer remains visible throughout the animation
+     * Checks [ComponentMatcher.LAUNCHER] layer remains visible throughout the animation
      */
     @Presubmit
     @Test
     fun launcherIsAlwaysVisible() {
         testSpec.assertLayers {
-            isVisible(LAUNCHER)
+            isVisible(ComponentMatcher.LAUNCHER)
         }
     }
 

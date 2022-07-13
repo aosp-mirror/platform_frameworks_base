@@ -3386,11 +3386,9 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING)
         @Override
         public void setToastRateLimitingEnabled(boolean enable) {
-            getContext().enforceCallingPermission(
-                    android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING,
-                    "App doesn't have the permission to enable/disable toast rate limiting");
 
             synchronized (mToastQueue) {
                 int uid = Binder.getCallingUid();

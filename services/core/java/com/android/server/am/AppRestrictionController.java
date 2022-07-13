@@ -2151,7 +2151,7 @@ public final class AppRestrictionController {
         return AppBackgroundRestrictionsInfo.SDK_UNKNOWN;
     }
 
-    private void applyRestrictionLevel(String pkgName, int uid,
+    void applyRestrictionLevel(String pkgName, int uid,
             @RestrictionLevel int level, TrackerInfo trackerInfo,
             int curBucket, boolean allowUpdateBucket, int reason, int subReason) {
         int curLevel;

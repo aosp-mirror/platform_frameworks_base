@@ -36,7 +36,7 @@ import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -93,9 +93,9 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(
-                FlickerComponentName.IME,
-                FlickerComponentName.SPLASH_SCREEN,
-                FlickerComponentName.SNAPSHOT))
+                ComponentMatcher.IME,
+                ComponentMatcher.SPLASH_SCREEN,
+                ComponentMatcher.SNAPSHOT))
         }
     }
 
@@ -107,9 +107,9 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun imeAppWindowBecomesInvisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(testApp.component)
+            this.isAppWindowVisible(testApp)
                     .then()
-                    .isAppWindowInvisible(testApp.component)
+                    .isAppWindowInvisible(testApp)
         }
     }
 
@@ -133,9 +133,9 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun imeAppLayerBecomesInvisible() {
         testSpec.assertLayers {
-            this.isVisible(testApp.component)
+            this.isVisible(testApp)
                     .then()
-                    .isInvisible(testApp.component)
+                    .isInvisible(testApp)
         }
     }
 
@@ -152,8 +152,8 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
     fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(listOf(
-                FlickerComponentName.IME,
-                FlickerComponentName.SPLASH_SCREEN))
+                ComponentMatcher.IME,
+                ComponentMatcher.SPLASH_SCREEN))
         }
     }
 

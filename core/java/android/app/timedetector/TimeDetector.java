@@ -113,14 +113,6 @@ public interface TimeDetector {
     boolean suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
 
     /**
-     * Suggests the time according to a network time source like NTP.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.SET_TIME)
-    void suggestNetworkTime(NetworkTimeSuggestion timeSuggestion);
-
-    /**
      * Suggests the time according to a gnss time source.
      *
      * @hide

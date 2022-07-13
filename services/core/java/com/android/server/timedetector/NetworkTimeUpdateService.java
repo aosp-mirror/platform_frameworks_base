@@ -20,8 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.app.timedetector.NetworkTimeSuggestion;
-import android.app.timedetector.TimeDetector;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -48,6 +46,7 @@ import android.util.NtpTrustedTime;
 import android.util.NtpTrustedTime.TimeResult;
 
 import com.android.internal.util.DumpUtils;
+import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -80,7 +79,7 @@ public class NetworkTimeUpdateService extends Binder {
     private final Context mContext;
     private final NtpTrustedTime mTime;
     private final AlarmManager mAlarmManager;
-    private final TimeDetector mTimeDetector;
+    private final TimeDetectorInternal mTimeDetectorInternal;
     private final ConnectivityManager mCM;
     private final PendingIntent mPendingPollIntent;
     private final PowerManager.WakeLock mWakeLock;
@@ -112,7 +111,7 @@ public class NetworkTimeUpdateService extends Binder {
         mContext = context;
         mTime = NtpTrustedTime.getInstance(context);
         mAlarmManager = mContext.getSystemService(AlarmManager.class);
-        mTimeDetector = mContext.getSystemService(TimeDetector.class);
+        mTimeDetectorInternal = LocalServices.getService(TimeDetectorInternal.class);
         mCM = mContext.getSystemService(ConnectivityManager.class);
 
         Intent pollIntent = new Intent(ACTION_POLL, null);
@@ -272,9 +271,10 @@ public class NetworkTimeUpdateService extends Binder {
     private void makeNetworkTimeSuggestion(TimeResult ntpResult, String debugInfo) {
         TimestampedValue<Long> timeSignal = new TimestampedValue<>(
                 ntpResult.getElapsedRealtimeMillis(), ntpResult.getTimeMillis());
-        NetworkTimeSuggestion timeSuggestion = new NetworkTimeSuggestion(timeSignal);
+        NetworkTimeSuggestion timeSuggestion =
+                new NetworkTimeSuggestion(timeSignal, ntpResult.getUncertaintyMillis());
         timeSuggestion.addDebugInfo(debugInfo);
-        mTimeDetector.suggestNetworkTime(timeSuggestion);
+        mTimeDetectorInternal.suggestNetworkTime(timeSuggestion);
     }
 
     /**

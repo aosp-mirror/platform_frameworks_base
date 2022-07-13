@@ -88,7 +88,7 @@ open class SetRequestedOrientationWhilePinnedTest(
                 pipApp.launchViaIntent(wmHelper)
                 // System bar may fade out during fixed rotation.
                 wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(pipApp.component)
+                    .withFullScreenApp(pipApp)
                     .withRotation(Surface.ROTATION_90)
                     .withAppTransitionIdle()
                     .withNavBarStatusBarVisible()
@@ -120,7 +120,7 @@ open class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipWindowInsideDisplay() {
         testSpec.assertWmStart {
-            frameRegion(pipApp.component).coversAtMost(startingBounds)
+            visibleRegion(pipApp).coversAtMost(startingBounds)
         }
     }
 
@@ -128,7 +128,7 @@ open class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipAppShowsOnTop() {
         testSpec.assertWmEnd {
-            isAppWindowOnTop(pipApp.component)
+            isAppWindowOnTop(pipApp)
         }
     }
 
@@ -136,7 +136,7 @@ open class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipLayerInsideDisplay() {
         testSpec.assertLayersStart {
-            visibleRegion(pipApp.component).coversAtMost(startingBounds)
+            visibleRegion(pipApp).coversAtMost(startingBounds)
         }
     }
 
@@ -144,7 +144,7 @@ open class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipAlwaysVisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(pipApp.component)
+            this.isAppWindowVisible(pipApp)
         }
     }
 
@@ -152,7 +152,7 @@ open class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipAppLayerCoversFullScreen() {
         testSpec.assertLayersEnd {
-            visibleRegion(pipApp.component).coversExactly(endingBounds)
+            visibleRegion(pipApp).coversExactly(endingBounds)
         }
     }
 

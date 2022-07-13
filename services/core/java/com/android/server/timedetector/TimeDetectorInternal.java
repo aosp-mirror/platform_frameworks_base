@@ -16,6 +16,8 @@
 
 package com.android.server.timedetector;
 
+import android.annotation.NonNull;
+
 /**
  * The internal (in-process) system server API for the {@link
  * com.android.server.timedetector.TimeDetectorService}.
@@ -25,4 +27,6 @@ package com.android.server.timedetector;
  */
 public interface TimeDetectorInternal {
 
+    /** Used to pass new network time suggestions to the time detector. */
+    void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSignal);
 }

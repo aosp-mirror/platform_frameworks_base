@@ -68,7 +68,7 @@ open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter) :
                 eachRun {
                     testApp.launchViaIntent(wmHelper)
                     wmHelper.StateSyncBuilder()
-                        .withFullScreenApp(testApp.component)
+                        .withFullScreenApp(testApp)
                         .waitForAndVerify()
                     testApp.postNotification(wmHelper)
                     tapl.goHome()
@@ -108,7 +108,7 @@ open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter) :
 
                 // Wait for the app to launch
                 wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(testApp.component)
+                    .withFullScreenApp(testApp)
                     .waitForAndVerify()
             }
 
@@ -148,7 +148,7 @@ open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter) :
     @Postsubmit
     fun notificationAppWindowVisibleAtEnd() {
         testSpec.assertWmEnd {
-            this.isAppWindowVisible(testApp.component)
+            this.isAppWindowVisible(testApp)
         }
     }
 
@@ -156,7 +156,7 @@ open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter) :
     @Postsubmit
     fun notificationAppWindowOnTopAtEnd() {
         testSpec.assertWmEnd {
-            this.isAppWindowOnTop(testApp.component)
+            this.isAppWindowOnTop(testApp)
         }
     }
 
@@ -164,7 +164,7 @@ open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter) :
     @Postsubmit
     fun notificationAppLayerVisibleAtEnd() {
         testSpec.assertLayersEnd {
-            this.isVisible(testApp.component)
+            this.isVisible(testApp)
         }
     }
 

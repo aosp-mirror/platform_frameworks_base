@@ -20,7 +20,7 @@ import android.app.Instrumentation
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.IComponentMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
@@ -29,7 +29,7 @@ class ImeEditorPopupDialogAppHelper @JvmOverloads constructor(
     private val rotation: Int,
     private val imePackageName: String = IME_PACKAGE,
     launcherName: String = ActivityOptions.EDITOR_POPUP_DIALOG_ACTIVITY_LAUNCHER_NAME,
-    component: FlickerComponentName =
+    component: IComponentMatcher =
             ActivityOptions.EDITOR_POPUP_DIALOG_ACTIVITY_COMPONENT_NAME.toFlickerComponent()
 ) : ImeAppHelper(instr, launcherName, component) {
     override fun openIME(wmHelper: WindowManagerStateHelper) {

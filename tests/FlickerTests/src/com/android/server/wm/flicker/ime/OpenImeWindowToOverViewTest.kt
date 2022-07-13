@@ -36,7 +36,7 @@ import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume.assumeFalse
@@ -154,10 +154,10 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
         assumeTrue(testSpec.isGesturalNavigation)
         assumeTrue(isShellTransitionsEnabled)
         testSpec.assertLayersStart {
-            this.isVisible(FlickerComponentName.NAV_BAR)
+            this.isVisible(ComponentMatcher.NAV_BAR)
         }
         testSpec.assertLayersEnd {
-            this.isInvisible(FlickerComponentName.NAV_BAR)
+            this.isInvisible(ComponentMatcher.NAV_BAR)
         }
     }
 
@@ -173,10 +173,10 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
     fun statusBarLayerIsInvisibleInLandscape() {
         assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
         testSpec.assertLayersStart {
-            this.isVisible(FlickerComponentName.STATUS_BAR)
+            this.isVisible(ComponentMatcher.STATUS_BAR)
         }
         testSpec.assertLayersEnd {
-            this.isInvisible(FlickerComponentName.STATUS_BAR)
+            this.isInvisible(ComponentMatcher.STATUS_BAR)
         }
     }
 
@@ -184,16 +184,16 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun imeLayerIsVisibleAndAssociatedWithAppWidow() {
         testSpec.assertLayersStart {
-            isVisible(FlickerComponentName.IME).visibleRegion(FlickerComponentName.IME)
-                    .coversAtMost(isVisible(imeTestApp.component)
-                            .visibleRegion(imeTestApp.component).region)
+            isVisible(ComponentMatcher.IME).visibleRegion(ComponentMatcher.IME)
+                    .coversAtMost(isVisible(imeTestApp)
+                            .visibleRegion(imeTestApp).region)
         }
         testSpec.assertLayers {
             this.invoke("imeLayerIsVisibleAndAlignAppWidow") {
-                val imeVisibleRegion = it.visibleRegion(FlickerComponentName.IME)
-                val appVisibleRegion = it.visibleRegion(imeTestApp.component)
+                val imeVisibleRegion = it.visibleRegion(ComponentMatcher.IME)
+                val appVisibleRegion = it.visibleRegion(imeTestApp)
                 if (imeVisibleRegion.region.isNotEmpty) {
-                    it.isVisible(FlickerComponentName.IME)
+                    it.isVisible(ComponentMatcher.IME)
                     imeVisibleRegion.coversAtMost(appVisibleRegion.region)
                 }
             }

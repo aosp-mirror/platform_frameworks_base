@@ -38,7 +38,7 @@ import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import com.android.server.wm.traces.common.Rect
 import org.junit.Assume
 import org.junit.Before
@@ -114,7 +114,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     @Test
     fun startsWithApp2WindowsCoverFullScreen() {
         testSpec.assertWmStart {
-            this.frameRegion(testApp2.component).coversExactly(startDisplayBounds)
+            this.visibleRegion(testApp2).coversExactly(startDisplayBounds)
         }
     }
 
@@ -126,7 +126,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     @Test
     fun startsWithApp2LayersCoverFullScreen() {
         testSpec.assertLayersStart {
-            this.visibleRegion(testApp2.component).coversExactly(startDisplayBounds)
+            this.visibleRegion(testApp2).coversExactly(startDisplayBounds)
         }
     }
 
@@ -137,7 +137,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     @Test
     fun startsWithApp2WindowBeingOnTop() {
         testSpec.assertWmStart {
-            this.isAppWindowOnTop(testApp2.component)
+            this.isAppWindowOnTop(testApp2)
         }
     }
 
@@ -149,7 +149,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     @Test
     fun endsWithApp1WindowsCoveringFullScreen() {
         testSpec.assertWmEnd {
-            this.frameRegion(testApp1.component).coversExactly(startDisplayBounds)
+            this.visibleRegion(testApp1).coversExactly(startDisplayBounds)
         }
     }
 
@@ -161,7 +161,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     @Test
     fun endsWithApp1LayersCoveringFullScreen() {
         testSpec.assertLayersEnd {
-            this.visibleRegion(testApp1.component).coversExactly(startDisplayBounds)
+            this.visibleRegion(testApp1).coversExactly(startDisplayBounds)
         }
     }
 
@@ -173,7 +173,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     @Test
     fun endsWithApp1BeingOnTop() {
         testSpec.assertWmEnd {
-            this.isAppWindowOnTop(testApp1.component)
+            this.isAppWindowOnTop(testApp1)
         }
     }
 
@@ -185,11 +185,11 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     @Test
     fun app1WindowBecomesAndStaysVisible() {
         testSpec.assertWm {
-            this.isAppWindowInvisible(testApp1.component)
+            this.isAppWindowInvisible(testApp1)
                     .then()
-                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
+                    .isAppWindowVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
                     .then()
-                    .isAppWindowVisible(testApp1.component)
+                    .isAppWindowVisible(testApp1)
         }
     }
 
@@ -201,9 +201,9 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     @Test
     fun app1LayerBecomesAndStaysVisible() {
         testSpec.assertLayers {
-            this.isInvisible(testApp1.component)
+            this.isInvisible(testApp1)
                     .then()
-                    .isVisible(testApp1.component)
+                    .isVisible(testApp1)
         }
     }
 
@@ -215,9 +215,9 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     @Test
     fun app2WindowBecomesAndStaysInvisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(testApp2.component)
+            this.isAppWindowVisible(testApp2)
                     .then()
-                    .isAppWindowInvisible(testApp2.component)
+                    .isAppWindowInvisible(testApp2)
         }
     }
 
@@ -229,9 +229,9 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     @Test
     fun app2LayerBecomesAndStaysInvisible() {
         testSpec.assertLayers {
-            this.isVisible(testApp2.component)
+            this.isVisible(testApp2)
                     .then()
-                    .isInvisible(testApp2.component)
+                    .isInvisible(testApp2)
         }
     }
 
@@ -244,14 +244,14 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     @Test
     fun app1WindowIsVisibleOnceApp2WindowIsInvisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(testApp2.component)
+            this.isAppWindowVisible(testApp2)
                     .then()
                     // TODO: Do we actually want to test this? Seems too implementation specific...
-                    .isAppWindowVisible(FlickerComponentName.LAUNCHER, isOptional = true)
+                    .isAppWindowVisible(ComponentMatcher.LAUNCHER, isOptional = true)
                     .then()
-                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
+                    .isAppWindowVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
                     .then()
-                    .isAppWindowVisible(testApp1.component)
+                    .isAppWindowVisible(testApp1)
         }
     }
 
@@ -264,13 +264,13 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     @Test
     fun app1LayerIsVisibleOnceApp2LayerIsInvisible() {
         testSpec.assertLayers {
-            this.isVisible(testApp2.component)
+            this.isVisible(testApp2)
                     .then()
-                    .isVisible(FlickerComponentName.LAUNCHER, isOptional = true)
+                    .isVisible(ComponentMatcher.LAUNCHER, isOptional = true)
                     .then()
-                    .isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
+                    .isVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
                     .then()
-                    .isVisible(testApp1.component)
+                    .isVisible(testApp1)
         }
     }
 
