@@ -1111,15 +1111,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     appOpsManager.finishProxyOp(AppOpsManager.opToPublicName(op),
                             resolvedAttributionSource, skipCurrentFinish);
                 }
-
-                if (next == null || next.getNext() == null) {
-                    return;
-                }
-
                 RegisteredAttribution registered =
                         sRunningAttributionSources.remove(current.getToken());
                 if (registered != null) {
                     registered.unregister();
+                }
+
+                if (next == null || next.getNext() == null) {
+                    if (next != null) {
+                        registered = sRunningAttributionSources.remove(next.getToken());
+                        if (registered != null) {
+                            registered.unregister();
+                        }
+                    }
+                    return;
                 }
                 current = next;
             }
