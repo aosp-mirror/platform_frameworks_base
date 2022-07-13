@@ -716,31 +716,23 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             ActivityManager.RunningTaskInfo taskInfo1, ActivityManager.RunningTaskInfo taskInfo2) {
         if (offsetX == 0 && offsetY == 0) {
             wct.setBounds(taskInfo1.token, mBounds1);
-            wct.setAppBounds(taskInfo1.token, null);
             wct.setScreenSizeDp(taskInfo1.token,
                     SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
 
             wct.setBounds(taskInfo2.token, mBounds2);
-            wct.setAppBounds(taskInfo2.token, null);
             wct.setScreenSizeDp(taskInfo2.token,
                     SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
         } else {
-            mTempRect.set(taskInfo1.configuration.windowConfiguration.getBounds());
+            getBounds1(mTempRect);
             mTempRect.offset(offsetX, offsetY);
             wct.setBounds(taskInfo1.token, mTempRect);
-            mTempRect.set(taskInfo1.configuration.windowConfiguration.getAppBounds());
-            mTempRect.offset(offsetX, offsetY);
-            wct.setAppBounds(taskInfo1.token, mTempRect);
             wct.setScreenSizeDp(taskInfo1.token,
                     taskInfo1.configuration.screenWidthDp,
                     taskInfo1.configuration.screenHeightDp);
 
-            mTempRect.set(taskInfo2.configuration.windowConfiguration.getBounds());
+            getBounds2(mTempRect);
             mTempRect.offset(offsetX, offsetY);
             wct.setBounds(taskInfo2.token, mTempRect);
-            mTempRect.set(taskInfo2.configuration.windowConfiguration.getAppBounds());
-            mTempRect.offset(offsetX, offsetY);
-            wct.setAppBounds(taskInfo2.token, mTempRect);
             wct.setScreenSizeDp(taskInfo2.token,
                     taskInfo2.configuration.screenWidthDp,
                     taskInfo2.configuration.screenHeightDp);
