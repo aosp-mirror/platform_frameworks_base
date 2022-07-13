@@ -90,6 +90,7 @@ import com.android.systemui.wallet.dagger.WalletModule;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.dagger.DynamicOverride;
+import com.android.wm.shell.sysui.ShellController;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -208,7 +209,6 @@ public abstract class SystemUIModule {
             NotificationShadeWindowController notificationShadeWindowController,
             KeyguardStateController keyguardStateController,
             ShadeController shadeController,
-            ConfigurationController configurationController,
             @Nullable IStatusBarService statusBarService,
             INotificationManager notificationManager,
             NotificationVisibilityProvider visibilityProvider,
@@ -226,7 +226,6 @@ public abstract class SystemUIModule {
                 notificationShadeWindowController,
                 keyguardStateController,
                 shadeController,
-                configurationController,
                 statusBarService,
                 notificationManager,
                 visibilityProvider,

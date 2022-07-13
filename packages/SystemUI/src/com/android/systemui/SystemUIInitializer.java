@@ -27,6 +27,7 @@ import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.util.InitializationChecker;
 import com.android.wm.shell.dagger.WMShellConcurrencyModule;
+import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.transition.ShellTransitions;
 
 import java.util.Optional;
@@ -90,6 +91,7 @@ public abstract class SystemUIInitializer {
             // Only initialize when not starting from tests since this currently initializes some
             // components that shouldn't be run in the test environment
             builder = prepareSysUIComponentBuilder(builder, mWMComponent)
+                    .setShell(mWMComponent.getShell())
                     .setPip(mWMComponent.getPip())
                     .setSplitScreen(mWMComponent.getSplitScreen())
                     .setOneHanded(mWMComponent.getOneHanded())
@@ -109,6 +111,7 @@ public abstract class SystemUIInitializer {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
             // is separating this logic into newly creating SystemUITestsFactory.
             builder = prepareSysUIComponentBuilder(builder, mWMComponent)
+                    .setShell(new ShellInterface() {})
                     .setPip(Optional.ofNullable(null))
                     .setSplitScreen(Optional.ofNullable(null))
                     .setOneHanded(Optional.ofNullable(null))

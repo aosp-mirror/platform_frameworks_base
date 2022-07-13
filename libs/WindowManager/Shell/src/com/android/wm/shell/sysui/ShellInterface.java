@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.draganddrop;
+package com.android.wm.shell.sysui;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import android.content.res.Configuration;
 
 /**
- * Interface for telling DragAndDrop stuff.
+ * General interface for notifying the Shell of common SysUI events like configuration or keyguard
+ * changes.
+ *
+ * TODO: Move ShellInit and ShellCommandHandler into this interface
  */
-@ExternalThread
-public interface DragAndDrop {
+public interface ShellInterface {
+
+    /**
+     * Notifies the Shell that the configuration has changed.
+     */
+    default void onConfigurationChanged(Configuration newConfiguration) {}
 }

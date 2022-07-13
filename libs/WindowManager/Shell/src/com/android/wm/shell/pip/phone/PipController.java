@@ -87,6 +87,8 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
@@ -100,7 +102,7 @@ import java.util.function.Consumer;
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
 public class PipController implements PipTransitionController.PipTransitionCallback,
-        RemoteCallable<PipController> {
+        RemoteCallable<PipController>, ConfigurationChangeListener {
     private static final String TAG = "PipController";
 
     private Context mContext;
@@ -119,6 +121,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private TaskStackListenerImpl mTaskStackListener;
     private PipParamsChangedForwarder mPipParamsChangedForwarder;
     private Optional<OneHandedController> mOneHandedController;
+    private final ShellController mShellController;
     protected final PipImpl mImpl;
 
     private final Rect mTmpInsetBounds = new Rect();
@@ -290,13 +293,20 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      * Instantiates {@link PipController}, returns {@code null} if the feature not supported.
      */
     @Nullable
-    public static Pip create(Context context, DisplayController displayController,
-            PipAppOpsListener pipAppOpsListener, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipKeepClearAlgorithm pipKeepClearAlgorithm, PipBoundsState pipBoundsState,
-            PipMotionHelper pipMotionHelper, PipMediaController pipMediaController,
-            PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
+    public static Pip create(Context context,
+            ShellController shellController,
+            DisplayController displayController,
+            PipAppOpsListener pipAppOpsListener,
+            PipBoundsAlgorithm pipBoundsAlgorithm,
+            PipKeepClearAlgorithm pipKeepClearAlgorithm,
+            PipBoundsState pipBoundsState,
+            PipMotionHelper pipMotionHelper,
+            PipMediaController pipMediaController,
+            PhonePipMenuController phonePipMenuController,
+            PipTaskOrganizer pipTaskOrganizer,
             PipTransitionState pipTransitionState,
-            PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
+            PipTouchHandler pipTouchHandler,
+            PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
@@ -308,9 +318,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             return null;
         }
 
-        return new PipController(context, displayController, pipAppOpsListener, pipBoundsAlgorithm,
-                pipKeepClearAlgorithm, pipBoundsState, pipMotionHelper, pipMediaController,
-                phonePipMenuController, pipTaskOrganizer, pipTransitionState,
+        return new PipController(context, shellController, displayController, pipAppOpsListener,
+                pipBoundsAlgorithm, pipKeepClearAlgorithm, pipBoundsState, pipMotionHelper,
+                pipMediaController, phonePipMenuController, pipTaskOrganizer, pipTransitionState,
                 pipTouchHandler, pipTransitionController,
                 windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
                 oneHandedController, mainExecutor)
@@ -318,6 +328,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     protected PipController(Context context,
+            ShellController shellController,
             DisplayController displayController,
             PipAppOpsListener pipAppOpsListener,
             PipBoundsAlgorithm pipBoundsAlgorithm,
@@ -343,6 +354,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         mContext = context;
+        mShellController = shellController;
         mImpl = new PipImpl();
         mWindowManagerShellWrapper = windowManagerShellWrapper;
         mDisplayController = displayController;
@@ -513,6 +525,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         }
                     });
         });
+
+        mShellController.addConfigurationChangeListener(this);
     }
 
     @Override
@@ -525,18 +539,21 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         return mMainExecutor;
     }
 
-    private void onConfigurationChanged(Configuration newConfig) {
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
         mPipBoundsAlgorithm.onConfigurationChanged(mContext);
         mTouchHandler.onConfigurationChanged();
         mPipBoundsState.onConfigurationChanged();
     }
 
-    private void onDensityOrFontScaleChanged() {
+    @Override
+    public void onDensityOrFontScaleChanged() {
         mPipTaskOrganizer.onDensityOrFontScaleChanged(mContext);
         onPipResourceDimensionsChanged();
     }
 
-    private void onOverlayChanged() {
+    @Override
+    public void onThemeChanged() {
         mTouchHandler.onOverlayChanged();
         onDisplayChanged(new DisplayLayout(mContext, mContext.getDisplay()),
                 false /* saveRestoreSnapFraction */);
@@ -919,27 +936,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         public void expandPip() {
             mMainExecutor.execute(() -> {
                 PipController.this.expandPip();
-            });
-        }
-
-        @Override
-        public void onConfigurationChanged(Configuration newConfig) {
-            mMainExecutor.execute(() -> {
-                PipController.this.onConfigurationChanged(newConfig);
-            });
-        }
-
-        @Override
-        public void onDensityOrFontScaleChanged() {
-            mMainExecutor.execute(() -> {
-                PipController.this.onDensityOrFontScaleChanged();
-            });
-        }
-
-        @Override
-        public void onOverlayChanged() {
-            mMainExecutor.execute(() -> {
-                PipController.this.onOverlayChanged();
             });
         }
 

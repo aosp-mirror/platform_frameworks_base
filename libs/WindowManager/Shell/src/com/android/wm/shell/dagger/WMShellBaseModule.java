@@ -82,6 +82,8 @@ import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.startingsurface.StartingWindowController;
 import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
 import com.android.wm.shell.startingsurface.phone.PhoneStartingWindowTypeAlgorithm;
+import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelper;
 import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelperController;
 import com.android.wm.shell.transition.ShellTransitions;
@@ -159,10 +161,13 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static DragAndDropController provideDragAndDropController(Context context,
-            DisplayController displayController, UiEventLogger uiEventLogger,
-            IconProvider iconProvider, @ShellMainThread ShellExecutor mainExecutor) {
-        return new DragAndDropController(context, displayController, uiEventLogger, iconProvider,
-                mainExecutor);
+            ShellController shellController,
+            DisplayController displayController,
+            UiEventLogger uiEventLogger,
+            IconProvider iconProvider,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new DragAndDropController(context, shellController, displayController, uiEventLogger,
+                iconProvider, mainExecutor);
     }
 
     @WMSingleton
@@ -377,9 +382,11 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Optional<HideDisplayCutoutController> provideHideDisplayCutoutController(Context context,
-            DisplayController displayController, @ShellMainThread ShellExecutor mainExecutor) {
+            ShellController shellController, DisplayController displayController,
+            @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(
-                HideDisplayCutoutController.create(context, displayController, mainExecutor));
+                HideDisplayCutoutController.create(context, shellController, displayController,
+                        mainExecutor));
     }
 
     //
@@ -619,6 +626,22 @@ public abstract class WMShellBaseModule {
             TaskViewTransitions taskViewTransitions) {
         return new TaskViewFactoryController(shellTaskOrganizer, mainExecutor, syncQueue,
                 taskViewTransitions);
+    }
+
+    //
+    // SysUI -> Shell interface
+    //
+
+    @WMSingleton
+    @Provides
+    static ShellInterface provideShellSysuiCallbacks(ShellController shellController) {
+        return shellController.asShell();
+    }
+
+    @WMSingleton
+    @Provides
+    static ShellController provideShellController(@ShellMainThread ShellExecutor mainExecutor) {
+        return new ShellController(mainExecutor);
     }
 
     //
