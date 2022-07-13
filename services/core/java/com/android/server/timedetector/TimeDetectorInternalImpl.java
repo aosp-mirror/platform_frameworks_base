@@ -46,4 +46,11 @@ public class TimeDetectorInternalImpl implements TimeDetectorInternal {
 
         mHandler.post(() -> mTimeDetectorStrategy.suggestNetworkTime(timeSignal));
     }
+
+    @Override
+    public void suggestGnssTime(@NonNull GnssTimeSuggestion timeSignal) {
+        Objects.requireNonNull(timeSignal);
+
+        mHandler.post(() -> mTimeDetectorStrategy.suggestGnssTime(timeSignal));
+    }
 }

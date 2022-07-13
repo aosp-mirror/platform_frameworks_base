@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package android.app.timedetector;
+package com.android.server.timedetector;
 
 import android.annotation.NonNull;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.app.timedetector.TimeSuggestionHelper;
 import android.os.ShellCommand;
 import android.os.TimestampedValue;
 
@@ -30,23 +29,8 @@ import java.util.Objects;
  * A time signal from a GNSS source.
  *
  * <p>See {@link TimeSuggestionHelper} for property information.
- *
- * @hide
  */
-public final class GnssTimeSuggestion implements Parcelable {
-
-    public static final @NonNull Creator<GnssTimeSuggestion> CREATOR =
-            new Creator<GnssTimeSuggestion>() {
-                public GnssTimeSuggestion createFromParcel(Parcel in) {
-                    TimeSuggestionHelper helper = TimeSuggestionHelper.handleCreateFromParcel(
-                            GnssTimeSuggestion.class, in);
-                    return new GnssTimeSuggestion(helper);
-                }
-
-                public GnssTimeSuggestion[] newArray(int size) {
-                    return new GnssTimeSuggestion[size];
-                }
-            };
+public final class GnssTimeSuggestion {
 
     @NonNull private final TimeSuggestionHelper mTimeSuggestionHelper;
 
@@ -56,16 +40,6 @@ public final class GnssTimeSuggestion implements Parcelable {
 
     private GnssTimeSuggestion(@NonNull TimeSuggestionHelper helper) {
         mTimeSuggestionHelper = Objects.requireNonNull(helper);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        mTimeSuggestionHelper.handleWriteToParcel(dest, flags);
     }
 
     @NonNull

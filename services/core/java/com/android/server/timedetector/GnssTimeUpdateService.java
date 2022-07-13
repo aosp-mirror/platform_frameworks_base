@@ -19,8 +19,6 @@ package com.android.server.timedetector;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
-import android.app.timedetector.GnssTimeSuggestion;
-import android.app.timedetector.TimeDetector;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -42,12 +40,13 @@ import com.android.server.SystemService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.time.Duration;
+import java.util.Objects;
 
 /**
  * Monitors the GNSS time.
  *
  * <p>When available, the time is always suggested to the {@link
- * com.android.server.timedetector.TimeDetectorService} where it may be used to set the device
+ * com.android.server.timedetector.TimeDetectorInternal} where it may be used to set the device
  * system clock, depending on user settings and what other signals are available.
  */
 public final class GnssTimeUpdateService extends Binder {
@@ -66,7 +65,16 @@ public final class GnssTimeUpdateService extends Binder {
 
         @Override
         public void onStart() {
-            mService = new GnssTimeUpdateService(getContext());
+            Context context = getContext().createAttributionContext(ATTRIBUTION_TAG);
+            AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
+            LocationManager locationManager = context.getSystemService(LocationManager.class);
+            LocationManagerInternal locationManagerInternal =
+                    LocalServices.getService(LocationManagerInternal.class);
+            TimeDetectorInternal timeDetectorInternal =
+                    LocalServices.getService(TimeDetectorInternal.class);
+
+            mService = new GnssTimeUpdateService(context, alarmManager, locationManager,
+                    locationManagerInternal, timeDetectorInternal);
             publishBinderService("gnss_time_update_service", mService);
         }
 
@@ -88,7 +96,7 @@ public final class GnssTimeUpdateService extends Binder {
     private static final String ATTRIBUTION_TAG = "GnssTimeUpdateService";
 
     private final Context mContext;
-    private final TimeDetector mTimeDetector;
+    private final TimeDetectorInternal mTimeDetectorInternal;
     private final AlarmManager mAlarmManager;
     private final LocationManager mLocationManager;
     private final LocationManagerInternal mLocationManagerInternal;
@@ -98,12 +106,15 @@ public final class GnssTimeUpdateService extends Binder {
     @Nullable private TimestampedValue<Long> mLastSuggestedGnssTime;
 
     @VisibleForTesting
-    GnssTimeUpdateService(@NonNull Context context) {
-        mContext = context.createAttributionContext(ATTRIBUTION_TAG);
-        mTimeDetector = mContext.getSystemService(TimeDetector.class);
-        mLocationManager = mContext.getSystemService(LocationManager.class);
-        mAlarmManager = mContext.getSystemService(AlarmManager.class);
-        mLocationManagerInternal = LocalServices.getService(LocationManagerInternal.class);
+    GnssTimeUpdateService(@NonNull Context context, @NonNull AlarmManager alarmManager,
+            @NonNull LocationManager locationManager,
+            @NonNull LocationManagerInternal locationManagerInternal,
+            @NonNull TimeDetectorInternal timeDetectorInternal) {
+        mContext = Objects.requireNonNull(context);
+        mAlarmManager = Objects.requireNonNull(alarmManager);
+        mLocationManager = Objects.requireNonNull(locationManager);
+        mLocationManagerInternal = Objects.requireNonNull(locationManagerInternal);
+        mTimeDetectorInternal = Objects.requireNonNull(timeDetectorInternal);
     }
 
     /**
@@ -191,7 +202,7 @@ public final class GnssTimeUpdateService extends Binder {
         mLastSuggestedGnssTime = timeSignal;
 
         GnssTimeSuggestion timeSuggestion = new GnssTimeSuggestion(timeSignal);
-        mTimeDetector.suggestGnssTime(timeSuggestion);
+        mTimeDetectorInternal.suggestGnssTime(timeSuggestion);
     }
 
     @Override

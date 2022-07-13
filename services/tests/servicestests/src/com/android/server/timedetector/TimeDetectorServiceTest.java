@@ -38,7 +38,6 @@ import static org.mockito.Mockito.when;
 import android.app.time.ExternalTimeSuggestion;
 import android.app.time.ITimeDetectorListener;
 import android.app.time.TimeConfiguration;
-import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.app.timedetector.TimePoint;
