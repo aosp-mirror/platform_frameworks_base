@@ -1982,6 +1982,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             mOwners.load();
             setDeviceOwnershipSystemPropertyLocked();
+            if (mOwners.hasDeviceOwner()) {
+                setGlobalSettingDeviceOwnerType(
+                        mOwners.getDeviceOwnerType(mOwners.getDeviceOwnerPackageName()));
+            }
         }
     }
 
@@ -8811,6 +8815,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         deleteTransferOwnershipBundleLocked(userId);
         toggleBackupServiceActive(UserHandle.USER_SYSTEM, true);
         pushUserControlDisabledPackagesLocked(userId);
+        setGlobalSettingDeviceOwnerType(DEVICE_OWNER_TYPE_DEFAULT);
     }
 
     private void clearApplicationRestrictions(int userId) {
@@ -18377,6 +18382,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 "Test only admins can only set the device owner type more than once");
 
         mOwners.setDeviceOwnerType(packageName, deviceOwnerType, isAdminTestOnly);
+        setGlobalSettingDeviceOwnerType(deviceOwnerType);
+    }
+
+    // TODO(b/237065504): Allow mainline modules to get the device owner type. This is a workaround
+    // to get the device owner type in PermissionController. See HibernationPolicy.kt.
+    private void setGlobalSettingDeviceOwnerType(int deviceOwnerType) {
+        mInjector.binderWithCleanCallingIdentity(
+                () -> mInjector.settingsGlobalPutInt("device_owner_type", deviceOwnerType));
     }
 
     @Override
