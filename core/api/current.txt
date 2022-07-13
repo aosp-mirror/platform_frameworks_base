@@ -14929,6 +14929,8 @@ package android.graphics {
     method public android.graphics.PathEffect getPathEffect();
     method public float getRunAdvance(char[], int, int, int, int, boolean, int);
     method public float getRunAdvance(CharSequence, int, int, int, int, boolean, int);
+    method public float getRunCharacterAdvance(@NonNull char[], int, int, int, int, boolean, int, @Nullable float[], int);
+    method public float getRunCharacterAdvance(@NonNull CharSequence, int, int, int, int, boolean, int, @Nullable float[], int);
     method public android.graphics.Shader getShader();
     method @ColorInt public int getShadowLayerColor();
     method @ColorLong public long getShadowLayerColorLong();
