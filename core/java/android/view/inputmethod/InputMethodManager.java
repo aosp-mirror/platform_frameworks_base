@@ -921,7 +921,7 @@ public final class InputMethodManager {
                         mRequestUpdateCursorAnchorInfoMonitorMode =
                                 REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE;
 
-                        setInputChannelLocked(res.channel);
+                        updateInputChannelLocked(res.channel);
                         mCurMethod = res.method; // for @UnsupportedAppUsage
                         mCurBindState = new BindState(res);
                         mCurId = res.id; // for @UnsupportedAppUsage
@@ -1623,7 +1623,7 @@ public final class InputMethodManager {
     void clearBindingLocked() {
         if (DEBUG) Log.v(TAG, "Clearing binding!");
         clearConnectionLocked();
-        setInputChannelLocked(null);
+        updateInputChannelLocked(null);
         mCurId = null; // for @UnsupportedAppUsage
         mCurMethod = null; // for @UnsupportedAppUsage
         // We only reset sequence number for input method, but not accessibility.
@@ -1648,26 +1648,36 @@ public final class InputMethodManager {
         mAccessibilityInputMethodSession.clear();
     }
 
-    void setInputChannelLocked(InputChannel channel) {
-        if (mCurChannel == channel) {
+    @GuardedBy("mH")
+    private void updateInputChannelLocked(InputChannel channel) {
+        if (areSameInputChannel(mCurChannel, channel)) {
             return;
         }
-        if (mCurChannel != null && channel != null
-                && mCurChannel.getToken() == channel.getToken()) {
-            // channel is a dupe of 'mCurChannel', because they have the same token, and represent
-            // the same connection. Ignore the incoming channel and keep using 'mCurChannel' to
-            // avoid confusing the InputEventReceiver.
-            return;
-        }
+        // TODO(b/238720598) : Requirements when design a new protocol for InputChannel
+        // channel is a dupe of 'mCurChannel', because they have the same token, and represent
+        // the same connection. Ignore the incoming channel and keep using 'mCurChannel' to
+        // avoid confusing the InputEventReceiver.
         if (mCurSender != null) {
             flushPendingEventsLocked();
             mCurSender.dispose();
             mCurSender = null;
         }
+
         if (mCurChannel != null) {
             mCurChannel.dispose();
         }
         mCurChannel = channel;
+    }
+
+    private static boolean areSameInputChannel(@Nullable InputChannel lhs,
+            @Nullable InputChannel rhs) {
+        if (lhs == rhs) {
+            return true;
+        }
+        if (lhs == null || rhs == null) {
+            return false;
+        }
+        return lhs.getToken() == rhs.getToken();
     }
 
     /**
@@ -2384,7 +2394,7 @@ public final class InputMethodManager {
             }
             mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
             if (res.id != null) {
-                setInputChannelLocked(res.channel);
+                updateInputChannelLocked(res.channel);
                 mCurMethod = res.method; // for @UnsupportedAppUsage
                 mCurBindState = new BindState(res);
                 mAccessibilityInputMethodSession.clear();
