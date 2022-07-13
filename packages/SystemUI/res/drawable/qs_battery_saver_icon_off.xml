@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <target android:name="time_group">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:duration="183"
+                    android:propertyName="translateX"
+                    android:startOffset="0"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:valueType="floatType" />
+            </set>
+        </aapt:attr>
+    </target>
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportHeight="24"
+            android:viewportWidth="24">
+            <group android:name="_R_G">
+                <group
+                    android:name="_R_G_L_0_G"
+                    android:translateX="12"
+                    android:translateY="12">
+                    <path
+                        android:name="_R_G_L_0_G_D_0_P_0"
+                        android:pathData=" M3.67 -8 C3.67,-8 2,-8 2,-8 C2,-8 2,-10 2,-10 C2,-10 -2,-10 -2,-10 C-2,-10 -2,-8 -2,-8 C-2,-8 -3.67,-8 -3.67,-8 C-4.4,-8 -5,-7.4 -5,-6.67 C-5,-6.67 -5,8.66 -5,8.66 C-5,9.4 -4.4,10 -3.67,10 C-3.67,10 3.66,10 3.66,10 C4.4,10 5,9.4 5,8.67 C5,8.67 5,-6.67 5,-6.67 C5,-7.4 4.4,-8 3.67,-8c "
+                        android:strokeAlpha="1"
+                        android:strokeColor="#ffffff"
+                        android:strokeLineCap="round"
+                        android:strokeLineJoin="round"
+                        android:strokeWidth="2" />
+                    <path
+                        android:name="_R_G_L_0_G_D_1_P_0"
+                        android:fillAlpha="1"
+                        android:fillColor="#ffffff"
+                        android:fillType="nonZero"
+                        android:pathData=" M2 -10 C2,-10 2,-7 2,-7 C2,-7 -2,-7 -2,-7 C-2,-7 -2,-10 -2,-10 C-2,-10 2,-10 2,-10c " />
+                    <path
+                        android:name="_R_G_L_0_G_D_2_P_0"
+                        android:fillAlpha="1"
+                        android:fillColor="#ffffff"
+                        android:fillType="nonZero"
+                        android:pathData=" M3 2 C3,2 1,2 1,2 C1,2 1,4 1,4 C1,4 -1,4 -1,4 C-1,4 -1,2 -1,2 C-1,2 -3,2 -3,2 C-3,2 -3,0 -3,0 C-3,0 -1,0 -1,0 C-1,0 -1,-2 -1,-2 C-1,-2 1,-2 1,-2 C1,-2 1,0 1,0 C1,0 3,0 3,0 C3,0 3,2 3,2c " />
+                </group>
+            </group>
+            <group android:name="time_group" />
+        </vector>
+    </aapt:attr>
+</animated-vector>
