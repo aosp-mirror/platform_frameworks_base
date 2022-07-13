@@ -670,9 +670,6 @@ public class AlarmManagerService extends SystemService {
         private static final String KEY_APP_STANDBY_RESTRICTED_WINDOW =
                 "app_standby_restricted_window";
 
-        @VisibleForTesting
-        static final String KEY_LAZY_BATCHING = "lazy_batching";
-
         private static final String KEY_TIME_TICK_ALLOWED_WHILE_IDLE =
                 "time_tick_allowed_while_idle";
 
@@ -722,7 +719,6 @@ public class AlarmManagerService extends SystemService {
         private static final int DEFAULT_APP_STANDBY_RESTRICTED_QUOTA = 1;
         private static final long DEFAULT_APP_STANDBY_RESTRICTED_WINDOW = INTERVAL_DAY;
 
-        private static final boolean DEFAULT_LAZY_BATCHING = true;
         private static final boolean DEFAULT_TIME_TICK_ALLOWED_WHILE_IDLE = true;
 
         /**
@@ -769,7 +765,6 @@ public class AlarmManagerService extends SystemService {
         public int APP_STANDBY_RESTRICTED_QUOTA = DEFAULT_APP_STANDBY_RESTRICTED_QUOTA;
         public long APP_STANDBY_RESTRICTED_WINDOW = DEFAULT_APP_STANDBY_RESTRICTED_WINDOW;
 
-        public boolean LAZY_BATCHING = DEFAULT_LAZY_BATCHING;
         public boolean TIME_TICK_ALLOWED_WHILE_IDLE = DEFAULT_TIME_TICK_ALLOWED_WHILE_IDLE;
 
         public int ALLOW_WHILE_IDLE_QUOTA = DEFAULT_ALLOW_WHILE_IDLE_QUOTA;
@@ -973,14 +968,6 @@ public class AlarmManagerService extends SystemService {
                         case KEY_APP_STANDBY_RESTRICTED_WINDOW:
                             updateStandbyWindowsLocked();
                             break;
-                        case KEY_LAZY_BATCHING:
-                            final boolean oldLazyBatching = LAZY_BATCHING;
-                            LAZY_BATCHING = properties.getBoolean(
-                                    KEY_LAZY_BATCHING, DEFAULT_LAZY_BATCHING);
-                            if (oldLazyBatching != LAZY_BATCHING) {
-                                migrateAlarmsToNewStoreLocked();
-                            }
-                            break;
                         case KEY_TIME_TICK_ALLOWED_WHILE_IDLE:
                             TIME_TICK_ALLOWED_WHILE_IDLE = properties.getBoolean(
                                     KEY_TIME_TICK_ALLOWED_WHILE_IDLE,
@@ -1089,15 +1076,6 @@ public class AlarmManagerService extends SystemService {
             } else {
                 EXACT_ALARM_DENY_LIST = newSet;
             }
-        }
-
-        private void migrateAlarmsToNewStoreLocked() {
-            final AlarmStore newStore = LAZY_BATCHING ? new LazyAlarmStore()
-                    : new BatchingAlarmStore();
-            final ArrayList<Alarm> allAlarms = mAlarmStore.remove((unused) -> true);
-            newStore.addAll(allAlarms);
-            mAlarmStore = newStore;
-            mAlarmStore.setAlarmClockRemovalListener(mAlarmClockUpdater);
         }
 
         private void updateDeviceIdleFuzzBoundaries() {
@@ -1235,9 +1213,6 @@ public class AlarmManagerService extends SystemService {
             pw.print(KEY_APP_STANDBY_RESTRICTED_WINDOW);
             pw.print("=");
             TimeUtils.formatDuration(APP_STANDBY_RESTRICTED_WINDOW, pw);
-            pw.println();
-
-            pw.print(KEY_LAZY_BATCHING, LAZY_BATCHING);
             pw.println();
 
             pw.print(KEY_TIME_TICK_ALLOWED_WHILE_IDLE, TIME_TICK_ALLOWED_WHILE_IDLE);
@@ -1875,8 +1850,7 @@ public class AlarmManagerService extends SystemService {
             mHandler = new AlarmHandler();
             mConstants = new Constants(mHandler);
 
-            mAlarmStore = mConstants.LAZY_BATCHING ? new LazyAlarmStore()
-                    : new BatchingAlarmStore();
+            mAlarmStore = new LazyAlarmStore();
             mAlarmStore.setAlarmClockRemovalListener(mAlarmClockUpdater);
 
             mAppWakeupHistory = new AppWakeupHistory(Constants.DEFAULT_APP_STANDBY_WINDOW);
