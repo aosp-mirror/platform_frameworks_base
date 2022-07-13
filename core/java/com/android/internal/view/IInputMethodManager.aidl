@@ -81,7 +81,11 @@ interface IInputMethodManager {
             int auxiliarySubtypeMode, int displayId);
 
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.TEST_INPUT_METHOD)")
     boolean isInputMethodPickerShownForTest();
+
     InputMethodSubtype getCurrentInputMethodSubtype();
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     // This is kept due to @UnsupportedAppUsage.
