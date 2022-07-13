@@ -11999,25 +11999,40 @@ public final class Settings {
                 "nitz_network_disconnect_retention";
 
         /**
-         * The preferred NTP server. This setting overrides Android's static xml configuration when
-         * present and valid.
+         * SNTP client config: The preferred NTP server. This setting overrides the static
+         * config.xml configuration when present and valid.
          *
          * <p>The legacy form is the NTP server name as a string.
          * <p>Newer code should use the form: ntp://{server name}[:port] (the standard NTP port,
          * 123, is used if not specified).
          *
+         * <p>The settings value can consist of a pipe ("|") delimited list of server names or
+         * ntp:// URIs. When present, all server name / ntp:// URIs must be valid or the entire
+         * setting value will be ignored and Android's xml config will be used.
+         *
          * <p>For example, the following examples are valid:
          * <ul>
-         *     <li>time.android.com</li>
-         *     <li>ntp://time.android.com</li>
-         *     <li>ntp://time.android.com:123</li>
+         *     <li>"time.android.com"</li>
+         *     <li>"ntp://time.android.com"</li>
+         *     <li>"ntp://time.android.com:123"</li>
+         *     <li>"time.android.com|time.other"</li>
+         *     <li>"ntp://time.android.com:123|ntp://time.other:123"</li>
+         *     <li>"time.android.com|ntp://time.other:123"</li>
          * </ul>
          *
          * @hide
          */
         @Readable
         public static final String NTP_SERVER = "ntp_server";
-        /** Timeout in milliseconds to wait for NTP server. {@hide} */
+
+        /**
+         * SNTP client config: Timeout to wait for an NTP server response. This setting overrides
+         * the static config.xml configuration when present and valid.
+         *
+         * <p>The value is the timeout in milliseconds. It must be > 0.
+         *
+         * @hide
+         */
         @Readable
         public static final String NTP_TIMEOUT = "ntp_timeout";
 

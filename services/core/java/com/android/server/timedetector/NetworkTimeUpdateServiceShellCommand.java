@@ -24,6 +24,8 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /** Implements the shell command interface for {@link NetworkTimeUpdateService}. */
@@ -97,14 +99,14 @@ class NetworkTimeUpdateServiceShellCommand extends ShellCommand {
     }
 
     private int runSetServerConfig() {
-        URI serverUri = null;
+        List<URI> serverUris = new ArrayList<>();
         Duration timeout = null;
         String opt;
         while ((opt = getNextArg()) != null) {
             switch (opt) {
                 case SET_SERVER_CONFIG_SERVER_ARG: {
                     try {
-                        serverUri = NtpTrustedTime.parseNtpUriStrict(getNextArgRequired());
+                        serverUris.add(NtpTrustedTime.parseNtpUriStrict(getNextArgRequired()));
                     } catch (URISyntaxException e) {
                         throw new IllegalArgumentException("Bad NTP server value", e);
                     }
@@ -120,7 +122,7 @@ class NetworkTimeUpdateServiceShellCommand extends ShellCommand {
             }
         }
 
-        if (serverUri == null) {
+        if (serverUris.isEmpty()) {
             throw new IllegalArgumentException(
                     "Missing required option: --" + SET_SERVER_CONFIG_SERVER_ARG);
         }
@@ -129,7 +131,7 @@ class NetworkTimeUpdateServiceShellCommand extends ShellCommand {
                     "Missing required option: --" + SET_SERVER_CONFIG_TIMEOUT_ARG);
         }
 
-        NtpTrustedTime.NtpConfig ntpConfig = new NtpTrustedTime.NtpConfig(serverUri, timeout);
+        NtpTrustedTime.NtpConfig ntpConfig = new NtpTrustedTime.NtpConfig(serverUris, timeout);
         mNetworkTimeUpdateService.setServerConfigForTests(ntpConfig);
         return 0;
     }
@@ -151,9 +153,10 @@ class NetworkTimeUpdateServiceShellCommand extends ShellCommand {
         pw.printf("    Refreshes the latest time. Prints whether it was successful.\n");
         pw.printf("  %s\n", SHELL_COMMAND_SET_SERVER_CONFIG);
         pw.printf("    Sets the NTP server config for tests. The config is not persisted.\n");
-        pw.printf("      Options: %s <uri> %s <millis>\n",
-                SET_SERVER_CONFIG_SERVER_ARG, SET_SERVER_CONFIG_TIMEOUT_ARG);
-        pw.printf("      The URI must be in the form \"ntp://hostname\" or"
+        pw.printf("      Options: %s <uri> [%s <additional uris>]+ %s <millis>\n",
+                SET_SERVER_CONFIG_SERVER_ARG, SET_SERVER_CONFIG_SERVER_ARG,
+                SET_SERVER_CONFIG_TIMEOUT_ARG);
+        pw.printf("      NTP server URIs must be in the form \"ntp://hostname\" or"
                 + " \"ntp://hostname:port\"");
         pw.printf("  %s\n", SHELL_COMMAND_RESET_SERVER_CONFIG);
         pw.printf("    Resets/clears the NTP server config set via %s.\n",

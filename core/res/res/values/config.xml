@@ -2308,19 +2308,25 @@
          it should be disabled in that locale's resources. -->
     <bool name="config_actionMenuItemAllCaps">true</bool>
 
-    <!-- Remote server that can provide NTP responses.
-         Values must be in the form: "ntp://<host>[:port]"
+    <!-- SNTP client config: NTP servers to use to obtain an accurate time.
+         Items must be in the form: "ntp://<host>[:port]"
          This is not a registered IANA URI scheme. -->
-    <string translatable="false" name="config_ntpServer">ntp://time.android.com</string>
-    <!-- Normal polling frequency in milliseconds -->
-    <integer name="config_ntpPollingInterval">64800000</integer>
-    <!-- Try-again polling interval in milliseconds, in case the network request failed -->
-    <integer name="config_ntpPollingIntervalShorter">60000</integer>
-    <!-- Number of times to try again with the shorter interval, before backing
-         off until the normal polling interval. A value < 0 indicates infinite. -->
-    <integer name="config_ntpRetry">3</integer>
-    <!-- Timeout to wait for NTP server response in milliseconds. -->
+    <string-array translatable="false" name="config_ntpServers">
+        <item>ntp://time.android.com</item>
+    </string-array>
+    <!-- SNTP client config: Timeout to wait for an NTP server response in milliseconds. -->
     <integer name="config_ntpTimeout">5000</integer>
+
+    <!-- Automatic "network" time detection config: Normal network time polling frequency in
+         milliseconds. -->
+    <integer name="config_ntpPollingInterval">64800000</integer>
+    <!-- Automatic "network" time detection config: Try-again network time polling interval in
+         milliseconds, in case the network request failed -->
+    <integer name="config_ntpPollingIntervalShorter">60000</integer>
+    <!-- Automatic "network" time detection config: Number of times to try network time polling with
+         the shorter interval, before backing off until the normal polling interval. A value < 0
+         indicates infinite. -->
+    <integer name="config_ntpRetry">3</integer>
 
     <!-- Default network policy warning threshold, in megabytes. -->
     <integer name="config_networkPolicyDefaultWarning">2048</integer>
