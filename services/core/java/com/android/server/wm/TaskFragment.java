@@ -165,6 +165,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * indicate that an Activity can't be embedded because the Activity is started on a new task.
      */
     static final int EMBEDDING_DISALLOWED_NEW_TASK = 3;
+    /**
+     * An embedding check result of
+     * {@link ActivityStarter#canEmbedActivity(TaskFragment, ActivityRecord, Task)}:
+     * indicate that an Activity can't be embedded because the Activity is started on a new
+     * TaskFragment, e.g. start an Activity on a new TaskFragment for result.
+     */
+    static final int EMBEDDING_DISALLOWED_NEW_TASK_FRAGMENT = 4;
 
     /**
      * Embedding check results of {@link #isAllowedToEmbedActivity(ActivityRecord)} or
@@ -175,6 +182,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             EMBEDDING_DISALLOWED_UNTRUSTED_HOST,
             EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION,
             EMBEDDING_DISALLOWED_NEW_TASK,
+            EMBEDDING_DISALLOWED_NEW_TASK_FRAGMENT,
     })
     @interface EmbeddingCheckResult {}
 
@@ -567,9 +575,17 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (!isAllowedToEmbedActivityInUntrustedMode(a)
                 && !isAllowedToEmbedActivityInTrustedMode(a, uid)) {
             return EMBEDDING_DISALLOWED_UNTRUSTED_HOST;
-        } else if (smallerThanMinDimension(a)) {
+        }
+
+        if (smallerThanMinDimension(a)) {
             return EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION;
         }
+
+        // Cannot embed activity across TaskFragments for activity result.
+        if (a.resultTo != null && a.resultTo.getTaskFragment() != this) {
+            return EMBEDDING_DISALLOWED_NEW_TASK_FRAGMENT;
+        }
+
         return EMBEDDING_ALLOWED;
     }
 
