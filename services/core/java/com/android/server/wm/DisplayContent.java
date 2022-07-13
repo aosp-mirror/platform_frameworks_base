@@ -1363,7 +1363,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void setInsetProvider(@InternalInsetsType int type, WindowContainer win,
             @Nullable TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider) {
-        setInsetProvider(type, win, frameProvider, null /* imeFrameProvider */);
+        setInsetProvider(type, win, frameProvider, null /* overrideFrameProviders */);
     }
 
     /**
@@ -1372,15 +1372,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @param type The type of inset this window provides.
      * @param win The window.
      * @param frameProvider Function to compute the frame, or {@code null} if the just the frame of
-     *                      the window should be taken.
-     * @param imeFrameProvider Function to compute the frame when dispatching insets to the IME, or
-     *                         {@code null} if the normal frame should be taken.
+     *                      the window should be taken. Only for non-WindowState providers, nav bar
+     *                      and status bar.
+     * @param overrideFrameProviders Functions to compute the frame when dispatching insets to the
+     *                               given window types, or {@code null} if the normal frame should
+     *                               be taken.
      */
     void setInsetProvider(@InternalInsetsType int type, WindowContainer win,
             @Nullable TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider,
-            @Nullable TriConsumer<DisplayFrames, WindowContainer, Rect> imeFrameProvider) {
+            @Nullable SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>>
+                    overrideFrameProviders) {
         mInsetsStateController.getSourceProvider(type).setWindowContainer(win, frameProvider,
-                imeFrameProvider);
+                overrideFrameProviders);
     }
 
     InsetsStateController getInsetsStateController() {
@@ -3866,7 +3869,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mAtmService.onImeWindowSetOnDisplayArea(imePid, mImeWindowsContainer);
         }
         mInsetsStateController.getSourceProvider(ITYPE_IME).setWindowContainer(win,
-                mDisplayPolicy.getImeSourceFrameProvider(), null /* imeFrameProvider */);
+                mDisplayPolicy.getImeSourceFrameProvider(), null);
         computeImeTarget(true /* updateImeTarget */);
         updateImeControlTarget();
     }
