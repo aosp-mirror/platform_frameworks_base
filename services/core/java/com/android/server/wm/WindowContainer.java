@@ -2476,7 +2476,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void assignLayer(Transaction t, int layer) {
         // Don't assign layers while a transition animation is playing
         // TODO(b/173528115): establish robust best-practices around z-order fighting.
-        if (mTransitionController.isPlaying()) return;
+        if (!mTransitionController.canAssignLayers()) return;
         final boolean changed = layer != mLastLayer || mLastRelativeToLayer != null;
         if (mSurfaceControl != null && changed) {
             setLayer(t, layer);
