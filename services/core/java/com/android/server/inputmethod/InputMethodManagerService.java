@@ -3988,7 +3988,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (mCurFocusedWindowClient != null && client != null
                 && mCurFocusedWindowClient.client.asBinder() == client.asBinder()) {
             return true;
-        } else if (getCurIntentLocked() != null && InputMethodUtils.checkIfPackageBelongsToUid(
+        }
+        if (mSettings.getCurrentUserId() != UserHandle.getUserId(uid)) {
+            return false;
+        }
+        if (getCurIntentLocked() != null && InputMethodUtils.checkIfPackageBelongsToUid(
                 mAppOpsManager,
                 uid,
                 getCurIntentLocked().getComponent().getPackageName())) {
@@ -4001,9 +4005,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     public void showInputMethodPickerFromClient(IInputMethodClient client,
             int auxiliarySubtypeMode) {
         synchronized (ImfLock.class) {
-            if (!calledFromValidUserLocked()) {
-                return;
-            }
             if (!canShowInputMethodPickerLocked(client)) {
                 Slog.w(TAG, "Ignoring showInputMethodPickerFromClient of uid "
                         + Binder.getCallingUid() + ": " + client);
