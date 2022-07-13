@@ -405,8 +405,8 @@ public class BubblesManager implements Dumpable {
             }
 
             @Override
-            public void onEntryUpdated(NotificationEntry entry) {
-                BubblesManager.this.onEntryUpdated(entry);
+            public void onEntryUpdated(NotificationEntry entry, boolean fromSystem) {
+                BubblesManager.this.onEntryUpdated(entry, fromSystem);
             }
 
             @Override
@@ -444,9 +444,10 @@ public class BubblesManager implements Dumpable {
         }
     }
 
-    void onEntryUpdated(NotificationEntry entry) {
+    void onEntryUpdated(NotificationEntry entry, boolean fromSystem) {
+        boolean shouldBubble = mNotificationInterruptStateProvider.shouldBubbleUp(entry);
         mBubbles.onEntryUpdated(notifToBubbleEntry(entry),
-                mNotificationInterruptStateProvider.shouldBubbleUp(entry));
+                shouldBubble, fromSystem);
     }
 
     void onEntryRemoved(NotificationEntry entry) {

@@ -1082,7 +1082,8 @@ public class BubbleController implements ConfigurationChangeListener {
         }
     }
 
-    void inflateAndAdd(Bubble bubble, boolean suppressFlyout, boolean showInShade) {
+    @VisibleForTesting
+    public void inflateAndAdd(Bubble bubble, boolean suppressFlyout, boolean showInShade) {
         // Lazy init stack view when a bubble is created
         ensureStackViewCreated();
         bubble.setInflateSynchronously(mInflateSynchronously);
@@ -1111,7 +1112,10 @@ public class BubbleController implements ConfigurationChangeListener {
     }
 
     @VisibleForTesting
-    public void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp) {
+    public void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp, boolean fromSystem) {
+        if (!fromSystem) {
+            return;
+        }
         // shouldBubbleUp checks canBubble & for bubble metadata
         boolean shouldBubble = shouldBubbleUp && canLaunchInTaskView(mContext, entry);
         if (!shouldBubble && mBubbleData.hasAnyBubbleWithKey(entry.getKey())) {
@@ -1174,7 +1178,7 @@ public class BubbleController implements ConfigurationChangeListener {
                 mBubbleData.dismissBubbleWithKey(key, DISMISS_NO_BUBBLE_UP);
             } else if (entry != null && mTmpRanking.isBubble() && !isActive) {
                 entry.setFlagBubble(true);
-                onEntryUpdated(entry, shouldBubbleUp);
+                onEntryUpdated(entry, shouldBubbleUp, /* fromSystem= */ true);
             }
         }
     }
@@ -1773,9 +1777,9 @@ public class BubbleController implements ConfigurationChangeListener {
         }
 
         @Override
-        public void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp) {
+        public void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp, boolean fromSystem) {
             mMainExecutor.execute(() -> {
-                BubbleController.this.onEntryUpdated(entry, shouldBubbleUp);
+                BubbleController.this.onEntryUpdated(entry, shouldBubbleUp, fromSystem);
             });
         }
 

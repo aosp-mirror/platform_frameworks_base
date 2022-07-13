@@ -33,6 +33,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -621,7 +622,7 @@ public class BubblesTest extends SysuiTestCase {
         assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getKey()).showDot());
 
         // Send update
-        mEntryListener.onEntryUpdated(mRow);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
 
         // Nothing should have changed
         // Notif is suppressed after expansion
@@ -789,7 +790,7 @@ public class BubblesTest extends SysuiTestCase {
     @Test
     public void testAddNotif_notBubble() {
         mEntryListener.onEntryAdded(mNonBubbleNotifRow.getEntry());
-        mEntryListener.onEntryUpdated(mNonBubbleNotifRow.getEntry());
+        mEntryListener.onEntryUpdated(mNonBubbleNotifRow.getEntry(), /* fromSystem= */ true);
 
         assertThat(mBubbleController.hasBubbles()).isFalse();
     }
@@ -827,7 +828,7 @@ public class BubblesTest extends SysuiTestCase {
         NotificationListenerService.Ranking ranking = new RankingBuilder(
                 mRow.getRanking()).setCanBubble(false).build();
         mRow.setRanking(ranking);
-        mEntryListener.onEntryUpdated(mRow);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
 
         assertFalse(mBubbleController.hasBubbles());
         verify(mDeleteIntent, never()).send();
@@ -1430,6 +1431,20 @@ public class BubblesTest extends SysuiTestCase {
 
         // Should no longer be in the stack
         assertThat(mBubbleData.hasBubbleInStackWithKey(mBubbleEntry.getKey())).isFalse();
+    }
+
+    @Test
+    public void testNonSystemUpdatesIgnored() {
+        mEntryListener.onEntryAdded(mRow);
+        assertThat(mBubbleController.hasBubbles()).isTrue();
+
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ false);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ false);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ false);
+
+        // Check that it wasn't inflated (1 because it would've been inflated via onEntryAdded)
+        verify(mBubbleController, times(1)).inflateAndAdd(
+                any(Bubble.class), anyBoolean(), anyBoolean());
     }
 
     /** Creates a bubble using the userId and package. */

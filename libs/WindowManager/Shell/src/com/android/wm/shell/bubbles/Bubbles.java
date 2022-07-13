@@ -171,8 +171,9 @@ public interface Bubbles {
      *
      * @param entry the {@link BubbleEntry} by the notification.
      * @param shouldBubbleUp {@code true} if this notification should bubble up.
+     * @param fromSystem {@code true} if this update is from NotificationManagerService.
      */
-    void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp);
+    void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp, boolean fromSystem);
 
     /**
      * Called when new notification entry removed.
