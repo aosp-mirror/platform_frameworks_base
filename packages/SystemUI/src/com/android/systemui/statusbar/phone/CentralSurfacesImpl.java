@@ -2532,8 +2532,13 @@ public class CentralSurfacesImpl extends CoreStartable implements
                 callback.onActivityStarted(ActivityManager.START_CANCELED);
             }
         };
+        // Do not deferKeyguard when occluded because, when keyguard is occluded,
+        // we do not launch the activity until keyguard is done.
+        boolean occluded = mStatusBarKeyguardViewManager.isShowing()
+                && mStatusBarKeyguardViewManager.isOccluded();
+        boolean deferred = !occluded;
         executeRunnableDismissingKeyguard(runnable, cancelRunnable, dismissShadeDirectly,
-                willLaunchResolverActivity, true /* deferred */, animate);
+                willLaunchResolverActivity, deferred /* deferred */, animate);
     }
 
     @Nullable
