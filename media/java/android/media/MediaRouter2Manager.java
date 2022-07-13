@@ -546,37 +546,15 @@ public final class MediaRouter2Manager {
         }
     }
 
-    void addRoutesOnHandler(List<MediaRoute2Info> routes) {
+    void updateRoutesOnHandler(@NonNull List<MediaRoute2Info> routes) {
         synchronized (mRoutesLock) {
+            mRoutes.clear();
             for (MediaRoute2Info route : routes) {
                 mRoutes.put(route.getId(), route);
             }
         }
-        if (routes.size() > 0) {
-            notifyRoutesAdded(routes);
-        }
-    }
 
-    void removeRoutesOnHandler(List<MediaRoute2Info> routes) {
-        synchronized (mRoutesLock) {
-            for (MediaRoute2Info route : routes) {
-                mRoutes.remove(route.getId());
-            }
-        }
-        if (routes.size() > 0) {
-            notifyRoutesRemoved(routes);
-        }
-    }
-
-    void changeRoutesOnHandler(List<MediaRoute2Info> routes) {
-        synchronized (mRoutesLock) {
-            for (MediaRoute2Info route : routes) {
-                mRoutes.put(route.getId(), route);
-            }
-        }
-        if (routes.size() > 0) {
-            notifyRoutesChanged(routes);
-        }
+        notifyRoutesUpdated();
     }
 
     void createSessionOnHandler(int requestId, RoutingSessionInfo sessionInfo) {
@@ -650,24 +628,9 @@ public final class MediaRouter2Manager {
         notifySessionUpdated(sessionInfo);
     }
 
-    private void notifyRoutesAdded(List<MediaRoute2Info> routes) {
+    private void notifyRoutesUpdated() {
         for (CallbackRecord record: mCallbackRecords) {
-            record.mExecutor.execute(
-                    () -> record.mCallback.onRoutesAdded(routes));
-        }
-    }
-
-    private void notifyRoutesRemoved(List<MediaRoute2Info> routes) {
-        for (CallbackRecord record: mCallbackRecords) {
-            record.mExecutor.execute(
-                    () -> record.mCallback.onRoutesRemoved(routes));
-        }
-    }
-
-    private void notifyRoutesChanged(List<MediaRoute2Info> routes) {
-        for (CallbackRecord record: mCallbackRecords) {
-            record.mExecutor.execute(
-                    () -> record.mCallback.onRoutesChanged(routes));
+            record.mExecutor.execute(() -> record.mCallback.onRoutesUpdated());
         }
     }
 
@@ -963,23 +926,12 @@ public final class MediaRouter2Manager {
      * Interface for receiving events about media routing changes.
      */
     public interface Callback {
-        /**
-         * Called when routes are added.
-         * @param routes the list of routes that have been added. It's never empty.
-         */
-        default void onRoutesAdded(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
-         * Called when routes are removed.
-         * @param routes the list of routes that have been removed. It's never empty.
+         * Called when the routes list changes. This includes adding, modifying, or removing
+         * individual routes.
          */
-        default void onRoutesRemoved(@NonNull List<MediaRoute2Info> routes) {}
-
-        /**
-         * Called when routes are changed.
-         * @param routes the list of routes that have been changed. It's never empty.
-         */
-        default void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
+        default void onRoutesUpdated() {}
 
         /**
          * Called when a session is changed.
@@ -1115,21 +1067,12 @@ public final class MediaRouter2Manager {
         }
 
         @Override
-        public void notifyRoutesAdded(List<MediaRoute2Info> routes) {
-            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::addRoutesOnHandler,
-                    MediaRouter2Manager.this, routes));
-        }
-
-        @Override
-        public void notifyRoutesRemoved(List<MediaRoute2Info> routes) {
-            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::removeRoutesOnHandler,
-                    MediaRouter2Manager.this, routes));
-        }
-
-        @Override
-        public void notifyRoutesChanged(List<MediaRoute2Info> routes) {
-            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::changeRoutesOnHandler,
-                    MediaRouter2Manager.this, routes));
+        public void notifyRoutesUpdated(List<MediaRoute2Info> routes) {
+            mHandler.sendMessage(
+                    obtainMessage(
+                            MediaRouter2Manager::updateRoutesOnHandler,
+                            MediaRouter2Manager.this,
+                            routes));
         }
     }
 }

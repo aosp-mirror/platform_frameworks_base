@@ -23187,9 +23187,10 @@ package android.media {
 
   public abstract static class MediaRouter2.RouteCallback {
     ctor public MediaRouter2.RouteCallback();
-    method public void onRoutesAdded(@NonNull java.util.List<android.media.MediaRoute2Info>);
-    method public void onRoutesChanged(@NonNull java.util.List<android.media.MediaRoute2Info>);
-    method public void onRoutesRemoved(@NonNull java.util.List<android.media.MediaRoute2Info>);
+    method @Deprecated public void onRoutesAdded(@NonNull java.util.List<android.media.MediaRoute2Info>);
+    method @Deprecated public void onRoutesChanged(@NonNull java.util.List<android.media.MediaRoute2Info>);
+    method @Deprecated public void onRoutesRemoved(@NonNull java.util.List<android.media.MediaRoute2Info>);
+    method public void onRoutesUpdated(@NonNull java.util.List<android.media.MediaRoute2Info>);
   }
 
   public class MediaRouter2.RoutingController {
