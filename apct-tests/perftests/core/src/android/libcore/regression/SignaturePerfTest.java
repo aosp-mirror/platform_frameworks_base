@@ -51,7 +51,6 @@ public class SignaturePerfTest {
                     {Algorithm.SHA256WithRSA, Implementation.OpenSSL},
                     {Algorithm.SHA384WithRSA, Implementation.OpenSSL},
                     {Algorithm.SHA512WithRSA, Implementation.OpenSSL},
-                    {Algorithm.SHA1withDSA, Implementation.OpenSSL},
                     {Algorithm.SHA1withDSA, Implementation.BouncyCastle}
                 });
     }
