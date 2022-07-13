@@ -35,9 +35,6 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.compatui.CompatUI;
-import com.android.wm.shell.draganddrop.DragAndDrop;
-import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
@@ -74,25 +71,20 @@ public class WMShellTest extends SysuiTestCase {
     @Mock Pip mPip;
     @Mock SplitScreen mSplitScreen;
     @Mock OneHanded mOneHanded;
-    @Mock HideDisplayCutout mHideDisplayCutout;
     @Mock WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock ProtoTracer mProtoTracer;
     @Mock ShellCommandHandler mShellCommandHandler;
-    @Mock CompatUI mCompatUI;
     @Mock UserInfoController mUserInfoController;
     @Mock ShellExecutor mSysUiMainExecutor;
-    @Mock DragAndDrop mDragAndDrop;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         mWMShell = new WMShell(mContext, mShellInterface, Optional.of(mPip),
-                Optional.of(mSplitScreen), Optional.of(mOneHanded), Optional.of(mHideDisplayCutout),
-                Optional.of(mShellCommandHandler), Optional.of(mCompatUI),
-                Optional.of(mDragAndDrop),
-                mCommandQueue, mConfigurationController, mKeyguardStateController,
-                mKeyguardUpdateMonitor, mScreenLifecycle, mSysUiState,
+                Optional.of(mSplitScreen), Optional.of(mOneHanded),
+                Optional.of(mShellCommandHandler), mCommandQueue, mConfigurationController,
+                mKeyguardStateController, mKeyguardUpdateMonitor, mScreenLifecycle, mSysUiState,
                 mProtoTracer, mWakefulnessLifecycle, mUserInfoController, mSysUiMainExecutor);
     }
 

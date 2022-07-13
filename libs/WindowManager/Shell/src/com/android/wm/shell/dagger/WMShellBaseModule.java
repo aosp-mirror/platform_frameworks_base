@@ -57,15 +57,12 @@ import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
-import com.android.wm.shell.compatui.CompatUI;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
-import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
-import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
 import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -85,8 +82,6 @@ import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
 import com.android.wm.shell.startingsurface.phone.PhoneStartingWindowTypeAlgorithm;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInterface;
-import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelper;
-import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelperController;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
@@ -173,12 +168,6 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static Optional<DragAndDrop> provideDragAndDrop(DragAndDropController dragAndDropController) {
-        return Optional.of(dragAndDropController.asDragAndDrop());
-    }
-
-    @WMSingleton
-    @Provides
     static ShellTaskOrganizer provideShellTaskOrganizer(@ShellMainThread ShellExecutor mainExecutor,
             Context context,
             CompatUIController compatUI,
@@ -204,11 +193,6 @@ public abstract class WMShellBaseModule {
         return new KidsModeTaskOrganizer(mainExecutor, mainHandler, context, syncTransactionQueue,
                 displayController, displayInsetsController, unfoldAnimationController,
                 recentTasksOptional);
-    }
-
-    @WMSingleton
-    @Provides static Optional<CompatUI> provideCompatUI(CompatUIController compatUIController) {
-        return Optional.of(compatUIController.asCompatUI());
     }
 
     @WMSingleton
@@ -376,13 +360,6 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static Optional<HideDisplayCutout> provideHideDisplayCutout(
-            Optional<HideDisplayCutoutController> hideDisplayCutoutController) {
-        return hideDisplayCutoutController.map((controller) -> controller.asHideDisplayCutout());
-    }
-
-    @WMSingleton
-    @Provides
     static Optional<HideDisplayCutoutController> provideHideDisplayCutoutController(Context context,
             ShellController shellController, DisplayController displayController,
             @ShellMainThread ShellExecutor mainExecutor) {
@@ -414,23 +391,6 @@ public abstract class WMShellBaseModule {
             return oneHandedController;
         }
         return Optional.empty();
-    }
-
-    //
-    // Task to Surface communication
-    //
-
-    @WMSingleton
-    @Provides
-    static Optional<TaskSurfaceHelper> provideTaskSurfaceHelper(
-            Optional<TaskSurfaceHelperController> taskSurfaceController) {
-        return taskSurfaceController.map((controller) -> controller.asTaskSurfaceHelper());
-    }
-
-    @Provides
-    static Optional<TaskSurfaceHelperController> provideTaskSurfaceHelperController(
-            ShellTaskOrganizer taskOrganizer, @ShellMainThread ShellExecutor mainExecutor) {
-        return Optional.ofNullable(new TaskSurfaceHelperController(taskOrganizer, mainExecutor));
     }
 
     //

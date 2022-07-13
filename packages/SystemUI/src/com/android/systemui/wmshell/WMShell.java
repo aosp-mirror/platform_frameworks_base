@@ -55,9 +55,6 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.ShellCommandHandler;
-import com.android.wm.shell.compatui.CompatUI;
-import com.android.wm.shell.draganddrop.DragAndDrop;
-import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
@@ -110,10 +107,7 @@ public final class WMShell extends CoreStartable
     private final Optional<Pip> mPipOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
-    private final Optional<HideDisplayCutout> mHideDisplayCutoutOptional;
     private final Optional<ShellCommandHandler> mShellCommandHandler;
-    private final Optional<CompatUI> mCompatUIOptional;
-    private final Optional<DragAndDrop> mDragAndDropOptional;
 
     private final CommandQueue mCommandQueue;
     private final ConfigurationController mConfigurationController;
@@ -136,10 +130,7 @@ public final class WMShell extends CoreStartable
             Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
-            Optional<HideDisplayCutout> hideDisplayCutoutOptional,
             Optional<ShellCommandHandler> shellCommandHandler,
-            Optional<CompatUI> sizeCompatUIOptional,
-            Optional<DragAndDrop> dragAndDropOptional,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
             KeyguardStateController keyguardStateController,
@@ -161,12 +152,9 @@ public final class WMShell extends CoreStartable
         mPipOptional = pipOptional;
         mSplitScreenOptional = splitScreenOptional;
         mOneHandedOptional = oneHandedOptional;
-        mHideDisplayCutoutOptional = hideDisplayCutoutOptional;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mProtoTracer = protoTracer;
         mShellCommandHandler = shellCommandHandler;
-        mCompatUIOptional = sizeCompatUIOptional;
-        mDragAndDropOptional = dragAndDropOptional;
         mUserInfoController = userInfoController;
         mSysUiMainExecutor = sysUiMainExecutor;
     }

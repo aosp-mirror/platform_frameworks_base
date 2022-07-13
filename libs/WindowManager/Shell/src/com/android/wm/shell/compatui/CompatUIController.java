@@ -39,7 +39,6 @@ import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListen
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
 import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
@@ -109,7 +108,6 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private final SyncTransactionQueue mSyncQueue;
     private final ShellExecutor mMainExecutor;
     private final Lazy<Transitions> mTransitionsLazy;
-    private final CompatUIImpl mImpl = new CompatUIImpl();
 
     private CompatUICallback mCallback;
 
@@ -140,11 +138,6 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mImeController.addPositionProcessor(this);
         mCompatUIHintsState = new CompatUIHintsState();
         shellController.addKeyguardChangeListener(this);
-    }
-
-    /** Returns implementation of {@link CompatUI}. */
-    public CompatUI asCompatUI() {
-        return mImpl;
     }
 
     /** Sets the callback for UI interactions. */
@@ -378,13 +371,6 @@ public class CompatUIController implements OnDisplaysChangedListener,
         if (mActiveLetterboxEduLayout != null && condition.test(mActiveLetterboxEduLayout)) {
             callback.accept(mActiveLetterboxEduLayout);
         }
-    }
-
-    /**
-     * The interface for calls from outside the Shell, within the host process.
-     */
-    @ExternalThread
-    private class CompatUIImpl implements CompatUI {
     }
 
     /** An implementation of {@link OnInsetsChangedListener} for a given display id. */
