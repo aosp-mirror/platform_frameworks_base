@@ -35,6 +35,8 @@ import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 
 import static com.android.wm.shell.common.split.SplitLayout.PARALLAX_ALIGN_CENTER;
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
@@ -98,6 +100,7 @@ import android.window.WindowContainerTransaction;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.util.ArrayUtils;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -138,7 +141,7 @@ import java.util.Optional;
  */
 public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         DisplayController.OnDisplaysChangedListener, Transitions.TransitionHandler,
-        ShellTaskOrganizer.TaskListener {
+        ShellTaskOrganizer.TaskListener, ShellTaskOrganizer.FocusListener {
 
     private static final String TAG = StageCoordinator.class.getSimpleName();
 
@@ -175,6 +178,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private final Rect mTempRect1 = new Rect();
     private final Rect mTempRect2 = new Rect();
+
+    private ActivityManager.RunningTaskInfo mFocusingTaskInfo;
 
     /**
      * A single-top root task which the split divider attached to.
@@ -254,6 +259,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mDisplayController.addDisplayWindowListener(this);
         mDisplayLayout = new DisplayLayout(displayController.getDisplayLayout(displayId));
         transitions.addHandler(this);
+        mTaskOrganizer.addFocusListener(this);
     }
 
     @VisibleForTesting
@@ -1186,12 +1192,21 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 exitSplitScreen(mSideStage, EXIT_REASON_APP_FINISHED);
             }
         } else if (isSideStage && !mMainStage.isActive()) {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            mSplitLayout.init();
-            prepareEnterSplitScreen(wct);
-            mSyncQueue.queue(wct);
-            mSyncQueue.runInSync(t ->
-                    updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */));
+            if (mFocusingTaskInfo != null && !isValidToEnterSplitScreen(mFocusingTaskInfo)) {
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                mSideStage.removeAllTasks(wct, true);
+                wct.reorder(mRootTaskInfo.token, false /* onTop */);
+                mTaskOrganizer.applyTransaction(wct);
+                Slog.i(TAG, "cancel entering split screen, reason = "
+                        + exitReasonToString(EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW));
+            } else {
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                mSplitLayout.init();
+                prepareEnterSplitScreen(wct);
+                mSyncQueue.queue(wct);
+                mSyncQueue.runInSync(t ->
+                        updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */));
+            }
         }
         if (mMainStageListener.mHasChildren && mSideStageListener.mHasChildren) {
             mShouldUpdateRecents = true;
@@ -1204,6 +1219,21 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         mSplitLayout.isLandscape());
             }
         }
+    }
+
+    boolean isValidToEnterSplitScreen(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
+        return taskInfo.supportsMultiWindow
+                && ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType())
+                && ArrayUtils.contains(CONTROLLED_WINDOWING_MODES, taskInfo.getWindowingMode());
+    }
+
+    ActivityManager.RunningTaskInfo getFocusingTaskInfo() {
+        return mFocusingTaskInfo;
+    }
+
+    @Override
+    public void onFocusTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        mFocusingTaskInfo = taskInfo;
     }
 
     @Override

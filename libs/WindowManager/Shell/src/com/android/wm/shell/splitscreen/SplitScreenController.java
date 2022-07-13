@@ -18,16 +18,12 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
@@ -66,7 +62,6 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.ArrayUtils;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -104,7 +99,7 @@ import java.util.concurrent.Executor;
  */
 // TODO(b/198577848): Implement split screen flicker test to consolidate CUJ of split screen.
 public class SplitScreenController implements DragAndDropPolicy.Starter,
-        RemoteCallable<SplitScreenController>, ShellTaskOrganizer.FocusListener {
+        RemoteCallable<SplitScreenController> {
     private static final String TAG = SplitScreenController.class.getSimpleName();
 
     static final int EXIT_REASON_UNKNOWN = 0;
@@ -152,8 +147,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     // outside the bounds of the roots by being reparented into a higher level fullscreen container
     private SurfaceControl mSplitTasksContainerLayer;
 
-    private ActivityManager.RunningTaskInfo mFocusingTaskInfo;
-
     public SplitScreenController(ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, Context context,
             RootTaskDisplayAreaOrganizer rootTDAOrganizer,
@@ -175,7 +168,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mLogger = new SplitscreenEventLogger();
         mIconProvider = iconProvider;
         mRecentTasksOptional = recentTasks;
-        mTaskOrganizer.addFocusListener(this);
     }
 
     public SplitScreen asSplitScreen() {
@@ -190,11 +182,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     @Override
     public ShellExecutor getRemoteCallExecutor() {
         return mMainExecutor;
-    }
-
-    @Override
-    public void onFocusTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        mFocusingTaskInfo = taskInfo;
     }
 
     public void onOrganizerRegistered() {
@@ -215,6 +202,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return mStageCoordinator;
     }
 
+    public ActivityManager.RunningTaskInfo getFocusingTaskInfo() {
+        return mStageCoordinator.getFocusingTaskInfo();
+    }
+
+    public boolean isValidToEnterSplitScreen(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
+        return mStageCoordinator.isValidToEnterSplitScreen(taskInfo);
+    }
+
     @Nullable
     public ActivityManager.RunningTaskInfo getTaskInfo(@SplitPosition int splitPosition) {
         if (!isSplitScreenVisible() || splitPosition == SPLIT_POSITION_UNDEFINED) {
@@ -228,12 +223,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public boolean isTaskInSplitScreen(int taskId) {
         return isSplitScreenVisible()
                 && mStageCoordinator.getStageOfTask(taskId) != STAGE_TYPE_UNDEFINED;
-    }
-
-    public boolean isValidToEnterSplitScreen(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
-        return taskInfo.supportsMultiWindow
-                && ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType())
-                && ArrayUtils.contains(CONTROLLED_WINDOWING_MODES, taskInfo.getWindowingMode());
     }
 
     public @SplitPosition int getSplitPosition(int taskId) {
@@ -472,8 +461,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             return Objects.equals(launchingActivity, pairedActivity);
         }
 
-        if (mFocusingTaskInfo != null && isValidToEnterSplitScreen(mFocusingTaskInfo)) {
-            return Objects.equals(mFocusingTaskInfo.baseIntent.getComponent(), launchingActivity);
+        final ActivityManager.RunningTaskInfo taskInfo = getFocusingTaskInfo();
+        if (taskInfo != null && isValidToEnterSplitScreen(taskInfo)) {
+            return Objects.equals(taskInfo.baseIntent.getComponent(), launchingActivity);
         }
 
         return false;
