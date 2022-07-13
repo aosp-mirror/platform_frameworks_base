@@ -59,7 +59,6 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.internal.util.LatencyTracker;
 import com.android.systemui.R;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
@@ -96,6 +95,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Utility class to handle edge swipes for back gesture
@@ -196,6 +196,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private final Region mExcludeRegion = new Region();
     private final Region mUnrestrictedExcludeRegion = new Region();
     private final LatencyTracker mLatencyTracker;
+    private final Provider<BackGestureTfClassifierProvider>
+            mBackGestureTfClassifierProviderProvider;
     private final FeatureFlags mFeatureFlags;
 
     // The left side edge width where touch down is allowed
@@ -316,6 +318,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             Optional<Pip> pipOptional,
             FalsingManager falsingManager,
             LatencyTracker latencyTracker,
+            Provider<BackGestureTfClassifierProvider> backGestureTfClassifierProviderProvider,
             FeatureFlags featureFlags) {
         super(broadcastDispatcher);
         mContext = context;
@@ -333,6 +336,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         mPipOptional = pipOptional;
         mFalsingManager = falsingManager;
         mLatencyTracker = latencyTracker;
+        mBackGestureTfClassifierProviderProvider = backGestureTfClassifierProviderProvider;
         mFeatureFlags = featureFlags;
         ComponentName recentsComponentName = ComponentName.unflattenFromString(
                 context.getString(com.android.internal.R.string.config_recentsComponentName));
@@ -612,10 +616,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         }
 
         if (newState) {
-            String mlModelName = DeviceConfig.getString(DeviceConfig.NAMESPACE_SYSTEMUI,
-                    SystemUiDeviceConfigFlags.BACK_GESTURE_ML_MODEL_NAME, "backgesture");
-            mBackGestureTfClassifierProvider = SystemUIFactory.getInstance()
-                    .createBackGestureTfClassifierProvider(mContext.getAssets(), mlModelName);
+            mBackGestureTfClassifierProvider = mBackGestureTfClassifierProviderProvider.get();
             mMLModelThreshold = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.BACK_GESTURE_ML_MODEL_THRESHOLD, 0.9f);
             if (mBackGestureTfClassifierProvider.isActive()) {
@@ -1007,6 +1008,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         private final Optional<Pip> mPipOptional;
         private final FalsingManager mFalsingManager;
         private final LatencyTracker mLatencyTracker;
+        private final Provider<BackGestureTfClassifierProvider>
+                mBackGestureTfClassifierProviderProvider;
         private final FeatureFlags mFeatureFlags;
 
         @Inject
@@ -1024,6 +1027,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                        Optional<Pip> pipOptional,
                        FalsingManager falsingManager,
                        LatencyTracker latencyTracker,
+                       Provider<BackGestureTfClassifierProvider>
+                               backGestureTfClassifierProviderProvider,
                        FeatureFlags featureFlags) {
             mOverviewProxyService = overviewProxyService;
             mSysUiState = sysUiState;
@@ -1039,6 +1044,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             mPipOptional = pipOptional;
             mFalsingManager = falsingManager;
             mLatencyTracker = latencyTracker;
+            mBackGestureTfClassifierProviderProvider = backGestureTfClassifierProviderProvider;
             mFeatureFlags = featureFlags;
         }
 
@@ -1060,6 +1066,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                     mPipOptional,
                     mFalsingManager,
                     mLatencyTracker,
+                    mBackGestureTfClassifierProviderProvider,
                     mFeatureFlags);
         }
     }

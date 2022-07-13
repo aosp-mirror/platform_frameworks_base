@@ -26,11 +26,7 @@ android_library {
     manifest: "AndroidManifest.xml",
 
     srcs: [
-        // All files in this library should be in Kotlin besides some exceptions.
         "src/**/*.kt",
-
-        // This file was forked from google3, so exceptionally it can be in Java.
-        "src/com/android/systemui/testing/screenshot/DynamicColorsTestUtils.java",
     ],
 
     resource_dirs: [
