@@ -650,7 +650,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 Process.myUid(),
                 getContext().getOpPackageName(),
                 UdfpsController.EFFECT_CLICK,
-                "lock-icon-device-entry",
+                "lock-screen-lock-icon-longpress",
                 TOUCH_VIBRATION_ATTRIBUTES);
 
         mKeyguardViewController.showBouncer(/* scrim */ true);
@@ -675,6 +675,12 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private boolean isActionable() {
+        if (mIsBouncerShowing) {
+            Log.v(TAG, "lock icon long-press ignored, bouncer already showing.");
+            // a long press gestures from AOD may have already triggered the bouncer to show,
+            // so this touch is no longer actionable
+            return false;
+        }
         return mUdfpsSupported || mShowUnlockIcon;
     }
 
