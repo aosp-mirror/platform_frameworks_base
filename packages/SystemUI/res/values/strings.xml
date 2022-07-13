@@ -2560,6 +2560,10 @@
     =1 {# notification}
     other {# notifications}
     }</string>
+    <!-- Accessibility label for weather complication on dreams with weather condition and temperature [CHAR_LIMIT=200] -->
+    <string name="dream_overlay_weather_complication_desc">
+        <xliff:g id="weather_condition" example="Partly cloudy">%1$s</xliff:g>, <xliff:g id="temperature" example="7°C">%2$s</xliff:g>
+    </string>
 
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, media app is broadcasting -->
     <string name="broadcasting_description_is_broadcasting">Broadcasting</string>
