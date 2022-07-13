@@ -1256,6 +1256,18 @@ public class ParsingPackageUtils {
         return input.success(pkg.addPermission(result.getResult()));
     }
 
+    private int parseMinOrMaxSdkVersion(TypedArray sa, int attr, int defaultValue) {
+        int val = defaultValue;
+        TypedValue peekVal = sa.peekValue(attr);
+        if (peekVal != null) {
+            if (peekVal.type >= TypedValue.TYPE_FIRST_INT
+                    && peekVal.type <= TypedValue.TYPE_LAST_INT) {
+                val = peekVal.data;
+            }
+        }
+        return val;
+    }
+
     private ParseResult<ParsingPackage> parseUsesPermission(ParseInput input,
             ParsingPackage pkg, Resources res, XmlResourceParser parser)
             throws IOException, XmlPullParserException {
@@ -1266,14 +1278,13 @@ public class ParsingPackageUtils {
             String name = sa.getNonResourceString(
                     R.styleable.AndroidManifestUsesPermission_name);
 
-            int maxSdkVersion = 0;
-            TypedValue val = sa.peekValue(
-                    R.styleable.AndroidManifestUsesPermission_maxSdkVersion);
-            if (val != null) {
-                if (val.type >= TypedValue.TYPE_FIRST_INT && val.type <= TypedValue.TYPE_LAST_INT) {
-                    maxSdkVersion = val.data;
-                }
-            }
+            int minSdkVersion =  parseMinOrMaxSdkVersion(sa,
+                    R.styleable.AndroidManifestUsesPermission_minSdkVersion,
+                    Integer.MIN_VALUE);
+
+            int maxSdkVersion =  parseMinOrMaxSdkVersion(sa,
+                    R.styleable.AndroidManifestUsesPermission_maxSdkVersion,
+                    Integer.MAX_VALUE);
 
             final ArraySet<String> requiredFeatures = new ArraySet<>();
             String feature = sa.getNonConfigurationString(
@@ -1338,7 +1349,8 @@ public class ParsingPackageUtils {
                 return success;
             }
 
-            if ((maxSdkVersion != 0) && (maxSdkVersion < Build.VERSION.RESOURCES_SDK_INT)) {
+            if (Build.VERSION.RESOURCES_SDK_INT < minSdkVersion
+                    || Build.VERSION.RESOURCES_SDK_INT > maxSdkVersion) {
                 return success;
             }
 
