@@ -1620,7 +1620,7 @@ public final class InputMethodManager {
      * Reset all of the state associated with being bound to an input method.
      */
     @GuardedBy("mH")
-    void clearBindingLocked() {
+    private void clearBindingLocked() {
         if (DEBUG) Log.v(TAG, "Clearing binding!");
         clearConnectionLocked();
         updateInputChannelLocked(null);
@@ -1634,16 +1634,16 @@ public final class InputMethodManager {
      * Reset all of the state associated with being bound to an accessibility service.
      */
     @GuardedBy("mH")
-    void clearAccessibilityBindingLocked(int id) {
+    private void clearAccessibilityBindingLocked(int id) {
         if (DEBUG) Log.v(TAG, "Clearing accessibility binding " + id);
         mAccessibilityInputMethodSession.remove(id);
     }
 
     /**
-     * Reset all of the state associated with being bound to all ccessibility services.
+     * Reset all of the state associated with being bound to all accessibility services.
      */
     @GuardedBy("mH")
-    void clearAllAccessibilityBindingLocked() {
+    private void clearAllAccessibilityBindingLocked() {
         if (DEBUG) Log.v(TAG, "Clearing all accessibility bindings");
         mAccessibilityInputMethodSession.clear();
     }
@@ -1684,7 +1684,7 @@ public final class InputMethodManager {
      * Reset all of the state associated with a served view being connected
      * to an input method
      */
-    void clearConnectionLocked() {
+    private void clearConnectionLocked() {
         mCurrentEditorInfo = null;
         if (mServedInputConnection != null) {
             mServedInputConnection.deactivate();
@@ -2234,7 +2234,7 @@ public final class InputMethodManager {
      * Note that this method should *NOT* be called inside of {@code mH} lock to prevent start input
      * background thread may blocked by other methods which already inside {@code mH} lock.
      */
-    boolean startInputInner(@StartInputReason int startInputReason,
+    private boolean startInputInner(@StartInputReason int startInputReason,
             @Nullable IBinder windowGainingFocus, @StartInputFlags int startInputFlags,
             @SoftInputModeFlags int softInputMode, int windowFlags) {
         final View view;
@@ -3075,7 +3075,7 @@ public final class InputMethodManager {
     }
 
     // Must be called on the main looper
-    void sendInputEventAndReportResultOnMainLooper(PendingEvent p) {
+    private void sendInputEventAndReportResultOnMainLooper(PendingEvent p) {
         final boolean handled;
         synchronized (mH) {
             int result = sendInputEventOnMainLooperLocked(p);
@@ -3090,7 +3090,7 @@ public final class InputMethodManager {
     }
 
     // Must be called on the main looper
-    int sendInputEventOnMainLooperLocked(PendingEvent p) {
+    private int sendInputEventOnMainLooperLocked(PendingEvent p) {
         if (mCurChannel != null) {
             if (mCurSender == null) {
                 mCurSender = new ImeInputEventSender(mCurChannel, mH.getLooper());
@@ -3115,7 +3115,7 @@ public final class InputMethodManager {
         return DISPATCH_NOT_HANDLED;
     }
 
-    void finishedInputEvent(int seq, boolean handled, boolean timeout) {
+    private void finishedInputEvent(int seq, boolean handled, boolean timeout) {
         final PendingEvent p;
         synchronized (mH) {
             int index = mPendingEvents.indexOfKey(seq);
@@ -3139,7 +3139,7 @@ public final class InputMethodManager {
     }
 
     // Assumes the event has already been removed from the queue.
-    void invokeFinishedInputEventCallback(PendingEvent p, boolean handled) {
+    private void invokeFinishedInputEventCallback(PendingEvent p, boolean handled) {
         p.mHandled = handled;
         if (p.mHandler.getLooper().isCurrentThread()) {
             // Already running on the callback handler thread so we can send the
@@ -3499,7 +3499,7 @@ public final class InputMethodManager {
         return mDisplayId;
     }
 
-    void doDump(FileDescriptor fd, PrintWriter fout, String[] args) {
+    private void doDump(FileDescriptor fd, PrintWriter fout, String[] args) {
         if (processDump(fd, args)) {
             return;
         }
