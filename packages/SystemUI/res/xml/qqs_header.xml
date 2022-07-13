@@ -89,7 +89,7 @@
             app:layout_constraintTop_toTopOf="parent"
             />
         <PropertySet
-            app:alpha="0"
+            android:alpha="0"
         />
     </Constraint>
 

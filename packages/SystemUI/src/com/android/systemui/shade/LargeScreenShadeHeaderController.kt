@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.shade
 
+import android.annotation.IdRes
 import android.app.StatusBarManager
 import android.content.res.Configuration
 import android.os.Trace
 import android.os.Trace.TRACE_TAG_APP
 import android.util.Pair
 import android.view.View
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowInsets
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.motion.widget.MotionLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
 import com.android.systemui.R
@@ -40,11 +40,14 @@ import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
-import com.android.systemui.statusbar.phone.LargeScreenShadeHeaderController.Companion.HEADER_TRANSITION_ID
-import com.android.systemui.statusbar.phone.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
-import com.android.systemui.statusbar.phone.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_TRANSITION_ID
-import com.android.systemui.statusbar.phone.LargeScreenShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
-import com.android.systemui.statusbar.phone.LargeScreenShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
+import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.HEADER_TRANSITION_ID
+import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
+import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_TRANSITION_ID
+import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
+import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
+import com.android.systemui.statusbar.phone.StatusBarIconController
+import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.LARGE_SCREEN_BATTERY_CONTROLLER
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.LARGE_SCREEN_SHADE_HEADER
@@ -82,18 +85,24 @@ class LargeScreenShadeHeaderController @Inject constructor(
     private val batteryMeterViewController: BatteryMeterViewController,
     private val dumpManager: DumpManager,
     private val featureFlags: FeatureFlags,
-    private val qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder
+    private val qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder,
+    private val combinedShadeHeadersConstraintManager: CombinedShadeHeadersConstraintManager
 ) : ViewController<View>(header), Dumpable {
 
     companion object {
         /** IDs for transitions and constraints for the [MotionLayout]. These are only used when
          * [Flags.COMBINED_QS_HEADERS] is enabled.
          */
-        private val HEADER_TRANSITION_ID = R.id.header_transition
-        private val LARGE_SCREEN_HEADER_TRANSITION_ID = R.id.large_screen_header_transition
-        private val QQS_HEADER_CONSTRAINT = R.id.qqs_header_constraint
-        private val QS_HEADER_CONSTRAINT = R.id.qs_header_constraint
-        private val LARGE_SCREEN_HEADER_CONSTRAINT = R.id.large_screen_header_constraint
+        @VisibleForTesting
+        internal val HEADER_TRANSITION_ID = R.id.header_transition
+        @VisibleForTesting
+        internal val LARGE_SCREEN_HEADER_TRANSITION_ID = R.id.large_screen_header_transition
+        @VisibleForTesting
+        internal val QQS_HEADER_CONSTRAINT = R.id.qqs_header_constraint
+        @VisibleForTesting
+        internal val QS_HEADER_CONSTRAINT = R.id.qs_header_constraint
+        @VisibleForTesting
+        internal val LARGE_SCREEN_HEADER_CONSTRAINT = R.id.large_screen_header_constraint
 
         private fun Int.stateToString() = when (this) {
             QQS_HEADER_CONSTRAINT -> "QQS Header"
@@ -178,7 +187,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
         set(value) {
             if (visible && field != value) {
                 field = value
-                updateVisibility()
                 updatePosition()
             }
         }
@@ -206,12 +214,9 @@ class LargeScreenShadeHeaderController @Inject constructor(
             if (header is MotionLayout) {
                 // If the privacy chip is visible, we hide the status icons and battery remaining
                 // icon, only in QQS.
-                val constraintAlpha = if (visible) 0f else 1f
-                val state = header.getConstraintSet(QQS_HEADER_CONSTRAINT).apply {
-                    setAlpha(R.id.statusIcons, constraintAlpha)
-                    setAlpha(R.id.batteryRemainingIcon, constraintAlpha)
-                }
-                header.updateState(QQS_HEADER_CONSTRAINT, state)
+                val update = combinedShadeHeadersConstraintManager
+                    .privacyChipVisibilityConstraints(visible)
+                header.updateAllConstraints(update)
             }
         }
     }
@@ -276,6 +281,10 @@ class LargeScreenShadeHeaderController @Inject constructor(
         privacyIconsController.chipVisibilityListener = chipVisibilityListener
         if (header is MotionLayout) {
             header.setOnApplyWindowInsetsListener(insetListener)
+            clock.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+                val newPivot = if (v.isLayoutRtl) v.width.toFloat() else 0f
+                v.pivotX = newPivot
+            }
         }
 
         dumpManager.registerDumpable(this)
@@ -322,74 +331,32 @@ class LargeScreenShadeHeaderController @Inject constructor(
         cutoutLeft = sbInsets.first
         cutoutRight = sbInsets.second
         val hasCornerCutout: Boolean = insetsProvider.currentRotationHasCornerCutout()
-        val collapsedConstraint = view.getConstraintSet(QQS_HEADER_CONSTRAINT)
         updateQQSPaddings()
         // Set these guides as the left/right limits for content that lives in the top row, using
         // cutoutLeft and cutoutRight
-        view.getConstraintSet(QQS_HEADER_CONSTRAINT).updateGuides()
-        view.getConstraintSet(QS_HEADER_CONSTRAINT).updateGuides()
+        var changes = combinedShadeHeadersConstraintManager
+            .edgesGuidelinesConstraints(
+                if (view.isLayoutRtl) cutoutRight else cutoutLeft,
+                header.paddingStart,
+                if (view.isLayoutRtl) cutoutLeft else cutoutRight,
+                header.paddingEnd
+            )
 
         if (cutout != null) {
             val topCutout = cutout.boundingRectTop
             if (topCutout.isEmpty || hasCornerCutout) {
-                updateConstraintsForNoCutout(view)
+                changes += combinedShadeHeadersConstraintManager.emptyCutoutConstraints()
             } else {
-                val rtl = view.isLayoutRtl
-                val centerStart = if (!rtl) R.id.center_left else R.id.center_right
-                val centerEnd = if (!rtl) R.id.center_right else R.id.center_left
-                val offsetFromEdge =
-                    (view.width - view.paddingLeft - view.paddingStart) / 2 - topCutout.width() / 2
-                collapsedConstraint.apply {
-                    // Use guidelines to block the center cutout area.
-                    setGuidelineBegin(centerStart, offsetFromEdge)
-                    setGuidelineEnd(centerEnd, offsetFromEdge)
-                    connect(R.id.date, ConstraintSet.END, centerStart, ConstraintSet.START)
-                    connect(
-                        R.id.statusIcons,
-                        ConstraintSet.START,
-                        centerEnd,
-                        ConstraintSet.END
-                    )
-                    connect(
-                        R.id.privacy_container,
-                        ConstraintSet.START,
-                        centerEnd,
-                        ConstraintSet.END
-                    )
-                    constrainWidth(R.id.statusIcons, 0)
-                }
+                changes += combinedShadeHeadersConstraintManager.centerCutoutConstraints(
+                    view.isLayoutRtl,
+                    (view.width - view.paddingLeft - view.paddingRight - topCutout.width()) / 2
+                )
             }
         } else {
-            updateConstraintsForNoCutout(view)
+           changes += combinedShadeHeadersConstraintManager.emptyCutoutConstraints()
         }
 
-        view.updateState(QQS_HEADER_CONSTRAINT, collapsedConstraint)
-    }
-
-    private fun ConstraintSet.updateGuides() {
-        setGuidelineBegin(R.id.begin_guide, Math.max(cutoutLeft - header.paddingLeft, 0))
-        setGuidelineEnd(R.id.end_guide, Math.max(cutoutRight - header.paddingRight, 0))
-    }
-
-    /**
-     * If there's no center cutout, either due to no cutouts at all or just corner cutouts, update
-     * constraints so elements are not constrained in the center.
-     */
-    private fun updateConstraintsForNoCutout(view: MotionLayout) {
-        val collapsedConstraint = view.getConstraintSet(QQS_HEADER_CONSTRAINT)
-        collapsedConstraint.apply {
-            connect(R.id.date, ConstraintSet.END, R.id.barrier, ConstraintSet.START)
-            createBarrier(
-                R.id.barrier,
-                ConstraintSet.START,
-                0,
-                R.id.statusIcons,
-                R.id.privacy_container
-            )
-            connect(R.id.statusIcons, ConstraintSet.START, R.id.date, ConstraintSet.END)
-            connect(R.id.privacy_container, ConstraintSet.START, R.id.date, ConstraintSet.END)
-            constrainWidth(R.id.statusIcons, WRAP_CONTENT)
-        }
+        view.updateAllConstraints(changes)
     }
 
     private fun updateScrollY() {
@@ -515,6 +482,29 @@ class LargeScreenShadeHeaderController @Inject constructor(
         if (combinedHeaders) {
             header as MotionLayout
             pw.println("currentState: ${header.currentState.stateToString()}")
+        }
+    }
+
+    private fun MotionLayout.updateConstraints(@IdRes state: Int, update: ConstraintChange) {
+        val constraints = getConstraintSet(state)
+        constraints.update()
+        updateState(state, constraints)
+    }
+
+    /**
+     * Updates the [ConstraintSet] for the case of combined headers.
+     *
+     * Only non-`null` changes are applied to reduce the number of rebuilding in the [MotionLayout].
+     */
+    private fun MotionLayout.updateAllConstraints(updates: ConstraintsChanges) {
+        if (updates.qqsConstraintsChanges != null) {
+            updateConstraints(QQS_HEADER_CONSTRAINT, updates.qqsConstraintsChanges)
+        }
+        if (updates.qsConstraintsChanges != null) {
+            updateConstraints(QS_HEADER_CONSTRAINT, updates.qsConstraintsChanges)
+        }
+        if (updates.largeScreenConstraintsChanges != null) {
+            updateConstraints(LARGE_SCREEN_HEADER_CONSTRAINT, updates.largeScreenConstraintsChanges)
         }
     }
 }

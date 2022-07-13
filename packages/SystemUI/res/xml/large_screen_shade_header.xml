@@ -112,6 +112,7 @@
             app:layout_constraintTop_toTopOf="@id/date"
             app:layout_constraintBottom_toBottomOf="@id/date"
             app:layout_constraintStart_toEndOf="@id/batteryRemainingIcon"
+            app:layout_constraintHorizontal_bias="1"
         />
     </Constraint>
 

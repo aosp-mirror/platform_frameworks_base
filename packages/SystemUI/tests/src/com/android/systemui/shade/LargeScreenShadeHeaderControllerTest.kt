@@ -1,4 +1,4 @@
-package com.android.systemui.statusbar.phone
+package com.android.systemui.shade
 
 import android.app.StatusBarManager
 import android.content.Context
@@ -17,10 +17,14 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.qs.HeaderPrivacyIconsController
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
+import com.android.systemui.statusbar.phone.StatusBarIconController
+import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.VariableDateViewController
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -28,6 +32,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
@@ -51,6 +56,8 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
     @Mock private lateinit var variableDateViewControllerFactory: VariableDateViewController.Factory
     @Mock private lateinit var variableDateViewController: VariableDateViewController
     @Mock private lateinit var dumpManager: DumpManager
+    @Mock private lateinit var combinedShadeHeadersConstraintManager:
+        CombinedShadeHeadersConstraintManager
 
     @Mock private lateinit var mockedContext: Context
 
@@ -95,12 +102,18 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
                 batteryMeterViewController,
                 dumpManager,
                 featureFlags,
-                qsCarrierGroupControllerBuilder
+                qsCarrierGroupControllerBuilder,
+                combinedShadeHeadersConstraintManager
         )
         whenever(view.isAttachedToWindow).thenReturn(true)
         mLargeScreenShadeHeaderController.init()
         carrierIconSlots = listOf(
                 context.getString(com.android.internal.R.string.status_bar_mobile))
+    }
+
+    @After
+    fun verifyEveryTest() {
+        verifyZeroInteractions(combinedShadeHeadersConstraintManager)
     }
 
     @Test

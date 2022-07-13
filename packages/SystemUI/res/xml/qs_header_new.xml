@@ -29,6 +29,7 @@
             app:layout_constraintEnd_toEndOf="@id/end_guide"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/carrier_group"
+            app:layout_constraintHorizontal_bias="1"
             />
     </Constraint>
 

@@ -34,6 +34,8 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.privacy.OngoingPrivacyChip;
+import com.android.systemui.shade.CombinedShadeHeadersConstraintManager;
+import com.android.systemui.shade.CombinedShadeHeadersConstraintManagerImpl;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
@@ -173,6 +175,14 @@ public abstract class StatusBarViewModule {
         stub.setLayoutResource(layoutId);
         View v = stub.inflate();
         return v;
+    }
+
+    /** */
+    @Provides
+    @CentralSurfacesComponent.CentralSurfacesScope
+    public static CombinedShadeHeadersConstraintManager
+            provideCombinedShadeHeadersConstraintManager() {
+        return CombinedShadeHeadersConstraintManagerImpl.INSTANCE;
     }
 
     /** */
