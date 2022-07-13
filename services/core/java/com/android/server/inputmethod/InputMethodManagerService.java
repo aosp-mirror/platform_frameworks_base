@@ -3356,14 +3356,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#showSoftInput");
         synchronized (ImfLock.class) {
-            if (!calledFromValidUserLocked()) {
+            if (!canInteractWithImeLocked(uid, client, "showSoftInput")) {
                 return false;
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                if (!canInteractWithImeLocked(uid, client, "showSoftInput")) {
-                    return false;
-                }
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
                 return showCurrentInputLocked(windowToken, flags, resultReceiver, reason);
             } finally {
@@ -3382,7 +3379,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     "InputMethodManagerService#startStylusHandwriting");
             int uid = Binder.getCallingUid();
             synchronized (ImfLock.class) {
-                if (!calledFromValidUserLocked()) {
+                if (!canInteractWithImeLocked(uid, client, "startStylusHandwriting")) {
                     return;
                 }
                 if (!hasSupportedStylusLocked()) {
@@ -3392,9 +3389,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    if (!canInteractWithImeLocked(uid, client, "startStylusHandwriting")) {
-                        return;
-                    }
                     if (!mBindingController.supportsStylusHandwriting()) {
                         Slog.w(TAG,
                                 "Stylus HW unsupported by IME. Ignoring startStylusHandwriting()");
@@ -3494,16 +3488,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#hideSoftInput");
         synchronized (ImfLock.class) {
-            if (!InputMethodManagerService.this.calledFromValidUserLocked()) {
+            if (!canInteractWithImeLocked(uid, client, "hideSoftInput")) {
                 return false;
             }
             final long ident = Binder.clearCallingIdentity();
             try {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideSoftInput");
-                if (!canInteractWithImeLocked(uid, client, "hideSoftInput")) {
-                    return false;
-                }
-
                 if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
                 return InputMethodManagerService.this.hideCurrentInputLocked(windowToken,
                         flags, resultReceiver, reason);
@@ -4474,14 +4464,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 "Using addVirtualStylusIdForTestSession() requires INJECT_EVENTS.");
         int uid = Binder.getCallingUid();
         synchronized (ImfLock.class) {
-            if (!calledFromValidUserLocked()) {
+            if (!canInteractWithImeLocked(uid, client, "addVirtualStylusIdForTestSession")) {
                 return;
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                if (!canInteractWithImeLocked(uid, client, "addVirtualStylusIdForTestSession")) {
-                    return;
-                }
                 if (!mBindingController.supportsStylusHandwriting()) {
                     Slog.w(TAG, "Stylus HW unsupported by IME. Ignoring addVirtualStylusId()");
                     return;
