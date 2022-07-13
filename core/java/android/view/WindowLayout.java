@@ -274,7 +274,7 @@ public class WindowLayout {
         }
 
         if (extendedByCutout) {
-            extendFrameByCutout(attrs.gravity, displayCutoutSafe, outDisplayFrame, outFrame,
+            extendFrameByCutout(displayCutoutSafe, outDisplayFrame, outFrame,
                     mTempRect);
         }
 
@@ -291,7 +291,7 @@ public class WindowLayout {
                 + " requestedVisibilities=" + requestedVisibilities);
     }
 
-    public static void extendFrameByCutout(int gravity, Rect displayCutoutSafe,
+    public static void extendFrameByCutout(Rect displayCutoutSafe,
             Rect displayFrame, Rect inOutFrame, Rect tempRect) {
         if (displayCutoutSafe.contains(inOutFrame)) {
             return;
