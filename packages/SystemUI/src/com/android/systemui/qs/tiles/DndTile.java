@@ -226,16 +226,15 @@ public class DndTile extends QSTileImpl<BooleanState> {
         if (mController == null) return;
         final int zen = arg instanceof Integer ? (Integer) arg : mController.getZen();
         final boolean newValue = zen != ZEN_MODE_OFF;
-        final boolean valueChanged = state.value != newValue;
-        if (state.slash == null) state.slash = new SlashState();
         state.dualTarget = true;
         state.value = newValue;
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-        state.slash.isSlashed = !state.value;
+        state.icon = ResourceIcon.get(state.value
+                ? R.drawable.qs_dnd_icon_on
+                : R.drawable.qs_dnd_icon_off);
         state.label = getTileLabel();
         state.secondaryLabel = TextUtils.emptyIfNull(ZenModeConfig.getDescription(mContext,
                 zen != Global.ZEN_MODE_OFF, mController.getConfig(), false));
-        state.icon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_dnd);
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
         // Keeping the secondaryLabel in contentDescription instead of stateDescription is easier
         // to understand.
