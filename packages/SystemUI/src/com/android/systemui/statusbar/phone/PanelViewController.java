@@ -41,6 +41,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
 
@@ -66,6 +67,7 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 public abstract class PanelViewController {
     public static final boolean DEBUG = PanelView.DEBUG;
@@ -1034,16 +1036,19 @@ public abstract class PanelViewController {
         animator.start();
         setAnimator(animator);
 
-        View[] viewsToAnimate = {
-                mKeyguardBottomArea.getIndicationArea(),
-                mCentralSurfaces.getAmbientIndicationContainer()};
-        for (View v : viewsToAnimate) {
-            if (v == null) {
-                continue;
-            }
-            v.animate().translationY(-mHintDistance).setDuration(250).setInterpolator(
-                    Interpolators.FAST_OUT_SLOW_IN).withEndAction(() -> v.animate().translationY(
-                    0).setDuration(450).setInterpolator(mBounceInterpolator).start()).start();
+        final List<ViewPropertyAnimator> indicationAnimators =
+                mKeyguardBottomArea.getIndicationAreaAnimators();
+        for (final ViewPropertyAnimator indicationAreaAnimator : indicationAnimators) {
+            indicationAreaAnimator
+                    .translationY(-mHintDistance)
+                    .setDuration(250)
+                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                    .withEndAction(() -> indicationAreaAnimator
+                            .translationY(0)
+                            .setDuration(450)
+                            .setInterpolator(mBounceInterpolator)
+                            .start())
+                    .start();
         }
     }
 

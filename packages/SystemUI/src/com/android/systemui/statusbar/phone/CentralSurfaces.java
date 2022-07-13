@@ -265,9 +265,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     boolean isPulsing();
 
-    @Nullable
-    View getAmbientIndicationContainer();
-
     boolean isOccluded();
 
     //TODO: These can / should probably be moved to NotificationPresenter or ShadeController

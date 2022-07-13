@@ -3194,14 +3194,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 getExpandedFraction());
         float alpha = Math.min(expansionAlpha, 1 - computeQsExpansionFraction());
         alpha *= mBottomAreaShadeAlpha;
-        mKeyguardBottomArea.setAffordanceAlpha(alpha);
-        mKeyguardBottomArea.setImportantForAccessibility(
-                alpha == 0f ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                        : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-        View ambientIndicationContainer = mCentralSurfaces.getAmbientIndicationContainer();
-        if (ambientIndicationContainer != null) {
-            ambientIndicationContainer.setAlpha(alpha);
-        }
+        mKeyguardBottomArea.setComponentAlphas(alpha);
         mLockIconViewController.setAlpha(alpha);
     }
 
