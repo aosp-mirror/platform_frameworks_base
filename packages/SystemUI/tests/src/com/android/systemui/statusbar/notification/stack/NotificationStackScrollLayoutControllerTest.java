@@ -150,7 +150,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
-        when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(false);
 
         mController = new NotificationStackScrollLayoutController(
                 true,
@@ -166,7 +165,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mKeyguardMediaController,
                 mKeyguardBypassController,
                 mZenModeController,
-                mColorExtractor,
                 mNotificationLockscreenUserManager,
                 mMetricsLogger,
                 mDumpManager,
@@ -179,15 +177,12 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mLegacyGroupManager,
                 mLegacyGroupManager,
                 mSilentHeaderController,
-                mNotifPipelineFlags,
                 mNotifPipeline,
                 mNotifCollection,
                 mEntryManager,
                 mLockscreenShadeTransitionController,
                 mShadeTransitionController,
-                mIStatusBarService,
                 mUiEventLogger,
-                mLayoutInflater,
                 mRemoteInputManager,
                 mVisualStabilityManager,
                 mShadeController,
