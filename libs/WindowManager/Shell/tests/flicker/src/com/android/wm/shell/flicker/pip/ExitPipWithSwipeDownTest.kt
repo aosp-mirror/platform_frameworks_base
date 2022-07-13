@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -71,14 +70,6 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
                     .waitForAndVerify()
             }
         }
-
-    @FlakyTest
-    @Test
-    override fun pipWindowBecomesInvisible() = super.pipWindowBecomesInvisible()
-
-    @FlakyTest
-    @Test
-    override fun pipLayerBecomesInvisible() = super.pipLayerBecomesInvisible()
 
     /**
      * Checks that the focus doesn't change between windows during the transition
