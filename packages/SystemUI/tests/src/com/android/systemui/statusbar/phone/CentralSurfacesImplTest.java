@@ -89,7 +89,6 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoModeController;
-import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentService;
@@ -118,7 +117,6 @@ import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
-import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -129,7 +127,6 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
@@ -159,7 +156,6 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.MessageRouterImpl;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
-import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
@@ -223,7 +219,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private AssistManager mAssistManager;
-    @Mock private NotifShadeEventSource mNotifShadeEventSource;
     @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private NotificationGutsManager mNotificationGutsManager;
     @Mock private NotificationMediaManager mNotificationMediaManager;
@@ -240,15 +235,12 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private StatusBarWindowStateController mStatusBarWindowStateController;
     @Mock private NotificationViewHierarchyManager mNotificationViewHierarchyManager;
     @Mock private UserSwitcherController mUserSwitcherController;
-    @Mock private NetworkController mNetworkController;
-    @Mock private BubblesManager mBubblesManager;
     @Mock private Bubbles mBubbles;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     @Mock private DozeParameters mDozeParameters;
     @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
-    @Mock private LockscreenGestureLogger mLockscreenGestureLogger;
     @Mock private LockscreenWallpaper mLockscreenWallpaper;
     @Mock private DozeServiceHost mDozeServiceHost;
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
@@ -286,7 +278,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private NotifLiveDataStore mNotifLiveDataStore;
     @Mock private InteractionJankMonitor mJankMonitor;
     @Mock private DeviceStateManager mDeviceStateManager;
-    @Mock private DreamOverlayStateController mDreamOverlayStateController;
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
@@ -401,7 +392,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 new FalsingManagerFake(),
                 new FalsingCollectorFake(),
                 mBroadcastDispatcher,
-                mNotifShadeEventSource,
                 mNotificationEntryManager,
                 mNotificationGutsManager,
                 notificationLogger,
@@ -416,13 +406,11 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mLockscreenUserManager,
                 mRemoteInputManager,
                 mUserSwitcherController,
-                mNetworkController,
                 mBatteryController,
                 mColorExtractor,
                 new ScreenLifecycle(mDumpManager),
                 wakefulnessLifecycle,
                 mStatusBarStateController,
-                Optional.of(mBubblesManager),
                 Optional.of(mBubbles),
                 mVisualStabilityManager,
                 mDeviceProvisionedController,
@@ -434,7 +422,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mDozeParameters,
                 mScrimController,
                 mLockscreenWallpaperLazy,
-                mLockscreenGestureLogger,
                 mBiometricUnlockControllerLazy,
                 mDozeServiceHost,
                 mPowerManager, mScreenPinningRequest,
@@ -466,7 +453,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mLockscreenTransitionController,
                 mFeatureFlags,
                 mKeyguardUnlockAnimationController,
-                new Handler(TestableLooper.get(this).getLooper()),
                 mMainExecutor,
                 new MessageRouterImpl(mMainExecutor),
                 mWallpaperManager,
@@ -475,7 +461,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mNotifPipelineFlags,
                 mJankMonitor,
                 mDeviceStateManager,
-                mDreamOverlayStateController,
                 mWiredChargingRippleController, mDreamManager);
         when(mKeyguardViewMediator.registerCentralSurfaces(
                 any(CentralSurfacesImpl.class),
