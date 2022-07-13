@@ -129,6 +129,7 @@ interface IVoiceInteractionManagerService {
      * @param activityToken optional token of activity that needs to be on top
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     boolean showSessionForActiveService(in Bundle args, int sourceFlags,
             IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken);
 
@@ -136,6 +137,7 @@ interface IVoiceInteractionManagerService {
      * Hides the session from the active service, if it is showing.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     void hideCurrentSession();
 
     /**
@@ -143,12 +145,14 @@ interface IVoiceInteractionManagerService {
      * be called if {@link #activeServiceSupportsLaunchFromKeyguard()} returns true.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     void launchVoiceAssistFromKeyguard();
 
     /**
      * Indicates whether there is a voice session running (but not necessarily showing).
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     boolean isSessionRunning();
 
     /**
@@ -156,6 +160,7 @@ interface IVoiceInteractionManagerService {
      * assist gesture.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     boolean activeServiceSupportsAssist();
 
     /**
@@ -163,18 +168,21 @@ interface IVoiceInteractionManagerService {
      * from the lockscreen.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     boolean activeServiceSupportsLaunchFromKeyguard();
 
     /**
      * Called when the lockscreen got shown.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     void onLockscreenShown();
 
     /**
      * Register a voice interaction listener.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     void registerVoiceInteractionSessionListener(IVoiceInteractionSessionListener listener);
 
     /**
@@ -182,6 +190,7 @@ interface IVoiceInteractionManagerService {
      * Returns all supported voice actions.
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     void getActiveServiceSupportedActions(in List<String> voiceActions,
      in IVoiceActionCheckCallback callback);
 
@@ -214,6 +223,7 @@ interface IVoiceInteractionManagerService {
      * NOTE: it's only effective when the service itself is available / enabled in the device, so
      * calling setDisable(false) would be a no-op when it isn't.
      */
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     void setDisabled(boolean disabled);
 
     /**
@@ -244,6 +254,7 @@ interface IVoiceInteractionManagerService {
      * @param callback Use this to report {@link HotwordDetectionService} status.
      * @param detectorType Indicate which detector is used.
      */
+    @EnforcePermission("MANAGE_HOTWORD_DETECTION")
     void updateState(
             in Identity originatorIdentity,
             in PersistableBundle options,
@@ -256,6 +267,7 @@ interface IVoiceInteractionManagerService {
      */
     void shutdownHotwordDetectionService();
 
+    @EnforcePermission(allOf={"RECORD_AUDIO", "CAPTURE_AUDIO_HOTWORD"})
     void startListeningFromMic(
         in AudioFormat audioFormat,
         in IMicrophoneHotwordDetectionVoiceInteractionCallback callback);
@@ -271,6 +283,7 @@ interface IVoiceInteractionManagerService {
     /**
      * Test API to simulate to trigger hardware recognition event for test.
      */
+    @EnforcePermission(allOf={"RECORD_AUDIO", "CAPTURE_AUDIO_HOTWORD"})
     void triggerHardwareRecognitionEventForTest(
             in SoundTrigger.KeyphraseRecognitionEvent event,
             in IHotwordRecognitionStatusCallback callback);
