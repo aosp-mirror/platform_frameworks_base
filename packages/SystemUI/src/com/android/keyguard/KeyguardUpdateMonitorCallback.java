@@ -249,11 +249,6 @@ public class KeyguardUpdateMonitorCallback {
             BiometricSourceType biometricSourceType) { }
 
     /**
-     * Called when the state of face unlock changed.
-     */
-    public void onFaceUnlockStateChanged(boolean running, int userId) { }
-
-    /**
      * Called when biometric running state changed.
      */
     public void onBiometricRunningStateChanged(boolean running,
