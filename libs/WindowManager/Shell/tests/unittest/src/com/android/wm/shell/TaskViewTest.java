@@ -169,6 +169,7 @@ public class TaskViewTest extends ShellTestCase {
         mTaskView.onTaskAppeared(mTaskInfo, mLeash);
 
         verify(mViewListener).onTaskCreated(eq(mTaskInfo.taskId), any());
+        assertThat(mTaskView.isInitialized()).isTrue();
         verify(mViewListener, never()).onTaskVisibilityChanged(anyInt(), anyBoolean());
     }
 
@@ -178,6 +179,7 @@ public class TaskViewTest extends ShellTestCase {
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
 
         verify(mViewListener).onInitialized();
+        assertThat(mTaskView.isInitialized()).isTrue();
         // No task, no visibility change
         verify(mViewListener, never()).onTaskVisibilityChanged(anyInt(), anyBoolean());
     }
@@ -189,6 +191,7 @@ public class TaskViewTest extends ShellTestCase {
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
 
         verify(mViewListener).onInitialized();
+        assertThat(mTaskView.isInitialized()).isTrue();
         verify(mViewListener).onTaskVisibilityChanged(eq(mTaskInfo.taskId), eq(true));
     }
 
@@ -223,6 +226,7 @@ public class TaskViewTest extends ShellTestCase {
 
         verify(mOrganizer).removeListener(eq(mTaskView));
         verify(mViewListener).onReleased();
+        assertThat(mTaskView.isInitialized()).isFalse();
     }
 
     @Test
@@ -270,6 +274,7 @@ public class TaskViewTest extends ShellTestCase {
 
         verify(mViewListener).onTaskCreated(eq(mTaskInfo.taskId), any());
         verify(mViewListener, never()).onInitialized();
+        assertThat(mTaskView.isInitialized()).isFalse();
         // If there's no surface the task should be made invisible
         verify(mViewListener).onTaskVisibilityChanged(eq(mTaskInfo.taskId), eq(false));
     }
@@ -281,6 +286,7 @@ public class TaskViewTest extends ShellTestCase {
         verify(mTaskViewTransitions, never()).setTaskViewVisible(any(), anyBoolean());
 
         verify(mViewListener).onInitialized();
+        assertThat(mTaskView.isInitialized()).isTrue();
         // No task, no visibility change
         verify(mViewListener, never()).onTaskVisibilityChanged(anyInt(), anyBoolean());
     }
@@ -353,6 +359,7 @@ public class TaskViewTest extends ShellTestCase {
 
         verify(mOrganizer).removeListener(eq(mTaskView));
         verify(mViewListener).onReleased();
+        assertThat(mTaskView.isInitialized()).isFalse();
         verify(mTaskViewTransitions).removeTaskView(eq(mTaskView));
     }
 
