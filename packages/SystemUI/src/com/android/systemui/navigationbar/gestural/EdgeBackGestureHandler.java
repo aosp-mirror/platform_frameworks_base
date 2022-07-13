@@ -53,7 +53,6 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
-import android.view.WindowMetrics;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
@@ -183,6 +182,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private final IWindowManager mWindowManagerService;
     private final Optional<Pip> mPipOptional;
     private final FalsingManager mFalsingManager;
+    private final Configuration mLastReportedConfig = new Configuration();
     // Activities which should not trigger Back gesture.
     private final List<ComponentName> mGestureBlockingActivities = new ArrayList<>();
 
@@ -334,6 +334,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         mFalsingManager = falsingManager;
         mLatencyTracker = latencyTracker;
         mFeatureFlags = featureFlags;
+        mLastReportedConfig.setTo(mContext.getResources().getConfiguration());
         ComponentName recentsComponentName = ComponentName.unflattenFromString(
                 context.getString(com.android.internal.R.string.config_recentsComponentName));
         if (recentsComponentName != null) {
@@ -885,12 +886,12 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         if (DEBUG_MISSING_GESTURE) {
             Log.d(DEBUG_MISSING_GESTURE_TAG, "Config changed: config=" + newConfig);
         }
+        mLastReportedConfig.updateFrom(newConfig);
         updateDisplaySize();
     }
 
     private void updateDisplaySize() {
-        WindowMetrics metrics = mWindowManager.getMaximumWindowMetrics();
-        Rect bounds = metrics.getBounds();
+        Rect bounds = mLastReportedConfig.windowConfiguration.getMaxBounds();
         mDisplaySize.set(bounds.width(), bounds.height());
         if (DEBUG_MISSING_GESTURE) {
             Log.d(DEBUG_MISSING_GESTURE_TAG, "Update display size: mDisplaySize=" + mDisplaySize);
