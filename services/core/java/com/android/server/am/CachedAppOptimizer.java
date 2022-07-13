@@ -613,7 +613,7 @@ public final class CachedAppOptimizer {
                     + " processes.");
             pw.println("Last Compaction per process stats:");
             pw.println("    (ProcessName,Source,DeltaAnonRssKBs,ZramConsumedKBs,AnonMemFreedKBs,"
-                    + "CompactEfficiency,CompactCost(ms/MB))");
+                    + "CompactEfficiency,CompactCost(ms/MB),procState,oomAdj)");
             for (Map.Entry<Integer, SingleCompactionStats> entry :
                     mLastCompactionStats.entrySet()) {
                 SingleCompactionStats stats = entry.getValue();
@@ -622,7 +622,7 @@ public final class CachedAppOptimizer {
             pw.println();
             pw.println("Last 20 Compactions Stats:");
             pw.println("    (ProcessName,Source,DeltaAnonRssKBs,ZramConsumedKBs,AnonMemFreedKBs,"
-                    + "CompactEfficiency,CompactCost(ms/MB))");
+                    + "CompactEfficiency,CompactCost(ms/MB),procState,oomAdj)");
             for (SingleCompactionStats stats : mCompactionStatsHistory) {
                 stats.dump(pw);
             }
@@ -1480,10 +1480,12 @@ public final class CachedAppOptimizer {
         public long mAnonMemFreedKBs;
         public float mCpuTimeMillis;
         public long mOrigAnonRss;
+        public int mProcState;
+        public int mOomAdj;
 
         SingleCompactionStats(long[] rss, CompactSource source, String processName,
                 long deltaAnonRss, long zramConsumed, long anonMemFreed, long origAnonRss,
-                long cpuTimeMillis) {
+                long cpuTimeMillis, int procState, int oomAdj) {
             mRssAfterCompaction = rss;
             mSourceType = source;
             mProcessName = processName;
@@ -1492,6 +1494,8 @@ public final class CachedAppOptimizer {
             mAnonMemFreedKBs = anonMemFreed;
             mCpuTimeMillis = cpuTimeMillis;
             mOrigAnonRss = origAnonRss;
+            mProcState = procState;
+            mOomAdj = oomAdj;
         }
 
         double getCompactEfficiency() { return mAnonMemFreedKBs / (double) mOrigAnonRss; }
@@ -1508,7 +1512,7 @@ public final class CachedAppOptimizer {
         void dump(PrintWriter pw) {
             pw.println("    (" + mProcessName + "," + mSourceType.name() + "," + mDeltaAnonRssKBs
                     + "," + mZramConsumedKBs + "," + mAnonMemFreedKBs + "," + getCompactEfficiency()
-                    + "," + getCompactCost() + ")");
+                    + "," + getCompactCost() + "," + mProcState + "," + mOomAdj + ")");
         }
     }
 
@@ -1793,7 +1797,7 @@ public final class CachedAppOptimizer {
                                         origAnonRss, totalCpuTimeMillis);
                                 SingleCompactionStats memStats = new SingleCompactionStats(rssAfter,
                                         compactSource, name, anonRssSavings, zramConsumed, memFreed,
-                                        origAnonRss, totalCpuTimeMillis);
+                                        origAnonRss, totalCpuTimeMillis, procState, lastOomAdj);
                                 mLastCompactionStats.remove(pid);
                                 mLastCompactionStats.put(pid, memStats);
                                 mCompactionStatsHistory.add(memStats);
