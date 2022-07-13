@@ -18,7 +18,6 @@ package com.android.systemui;
 
 import android.app.ActivityThread;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -29,7 +28,6 @@ import com.android.systemui.dagger.DaggerGlobalRootComponent;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
-import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvider;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 import com.android.wm.shell.dagger.WMShellConcurrencyModule;
 import com.android.wm.shell.transition.ShellTransitions;
@@ -250,14 +248,5 @@ public class SystemUIFactory {
                 createScreenshotNotificationSmartActionsProvider(
                         Context context, Executor executor, Handler uiHandler) {
         return new ScreenshotNotificationSmartActionsProvider();
-    }
-
-    /**
-     * Creates an instance of BackGestureTfClassifierProvider.
-     * This method is overridden in vendor specific implementation of Sys UI.
-     */
-    public BackGestureTfClassifierProvider createBackGestureTfClassifierProvider(
-            AssetManager am, String modelName) {
-        return new BackGestureTfClassifierProvider();
     }
 }
