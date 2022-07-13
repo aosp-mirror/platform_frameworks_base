@@ -4585,12 +4585,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return false;
         }
 
-        final long sleepDuration = mPowerManagerInternal.getLastWakeup().sleepDuration;
+        final long sleepDurationRealtime =
+                mPowerManagerInternal.getLastWakeup().sleepDurationRealtime;
         if (DEBUG_WAKEUP) {
-            Log.i(TAG, "shouldWakeUpWithHomeIntent: sleepDuration= " + sleepDuration
+            Log.i(TAG, "shouldWakeUpWithHomeIntent: sleepDurationRealtime= " + sleepDurationRealtime
                     + " mWakeUpToLastStateTimeout= " + mWakeUpToLastStateTimeout);
         }
-        return sleepDuration > mWakeUpToLastStateTimeout;
+        return sleepDurationRealtime > mWakeUpToLastStateTimeout;
     }
 
     private void wakeUpFromPowerKey(long eventTime) {
