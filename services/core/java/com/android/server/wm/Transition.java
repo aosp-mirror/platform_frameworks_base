@@ -533,9 +533,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
         // Need to update layers on involved displays since they were all paused while
         // the animation played. This puts the layers back into the correct order.
-        for (int i = displays.size() - 1; i >= 0; --i) {
-            if (displays.valueAt(i) == null) continue;
-            displays.valueAt(i).assignChildLayers(t);
+        mController.mBuildingFinishLayers = true;
+        try {
+            for (int i = displays.size() - 1; i >= 0; --i) {
+                if (displays.valueAt(i) == null) continue;
+                displays.valueAt(i).assignChildLayers(t);
+            }
+        } finally {
+            mController.mBuildingFinishLayers = false;
         }
         if (rootLeash.isValid()) {
             t.reparent(rootLeash, null);
