@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"మీ పిన్‌ని నమోదు చేయండి"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"మీ నమూనాను నమోదు చేయండి"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"మీ పాస్‌వర్డ్‌ను నమోదు చేయండి"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"మీ పాస్‌వర్డ్‌ను ఎంటర్ చేయండి"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"చెల్లని కార్డ్."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"ఛార్జ్ చేయబడింది"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • వైర్‌ లేకుండా ఛార్జ్ అవుతోంది"</string>
