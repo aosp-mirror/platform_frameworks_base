@@ -47,6 +47,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
@@ -89,6 +90,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
+        assumeFalse(WindowManagerService.sEnableShellTransitions);
         mAppTransitionController = new AppTransitionController(mWm, mDisplayContent);
     }
 
