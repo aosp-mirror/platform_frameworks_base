@@ -3500,21 +3500,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             final long ident = Binder.clearCallingIdentity();
             try {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideSoftInput");
-                if (mCurClient == null || client == null
-                        || mCurClient.client.asBinder() != client.asBinder()) {
-                    // We need to check if this is the current client with
-                    // focus in the window manager, to allow this call to
-                    // be made before input is started in it.
-                    final ClientState cs = mClients.get(client.asBinder());
-                    if (cs == null) {
-                        throw new IllegalArgumentException("unknown client " + client.asBinder());
-                    }
-                    if (!isImeClientFocused(windowToken, cs)) {
-                        if (DEBUG) {
-                            Slog.w(TAG, "Ignoring hideSoftInput of uid " + uid + ": " + client);
-                        }
-                        return false;
-                    }
+                if (!canInteractWithImeLocked(uid, client, "hideSoftInput")) {
+                    return false;
                 }
 
                 if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
