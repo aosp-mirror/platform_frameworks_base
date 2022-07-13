@@ -1159,7 +1159,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             final InsetsSourceConsumer consumer = getSourceConsumer(internalTypes.valueAt(i));
             boolean show = animationType == ANIMATION_TYPE_SHOW
                     || animationType == ANIMATION_TYPE_USER;
-            boolean canRun = false;
+            boolean canRun = true;
             if (show) {
                 // Show request
                 if (fromIme) {
@@ -1169,7 +1169,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 }
                 switch(consumer.requestShow(fromIme)) {
                     case ShowResult.SHOW_IMMEDIATELY:
-                        canRun = true;
                         break;
                     case ShowResult.IME_SHOW_DELAYED:
                         imeReady = false;
@@ -1180,6 +1179,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                                 + fromIme);
                         // IME cannot be shown (since it didn't have focus), proceed
                         // with animation of other types.
+                        canRun = false;
                         break;
                 }
             } else {
@@ -1189,7 +1189,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 if (!fromIme) {
                     consumer.notifyHidden();
                 }
-                canRun = true;
             }
             if (!canRun) {
                 if (WARN) Log.w(TAG, String.format(
