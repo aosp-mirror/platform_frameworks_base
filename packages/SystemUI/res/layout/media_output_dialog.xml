@@ -89,8 +89,7 @@
             android:id="@+id/list_result"
             android:scrollbars="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:overScrollMode="never"/>
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 
     <LinearLayout
