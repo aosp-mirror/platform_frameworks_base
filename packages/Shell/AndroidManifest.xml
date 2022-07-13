@@ -596,6 +596,9 @@
     <!-- Permission required for CTS test - ClipboardManagerTest -->
     <uses-permission android:name="android.permission.SET_CLIP_SOURCE" />
 
+    <!-- Permission required for CTS test - CtsInputMethodTestCases -->
+    <uses-permission android:name="android.permission.TEST_INPUT_METHOD" />
+
     <!-- Permission required for CTS test - FontManagerTest -->
     <uses-permission android:name="android.permission.UPDATE_FONTS" />
 
