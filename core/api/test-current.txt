@@ -822,7 +822,7 @@ package android.content.pm {
   }
 
   public abstract class PackageManager {
-    method @Nullable public String getContentCaptureServicePackageName();
+    method @Deprecated @Nullable public final String getContentCaptureServicePackageName();
     method @Nullable public String getDefaultTextClassifierPackageName();
     method @RequiresPermission(android.Manifest.permission.INJECT_EVENTS) public android.os.IBinder getHoldLockToken();
     method public abstract int getInstallReason(@NonNull String, @NonNull android.os.UserHandle);
