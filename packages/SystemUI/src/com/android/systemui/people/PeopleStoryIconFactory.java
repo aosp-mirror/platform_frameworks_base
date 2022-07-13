@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.IconDrawableFactory;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 
@@ -52,16 +53,15 @@ class PeopleStoryIconFactory implements AutoCloseable {
 
     PeopleStoryIconFactory(Context context, PackageManager pm,
             IconDrawableFactory iconDrawableFactory, int iconSizeDp) {
-        context.setTheme(android.R.style.Theme_DeviceDefault_DayNight);
-        mIconBitmapSize = (int) (iconSizeDp * context.getResources().getDisplayMetrics().density);
-        mDensity = context.getResources().getDisplayMetrics().density;
+        mContext = new ContextThemeWrapper(context, android.R.style.Theme_DeviceDefault_DayNight);
+        mIconBitmapSize = (int) (iconSizeDp * mContext.getResources().getDisplayMetrics().density);
+        mDensity = mContext.getResources().getDisplayMetrics().density;
         mIconSize = mDensity * iconSizeDp;
         mPackageManager = pm;
         mIconDrawableFactory = iconDrawableFactory;
-        mImportantConversationColor = context.getColor(R.color.important_conversation);
-        mAccentColor = Utils.getColorAttr(context,
+        mImportantConversationColor = mContext.getColor(R.color.important_conversation);
+        mAccentColor = Utils.getColorAttr(mContext,
                 com.android.internal.R.attr.colorAccentPrimaryVariant).getDefaultColor();
-        mContext = context;
     }
 
 

@@ -46,6 +46,7 @@ import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.media.dagger.MediaProjectionModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarComponent;
+import com.android.systemui.people.PeopleModule;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.privacy.PrivacyModule;
 import com.android.systemui.recents.Recents;
@@ -122,6 +123,7 @@ import dagger.Provides;
             LogModule.class,
             MediaProjectionModule.class,
             PeopleHubModule.class,
+            PeopleModule.class,
             PluginModule.class,
             PrivacyModule.class,
             QsFrameTranslateModule.class,
