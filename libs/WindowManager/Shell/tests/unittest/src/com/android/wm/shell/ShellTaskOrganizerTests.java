@@ -26,11 +26,13 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_MULTI_WINDOW;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
+import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -146,6 +148,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
 
     @Test
     public void testTaskLeashReleasedAfterVanished() throws RemoteException {
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         RunningTaskInfo taskInfo = createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW);
         SurfaceControl taskLeash = new SurfaceControl.Builder(new SurfaceSession())
                 .setName("task").build();

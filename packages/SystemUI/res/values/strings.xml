@@ -802,6 +802,8 @@
     <!-- Message shown when lock screen is unlocked (ie: by trust agent) and the user taps the empty space on the lock screen and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
     <string name="keyguard_unlock_press">Press the unlock icon to open</string>
 
+    <!-- Message shown when non-bypass face authentication succeeds. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
+    <string name="keyguard_face_successful_unlock_swipe">Unlocked by face. Swipe up to open.</string>
     <!-- Message shown when non-bypass face authentication succeeds and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
     <string name="keyguard_face_successful_unlock_press">Unlocked by face. Press the unlock icon to open.</string>
     <!-- Message shown when non-bypass face authentication succeeds and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
