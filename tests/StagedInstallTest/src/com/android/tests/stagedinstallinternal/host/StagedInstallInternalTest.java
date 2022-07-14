@@ -31,6 +31,7 @@ import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.ddmlib.Log;
 import com.android.tests.rollback.host.AbandonSessionsRule;
 import com.android.tradefed.device.DeviceNotAvailableException;
+import com.android.tradefed.device.PackageInfo;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 import com.android.tradefed.util.CommandResult;
@@ -201,6 +202,28 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         runPhase("testDuplicateApkInApexShouldFail_Commit");
         getDevice().reboot();
         runPhase("testDuplicateApkInApexShouldFail_Verify");
+    }
+
+    /**
+     * Tests the cache of apk-in-apex is pruned and rebuilt correctly.
+     */
+    @Test
+    @LargeTest
+    public void testApkInApexPruneCache() throws Exception {
+        final String apkInApexPackageName = "com.android.cts.install.lib.testapp.A";
+
+        pushTestApex(APK_IN_APEX_TESTAPEX_NAME + "_v1.apex");
+        getDevice().reboot();
+        PackageInfo pi = getDevice().getAppPackageInfo(apkInApexPackageName);
+        assertThat(Integer.parseInt(pi.getVersionCode())).isEqualTo(1);
+        assertThat(pi.getCodePath()).startsWith("/apex/" + APK_IN_APEX_TESTAPEX_NAME);
+
+        installPackage(APK_IN_APEX_TESTAPEX_NAME + "_v2.apex", "--staged");
+        getDevice().reboot();
+        pi = getDevice().getAppPackageInfo(apkInApexPackageName);
+        // The version code of apk-in-apex will be stale if the cache is not rebuilt
+        assertThat(Integer.parseInt(pi.getVersionCode())).isEqualTo(2);
+        assertThat(pi.getCodePath()).startsWith("/apex/" + APK_IN_APEX_TESTAPEX_NAME);
     }
 
     @Test
