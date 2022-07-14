@@ -133,7 +133,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                 @Override
                 public void onPrioritizedRotation(@Surface.Rotation int rotation) {
                     mStartingQuickstepRotation = rotation;
-                    updateDisabledForQuickstep(mContext.getResources().getConfiguration());
+                    updateDisabledForQuickstep(mLastReportedConfig);
                 }
             };
 
