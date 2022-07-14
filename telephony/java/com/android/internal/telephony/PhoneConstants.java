@@ -239,4 +239,10 @@ public class PhoneConstants {
     public static final int CELL_OFF_FLAG = 0;
     public static final int CELL_ON_FLAG = 1;
     public static final int CELL_OFF_DUE_TO_AIRPLANE_MODE_FLAG = 2;
+
+    /** The key to specify the selected domain for dialing calls. */
+    public static final String EXTRA_DIAL_DOMAIN = "dial_domain";
+
+    /** The key to specify the emergency service category */
+    public static final String EXTRA_EMERGENCY_SERVICE_CATEGORY = "emergency_service_category";
 }
