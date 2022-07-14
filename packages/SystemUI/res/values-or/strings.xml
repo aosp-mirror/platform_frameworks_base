@@ -87,8 +87,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ପୁଣିଥରେ ସ୍କ୍ରୀନ୍‌ଶଟ୍ ନେବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ସ୍କ୍ରିନସଟକୁ ସେଭ୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ଆପ୍‍ କିମ୍ବା ସଂସ୍ଥା ଦ୍ୱାରା ସ୍କ୍ରୀନଶଟ୍‍ ନେବାକୁ ଅନୁମତି ଦିଆଯାଇ ନାହିଁ"</string>
-    <string name="screenshot_edit_label" msgid="8754981973544133050">"ଏଡିଟ୍ କରନ୍ତୁ"</string>
-    <string name="screenshot_edit_description" msgid="3333092254706788906">"ସ୍କ୍ରିନସଟ୍ ଏଡିଟ୍ କରନ୍ତୁ"</string>
+    <string name="screenshot_edit_label" msgid="8754981973544133050">"ଏଡିଟ କରନ୍ତୁ"</string>
+    <string name="screenshot_edit_description" msgid="3333092254706788906">"ସ୍କ୍ରିନସଟ୍ ଏଡିଟ କରନ୍ତୁ"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ଅଧିକ କ୍ୟାପଚର୍ କରନ୍ତୁ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ସ୍କ୍ରିନସଟ୍ ଖାରଜ କରନ୍ତୁ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ସ୍କ୍ରିନସଟର ପ୍ରିଭ୍ୟୁ"</string>
@@ -114,7 +114,7 @@
     <string name="screenrecord_stop_label" msgid="72699670052087989">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"ବିରତି କରନ୍ତୁ"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ପୁଣି ଚାଲୁ କରନ୍ତୁ"</string>
-    <string name="screenrecord_cancel_label" msgid="7850926573274483294">"ବାତିଲ୍‌ କରନ୍ତୁ"</string>
+    <string name="screenrecord_cancel_label" msgid="7850926573274483294">"ବାତିଲ କରନ୍ତୁ"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ସେୟାର୍‍ କରନ୍ତୁ"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ବାତିଲ୍‌ କରିଦିଆଯାଇଛି"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"ସ୍କ୍ରିନ୍ ରେକର୍ଡିଂ ସେଭ୍ କରାଯାଇଛି"</string>
@@ -147,10 +147,10 @@
     <string name="phone_label" msgid="5715229948920451352">"ଫୋନ୍‌ ଖୋଲନ୍ତୁ"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"ଭଏସ୍‍ ସହାୟକ ଖୋଲନ୍ତୁ"</string>
     <string name="camera_label" msgid="8253821920931143699">"କ୍ୟାମେରା ଖୋଲନ୍ତୁ"</string>
-    <string name="cancel" msgid="1089011503403416730">"ବାତିଲ୍ କରନ୍ତୁ"</string>
+    <string name="cancel" msgid="1089011503403416730">"ବାତିଲ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ନିଶ୍ଚିତ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ପ୍ରାମାଣିକତା ବାତିଲ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ପ୍ରାମାଣିକତା ବାତିଲ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"ଆପଣଙ୍କର ମୁହଁକୁ ପ୍ରମାଣ କରୁଛି"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ମୁହଁ ପ୍ରାମାଣିକତା ହୋଇଛି"</string>
@@ -896,7 +896,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ଟାଇଲ୍‍ ପୁଣି ସଜାଇବାକୁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ବାହାର କରିବାକୁ ଏଠାକୁ ଡ୍ରାଗ୍‍ କରନ୍ତୁ"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"ଆପଣଙ୍କର ଅତିକମ୍‌ରେ <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>ଟି ଟାଇଲ୍ ଆବଶ୍ୟକ"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"ଏଡିଟ୍‌ କରନ୍ତୁ"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"ଏଡିଟ କରନ୍ତୁ"</string>
     <string name="tuner_time" msgid="2450785840990529997">"ସମୟ"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"ଘଣ୍ଟା, ମିନିଟ୍‍ ଏବଂ ସେକେଣ୍ଡ ଦେଖାନ୍ତୁ"</item>
@@ -931,7 +931,7 @@
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"ବିବରଣୀ ଖୋଲନ୍ତୁ"</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"<xliff:g id="REASON">%s</xliff:g> ଯୋଗୁଁ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> ସେଟିଙ୍ଗ ଖୋଲନ୍ତୁ।"</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ସେଟିଙ୍ଗର କ୍ରମ ସଂଶୋଧନ କରନ୍ତୁ।"</string>
+    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ସେଟିଂସର କ୍ରମ ଏଡିଟ କରନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ପାୱାର ମେନୁ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"ପୃଷ୍ଠା <xliff:g id="ID_1">%1$d</xliff:g> ମୋଟ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ଲକ୍‌ ସ୍କ୍ରୀନ୍‌"</string>
@@ -1104,7 +1104,7 @@
     <string name="controls_in_progress" msgid="4421080500238215939">"ପ୍ରଗତିରେ ଅଛି"</string>
     <string name="controls_added_tooltip" msgid="5866098408470111984">"ନୂଆ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଦେଖିବାକୁ କ୍ୱିକ୍ ସେଟିଂସ୍ ଖୋଲନ୍ତୁ"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଏଡିଟ୍ କରନ୍ତୁ"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଏଡିଟ କରନ୍ତୁ"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"ଆଉଟପୁଟ୍ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"ଗୋଷ୍ଠୀ"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1ଟି ଡିଭାଇସ୍ ଚୟନ କରାଯାଇଛି"</string>
