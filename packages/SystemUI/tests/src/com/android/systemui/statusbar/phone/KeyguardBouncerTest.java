@@ -230,6 +230,15 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     }
 
     @Test
+    public void show_notifiesKeyguardViewController() {
+        mBouncer.ensureView();
+
+        mBouncer.show(/* resetSecuritySelection= */ false);
+
+        verify(mKeyguardHostViewController).onBouncerVisibilityChanged(View.VISIBLE);
+    }
+
+    @Test
     public void testHide_notifiesFalsingManager() {
         mBouncer.hide(false);
         verify(mFalsingCollector).onBouncerHidden();
