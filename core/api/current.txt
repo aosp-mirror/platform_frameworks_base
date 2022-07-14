@@ -57703,7 +57703,7 @@ package android.widget {
     method public final void setSpannableFactory(android.text.Spannable.Factory);
     method public final void setText(CharSequence);
     method public void setText(CharSequence, android.widget.TextView.BufferType);
-    method public final void setText(char[], int, int);
+    method public final void setText(@NonNull char[], int, int);
     method public final void setText(@StringRes int);
     method public final void setText(@StringRes int, android.widget.TextView.BufferType);
     method public void setTextAppearance(@StyleRes int);
