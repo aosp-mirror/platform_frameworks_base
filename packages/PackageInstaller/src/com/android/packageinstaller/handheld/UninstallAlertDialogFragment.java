@@ -69,7 +69,7 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
                     getContext().getPackageManager().getApplicationInfo(pkg, 0).storageUuid,
                     pkg, user);
             return stats.getDataBytes();
-        } catch (PackageManager.NameNotFoundException | IOException e) {
+        } catch (PackageManager.NameNotFoundException | IOException | SecurityException e) {
             Log.e(LOG_TAG, "Cannot determine amount of app data for " + pkg, e);
         }
 
