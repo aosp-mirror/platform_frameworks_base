@@ -121,7 +121,13 @@ static const std::array gMethods = {
 };
 
 int register_android_graphics_HardwareRendererObserver(JNIEnv* env) {
-
+    int robolectricApiLevel = GetRobolectricApiLevel(env);
+    if (robolectricApiLevel < 30) {
+        // Skip HardwareRenderer registration for SDK < 29. HardwareRendererObserver doesn't
+        // exist, and this JNI registration references methods on
+        // HardwareRendererObserver.
+        return JNI_OK;
+    }
     jclass observerClass = FindClassOrDie(env, "android/graphics/HardwareRendererObserver");
     gHardwareRendererObserverClassInfo.callback = GetMethodIDOrDie(env, observerClass,
                                                                    "notifyDataAvailable", "()V");
@@ -131,4 +137,4 @@ int register_android_graphics_HardwareRendererObserver(JNIEnv* env) {
 
 }
 
-} // namespace android
+}  // namespace android
