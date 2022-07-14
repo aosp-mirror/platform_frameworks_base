@@ -33,7 +33,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.ForegroundServiceNotificationListener;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
@@ -50,7 +49,6 @@ import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
@@ -61,7 +59,6 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -125,15 +122,12 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationLockscreenUserManager.class),
                 mock(SysuiStatusBarStateController.class),
                 mock(NotifShadeEventSource.class),
-                mock(NotificationEntryManager.class),
                 mock(NotificationMediaManager.class),
                 mock(NotificationGutsManager.class),
-                mock(KeyguardUpdateMonitor.class),
                 lockscreenGestureLogger,
                 mInitController,
                 mNotificationInterruptStateProvider,
                 mock(NotificationRemoteInputManager.class),
-                mock(ConfigurationController.class),
                 mock(NotifPipelineFlags.class),
                 mock(NotificationRemoteInputManager.Callback.class),
                 mock(NotificationListContainer.class));
