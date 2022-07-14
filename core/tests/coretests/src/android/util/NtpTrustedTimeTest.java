@@ -16,9 +16,20 @@
 package android.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.net.Network;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -26,6 +37,7 @@ import androidx.test.filters.SmallTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -137,5 +149,159 @@ public class NtpTrustedTimeTest {
     @Test(expected = IllegalArgumentException.class)
     public void testNtpConfig_negativeTimeout() {
         new NtpTrustedTime.NtpConfig(VALID_SERVER_URI, Duration.ofMillis(-1));
+    }
+
+    @Test
+    public void testForceRefresh_nullConfig() {
+        NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+        when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(null);
+
+        assertFalse(ntpTrustedTime.forceRefresh());
+
+        assertFalse(ntpTrustedTime.hasCache());
+        assertEquals(0, ntpTrustedTime.getCachedNtpTime());
+        assertEquals(0, ntpTrustedTime.getCachedNtpTimeReference());
+        assertEquals(Long.MAX_VALUE, ntpTrustedTime.getCacheAge());
+        assertNull(ntpTrustedTime.getCachedTimeResult());
+
+        verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
+        verify(ntpTrustedTime, never()).getNetwork();
+        verify(ntpTrustedTime, never()).queryNtpServer(any(), any(), any());
+    }
+
+    @Test
+    public void testForceRefresh_noConnectivity() {
+        NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+        URI serverUri = URI.create("ntp://ntpserver.name");
+        Duration timeout = Duration.ofSeconds(5);
+        when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
+                new NtpTrustedTime.NtpConfig(serverUri, timeout));
+
+        when(ntpTrustedTime.getNetwork()).thenReturn(null);
+
+        assertFalse(ntpTrustedTime.forceRefresh());
+
+        assertFalse(ntpTrustedTime.hasCache());
+        assertEquals(0, ntpTrustedTime.getCachedNtpTime());
+        assertEquals(0, ntpTrustedTime.getCachedNtpTimeReference());
+        assertEquals(Long.MAX_VALUE, ntpTrustedTime.getCacheAge());
+        assertNull(ntpTrustedTime.getCachedTimeResult());
+
+        verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
+        verify(ntpTrustedTime, times(1)).getNetwork();
+        verify(ntpTrustedTime, never()).queryNtpServer(any(), any(), any());
+    }
+
+    @Test
+    public void testForceRefresh_queryFailed() {
+        NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+        URI serverUri = URI.create("ntp://ntpserver.name");
+        Duration timeout = Duration.ofSeconds(5);
+        when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
+                new NtpTrustedTime.NtpConfig(serverUri, timeout));
+
+        Network network = mock(Network.class);
+        when(ntpTrustedTime.getNetwork()).thenReturn(network);
+
+        when(ntpTrustedTime.queryNtpServer(network, serverUri, timeout)).thenReturn(null);
+
+        assertFalse(ntpTrustedTime.forceRefresh());
+
+        assertFalse(ntpTrustedTime.hasCache());
+        assertEquals(0, ntpTrustedTime.getCachedNtpTime());
+        assertEquals(0, ntpTrustedTime.getCachedNtpTimeReference());
+        assertEquals(Long.MAX_VALUE, ntpTrustedTime.getCacheAge());
+        assertNull(ntpTrustedTime.getCachedTimeResult());
+
+        verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
+        verify(ntpTrustedTime, times(1)).getNetwork();
+        verify(ntpTrustedTime, times(1)).queryNtpServer(network, serverUri, timeout);
+    }
+
+    @Test
+    public void testForceRefresh_querySucceeded() {
+        NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+        URI serverUri = URI.create("ntp://ntpserver.name");
+        Duration timeout = Duration.ofSeconds(5);
+        when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
+                new NtpTrustedTime.NtpConfig(serverUri, timeout));
+
+        Network network = mock(Network.class);
+        when(ntpTrustedTime.getNetwork()).thenReturn(network);
+
+        NtpTrustedTime.TimeResult successResult = new NtpTrustedTime.TimeResult(123L, 456L, 789,
+                InetSocketAddress.createUnresolved("placeholder", 123));
+        when(ntpTrustedTime.queryNtpServer(network, serverUri, timeout)).thenReturn(successResult);
+
+        assertTrue(ntpTrustedTime.forceRefresh());
+
+        assertTrue(ntpTrustedTime.hasCache());
+        assertEquals(successResult.getTimeMillis(), ntpTrustedTime.getCachedNtpTime());
+        assertEquals(successResult.getElapsedRealtimeMillis(),
+                ntpTrustedTime.getCachedNtpTimeReference());
+        assertTrue(ntpTrustedTime.getCacheAge() != Long.MAX_VALUE);
+        assertEquals(successResult, ntpTrustedTime.getCachedTimeResult());
+
+        verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
+        verify(ntpTrustedTime, times(1)).getNetwork();
+        verify(ntpTrustedTime, times(1)).queryNtpServer(network, serverUri, timeout);
+    }
+
+    @Test
+    public void testForceRefresh_keepsOldValueOnFailure() {
+        NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+        URI serverUri = URI.create("ntp://ntpserver.name");
+        Duration timeout = Duration.ofSeconds(5);
+        when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
+                new NtpTrustedTime.NtpConfig(serverUri, timeout));
+
+        Network network = mock(Network.class);
+        when(ntpTrustedTime.getNetwork()).thenReturn(network);
+
+        NtpTrustedTime.TimeResult successResult = new NtpTrustedTime.TimeResult(123L, 456L, 789,
+                InetSocketAddress.createUnresolved("placeholder", 123));
+        when(ntpTrustedTime.queryNtpServer(network, serverUri, timeout)).thenReturn(successResult);
+
+        assertTrue(ntpTrustedTime.forceRefresh());
+
+        assertTrue(ntpTrustedTime.hasCache());
+        assertEquals(successResult, ntpTrustedTime.getCachedTimeResult());
+
+        when(ntpTrustedTime.queryNtpServer(network, serverUri, timeout)).thenReturn(null);
+
+        assertFalse(ntpTrustedTime.forceRefresh());
+
+        assertTrue(ntpTrustedTime.hasCache());
+        assertEquals(successResult, ntpTrustedTime.getCachedTimeResult());
+    }
+
+    @Test
+    public void testForceRefresh_keepsNewValueOnSuccess() {
+        NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+        URI serverUri = URI.create("ntp://ntpserver.name");
+        Duration timeout = Duration.ofSeconds(5);
+        when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
+                new NtpTrustedTime.NtpConfig(serverUri, timeout));
+
+        Network network = mock(Network.class);
+        when(ntpTrustedTime.getNetwork()).thenReturn(network);
+
+        NtpTrustedTime.TimeResult successResult1 = new NtpTrustedTime.TimeResult(123L, 456L, 789,
+                InetSocketAddress.createUnresolved("placeholder", 123));
+        when(ntpTrustedTime.queryNtpServer(network, serverUri, timeout)).thenReturn(successResult1);
+
+        assertTrue(ntpTrustedTime.forceRefresh());
+
+        assertTrue(ntpTrustedTime.hasCache());
+        assertEquals(successResult1, ntpTrustedTime.getCachedTimeResult());
+
+        NtpTrustedTime.TimeResult successResult2 = new NtpTrustedTime.TimeResult(123L, 456L, 789,
+                InetSocketAddress.createUnresolved("placeholder", 123));
+        when(ntpTrustedTime.queryNtpServer(network, serverUri, timeout)).thenReturn(successResult2);
+
+        assertTrue(ntpTrustedTime.forceRefresh());
+
+        assertTrue(ntpTrustedTime.hasCache());
+        assertEquals(successResult2, ntpTrustedTime.getCachedTimeResult());
     }
 }

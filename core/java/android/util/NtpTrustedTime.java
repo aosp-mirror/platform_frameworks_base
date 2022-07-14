@@ -35,6 +35,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -50,7 +51,7 @@ import java.util.function.Supplier;
  *
  * @hide
  */
-public class NtpTrustedTime implements TrustedTime {
+public abstract class NtpTrustedTime implements TrustedTime {
 
     private static final String URI_SCHEME_NTP = "ntp";
 
@@ -107,16 +108,19 @@ public class NtpTrustedTime implements TrustedTime {
      *
      * @hide
      */
-    public static class TimeResult {
+    public static final class TimeResult {
         private final long mUnixEpochTimeMillis;
         private final long mElapsedRealtimeMillis;
         private final int mUncertaintyMillis;
+        @NonNull private final InetSocketAddress mNtpServerSocketAddress;
 
         public TimeResult(
-                long unixEpochTimeMillis, long elapsedRealtimeMillis, int uncertaintyMillis) {
+                long unixEpochTimeMillis, long elapsedRealtimeMillis, int uncertaintyMillis,
+                @NonNull InetSocketAddress ntpServerSocketAddress) {
             mUnixEpochTimeMillis = unixEpochTimeMillis;
             mElapsedRealtimeMillis = elapsedRealtimeMillis;
             mUncertaintyMillis = uncertaintyMillis;
+            mNtpServerSocketAddress = Objects.requireNonNull(ntpServerSocketAddress);
         }
 
         public long getTimeMillis() {
@@ -153,11 +157,34 @@ public class NtpTrustedTime implements TrustedTime {
         }
 
         @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof TimeResult)) {
+                return false;
+            }
+            TimeResult that = (TimeResult) o;
+            return mUnixEpochTimeMillis == that.mUnixEpochTimeMillis
+                    && mElapsedRealtimeMillis == that.mElapsedRealtimeMillis
+                    && mUncertaintyMillis == that.mUncertaintyMillis
+                    && mNtpServerSocketAddress.equals(
+                    that.mNtpServerSocketAddress);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mUnixEpochTimeMillis, mElapsedRealtimeMillis, mUncertaintyMillis,
+                    mNtpServerSocketAddress);
+        }
+
+        @Override
         public String toString() {
             return "TimeResult{"
                     + "unixEpochTime=" + Instant.ofEpochMilli(mUnixEpochTimeMillis)
                     + ", elapsedRealtime=" + Duration.ofMillis(mElapsedRealtimeMillis)
                     + ", mUncertaintyMillis=" + mUncertaintyMillis
+                    + ", mNtpServerSocketAddress=" + mNtpServerSocketAddress
                     + '}';
         }
     }
@@ -167,46 +194,23 @@ public class NtpTrustedTime implements TrustedTime {
 
     private static NtpTrustedTime sSingleton;
 
-    @NonNull
-    private final Context mContext;
-
-    /**
-     * A supplier that returns the ConnectivityManager. The Supplier can return null if
-     * ConnectivityService isn't running yet.
-     */
-    private final Supplier<ConnectivityManager> mConnectivityManagerSupplier =
-            new Supplier<ConnectivityManager>() {
-        private ConnectivityManager mConnectivityManager;
-
-        @Nullable
-        @Override
-        public synchronized ConnectivityManager get() {
-            // We can't do this at initialization time: ConnectivityService might not be running
-            // yet.
-            if (mConnectivityManager == null) {
-                mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
-            }
-            return mConnectivityManager;
-        }
-    };
-
     /** An in-memory config override for use during tests. */
+    @GuardedBy("this")
     @Nullable
     private NtpConfig mNtpConfigForTests;
 
-    // Declared volatile and accessed outside of synchronized blocks to avoid blocking reads during
+    // Declared volatile and accessed outside synchronized blocks to avoid blocking reads during
     // forceRefresh().
     private volatile TimeResult mTimeResult;
 
-    private NtpTrustedTime(Context context) {
-        mContext = Objects.requireNonNull(context);
+    protected NtpTrustedTime() {
     }
 
     @UnsupportedAppUsage
     public static synchronized NtpTrustedTime getInstance(Context context) {
         if (sSingleton == null) {
             Context appContext = context.getApplicationContext();
-            sSingleton = new NtpTrustedTime(appContext);
+            sSingleton = new NtpTrustedTimeImpl(appContext);
         }
         return sSingleton;
     }
@@ -224,65 +228,71 @@ public class NtpTrustedTime implements TrustedTime {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean forceRefresh() {
         synchronized (this) {
-            NtpConfig connectionInfo = getNtpConfig();
-            if (connectionInfo == null) {
+            NtpConfig ntpConfig = getNtpConfig();
+            if (ntpConfig == null) {
                 // missing server config, so no NTP time available
                 if (LOGD) Log.d(TAG, "forceRefresh: invalid server config");
                 return false;
             }
 
-            ConnectivityManager connectivityManager = mConnectivityManagerSupplier.get();
-            if (connectivityManager == null) {
-                if (LOGD) Log.d(TAG, "forceRefresh: no ConnectivityManager");
-                return false;
-            }
-            final Network network = connectivityManager.getActiveNetwork();
-            final NetworkInfo ni = connectivityManager.getNetworkInfo(network);
-
-            // This connectivity check is to avoid performing a DNS lookup for the time server on a
-            // unconnected network. There are races to obtain time in Android when connectivity
-            // changes, which means that forceRefresh() can be called by various components before
-            // the network is actually available. This led in the past to DNS lookup failures being
-            // cached (~2 seconds) thereby preventing the device successfully making an NTP request
-            // when connectivity had actually been established.
-            // A side effect of check is that tests that run a fake NTP server on the device itself
-            // will only be able to use it if the active network is connected, even though loopback
-            // addresses are actually reachable.
-            if (ni == null || !ni.isConnected()) {
-                if (LOGD) Log.d(TAG, "forceRefresh: no connectivity");
+            Network network = getNetwork();
+            if (network == null) {
+                if (LOGD) Log.d(TAG, "forceRefresh: no network available");
                 return false;
             }
 
-            if (LOGD) Log.d(TAG, "forceRefresh() from cache miss");
-            final SntpClient client = new SntpClient();
-            final URI ntpServerUri = connectionInfo.getServerUri();
-            final String serverName = ntpServerUri.getHost();
-            final int port = ntpServerUri.getPort() == -1
-                    ? SntpClient.STANDARD_NTP_PORT : ntpServerUri.getPort();
-            final int timeoutMillis = saturatedCast(connectionInfo.getTimeout().toMillis());
-            if (client.requestTime(serverName, port, timeoutMillis, network)) {
-                int ntpUncertaintyMillis = saturatedCast(client.getRoundTripTime() / 2);
-                mTimeResult = new TimeResult(
-                        client.getNtpTime(), client.getNtpTimeReference(), ntpUncertaintyMillis);
-                return true;
-            } else {
-                return false;
+            if (LOGD) {
+                Log.d(TAG, "forceRefresh: NTP request network=" + network
+                        + " ntpConfig=" + ntpConfig);
             }
+            TimeResult timeResult =
+                    queryNtpServer(network, ntpConfig.getServerUri(), ntpConfig.getTimeout());
+            if (timeResult != null) {
+                // Keep any previous time result.
+                mTimeResult = timeResult;
+            }
+            return timeResult != null;
         }
+    }
+
+    @GuardedBy("this")
+    private NtpConfig getNtpConfig() {
+        if (mNtpConfigForTests != null) {
+            return mNtpConfigForTests;
+        }
+        return getNtpConfigInternal();
     }
 
     /**
-     * Casts a {@code long} to an {@code int}, clamping the value within the int range.
+     * Returns the {@link NtpConfig} to use during an NTP query. This method can return {@code null}
+     * if there is no config, or the config found is invalid.
+     *
+     * <p>This method has been made public for easy replacement during tests.
      */
-    private static int saturatedCast(long longValue) {
-        if (longValue > Integer.MAX_VALUE) {
-            return Integer.MAX_VALUE;
-        }
-        if (longValue < Integer.MIN_VALUE) {
-            return Integer.MIN_VALUE;
-        }
-        return (int) longValue;
-    }
+    @VisibleForTesting
+    @Nullable
+    public abstract NtpConfig getNtpConfigInternal();
+
+    /**
+     * Returns the {@link Network} to use during an NTP query. This method can return {@code null}
+     * if there is no connectivity
+     *
+     * <p>This method has been made public for easy replacement during tests.
+     */
+    @VisibleForTesting
+    @Nullable
+    public abstract Network getNetwork();
+
+    /**
+     * Queries the specified NTP server. This is a blocking call. Returns {@code null} if the query
+     * fails.
+     *
+     * <p>This method has been made public for easy replacement during tests.
+     */
+    @VisibleForTesting
+    @Nullable
+    public abstract TimeResult queryNtpServer(
+            @NonNull Network network, @NonNull URI ntpServerUri, @NonNull Duration timeout);
 
     /**
      * Only kept for UnsupportedAppUsage.
@@ -371,39 +381,6 @@ public class NtpTrustedTime implements TrustedTime {
         }
     }
 
-    @GuardedBy("this")
-    private NtpConfig getNtpConfig() {
-        if (mNtpConfigForTests != null) {
-            return mNtpConfigForTests;
-        }
-
-        final ContentResolver resolver = mContext.getContentResolver();
-        final Resources res = mContext.getResources();
-
-        // The Settings value has priority over static config. Check settings first.
-        final String serverGlobalSetting =
-                Settings.Global.getString(resolver, Settings.Global.NTP_SERVER);
-        final URI settingsServerInfo = parseNtpServerSetting(serverGlobalSetting);
-
-        URI ntpServerUri;
-        if (settingsServerInfo != null) {
-            ntpServerUri = settingsServerInfo;
-        } else {
-            String configValue = res.getString(com.android.internal.R.string.config_ntpServer);
-            try {
-                ntpServerUri = parseNtpUriStrict(configValue);
-            } catch (URISyntaxException e) {
-                ntpServerUri = null;
-            }
-        }
-
-        final int defaultTimeoutMillis =
-                res.getInteger(com.android.internal.R.integer.config_ntpTimeout);
-        final Duration timeout = Duration.ofMillis(Settings.Global.getInt(
-                resolver, Settings.Global.NTP_TIMEOUT, defaultTimeoutMillis));
-        return ntpServerUri == null ? null : new NtpConfig(ntpServerUri, timeout);
-    }
-
     /**
      * Parses and returns an NTP server config URI, or throws an exception if the URI doesn't
      * conform to expectations.
@@ -485,6 +462,131 @@ public class NtpTrustedTime implements TrustedTime {
                 pw.println("mTimeResult.getAgeMillis()="
                         + Duration.ofMillis(mTimeResult.getAgeMillis()));
             }
+        }
+    }
+
+    /**
+     * The real implementation of {@link NtpTrustedTime}. Contains the parts that are more difficult
+     * to test.
+     */
+    private static final class NtpTrustedTimeImpl extends NtpTrustedTime {
+
+        /**
+         * A supplier that returns the ConnectivityManager. The Supplier can return null if
+         * ConnectivityService isn't running yet.
+         */
+        private final Supplier<ConnectivityManager> mConnectivityManagerSupplier =
+                new Supplier<>() {
+            private ConnectivityManager mConnectivityManager;
+
+            @Nullable
+            @Override
+            public synchronized ConnectivityManager get() {
+                // We can't do this at initialization time: ConnectivityService might not be running
+                // yet.
+                if (mConnectivityManager == null) {
+                    mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
+                }
+                return mConnectivityManager;
+            }
+        };
+
+        @NonNull
+        private final Context mContext;
+
+        private NtpTrustedTimeImpl(@NonNull Context context) {
+            mContext = Objects.requireNonNull(context);
+        }
+
+        @Override
+        @VisibleForTesting
+        @Nullable
+        public NtpConfig getNtpConfigInternal() {
+            final ContentResolver resolver = mContext.getContentResolver();
+            final Resources res = mContext.getResources();
+
+            // The Settings value has priority over static config. Check settings first.
+            final String serverGlobalSetting =
+                    Settings.Global.getString(resolver, Settings.Global.NTP_SERVER);
+            final URI settingsServerInfo = parseNtpServerSetting(serverGlobalSetting);
+
+            URI ntpServerUri;
+            if (settingsServerInfo != null) {
+                ntpServerUri = settingsServerInfo;
+            } else {
+                String configValue = res.getString(com.android.internal.R.string.config_ntpServer);
+                try {
+                    ntpServerUri = parseNtpUriStrict(configValue);
+                } catch (URISyntaxException e) {
+                    ntpServerUri = null;
+                }
+            }
+
+            final int defaultTimeoutMillis =
+                    res.getInteger(com.android.internal.R.integer.config_ntpTimeout);
+            final Duration timeout = Duration.ofMillis(Settings.Global.getInt(
+                    resolver, Settings.Global.NTP_TIMEOUT, defaultTimeoutMillis));
+            return ntpServerUri == null ? null : new NtpConfig(ntpServerUri, timeout);
+        }
+
+        @Override
+        public Network getNetwork() {
+            ConnectivityManager connectivityManager = mConnectivityManagerSupplier.get();
+            if (connectivityManager == null) {
+                if (LOGD) Log.d(TAG, "getNetwork: no ConnectivityManager");
+                return null;
+            }
+            final Network network = connectivityManager.getActiveNetwork();
+            final NetworkInfo ni = connectivityManager.getNetworkInfo(network);
+
+            // This connectivity check is to avoid performing a DNS lookup for the time server on a
+            // unconnected network. There are races to obtain time in Android when connectivity
+            // changes, which means that forceRefresh() can be called by various components before
+            // the network is actually available. This led in the past to DNS lookup failures being
+            // cached (~2 seconds) thereby preventing the device successfully making an NTP request
+            // when connectivity had actually been established.
+            // A side effect of check is that tests that run a fake NTP server on the device itself
+            // will only be able to use it if the active network is connected, even though loopback
+            // addresses are actually reachable.
+            if (ni == null || !ni.isConnected()) {
+                if (LOGD) Log.d(TAG, "getNetwork: no connectivity");
+                return null;
+            }
+            return network;
+        }
+
+        @Override
+        @Nullable
+        public TimeResult queryNtpServer(
+                @NonNull Network network, @NonNull URI ntpServerUri, @NonNull Duration timeout) {
+
+            final SntpClient client = new SntpClient();
+            final String serverName = ntpServerUri.getHost();
+            final int port = ntpServerUri.getPort() == -1
+                    ? SntpClient.STANDARD_NTP_PORT : ntpServerUri.getPort();
+            final int timeoutMillis = saturatedCast(timeout.toMillis());
+            if (client.requestTime(serverName, port, timeoutMillis, network)) {
+                int ntpUncertaintyMillis = saturatedCast(client.getRoundTripTime() / 2);
+                InetSocketAddress ntpServerSocketAddress = client.getServerSocketAddress();
+                return new TimeResult(
+                        client.getNtpTime(), client.getNtpTimeReference(), ntpUncertaintyMillis,
+                        ntpServerSocketAddress);
+            } else {
+                return null;
+            }
+        }
+
+        /**
+         * Casts a {@code long} to an {@code int}, clamping the value within the int range.
+         */
+        private static int saturatedCast(long longValue) {
+            if (longValue > Integer.MAX_VALUE) {
+                return Integer.MAX_VALUE;
+            }
+            if (longValue < Integer.MIN_VALUE) {
+                return Integer.MIN_VALUE;
+            }
+            return (int) longValue;
         }
     }
 }
