@@ -4049,6 +4049,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 fout.decreaseIndent();
 
+                fout.println("Network to interfaces:");
+                fout.increaseIndent();
+                for (int i = 0; i < mNetworkToIfaces.size(); ++i) {
+                    final int key = mNetworkToIfaces.keyAt(i);
+                    fout.println(key + ": " + mNetworkToIfaces.get(key));
+                }
+                fout.decreaseIndent();
+
                 fout.println();
                 mStatLogger.dump(fout);
 
