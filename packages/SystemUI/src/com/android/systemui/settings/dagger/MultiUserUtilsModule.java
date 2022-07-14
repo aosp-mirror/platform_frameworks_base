@@ -21,25 +21,28 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.UserManager;
 
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.UserContentResolverProvider;
 import com.android.systemui.settings.UserContextProvider;
+import com.android.systemui.settings.UserFileManager;
+import com.android.systemui.settings.UserFileManagerImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.UserTrackerImpl;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 /**
  * Dagger Module for classes found within the com.android.systemui.settings package.
  */
 @Module
-public abstract class SettingsModule {
-
-
+public abstract class MultiUserUtilsModule {
     @Binds
     @SysUISingleton
     abstract UserContextProvider bindUserContextProvider(UserTracker tracker);
@@ -62,4 +65,12 @@ public abstract class SettingsModule {
         tracker.initialize(startingUser);
         return tracker;
     }
+
+    @Binds
+    @IntoMap
+    @ClassKey(UserFileManagerImpl.class)
+    abstract CoreStartable bindUserFileManagerCoreStartable(UserFileManagerImpl sysui);
+
+    @Binds
+    abstract UserFileManager bindUserFileManager(UserFileManagerImpl impl);
 }
