@@ -93,7 +93,7 @@ public class InteractionJankMonitorTest {
     @Test
     public void testBeginEnd() {
         InteractionJankMonitor monitor = createMockedInteractionJankMonitor();
-        FrameTracker tracker = createMockedFrameTracker(null);
+        FrameTracker tracker = createMockedFrameTracker(monitor, null);
         doReturn(tracker).when(monitor).createFrameTracker(any(), any());
         doNothing().when(tracker).begin();
         doReturn(true).when(tracker).end(anyInt());
@@ -134,7 +134,7 @@ public class InteractionJankMonitorTest {
     public void testBeginTimeout() {
         ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
         InteractionJankMonitor monitor = createMockedInteractionJankMonitor();
-        FrameTracker tracker = createMockedFrameTracker(null);
+        FrameTracker tracker = createMockedFrameTracker(monitor, null);
         doReturn(tracker).when(monitor).createFrameTracker(any(), any());
         doNothing().when(tracker).begin();
         doReturn(true).when(tracker).cancel(anyInt());
@@ -180,7 +180,8 @@ public class InteractionJankMonitorTest {
         return monitor;
     }
 
-    private FrameTracker createMockedFrameTracker(FrameTracker.FrameTrackerListener listener) {
+    private FrameTracker createMockedFrameTracker(InteractionJankMonitor monitor,
+            FrameTracker.FrameTrackerListener listener) {
         Session session = spy(new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE, CUJ_POSTFIX));
         doReturn(false).when(session).logToStatsd();
 
@@ -190,6 +191,7 @@ public class InteractionJankMonitorTest {
 
         ViewRootWrapper viewRoot = spy(new ViewRootWrapper(mView.getViewRootImpl()));
         doNothing().when(viewRoot).addSurfaceChangedCallback(any());
+        doNothing().when(viewRoot).removeSurfaceChangedCallback(any());
 
         SurfaceControlWrapper surfaceControl = mock(SurfaceControlWrapper.class);
         doNothing().when(surfaceControl).addJankStatsListener(any(), any());
@@ -200,15 +202,18 @@ public class InteractionJankMonitorTest {
 
         Configuration configuration = mock(Configuration.class);
         when(configuration.isSurfaceOnly()).thenReturn(false);
+        when(configuration.getView()).thenReturn(mView);
+        when(configuration.getHandler()).thenReturn(mView.getHandler());
 
-        FrameTracker tracker = spy(new FrameTracker(session, mWorker.getThreadHandler(),
+        FrameTracker tracker = spy(new FrameTracker(monitor, session, mWorker.getThreadHandler(),
                 threadedRenderer, viewRoot, surfaceControl, choreographer,
                 new FrameMetricsWrapper(), new StatsLogWrapper(),
                 /* traceThresholdMissedFrames= */ 1,
                 /* traceThresholdFrameTimeMillis= */ -1, listener, configuration));
 
-        doNothing().when(tracker).postTraceStartMarker();
+        doNothing().when(tracker).postTraceStartMarker(any());
         doNothing().when(tracker).triggerPerfetto();
+        doReturn(configuration.getHandler()).when(tracker).getHandler();
 
         return tracker;
     }
