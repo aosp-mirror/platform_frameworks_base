@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permet à l\'application de connaître le niveau de complexité du verrouillage de l\'écran (élevé, moyen, faible ou aucun), qui indique les possibilités en matière de longueur du mot de passe et de type de verrouillage de l\'écran. L\'application peut également suggérer aux utilisateurs de modifier la complexité du verrouillage, mais ces derniers peuvent librement l\'ignorer. Remarque : Comme le verrouillage de l\'écran n\'est pas stocké au format texte brut, l\'application ne connaît pas le mot de passe exact."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"afficher des notifications"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Autorise l\'appli à afficher des notifications"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"Allumer l\'écran"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Autorise l\'appli à allumer l\'écran."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"utiliser les composants biométriques"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Autoriser l\'application à utiliser les composants biométriques pour l\'authentification"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"Gérer le matériel d\'empreintes digitales"</string>
@@ -623,7 +625,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Appuyez pour supprimer votre empreinte faciale, puis ajoutez de nouveau votre visage"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurer le déverrouillage par reconnaissance faciale"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Déverrouillez votre téléphone en le regardant"</string>
-    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Pour utiliser Face Unlock, activez "<b>"Accès à l\'appareil photo"</b>" dans Paramètres &gt; Confidentialité"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Pour utiliser le déverrouillage par reconnaissance faciale, activez "<b>"Accès à l\'appareil photo"</b>" dans Paramètres &gt; Confidentialité"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configurer d\'autres méthodes de déverrouillage"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Appuyez pour ajouter une empreinte digitale"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Déverrouillage par empreinte digitale"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"En savoir plus"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées remplacent les notifications intelligentes dans Android 12. Cette fonctionnalité affiche les suggestions d\'actions et de réponses, et organise vos notifications.\n\nElle a accès au contenu des notifications, y compris aux informations personnelles tels que les noms des contacts et les messages. Elle peut aussi fermer les notifications ou effectuer des actions comme répondre à un appel téléphonique et contrôler le mode Ne pas déranger."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Économiseur de batterie activé"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Réduction de l\'utilisation de la batterie pour prolonger son autonomie"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Économiseur de batterie"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Économiseur de batterie désactivé"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Téléphone suffisamment chargé. Les fonctionnalités ne sont plus restreintes."</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Impossible d\'accéder à l\'appareil photo du téléphone depuis votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Impossible d\'accéder à l\'appareil photo de la tablette depuis votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Paramètre système par défaut"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

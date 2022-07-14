@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Hiermee krijgt de app toestemming om het complexiteitsniveau van de schermvergrendeling te achterhalen (hoog, midden, laag of geen). Dat geeft een indicatie van het mogelijke lengtebereik en type van de schermvergrendeling. De app kan gebruikers ook voorstellen de schermvergrendeling naar een bepaald niveau te updaten, maar gebruikers kunnen dit altijd negeren en de app verlaten. De schermvergrendeling wordt niet opgeslagen als platte tekst, zodat de app het precieze wachtwoord niet weet."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"meldingen laten zien"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Hiermee kan de app meldingen laten zien"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"het scherm aanzetten"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Hiermee kan de app het scherm aanzetten."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"biometrische hardware gebruiken"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Hiermee kan de app biometrische hardware gebruiken voor verificatie"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"Vingerafdrukhardware beheren"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Kan geen toegang tot de camera van de telefoon krijgen vanaf je <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Kan geen toegang tot de camera van de tablet krijgen vanaf je <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Systeemstandaard"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

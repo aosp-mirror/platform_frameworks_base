@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ಆ್ಯಪ್‌ಗೆ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಸಂಕೀರ್ಣತೆ ಮಟ್ಟವನ್ನು (ಅಧಿಕ, ಮಧ್ಯಮ, ಕಡಿಮೆ ಅಥವಾ ಯಾವುದೂ ಅಲ್ಲ) ತಿಳಿದುಕೊಳ್ಳಲು ಅನುಮತಿಸುತ್ತದೆ, ಅದು ಉದ್ದದ ಸಂಭವನೀಯ ಶ್ರೇಣಿ ಮತ್ತು ಸ್ಕ್ರೀನ್ ಲಾಕ್‌ನ ವಿಧವನ್ನು ಸೂಚಿಸುತ್ತದೆ. ಬಳಕೆದಾರರು ನಿರ್ದಿಷ್ಟ ಹಂತದವರೆಗೆ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಬಹುದು, ಆದರೆ ಅವರು ಅದನ್ನು ನಿರ್ಲಕ್ಷಿಸಬಹುದು ಮತ್ತು ಅದರಿಂದ ಹೊರಬರಬಹುದು ಎಂಬುದನ್ನು ಸಹ ಆ್ಯಪ್ ಬಳಕೆದಾರರಿಗೆ ಸೂಚಿಸುತ್ತದೆ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಪಠ್ಯದ ರೂಪದಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿರುವುದಿಲ್ಲ, ಇದರಿಂದಾಗಿ ಆ್ಯಪ್‌ಗೆ ಸರಿಯಾದ ಪಾಸ್‌ವರ್ಡ್ ಗೊತ್ತಿರುವುದಿಲ್ಲ ಎಂಬುದನ್ನು ಗಮನಿಸಿ."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್ ಮಾಡಲು ಆ್ಯಪ್ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ಬಯೋಮೆಟ್ರಿಕ್ ಹಾರ್ಡ್‌ವೇರ್‌ ಬಳಸಿ"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಬಯೋಮೆಟ್ರಿಕ್ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್ ನಿರ್ವಹಿಸಿ"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ಮೂಲಕ ಫೋನ್‌ನ ಕ್ಯಾಮರಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ಮೂಲಕ ಟ್ಯಾಬ್ಲೆಟ್‌ನ ಕ್ಯಾಮರಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ಸಿಸ್ಟಂ ಡೀಫಾಲ್ಟ್"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

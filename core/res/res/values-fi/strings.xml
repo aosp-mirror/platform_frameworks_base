@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Sovellus saa luvan selvittää näytön lukituksen monimutkaisuuden (korkea, keskitaso tai matala) eli sen pituusluokan ja tyypin. Sovellus voi myös ehdottaa käyttäjille näytön lukituksen vaihtamista tietylle tasolle, mutta he voivat ohittaa tämän ja poistua. Itse näytön lukitusta ei säilytetä tekstimuodossa, joten sovellus ei tiedä sitä tarkalleen."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"näyttää ilmoituksia"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Antaa sovelluksen näyttää ilmoituksia"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"laita näyttö päälle"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Salli sovelluksen laittaa näyttö päälle."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"käytä biometristä laitteistoa"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Sallii sovelluksen käyttää biometristä laitteistoa todennukseen"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"sormenjälkilaitteiston hallinnointi"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lue lisää"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Parannetut ilmoitukset korvasivat Androidin mukautuvat ilmoitukset Android 12:ssa. Tämä ominaisuus näyttää toiminto- ja vastausehdotuksia ja järjestää ilmoituksesi.\n\nParannetuilla ilmoituksilla on pääsy kaikkeen ilmoitussisältöön, myös henkilökohtaisiin tietoihin (esim. kontaktien nimet ja viestit). Ominaisuus voi myös ohittaa ilmoituksia tai vastata niihin, esim. vastata puheluihin ja ohjata Älä häiritse ‑tilaa."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohjelmatilan tietoilmoitus"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Virransäästö päällä"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Akun käyttöä rajoitetaan akunkeston pidentämiseksi"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Virransäästö"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Virransäästö laitettiin pois päältä"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Puhelimessa on tarpeeksi virtaa. Ominaisuuksia ei enää rajoiteta."</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> ei pääse puhelimen kameraan"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> ei pääse tabletin kameraan"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Järjestelmän oletusarvo"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

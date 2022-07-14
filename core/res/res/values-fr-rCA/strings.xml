@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Autorise l\'application à apprendre le niveau de complexité de l\'écran de verrouillage (élevé, moyen, faible ou aucun), qui indique la gamme possible de longueur et de type de verrouillage d\'écran. L\'application peut aussi suggérer aux utilisateurs de mettre à jour l\'écran de verrouillage afin d\'utiliser un certain niveau de complexité, mais ils peuvent ignorer la suggestion. Notez que le verrouillage d\'écran n\'est pas stocké en texte brut pour de manière à ce que l\'application n\'ait pas accès au mot de passe exact."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"afficher les notifications"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Permet à l\'application d\'afficher les notifications"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"allumer l\'écran"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Permet à l\'application d\'allumer l\'écran."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"utiliser le matériel biométrique"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permet à l\'application d\'utiliser du matériel biométrique pour l\'authentification"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"gérer le lecteur d\'empreintes digitales"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"En savoir plus"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées ont remplacé les notifications adaptatives Android sous Android 12. Cette fonctionnalité vous présente des suggestions d\'actions et de réponses, et organise vos notifications.\n\nLes notifications améliorées peuvent accéder au contenu de toutes les notifications, y compris les renseignements personnels comme le nom des contacts et les messages. Cette fonctionnalité peut aussi fermer des notifications ou interagir avec elles, comme répondre aux appels téléphoniques et gérer le mode Ne pas déranger."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Économiseur de pile activé"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Réduction de l\'utilisation de la pile pour en prolonger l\'autonomie"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Économiseur de pile"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Le mode Économiseur de pile est désactivé"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Le téléphone est suffisamment chargé. Ces fonctionnalités ne sont plus restreintes."</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Impossible d\'accéder à l\'appareil photo du téléphone à partir de votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Impossible d\'accéder à l\'appareil photo de la tablette à partir de votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Paramètre système par défaut"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Tillåter att appen får reda på komplexitetsnivån för skärmlåset (hög, mellan, låg eller ingen). Detta ger en indikation på skärmlåsets möjliga längd och typ. Appen kan även föreslå att skärmlåset uppdateras till en viss nivå, men användare kan ignorera förslaget och fortsätta navigera. Observera att skärmlåset inte lagras i vanlig text så appen får inte reda på det exakta lösenordet."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"visa aviseringar"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Tillåter att appen visar aviseringar"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"Slå på skärmen"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Tillåter att appen slår på skärmen."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"använd biometrisk maskinvara"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Tillåter att appen använder biometrisk maskinvara vid autentisering"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"hantera maskinvara för fingeravtryck"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Läs mer"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Förbättrade aviseringar har ersatt Anpassade aviseringar för Android i Android 12. Den här funktionen visar förslag på åtgärder och svar och organiserar dina aviseringar.\n\nFörbättrade aviseringar har åtkomst till allt innehåll i aviseringar, inklusive personliga uppgifter som namn på kontakter och meddelanden. Funktionen kan även ignorera aviseringar eller utföra åtgärder utifrån dem, till exempel svara på telefonsamtal och styra Stör ej."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Avisering om rutinläge"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Batterisparläget har aktiverats"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Minskar batteriförbrukning för att förlänga batteritiden"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Batterisparläge"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Batterisparläget har inaktiverats"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefonen har laddats tillräckligt. Funktioner begränsas inte längre."</string>
@@ -2269,7 +2269,7 @@
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Återaktivera enhetens mikrofon"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Återaktivera enhetens kamera"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"För &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; och alla appar och tjänster"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Återaktivera"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Avblockera"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorintegritet"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Appikon"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Appens varumärkesbild"</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Telefonens kamera kan inte användas från <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Surfplattans kamera kan inte användas från <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Systemets standardinställning"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

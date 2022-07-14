@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Ilova ekran qulfining qiyinlik darajasi (yuqori, oʻrta, past yoki hech qanday), jumladan, qulf turi va parol uzunligi haqida axborotga ruxsat oladi. Bundan tashqari, foydalanuvchilarga qulflash qiyinligi darajasini oshirish taklif etiladi. Bu tavsiyalar majburiy emas. Parollar ochiq matn sifatida saqlanmaydi va ilova uni ocha olmaydi."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"bildirishnomalarni chiqarish"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Ilovaga bildirishnomalarni chiqarish uchun ruxsat beradi"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"ekranni yoqish"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Ilovaga ekranni yoqish ruxsatini beradi."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"biometrik sensordan foydalanish"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Haqiqiylikni tekshirish uchun biometrik sensordan foydalanish imkonini beradi"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"barmoq izi skanerini boshqarish"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> qurilmasidan telefonning kamerasiga kirish imkonsiz"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> qurilmasidan planshetning kamerasiga kirish imkonsiz"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Tizim standarti"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"এপ্‌টোক স্ক্ৰীন লকৰ জটিলতাৰ স্তৰ (উচ্চ, মধ্যম, নিম্ন বা একেবাৰে নাই)ৰ বিষয়ে জানিবলৈ অনুমতি দিয়ে, যিয়ে স্ক্ৰীন লকৰ সম্ভাব্য দৈৰ্ঘ্য বা স্ক্ৰীন লকৰ প্ৰকাৰ দৰ্শায়। লগতে এপ্‌টোৱে ব্যৱহাৰকাৰীক স্ক্ৰীন লকটো এটা নিৰ্দিষ্ট স্তৰলৈ আপডে’ট কৰিবলৈ পৰামৰ্শ দিব পাৰে যিটো ব্যৱহাৰকাৰীয়ে অৱজ্ঞা কৰি পৰৱর্তী পৃষ্ঠালৈ যাব পাৰে। মনত ৰাখিব যে স্ক্ৰীন লকটো সাধাৰণ পাঠ হিচাপে ষ্ট\'ৰ কৰা নহয়; সেয়েহে, এপ্‌টোৱে সঠিক পাছৱৰ্ডটো জানিব নোৱাৰে।"</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"জাননী দেখুৱাওক"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"এপ্‌টোক জাননী দেখুৱাবলৈ দিয়ে"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"স্ক্ৰীনখন অন কৰক"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"এপ্‌টোক স্ক্ৰীনখন অন কৰিবলৈ দিয়ে।"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"বায়োমেট্ৰিক হাৰ্ডৱেৰ ব্যৱহাৰ কৰক"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"বিশ্বাসযোগ্য়তা প্ৰমাণীকৰণৰ বাবে এপক বায়োমেট্ৰিক হাৰ্ডৱেৰ ব্যৱহাৰ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ফিংগাৰপ্ৰিণ্ট হাৰ্ডৱেৰ পৰিচালনা কৰিব পাৰে"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"অধিক জানক"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12ত Androidৰ অভিযোজিত জাননীক উন্নত জাননীৰ দ্বাৰা সলনি কৰা হৈছে। এই সুবিধাটোৱে পৰামৰ্শ দিয়া কাৰ্য আৰু প্ৰত্যুত্তৰ দেখুৱায় আৰু আপোনাৰ জাননীসমূহ শৃংখলাবদ্ধ কৰে।\n\nউন্নত জাননীয়ে সম্পৰ্কৰ নাম আৰু বাৰ্তাৰ দৰে ব্যক্তিগত তথ্যকে ধৰি জাননীৰ সমল এক্সেছ কৰিব পাৰে। এই সুবিধাটোৱে জাননী অগ্ৰাহ্য কৰিব অথবা জাননীৰ প্ৰতি সঁহাৰি জনাবও পাৰে, যেনে ফ’ন কলৰ উত্তৰ দিয়া আৰু অসুবিধা নিদিব সুবিধাটো নিয়ন্ত্ৰণ কৰা আদি।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ৰুটিন ম’ডৰ তথ্য জাননী"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"বেটাৰী সঞ্চয়কাৰী অন কৰা হৈছে"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"বেটাৰীৰ জীৱনকাল বৃদ্ধি কৰিবলৈ বেটাৰীৰ ব্যৱহাৰ কমোৱা হৈছে"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"বেটাৰী সঞ্চয়কাৰী"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"বেটাৰী সঞ্চয়কাৰী অফ কৰা হ’ল"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ফ\'নটোত পর্যাপ্ত পৰিমাণে চার্জ আছে। সুবিধাবোৰ আৰু সীমাবদ্ধ কৰা নাই।"</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ৰ পৰা ফ’নটোৰ কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ৰ পৰা টেবলেটটোৰ কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ছিষ্টেম ডিফ’ল্ট"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>
