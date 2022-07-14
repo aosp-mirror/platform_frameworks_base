@@ -43,7 +43,6 @@ class LockSettingsShellCommand extends ShellCommand {
     private static final String COMMAND_SET_PIN = "set-pin";
     private static final String COMMAND_SET_PASSWORD = "set-password";
     private static final String COMMAND_CLEAR = "clear";
-    private static final String COMMAND_SP = "sp";
     private static final String COMMAND_SET_DISABLED = "set-disabled";
     private static final String COMMAND_VERIFY = "verify";
     private static final String COMMAND_GET_DISABLED = "get-disabled";
@@ -124,9 +123,6 @@ class LockSettingsShellCommand extends ShellCommand {
                     break;
                 case COMMAND_CLEAR:
                     success = runClear();
-                    break;
-                case COMMAND_SP:
-                    runChangeSp();
                     break;
                 case COMMAND_SET_DISABLED:
                     runSetDisabled();
@@ -222,20 +218,6 @@ class LockSettingsShellCommand extends ShellCommand {
             }
         }
         mNew = getNextArg();
-    }
-
-    private void runChangeSp() {
-        if (mNew != null ) {
-            if ("1".equals(mNew)) {
-                mLockPatternUtils.enableSyntheticPassword();
-                getOutPrintWriter().println("Synthetic password enabled");
-            } else if ("0".equals(mNew)) {
-                mLockPatternUtils.disableSyntheticPassword();
-                getOutPrintWriter().println("Synthetic password disabled");
-            }
-        }
-        getOutPrintWriter().println(String.format("SP Enabled = %b",
-                mLockPatternUtils.isSyntheticPasswordEnabled()));
     }
 
     private LockscreenCredential getOldCredential() {
