@@ -113,6 +113,8 @@ public interface Computer extends PackageDataSnapshot {
             @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags,
             int filterCallingUid, int userId, boolean resolveForStart, boolean allowDynamicSplits);
     @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent, String resolvedType,
+            long flags, int filterCallingUid, int userId);
+    @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent, String resolvedType,
             long flags, int userId);
     @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent, String resolvedType,
             long flags, int userId, int callingUid, boolean includeInstantApps);
