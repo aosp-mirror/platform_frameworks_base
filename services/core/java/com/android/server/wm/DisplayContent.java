@@ -5669,7 +5669,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void getKeepClearAreas(Set<Rect> outRestricted, Set<Rect> outUnrestricted) {
         final Matrix tmpMatrix = new Matrix();
         final float[] tmpFloat9 = new float[9];
+        final RecentsAnimationController recentsAnimationController =
+                mWmService.getRecentsAnimationController();
         forAllWindows(w -> {
+            // Skip the window if it is part of Recents animation
+            final boolean ignoreRecentsAnimationTarget = recentsAnimationController != null
+                    && recentsAnimationController.shouldApplyInputConsumer(w.getActivityRecord());
+            if (ignoreRecentsAnimationTarget) {
+                return false;  // continue traversal
+            }
+
             if (w.isVisible() && !w.inPinnedWindowingMode()) {
                 w.getKeepClearAreas(outRestricted, outUnrestricted, tmpMatrix, tmpFloat9);
             }
