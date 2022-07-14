@@ -67,9 +67,11 @@ final class PackageUtils {
         String requiredFeature = FEATURE_COMPANION_DEVICE_SETUP;
 
         FeatureInfo[] requestedFeatures = getPackageInfo(context, userId, packageName).reqFeatures;
-        for (int i = 0; i < requestedFeatures.length; i++) {
-            if (requiredFeature.equals(requestedFeatures[i].name)) {
-                return;
+        if (requestedFeatures != null) {
+            for (int i = 0; i < requestedFeatures.length; i++) {
+                if (requiredFeature.equals(requestedFeatures[i].name)) {
+                    return;
+                }
             }
         }
 
