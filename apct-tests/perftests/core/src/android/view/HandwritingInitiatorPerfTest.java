@@ -22,7 +22,6 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.view.MotionEvent.TOOL_TYPE_FINGER;
 import static android.view.MotionEvent.TOOL_TYPE_STYLUS;
 
-
 import android.app.Instrumentation;
 import android.content.Context;
 import android.perftests.utils.BenchmarkState;
@@ -34,10 +33,14 @@ import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.compatibility.common.util.PollingCheck;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Benchmark tests for {@link HandwritingInitiator}
@@ -56,11 +59,21 @@ public class HandwritingInitiatorPerfTest {
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Before
-    public void setup() {
-        final Instrumentation mInstrumentation = InstrumentationRegistry.getInstrumentation();
-        mContext = mInstrumentation.getTargetContext();
+    public void setup() throws Exception {
+        final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        mContext = instrumentation.getTargetContext();
+
+        String imeId = HandwritingImeService.getImeId();
+        instrumentation.getUiAutomation().executeShellCommand("ime enable " + imeId);
+        instrumentation.getUiAutomation().executeShellCommand("ime set " + imeId);
+        PollingCheck.check("Check that stylus handwriting is available",
+                TimeUnit.SECONDS.toMillis(10),
+                () -> mContext.getSystemService(InputMethodManager.class)
+                        .isStylusHandwritingAvailable());
+
         final ViewConfiguration viewConfiguration = ViewConfiguration.get(mContext);
         mTouchSlop = viewConfiguration.getScaledTouchSlop();
+
         final InputMethodManager inputMethodManager =
                 mContext.getSystemService(InputMethodManager.class);
         mHandwritingInitiator = new HandwritingInitiator(viewConfiguration, inputMethodManager);
