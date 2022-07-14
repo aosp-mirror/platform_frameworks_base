@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.os.HandlerThread;
+import android.os.TimestampedValue;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -55,14 +56,41 @@ public class TimeDetectorInternalImplTest {
                 mMockContext, mTestHandler, mFakeTimeDetectorStrategy);
     }
 
-    @Test
-    public void placeholder() {
-      // A placeholder test until there are real methods to test.
-    }
-
     @After
     public void tearDown() throws Exception {
         mHandlerThread.quit();
         mHandlerThread.join();
+    }
+
+    @Test
+    public void testSuggestNetworkTime() throws Exception {
+        NetworkTimeSuggestion networkTimeSuggestion = createNetworkTimeSuggestion();
+
+        mTimeDetectorInternal.suggestNetworkTime(networkTimeSuggestion);
+        mTestHandler.assertTotalMessagesEnqueued(1);
+
+        mTestHandler.waitForMessagesToBeProcessed();
+        mFakeTimeDetectorStrategy.verifySuggestNetworkTimeCalled(networkTimeSuggestion);
+    }
+
+    private static NetworkTimeSuggestion createNetworkTimeSuggestion() {
+        TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
+        return new NetworkTimeSuggestion(timeValue, 123);
+    }
+
+    @Test
+    public void testSuggestGnssTime() throws Exception {
+        GnssTimeSuggestion gnssTimeSuggestion = createGnssTimeSuggestion();
+
+        mTimeDetectorInternal.suggestGnssTime(gnssTimeSuggestion);
+        mTestHandler.assertTotalMessagesEnqueued(1);
+
+        mTestHandler.waitForMessagesToBeProcessed();
+        mFakeTimeDetectorStrategy.verifySuggestGnssTimeCalled(gnssTimeSuggestion);
+    }
+
+    private static GnssTimeSuggestion createGnssTimeSuggestion() {
+        TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
+        return new GnssTimeSuggestion(timeValue);
     }
 }

@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
+import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -542,7 +543,8 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             // Notify the recent tasks that a task has been removed
             mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskRemoved(taskInfo));
 
-            if (appearedInfo.getLeash() != null) {
+            if (!ENABLE_SHELL_TRANSITIONS && (appearedInfo.getLeash() != null)) {
+                // Preemptively clean up the leash only if shell transitions are not enabled
                 appearedInfo.getLeash().release();
             }
         }

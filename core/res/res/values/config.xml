@@ -2308,8 +2308,10 @@
          it should be disabled in that locale's resources. -->
     <bool name="config_actionMenuItemAllCaps">true</bool>
 
-    <!-- Remote server that can provide NTP responses. -->
-    <string translatable="false" name="config_ntpServer">time.android.com</string>
+    <!-- Remote server that can provide NTP responses.
+         Values must be in the form: "ntp://<host>[:port]"
+         This is not a registered IANA URI scheme. -->
+    <string translatable="false" name="config_ntpServer">ntp://time.android.com</string>
     <!-- Normal polling frequency in milliseconds -->
     <integer name="config_ntpPollingInterval">64800000</integer>
     <!-- Try-again polling interval in milliseconds, in case the network request failed -->

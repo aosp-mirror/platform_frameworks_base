@@ -29,7 +29,6 @@ import static org.junit.Assert.fail;
 
 import android.annotation.UserIdInt;
 import android.app.time.ExternalTimeSuggestion;
-import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.TimestampedValue;

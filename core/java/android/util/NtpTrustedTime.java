@@ -32,8 +32,11 @@ import android.provider.Settings;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
@@ -48,6 +51,56 @@ import java.util.function.Supplier;
  * @hide
  */
 public class NtpTrustedTime implements TrustedTime {
+
+    private static final String URI_SCHEME_NTP = "ntp";
+
+    /**
+     * NTP server configuration.
+     *
+     * @hide
+     */
+    public static final class NtpConfig {
+
+        @NonNull private final URI mServerUri;
+        @NonNull private final Duration mTimeout;
+
+        /**
+         * Creates an instance. If the arguments are invalid then an {@link
+         * IllegalArgumentException} will be thrown. See {@link #parseNtpUriStrict(String)} and
+         * {@link #parseNtpServerSetting(String)} to create valid URIs.
+         */
+        public NtpConfig(@NonNull URI serverUri, @NonNull Duration timeout)
+                throws IllegalArgumentException {
+            try {
+                mServerUri = validateNtpServerUri(Objects.requireNonNull(serverUri));
+            } catch (URISyntaxException e) {
+                throw new IllegalArgumentException("Bad URI", e);
+            }
+
+            if (timeout.isNegative() || timeout.isZero()) {
+                throw new IllegalArgumentException("timeout < 0");
+            }
+            mTimeout = timeout;
+        }
+
+        @NonNull
+        public URI getServerUri() {
+            return mServerUri;
+        }
+
+        @NonNull
+        public Duration getTimeout() {
+            return mTimeout;
+        }
+
+        @Override
+        public String toString() {
+            return "NtpConnectionInfo{"
+                    + "mServerUri=" + mServerUri
+                    + ", mTimeout=" + mTimeout
+                    + '}';
+        }
+    }
 
     /**
      * The result of a successful NTP query.
@@ -139,15 +192,7 @@ public class NtpTrustedTime implements TrustedTime {
 
     /** An in-memory config override for use during tests. */
     @Nullable
-    private String mHostnameForTests;
-
-    /** An in-memory config override for use during tests. */
-    @Nullable
-    private Integer mPortForTests;
-
-    /** An in-memory config override for use during tests. */
-    @Nullable
-    private Duration mTimeoutForTests;
+    private NtpConfig mNtpConfigForTests;
 
     // Declared volatile and accessed outside of synchronized blocks to avoid blocking reads during
     // forceRefresh().
@@ -170,19 +215,16 @@ public class NtpTrustedTime implements TrustedTime {
      * Overrides the NTP server config for tests. Passing {@code null} to a parameter clears the
      * test value, i.e. so the normal value will be used next time.
      */
-    public void setServerConfigForTests(
-            @Nullable String hostname, @Nullable Integer port, @Nullable Duration timeout) {
+    public void setServerConfigForTests(@NonNull NtpConfig ntpConfig) {
         synchronized (this) {
-            mHostnameForTests = hostname;
-            mPortForTests = port;
-            mTimeoutForTests = timeout;
+            mNtpConfigForTests = ntpConfig;
         }
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean forceRefresh() {
         synchronized (this) {
-            NtpConnectionInfo connectionInfo = getNtpConnectionInfo();
+            NtpConfig connectionInfo = getNtpConfig();
             if (connectionInfo == null) {
                 // missing server config, so no NTP time available
                 if (LOGD) Log.d(TAG, "forceRefresh: invalid server config");
@@ -213,9 +255,11 @@ public class NtpTrustedTime implements TrustedTime {
 
             if (LOGD) Log.d(TAG, "forceRefresh() from cache miss");
             final SntpClient client = new SntpClient();
-            final String serverName = connectionInfo.getServer();
-            final int port = connectionInfo.getPort();
-            final int timeoutMillis = connectionInfo.getTimeoutMillis();
+            final URI ntpServerUri = connectionInfo.getServerUri();
+            final String serverName = ntpServerUri.getHost();
+            final int port = ntpServerUri.getPort() == -1
+                    ? SntpClient.STANDARD_NTP_PORT : ntpServerUri.getPort();
+            final int timeoutMillis = saturatedCast(connectionInfo.getTimeout().toMillis());
             if (client.requestTime(serverName, port, timeoutMillis, network)) {
                 int ntpUncertaintyMillis = saturatedCast(client.getRoundTripTime() / 2);
                 mTimeResult = new TimeResult(
@@ -327,85 +371,115 @@ public class NtpTrustedTime implements TrustedTime {
         }
     }
 
-    private static class NtpConnectionInfo {
-
-        @NonNull private final String mServer;
-        private final int mPort;
-        private final int mTimeoutMillis;
-
-        NtpConnectionInfo(@NonNull String server, int port, int timeoutMillis) {
-            mServer = Objects.requireNonNull(server);
-            mPort = port;
-            mTimeoutMillis = timeoutMillis;
-        }
-
-        @NonNull
-        public String getServer() {
-            return mServer;
-        }
-
-        @NonNull
-        public int getPort() {
-            return mPort;
-        }
-
-        int getTimeoutMillis() {
-            return mTimeoutMillis;
-        }
-
-        @Override
-        public String toString() {
-            return "NtpConnectionInfo{"
-                    + "mServer='" + mServer + '\''
-                    + ", mPort='" + mPort + '\''
-                    + ", mTimeoutMillis=" + mTimeoutMillis
-                    + '}';
-        }
-    }
-
     @GuardedBy("this")
-    private NtpConnectionInfo getNtpConnectionInfo() {
-        final ContentResolver resolver = mContext.getContentResolver();
+    private NtpConfig getNtpConfig() {
+        if (mNtpConfigForTests != null) {
+            return mNtpConfigForTests;
+        }
 
+        final ContentResolver resolver = mContext.getContentResolver();
         final Resources res = mContext.getResources();
 
-        final String hostname;
-        if (mHostnameForTests != null) {
-            hostname = mHostnameForTests;
+        // The Settings value has priority over static config. Check settings first.
+        final String serverGlobalSetting =
+                Settings.Global.getString(resolver, Settings.Global.NTP_SERVER);
+        final URI settingsServerInfo = parseNtpServerSetting(serverGlobalSetting);
+
+        URI ntpServerUri;
+        if (settingsServerInfo != null) {
+            ntpServerUri = settingsServerInfo;
         } else {
-            String serverGlobalSetting =
-                    Settings.Global.getString(resolver, Settings.Global.NTP_SERVER);
-            if (serverGlobalSetting != null) {
-                hostname = serverGlobalSetting;
-            } else {
-                hostname = res.getString(com.android.internal.R.string.config_ntpServer);
+            String configValue = res.getString(com.android.internal.R.string.config_ntpServer);
+            try {
+                ntpServerUri = parseNtpUriStrict(configValue);
+            } catch (URISyntaxException e) {
+                ntpServerUri = null;
             }
         }
 
-        final Integer port;
-        if (mPortForTests != null) {
-            port = mPortForTests;
-        } else {
-            port = SntpClient.STANDARD_NTP_PORT;
-        }
+        final int defaultTimeoutMillis =
+                res.getInteger(com.android.internal.R.integer.config_ntpTimeout);
+        final Duration timeout = Duration.ofMillis(Settings.Global.getInt(
+                resolver, Settings.Global.NTP_TIMEOUT, defaultTimeoutMillis));
+        return ntpServerUri == null ? null : new NtpConfig(ntpServerUri, timeout);
+    }
 
-        final int timeoutMillis;
-        if (mTimeoutForTests != null) {
-            timeoutMillis = (int) mTimeoutForTests.toMillis();
+    /**
+     * Parses and returns an NTP server config URI, or throws an exception if the URI doesn't
+     * conform to expectations.
+     *
+     * <p>NTP server config URIs are in the form "ntp://{hostname}[:port]". This is not a registered
+     * IANA URI scheme.
+     */
+    public static URI parseNtpUriStrict(String ntpServerUriString) throws URISyntaxException {
+        // java.net.URI is used in preference to android.net.Uri, since android.net.Uri is very
+        // forgiving of obvious errors. URI catches issues sooner.
+        URI unvalidatedUri = new URI(ntpServerUriString);
+        return validateNtpServerUri(unvalidatedUri);
+    }
+
+    /**
+     * Parses a setting string and returns a URI that will be accepted by {@link NtpConfig}, or
+     * {@code null} if the string does not produce a URI considered valid.
+     *
+     * <p>NTP server config URIs are in the form "ntp://{hostname}[:port]". This is not a registered
+     * IANA URI scheme.
+     *
+     * <p>Unlike {@link #parseNtpUriStrict(String)} this method will not throw an exception. It
+     * checks for a leading "ntp:" and will call through to {@link #parseNtpUriStrict(String)} to
+     * attempt to parse it, returning {@code null} if it fails. To support legacy settings values,
+     * it will also accept a string that only consists of a server name, which will be coerced into
+     * a URI in the form "ntp://{server name}".
+     */
+    @VisibleForTesting
+    public static URI parseNtpServerSetting(String ntpServerSetting) {
+        if (TextUtils.isEmpty(ntpServerSetting)) {
+            return null;
+        } else if (ntpServerSetting.startsWith(URI_SCHEME_NTP + ":")) {
+            try {
+                return parseNtpUriStrict(ntpServerSetting);
+            } catch (URISyntaxException e) {
+                Log.w(TAG, "Rejected NTP uri setting=" + ntpServerSetting, e);
+                return null;
+            }
         } else {
-            int defaultTimeoutMillis =
-                    res.getInteger(com.android.internal.R.integer.config_ntpTimeout);
-            timeoutMillis = Settings.Global.getInt(
-                    resolver, Settings.Global.NTP_TIMEOUT, defaultTimeoutMillis);
+            // This is the legacy settings path. Assumes that the string is just a host name and
+            // creates a URI in the form ntp://<host name>
+            try {
+                URI uri = new URI(URI_SCHEME_NTP, /*host=*/ntpServerSetting,
+                        /*path=*/null, /*fragment=*/null);
+                // Paranoia: validate just in case the host name somehow results in a bad URI.
+                return validateNtpServerUri(uri);
+            } catch (URISyntaxException e) {
+                Log.w(TAG, "Rejected NTP legacy setting=" + ntpServerSetting, e);
+                return null;
+            }
         }
-        return TextUtils.isEmpty(hostname) ? null :
-            new NtpConnectionInfo(hostname, port, timeoutMillis);
+    }
+
+    /**
+     * Checks that the supplied URI can be used to identify an NTP server.
+     * This method currently ignores Uri components that are not used, only checking the parts that
+     * must be present. Returns the supplied {@code uri} if validation is successful.
+     */
+    private static URI validateNtpServerUri(URI uri) throws URISyntaxException {
+        if (!uri.isAbsolute()) {
+            throw new URISyntaxException(uri.toString(), "Relative URI not supported");
+        }
+        if (!URI_SCHEME_NTP.equals(uri.getScheme())) {
+            throw new URISyntaxException(uri.toString(), "Unrecognized scheme");
+        }
+        String host = uri.getHost();
+        if (TextUtils.isEmpty(host)) {
+            throw new URISyntaxException(uri.toString(), "Missing host");
+        }
+        return uri;
     }
 
     /** Prints debug information. */
     public void dump(PrintWriter pw) {
         synchronized (this) {
-            pw.println("getNtpConnectionInfo()=" + getNtpConnectionInfo());
+            pw.println("getNtpConfig()=" + getNtpConfig());
             pw.println("mTimeResult=" + mTimeResult);
             if (mTimeResult != null) {
                 pw.println("mTimeResult.getAgeMillis()="

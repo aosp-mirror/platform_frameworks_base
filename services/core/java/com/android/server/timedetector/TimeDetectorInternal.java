@@ -29,4 +29,7 @@ public interface TimeDetectorInternal {
 
     /** Used to pass new network time suggestions to the time detector. */
     void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSignal);
+
+    /** Used to pass new GNSS time suggestions to the time detector. */
+    void suggestGnssTime(@NonNull GnssTimeSuggestion timeSignal);
 }

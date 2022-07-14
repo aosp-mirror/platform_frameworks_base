@@ -38,7 +38,6 @@ import static org.mockito.Mockito.when;
 import android.app.time.ExternalTimeSuggestion;
 import android.app.time.ITimeDetectorListener;
 import android.app.time.TimeConfiguration;
-import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.app.timedetector.TimePoint;
@@ -318,10 +317,10 @@ public class TimeDetectorServiceTest {
     public void testSuggestNetworkTime_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
-        NetworkTimeSuggestion NetworkTimeSuggestion = createNetworkTimeSuggestion();
+        NetworkTimeSuggestion networkTimeSuggestion = createNetworkTimeSuggestion();
 
         try {
-            mTimeDetectorService.suggestNetworkTime(NetworkTimeSuggestion);
+            mTimeDetectorService.suggestNetworkTime(networkTimeSuggestion);
             fail();
         } finally {
             verify(mMockContext).enforceCallingOrSelfPermission(
@@ -333,15 +332,15 @@ public class TimeDetectorServiceTest {
     public void testSuggestNetworkTime() throws Exception {
         doNothing().when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
 
-        NetworkTimeSuggestion NetworkTimeSuggestion = createNetworkTimeSuggestion();
-        mTimeDetectorService.suggestNetworkTime(NetworkTimeSuggestion);
+        NetworkTimeSuggestion networkTimeSuggestion = createNetworkTimeSuggestion();
+        mTimeDetectorService.suggestNetworkTime(networkTimeSuggestion);
         mTestHandler.assertTotalMessagesEnqueued(1);
 
         verify(mMockContext).enforceCallingOrSelfPermission(
                 eq(android.Manifest.permission.SET_TIME), anyString());
 
         mTestHandler.waitForMessagesToBeProcessed();
-        mFakeTimeDetectorStrategy.verifySuggestNetworkTimeCalled(NetworkTimeSuggestion);
+        mFakeTimeDetectorStrategy.verifySuggestNetworkTimeCalled(networkTimeSuggestion);
     }
 
     @Test(expected = SecurityException.class)

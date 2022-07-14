@@ -4068,6 +4068,11 @@
     <permission android:name="android.permission.BIND_INPUT_METHOD"
         android:protectionLevel="signature" />
 
+    <!-- Allows access to Test APIs defined in {@link android.view.inputmethod.InputMethodManager}.
+         @hide -->
+    <permission android:name="android.permission.TEST_INPUT_METHOD"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by an {@link android.media.midi.MidiDeviceService},
          to ensure that only the system can bind to it.
          <p>Protection level: signature

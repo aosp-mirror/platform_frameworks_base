@@ -37,94 +37,94 @@ import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManage
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.tuner.TunerService
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import java.util.Optional
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
-    private lateinit var mController: NotificationShadeWindowViewController
-
     @Mock
-    private lateinit var mView: NotificationShadeWindowView
+    private lateinit var view: NotificationShadeWindowView
     @Mock
-    private lateinit var mTunerService: TunerService
+    private lateinit var tunserService: TunerService
     @Mock
-    private lateinit var mStatusBarStateController: SysuiStatusBarStateController
+    private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
     @Mock
-    private lateinit var mCentralSurfaces: CentralSurfaces
+    private lateinit var centralSurfaces: CentralSurfaces
     @Mock
-    private lateinit var mDockManager: DockManager
+    private lateinit var dockManager: DockManager
     @Mock
-    private lateinit var mNotificationPanelViewController: NotificationPanelViewController
+    private lateinit var notificationPanelViewController: NotificationPanelViewController
     @Mock
-    private lateinit var mNotificationShadeDepthController: NotificationShadeDepthController
+    private lateinit var notificationShadeDepthController: NotificationShadeDepthController
     @Mock
-    private lateinit var mNotificationShadeWindowController: NotificationShadeWindowController
+    private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock
-    private lateinit var mKeyguardUnlockAnimationController: KeyguardUnlockAnimationController
+    private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock
-    private lateinit var mAmbientState: AmbientState
+    private lateinit var ambientState: AmbientState
     @Mock
     private lateinit var stackScrollLayoutController: NotificationStackScrollLayoutController
     @Mock
-    private lateinit var mStatusBarKeyguardViewManager: StatusBarKeyguardViewManager
+    private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock
-    private lateinit var mStatusBarWindowStateController: StatusBarWindowStateController
+    private lateinit var statusBarWindowStateController: StatusBarWindowStateController
     @Mock
-    private lateinit var mLockscreenShadeTransitionController: LockscreenShadeTransitionController
+    private lateinit var lockscreenShadeTransitionController: LockscreenShadeTransitionController
     @Mock
-    private lateinit var mLockIconViewController: LockIconViewController
+    private lateinit var lockIconViewController: LockIconViewController
     @Mock
-    private lateinit var mPhoneStatusBarViewController: PhoneStatusBarViewController
+    private lateinit var phoneStatusBarViewController: PhoneStatusBarViewController
     @Mock
-    private lateinit var mLowLightClockController: LowLightClockController
+    private lateinit var lowLightClockController: LowLightClockController
 
-    private lateinit var mInteractionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
-    private lateinit var mInteractionEventHandler: InteractionEventHandler
+    private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
+    private lateinit var interactionEventHandler: InteractionEventHandler
+
+    private lateinit var underTest: NotificationShadeWindowViewController
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(mView.bottom).thenReturn(VIEW_BOTTOM)
+        whenever(view.bottom).thenReturn(VIEW_BOTTOM)
 
-        mController = NotificationShadeWindowViewController(
-            mLockscreenShadeTransitionController,
+        underTest = NotificationShadeWindowViewController(
+            lockscreenShadeTransitionController,
             FalsingCollectorFake(),
-            mTunerService,
-            mStatusBarStateController,
-            mDockManager,
-            mNotificationShadeDepthController,
-            mView,
-            mNotificationPanelViewController,
+            tunserService,
+            sysuiStatusBarStateController,
+            dockManager,
+            notificationShadeDepthController,
+            view,
+            notificationPanelViewController,
             PanelExpansionStateManager(),
             stackScrollLayoutController,
-            mStatusBarKeyguardViewManager,
-            mStatusBarWindowStateController,
-            mLockIconViewController,
-            Optional.of(mLowLightClockController),
-            mCentralSurfaces,
-            mNotificationShadeWindowController,
-            mKeyguardUnlockAnimationController,
-            mAmbientState
+            statusBarKeyguardViewManager,
+            statusBarWindowStateController,
+            lockIconViewController,
+            Optional.of(lowLightClockController),
+            centralSurfaces,
+            notificationShadeWindowController,
+            keyguardUnlockAnimationController,
+            ambientState
         )
-        mController.setupExpandedStatusBar()
+        underTest.setupExpandedStatusBar()
 
-        mInteractionEventHandlerCaptor =
+        interactionEventHandlerCaptor =
             ArgumentCaptor.forClass(InteractionEventHandler::class.java)
-        verify(mView).setInteractionEventHandler(mInteractionEventHandlerCaptor.capture())
-            mInteractionEventHandler = mInteractionEventHandlerCaptor.value
+        verify(view).setInteractionEventHandler(interactionEventHandlerCaptor.capture())
+            interactionEventHandler = interactionEventHandlerCaptor.value
     }
 
     // Note: So far, these tests only cover interactions with the status bar view controller. More
@@ -132,148 +132,148 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
 
     @Test
     fun handleDispatchTouchEvent_nullStatusBarViewController_returnsFalse() {
-        mController.setStatusBarViewController(null)
+        underTest.setStatusBarViewController(null)
 
-        val returnVal = mInteractionEventHandler.handleDispatchTouchEvent(downEv)
+        val returnVal = interactionEventHandler.handleDispatchTouchEvent(downEv)
 
         assertThat(returnVal).isFalse()
     }
 
     @Test
     fun handleDispatchTouchEvent_downTouchBelowView_sendsTouchToSb() {
-        mController.setStatusBarViewController(mPhoneStatusBarViewController)
+        underTest.setStatusBarViewController(phoneStatusBarViewController)
         val ev = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, VIEW_BOTTOM + 4f, 0)
-        whenever(mPhoneStatusBarViewController.sendTouchToView(ev)).thenReturn(true)
+        whenever(phoneStatusBarViewController.sendTouchToView(ev)).thenReturn(true)
 
-        val returnVal = mInteractionEventHandler.handleDispatchTouchEvent(ev)
+        val returnVal = interactionEventHandler.handleDispatchTouchEvent(ev)
 
-        verify(mPhoneStatusBarViewController).sendTouchToView(ev)
+        verify(phoneStatusBarViewController).sendTouchToView(ev)
         assertThat(returnVal).isTrue()
     }
 
     @Test
     fun handleDispatchTouchEvent_downTouchBelowViewThenAnotherTouch_sendsTouchToSb() {
-        mController.setStatusBarViewController(mPhoneStatusBarViewController)
+        underTest.setStatusBarViewController(phoneStatusBarViewController)
         val downEvBelow = MotionEvent.obtain(
             0L, 0L, MotionEvent.ACTION_DOWN, 0f, VIEW_BOTTOM + 4f, 0
         )
-        mInteractionEventHandler.handleDispatchTouchEvent(downEvBelow)
+        interactionEventHandler.handleDispatchTouchEvent(downEvBelow)
 
         val nextEvent = MotionEvent.obtain(
             0L, 0L, MotionEvent.ACTION_MOVE, 0f, VIEW_BOTTOM + 5f, 0
         )
-        whenever(mPhoneStatusBarViewController.sendTouchToView(nextEvent)).thenReturn(true)
+        whenever(phoneStatusBarViewController.sendTouchToView(nextEvent)).thenReturn(true)
 
-        val returnVal = mInteractionEventHandler.handleDispatchTouchEvent(nextEvent)
+        val returnVal = interactionEventHandler.handleDispatchTouchEvent(nextEvent)
 
-        verify(mPhoneStatusBarViewController).sendTouchToView(nextEvent)
+        verify(phoneStatusBarViewController).sendTouchToView(nextEvent)
         assertThat(returnVal).isTrue()
     }
 
     @Test
     fun handleDispatchTouchEvent_downAndPanelCollapsedAndInSbBoundAndSbWindowShow_sendsTouchToSb() {
-        mController.setStatusBarViewController(mPhoneStatusBarViewController)
-        whenever(mStatusBarWindowStateController.windowIsShowing()).thenReturn(true)
-        whenever(mNotificationPanelViewController.isFullyCollapsed).thenReturn(true)
-        whenever(mPhoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
+        underTest.setStatusBarViewController(phoneStatusBarViewController)
+        whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
+        whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+        whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
             .thenReturn(true)
-        whenever(mPhoneStatusBarViewController.sendTouchToView(downEv)).thenReturn(true)
+        whenever(phoneStatusBarViewController.sendTouchToView(downEv)).thenReturn(true)
 
-        val returnVal = mInteractionEventHandler.handleDispatchTouchEvent(downEv)
+        val returnVal = interactionEventHandler.handleDispatchTouchEvent(downEv)
 
-        verify(mPhoneStatusBarViewController).sendTouchToView(downEv)
+        verify(phoneStatusBarViewController).sendTouchToView(downEv)
         assertThat(returnVal).isTrue()
     }
 
     @Test
     fun handleDispatchTouchEvent_panelNotCollapsed_returnsNull() {
-        mController.setStatusBarViewController(mPhoneStatusBarViewController)
-        whenever(mStatusBarWindowStateController.windowIsShowing()).thenReturn(true)
-        whenever(mPhoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
+        underTest.setStatusBarViewController(phoneStatusBarViewController)
+        whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
+        whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
             .thenReturn(true)
         // Item we're testing
-        whenever(mNotificationPanelViewController.isFullyCollapsed).thenReturn(false)
+        whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(false)
 
-        val returnVal = mInteractionEventHandler.handleDispatchTouchEvent(downEv)
+        val returnVal = interactionEventHandler.handleDispatchTouchEvent(downEv)
 
-        verify(mPhoneStatusBarViewController, never()).sendTouchToView(downEv)
+        verify(phoneStatusBarViewController, never()).sendTouchToView(downEv)
         assertThat(returnVal).isNull()
     }
 
     @Test
     fun handleDispatchTouchEvent_touchNotInSbBounds_returnsNull() {
-        mController.setStatusBarViewController(mPhoneStatusBarViewController)
-        whenever(mStatusBarWindowStateController.windowIsShowing()).thenReturn(true)
-        whenever(mNotificationPanelViewController.isFullyCollapsed).thenReturn(true)
+        underTest.setStatusBarViewController(phoneStatusBarViewController)
+        whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
+        whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
         // Item we're testing
-        whenever(mPhoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
+        whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
             .thenReturn(false)
 
-        val returnVal = mInteractionEventHandler.handleDispatchTouchEvent(downEv)
+        val returnVal = interactionEventHandler.handleDispatchTouchEvent(downEv)
 
-        verify(mPhoneStatusBarViewController, never()).sendTouchToView(downEv)
+        verify(phoneStatusBarViewController, never()).sendTouchToView(downEv)
         assertThat(returnVal).isNull()
     }
 
     @Test
     fun handleDispatchTouchEvent_sbWindowNotShowing_noSendTouchToSbAndReturnsTrue() {
-        mController.setStatusBarViewController(mPhoneStatusBarViewController)
-        whenever(mNotificationPanelViewController.isFullyCollapsed).thenReturn(true)
-        whenever(mPhoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
+        underTest.setStatusBarViewController(phoneStatusBarViewController)
+        whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+        whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
             .thenReturn(true)
         // Item we're testing
-        whenever(mStatusBarWindowStateController.windowIsShowing()).thenReturn(false)
+        whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(false)
 
-        val returnVal = mInteractionEventHandler.handleDispatchTouchEvent(downEv)
+        val returnVal = interactionEventHandler.handleDispatchTouchEvent(downEv)
 
-        verify(mPhoneStatusBarViewController, never()).sendTouchToView(downEv)
+        verify(phoneStatusBarViewController, never()).sendTouchToView(downEv)
         assertThat(returnVal).isTrue()
     }
 
     @Test
     fun handleDispatchTouchEvent_downEventSentToSbThenAnotherEvent_sendsTouchToSb() {
-        mController.setStatusBarViewController(mPhoneStatusBarViewController)
-        whenever(mStatusBarWindowStateController.windowIsShowing()).thenReturn(true)
-        whenever(mNotificationPanelViewController.isFullyCollapsed).thenReturn(true)
-        whenever(mPhoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
+        underTest.setStatusBarViewController(phoneStatusBarViewController)
+        whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
+        whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+        whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
             .thenReturn(true)
 
         // Down event first
-        mInteractionEventHandler.handleDispatchTouchEvent(downEv)
+        interactionEventHandler.handleDispatchTouchEvent(downEv)
 
         // Then another event
         val nextEvent = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
-        whenever(mPhoneStatusBarViewController.sendTouchToView(nextEvent)).thenReturn(true)
+        whenever(phoneStatusBarViewController.sendTouchToView(nextEvent)).thenReturn(true)
 
-        val returnVal = mInteractionEventHandler.handleDispatchTouchEvent(nextEvent)
+        val returnVal = interactionEventHandler.handleDispatchTouchEvent(nextEvent)
 
-        verify(mPhoneStatusBarViewController).sendTouchToView(nextEvent)
+        verify(phoneStatusBarViewController).sendTouchToView(nextEvent)
         assertThat(returnVal).isTrue()
     }
 
     @Test
     fun testLowLightClockAttachedWhenExpandedStatusBarSetup() {
-        verify(mLowLightClockController).attachLowLightClockView(ArgumentMatchers.any())
+        verify(lowLightClockController).attachLowLightClockView(ArgumentMatchers.any())
     }
 
     @Test
     fun testLowLightClockShownWhenDozing() {
-        mController.setDozing(true)
-        verify(mLowLightClockController).showLowLightClock(true)
+        underTest.setDozing(true)
+        verify(lowLightClockController).showLowLightClock(true)
     }
 
     @Test
     fun testLowLightClockDozeTimeTickCalled() {
-        mController.dozeTimeTick()
-        verify(mLowLightClockController).dozeTimeTick()
+        underTest.dozeTimeTick()
+        verify(lowLightClockController).dozeTimeTick()
     }
 
     @Test
     fun testLowLightClockHiddenWhenNotDozing() {
-        mController.setDozing(true)
-        verify(mLowLightClockController).showLowLightClock(true)
-        mController.setDozing(false)
-        verify(mLowLightClockController).showLowLightClock(false)
+        underTest.setDozing(true)
+        verify(lowLightClockController).showLowLightClock(true)
+        underTest.setDozing(false)
+        verify(lowLightClockController).showLowLightClock(false)
     }
 }
 

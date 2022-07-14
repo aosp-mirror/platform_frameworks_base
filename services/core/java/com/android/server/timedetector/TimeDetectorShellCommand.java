@@ -30,7 +30,6 @@ import static com.android.server.timedetector.ServerFlags.KEY_TIME_DETECTOR_ORIG
 
 import android.app.time.ExternalTimeSuggestion;
 import android.app.time.TimeConfiguration;
-import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.ShellCommand;

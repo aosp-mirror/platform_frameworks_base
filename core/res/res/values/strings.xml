@@ -6324,4 +6324,7 @@ ul.</string>
 
     <!-- Title for preference of the system default locale. [CHAR LIMIT=50]-->
     <string name="system_locale_title">System default</string>
+
+    <!-- Display content to tell the user the sim card name and number-->
+    <string name="default_card_name">CARD <xliff:g id="cardNumber" example="1">%d</xliff:g></string>
 </resources>
