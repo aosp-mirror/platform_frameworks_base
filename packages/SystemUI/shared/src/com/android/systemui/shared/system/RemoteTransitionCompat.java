@@ -224,6 +224,7 @@ public class RemoteTransitionCompat implements Parcelable {
         private WindowContainerToken mRecentsTask = null;
         private TransitionInfo mInfo = null;
         private ArrayList<SurfaceControl> mOpeningLeashes = null;
+        private boolean mOpeningHome = false;
         private ArrayMap<SurfaceControl, SurfaceControl> mLeashMap = null;
         private PictureInPictureSurfaceTransaction mPipTransaction = null;
         private IBinder mTransition = null;
@@ -321,6 +322,7 @@ public class RemoteTransitionCompat implements Parcelable {
             }
             final int layer = mInfo.getChanges().size() * 3;
             mOpeningLeashes = new ArrayList<>();
+            mOpeningHome = cancelRecents;
             final RemoteAnimationTargetCompat[] targets =
                     new RemoteAnimationTargetCompat[openingTasks.size()];
             for (int i = 0; i < openingTasks.size(); ++i) {
@@ -406,6 +408,26 @@ public class RemoteTransitionCompat implements Parcelable {
                 if (!mKeyguardLocked && mRecentsTask != null) {
                     wct.restoreTransientOrder(mRecentsTask);
                 }
+            } else if (toHome && mOpeningHome && mPausingTasks != null) {
+                // Special situaition where 3p launcher was changed during recents (this happens
+                // during tapltests...). Here we get both "return to home" AND "home opening".
+                // This is basically going home, but we have to restore recents order and also
+                // treat the home "pausing" task properly.
+                for (int i = mPausingTasks.size() - 1; i >= 0; --i) {
+                    final TransitionInfo.Change change = mInfo.getChange(mPausingTasks.get(i));
+                    final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+                    if (taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
+                        // Treat as opening (see above)
+                        wct.reorder(mPausingTasks.get(i), true /* onTop */);
+                        t.show(mInfo.getChange(mPausingTasks.get(i)).getLeash());
+                    } else {
+                        // Treat as hiding (see below)
+                        t.hide(mInfo.getChange(mPausingTasks.get(i)).getLeash());
+                    }
+                }
+                if (!mKeyguardLocked && mRecentsTask != null) {
+                    wct.restoreTransientOrder(mRecentsTask);
+                }
             } else {
                 for (int i = 0; i < mPausingTasks.size(); ++i) {
                     if (!sendUserLeaveHint) {
@@ -444,6 +466,7 @@ public class RemoteTransitionCompat implements Parcelable {
             mPausingTasks = null;
             mInfo = null;
             mOpeningLeashes = null;
+            mOpeningHome = false;
             mLeashMap = null;
             mTransition = null;
         }
