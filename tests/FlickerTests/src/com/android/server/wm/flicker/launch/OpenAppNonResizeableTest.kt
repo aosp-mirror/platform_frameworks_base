@@ -27,10 +27,11 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
-import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.navBarLayerPositionEnd
+import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import com.android.server.wm.traces.common.ComponentMatcher
+import org.junit.Assume
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -65,8 +66,8 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     override val testApp = NonResizeableAppHelper(instrumentation)
 
     /**
-     * Checks that the nav bar layer starts invisible, becomes visible during unlocking animation
-     * and remains visible at the end
+     * Checks that the [ComponentMatcher.NAV_BAR] layer starts invisible, becomes visible during
+     * unlocking animation and remains visible at the end
      */
     @FlakyTest(bugId = 227083463)
     @Test
@@ -90,12 +91,13 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     }
 
     /**
-     * Checks that the nav bar starts the transition invisible, then becomes visible during
-     * the unlocking animation and remains visible at the end of the transition
+     * Checks that the [ComponentMatcher.NAV_BAR] starts the transition invisible, then becomes
+     * visible during the unlocking animation and remains visible at the end of the transition
      */
     @Presubmit
     @Test
     fun navBarWindowsVisibilityChanges() {
+        Assume.assumeFalse(testSpec.isTablet)
         testSpec.assertWm {
             this.isNonAppWindowInvisible(ComponentMatcher.NAV_BAR)
                 .then()
@@ -104,50 +106,98 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     }
 
     /**
-     * Checks that the status bar layer is visible at the end of the trace
+     * Checks that the [ComponentMatcher.TASK_BAR] starts the transition invisible, then becomes
+     * visible during the unlocking animation and remains visible at the end of the transition
+     */
+    @Presubmit
+    @Test
+    fun taskBarLayerIsVisibleAtEnd() {
+        Assume.assumeTrue(testSpec.isTablet)
+        testSpec.assertLayersEnd {
+            this.isVisible(ComponentMatcher.TASK_BAR)
+        }
+    }
+
+    /**
+     * Checks that the [ComponentMatcher.STATUS_BAR] layer is visible at the end of the trace
      *
      * It is not possible to check at the start because the screen is off
      */
     @Presubmit
     @Test
-    override fun statusBarLayerIsVisible() {
+    override fun statusBarLayerIsVisibleAtStartAndEnd() {
         testSpec.assertLayersEnd {
             this.isVisible(ComponentMatcher.STATUS_BAR)
         }
     }
 
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    fun statusBarLayerPositionAtEnd() {
-        testSpec.assertLayersEnd {
-            val display = this.entry.displays.minByOrNull { it.id }
-                ?: error("There is no display!")
-            this.visibleRegion(ComponentMatcher.STATUS_BAR)
-                .coversExactly(WindowUtils.getStatusBarPosition(display))
-        }
-    }
-
     /**
-     * Checks the position of the navigation bar at the start and end of the transition
-     *
-     * Differently from the normal usage of this assertion, check only the final state of the
-     * transition because the display is off at the start and the NavBar is never visible
+     * Checks the position of the [ComponentMatcher.NAV_BAR] at the end of the transition
      */
     @Postsubmit
     @Test
-    override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerPositionEnd()
+    override fun navBarLayerPositionAtEnd() = super.navBarLayerPositionAtEnd()
+
+    /** {@inheritDoc} */
+    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    override fun taskBarLayerIsVisibleAtStartAndEnd() { }
+
+    /** {@inheritDoc} */
+    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    override fun navBarLayerIsVisibleAtStartAndEnd() { }
+
+    /** {@inheritDoc} */
+    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    override fun taskBarWindowIsAlwaysVisible() { }
+
+    /** {@inheritDoc} */
+    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    override fun navBarWindowIsAlwaysVisible() { }
+
+    /** {@inheritDoc} */
+    @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
+    override fun statusBarWindowIsAlwaysVisible() { }
+
+    /**
+     * Checks the position of the [ComponentMatcher.STATUS_BAR] at the end of the
+     * transition
+     */
+    @Postsubmit
+    @Test
+    fun statusBarLayerPositionEnd() = testSpec.statusBarLayerPositionAtEnd()
+
+    /**
+     * Checks the [ComponentMatcher.NAV_BAR] is visible at the end of the transition
+     */
+    @Postsubmit
+    @Test
+    fun navBarLayerIsVisibleAtEnd() {
+        testSpec.assertLayersEnd {
+            this.isVisible(ComponentMatcher.NAV_BAR)
+        }
+    }
 
     /** {@inheritDoc} */
     @FlakyTest
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
             super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appLayerBecomesVisible() {
+        Assume.assumeFalse(testSpec.isTablet)
+        super.appLayerBecomesVisible()
+    }
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 227143265)
+    @Test
+    fun appLayerBecomesVisibleTablet() {
+        Assume.assumeTrue(testSpec.isTablet)
+        super.appLayerBecomesVisible()
+    }
 
     /** {@inheritDoc} */
     @FlakyTest

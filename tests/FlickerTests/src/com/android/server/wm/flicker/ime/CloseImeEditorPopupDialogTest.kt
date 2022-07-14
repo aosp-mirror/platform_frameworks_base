@@ -16,21 +16,17 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.app.Instrumentation
 import android.platform.test.annotations.Postsubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerBuilderProvider
+import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeEditorPopupDialogAppHelper
-import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.flicker.traces.region.RegionSubject
 import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.FixMethodOrder
@@ -44,44 +40,94 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-class CloseImeEditorPopupDialogTest(private val testSpec: FlickerTestParameter) {
-    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+class CloseImeEditorPopupDialogTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     private val imeTestApp = ImeEditorPopupDialogAppHelper(instrumentation, testSpec.startRotation)
 
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            setup {
-                eachRun {
-                    imeTestApp.launchViaIntent(wmHelper)
-                    imeTestApp.openIME(wmHelper)
-                }
+    /** {@inheritDoc} */
+    override val transition: FlickerBuilder.() -> Unit = {
+        setup {
+            eachRun {
+                imeTestApp.launchViaIntent(wmHelper)
+                imeTestApp.openIME(wmHelper)
             }
-            transitions {
-                imeTestApp.dismissDialog(wmHelper)
+        }
+        transitions {
+            imeTestApp.dismissDialog(wmHelper)
+            wmHelper.StateSyncBuilder()
+                .withImeGone()
+                .waitForAndVerify()
+        }
+        teardown {
+            eachRun {
+                device.pressHome()
                 wmHelper.StateSyncBuilder()
-                    .withImeGone()
+                    .withHomeActivityVisible()
                     .waitForAndVerify()
-            }
-            teardown {
-                eachRun {
-                    device.pressHome()
-                    wmHelper.StateSyncBuilder()
-                        .withHomeActivityVisible()
-                        .waitForAndVerify()
-                    imeTestApp.exit(wmHelper)
-                }
+                imeTestApp.exit(wmHelper)
             }
         }
     }
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
+    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun entireScreenCovered() =
+        super.entireScreenCovered()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun taskBarLayerIsVisibleAtStartAndEnd() =
+        super.taskBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     @Postsubmit
     @Test
@@ -92,11 +138,11 @@ class CloseImeEditorPopupDialogTest(private val testSpec: FlickerTestParameter) 
     fun imeLayerAndImeSnapshotVisibleOnScreen() {
         testSpec.assertLayers {
             this.isVisible(ComponentMatcher.IME)
-                    .then()
-                    .isVisible(ComponentMatcher.IME_SNAPSHOT)
-                    .then()
-                    .isInvisible(ComponentMatcher.IME_SNAPSHOT, isOptional = true)
-                    .isInvisible(ComponentMatcher.IME)
+                .then()
+                .isVisible(ComponentMatcher.IME_SNAPSHOT)
+                .then()
+                .isInvisible(ComponentMatcher.IME_SNAPSHOT, isOptional = true)
+                .isInvisible(ComponentMatcher.IME)
         }
     }
 
@@ -105,13 +151,15 @@ class CloseImeEditorPopupDialogTest(private val testSpec: FlickerTestParameter) 
     fun imeSnapshotAssociatedOnAppVisibleRegion() {
         testSpec.assertLayers {
             this.invoke("imeSnapshotAssociatedOnAppVisibleRegion") {
-                val imeSnapshotLayers = it.subjects.filter {
-                    subject -> subject.name.contains(
-                    ComponentMatcher.IME_SNAPSHOT.toLayerName()) && subject.isVisible
+                val imeSnapshotLayers = it.subjects.filter { subject ->
+                    subject.name.contains(
+                        ComponentMatcher.IME_SNAPSHOT.toLayerName()
+                    ) && subject.isVisible
                 }
                 if (imeSnapshotLayers.isNotEmpty()) {
                     val visibleAreas = imeSnapshotLayers.mapNotNull { imeSnapshotLayer ->
-                        imeSnapshotLayer.layer?.visibleRegion }.toTypedArray()
+                        imeSnapshotLayer.layer?.visibleRegion
+                    }.toTypedArray()
                     val imeVisibleRegion = RegionSubject.assertThat(visibleAreas, this, timestamp)
                     val appVisibleRegion = it.visibleRegion(imeTestApp)
                     if (imeVisibleRegion.region.isNotEmpty) {
@@ -127,14 +175,14 @@ class CloseImeEditorPopupDialogTest(private val testSpec: FlickerTestParameter) 
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(
-                            repetitions = 2,
-                            supportedNavigationModes = listOf(
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                            ),
-                            supportedRotations = listOf(Surface.ROTATION_0)
-                    )
+                .getConfigNonRotationTests(
+                    repetitions = 2,
+                    supportedNavigationModes = listOf(
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                    ),
+                    supportedRotations = listOf(Surface.ROTATION_0)
+                )
         }
     }
 }

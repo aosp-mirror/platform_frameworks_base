@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker
+package com.android.wm.shell.flicker.pip.tv
 
 import android.app.Instrumentation
 import android.content.pm.PackageManager
-import android.content.pm.PackageManager.FEATURE_LEANBACK
-import android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY
 import android.view.Surface
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import org.junit.Assume.assumeFalse
+import com.android.wm.shell.flicker.helpers.PipAppHelper
 import org.junit.Before
 import org.junit.runners.Parameterized
 
-/**
- * Base class of all Flicker test that performs common functions for all flicker tests:
- *
- * - Caches transitions so that a transition is run once and the transition results are used by
- * tests multiple times. This is needed for parameterized tests which call the BeforeClass methods
- * multiple times.
- * - Keeps track of all test artifacts and deletes ones which do not need to be reviewed.
- * - Fails tests if results are not available for any test due to jank.
- */
-abstract class FlickerTestBase(
+abstract class PipTestBase(
     protected val rotationName: String,
     protected val rotation: Int
 ) {
@@ -45,16 +34,20 @@ abstract class FlickerTestBase(
     val packageManager: PackageManager = instrumentation.context.packageManager
     protected val isTelevision: Boolean by lazy {
         packageManager.run {
-            hasSystemFeature(FEATURE_LEANBACK) || hasSystemFeature(FEATURE_LEANBACK_ONLY)
+            hasSystemFeature(PackageManager.FEATURE_LEANBACK) ||
+                hasSystemFeature(PackageManager.FEATURE_LEANBACK_ONLY)
         }
     }
+    protected val testApp = PipAppHelper(instrumentation)
 
-    /**
-     * By default WmShellFlickerTests do not run on TV devices.
-     * If the test should run on TV - it should override this method.
-     */
     @Before
-    open fun televisionSetUp() = assumeFalse(isTelevision)
+    open fun televisionSetUp() {
+        /**
+         * The super implementation assumes ([org.junit.Assume]) that not running on TV, thus
+         * disabling the test on TV. This test, however, *should run on TV*, so we overriding this
+         * method and simply leaving it blank.
+         */
+    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

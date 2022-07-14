@@ -39,8 +39,9 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group2
 @FlakyTest(bugId = 221854428)
-class ReOpenImeWindowTest_ShellTransit(private val testSpec: FlickerTestParameter)
-    : ReOpenImeWindowTest(testSpec) {
+class ReOpenImeWindowTest_ShellTransit(
+    testSpec: FlickerTestParameter
+) : ReOpenImeWindowTest(testSpec) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)

@@ -54,11 +54,10 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-open class OpenAppColdTest(testSpec: FlickerTestParameter) :
-    OpenAppFromLauncherTransition(testSpec) {
-    /**
-     * Defines the transition used to run the test
-     */
+open class OpenAppColdTest(
+    testSpec: FlickerTestParameter
+) : OpenAppFromLauncherTransition(testSpec) {
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
@@ -81,40 +80,20 @@ open class OpenAppColdTest(testSpec: FlickerTestParameter) :
     /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun navBarLayerRotatesAndScales() {
-        super.navBarLayerRotatesAndScales()
+    override fun navBarLayerPositionAtStartAndEnd() {
+        super.navBarLayerPositionAtStartAndEnd()
     }
 
     /** {@inheritDoc} */
     @Presubmit
     @Test
     override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appWindowReplacesLauncherAsTopWindow() =
-        super.appWindowReplacesLauncherAsTopWindow()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         /**

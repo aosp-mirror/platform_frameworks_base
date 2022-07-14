@@ -16,7 +16,9 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.app.Activity
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -27,12 +29,15 @@ import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.navBarLayerPositionAtStartAndEnd
+import com.android.server.wm.traces.common.ComponentMatcher
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
 import com.android.wm.shell.flicker.testapp.Components.FixedActivity.EXTRA_FIXED_ORIENTATION
 import com.android.wm.shell.flicker.testapp.Components.PipActivity.ACTION_ENTER_PIP
+import org.junit.Assume
+import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -79,11 +84,17 @@ class EnterPipToOtherOrientationTest(
             setup {
                 eachRun {
                     // Launch a portrait only app on the fullscreen stack
-                    testApp.launchViaIntent(wmHelper, stringExtras = mapOf(
-                        EXTRA_FIXED_ORIENTATION to ORIENTATION_PORTRAIT.toString()))
+                    testApp.launchViaIntent(
+                        wmHelper, stringExtras = mapOf(
+                            EXTRA_FIXED_ORIENTATION to ORIENTATION_PORTRAIT.toString()
+                        )
+                    )
                     // Launch the PiP activity fixed as landscape
-                    pipApp.launchViaIntent(wmHelper, stringExtras = mapOf(
-                        EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString()))
+                    pipApp.launchViaIntent(
+                        wmHelper, stringExtras = mapOf(
+                            EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString()
+                        )
+                    )
                 }
             }
             teardown {
@@ -99,11 +110,20 @@ class EnterPipToOtherOrientationTest(
                 // during rotation the status bar becomes invisible and reappears at the end
                 wmHelper.StateSyncBuilder()
                     .withPipShown()
-                    .withAppTransitionIdle()
-                    .withNavBarStatusBarVisible()
+                    .withNavOrTaskBarVisible()
+                    .withStatusBarVisible()
                     .waitForAndVerify()
             }
         }
+
+    /**
+     * This test is not compatible with Tablets. When using [Activity.setRequestedOrientation]
+     * to fix a orientation, Tablets instead keep the same orientation and add letterboxes
+     */
+    @Before
+    fun setup() {
+        Assume.assumeFalse(testSpec.isTablet)
+    }
 
     /**
      * Checks that the [ComponentMatcher.NAV_BAR] has the correct position at
@@ -111,7 +131,7 @@ class EnterPipToOtherOrientationTest(
      */
     @FlakyTest
     @Test
-    override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
+    override fun navBarLayerPositionAtStartAndEnd() = testSpec.navBarLayerPositionAtStartAndEnd()
 
     /**
      * Checks that all parts of the screen are covered at the start and end of the transition
@@ -120,7 +140,7 @@ class EnterPipToOtherOrientationTest(
      */
     @Presubmit
     @Test
-    override fun entireScreenCovered() = testSpec.entireScreenCovered(allStates = false)
+    fun entireScreenCoveredAtStartAndEnd() = testSpec.entireScreenCovered(allStates = false)
 
     /**
      * Checks [pipApp] window remains visible and on top throughout the transition
@@ -204,6 +224,60 @@ class EnterPipToOtherOrientationTest(
         }
     }
 
+    /** {@inheritDoc}  */
+    @Postsubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc}  */
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc}  */
+    @Postsubmit
+    @Test
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc}  */
+    @Postsubmit
+    @Test
+    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc}  */
+    @FlakyTest(bugId = 197726599)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
+
+    /** {@inheritDoc}  */
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc}  */
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc}  */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc}  */
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc}  */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
+
     companion object {
         /**
          * Creates the test configurations.
@@ -215,8 +289,10 @@ class EnterPipToOtherOrientationTest(
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                    repetitions = 3)
+                .getConfigNonRotationTests(
+                    supportedRotations = listOf(Surface.ROTATION_0),
+                    repetitions = 3
+                )
         }
     }
 }

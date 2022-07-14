@@ -16,8 +16,8 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.app.Instrumentation
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowInsets.Type.ime
@@ -25,8 +25,7 @@ import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerBuilderProvider
+import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -49,36 +48,94 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LaunchAppShowImeAndDialogThemeAppTest(private val testSpec: FlickerTestParameter) {
-    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+class LaunchAppShowImeAndDialogThemeAppTest(
+    testSpec: FlickerTestParameter
+) : BaseTest(testSpec) {
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
 
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            setup {
-                eachRun {
-                    testApp.launchViaIntent(wmHelper)
-                    wmHelper.StateSyncBuilder()
-                        .withImeShown()
-                        .waitForAndVerify()
-                    testApp.startDialogThemedActivity(wmHelper)
-                    // Verify IME insets isn't visible on dialog since it's non-IME focusable window
-                    assertFalse(testApp.getInsetsVisibleFromDialog(ime()))
-                    assertTrue(testApp.getInsetsVisibleFromDialog(statusBars()))
-                    assertTrue(testApp.getInsetsVisibleFromDialog(navigationBars()))
-                }
-            }
-            teardown {
-                eachRun {
-                    testApp.exit(wmHelper)
-                }
-            }
-            transitions {
-                testApp.dismissDialog(wmHelper)
+    /** {@inheritDoc} */
+    override val transition: FlickerBuilder.() -> Unit = {
+        setup {
+            eachRun {
+                testApp.launchViaIntent(wmHelper)
+                wmHelper.StateSyncBuilder()
+                    .withImeShown()
+                    .waitForAndVerify()
+                testApp.startDialogThemedActivity(wmHelper)
+                // Verify IME insets isn't visible on dialog since it's non-IME focusable window
+                assertFalse(testApp.getInsetsVisibleFromDialog(ime()))
+                assertTrue(testApp.getInsetsVisibleFromDialog(statusBars()))
+                assertTrue(testApp.getInsetsVisibleFromDialog(navigationBars()))
             }
         }
+        teardown {
+            eachRun {
+                testApp.exit(wmHelper)
+            }
+        }
+        transitions {
+            testApp.dismissDialog(wmHelper)
+        }
     }
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     /**
      * Checks that [ComponentMatcher.IME] layer becomes visible during the transition
