@@ -20,6 +20,7 @@ import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPR
 import static android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.systemui.classifier.Classifier.LOCK_ICON;
 import static com.android.systemui.classifier.Classifier.UDFPS_AUTHENTICATION;
 
 import android.annotation.NonNull;
@@ -167,10 +168,15 @@ public class UdfpsController implements DozeReceiver {
     private final Set<Callback> mCallbacks = new HashSet<>();
 
     @VisibleForTesting
-    public static final VibrationAttributes VIBRATION_ATTRIBUTES =
+    public static final VibrationAttributes UDFPS_VIBRATION_ATTRIBUTES =
             new VibrationAttributes.Builder()
                     // vibration will bypass battery saver mode:
                     .setUsage(VibrationAttributes.USAGE_COMMUNICATION_REQUEST)
+                    .build();
+    @VisibleForTesting
+    public static final VibrationAttributes LOCK_ICON_VIBRATION_ATTRIBUTES =
+            new VibrationAttributes.Builder()
+                    .setUsage(VibrationAttributes.USAGE_TOUCH)
                     .build();
 
     // haptic to use for successful device entry
@@ -671,7 +677,7 @@ public class UdfpsController implements DozeReceiver {
                     mContext.getOpPackageName(),
                     EFFECT_CLICK,
                     "udfps-onStart-click",
-                    VIBRATION_ATTRIBUTES);
+                    UDFPS_VIBRATION_ATTRIBUTES);
         }
     }
 
@@ -748,7 +754,19 @@ public class UdfpsController implements DozeReceiver {
         }
 
         if (!mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
+            if (mFalsingManager.isFalseTouch(LOCK_ICON)) {
+                Log.v(TAG, "aod lock icon long-press rejected by the falsing manager.");
+                return;
+            }
             mKeyguardViewManager.showBouncer(true);
+
+            // play the same haptic as the LockIconViewController longpress
+            mVibrator.vibrate(
+                    Process.myUid(),
+                    mContext.getOpPackageName(),
+                    UdfpsController.EFFECT_CLICK,
+                    "aod-lock-icon-longpress",
+                    LOCK_ICON_VIBRATION_ATTRIBUTES);
             return;
         }
 

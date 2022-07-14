@@ -900,16 +900,36 @@ public class KeyguardIndicationController {
                 mStatusBarKeyguardViewManager.showBouncerMessage(message, mInitialTextColorState);
             }
         } else {
-            if (!mAccessibilityManager.isEnabled()
-                    && !mAccessibilityManager.isTouchExplorationEnabled()
-                    && mKeyguardUpdateMonitor.isUdfpsSupported()
-                    && mKeyguardUpdateMonitor.getUserCanSkipBouncer(
-                    KeyguardUpdateMonitor.getCurrentUser())) {
-                final int stringId = mKeyguardUpdateMonitor.getIsFaceAuthenticated()
-                        ? R.string.keyguard_face_successful_unlock_press
-                        : R.string.keyguard_unlock_press;
-                showBiometricMessage(mContext.getString(stringId));
+            final boolean canSkipBouncer = mKeyguardUpdateMonitor.getUserCanSkipBouncer(
+                    KeyguardUpdateMonitor.getCurrentUser());
+            if (canSkipBouncer) {
+                final boolean faceAuthenticated = mKeyguardUpdateMonitor.getIsFaceAuthenticated();
+                final boolean udfpsSupported = mKeyguardUpdateMonitor.isUdfpsSupported();
+                final boolean a11yEnabled = mAccessibilityManager.isEnabled()
+                        || mAccessibilityManager.isTouchExplorationEnabled();
+                if (udfpsSupported && faceAuthenticated) { // co-ex
+                    if (a11yEnabled) {
+                        showBiometricMessage(mContext.getString(
+                                R.string.keyguard_face_successful_unlock_swipe));
+                    } else {
+                        showBiometricMessage(mContext.getString(
+                                R.string.keyguard_face_successful_unlock_press));
+                    }
+                } else if (faceAuthenticated) { // face-only
+                    showBiometricMessage(mContext.getString(
+                            R.string.keyguard_face_successful_unlock_swipe));
+                } else if (udfpsSupported) { // udfps-only
+                    if (a11yEnabled) {
+                        showBiometricMessage(mContext.getString(R.string.keyguard_unlock));
+                    } else {
+                        showBiometricMessage(mContext.getString(
+                                R.string.keyguard_unlock_press));
+                    }
+                } else { // no security or unlocked by a trust agent
+                    showBiometricMessage(mContext.getString(R.string.keyguard_unlock));
+                }
             } else {
+                // suggest swiping up for the primary authentication bouncer
                 showBiometricMessage(mContext.getString(R.string.keyguard_unlock));
             }
         }

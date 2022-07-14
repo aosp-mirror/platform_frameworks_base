@@ -31,6 +31,10 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.BubbleController;
+import com.android.wm.shell.bubbles.BubbleData;
+import com.android.wm.shell.bubbles.BubbleDataRepository;
+import com.android.wm.shell.bubbles.BubbleLogger;
+import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -104,10 +108,33 @@ public abstract class WMShellModule {
     // Bubbles
     //
 
+    @WMSingleton
+    @Provides
+    static BubbleLogger provideBubbleLogger(UiEventLogger uiEventLogger) {
+        return new BubbleLogger(uiEventLogger);
+    }
+
+    @WMSingleton
+    @Provides
+    static BubblePositioner provideBubblePositioner(Context context,
+            WindowManager windowManager) {
+        return new BubblePositioner(context, windowManager);
+    }
+
+    @WMSingleton
+    @Provides
+    static BubbleData provideBubbleData(Context context,
+            BubbleLogger logger,
+            BubblePositioner positioner,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new BubbleData(context, logger, positioner, mainExecutor);
+    }
+
     // Note: Handler needed for LauncherApps.register
     @WMSingleton
     @Provides
     static BubbleController provideBubbleController(Context context,
+            BubbleData data,
             FloatingContentCoordinator floatingContentCoordinator,
             IStatusBarService statusBarService,
             WindowManager windowManager,
@@ -115,8 +142,9 @@ public abstract class WMShellModule {
             UserManager userManager,
             LauncherApps launcherApps,
             TaskStackListenerImpl taskStackListener,
-            UiEventLogger uiEventLogger,
+            BubbleLogger logger,
             ShellTaskOrganizer organizer,
+            BubblePositioner positioner,
             DisplayController displayController,
             @DynamicOverride Optional<OneHandedController> oneHandedOptional,
             DragAndDropController dragAndDropController,
@@ -125,11 +153,12 @@ public abstract class WMShellModule {
             @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue) {
-        return BubbleController.create(context, null /* synchronizer */,
-                floatingContentCoordinator, statusBarService, windowManager,
-                windowManagerShellWrapper, userManager, launcherApps, taskStackListener,
-                uiEventLogger, organizer, displayController, oneHandedOptional,
-                dragAndDropController, mainExecutor, mainHandler, bgExecutor,
+        return new BubbleController(context, data, null /* synchronizer */,
+                floatingContentCoordinator,
+                new BubbleDataRepository(context, launcherApps, mainExecutor),
+                statusBarService, windowManager, windowManagerShellWrapper, userManager,
+                launcherApps, logger, taskStackListener, organizer, positioner, displayController,
+                oneHandedOptional, dragAndDropController, mainExecutor, mainHandler, bgExecutor,
                 taskViewTransitions, syncQueue);
     }
 

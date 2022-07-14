@@ -1005,16 +1005,13 @@ public class MediaControlPanel {
 
     private void bindScrubbingTime(MediaData data) {
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
-        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         int elapsedTimeId = mMediaViewHolder.getScrubbingElapsedTimeView().getId();
         int totalTimeId = mMediaViewHolder.getScrubbingTotalTimeView().getId();
 
         boolean visible = scrubbingTimeViewsEnabled(data.getSemanticActions()) && mIsScrubbing;
         setVisibleAndAlpha(expandedSet, elapsedTimeId, visible);
         setVisibleAndAlpha(expandedSet, totalTimeId, visible);
-        // Never show in collapsed
-        setVisibleAndAlpha(collapsedSet, elapsedTimeId, false);
-        setVisibleAndAlpha(collapsedSet, totalTimeId, false);
+        // Collapsed view is always GONE as set in XML, so doesn't need to be updated dynamically
     }
 
     private boolean scrubbingTimeViewsEnabled(@Nullable MediaButton semanticActions) {

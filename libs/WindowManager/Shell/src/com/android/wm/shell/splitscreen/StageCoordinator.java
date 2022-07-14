@@ -442,7 +442,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         new IRemoteAnimationFinishedCallback.Stub() {
                             @Override
                             public void onAnimationFinished() throws RemoteException {
-                                onRemoteAnimationFinishedOrCancelled(evictWct);
+                                onRemoteAnimationFinishedOrCancelled(false /* cancel */, evictWct);
                                 finishedCallback.onAnimationFinished();
                             }
                         };
@@ -463,7 +463,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
             @Override
             public void onAnimationCancelled(boolean isKeyguardOccluded) {
-                onRemoteAnimationFinishedOrCancelled(evictWct);
+                onRemoteAnimationFinishedOrCancelled(true /* cancel */, evictWct);
                 try {
                     adapter.getRunner().onAnimationCancelled(isKeyguardOccluded);
                 } catch (RemoteException e) {
@@ -513,13 +513,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         });
     }
 
-    private void onRemoteAnimationFinishedOrCancelled(WindowContainerTransaction evictWct) {
+    private void onRemoteAnimationFinishedOrCancelled(boolean cancel,
+            WindowContainerTransaction evictWct) {
         mIsDividerRemoteAnimating = false;
         mShouldUpdateRecents = true;
         // If any stage has no child after animation finished, it means that split will display
         // nothing, such status will happen if task and intent is same app but not support
         // multi-instagce, we should exit split and expand that app as full screen.
-        if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0) {
+        if (!cancel && (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0)) {
             mMainExecutor.execute(() ->
                     exitSplitScreen(mMainStage.getChildCount() == 0
                         ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
