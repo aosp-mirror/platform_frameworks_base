@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Qabarcıq"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"İdarə edin"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Qabarcıqdan imtina edilib."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Bu tətbiqi sıfırlayaraq tam ekrana keçmək üçün toxunun."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Toxunaraq bu tətbiqi yenidən başladın ki, daha görüntü əldə edəsiniz."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Kamera problemi var?\nBərpa etmək üçün toxunun"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Düzəltməmisiniz?\nGeri qaytarmaq üçün toxunun"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Kamera problemi yoxdur? Qapatmaq üçün toxunun."</string>

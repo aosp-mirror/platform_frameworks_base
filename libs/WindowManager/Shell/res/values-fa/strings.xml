@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"حباب"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"مدیریت"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"حبابک رد شد."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"برای بازراه‌اندازی این برنامه و تغییر به حالت تمام‌صفحه، ضربه بزنید."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"برای داشتن نمایی بهتر، ضربه بزنید تا این برنامه بازراه‌اندازی شود."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"دوربین مشکل دارد؟\nبرای تنظیم مجدد اندازه ضربه بزنید"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"مشکل برطرف نشد؟\nبرای برگرداندن ضربه بزنید"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"دوربین مشکلی ندارد؟ برای بستن ضربه بزنید."</string>

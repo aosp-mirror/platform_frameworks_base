@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Flluskë"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Menaxho"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Flluska u hoq."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Trokit për ta rinisur këtë aplikacion dhe për të kaluar në ekranin e plotë."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Trokit për të rifilluar këtë aplikacion për një pamje më të mirë."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Ka probleme me kamerën?\nTrokit për ta ripërshtatur"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nuk u rregullua?\nTrokit për ta rikthyer"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nuk ka probleme me kamerën? Trokit për ta shpërfillur."</string>

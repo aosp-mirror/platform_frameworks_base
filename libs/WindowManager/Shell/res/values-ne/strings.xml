@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"व्यवस्थापन गर्नुहोस्"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल हटाइयो।"</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"यो एप रिस्टार्ट गर्न ट्याप गर्नुहोस् र फुल स्क्रिन मोडमा जानुहोस्।"</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"यो एप अझ राम्रो हेर्न मिल्ने बनाउनका लागि यसलाई रिस्टार्ट गर्न ट्याप गर्नुहोस्।"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"क्यामेरासम्बन्धी समस्या देखियो?\nसमस्या हल गर्न ट्याप गर्नुहोस्"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"समस्या हल भएन?\nपहिलेको जस्तै बनाउन ट्याप गर्नुहोस्"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"क्यामेरासम्बन्धी कुनै पनि समस्या छैन? खारेज गर्न ट्याप गर्नुहोस्।"</string>

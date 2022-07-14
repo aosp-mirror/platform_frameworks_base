@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"气泡"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"已关闭对话泡。"</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"点按即可重启此应用并进入全屏模式。"</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"点按即可重启此应用，获得更好的视图体验。"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"相机有问题？\n点按即可整修"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"没有解决此问题？\n点按即可恢复"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"相机没有问题？点按即可忽略。"</string>

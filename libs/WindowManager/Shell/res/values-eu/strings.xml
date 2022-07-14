@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Burbuila"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Kudeatu"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Baztertu da globoa."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Saka ezazu aplikazioa berrabiarazteko, eta ezarri pantaila osoko modua."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Hobeto ikusteko, sakatu hau aplikazioa berrabiarazteko."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Arazoak dauzkazu kamerarekin?\nBerriro doitzeko, sakatu hau."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Ez al da konpondu?\nLeheneratzeko, sakatu hau."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Ez daukazu arazorik kamerarekin? Baztertzeko, sakatu hau."</string>
