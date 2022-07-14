@@ -214,11 +214,12 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static CompatUIController provideCompatUIController(Context context,
+            ShellController shellController,
             DisplayController displayController, DisplayInsetsController displayInsetsController,
             DisplayImeController imeController, SyncTransactionQueue syncQueue,
             @ShellMainThread ShellExecutor mainExecutor, Lazy<Transitions> transitionsLazy) {
-        return new CompatUIController(context, displayController, displayInsetsController,
-                imeController, syncQueue, mainExecutor, transitionsLazy);
+        return new CompatUIController(context, shellController, displayController,
+                displayInsetsController, imeController, syncQueue, mainExecutor, transitionsLazy);
     }
 
     @WMSingleton

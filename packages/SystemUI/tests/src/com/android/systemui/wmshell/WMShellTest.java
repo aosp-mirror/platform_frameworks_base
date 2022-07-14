@@ -24,12 +24,10 @@ import android.test.suitebuilder.annotation.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -71,7 +69,6 @@ public class WMShellTest extends SysuiTestCase {
     @Mock ConfigurationController mConfigurationController;
     @Mock KeyguardStateController mKeyguardStateController;
     @Mock KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock NavigationModeController mNavigationModeController;
     @Mock ScreenLifecycle mScreenLifecycle;
     @Mock SysUiState mSysUiState;
     @Mock Pip mPip;
@@ -107,27 +104,12 @@ public class WMShellTest extends SysuiTestCase {
     }
 
     @Test
-    public void initSplitScreen_registersCallbacks() {
-        mWMShell.initSplitScreen(mSplitScreen);
-
-        verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
-    }
-
-    @Test
     public void initOneHanded_registersCallbacks() {
         mWMShell.initOneHanded(mOneHanded);
 
-        verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
         verify(mCommandQueue).addCallback(any(CommandQueue.Callbacks.class));
         verify(mScreenLifecycle).addObserver(any(ScreenLifecycle.Observer.class));
         verify(mOneHanded).registerTransitionCallback(any(OneHandedTransitionCallback.class));
         verify(mOneHanded).registerEventCallback(any(OneHandedEventCallback.class));
-    }
-
-    @Test
-    public void initCompatUI_registersCallbacks() {
-        mWMShell.initCompatUi(mCompatUI);
-
-        verify(mKeyguardStateController).addCallback(any(KeyguardStateController.Callback.class));
     }
 }

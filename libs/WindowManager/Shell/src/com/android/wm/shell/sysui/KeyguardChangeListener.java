@@ -16,30 +16,21 @@
 
 package com.android.wm.shell.sysui;
 
-import android.content.res.Configuration;
-
 /**
- * General interface for notifying the Shell of common SysUI events like configuration or keyguard
- * changes.
- *
- * TODO: Move ShellInit and ShellCommandHandler into this interface
+ * Callbacks for when the keyguard changes.
  */
-public interface ShellInterface {
-
+public interface KeyguardChangeListener {
     /**
-     * Notifies the Shell that the configuration has changed.
-     */
-    default void onConfigurationChanged(Configuration newConfiguration) {}
-
-    /**
-     * Notifies the Shell that the keyguard is showing (and if so, whether it is occluded) or not
-     * showing, and whether it is animating a dismiss.
+     * Notifies the Shell that the keyguard is showing (and if so, whether it is occluded).
      */
     default void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
             boolean animatingDismiss) {}
 
     /**
      * Notifies the Shell when the keyguard dismiss animation has finished.
+     *
+     * TODO(b/206741900) deprecate this path once we're able to animate the PiP window as part of
+     * keyguard dismiss animation.
      */
     default void onKeyguardDismissAnimationFinished() {}
 }

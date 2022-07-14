@@ -23,13 +23,4 @@ import com.android.wm.shell.common.annotations.ExternalThread;
  */
 @ExternalThread
 public interface CompatUI {
-    /**
-     * Called when the keyguard showing state changes. Removes all compat UIs if the
-     * keyguard is now showing.
-     *
-     * <p>Note that if the keyguard is occluded it will also be considered showing.
-     *
-     * @param showing indicates if the keyguard is now showing.
-     */
-    void onKeyguardShowingChanged(boolean showing);
 }

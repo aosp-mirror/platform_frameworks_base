@@ -55,6 +55,7 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
+import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
 
 import java.io.PrintWriter;
@@ -63,7 +64,8 @@ import java.io.PrintWriter;
  * Manages and manipulates the one handed states, transitions, and gesture for phones.
  */
 public class OneHandedController implements RemoteCallable<OneHandedController>,
-        DisplayChangeController.OnDisplayChangingListener, ConfigurationChangeListener {
+        DisplayChangeController.OnDisplayChangingListener, ConfigurationChangeListener,
+        KeyguardChangeListener {
     private static final String TAG = "OneHandedController";
 
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
@@ -279,6 +281,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
 
         mState.addSListeners(mTutorialHandler);
         mShellController.addConfigurationChangeListener(this);
+        mShellController.addKeyguardChangeListener(this);
     }
 
     public OneHanded asOneHanded() {
@@ -605,8 +608,11 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         mTutorialHandler.onConfigurationChanged();
     }
 
-    private void onKeyguardVisibilityChanged(boolean showing) {
-        mKeyguardShowing = showing;
+    @Override
+    public void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
+            boolean animatingDismiss) {
+        mKeyguardShowing = visible;
+        stopOneHanded();
     }
 
     private void onUserSwitch(int newUserId) {
@@ -754,13 +760,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         public void onUserSwitch(int userId) {
             mMainExecutor.execute(() -> {
                 OneHandedController.this.onUserSwitch(userId);
-            });
-        }
-
-        @Override
-        public void onKeyguardVisibilityChanged(boolean showing) {
-            mMainExecutor.execute(() -> {
-                OneHandedController.this.onKeyguardVisibilityChanged(showing);
             });
         }
     }
