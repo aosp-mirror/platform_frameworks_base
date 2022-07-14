@@ -84,11 +84,9 @@ import android.window.TransitionInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
-import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.lang.annotation.Retention;
@@ -956,26 +954,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                         topActivity.getBounds());
                 dc.getInputMonitor().setActiveRecents(recentsActivity, topActivity);
             }
-        }
-
-        // Hiding IME/IME icon when starting quick-step with resents animation.
-        if (!mTargetDisplays.get(mRecentsDisplayId).isImeAttachedToApp()) {
-            // Hiding IME if IME window is not attached to app.
-            // Since some windowing mode is not proper to snapshot Task with IME window
-            // while the app transitioning to the next task (e.g. split-screen mode)
-            final InputMethodManagerInternal inputMethodManagerInternal =
-                    LocalServices.getService(InputMethodManagerInternal.class);
-            if (inputMethodManagerInternal != null) {
-                inputMethodManagerInternal.hideCurrentInputMethod(
-                        SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
-            }
-        } else {
-            // Disable IME icon explicitly when IME attached to the app in case
-            // IME icon might flickering while swiping to the next app task still
-            // in animating before the next app window focused, or IME icon
-            // persists on the bottom when swiping the task to recents.
-            InputMethodManagerInternal.get().updateImeWindowStatus(
-                    true /* disableImeIcon */);
         }
 
         // The rest of this function handles nav-bar reparenting
