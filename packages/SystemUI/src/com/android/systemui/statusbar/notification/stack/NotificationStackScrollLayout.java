@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
 import static com.android.systemui.util.DumpUtilsKt.println;
@@ -5246,6 +5247,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         setClearAllInProgress(true);
         mShadeNeedsToClose = closeShade;
 
+        InteractionJankMonitor.getInstance().begin(this, CUJ_SHADE_CLEAR_ALL);
         // Decrease the delay for every row we animate to give the sense of
         // accelerating the swipes
         final int rowDelayDecrement = 5;
@@ -6158,6 +6160,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void onClearAllAnimationsEnd(
             List<ExpandableNotificationRow> viewsToRemove,
             @SelectedRows int selectedRows) {
+        InteractionJankMonitor.getInstance().end(CUJ_SHADE_CLEAR_ALL);
         if (mClearAllAnimationListener != null) {
             mClearAllAnimationListener.onAnimationEnd(viewsToRemove, selectedRows);
         }
