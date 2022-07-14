@@ -445,6 +445,14 @@ import java.util.concurrent.locks.ReentrantLock;
     <td class=NA>Not Used</td>
     <td class=NA>Not Used</td>
    </tr>
+   <tr>
+    <td>AV1</td>
+    <td>AV1 <a href="https://aomediacodec.github.io/av1-isobmff/#av1codecconfigurationbox-syntax">
+        AV1CodecConfigurationRecord</a> Data (optional)
+    </td>
+    <td class=NA>Not Used</td>
+    <td class=NA>Not Used</td>
+   </tr>
   </tbody>
  </table>
 
