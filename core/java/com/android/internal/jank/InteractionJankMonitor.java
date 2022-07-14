@@ -53,6 +53,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_QS_TILE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_CLEAR_ALL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_DIALOG_OPEN;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_EXPAND_COLLAPSE_LOCK;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_APPEAR;
@@ -210,6 +211,7 @@ public class InteractionJankMonitor {
     public static final int CUJ_USER_DIALOG_OPEN = 59;
     public static final int CUJ_TASKBAR_EXPAND = 60;
     public static final int CUJ_TASKBAR_COLLAPSE = 61;
+    public static final int CUJ_SHADE_CLEAR_ALL = 62;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -280,6 +282,7 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_DIALOG_OPEN,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TASKBAR_EXPAND,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TASKBAR_COLLAPSE,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_CLEAR_ALL,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -361,7 +364,8 @@ public class InteractionJankMonitor {
             CUJ_SHADE_DIALOG_OPEN,
             CUJ_USER_DIALOG_OPEN,
             CUJ_TASKBAR_EXPAND,
-            CUJ_TASKBAR_COLLAPSE
+            CUJ_TASKBAR_COLLAPSE,
+            CUJ_SHADE_CLEAR_ALL
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -804,6 +808,8 @@ public class InteractionJankMonitor {
                 return "TASKBAR_EXPAND";
             case CUJ_TASKBAR_COLLAPSE:
                 return "TASKBAR_COLLAPSE";
+            case CUJ_SHADE_CLEAR_ALL:
+                return "SHADE_CLEAR_ALL";
         }
         return "UNKNOWN";
     }
