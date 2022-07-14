@@ -124,9 +124,6 @@
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Төхөөрөмжийг түгжсэн"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Скан хийх нүүр царай"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Илгээх"</string>
-    <string name="phone_label" msgid="5715229948920451352">"утас нээх"</string>
-    <string name="voice_assist_label" msgid="3725967093735929020">"дуут туслахыг нээнэ"</string>
-    <string name="camera_label" msgid="8253821920931143699">"камер нээх"</string>
     <string name="cancel" msgid="1089011503403416730">"Цуцлах"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Баталгаажуулах"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Дахин оролдох"</string>
@@ -173,7 +170,7 @@
     <string name="cell_data_off" msgid="4886198950247099526">"Идэвхгүй"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Нислэгийн горим"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN асаалттай байна."</string>
-    <string name="accessibility_battery_level" msgid="5143715405241138822">"Батерей <xliff:g id="NUMBER">%d</xliff:g> хувьтай."</string>
+    <string name="accessibility_battery_level" msgid="5143715405241138822">"Батарей <xliff:g id="NUMBER">%d</xliff:g> хувьтай."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Батарей <xliff:g id="PERCENTAGE">%1$s</xliff:g> хувьтай байна. Таны хэрэглээнд тулгуурлан ойролцоогоор <xliff:g id="TIME">%2$s</xliff:g> үлдсэн"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Батарейг цэнэглэж байна, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Бүх мэдэгдлийг харах"</string>
@@ -214,7 +211,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Бүү саад бол"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Хослуулсан төхөөрөмж байхгүй"</string>
-    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> батерей"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> батарей"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Чихэвч"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Оролт"</string>
@@ -248,7 +245,7 @@
     <string name="quick_settings_done" msgid="2163641301648855793">"Дууссан"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Хаах"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Холбогдсон"</string>
-    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Холбогдсон, батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Холбогдсон, батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Холбогдож байна..."</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Сүлжээний цэг"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Асааж байна…"</string>
@@ -310,6 +307,8 @@
     <string name="tap_again" msgid="1315420114387908655">"Дaхин товшино уу"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Нээхийн тулд дээш шударна уу"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Нээхийн тулд түгжээг тайлах дүрс тэмдэг дээр дараарай"</string>
+    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
+    <skip />
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Царайгаар түгжээг тайлсан. Нээхийн тулд түгжээг тайлах дүрс тэмдэг дээр дараарай."</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Царайгаар түгжээг тайлсан. Нээхийн тулд дарна уу."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Царайг таньсан. Нээхийн тулд дарна уу."</string>
@@ -706,7 +705,7 @@
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Апп (<xliff:g id="ID_1">%s</xliff:g>) Бүү саад бол горимыг асаасан."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Автомат дүрэм эсвэл апп Бүү саад бол горимыг асаасан."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Цаана ажиллаж буй апп"</string>
-    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Батерей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
+    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Батарей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Мобайл датаг унтраах уу?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Та <xliff:g id="CARRIER">%s</xliff:g>-р дата эсвэл интернэтэд хандах боломжгүй болно. Интернэтэд зөвхөн Wi-Fi-р холбогдох боломжтой болно."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"таны оператор компани"</string>
@@ -953,4 +952,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g>-г нэвтрүүлэх"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Гаралтыг өөрчлөх"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Тодорхойгүй"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"MMM d EEE"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
 </resources>

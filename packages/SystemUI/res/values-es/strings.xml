@@ -124,9 +124,6 @@
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositivo bloqueado"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Escaneando cara"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Enviar"</string>
-    <string name="phone_label" msgid="5715229948920451352">"abrir teléfono"</string>
-    <string name="voice_assist_label" msgid="3725967093735929020">"abrir el asistente de voz"</string>
-    <string name="camera_label" msgid="8253821920931143699">"abrir cámara"</string>
     <string name="cancel" msgid="1089011503403416730">"Cancelar"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Confirmar"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Reintentar"</string>
@@ -310,6 +307,8 @@
     <string name="tap_again" msgid="1315420114387908655">"Toca de nuevo"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza el dedo hacia arriba para abrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Pulsa el icono desbloquear para abrir"</string>
+    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
+    <skip />
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Desbloqueado con la cara. Toca el icono de desbloquear para abrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Desbloqueado con la cara. Pulsa para abrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Cara reconocida. Pulsa para abrir."</string>
@@ -402,7 +401,7 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Se ha instalado una entidad de certificación en este dispositivo. Es posible que se supervise o se modifique tu tráfico de red seguro."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"El administrador ha activado el registro de la red para supervisar el tráfico en tu dispositivo."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Tu administrador ha activado el registro de la red, por lo que se monitorizará el tráfico de tu perfil de trabajo, aunque no el de tu perfil personal."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Este dispositivo está conectado a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. Tu actividad de red, como los correos electrónicos y los datos de navegación, es visible para tu administrador de TI."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Este dispositivo está conectado a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. Tu actividad en esta red, como tus correos electrónicos y tus datos de navegación, es visible para tu administrador de TI."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Este dispositivo está conectado a Internet a través de <xliff:g id="VPN_APP_0">%1$s</xliff:g> y <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Tu actividad de red, como los correos electrónicos y los datos de navegación, es visible para tu administrador de TI."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Tus aplicaciones de trabajo están conectadas a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. Tu actividad de red en las aplicaciones de trabajo, incluidos los correos electrónicos y los datos de navegación, es visible para tu administrador de TI y tu proveedor de VPN."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Tus aplicaciones personales están conectadas a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. Tu actividad de red, como los correos electrónicos y los datos de navegación, es visible para tu proveedor de VPN."</string>
@@ -953,4 +952,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Emitir <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Cambiar salida"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Desconocido"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, d MMM"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
 </resources>

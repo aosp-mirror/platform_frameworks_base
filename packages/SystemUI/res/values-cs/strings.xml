@@ -124,9 +124,6 @@
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Zařízení uzamčeno"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Skenování obličeje"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Odeslat"</string>
-    <string name="phone_label" msgid="5715229948920451352">"otevřít telefon"</string>
-    <string name="voice_assist_label" msgid="3725967093735929020">"otevřít hlasovou asistenci"</string>
-    <string name="camera_label" msgid="8253821920931143699">"spustit fotoaparát"</string>
     <string name="cancel" msgid="1089011503403416730">"Zrušit"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Potvrdit"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Zkusit znovu"</string>
@@ -310,6 +307,8 @@
     <string name="tap_again" msgid="1315420114387908655">"Znovu klepněte"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Otevřete přejetím prstem nahoru"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Otevřete klepnutím na ikonu odemknutí"</string>
+    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
+    <skip />
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Odemknuto obličejem. Klepněte na ikonu odemknutí."</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Odemknuto obličejem. Stisknutím otevřete."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Obličej rozpoznán. Stisknutím otevřete."</string>
@@ -374,7 +373,7 @@
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Toto zařízení spravuje organizace <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, která může sledovat síťový provoz"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Toto zařízení poskytuje <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Toto zařízení patří vaší organizaci a je připojeno k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> a je připojeno k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> a je připojeno k internetu pomocí aplikace <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Toto zařízení patří vaší organizaci"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Toto zařízení patří vaší organizaci a je připojeno k internetu prostřednictvím sítí VPN"</string>
@@ -953,4 +952,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Vysílat v aplikaci <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Změna výstupu"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Neznámé"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE d. MMMM"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"H:mm"</string>
 </resources>
