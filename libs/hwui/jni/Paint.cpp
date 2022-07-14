@@ -727,6 +727,14 @@ namespace PaintGlue {
         return GraphicsJNI::set_metrics_int(env, metricsObj, metrics);
     }
 
+    // Required for API O and O_MR1.
+    static jint getFontMetricsIntTypeface(JNIEnv* env, jobject, jlong paintHandle,
+                                          jlong typefaceHandle, jobject metricsObj) {
+        SkFontMetrics metrics;
+
+        getMetricsInternal(paintHandle, typefaceHandle, &metrics);
+        return GraphicsJNI::set_metrics_int(env, metricsObj, metrics);
+    }
 
     // ------------------ @CriticalNative ---------------------------
 
@@ -1194,6 +1202,8 @@ static const JNINativeMethod methods[] = {
          (void*)PaintGlue::getFontMetrics},
         {"nGetFontMetricsInt", "(JLandroid/graphics/Paint$FontMetricsInt;)I",
          (void*)PaintGlue::getFontMetricsInt},
+        {"nGetFontMetricsInt", "(JJLandroid/graphics/Paint$FontMetricsInt;)I",
+         (void*)PaintGlue::getFontMetricsIntTypeface},
 
         // --------------- @CriticalNative ------------------
 
