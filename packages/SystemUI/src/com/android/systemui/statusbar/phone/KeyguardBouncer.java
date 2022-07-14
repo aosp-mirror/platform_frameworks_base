@@ -644,6 +644,10 @@ public class KeyguardBouncer {
     public interface BouncerExpansionCallback {
         /**
          * Invoked when the bouncer expansion reaches {@link KeyguardBouncer#EXPANSION_VISIBLE}.
+         * This is NOT called each time the bouncer is shown, but rather only when the fully
+         * shown amount has changed based on the panel expansion. The bouncer is visibility
+         * can still change when the expansion amount hasn't changed.
+         * See {@link KeyguardBouncer#isShowing()} for the checks for the bouncer showing state.
          */
         default void onFullyShown() {
         }
