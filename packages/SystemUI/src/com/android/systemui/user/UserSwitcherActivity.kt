@@ -28,6 +28,7 @@ import android.os.Bundle
 import android.os.UserManager
 import android.provider.Settings
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
@@ -38,8 +39,10 @@ import androidx.constraintlayout.helper.widget.Flow
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.util.UserIcons
 import com.android.settingslib.Utils
+import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
 import com.android.systemui.settings.UserTracker
@@ -61,12 +64,13 @@ class UserSwitcherActivity @Inject constructor(
     private val userSwitcherController: UserSwitcherController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val layoutInflater: LayoutInflater,
+    private val falsingCollector: FalsingCollector,
     private val falsingManager: FalsingManager,
     private val userManager: UserManager,
     private val userTracker: UserTracker
 ) : LifecycleActivity() {
 
-    private lateinit var parent: ViewGroup
+    private lateinit var parent: UserSwitcherRootView
     private lateinit var broadcastReceiver: BroadcastReceiver
     private var popupMenu: UserSwitcherPopupMenu? = null
     private lateinit var addButton: View
@@ -202,7 +206,14 @@ class UserSwitcherActivity @Inject constructor(
             or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
 
-        parent = requireViewById<ViewGroup>(R.id.user_switcher_root)
+        parent = requireViewById<UserSwitcherRootView>(R.id.user_switcher_root)
+
+        parent.touchHandler = object : Gefingerpoken {
+            override fun onTouchEvent(ev: MotionEvent?): Boolean {
+                falsingCollector.onTouchEvent(ev)
+                return false
+            }
+        }
 
         requireViewById<View>(R.id.cancel).apply {
             setOnClickListener {
@@ -241,7 +252,7 @@ class UserSwitcherActivity @Inject constructor(
         )
         popupMenuAdapter.addAll(items)
 
-        popupMenu = UserSwitcherPopupMenu(this, falsingManager).apply {
+        popupMenu = UserSwitcherPopupMenu(this).apply {
             setAnchorView(addButton)
             setAdapter(popupMenuAdapter)
             setOnItemClickListener {

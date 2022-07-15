@@ -23,16 +23,13 @@ import android.view.View.MeasureSpec
 import android.widget.ListAdapter
 import android.widget.ListPopupWindow
 import android.widget.ListView
-
 import com.android.systemui.R
-import com.android.systemui.plugins.FalsingManager
 
 /**
  * Popup menu for displaying items on the fullscreen user switcher.
  */
 class UserSwitcherPopupMenu(
-    private val context: Context,
-    private val falsingManager: FalsingManager
+    private val context: Context
 ) : ListPopupWindow(context) {
 
     private val res = context.resources
