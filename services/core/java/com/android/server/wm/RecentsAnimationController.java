@@ -352,10 +352,6 @@ public class RecentsAnimationController implements DeathRecipient {
             }
         }
 
-        // TODO(b/166736352): Remove this method without the need to expose to launcher.
-        @Override
-        public void hideCurrentInputMethod() { }
-
         @Override
         public void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot) {
             synchronized (mService.mGlobalLock) {
