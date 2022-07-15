@@ -114,6 +114,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowAttributes;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityManager;
@@ -3552,6 +3553,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             return userState.isAudioDescriptionByDefaultEnabledLocked();
         }
+    }
+
+    /**
+     * Sets the {@link AccessibilityWindowAttributes} to the window associated with the given
+     * window id.
+     *
+     * @param displayId The display id of the window.
+     * @param windowId The id of the window
+     * @param userId The user id.
+     * @param attributes The accessibility window attributes.
+     */
+    @Override
+    public void setAccessibilityWindowAttributes(int displayId, int windowId, int userId,
+            AccessibilityWindowAttributes attributes) {
+        if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
+            mTraceManager.logTrace(LOG_TAG + ".setAccessibilityWindowAttributes",
+                    FLAGS_ACCESSIBILITY_MANAGER);
+        }
+        mA11yWindowManager.setAccessibilityWindowAttributes(displayId, windowId, userId,
+                attributes);
     }
 
     @Override

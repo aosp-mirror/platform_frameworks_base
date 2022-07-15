@@ -193,8 +193,8 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     private void addPipMenuViewToSystemWindows(View v, String title) {
-        mSystemWindows.addView(v, getPipMenuLayoutParams(title, 0 /* width */, 0 /* height */),
-                0 /* displayId */, SHELL_ROOT_LAYER_PIP);
+        mSystemWindows.addView(v, getPipMenuLayoutParams(mContext, title, 0 /* width */,
+                0 /* height */), 0 /* displayId */, SHELL_ROOT_LAYER_PIP);
     }
 
     void notifyPipAnimating(boolean animating) {
@@ -572,10 +572,10 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                     "%s: updateMenuBounds: %s", TAG, menuBounds.toShortString());
         }
         mSystemWindows.updateViewLayout(mPipBackgroundView,
-                getPipMenuLayoutParams(BACKGROUND_WINDOW_TITLE, menuBounds.width(),
+                getPipMenuLayoutParams(mContext, BACKGROUND_WINDOW_TITLE, menuBounds.width(),
                         menuBounds.height()));
         mSystemWindows.updateViewLayout(mPipMenuView,
-                getPipMenuLayoutParams(MENU_WINDOW_TITLE, menuBounds.width(),
+                getPipMenuLayoutParams(mContext, MENU_WINDOW_TITLE, menuBounds.width(),
                         menuBounds.height()));
 
         if (mPipMenuView != null) {

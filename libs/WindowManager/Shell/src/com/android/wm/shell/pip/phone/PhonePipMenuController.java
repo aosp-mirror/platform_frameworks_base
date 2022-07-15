@@ -181,7 +181,7 @@ public class PhonePipMenuController implements PipMenuController {
         mPipMenuView = new PipMenuView(mContext, this, mMainExecutor, mMainHandler,
                 mSplitScreenController, mPipUiEventLogger);
         mSystemWindows.addView(mPipMenuView,
-                getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
+                getPipMenuLayoutParams(mContext, MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
                 0, SHELL_ROOT_LAYER_PIP);
         setShellRootAccessibilityWindow();
 
@@ -206,7 +206,7 @@ public class PhonePipMenuController implements PipMenuController {
     @Override
     public void updateMenuBounds(Rect destinationBounds) {
         mSystemWindows.updateViewLayout(mPipMenuView,
-                getPipMenuLayoutParams(MENU_WINDOW_TITLE, destinationBounds.width(),
+                getPipMenuLayoutParams(mContext, MENU_WINDOW_TITLE, destinationBounds.width(),
                         destinationBounds.height()));
         updateMenuLayout(destinationBounds);
     }

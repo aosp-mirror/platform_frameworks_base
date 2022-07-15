@@ -179,6 +179,7 @@ import android.view.accessibility.AccessibilityNodeIdManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
+import android.view.accessibility.AccessibilityWindowAttributes;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
 import android.view.accessibility.IAccessibilityInteractionConnection;
@@ -1362,6 +1363,7 @@ public final class ViewRootImpl implements ViewParent,
 
                 if (mAccessibilityManager.isEnabled()) {
                     mAccessibilityInteractionConnectionManager.ensureConnection();
+                    setAccessibilityWindowAttributesIfNeeded();
                 }
 
                 if (view.getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
@@ -1387,6 +1389,17 @@ public final class ViewRootImpl implements ViewParent,
 
                 AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
             }
+        }
+    }
+
+    private void setAccessibilityWindowAttributesIfNeeded() {
+        final boolean registered = mAttachInfo.mAccessibilityWindowId
+                != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+        if (registered) {
+            final AccessibilityWindowAttributes attributes = new AccessibilityWindowAttributes(
+                    mWindowAttributes);
+            mAccessibilityManager.setAccessibilityWindowAttributes(getDisplayId(),
+                    mAttachInfo.mAccessibilityWindowId, attributes);
         }
     }
 
@@ -1707,6 +1720,7 @@ public final class ViewRootImpl implements ViewParent,
 
             mWindowAttributesChanged = true;
             scheduleTraversals();
+            setAccessibilityWindowAttributesIfNeeded();
         }
     }
 
@@ -10294,6 +10308,7 @@ public final class ViewRootImpl implements ViewParent,
         public void onAccessibilityStateChanged(boolean enabled) {
             if (enabled) {
                 ensureConnection();
+                setAccessibilityWindowAttributesIfNeeded();
                 if (mAttachInfo.mHasWindowFocus && (mView != null)) {
                     mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
                     View focusedView = mView.findFocus();
