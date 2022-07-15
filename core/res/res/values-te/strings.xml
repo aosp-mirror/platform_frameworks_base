@@ -932,7 +932,7 @@
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"సైన్ ఇన్ చేయండి"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"వినియోగదారు పేరు లేదా పాస్‌వర్డ్ చెల్లదు."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"మీ వినియోగదారు పేరు లేదా పాస్‌వర్డ్‌ను మర్చిపోయారా?\n"<b>"google.com/accounts/recovery"</b>"ని సందర్శించండి."</string>
-    <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"తనిఖీ చేస్తోంది..."</string>
+    <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"చెక్ చేస్తోంది..."</string>
     <string name="lockscreen_unlock_label" msgid="4648257878373307582">"అన్‌లాక్ చేయండి"</string>
     <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"ధ్వని ఆన్‌లో ఉంది"</string>
     <string name="lockscreen_sound_off_label" msgid="2331496559245450053">"ధ్వని ఆఫ్‌లో ఉంది"</string>
@@ -1379,7 +1379,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"పరీక్ష నియంత్రణ మోడ్ ప్రారంభించబడింది"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"పరీక్ష నియంత్రణ మోడ్‌ను నిలిపివేయడానికి ఫ్యాక్టరీ రీసెట్‍‌ను అమలు చేయండి."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"సీరియల్ కన్సోల్ ప్రారంభించబడింది"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"పని తీరు ప్రభావితమైంది. నిలిపివేయడానికి, బూట్‌లోడర్‌ను తనిఖీ చేయండి."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"పని తీరు ప్రభావితమైంది. నిలిపివేయడానికి, బూట్‌లోడర్‌ను చెక్ చేయండి."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB పోర్ట్‌లో ద్రవ లేదా వ్యర్థ పదార్థాలు ఉన్నాయి"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB పోర్ట్ ఆటోమేటిక్‌గా నిలిపివేయబడింది. మరింత తెలుసుకోవడానికి నొక్కండి."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB పోర్ట్‌ను ఉపయోగించడం సురక్షితం"</string>
@@ -1402,7 +1402,7 @@
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> ఇతర యాప్‌లలో చూపబడుతోంది"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి ట్యాప్ చేసి, దీన్ని ఆఫ్ చేయండి."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"ఆఫ్ చేయి"</string>
-    <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g>ని తనిఖీ చేస్తోంది…"</string>
+    <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g>ని చెక్ చేస్తోంది…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"ప్రస్తుత కంటెంట్ సమీక్షించబడుతోంది"</string>
     <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"మీడియా స్టోరేజ్‌ను విశ్లేషిస్తోంది"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"కొత్త <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1442,7 +1442,7 @@
     <string name="ext_media_move_failure_message" msgid="4197306718121869335">"కంటెంట్‌ని తరలించడానికి మళ్లీ ప్రయత్నించండి"</string>
     <string name="ext_media_status_removed" msgid="241223931135751691">"తీసివేయబడింది"</string>
     <string name="ext_media_status_unmounted" msgid="8145812017295835941">"తొలగించబడింది"</string>
-    <string name="ext_media_status_checking" msgid="159013362442090347">"తనిఖీ చేస్తోంది..."</string>
+    <string name="ext_media_status_checking" msgid="159013362442090347">"చెక్ చేస్తోంది..."</string>
     <string name="ext_media_status_mounted" msgid="3459448555811203459">"సిద్ధంగా ఉంది"</string>
     <string name="ext_media_status_mounted_ro" msgid="1974809199760086956">"చదవడానికి మాత్రమే"</string>
     <string name="ext_media_status_bad_removal" msgid="508448566481406245">"అసురక్షితంగా తీసివేయబడింది"</string>
@@ -1671,7 +1671,7 @@
     <string name="kg_login_submit_button" msgid="893611277617096870">"సైన్ ఇన్ చేయండి"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"చెల్లని వినియోగదారు పేరు లేదా పాస్‌వర్డ్."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"మీ వినియోగదారు పేరు లేదా పాస్‌వర్డ్‌ను మర్చిపోయారా?\n"<b>"google.com/accounts/recovery"</b>"ని సందర్శించండి."</string>
-    <string name="kg_login_checking_password" msgid="4676010303243317253">"ఖాతాను తనిఖీ చేస్తోంది…"</string>
+    <string name="kg_login_checking_password" msgid="4676010303243317253">"ఖాతాను చెక్ చేస్తోంది…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
@@ -1705,7 +1705,7 @@
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"స్క్రీన్‌పై ఉండే కంటెంట్‌ మొత్తాన్ని చదవగలుగుతుంది మరియు ఇతర యాప్‌లలో కూడా ఈ కంటెంట్‌ను ప్రదర్శిస్తుంది."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"చర్యలను చూసి, అమలు చేయగలగడం"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"మీరు ఒక యాప్‌‌తో చేసే ఇంటరాక్షన్‌లను లేదా హార్డ్‌వేర్ సెన్సార్‌ను ట్రాక్ చేస్తూ మీ త‌ర‌ఫున యాప్‌లతో ఇంటరాక్ట్ చేయగలదు."</string>
-    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"అనుమతించు"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"అనుమతించండి"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"నిరాకరించు"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ఫీచర్‌ని ఉపయోగించడం ప్రారంభించడానికి, దాన్ని ట్యాప్ చేయండి:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"యాక్సెసిబిలిటీ బటన్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
@@ -1982,7 +1982,7 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ఆన్ చేయి"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"యాప్ అందుబాటులో లేదు"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ఈ యాప్ పాత వెర్షన్ Android కోసం రూపొందించబడింది మరియు అది సరిగ్గా పని చేయకపోవచ్చు. అప్‌డేట్‌ల కోసం తనిఖీ చేయడానికి ప్రయత్నించండి లేదా డెవలపర్‌ని సంప్రదించండి."</string>
+    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ఈ యాప్ పాత వెర్షన్ Android కోసం రూపొందించబడింది మరియు అది సరిగ్గా పని చేయకపోవచ్చు. అప్‌డేట్‌ల కోసం చెక్ చేయడానికి ప్రయత్నించండి లేదా డెవలపర్‌ని సంప్రదించండి."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"అప్‌డేట్ కోసం చెక్ చేయండి"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"మీకు కొత్త మెసేజ్‌లు ఉన్నాయి"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"వీక్షించడానికి SMS యాప్‌ను తెరవండి"</string>
@@ -2004,7 +2004,7 @@
     <string name="tooltip_popup_title" msgid="7863719020269945722">"సాధనం చిట్కా"</string>
     <string name="app_category_game" msgid="4534216074910244790">"గేమ్‌లు"</string>
     <string name="app_category_audio" msgid="8296029904794676222">"సంగీతం &amp; ఆడియో"</string>
-    <string name="app_category_video" msgid="2590183854839565814">"చలనచిత్రాలు &amp; వీడియో"</string>
+    <string name="app_category_video" msgid="2590183854839565814">"సినిమాలు &amp; వీడియో"</string>
     <string name="app_category_image" msgid="7307840291864213007">"ఫోటోలు, ఇమేజ్‌లు"</string>
     <string name="app_category_social" msgid="2278269325488344054">"సామాజికం &amp; కమ్యూనికేషన్"</string>
     <string name="app_category_news" msgid="1172762719574964544">"వార్తలు &amp; వార్తాపత్రికలు"</string>
@@ -2083,7 +2083,7 @@
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"కొత్తది: అంతరాయం కలిగించవద్దు నోటిఫికేషన్‌లను దాస్తోంది"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"మరింత తెలుసుకోవడానికి మరియు మార్చడానికి నొక్కండి."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"అంతరాయం కలిగించవద్దు మార్చబడింది"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"బ్లాక్ చేయబడిన దాన్ని తనిఖీ చేయడానికి నొక్కండి."</string>
+    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"బ్లాక్ చేయబడిన దాన్ని చెక్ చేయడానికి నొక్కండి."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"సిస్టమ్"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"సెట్టింగ్‌లు"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"కెమెరా"</string>
