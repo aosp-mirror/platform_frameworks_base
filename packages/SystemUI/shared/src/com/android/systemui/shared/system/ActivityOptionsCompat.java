@@ -28,14 +28,6 @@ import android.os.Handler;
 public abstract class ActivityOptionsCompat {
 
     /**
-     * @Deprecated
-     * @return ActivityOptions for starting a task in split screen as the primary window.
-     */
-    public static ActivityOptions makeSplitScreenOptions(boolean dockTopLeft) {
-        return ActivityOptions.makeBasic();
-    }
-
-    /**
      * @return ActivityOptions for starting a task in freeform.
      */
     public static ActivityOptions makeFreeformOptions() {
