@@ -189,6 +189,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private boolean mShouldUpdateRecents;
     private boolean mExitSplitScreenOnHide;
     private boolean mIsDividerRemoteAnimating;
+    private boolean mIsExiting;
     private boolean mResizingSplits;
 
     /** The target stage to dismiss to when unlock after folded. */
@@ -734,7 +735,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void applyExitSplitScreen(@Nullable StageTaskListener childrenToTop,
             WindowContainerTransaction wct, @ExitReason int exitReason) {
-        if (!mMainStage.isActive()) return;
+        if (!mMainStage.isActive() || mIsExiting) return;
 
         mRecentTasks.ifPresent(recentTasks -> {
             // Notify recents if we are exiting in a way that breaks the pair, and disable further
@@ -746,21 +747,45 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         });
         mShouldUpdateRecents = false;
 
-        // When the exit split-screen is caused by one of the task enters auto pip,
-        // we want the tasks to be put to bottom instead of top, otherwise it will end up
-        // a fullscreen plus a pinned task instead of pinned only at the end of the transition.
-        final boolean fromEnteringPip = exitReason == EXIT_REASON_CHILD_TASK_ENTER_PIP;
-        mSideStage.removeAllTasks(wct, !fromEnteringPip && mSideStage == childrenToTop);
-        mMainStage.deactivate(wct, !fromEnteringPip && mMainStage == childrenToTop);
-        wct.reorder(mRootTaskInfo.token, false /* onTop */);
-        mTaskOrganizer.applyTransaction(wct);
+        if (childrenToTop == null) {
+            mSideStage.removeAllTasks(wct, false /* toTop */);
+            mMainStage.deactivate(wct, false /* toTop */);
+            wct.reorder(mRootTaskInfo.token, false /* onTop */);
+            onTransitionAnimationComplete();
+        } else {
+            // Expand to top side split as full screen for fading out decor animation and dismiss
+            // another side split(Moving its children to bottom).
+            mIsExiting = true;
+            final StageTaskListener tempFullStage = childrenToTop;
+            final StageTaskListener dismissStage = mMainStage == childrenToTop
+                    ? mSideStage : mMainStage;
+            tempFullStage.resetBounds(wct);
+            wct.setSmallestScreenWidthDp(tempFullStage.mRootTaskInfo.token,
+                    mRootTaskInfo.configuration.smallestScreenWidthDp);
+            dismissStage.dismiss(wct, false /* toTop */);
+        }
+        mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t -> {
             t.setWindowCrop(mMainStage.mRootLeash, null)
                     .setWindowCrop(mSideStage.mRootLeash, null);
+            t.setPosition(mMainStage.mRootLeash, 0, 0)
+                    .setPosition(mSideStage.mRootLeash, 0, 0);
             setDividerVisibility(false, t);
+
+            // In this case, exit still under progress, fade out the split decor after first WCT
+            // done and do remaining WCT after animation finished.
+            if (childrenToTop != null) {
+                childrenToTop.fadeOutDecor(() -> {
+                    WindowContainerTransaction finishedWCT = new WindowContainerTransaction();
+                    mIsExiting = false;
+                    childrenToTop.dismiss(finishedWCT, true /* toTop */);
+                    wct.reorder(mRootTaskInfo.token, false /* toTop */);
+                    mTaskOrganizer.applyTransaction(finishedWCT);
+                    onTransitionAnimationComplete();
+                });
+            }
         });
 
-        onTransitionAnimationComplete();
         Slog.i(TAG, "applyExitSplitScreen, reason = " + exitReasonToString(exitReason));
         // Log the exit
         if (childrenToTop != null) {
@@ -930,9 +955,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
-    private void onStageChildTaskEnterPip(StageListenerImpl stageListener, int taskId) {
-        exitSplitScreen(stageListener == mMainStageListener ? mMainStage : mSideStage,
-                EXIT_REASON_CHILD_TASK_ENTER_PIP);
+    private void onStageChildTaskEnterPip() {
+        // When the exit split-screen is caused by one of the task enters auto pip,
+        // we want both tasks to be put to bottom instead of top, otherwise it will end up
+        // a fullscreen plus a pinned task instead of pinned only at the end of the transition.
+        exitSplitScreen(null, EXIT_REASON_CHILD_TASK_ENTER_PIP);
     }
 
     private void updateRecentTasksSplitPair() {
@@ -1178,13 +1205,25 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void onStageHasChildrenChanged(StageListenerImpl stageListener) {
         final boolean hasChildren = stageListener.mHasChildren;
         final boolean isSideStage = stageListener == mSideStageListener;
-        if (!hasChildren) {
+        if (!hasChildren && !mIsExiting) {
             if (isSideStage && mMainStageListener.mVisible) {
                 // Exit to main stage if side stage no longer has children.
-                exitSplitScreen(mMainStage, EXIT_REASON_APP_FINISHED);
+                if (ENABLE_SHELL_TRANSITIONS) {
+                    exitSplitScreen(mMainStage, EXIT_REASON_APP_FINISHED);
+                } else {
+                    mSplitLayout.flingDividerToDismiss(
+                            mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                            EXIT_REASON_APP_FINISHED);
+                }
             } else if (!isSideStage && mSideStageListener.mVisible) {
                 // Exit to side stage if main stage no longer has children.
-                exitSplitScreen(mSideStage, EXIT_REASON_APP_FINISHED);
+                if (ENABLE_SHELL_TRANSITIONS) {
+                    exitSplitScreen(mSideStage, EXIT_REASON_APP_FINISHED);
+                } else {
+                    mSplitLayout.flingDividerToDismiss(
+                            mSideStagePosition != SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                            EXIT_REASON_APP_FINISHED);
+                }
             }
         } else if (isSideStage && !mMainStage.isActive()) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -1208,12 +1247,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     @Override
-    public void onSnappedToDismiss(boolean bottomOrRight) {
+    public void onSnappedToDismiss(boolean bottomOrRight, int reason) {
         final boolean mainStageToTop =
                 bottomOrRight ? mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT
                         : mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT;
         if (!ENABLE_SHELL_TRANSITIONS) {
-            exitSplitScreen(mainStageToTop ? mMainStage : mSideStage, EXIT_REASON_DRAG_DIVIDER);
+            exitSplitScreen(mainStageToTop ? mMainStage : mSideStage, reason);
             return;
         }
 
@@ -1615,7 +1654,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Called to clean-up state and do house-keeping after the animation is done. */
     public void onTransitionAnimationComplete() {
         // If still playing, let it finish.
-        if (!mMainStage.isActive()) {
+        if (!mMainStage.isActive() && !mIsExiting) {
             // Update divider state after animation so that it is still around and positioned
             // properly for the animation itself.
             mSplitLayout.release();
@@ -1911,8 +1950,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         @Override
-        public void onChildTaskEnterPip(int taskId) {
-            StageCoordinator.this.onStageChildTaskEnterPip(this, taskId);
+        public void onChildTaskEnterPip() {
+            StageCoordinator.this.onStageChildTaskEnterPip();
         }
 
         @Override
