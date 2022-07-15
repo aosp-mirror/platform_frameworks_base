@@ -268,6 +268,20 @@ public class TaskTests extends WindowTestsBase {
         assertFalse(task.hasChild());
         // In real case, the task should be preserved for adding new activity.
         assertTrue(task.isAttached());
+
+        final ActivityRecord activityA = new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord activityB = new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord activityC = new ActivityBuilder(mAtm).setTask(task).build();
+        activityA.setState(ActivityRecord.State.STOPPED, "test");
+        activityB.setState(ActivityRecord.State.PAUSED, "test");
+        activityC.setState(ActivityRecord.State.RESUMED, "test");
+        doReturn(true).when(activityB).shouldBeVisibleUnchecked();
+        doReturn(true).when(activityC).shouldBeVisibleUnchecked();
+        activityA.getConfiguration().densityDpi += 100;
+        assertTrue(task.performClearTop(activityA, 0 /* launchFlags */).finishing);
+        // The bottom activity should destroy directly without relaunch for config change.
+        assertEquals(ActivityRecord.State.DESTROYING, activityA.getState());
+        verify(activityA, never()).startRelaunching();
     }
 
     @Test
