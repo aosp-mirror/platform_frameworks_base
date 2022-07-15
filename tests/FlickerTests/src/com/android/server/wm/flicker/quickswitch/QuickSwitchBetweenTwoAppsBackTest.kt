@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.quickswitch
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
@@ -103,7 +102,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
      */
     @Presubmit
     @Test
-    fun startsWithApp2WindowsCoverFullScreen() {
+    open fun startsWithApp2WindowsCoverFullScreen() {
         testSpec.assertWmStart {
             this.visibleRegion(testApp2).coversExactly(startDisplayBounds)
         }
@@ -115,7 +114,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
      */
     @Presubmit
     @Test
-    fun startsWithApp2LayersCoverFullScreen() {
+    open fun startsWithApp2LayersCoverFullScreen() {
         testSpec.assertLayersStart {
             this.visibleRegion(testApp2).coversExactly(startDisplayBounds)
         }
@@ -126,7 +125,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
      */
     @Presubmit
     @Test
-    fun startsWithApp2WindowBeingOnTop() {
+    open fun startsWithApp2WindowBeingOnTop() {
         testSpec.assertWmStart {
             this.isAppWindowOnTop(testApp2)
         }
@@ -138,7 +137,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
      */
     @Presubmit
     @Test
-    fun endsWithApp1WindowsCoveringFullScreen() {
+    open fun endsWithApp1WindowsCoveringFullScreen() {
         testSpec.assertWmEnd {
             this.visibleRegion(testApp1).coversExactly(startDisplayBounds)
         }
@@ -162,7 +161,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
      */
     @Presubmit
     @Test
-    fun endsWithApp1BeingOnTop() {
+    open fun endsWithApp1BeingOnTop() {
         testSpec.assertWmEnd {
             this.isAppWindowOnTop(testApp1)
         }
@@ -174,7 +173,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
      */
     @Presubmit
     @Test
-    fun app1WindowBecomesAndStaysVisible() {
+    open fun app1WindowBecomesAndStaysVisible() {
         testSpec.assertWm {
             this.isAppWindowInvisible(testApp1)
                 .then()
@@ -190,7 +189,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
      */
     @Presubmit
     @Test
-    fun app1LayerBecomesAndStaysVisible() {
+    open fun app1LayerBecomesAndStaysVisible() {
         testSpec.assertLayers {
             this.isInvisible(testApp1)
                 .then()
@@ -204,7 +203,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
      */
     @Presubmit
     @Test
-    fun app2WindowBecomesAndStaysInvisible() {
+    open fun app2WindowBecomesAndStaysInvisible() {
         testSpec.assertWm {
             this.isAppWindowVisible(testApp2)
                 .then()
@@ -218,7 +217,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
      */
     @Presubmit
     @Test
-    fun app2LayerBecomesAndStaysInvisible() {
+    open fun app2LayerBecomesAndStaysInvisible() {
         testSpec.assertLayers {
             this.isVisible(testApp2)
                 .then()
@@ -233,7 +232,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
      */
     @Presubmit
     @Test
-    fun app1WindowIsVisibleOnceApp2WindowIsInvisible() {
+    open fun app1WindowIsVisibleOnceApp2WindowIsInvisible() {
         testSpec.assertWm {
             this.isAppWindowVisible(testApp2)
                 .then()
@@ -253,7 +252,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
      */
     @Presubmit
     @Test
-    fun app1LayerIsVisibleOnceApp2LayerIsInvisible() {
+    open fun app1LayerIsVisibleOnceApp2LayerIsInvisible() {
         testSpec.assertLayers {
             this.isVisible(testApp2)
                 .then()
@@ -266,9 +265,9 @@ open class QuickSwitchBetweenTwoAppsBackTest(
     }
 
     /** {@inheritDoc} */
-    @FlakyTest
+    @Postsubmit
     @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
