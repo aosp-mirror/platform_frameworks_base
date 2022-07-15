@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A class representing a lockscreen credential. It can be either an empty password, a pattern
- * or a password (or PIN).
+ * A class representing a lockscreen credential, also called a Lock Screen Knowledge Factor (LSKF).
+ * It can be a PIN, pattern, password, or none (a.k.a. empty).
  *
  * <p> As required by some security certification, the framework tries its best to
  * remove copies of the lockscreen credential bytes from memory. In this regard, this class
@@ -52,10 +52,10 @@ import java.util.Objects;
  *     // Process the credential in some way
  * }
  * </pre>
- * With this construct, we can guarantee that there will be no copies of the password left in
- * memory when the credential goes out of scope. This should help mitigate certain class of
- * attacks where the attcker gains read-only access to full device memory (cold boot attack,
- * unsecured software/hardware memory dumping interfaces such as JTAG).
+ * With this construct, we can guarantee that there will be no copies of the credential left in
+ * memory when the object goes out of scope. This should help mitigate certain class of attacks
+ * where the attacker gains read-only access to full device memory (cold boot attack, unsecured
+ * software/hardware memory dumping interfaces such as JTAG).
  */
 public class LockscreenCredential implements Parcelable, AutoCloseable {
 
