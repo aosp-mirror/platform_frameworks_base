@@ -59,6 +59,7 @@ import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -4281,7 +4282,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         });
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    @EnforcePermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
     @Override
     public void removeImeSurface() {
         mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE).sendToTarget();
