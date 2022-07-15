@@ -556,10 +556,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         }
 
         @Override
-        public void onUserInfoChanged(int userId) {
-        }
-
-        @Override
         public void onClockVisibilityChanged() {
             adjustStatusBarLocked();
         }
