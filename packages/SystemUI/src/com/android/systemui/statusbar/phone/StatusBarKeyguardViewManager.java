@@ -965,7 +965,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public boolean bouncerIsOrWillBeShowing() {
-        return isBouncerShowing() || mBouncer.getShowingSoon();
+        return isBouncerShowing() || mBouncer.inTransit();
     }
 
     public boolean isFullscreenBouncer() {
