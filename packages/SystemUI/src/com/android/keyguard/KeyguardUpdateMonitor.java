@@ -165,7 +165,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int MSG_USER_SWITCHING = 310;
     private static final int MSG_KEYGUARD_RESET = 312;
     private static final int MSG_USER_SWITCH_COMPLETE = 314;
-    private static final int MSG_USER_INFO_CHANGED = 317;
     private static final int MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
     private static final int MSG_STARTED_WAKING_UP = 319;
     private static final int MSG_FINISHED_GOING_TO_SLEEP = 320;
@@ -1453,9 +1452,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             final String action = intent.getAction();
             if (AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED.equals(action)) {
                 mHandler.sendEmptyMessage(MSG_TIME_UPDATE);
-            } else if (Intent.ACTION_USER_INFO_CHANGED.equals(action)) {
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_INFO_CHANGED,
-                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, getSendingUserId()), 0));
             } else if (ACTION_FACE_UNLOCK_STARTED.equals(action)) {
                 Trace.beginSection(
                         "KeyguardUpdateMonitor.mBroadcastAllReceiver#onReceive "
@@ -1811,16 +1807,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
-    private void handleUserInfoChanged(int userId) {
-        Assert.isMainThread();
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onUserInfoChanged(userId);
-            }
-        }
-    }
-
     private void handleUserUnlocked(int userId) {
         Assert.isMainThread();
         mUserIsUnlocked.put(userId, true);
@@ -1938,9 +1924,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     case MSG_KEYGUARD_BOUNCER_CHANGED:
                         handleKeyguardBouncerChanged(msg.arg1, msg.arg2);
                         break;
-                    case MSG_USER_INFO_CHANGED:
-                        handleUserInfoChanged(msg.arg1);
-                        break;
                     case MSG_REPORT_EMERGENCY_CALL_ACTION:
                         handleReportEmergencyCallAction();
                         break;
@@ -2051,7 +2034,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         });
 
         final IntentFilter allUserFilter = new IntentFilter();
-        allUserFilter.addAction(Intent.ACTION_USER_INFO_CHANGED);
         allUserFilter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
         allUserFilter.addAction(ACTION_FACE_UNLOCK_STARTED);
         allUserFilter.addAction(ACTION_FACE_UNLOCK_STOPPED);
@@ -3149,20 +3131,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE);
     }
 
-    /** Notifies that the occluded state changed. */
-    public void onKeyguardOccludedChanged(boolean occluded) {
-        Assert.isMainThread();
-        if (DEBUG) {
-            Log.d(TAG, "onKeyguardOccludedChanged(" + occluded + ")");
-        }
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onKeyguardOccludedChanged(occluded);
-            }
-        }
-    }
-
     /**
      * Handle {@link #MSG_KEYGUARD_RESET}
      */
@@ -3380,7 +3348,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         callback.onPhoneStateChanged(mPhoneState);
         callback.onRefreshCarrierInfo();
         callback.onClockVisibilityChanged();
-        callback.onKeyguardOccludedChanged(mKeyguardOccluded);
         callback.onKeyguardVisibilityChangedRaw(mKeyguardIsVisible);
         callback.onTelephonyCapable(mTelephonyCapable);
 
