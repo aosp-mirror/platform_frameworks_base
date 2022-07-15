@@ -204,7 +204,7 @@
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g>కి పూర్తి మద్దతు ఉంది"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g>కి నెట్‌వర్క్ కనెక్షన్ అవసరం"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g>కు మద్దతు లేదు"</string>
-    <string name="tts_status_checking" msgid="8026559918948285013">"తనిఖీ చేస్తోంది..."</string>
+    <string name="tts_status_checking" msgid="8026559918948285013">"చెక్ చేస్తోంది..."</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> కోసం సెట్టింగ్‌లు"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"ఇంజిన్ సెట్టింగ్‌లను ప్రారంభించండి"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"ప్రాధాన్య ఇంజిన్"</string>
@@ -336,7 +336,7 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"అభివృద్ధి సెట్టింగ్‌లను అనుమతించాలా?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"ఈ సెట్టింగ్‌లు అభివృద్ధి వినియోగం కోసం మాత్రమే ఉద్దేశించబడినవి. వీటి వలన మీ పరికరం మరియు దీనిలోని యాప్‌లు విచ్ఛిన్నం కావచ్చు లేదా తప్పుగా ప్రవర్తించవచ్చు."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB ద్వారా యాప్‌లను వెరిఫై చేయి"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"హానికరమైన ప్రవర్తన కోసం ADB/ADT ద్వారా ఇన్‌స్టాల్ చేయబడిన యాప్‌లను తనిఖీ చేయి."</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"హానికరమైన ప్రవర్తన కోసం ADB/ADT ద్వారా ఇన్‌స్టాల్ చేయబడిన యాప్‌లను చెక్ చేయండి."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"పేర్లు (MAC అడ్రస్‌లు మాత్రమే) లేని బ్లూటూత్ పరికరాలు డిస్‌ప్లే కాబడతాయి"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"రిమోట్ పరికరాల్లో ఆమోదించలేని స్థాయిలో అధిక వాల్యూమ్ ఉండటం లేదా వాల్యూమ్ కంట్రోల్ లేకపోవడం వంటి సమస్యలు ఉంటే బ్లూటూత్ సంపూర్ణ వాల్యూమ్ ఫీచర్‌ను డిజేబుల్ చేస్తుంది."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"బ్లూటూత్ Gabeldorsche ఫీచర్ స్ట్యాక్‌ను ఎనేబుల్ చేస్తుంది."</string>
