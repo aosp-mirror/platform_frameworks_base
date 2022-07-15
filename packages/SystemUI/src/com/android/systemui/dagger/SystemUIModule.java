@@ -81,6 +81,7 @@ import com.android.systemui.unfold.SysUIUnfoldModule;
 import com.android.systemui.user.UserModule;
 import com.android.systemui.util.concurrency.SysUIConcurrencyModule;
 import com.android.systemui.util.dagger.UtilModule;
+import com.android.systemui.util.kotlin.CoroutinesModule;
 import com.android.systemui.util.sensors.SensorModule;
 import com.android.systemui.util.settings.SettingsUtilModule;
 import com.android.systemui.util.time.SystemClock;
@@ -113,6 +114,7 @@ import dagger.Provides;
             AssistModule.class,
             BiometricsModule.class,
             ClockModule.class,
+            CoroutinesModule.class,
             DreamModule.class,
             ControlsModule.class,
             DemoModeModule.class,
