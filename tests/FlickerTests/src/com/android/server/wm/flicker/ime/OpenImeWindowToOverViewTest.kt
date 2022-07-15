@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
@@ -244,7 +243,7 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
         testSpec.statusBarLayerIsVisibleAtStartAndEnd()
     }
 
-    @FlakyTest(bugId = 228011606)
+    @Presubmit
     @Test
     fun imeLayerIsVisibleAndAssociatedWithAppWidow() {
         testSpec.assertLayersStart {
