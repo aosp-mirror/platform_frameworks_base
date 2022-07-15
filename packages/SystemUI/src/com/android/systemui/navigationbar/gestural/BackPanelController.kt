@@ -30,6 +30,7 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.PathInterpolator
@@ -98,6 +99,7 @@ class BackPanelController private constructor(
     context: Context,
     private var backAnimation: BackAnimation?,
     private val windowManager: WindowManager,
+    private val viewConfiguration: ViewConfiguration,
     @Main private val mainHandler: Handler,
     private val vibratorHelper: VibratorHelper,
     private val configurationController: ConfigurationController,
@@ -112,6 +114,7 @@ class BackPanelController private constructor(
      */
     class Factory @Inject constructor(
         private val windowManager: WindowManager,
+        private val viewConfiguration: ViewConfiguration,
         @Main private val mainHandler: Handler,
         private val vibratorHelper: VibratorHelper,
         private val configurationController: ConfigurationController,
@@ -123,6 +126,7 @@ class BackPanelController private constructor(
                 context,
                 backAnimation,
                 windowManager,
+                viewConfiguration,
                 mainHandler,
                 vibratorHelper,
                 configurationController,
@@ -163,6 +167,10 @@ class BackPanelController private constructor(
     private var startY = 0f
 
     private var gestureStartTime = 0L
+
+    // Whether the current gesture has moved a sufficiently large amount,
+    // so that we can unambiguously start showing the ENTRY animation
+    private var hasPassedDragSlop = false
 
     private val failsafeRunnable = Runnable { onFailsafe() }
 
@@ -304,18 +312,17 @@ class BackPanelController private constructor(
                 startX = event.x
                 startY = event.y
                 gestureStartTime = SystemClock.uptimeMillis()
-
-                // Reset the arrow to the side
-                updateArrowState(GestureState.ENTRY)
-
-                windowManager.updateViewLayout(mView, layoutParams)
-                mView.startTrackingShowBackArrowLatency()
             }
-            MotionEvent.ACTION_MOVE -> handleMoveEvent(event)
+            MotionEvent.ACTION_MOVE -> {
+                // only go to the ENTRY state after some minimum motion has occurred
+                if (dragSlopExceeded(event.x, startX)) {
+                    handleMoveEvent(event)
+                }
+            }
             MotionEvent.ACTION_UP -> {
                 if (currentState == GestureState.ACTIVE) {
                     updateArrowState(if (isFlung()) GestureState.FLUNG else GestureState.COMMITTED)
-                } else {
+                } else if (currentState != GestureState.GONE) { // if invisible, skip animation
                     updateArrowState(GestureState.CANCELLED)
                 }
                 velocityTracker = null
@@ -328,6 +335,28 @@ class BackPanelController private constructor(
                 velocityTracker = null
             }
         }
+    }
+
+    /**
+     * Returns false until the current gesture exceeds the touch slop threshold,
+     * and returns true thereafter (we reset on the subsequent back gesture).
+     * The moment it switches from false -> true is important,
+     * because that's when we switch state, from GONE -> ENTRY.
+     * @return whether the current gesture has moved past a minimum threshold.
+     */
+    private fun dragSlopExceeded(curX: Float, startX: Float): Boolean {
+        if (hasPassedDragSlop) return true
+
+        if (abs(curX - startX) > viewConfiguration.scaledTouchSlop) {
+            // Reset the arrow to the side
+            updateArrowState(GestureState.ENTRY)
+
+            windowManager.updateViewLayout(mView, layoutParams)
+            mView.startTrackingShowBackArrowLatency()
+
+            hasPassedDragSlop = true
+        }
+        return hasPassedDragSlop
     }
 
     private fun updateArrowStateOnMove(yTranslation: Float, xTranslation: Float) {
@@ -533,6 +562,7 @@ class BackPanelController private constructor(
     }
 
     private fun resetOnDown() {
+        hasPassedDragSlop = false
         hasHapticPlayed = false
         totalTouchDelta = 0f
         vibrationTime = 0

@@ -99,6 +99,8 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
                         + " during unit tests");
             }
             mRemote.getRemoteTransition().startAnimation(transition, info, startTransaction, cb);
+            // assume that remote will apply the start transaction.
+            startTransaction.clear();
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error running remote transition.", e);
             if (mRemote.asBinder() != null) {
@@ -120,6 +122,11 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
             @Override
             public void onTransitionFinished(WindowContainerTransaction wct,
                     SurfaceControl.Transaction sct) {
+                // We have merged, since we sent the transaction over binder, the one in this
+                // process won't be cleared if the remote applied it. We don't actually know if the
+                // remote applied the transaction, but applying twice will break surfaceflinger
+                // so just assume the worst-case and clear the local transaction.
+                t.clear();
                 mMainExecutor.execute(
                         () -> finishCallback.onTransitionFinished(wct, null /* wctCB */));
             }

@@ -33,6 +33,7 @@ import com.android.systemui.log.SessionTracker
 import com.android.systemui.media.RingtonePlayer
 import com.android.systemui.power.PowerUI
 import com.android.systemui.recents.Recents
+import com.android.systemui.settings.dagger.MultiUserUtilsModule
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.notification.InstantAppNotifier
 import com.android.systemui.statusbar.phone.KeyguardLiftController
@@ -51,7 +52,7 @@ import dagger.multibindings.IntoMap
 /**
  * Collection of {@link CoreStartable}s that should be run on AOSP.
  */
-@Module
+@Module(includes = [MultiUserUtilsModule::class])
 abstract class SystemUICoreStartableModule {
     /** Inject into AuthController.  */
     @Binds

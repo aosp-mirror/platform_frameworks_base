@@ -157,6 +157,7 @@ import androidx.test.filters.MediumTest;
 
 import com.android.internal.R;
 import com.android.server.wm.ActivityRecord.State;
+import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -550,7 +551,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Rect insets = new Rect();
         final DisplayInfo displayInfo = task.mDisplayContent.getDisplayInfo();
         final DisplayPolicy policy = task.mDisplayContent.getDisplayPolicy();
-        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.displayCutout, insets);
+        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.logicalWidth,
+                displayInfo.logicalHeight, WmDisplayCutout.NO_CUTOUT, insets);
         policy.convertNonDecorInsetsToStableInsets(insets, displayInfo.rotation);
         Task.intersectWithInsetsIfFits(stableRect, stableRect, insets);
 
@@ -591,7 +593,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Rect insets = new Rect();
         final DisplayInfo displayInfo = rootTask.mDisplayContent.getDisplayInfo();
         final DisplayPolicy policy = rootTask.mDisplayContent.getDisplayPolicy();
-        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.displayCutout, insets);
+        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.logicalWidth,
+                displayInfo.logicalHeight, WmDisplayCutout.NO_CUTOUT, insets);
         policy.convertNonDecorInsetsToStableInsets(insets, displayInfo.rotation);
         Task.intersectWithInsetsIfFits(stableRect, stableRect, insets);
 
