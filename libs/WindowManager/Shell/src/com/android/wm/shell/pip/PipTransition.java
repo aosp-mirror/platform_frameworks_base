@@ -315,7 +315,7 @@ public class PipTransition extends PipTransitionController {
     }
 
     @Override
-    public void onTransitionMerged(@NonNull IBinder transition) {
+    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted) {
         if (transition != mExitTransition) {
             return;
         }
@@ -328,7 +328,7 @@ public class PipTransition extends PipTransitionController {
         }
         // Unset exitTransition AFTER cancel so that finishResize knows we are merging.
         mExitTransition = null;
-        if (!cancelled) return;
+        if (!cancelled || aborted) return;
         final ActivityManager.RunningTaskInfo taskInfo = mPipOrganizer.getTaskInfo();
         if (taskInfo != null) {
             startExpandAnimation(taskInfo, mPipOrganizer.getSurfaceControl(),

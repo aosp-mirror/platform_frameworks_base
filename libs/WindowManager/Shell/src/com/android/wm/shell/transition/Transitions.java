@@ -516,15 +516,20 @@ public class Transitions implements RemoteCallable<Transitions> {
             active.mMerged = true;
             active.mAborted = abort;
             if (active.mHandler != null) {
-                active.mHandler.onTransitionMerged(active.mToken);
+                active.mHandler.onTransitionConsumed(active.mToken, abort);
             }
             return;
         }
-        mActiveTransitions.get(activeIdx).mAborted = abort;
+        final ActiveTransition active = mActiveTransitions.get(activeIdx);
+        active.mAborted = abort;
+        if (active.mAborted && active.mHandler != null) {
+            // Notifies to clean-up the aborted transition.
+            active.mHandler.onTransitionConsumed(transition, true /* aborted */);
+        }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "Transition animation finished (abort=%b), notifying core %s", abort, transition);
         // Merge all relevant transactions together
-        SurfaceControl.Transaction fullFinish = mActiveTransitions.get(activeIdx).mFinishT;
+        SurfaceControl.Transaction fullFinish = active.mFinishT;
         for (int iA = activeIdx + 1; iA < mActiveTransitions.size(); ++iA) {
             final ActiveTransition toMerge = mActiveTransitions.get(iA);
             if (!toMerge.mMerged) break;
@@ -553,6 +558,10 @@ public class Transitions implements RemoteCallable<Transitions> {
         while (mActiveTransitions.size() > activeIdx
                 && mActiveTransitions.get(activeIdx).mAborted) {
             ActiveTransition aborted = mActiveTransitions.remove(activeIdx);
+            // Notifies to clean-up the aborted transition.
+            if (aborted.mHandler != null) {
+                aborted.mHandler.onTransitionConsumed(transition, true /* aborted */);
+            }
             mOrganizer.finishTransition(aborted.mToken, null /* wct */, null /* wctCB */);
         }
         if (mActiveTransitions.size() <= activeIdx) {
@@ -735,9 +744,10 @@ public class Transitions implements RemoteCallable<Transitions> {
 
         /**
          * Called when a transition which was already "claimed" by this handler has been merged
-         * into another animation. Gives this handler a chance to clean-up any expectations.
+         * into another animation or has been aborted. Gives this handler a chance to clean-up any
+         * expectations.
          */
-        default void onTransitionMerged(@NonNull IBinder transition) { }
+        default void onTransitionConsumed(@NonNull IBinder transition, boolean aborted) { }
 
         /**
          * Sets transition animation scale settings value to handler.
