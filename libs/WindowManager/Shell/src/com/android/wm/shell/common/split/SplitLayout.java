@@ -32,6 +32,7 @@ import static com.android.wm.shell.animation.Interpolators.SLOWDOWN_INTERPOLATOR
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -449,11 +450,13 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         switch (snapTarget.flag) {
             case FLAG_DISMISS_START:
                 flingDividePosition(currentPosition, snapTarget.position,
-                        () -> mSplitLayoutHandler.onSnappedToDismiss(false /* bottomOrRight */));
+                        () -> mSplitLayoutHandler.onSnappedToDismiss(false /* bottomOrRight */,
+                                EXIT_REASON_DRAG_DIVIDER));
                 break;
             case FLAG_DISMISS_END:
                 flingDividePosition(currentPosition, snapTarget.position,
-                        () -> mSplitLayoutHandler.onSnappedToDismiss(true /* bottomOrRight */));
+                        () -> mSplitLayoutHandler.onSnappedToDismiss(true /* bottomOrRight */,
+                                EXIT_REASON_DRAG_DIVIDER));
                 break;
             default:
                 flingDividePosition(currentPosition, snapTarget.position,
@@ -507,6 +510,14 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 !isLandscape,
                 insets,
                 isLandscape ? DOCKED_LEFT : DOCKED_TOP /* dockSide */);
+    }
+
+    /** Fling divider from current position to end or start position then exit */
+    public void flingDividerToDismiss(boolean toEnd, int reason) {
+        final int target = toEnd ? mDividerSnapAlgorithm.getDismissEndTarget().position
+                : mDividerSnapAlgorithm.getDismissStartTarget().position;
+        flingDividePosition(getDividePosition(), target,
+                () -> mSplitLayoutHandler.onSnappedToDismiss(toEnd, reason));
     }
 
     @VisibleForTesting
@@ -758,7 +769,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     public interface SplitLayoutHandler {
 
         /** Calls when dismissing split. */
-        void onSnappedToDismiss(boolean snappedToEnd);
+        void onSnappedToDismiss(boolean snappedToEnd, int reason);
 
         /**
          * Calls when resizing the split bounds.

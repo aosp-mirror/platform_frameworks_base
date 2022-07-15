@@ -45,6 +45,11 @@ class MainStage extends StageTaskListener {
                 iconProvider);
     }
 
+    @Override
+    void dismiss(WindowContainerTransaction wct, boolean toTop) {
+        deactivate(wct, toTop);
+    }
+
     boolean isActive() {
         return mIsActive;
     }
