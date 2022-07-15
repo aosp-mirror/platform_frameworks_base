@@ -28,8 +28,10 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -42,6 +44,8 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ViewTreeLifecycleOwner;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
@@ -61,6 +65,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -69,7 +74,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
 
     @Mock private WindowManager mWindowManager;
     @Mock private DozeParameters mDozeParameters;
-    @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
+    @Spy private final NotificationShadeWindowView mNotificationShadeWindowView = spy(
+            new NotificationShadeWindowView(mContext, null));
     @Mock private IActivityManager mActivityManager;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
@@ -84,6 +90,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
 
     private NotificationShadeWindowControllerImpl mNotificationShadeWindowController;
+
 
     @Before
     public void setUp() {
@@ -174,6 +181,24 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         // Instead, we're not relying on SurfaceControl#setOpaque on
         // NotificationShadeDepthController.
         verify(mWindowManager, never()).updateViewLayout(any(), mLayoutParameters.capture());
+    }
+
+    @Test
+    public void attach_setsUpLifecycleOwner() {
+        mNotificationShadeWindowController.attach();
+
+        assertThat(ViewTreeLifecycleOwner.get(mNotificationShadeWindowView)).isNotNull();
+    }
+
+    @Test
+    public void attach_doesNotSetUpLifecycleOwnerIfAlreadySet() {
+        final LifecycleOwner previouslySet = mock(LifecycleOwner.class);
+        ViewTreeLifecycleOwner.set(mNotificationShadeWindowView, previouslySet);
+
+        mNotificationShadeWindowController.attach();
+
+        assertThat(ViewTreeLifecycleOwner.get(mNotificationShadeWindowView))
+                .isEqualTo(previouslySet);
     }
 
     @Test
