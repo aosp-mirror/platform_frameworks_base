@@ -50,6 +50,7 @@ import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfiguration
 import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfigurationDuration;
 import android.hardware.camera2.marshal.impl.MarshalQueryableString;
 import android.hardware.camera2.params.Capability;
+import android.hardware.camera2.params.ColorSpaceProfiles;
 import android.hardware.camera2.params.DeviceStateSensorOrientationMap;
 import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.params.Face;
@@ -813,6 +814,15 @@ public class CameraMetadataNative implements Parcelable {
                     }
                 });
         sGetCommandMap.put(
+                CameraCharacteristics.REQUEST_AVAILABLE_COLOR_SPACE_PROFILES.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getColorSpaceProfiles();
+                    }
+                });
+        sGetCommandMap.put(
                 CaptureResult.STATISTICS_OIS_SAMPLES.getNativeKey(),
                         new GetCommand() {
                     @Override
@@ -1066,6 +1076,17 @@ public class CameraMetadataNative implements Parcelable {
         }
 
         return new DynamicRangeProfiles(profileArray);
+    }
+
+    private ColorSpaceProfiles getColorSpaceProfiles() {
+        long[] profileArray = getBase(
+                CameraCharacteristics.REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP);
+
+        if (profileArray == null) {
+            return null;
+        }
+
+        return new ColorSpaceProfiles(profileArray);
     }
 
     private Location getGpsLocation() {

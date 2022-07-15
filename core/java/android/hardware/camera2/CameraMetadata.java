@@ -1257,6 +1257,24 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE = 19;
 
+    /**
+     * <p>The device supports querying the possible combinations of color spaces, image
+     * formats, and dynamic range profiles supported by the camera and requesting a
+     * particular color space for a session via
+     * {@link android.hardware.camera2.params.SessionConfiguration#setColorSpace }.</p>
+     * <p>Cameras that enable this capability may or may not also implement dynamic range
+     * profiles. If they don't,
+     * {@link android.hardware.camera2.params.ColorSpaceProfiles#getSupportedDynamicRangeProfiles }
+     * will return only
+     * {@link android.hardware.camera2.params.DynamicRangeProfiles#STANDARD } and
+     * {@link android.hardware.camera2.params.ColorSpaceProfiles#getSupportedColorSpacesForDynamicRange }
+     * will assume support of the
+     * {@link android.hardware.camera2.params.DynamicRangeProfiles#STANDARD }
+     * profile in all combinations of color spaces and image formats.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_COLOR_SPACE_PROFILES = 20;
+
     //
     // Enumeration values for CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
     //
@@ -1365,6 +1383,18 @@ public abstract class CameraMetadata<TKey> {
      * @hide
      */
     public static final int REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP_MAX = 0x1000;
+
+    //
+    // Enumeration values for CameraCharacteristics#REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP
+    //
+
+    /**
+     * <p>Default value, when not explicitly specified. The Camera device will choose the color
+     * space to employ.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP
+     * @hide
+     */
+    public static final int REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_UNSPECIFIED = -1;
 
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
