@@ -16,13 +16,12 @@
 
 package com.android.server.wm.flicker.activityembedding
 
-import android.app.Instrumentation
-import androidx.test.platform.app.InstrumentationRegistry
+import com.android.server.wm.flicker.BaseTest
+import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import org.junit.Before
 
-abstract class ActivityEmbeddingTestBase {
-    val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+abstract class ActivityEmbeddingTestBase(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     val testApp = ActivityEmbeddingAppHelper(instrumentation)
 
     @Before
