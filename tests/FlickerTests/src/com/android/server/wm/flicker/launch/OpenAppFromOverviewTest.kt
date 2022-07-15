@@ -25,9 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -100,11 +98,6 @@ open class OpenAppFromOverviewTest(
         }
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
     @Presubmit
     @Test
     override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
@@ -135,39 +128,15 @@ open class OpenAppFromOverviewTest(
     override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 229735718)
+    @Presubmit
     @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    override fun appWindowReplacesLauncherAsTopWindow() =
+        super.appWindowReplacesLauncherAsTopWindow()
 
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun appWindowReplacesLauncherAsTopWindow() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        super.appWindowReplacesLauncherAsTopWindow()
-    }
-
-    @FlakyTest(bugId = 229738092)
-    @Test
-    fun appWindowReplacesLauncherAsTopWindow_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        super.appWindowReplacesLauncherAsTopWindow()
-    }
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appWindowBecomesTopWindow() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        super.appWindowBecomesTopWindow()
-    }
-
-    @FlakyTest(bugId = 229738092)
-    @Test
-    fun appWindowBecomesTopWindow_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        super.appWindowBecomesTopWindow()
-    }
+    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
 
     companion object {
         /**

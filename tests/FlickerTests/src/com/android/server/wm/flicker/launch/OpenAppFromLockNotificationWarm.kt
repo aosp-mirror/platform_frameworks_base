@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -188,6 +189,12 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
     @Test
     override fun appWindowIsTopWindowAtEnd() =
         super.appWindowIsTopWindowAtEnd()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowBecomesTopWindow_ShellTransit() =
+        super.appWindowBecomesTopWindow_ShellTransit()
 
     companion object {
         /**
