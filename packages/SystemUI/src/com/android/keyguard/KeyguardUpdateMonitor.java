@@ -250,7 +250,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private final Context mContext;
     private final boolean mIsPrimaryUser;
-    private final boolean mIsAutomotive;
     private final AuthController mAuthController;
     private final StatusBarStateController mStatusBarStateController;
     private int mStatusBarState;
@@ -328,8 +327,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final LatencyTracker mLatencyTracker;
     private boolean mLogoutEnabled;
     private boolean mIsFaceEnrolled;
-    // If the user long pressed the lock icon, disabling face auth for the current session.
-    private boolean mLockIconPressed;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private final Executor mBackgroundExecutor;
     private SensorPrivacyManager mSensorPrivacyManager;
@@ -1767,7 +1764,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     protected void handleStartedGoingToSleep(int arg1) {
         Assert.isMainThread();
-        mLockIconPressed = false;
         clearBiometricRecognized();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -2115,8 +2111,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (mFaceManager != null) {
             mFaceManager.addLockoutResetCallback(mFaceLockoutResetCallback);
         }
-
-        mIsAutomotive = isAutomotive();
 
         TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
         mUserManager = context.getSystemService(UserManager.class);
@@ -2618,7 +2612,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         || mAuthController.isUdfpsFingerDown()
                         || mUdfpsBouncerShowing)
                 && !mSwitchingUser && !faceDisabledForUser && becauseCannotSkipBouncer
-                && !mKeyguardGoingAway && biometricEnabledForUser && !mLockIconPressed
+                && !mKeyguardGoingAway && biometricEnabledForUser
                 && strongAuthAllowsScanning && mIsPrimaryUser
                 && (!mSecureCameraLaunched || mOccludingAppRequestingFace)
                 && !faceAuthenticated
@@ -2641,7 +2635,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         awakeKeyguard,
                         mKeyguardGoingAway,
                         shouldListenForFaceAssistant,
-                        mLockIconPressed,
                         mOccludingAppRequestingFace,
                         mIsPrimaryUser,
                         strongAuthAllowsScanning,
@@ -2684,18 +2677,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 || running && !model.getListening()) {
             mListenModels.add(model);
         }
-    }
-
-    /**
-     * Whenever the lock icon is long pressed, disabling trust agents.
-     * This means that we cannot auth passively (face) until the user presses power.
-     */
-    public void onLockIconPressed() {
-        mLockIconPressed = true;
-        final int userId = getCurrentUser();
-        mUserFaceAuthenticated.put(userId, null);
-        updateFaceListeningState(BIOMETRIC_ACTION_UPDATE);
-        mStrongAuthTracker.onStrongAuthRequiredChanged(userId);
     }
 
     private void startListeningForFingerprint() {
@@ -3336,10 +3317,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         return false;
     }
 
-    private boolean isAutomotive() {
-        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
-    }
-
     /**
      * Remove the given observer's callback.
      *
@@ -3812,9 +3789,5 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    mNeedsSlowUnlockTransition=" + mNeedsSlowUnlockTransition);
         }
         mListenModels.print(pw);
-
-        if (mIsAutomotive) {
-            pw.println("  Running on Automotive build");
-        }
     }
 }
