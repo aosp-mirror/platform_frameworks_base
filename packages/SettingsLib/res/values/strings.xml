@@ -246,9 +246,9 @@
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PAN profile (accessing Internet through remote device). [CHAR LIMIT=40] -->
     <string name="bluetooth_profile_pan">Internet access</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PBAP profile. [CHAR LIMIT=40] -->
-    <string name="bluetooth_profile_pbap">Contact sharing</string>
+    <string name="bluetooth_profile_pbap">Contacts and call history sharing</string>
     <!-- Bluetooth settings. The user-visible summary string that is used whenever referring to the PBAP profile (sharing contacts). [CHAR LIMIT=60] -->
-    <string name="bluetooth_profile_pbap_summary">Use for contact sharing</string>
+    <string name="bluetooth_profile_pbap_summary">Use for contacts and call history sharing</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PAN profile (sharing this device's Internet connection). [CHAR LIMIT=40] -->
     <string name="bluetooth_profile_pan_nap">Internet connection sharing</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the map profile. -->
