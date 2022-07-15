@@ -20,17 +20,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
-import android.graphics.Rect
 import android.text.format.DateFormat
-import android.view.View
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.plugins.Clock
-import com.android.systemui.plugins.ClockDarkness
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shared.navigationbar.RegionSamplingHelper
+import com.android.systemui.shared.regionsampling.RegionSamplingInstance
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -61,6 +58,7 @@ class ClockEventController @Inject constructor(
             field = value
             if (value != null) {
                 value.initialize(resources, dozeAmount, 0f)
+                updateRegionSamplers(value)
             }
         }
 
@@ -71,94 +69,65 @@ class ClockEventController @Inject constructor(
     private var dozeAmount = 0f
     private var isKeyguardShowing = false
 
-    private var smallClockIsDark = ClockDarkness.DEFAULT
-    private var largeClockIsDark = ClockDarkness.DEFAULT
-    private var smallSamplingBounds = Rect()
-    private var largeSamplingBounds = Rect()
-
     private val regionSamplingEnabled =
             featureFlags.isEnabled(com.android.systemui.flags.Flags.REGION_SAMPLING)
 
-    private fun setClockDarkness(isRegionDark: Boolean): ClockDarkness {
-        return if (isRegionDark) {
-            ClockDarkness.DARK
-        } else {
-            ClockDarkness.LIGHT
-        }
+    private fun updateColors(currentClock: Clock?) {
+        smallClockIsDark = smallRegionSamplingInstance.currentClockDarkness()
+        largeClockIsDark = largeRegionSamplingInstance.currentClockDarkness()
+
+        currentClock?.events?.onColorPaletteChanged(resources, smallClockIsDark, largeClockIsDark)
     }
 
-    // TODO: Abstract out the creation of RegionSampler and its fields
-    var smallRegionSampling: RegionSamplingHelper? =
-            if (!regionSamplingEnabled || clock == null) {
-                null
-            } else {
-                RegionSamplingHelper(clock?.smallClock,
-                        object : RegionSamplingHelper.SamplingCallback {
-                            override fun onRegionDarknessChanged(isRegionDark: Boolean) {
-                                smallClockIsDark = setClockDarkness(isRegionDark)
-                                clock?.events?.onColorPaletteChanged(
-                                        resources,
-                                        smallClockIsDark,
-                                        largeClockIsDark
-                                )
-                            }
+    fun updateRegionSamplers(currentClock: Clock?) {
+        smallRegionSamplingInstance = RegionSamplingInstance(
+                currentClock?.smallClock,
+                mainExecutor,
+                bgExecutor,
+                regionSamplingEnabled,
+                currentClock,
+                resources
+        )
 
-                            override fun getSampledRegion(sampledView: View): Rect {
-                                smallSamplingBounds = Rect(
-                                        sampledView.left,
-                                        sampledView.top,
-                                        sampledView.right,
-                                        sampledView.bottom
-                                )
-                                return smallSamplingBounds
-                            }
+        largeRegionSamplingInstance = RegionSamplingInstance(
+                currentClock?.largeClock,
+                mainExecutor,
+                bgExecutor,
+                regionSamplingEnabled,
+                currentClock,
+                resources
+        )
 
-                            override fun isSamplingEnabled(): Boolean {
-                                return regionSamplingEnabled
-                            }
-                        },
-                        mainExecutor, bgExecutor)
-            }
+        smallRegionSamplingInstance.startRegionSampler()
+        largeRegionSamplingInstance.startRegionSampler()
 
-    var largeRegionSampling: RegionSamplingHelper? =
-            if (!regionSamplingEnabled || clock == null) {
-                null
-            } else {
-                RegionSamplingHelper(clock?.largeClock,
-                        object : RegionSamplingHelper.SamplingCallback {
-                            override fun onRegionDarknessChanged(isRegionDark: Boolean) {
-                                largeClockIsDark = setClockDarkness(isRegionDark)
-                                clock?.events?.onColorPaletteChanged(
-                                        resources,
-                                        smallClockIsDark,
-                                        largeClockIsDark
-                                )
-                            }
+        updateColors(currentClock)
+    }
 
-                            override fun getSampledRegion(sampledView: View): Rect {
-                                largeSamplingBounds = Rect(
-                                        sampledView.left,
-                                        sampledView.top,
-                                        sampledView.right,
-                                        sampledView.bottom
-                                )
-                                return largeSamplingBounds
-                            }
+    var smallRegionSamplingInstance: RegionSamplingInstance = RegionSamplingInstance(
+            clock?.smallClock,
+            mainExecutor,
+            bgExecutor,
+            regionSamplingEnabled,
+            clock,
+            resources
+    )
 
-                            override fun isSamplingEnabled(): Boolean {
-                                return regionSamplingEnabled
-                            }
-                        },
-                        mainExecutor, bgExecutor)
-            }
+    var largeRegionSamplingInstance: RegionSamplingInstance = RegionSamplingInstance(
+            clock?.largeClock,
+            mainExecutor,
+            bgExecutor,
+            regionSamplingEnabled,
+            clock,
+            resources
+    )
+
+    private var smallClockIsDark = smallRegionSamplingInstance.currentClockDarkness()
+    private var largeClockIsDark = largeRegionSamplingInstance.currentClockDarkness()
 
     private val configListener = object : ConfigurationController.ConfigurationListener {
         override fun onThemeChanged() {
-            clock?.events?.onColorPaletteChanged(
-                    resources,
-                    smallClockIsDark,
-                    largeClockIsDark
-            )
+            updateColors(clock)
         }
     }
 
@@ -209,8 +178,6 @@ class ClockEventController @Inject constructor(
 
     init {
         isDozing = statusBarStateController.isDozing
-        smallRegionSampling?.setWindowVisible(true)
-        largeRegionSampling?.setWindowVisible(true)
         clock?.events?.onColorPaletteChanged(resources, smallClockIsDark, largeClockIsDark)
     }
 
@@ -226,8 +193,8 @@ class ClockEventController @Inject constructor(
         batteryController.addCallback(batteryCallback)
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
         statusBarStateController.addCallback(statusBarStateListener)
-        smallRegionSampling?.start(smallSamplingBounds)
-        largeRegionSampling?.start(largeSamplingBounds)
+        smallRegionSamplingInstance.startRegionSampler()
+        largeRegionSamplingInstance.startRegionSampler()
     }
 
     fun unregisterListeners() {
@@ -236,8 +203,8 @@ class ClockEventController @Inject constructor(
         batteryController.removeCallback(batteryCallback)
         keyguardUpdateMonitor.removeCallback(keyguardUpdateMonitorCallback)
         statusBarStateController.removeCallback(statusBarStateListener)
-        smallRegionSampling?.stop()
-        largeRegionSampling?.stop()
+        smallRegionSamplingInstance.stopRegionSampler()
+        largeRegionSamplingInstance.stopRegionSampler()
     }
 
     /**
@@ -246,8 +213,8 @@ class ClockEventController @Inject constructor(
     fun dump(pw: PrintWriter) {
         pw.println(this)
         clock?.dump(pw)
-        smallRegionSampling?.dump(pw)
-        largeRegionSampling?.dump(pw)
+        smallRegionSamplingInstance.dump(pw)
+        largeRegionSamplingInstance.dump(pw)
     }
 
     companion object {
