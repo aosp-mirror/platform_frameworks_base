@@ -10373,6 +10373,11 @@ public class AudioService extends IAudioService.Stub
 
         @Override
         public void setAccessibilityServiceUids(IntArray uids) {
+            // TODO(b/233287010): Fix voice interaction and a11y concurrency in audio policy service
+            if (isPlatformAutomotive()) {
+                return;
+            }
+
             synchronized (mAccessibilityServiceUidsLock) {
                 if (uids.size() == 0) {
                     mAccessibilityServiceUids = null;
