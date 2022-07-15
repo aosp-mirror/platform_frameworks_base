@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.bubble
 
 import android.os.SystemClock
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
@@ -51,6 +52,7 @@ open class MultiBubblesScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
         Assume.assumeFalse(isShellTransitionsEnabled)
     }
 
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
@@ -59,15 +61,21 @@ open class MultiBubblesScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
                         val addBubbleBtn = waitAndGetAddBubbleBtn()
                         addBubbleBtn?.run { addBubbleBtn.click() } ?: error("Add Bubble not found")
                     }
-                    val showBubble = device.wait(Until.findObject(
-                            By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)), FIND_OBJECT_TIMEOUT)
+                    val showBubble = device.wait(
+                        Until.findObject(
+                            By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)
+                        ), FIND_OBJECT_TIMEOUT
+                    )
                     showBubble?.run { showBubble.click() } ?: error("Show bubble not found")
                     SystemClock.sleep(1000)
                 }
             }
             transitions {
-                val bubbles = device.wait(Until.findObjects(
-                        By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)), FIND_OBJECT_TIMEOUT)
+                val bubbles = device.wait(
+                    Until.findObjects(
+                        By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)
+                    ), FIND_OBJECT_TIMEOUT
+                )
                 for (entry in bubbles) {
                     entry?.run { entry.click() } ?: error("Bubble not found")
                     SystemClock.sleep(1000)
@@ -82,4 +90,70 @@ open class MultiBubblesScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
             this.isVisible(testApp)
         }
     }
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun entireScreenCovered() =
+        super.entireScreenCovered()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisibleAtStartAndEnd() =
+        super.navBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() =
+        super.navBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsAlwaysVisible() =
+        super.navBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() =
+        super.statusBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun taskBarLayerIsVisibleAtStartAndEnd() =
+        super.taskBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun taskBarWindowIsAlwaysVisible() =
+        super.taskBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 }

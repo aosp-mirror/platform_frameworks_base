@@ -10083,15 +10083,21 @@ public abstract class PackageManager {
     }
 
     /**
-     * @return the system defined content capture package name, or null if there's none.
+     * @deprecated This function throws an {@link UnsupportedOperationException}. For pre-granting
+     * permissions, instead of looking up the package that provides {@code ContentCaptureService},
+     * use roles.
      *
      * @hide
      */
+    // This function cannot yet be removed because it is referenced from GTS tests. The tests have
+    // been updated to not rely on it when running on Android T and above, but in order to compile
+    // the tests we must keep this method.
+    @Deprecated
     @TestApi
     @Nullable
-    public String getContentCaptureServicePackageName() {
+    public final String getContentCaptureServicePackageName() {
         throw new UnsupportedOperationException(
-                "getContentCaptureServicePackageName not implemented in subclass");
+                "getContentCaptureServicePackageName is deprecated");
     }
 
     /**

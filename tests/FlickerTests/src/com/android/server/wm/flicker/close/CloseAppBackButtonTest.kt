@@ -25,8 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,6 +67,7 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
 class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransition(testSpec) {
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
@@ -82,22 +82,22 @@ class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
     /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerRotatesScales() {
+    override fun statusBarLayerPositionAtStartAndEnd() {
         // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        super.statusBarLayerRotatesScales()
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        super.statusBarLayerPositionAtStartAndEnd()
     }
 
     @FlakyTest(bugId = 214452854)
     @Test
-    fun statusBarLayerRotatesScales_shellTransit() {
-        assumeTrue(isShellTransitionsEnabled)
-        super.statusBarLayerRotatesScales()
+    fun statusBarLayerPositionAtStartAndEnd_shellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        super.statusBarLayerPositionAtStartAndEnd()
     }
 
     /** {@inheritDoc} */

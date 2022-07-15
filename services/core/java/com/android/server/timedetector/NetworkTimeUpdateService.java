@@ -271,6 +271,7 @@ public class NetworkTimeUpdateService extends Binder {
         NetworkTimeSuggestion timeSuggestion =
                 new NetworkTimeSuggestion(timeSignal, ntpResult.getUncertaintyMillis());
         timeSuggestion.addDebugInfo(debugInfo);
+        timeSuggestion.addDebugInfo(ntpResult.toString());
         mTimeDetectorInternal.suggestNetworkTime(timeSuggestion);
     }
 

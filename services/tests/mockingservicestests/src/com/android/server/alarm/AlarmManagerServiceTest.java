@@ -74,7 +74,6 @@ import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_W
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_WINDOW;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_EXACT_ALARM_DENY_LIST;
-import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LAZY_BATCHING;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LISTENER_TIMEOUT;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MAX_DEVICE_IDLE_FUZZ;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MAX_INTERVAL;
@@ -3091,37 +3090,6 @@ public class AlarmManagerServiceTest {
     @Test
     public void emptyBroadcastOptionsSentOnExpiration() throws Exception {
         optionsSentOnExpiration(false, null);
-    }
-
-    @Test
-    public void alarmStoreMigration() {
-        setDeviceConfigBoolean(KEY_LAZY_BATCHING, false);
-        final int numAlarms = 10;
-        final PendingIntent[] pis = new PendingIntent[numAlarms];
-        for (int i = 0; i < numAlarms; i++) {
-            pis[i] = getNewMockPendingIntent();
-            setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 1, pis[i]);
-        }
-
-        final ArrayList<Alarm> alarmsBefore = mService.mAlarmStore.asList();
-        assertEquals(numAlarms, alarmsBefore.size());
-        for (int i = 0; i < numAlarms; i++) {
-            final PendingIntent pi = pis[i];
-            assertTrue(i + "th PendingIntent missing: ",
-                    alarmsBefore.removeIf(a -> a.matches(pi, null)));
-        }
-        assertEquals(BatchingAlarmStore.TAG, mService.mAlarmStore.getName());
-
-        setDeviceConfigBoolean(KEY_LAZY_BATCHING, true);
-
-        final ArrayList<Alarm> alarmsAfter = mService.mAlarmStore.asList();
-        assertEquals(numAlarms, alarmsAfter.size());
-        for (int i = 0; i < numAlarms; i++) {
-            final PendingIntent pi = pis[i];
-            assertTrue(i + "th PendingIntent missing: ",
-                    alarmsAfter.removeIf(a -> a.matches(pi, null)));
-        }
-        assertEquals(LazyAlarmStore.TAG, mService.mAlarmStore.getName());
     }
 
     private void registerAppIds(String[] packages, Integer[] ids) {

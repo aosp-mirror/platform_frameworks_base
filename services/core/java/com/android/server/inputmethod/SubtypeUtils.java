@@ -85,8 +85,8 @@ final class SubtypeUtils {
                     continue;
                 }
             }
-            if (mode == SUBTYPE_MODE_ANY || TextUtils.isEmpty(mode) ||
-                    mode.equalsIgnoreCase(subtype.getMode())) {
+            if (mode == SUBTYPE_MODE_ANY || TextUtils.isEmpty(mode)
+                    || mode.equalsIgnoreCase(subtype.getMode())) {
                 return true;
             }
         }
@@ -237,17 +237,20 @@ final class SubtypeUtils {
     /**
      * If there are no selected subtypes, tries finding the most applicable one according to the
      * given locale.
-     * @param subtypes this function will search the most applicable subtype in subtypes
-     * @param mode subtypes will be filtered by mode
-     * @param locale subtypes will be filtered by locale
-     * @param canIgnoreLocaleAsLastResort if this function can't find the most applicable subtype,
-     * it will return the first subtype matched with mode
+     *
+     * @param subtypes                    a list of {@link InputMethodSubtype} to search
+     * @param mode                        the mode used for filtering subtypes
+     * @param locale                      the locale used for filtering subtypes
+     * @param canIgnoreLocaleAsLastResort when set to {@code true}, if this function can't find the
+     *                                    most applicable subtype, it will return the first subtype
+     *                                    matched with mode
+     *
      * @return the most applicable subtypeId
      */
     static InputMethodSubtype findLastResortApplicableSubtypeLocked(
             Resources res, List<InputMethodSubtype> subtypes, String mode, String locale,
             boolean canIgnoreLocaleAsLastResort) {
-        if (subtypes == null || subtypes.size() == 0) {
+        if (subtypes == null || subtypes.isEmpty()) {
             return null;
         }
         if (TextUtils.isEmpty(locale)) {

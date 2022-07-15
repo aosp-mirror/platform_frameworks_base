@@ -125,6 +125,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.IRemoteViewsFactory;
 import com.android.server.LocalServices;
+import com.android.server.ServiceThread;
 import com.android.server.WidgetBackupProvider;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -270,7 +271,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mDevicePolicyManagerInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mSaveStateHandler = BackgroundThread.getHandler();
-        mCallbackHandler = new CallbackHandler(mContext.getMainLooper());
+        final ServiceThread serviceThread = new ServiceThread(TAG,
+                android.os.Process.THREAD_PRIORITY_FOREGROUND, false /* allowIo */);
+        serviceThread.start();
+        mCallbackHandler = new CallbackHandler(serviceThread.getLooper());
         mBackupRestoreController = new BackupRestoreController();
         mSecurityPolicy = new SecurityPolicy();
         mIsProviderInfoPersisted = !ActivityManager.isLowRamDeviceStatic()
@@ -313,26 +317,26 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         packageFilter.addDataScheme("package");
         mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
-                packageFilter, null, null);
+                packageFilter, null, mCallbackHandler);
 
         // Register for events related to sdcard installation.
         IntentFilter sdFilter = new IntentFilter();
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
-                sdFilter, null, null);
+                sdFilter, null, mCallbackHandler);
 
         IntentFilter offModeFilter = new IntentFilter();
         offModeFilter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         offModeFilter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
-                offModeFilter, null, null);
+                offModeFilter, null, mCallbackHandler);
 
         IntentFilter suspendPackageFilter = new IntentFilter();
         suspendPackageFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
         suspendPackageFilter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
         mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
-                suspendPackageFilter, null, null);
+                suspendPackageFilter, null, mCallbackHandler);
     }
 
     private void registerOnCrossProfileProvidersChangedListener() {

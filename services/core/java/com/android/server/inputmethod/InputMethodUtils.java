@@ -142,7 +142,7 @@ final class InputMethodUtils {
                 }
                 continue;
             }
-            ApplicationInfo ai = null;
+            ApplicationInfo ai;
             try {
                 ai = packageManagerForUser.getApplicationInfo(packageName,
                         PackageManager.ApplicationInfoFlags.of(

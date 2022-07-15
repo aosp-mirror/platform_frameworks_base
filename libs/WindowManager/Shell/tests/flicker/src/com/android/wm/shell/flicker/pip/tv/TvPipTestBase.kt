@@ -25,7 +25,6 @@ import android.view.Surface.rotationToString
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
-import com.android.wm.shell.flicker.pip.PipTestBase
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assume.assumeTrue

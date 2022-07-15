@@ -16,26 +16,18 @@
 
 package com.android.server.wm.flicker.quickswitch
 
-import android.app.Instrumentation
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.server.wm.flicker.FlickerBuilderProvider
+import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.navBarLayerIsVisible
-import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.statusBarLayerIsVisible
-import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.ComponentMatcher
 import com.android.server.wm.traces.common.Rect
 import org.junit.FixMethodOrder
@@ -60,44 +52,40 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
-    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val taplInstrumentation = LauncherInstrumentation()
-
+class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     private val testApp = SimpleAppHelper(instrumentation)
 
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            setup {
-                test {
-                    taplInstrumentation.setExpectedRotation(testSpec.startRotation)
-                }
-
-                eachRun {
-                    testApp.launchViaIntent(wmHelper)
-                    device.pressHome()
-                    wmHelper.StateSyncBuilder()
-                        .withHomeActivityVisible()
-                        .withWindowSurfaceDisappeared(testApp)
-                        .waitForAndVerify()
-
-                    startDisplayBounds = wmHelper.currentState.layerState
-                        .physicalDisplayBounds ?: error("Display not found")
-                }
+    /** {@inheritDoc} */
+    override val transition: FlickerBuilder.() -> Unit = {
+        setup {
+            test {
+                tapl.setExpectedRotation(testSpec.startRotation)
             }
-            transitions {
-                taplInstrumentation.workspace.quickSwitchToPreviousApp()
+
+            eachRun {
+                testApp.launchViaIntent(wmHelper)
+                device.pressHome()
                 wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(testApp)
-                    .withNavBarStatusBarVisible()
+                    .withHomeActivityVisible()
+                    .withWindowSurfaceDisappeared(testApp)
                     .waitForAndVerify()
-            }
 
-            teardown {
-                eachRun {
-                    testApp.exit(wmHelper)
-                }
+                startDisplayBounds = wmHelper.currentState.layerState
+                    .physicalDisplayBounds ?: error("Display not found")
+            }
+        }
+        transitions {
+            tapl.workspace.quickSwitchToPreviousApp()
+            wmHelper.StateSyncBuilder()
+                .withFullScreenApp(testApp)
+                .withNavOrTaskBarVisible()
+                .withStatusBarVisible()
+                .waitForAndVerify()
+        }
+
+        teardown {
+            eachRun {
+                testApp.exit(wmHelper)
             }
         }
     }
@@ -150,8 +138,8 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the transition starts with the launcher windows filling/covering exactly the
-     * entirety of the display.
+     * Checks that the transition starts with the [ComponentMatcher.LAUNCHER] windows
+     * filling/covering exactly display size
      */
     @Presubmit
     @Test
@@ -162,8 +150,8 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the transition starts with the launcher layers filling/covering exactly the
-     * entirety of the display.
+     * Checks that the transition starts with the [ComponentMatcher.LAUNCHER] layers
+     * filling/covering exactly the display size.
      */
     @Presubmit
     @Test
@@ -174,7 +162,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the transition starts with the launcher being the top window.
+     * Checks that the transition starts with the [ComponentMatcher.LAUNCHER] being the top window.
      */
     @Presubmit
     @Test
@@ -225,7 +213,8 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the launcher window starts off visible and becomes invisible at some point before
+     * Checks that the [ComponentMatcher.LAUNCHER] window starts off visible and becomes invisible
+     * at some point before
      * the end of the transition and then stays invisible until the end of the transition.
      */
     @Presubmit
@@ -239,7 +228,8 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the launcher layer starts off visible and becomes invisible at some point before
+     * Checks that the [ComponentMatcher.LAUNCHER] layer starts off visible and becomes invisible
+     * at some point before
      * the end of the transition and then stays invisible until the end of the transition.
      */
     @Presubmit
@@ -253,7 +243,8 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the launcher window is visible at least until the app window is visible. Ensures
+     * Checks that the [ComponentMatcher.LAUNCHER] window is visible at least until the app window
+     * is visible. Ensures
      * that at any point, either the launcher or [testApp] windows are at least partially visible.
      */
     @Presubmit
@@ -269,8 +260,9 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the launcher layer is visible at least until the app layer is visible. Ensures
-     * that at any point, either the launcher or [testApp] layers are at least partially visible.
+     * Checks that the [ComponentMatcher.LAUNCHER] layer is visible at least until the app layer
+     * is visible. Ensures that at any point, either the launcher or [testApp] layers are at least
+     * partially visible.
      */
     @Presubmit
     @Test
@@ -284,49 +276,28 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
         }
     }
 
-    /**
-     * Checks that the navbar window is visible throughout the entire transition.
-     */
-    @Presubmit
+    /** {@inheritDoc} */
+    @Postsubmit
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsVisible()
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
 
-    /**
-     * Checks that the navbar layer is visible throughout the entire transition.
-     */
-    @Presubmit
+    /** {@inheritDoc} */
+    @Postsubmit
     @Test
-    fun navBarLayerAlwaysIsVisible() = testSpec.navBarLayerIsVisible()
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
-    /**
-     * Checks that the navbar is always in the right position and covers the expected region.
-     *
-     * NOTE: This doesn't check that the navbar is visible or not.
-     */
-    @Presubmit
+    /** {@inheritDoc} */
+    @Postsubmit
     @Test
-    fun navbarIsAlwaysInRightPosition() = testSpec.navBarLayerRotatesAndScales()
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    /**
-     * Checks that the status bar window is visible throughout the entire transition.
-     */
-    @Presubmit
+    /** {@inheritDoc} */
+    @Postsubmit
     @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsVisible()
-
-    /**
-     * Checks that the status bar layer is visible throughout the entire transition.
-     */
-    @Presubmit
-    @Test
-    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsVisible()
-
-    /**
-     * Checks that the screen is always fully covered by visible layers throughout the transition.
-     */
-    @Presubmit
-    @Test
-    fun screenIsAlwaysFilled() = testSpec.entireScreenCovered()
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         private var startDisplayBounds = Rect.EMPTY

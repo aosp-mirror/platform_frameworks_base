@@ -2269,7 +2269,9 @@ public final class ProcessList {
                 final boolean inBgRestricted = ast.isAppBackgroundRestricted(
                         app.info.uid, app.info.packageName);
                 if (inBgRestricted) {
-                    mAppsInBackgroundRestricted.add(app);
+                    synchronized (mService) {
+                        mAppsInBackgroundRestricted.add(app);
+                    }
                 }
                 app.mState.setBackgroundRestricted(inBgRestricted);
             }

@@ -100,6 +100,14 @@ class TransitionController {
     // TODO(b/188595497): remove when not needed.
     final StatusBarManagerInternal mStatusBar;
 
+    /**
+     * `true` when building surface layer order for the finish transaction. We want to prevent
+     * wm from touching z-order of surfaces during transitions, but we still need to be able to
+     * calculate the layers for the finishTransaction. So, when assigning layers into the finish
+     * transaction, set this to true so that the {@link canAssignLayers} will allow it.
+     */
+    boolean mBuildingFinishLayers = false;
+
     TransitionController(ActivityTaskManagerService atm,
             TaskSnapshotController taskSnapshotController,
             TransitionTracer transitionTracer) {
@@ -307,6 +315,15 @@ class TransitionController {
             if (mPlayingTransitions.get(i).isTransientLaunch(ar)) return true;
         }
         return false;
+    }
+
+    /**
+     * Whether WM can assign layers to window surfaces at this time. This is usually false while
+     * playing, but can be "opened-up" for certain transition operations like calculating layers
+     * for finishTransaction.
+     */
+    boolean canAssignLayers() {
+        return mBuildingFinishLayers || !isPlaying();
     }
 
     @WindowConfiguration.WindowingMode

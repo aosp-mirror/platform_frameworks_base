@@ -16,15 +16,13 @@
 
 package com.android.server.wm.flicker.quickswitch
 
-import android.app.Instrumentation
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.server.wm.flicker.FlickerBuilderProvider
+import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -33,11 +31,6 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import com.android.server.wm.flicker.navBarLayerIsVisible
-import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.statusBarLayerIsVisible
-import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.ComponentMatcher
 import com.android.server.wm.traces.common.Rect
 import org.junit.Assume
@@ -64,10 +57,9 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTestParameter) {
-    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val tapl = LauncherInstrumentation()
-
+open class QuickSwitchBetweenTwoAppsForwardTest(
+    testSpec: FlickerTestParameter
+) : BaseTest(testSpec) {
     private val testApp1 = SimpleAppHelper(instrumentation)
     private val testApp2 = NonResizeableAppHelper(instrumentation)
 
@@ -76,36 +68,36 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
         Assume.assumeFalse(isShellTransitionsEnabled)
     }
 
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            setup {
-                test {
-                    tapl.setExpectedRotation(testSpec.startRotation)
-                }
-                eachRun {
-                    testApp1.launchViaIntent(wmHelper)
-                    testApp2.launchViaIntent(wmHelper)
-                    tapl.launchedAppState.quickSwitchToPreviousApp()
-                    wmHelper.StateSyncBuilder()
-                        .withNavBarStatusBarVisible()
-                        .waitForAndVerify()
-                    startDisplayBounds = wmHelper.currentState.layerState
-                        .physicalDisplayBounds ?: error("Display not found")
-                }
+    /** {@inheritDoc} */
+    override val transition: FlickerBuilder.() -> Unit = {
+        setup {
+            test {
+                tapl.setExpectedRotation(testSpec.startRotation)
             }
-            transitions {
-                tapl.launchedAppState.quickSwitchToPreviousAppSwipeLeft()
+            eachRun {
+                testApp1.launchViaIntent(wmHelper)
+                testApp2.launchViaIntent(wmHelper)
+                tapl.launchedAppState.quickSwitchToPreviousApp()
                 wmHelper.StateSyncBuilder()
-                    .withNavBarStatusBarVisible()
+                    .withNavOrTaskBarVisible()
+                    .withStatusBarVisible()
                     .waitForAndVerify()
+                startDisplayBounds = wmHelper.currentState.layerState
+                    .physicalDisplayBounds ?: error("Display not found")
             }
+        }
+        transitions {
+            tapl.launchedAppState.quickSwitchToPreviousAppSwipeLeft()
+            wmHelper.StateSyncBuilder()
+                .withNavOrTaskBarVisible()
+                .withStatusBarVisible()
+                .waitForAndVerify()
+        }
 
-            teardown {
-                test {
-                    testApp1.exit(wmHelper)
-                    testApp2.exit(wmHelper)
-                }
+        teardown {
+            test {
+                testApp1.exit(wmHelper)
+                testApp2.exit(wmHelper)
             }
         }
     }
@@ -279,52 +271,28 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
         }
     }
 
-    /**
-     * Checks that the navbar window is visible throughout the entire transition.
-     */
-    @Presubmit
-    @Test
-    open fun navBarWindowIsAlwaysVisible() {
-        testSpec.navBarWindowIsVisible()
-    }
-
-    /**
-     * Checks that the navbar layer is visible throughout the entire transition.
-     */
-    @Presubmit
-    @Test
-    open fun navBarLayerAlwaysIsVisible() {
-        testSpec.navBarLayerIsVisible()
-    }
-
-    /**
-     * Checks that the navbar is always in the right position and covers the expected region.
-     *
-     * NOTE: This doesn't check that the navbar is visible or not.
-     */
+    /** {@inheritDoc} */
     @FlakyTest
     @Test
-    open fun navbarIsAlwaysInRightPosition() {
-        testSpec.navBarLayerRotatesAndScales()
-    }
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
-    /**
-     * Checks that the status bar window is visible throughout the entire transition.
-     */
-    @Presubmit
+    /** {@inheritDoc} */
+    @Postsubmit
     @Test
-    open fun statusBarWindowIsAlwaysVisible() {
-        testSpec.statusBarWindowIsVisible()
-    }
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    /**
-     * Checks that the status bar layer is visible throughout the entire transition.
-     */
-    @Presubmit
+    /** {@inheritDoc} */
+    @Postsubmit
     @Test
-    open fun statusBarLayerIsAlwaysVisible() {
-        testSpec.statusBarLayerIsVisible()
-    }
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         private var startDisplayBounds = Rect.EMPTY

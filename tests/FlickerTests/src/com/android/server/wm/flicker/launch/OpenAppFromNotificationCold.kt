@@ -42,8 +42,10 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
 @Postsubmit
-open class OpenAppFromNotificationCold(testSpec: FlickerTestParameter) :
-    OpenAppFromNotificationWarm(testSpec) {
+open class OpenAppFromNotificationCold(
+    testSpec: FlickerTestParameter
+) : OpenAppFromNotificationWarm(testSpec) {
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
@@ -59,10 +61,81 @@ open class OpenAppFromNotificationCold(testSpec: FlickerTestParameter) :
             }
         }
 
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun notificationAppWindowVisibleAtEnd() = super.notificationAppWindowVisibleAtEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun notificationAppWindowOnTopAtEnd() = super.notificationAppWindowOnTopAtEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun notificationAppLayerVisibleAtEnd() = super.notificationAppLayerVisibleAtEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
+
+    /** {@inheritDoc} */
     @Test
     @Postsubmit
     override fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
 
+    /** {@inheritDoc} */
     @Test
     @Postsubmit
     override fun appLayerBecomesVisible() = appLayerBecomesVisible_coldStart()
@@ -84,7 +157,7 @@ open class OpenAppFromNotificationCold(testSpec: FlickerTestParameter) :
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(repetitions = 3)
+                .getConfigNonRotationTests(repetitions = 3)
         }
     }
 }

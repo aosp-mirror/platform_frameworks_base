@@ -54,11 +54,10 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class OpenAppColdFromIcon(testSpec: FlickerTestParameter) :
-    OpenAppFromLauncherTransition(testSpec) {
-    /**
-     * Defines the transition used to run the test
-     */
+class OpenAppColdFromIcon(
+    testSpec: FlickerTestParameter
+) : OpenAppFromLauncherTransition(testSpec) {
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
@@ -82,85 +81,107 @@ class OpenAppColdFromIcon(testSpec: FlickerTestParameter) :
             }
         }
 
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appWindowAsTopWindowAtEnd() =
+        super.appWindowAsTopWindowAtEnd()
+
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun appWindowReplacesLauncherAsTopWindow() =
         super.appWindowReplacesLauncherAsTopWindow()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun appLayerBecomesVisible() =
         super.appLayerBecomesVisible()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun appLayerReplacesLauncher() =
-        super.appLayerReplacesLauncher()
+    override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun appWindowBecomesTopWindow() =
-        super.appWindowBecomesTopWindow()
+    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun appWindowBecomesVisible() =
-        super.appWindowBecomesVisible()
+    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun entireScreenCovered() =
-        super.entireScreenCovered()
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun focusChanges() =
-        super.focusChanges()
+    override fun focusChanges() = super.focusChanges()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun navBarLayerIsVisible() =
-        super.navBarLayerIsVisible()
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun navBarLayerRotatesAndScales() =
-        super.navBarLayerRotatesAndScales()
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun navBarWindowIsVisible() =
-        super.navBarWindowIsVisible()
+    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun statusBarLayerRotatesScales() =
-        super.statusBarLayerRotatesScales()
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun statusBarLayerIsVisible() =
-        super.statusBarLayerIsVisible()
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun statusBarWindowIsVisible() =
-        super.statusBarWindowIsVisible()
+    override fun statusBarLayerPositionAtStartAndEnd() =
+        super.statusBarLayerPositionAtStartAndEnd()
 
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
+    /** {@inheritDoc} */
     @Postsubmit
     @Test
-    override fun appWindowIsTopWindowAtEnd() =
-        super.appWindowIsTopWindowAtEnd()
+    override fun appWindowIsTopWindowAtEnd() = super.appWindowIsTopWindowAtEnd()
 
     companion object {
         /**
