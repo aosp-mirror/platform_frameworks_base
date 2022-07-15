@@ -34,6 +34,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.mockito.Mockito;
 
+import java.util.concurrent.ExecutionException;
+
 public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
 
     public static final Class<?>[] ALL_SUPPORTED_CLASSES = LeakCheckedTest.ALL_SUPPORTED_CLASSES;
@@ -54,10 +56,11 @@ public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
     }
 
     @Before
-    public void SysuiSetup() {
-        SystemUIFactory.createFromConfig(mContext, true);
-        mDependency = new TestableDependency(
-                SystemUIFactory.getInstance().getSysUIComponent().createDependency());
+    public void sysuiSetup() throws ExecutionException, InterruptedException {
+        SystemUIInitializer initializer =
+                SystemUIInitializerFactory.createFromConfigNoAssert(mContext);
+        initializer.init(true);
+        mDependency = new TestableDependency(initializer.getSysUIComponent().createDependency());
         Dependency.setInstance(mDependency);
 
         // TODO: Figure out another way to give reference to a SysuiTestableContext.
@@ -77,7 +80,6 @@ public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
     public void SysuiTeardown() {
         InstrumentationRegistry.registerInstance(mRealInstrumentation,
                 InstrumentationRegistry.getArguments());
-        SystemUIFactory.cleanup();
     }
 
     @AfterClass
