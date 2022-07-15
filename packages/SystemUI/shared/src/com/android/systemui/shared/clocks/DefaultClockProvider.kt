@@ -84,6 +84,9 @@ class DefaultClock(
         resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale_burmese)
     private val defaultLineSpacing = resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale)
 
+    private var smallRegionDarkness = RegionDarkness.DEFAULT
+    private var largeRegionDarkness = RegionDarkness.DEFAULT
+
     private fun updateClockColor(clock: AnimatableClockView, isRegionDark: RegionDarkness) {
         val color = if (isRegionDark.isDark) {
             resources.getColor(android.R.color.system_accent2_100)
@@ -91,6 +94,7 @@ class DefaultClock(
             resources.getColor(android.R.color.system_accent1_600)
         }
         clock.setColors(DOZE_COLOR, color)
+        clock.animateAppearOnLockscreen()
     }
 
     override val events = object : ClockEvents {
@@ -119,8 +123,14 @@ class DefaultClock(
                 smallClockIsDark: RegionDarkness,
                 largeClockIsDark: RegionDarkness
         ) {
-            updateClockColor(smallClock, smallClockIsDark)
-            updateClockColor(largeClock, largeClockIsDark)
+            if (smallRegionDarkness != smallClockIsDark) {
+                smallRegionDarkness = smallClockIsDark
+                updateClockColor(smallClock, smallClockIsDark)
+            }
+            if (largeRegionDarkness != largeClockIsDark) {
+                largeRegionDarkness = largeClockIsDark
+                updateClockColor(largeClock, largeClockIsDark)
+            }
         }
 
         override fun onLocaleChanged(locale: Locale) {
