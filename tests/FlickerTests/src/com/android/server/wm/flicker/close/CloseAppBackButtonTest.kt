@@ -24,8 +24,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -83,28 +81,6 @@ class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
     @FlakyTest(bugId = 206753786)
     @Test
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() {
-        // This test doesn't work in shell transitions because of b/206753786
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        super.statusBarLayerPositionAtStartAndEnd()
-    }
-
-    @FlakyTest(bugId = 214452854)
-    @Test
-    fun statusBarLayerPositionAtStartAndEnd_shellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        super.statusBarLayerPositionAtStartAndEnd()
-    }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 229762973)
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     companion object {
         /**
