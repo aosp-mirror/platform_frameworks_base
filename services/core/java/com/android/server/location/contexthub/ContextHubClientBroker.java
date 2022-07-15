@@ -162,7 +162,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * The remote callback interface for this client. This will be set to null whenever the
      * client connection is closed (either explicitly or via binder death).
      */
-    private IContextHubClientCallback mCallbackInterface = null;
+    private IContextHubClientCallback mCallbackInterface;
 
     /*
      * True if the client is still registered with the Context Hub Service, false otherwise.
@@ -170,16 +170,19 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private boolean mRegistered = true;
 
     /**
-     * String containing an attribution tag that was denoted in the {@link Context} of the
-     * creator of this broker. This is used when attributing the permissions usage of the broker.
+     * String containing an attribution tag that was denoted in the {@link Context} of the creator
+     * of this broker. This is used when attributing the permissions usage of the broker.
      */
-    private @Nullable String mAttributionTag;
+    @Nullable private String mAttributionTag;
 
     /** Wakelock held while nanoapp message are in flight to the client */
     @GuardedBy("mWakeLock")
     private final WakeLock mWakeLock;
 
-    /** True if {@link #mWakeLock} is open for acquisition. */
+    /**
+     * True if {@link #mWakeLock} is open for acquisition. It is set to false after the client is
+     * unregistered.
+     */
     @GuardedBy("mWakeLock")
     private boolean mIsWakeLockActive = true;
 
@@ -223,13 +226,13 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     /*
      * True if a PendingIntent has been cancelled.
      */
-    private AtomicBoolean mIsPendingIntentCancelled = new AtomicBoolean(false);
+    private final AtomicBoolean mIsPendingIntentCancelled = new AtomicBoolean(false);
 
     /**
      * True if a permissions query has been issued and is being processed. Used to prevent too many
      * queries from being issued by a single client at once.
      */
-    private AtomicBoolean mIsPermQueryIssued = new AtomicBoolean(false);
+    private final AtomicBoolean mIsPermQueryIssued = new AtomicBoolean(false);
 
     /*
      * Map containing all nanoapps this client has a messaging channel with and whether it is
@@ -279,7 +282,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     /*
      * Helper class to manage registered PendingIntent requests from the client.
      */
-    private class PendingIntentRequest {
+    private static class PendingIntentRequest {
         /*
          * The PendingIntent object to request, null if there is no open request.
          */
@@ -606,7 +609,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * Notifies the client of a hub reset event if the connection is open.
      */
     /* package */ void onHubReset() {
-        invokeCallback(callback -> callback.onHubReset());
+        invokeCallback(IContextHubClientCallback::onHubReset);
         sendPendingIntent(() -> createIntent(ContextHubManager.EVENT_HUB_RESET));
 
         // Re-send the host endpoint connected event as the Context Hub restarted.
@@ -634,7 +637,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @return true if the given PendingIntent is currently registered, false otherwise
      */
     /* package */ boolean hasPendingIntent(PendingIntent intent, long nanoAppId) {
-        PendingIntent pendingIntent = null;
+        PendingIntent pendingIntent;
         long intentNanoAppId;
         synchronized (this) {
             pendingIntent = mPendingIntentRequest.getPendingIntent();
@@ -680,7 +683,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     /* package */ boolean notePermissions(List<String> permissions, String noteMessage) {
         for (String permission : permissions) {
-            int opCode = mAppOpsManager.permissionToOpCode(permission);
+            int opCode = AppOpsManager.permissionToOpCode(permission);
             if (opCode != AppOpsManager.OP_NONE) {
                 try {
                     if (mAppOpsManager.noteOp(opCode, mUid, mPackage, mAttributionTag, noteMessage)
@@ -833,7 +836,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private synchronized void invokeCallback(CallbackConsumer consumer) {
         if (mCallbackInterface != null) {
             try {
-                Binder.withCleanCallingIdentity(this::acquireWakeLock);
+                acquireWakeLock();
                 consumer.accept(mCallbackInterface);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while invoking client callback (host endpoint ID = "
@@ -902,7 +905,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private void doSendPendingIntent(PendingIntent pendingIntent, Intent intent) {
         try {
             String requiredPermission = Manifest.permission.ACCESS_CONTEXT_HUB;
-            Binder.withCleanCallingIdentity(this::acquireWakeLock);
+            acquireWakeLock();
             pendingIntent.send(
                     mContext,
                     /* code= */ 0,
@@ -939,13 +942,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             mCallbackInterface.asBinder().unlinkToDeath(this, 0 /* flags */);
             mCallbackInterface = null;
         }
+        // The client is only unregistered and cleared when there is NOT any PendingIntent
         if (!mPendingIntentRequest.hasPendingIntent() && mRegistered) {
             mClientManager.unregisterClient(mHostEndPointId);
             mRegistered = false;
-            Binder.withCleanCallingIdentity(this::releaseWakeLockOnExit);
+            mAppOpsManager.stopWatchingMode(this);
+            mContextHubProxy.onHostEndpointDisconnected(mHostEndPointId);
+            releaseWakeLockOnExit();
         }
-        mAppOpsManager.stopWatchingMode(this);
-        mContextHubProxy.onHostEndpointDisconnected(mHostEndPointId);
     }
 
     private String authStateToString(@ContextHubManager.AuthorizationState int state) {
@@ -996,43 +1000,46 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
 
     @Override
     public String toString() {
-        String out = "[ContextHubClient ";
-        out += "endpointID: " + getHostEndPointId() + ", ";
-        out += "contextHub: " + getAttachedContextHubId() + ", ";
+        StringBuilder out = new StringBuilder("[ContextHubClient ");
+        out.append("endpointID: ").append(getHostEndPointId()).append(", ");
+        out.append("contextHub: ").append(getAttachedContextHubId()).append(", ");
         if (mAttributionTag != null) {
-            out += "attributionTag: " + getAttributionTag() + ", ";
+            out.append("attributionTag: ").append(getAttributionTag()).append(", ");
         }
         if (mPendingIntentRequest.isValid()) {
-            out += "intentCreatorPackage: " + mPackage + ", ";
-            out += "nanoAppId: 0x" + Long.toHexString(mPendingIntentRequest.getNanoAppId());
+            out.append("intentCreatorPackage: ").append(mPackage).append(", ");
+            out.append("nanoAppId: 0x")
+                    .append(Long.toHexString(mPendingIntentRequest.getNanoAppId()));
         } else {
-            out += "package: " + mPackage;
+            out.append("package: ").append(mPackage);
         }
         if (mMessageChannelNanoappIdMap.size() > 0) {
-            out += " messageChannelNanoappSet: (";
+            out.append(" messageChannelNanoappSet: (");
             Iterator<Map.Entry<Long, Integer>> it =
                     mMessageChannelNanoappIdMap.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<Long, Integer> entry = it.next();
-                out += "0x" + Long.toHexString(entry.getKey()) + " auth state: "
-                        + authStateToString(entry.getValue());
+                out.append("0x")
+                        .append(Long.toHexString(entry.getKey()))
+                        .append(" auth state: ")
+                        .append(authStateToString(entry.getValue()));
                 if (it.hasNext()) {
-                    out += ",";
+                    out.append(",");
                 }
             }
-            out += ")";
+            out.append(")");
         }
         synchronized (mWakeLock) {
-            out += "wakelock: " + mWakeLock;
+            out.append("wakelock: ").append(mWakeLock);
         }
-        out += "]";
-        return out;
+        out.append("]");
+        return out.toString();
     }
 
     /** Callback that arrives when direct-call message callback delivery completed */
     @Override
     public void callbackFinished() {
-        Binder.withCleanCallingIdentity(this::releaseWakeLock);
+        releaseWakeLock();
     }
 
     @Override
@@ -1042,15 +1049,18 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             int resultCode,
             String resultData,
             Bundle resultExtras) {
-        Binder.withCleanCallingIdentity(this::releaseWakeLock);
+        releaseWakeLock();
     }
 
     private void acquireWakeLock() {
-        synchronized (mWakeLock) {
-            if (mIsWakeLockActive) {
-                mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
-            }
-        }
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    synchronized (mWakeLock) {
+                        if (mIsWakeLockActive) {
+                            mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
+                        }
+                    }
+                });
     }
 
     /**
@@ -1059,15 +1069,18 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * <p>The check-and-release operation should be atomic to avoid overly release.
      */
     private void releaseWakeLock() {
-        synchronized (mWakeLock) {
-            if (mWakeLock.isHeld()) {
-                try {
-                    mWakeLock.release();
-                } catch (RuntimeException e) {
-                    Log.e(TAG, "Releasing the wakelock fails - ", e);
-                }
-            }
-        }
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    synchronized (mWakeLock) {
+                        if (mWakeLock.isHeld()) {
+                            try {
+                                mWakeLock.release();
+                            } catch (RuntimeException e) {
+                                Log.e(TAG, "Releasing the wakelock fails - ", e);
+                            }
+                        }
+                    }
+                });
     }
 
     /**
@@ -1076,16 +1089,22 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * <p>The check-and-release operation should be atomic to avoid overly release.
      */
     private void releaseWakeLockOnExit() {
-        synchronized (mWakeLock) {
-            mIsWakeLockActive = false;
-            while (mWakeLock.isHeld()) {
-                try {
-                    mWakeLock.release();
-                } catch (RuntimeException e) {
-                    Log.e(TAG, "Releasing the wakelock for all acquisitions fails - ", e);
-                    break;
-                }
-            }
-        }
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    synchronized (mWakeLock) {
+                        mIsWakeLockActive = false;
+                        while (mWakeLock.isHeld()) {
+                            try {
+                                mWakeLock.release();
+                            } catch (RuntimeException e) {
+                                Log.e(
+                                        TAG,
+                                        "Releasing the wakelock for all acquisitions fails - ",
+                                        e);
+                                break;
+                            }
+                        }
+                    }
+                });
     }
 }
