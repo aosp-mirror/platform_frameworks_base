@@ -272,12 +272,12 @@ open class QuickSwitchBetweenTwoAppsForwardTest(
     }
 
     /** {@inheritDoc} */
-    @FlakyTest
+    @Postsubmit
     @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 239148258)
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
@@ -289,7 +289,7 @@ open class QuickSwitchBetweenTwoAppsForwardTest(
         super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 239148258)
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
