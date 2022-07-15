@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 import android.widget.TextView;
 
@@ -79,7 +80,7 @@ public class DreamWeatherComplicationTest extends SysuiTestCase {
         final DreamWeatherComplication.DreamWeatherViewController controller =
                 new DreamWeatherComplication.DreamWeatherViewController(mock(
                         TextView.class), TRAMPOLINE_COMPONENT, mock(ActivityStarter.class),
-                        mDreamSmartspaceController);
+                        mDreamSmartspaceController, mock(Resources.class));
         controller.onViewAttached();
         verify(mDreamSmartspaceController).addUnfilteredListener(any());
         controller.onViewDetached();

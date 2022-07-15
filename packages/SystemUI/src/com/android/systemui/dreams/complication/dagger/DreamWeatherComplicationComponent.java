@@ -19,12 +19,14 @@ package com.android.systemui.dreams.complication.dagger;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.ComplicationLayoutParams;
 import com.android.systemui.dreams.complication.DreamWeatherComplication.DreamWeatherViewHolder;
 
@@ -34,6 +36,7 @@ import java.lang.annotation.Retention;
 import javax.inject.Named;
 import javax.inject.Scope;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Subcomponent;
@@ -106,5 +109,12 @@ public interface DreamWeatherComplicationComponent {
                     ComplicationLayoutParams.DIRECTION_END,
                     INSERT_ORDER_WEIGHT, /* snapToGuide= */ true);
         }
+
+        /**
+         * Binds resources in the dream weather complication scope.
+         */
+        @Binds
+        @DreamWeatherComplicationScope
+        Resources getResources(@Main Resources resources);
     }
 }

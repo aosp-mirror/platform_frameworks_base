@@ -24,6 +24,7 @@ import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.text.TextUtils;
@@ -133,16 +134,19 @@ public class DreamWeatherComplication implements Complication {
         private final ActivityStarter mActivityStarter;
         private final String mSmartspaceTrampolineActivityComponent;
         private SmartspaceTargetListener mSmartspaceTargetListener;
+        private final Resources mResources;
 
         @Inject
         DreamWeatherViewController(
                 @Named(DREAM_WEATHER_COMPLICATION_VIEW) TextView view,
                 @Named(SMARTSPACE_TRAMPOLINE_ACTIVITY_COMPONENT) String smartspaceTrampoline,
                 ActivityStarter activityStarter,
-                DreamSmartspaceController smartspaceController
+                DreamSmartspaceController smartspaceController,
+                Resources resources
         ) {
             super(view);
             mActivityStarter = activityStarter;
+            mResources = resources;
             mSmartSpaceController = smartspaceController;
             mSmartspaceTrampolineActivityComponent = smartspaceTrampoline;
         }
@@ -161,8 +165,10 @@ public class DreamWeatherComplication implements Complication {
                                 return;
                             }
 
-                            String temperature = headerAction.getTitle().toString();
+                            final CharSequence temperature = headerAction.getTitle();
                             mView.setText(temperature);
+                            mView.setContentDescription(getFormattedContentDescription(temperature,
+                                    headerAction.getContentDescription()));
                             final Icon icon = headerAction.getIcon();
                             if (icon != null) {
                                 final int iconSize =
@@ -174,7 +180,6 @@ public class DreamWeatherComplication implements Complication {
                                 mView.setCompoundDrawablePadding(
                                         getResources().getDimensionPixelSize(
                                                 R.dimen.smart_action_button_icon_padding));
-
                             }
                             mView.setOnClickListener(v -> {
                                 final Intent intent = headerAction.getIntent();
@@ -195,6 +200,22 @@ public class DreamWeatherComplication implements Complication {
         @Override
         protected void onViewDetached() {
             mSmartSpaceController.removeUnfilteredListener(mSmartspaceTargetListener);
+        }
+
+        /**
+         * Returns a formatted content description for accessibility of the weather condition and
+         * temperature.
+         */
+        private CharSequence getFormattedContentDescription(CharSequence temperature,
+                CharSequence weatherCondition) {
+            if (TextUtils.isEmpty(temperature)) {
+                return weatherCondition;
+            } else if (TextUtils.isEmpty(weatherCondition)) {
+                return temperature;
+            }
+
+            return mResources.getString(R.string.dream_overlay_weather_complication_desc,
+                    weatherCondition, temperature);
         }
     }
 }
