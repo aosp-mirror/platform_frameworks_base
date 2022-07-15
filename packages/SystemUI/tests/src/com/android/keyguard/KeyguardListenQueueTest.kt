@@ -92,7 +92,6 @@ private fun faceModel(user: Int) = KeyguardFaceListenModel(
     keyguardAwake = false,
     keyguardGoingAway = false,
     listeningForFaceAssistant = false,
-    lockIconPressed = false,
     occludingAppRequestingFaceAuth = false,
     primaryUser = false,
     scanningAllowedByStrongAuth = false,
