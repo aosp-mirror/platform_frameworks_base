@@ -131,13 +131,6 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
         }
     }
 
-    /**
-     * Checks the position of the [ComponentMatcher.NAV_BAR] at the end of the transition
-     */
-    @Postsubmit
-    @Test
-    override fun navBarLayerPositionAtEnd() = super.navBarLayerPositionAtEnd()
-
     /** {@inheritDoc} */
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun taskBarLayerIsVisibleAtStartAndEnd() { }
@@ -162,7 +155,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
      * Checks the position of the [ComponentMatcher.STATUS_BAR] at the end of the
      * transition
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarLayerPositionEnd() = testSpec.statusBarLayerPositionAtEnd()
 
