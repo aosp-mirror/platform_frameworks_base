@@ -389,6 +389,16 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testBouncerIsOrWillBeShowing_whenBouncerIsInTransit() {
+        when(mBouncer.isShowing()).thenReturn(false);
+        when(mBouncer.inTransit()).thenReturn(true);
+
+        assertTrue(
+                "Is or will be showing should be true when bouncer is in transit",
+                mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing());
+    }
+
+    @Test
     public void testShowAltAuth_unlockingWithBiometricNotAllowed() {
         // GIVEN alt auth exists, unlocking with biometric isn't allowed
         mStatusBarKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);

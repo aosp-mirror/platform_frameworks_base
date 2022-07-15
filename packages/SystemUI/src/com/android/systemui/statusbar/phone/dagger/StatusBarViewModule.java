@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
@@ -290,4 +291,17 @@ public abstract class StatusBarViewModule {
                 secureSettings,
                 mainExecutor);
     }
+
+    /**
+     * Constructs a new, unattached {@link KeyguardBottomAreaView}.
+     *
+     * Note that this is explicitly _not_ a singleton, as we want to be able to reinflate it
+     */
+    @Provides
+    public static KeyguardBottomAreaView providesKeyguardBottomAreaView(
+            NotificationPanelView npv, LayoutInflater layoutInflater) {
+        return (KeyguardBottomAreaView) layoutInflater.inflate(R
+                .layout.keyguard_bottom_area, npv, false);
+    }
+
 }
