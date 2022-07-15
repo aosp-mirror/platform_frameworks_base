@@ -29758,7 +29758,7 @@ package android.os {
     method @Deprecated public static void changeDebugPort(int);
     method public static void dumpHprofData(String) throws java.io.IOException;
     method public static boolean dumpService(String, java.io.FileDescriptor, String[]);
-    method public static void enableEmulatorTraceOutput();
+    method @Deprecated public static void enableEmulatorTraceOutput();
     method public static int getBinderDeathObjectCount();
     method public static int getBinderLocalObjectCount();
     method public static int getBinderProxyObjectCount();
