@@ -182,7 +182,7 @@ open class SwitchImeWindowsFromGestureNavTest(
     }
 
     @Test
-    fun imeLayerIsVisibleWhenSwitchingToImeApp() {
+    open fun imeLayerIsVisibleWhenSwitchingToImeApp() {
         testSpec.assertLayersStart {
             isVisible(ComponentMatcher.IME)
         }
