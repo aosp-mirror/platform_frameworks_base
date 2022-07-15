@@ -419,6 +419,7 @@ package android.app {
   public class TaskInfo {
     method public boolean containsLaunchCookie(@NonNull android.os.IBinder);
     method @NonNull public android.content.res.Configuration getConfiguration();
+    method public int getDisplayId();
     method public int getParentTaskId();
     method @Nullable public android.app.PictureInPictureParams getPictureInPictureParams();
     method @NonNull public android.window.WindowContainerToken getToken();
