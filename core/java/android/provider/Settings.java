@@ -11371,6 +11371,7 @@ public final class Settings {
          * <li>{@link BatteryManager#BATTERY_PLUGGED_AC} to stay on for AC charger</li>
          * <li>{@link BatteryManager#BATTERY_PLUGGED_USB} to stay on for USB charger</li>
          * <li>{@link BatteryManager#BATTERY_PLUGGED_WIRELESS} to stay on for wireless charger</li>
+         * <li>{@link BatteryManager#BATTERY_PLUGGED_DOCK} to stay on for dock charger</li>
          * </ul>
          * These values can be OR-ed together.
          */
