@@ -637,7 +637,7 @@ public final class InputMethodManager {
      * {@link android.view.WindowInsetsController}.
      * @hide
      */
-    public void reportPerceptible(IBinder windowToken, boolean perceptible) {
+    public void reportPerceptible(@NonNull IBinder windowToken, boolean perceptible) {
         mServiceInvoker.reportPerceptibleAsync(windowToken, perceptible);
     }
 
@@ -1396,6 +1396,7 @@ public final class InputMethodManager {
      *
      * @return {@link List} of {@link InputMethodInfo}.
      */
+    @NonNull
     public List<InputMethodInfo> getInputMethodList() {
         // We intentionally do not use UserHandle.getCallingUserId() here because for system
         // services InputMethodManagerInternal.getInputMethodListAsUser() should be used
@@ -1474,6 +1475,7 @@ public final class InputMethodManager {
      *
      * @return {@link List} of {@link InputMethodInfo}.
      */
+    @NonNull
     public List<InputMethodInfo> getEnabledInputMethodList() {
         // We intentionally do not use UserHandle.getCallingUserId() here because for system
         // services InputMethodManagerInternal.getEnabledInputMethodListAsUser() should be used
@@ -1498,12 +1500,14 @@ public final class InputMethodManager {
      *
      * <p>On multi user environment, this API returns a result for the calling process user.</p>
      *
-     * @param imi An input method info whose subtypes list will be returned.
+     * @param imi The {@link InputMethodInfo} whose subtypes list will be returned. If {@code null},
+     * returns enabled subtypes for the currently selected {@link InputMethodInfo}.
      * @param allowsImplicitlySelectedSubtypes A boolean flag to allow to return the implicitly
      * selected subtypes. If an input method info doesn't have enabled subtypes, the framework
      * will implicitly enable subtypes according to the current system language.
      */
-    public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi,
+    @NonNull
+    public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(@Nullable InputMethodInfo imi,
             boolean allowsImplicitlySelectedSubtypes) {
         return mServiceInvoker.getEnabledInputMethodSubtypeList(
                 imi == null ? null : imi.getId(),
@@ -2606,7 +2610,7 @@ public final class InputMethodManager {
      * @param windowToken The client window token that requests the IME to remove its surface.
      * @hide
      */
-    public void removeImeSurface(IBinder windowToken) {
+    public void removeImeSurface(@NonNull IBinder windowToken) {
         synchronized (mH) {
             mServiceInvoker.removeImeSurfaceFromWindowAsync(windowToken);
         }
@@ -3238,7 +3242,7 @@ public final class InputMethodManager {
      * @param imiId An input method, whose subtypes settings will be shown. If imiId is null,
      * subtypes of all input methods will be shown.
      */
-    public void showInputMethodAndSubtypeEnabler(String imiId) {
+    public void showInputMethodAndSubtypeEnabler(@Nullable String imiId) {
         mServiceInvoker.showInputMethodAndSubtypeEnablerFromClient(mClient, imiId);
     }
 
@@ -3247,6 +3251,7 @@ public final class InputMethodManager {
      * the current input method. This method returns null when the current input method doesn't
      * have any input method subtype.
      */
+    @Nullable
     public InputMethodSubtype getCurrentInputMethodSubtype() {
         return mServiceInvoker.getCurrentInputMethodSubtype();
     }
@@ -3481,10 +3486,12 @@ public final class InputMethodManager {
      *             of "Additional Subtype" may be completely dropped in a future version of Android.
      */
     @Deprecated
-    public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
+    public void setAdditionalInputMethodSubtypes(@NonNull String imiId,
+            @NonNull InputMethodSubtype[] subtypes) {
         mServiceInvoker.setAdditionalInputMethodSubtypes(imiId, subtypes);
     }
 
+    @Nullable
     public InputMethodSubtype getLastInputMethodSubtype() {
         return mServiceInvoker.getLastInputMethodSubtype();
     }
