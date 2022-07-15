@@ -126,12 +126,6 @@ class ChangeAppRotationTest(
     /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest
-    @Test
     override fun navBarLayerPositionAtStartAndEnd() =
         super.navBarLayerPositionAtStartAndEnd()
 
