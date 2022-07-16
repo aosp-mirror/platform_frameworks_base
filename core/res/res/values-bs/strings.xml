@@ -554,6 +554,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Omogućava aplikaciji da sazna nivo kompleksnosti zaključavanja ekrana (visoki, srednji, niski ili bez zaključavanja), što naznačava mogući raspon trajanja i vrste zaključavanja ekrana. Aplikacija također može korisnicima predložiti da ažuriraju zaključavanje ekrana do određenog nivoa, ali korisnici slobodno mogu ignorirati prijedlog i napustiti stranicu. Važno je napomenuti da se zaključavanje ekrana ne pohranjuje kao obični tekst tako da aplikacija ne zna tačnu lozinku."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"prikaz obavještenja"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Dozvoljava aplikaciji da prikazuje obavještenja"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"uključivanje ekrana"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Omogućava aplikaciji da uključi ekran."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"koristi biometrijski hardver za otiske prstij"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Omogućava aplikaciji da za autentifikaciju koristi biometrijski hardver"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"upravljanje hardverom za otisak prsta"</string>
@@ -2076,8 +2078,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saznajte više"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Poboljšana obavještenja su zamijenila Prilagodljiva obavještenja Androida u verziji Android 12. Ova funkcija prikazuje predložene radnje i odgovore te organizira vaša obavještenja.\n\nPoboljšana obavještenja mogu pristupiti sadržaju obavještenja, uključujući lične informacije kao što su imena kontakata i poruke. Ova funkcija također može odbacivati obavještenja ili reagirati na njih, npr. može odgovarati na telefonske pozive i kontrolirati funkciju Ne ometaj."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Obavještenje za informacije Rutinskog načina"</string>
-    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Uključena je štednja baterije"</string>
-    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Smanjuje se potrošnja baterije radi produženja njezinog trajanja"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Ušteda baterije je uključena"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Smanjena je potrošnja baterije da se produži vijek trajanja baterije"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Ušteda baterije"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Ušteda baterije je isključena"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefon se dovoljno napunio. Funkcije nisu više ograničene."</string>
@@ -2285,4 +2287,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nije moguće pristupiti kameri telefona s uređaja <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nije moguće pristupiti kameri tableta s uređaja <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Sistemski zadano"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

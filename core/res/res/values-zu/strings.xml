@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Ivumela uhlelo lokusebenza ukuthi lifunde ileveli yobunkimbinkimbi bokukhiya isikrini (okuphezulu, okuphakathi nendawo, okuphansi noma lutho), obubonisa ibanga elingaba khona lobude nohlobo lokukhiya isikrini Uhlelo lokusebenza lungaphinda luphakamise kubasebenzisi ukuthi babuyekeze ukukhiya isikrini kuleveli elithile kodwa abasebenzisi bangaziba ngokukhululekile baphinde bazulazule nje. Qaphela ukuthi ukukhiya isikrini akugcinwa kumbhalo osobala ukuze uhlelo lokusebenza lungayazi iphasiwedi enembile."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"bonisa izaziso"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Kuvumela i-app ibonise izaziso"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"vula isikrini"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Ivumela i-app ukuthi ivule isikrini."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"sebenzisa izingxenyekazi zekhompyutha ze-biometric"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Ivumela uhlelo lokusebenza ukuthi lusebenzise izingxenyekazi zekhompyutha ze-biometric ukuze kuqinisekiswe"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"phatha izingxenyekazi zekhompyutha zezigxivizo zeminwe"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ayikwazi ukufinyelela ikhamera yefoni kusuka ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ayikwazi ukufinyelela ikhamera yethebulethi kusuka ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Okuzenzakalelayo kwesistimu"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

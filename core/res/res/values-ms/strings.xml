@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Benarkan apl mengetahui tahap kekompleksan kunci skrin (tinggi, sederhana, rendah atau tiada) yang menunjukkan kemungkinan julat panjang dan jenis kunci skrin. Apl juga boleh mencadangkan kepada pengguna supaya mengemas kini kunci skrin pada tahap tertentu namun pengguna boleh mengabaikan dan menavigasi keluar dengan bebas. Sila ambil perhatian bahawa kunci skrin tidak disimpan dalam format teks biasa, maka apl tidak mengetahui kata laluan yang tepat."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"tunjukkan pemberitahuan"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Membenarkan apl menunjukkan pemberitahuan"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"hidupkan skrin"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Membenarkan apl untuk menghidupkan skrin."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"gunakan perkakasan biometrik"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Membenarkan apl menggunakan perkakasan biometrik untuk pengesahan"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"urus perkakasan cap jari"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Tidak dapat mengakses kamera telefon daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Tidak dapat mengakses kamera tablet daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Lalai sistem"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

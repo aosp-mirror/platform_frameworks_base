@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"អនុញ្ញាតឱ្យ​កម្មវិធី​រៀនអំពី​កម្រិតស្មុគស្មាញ​ការនៃការចាក់សោអេក្រង់ (ខ្ពស់ មធ្យម​ ទាប ឬគ្មាន) ដែល​បញ្ជាក់អំពី​​ប្រវែង និងប្រភេទ​នៃការចាក់សោអេក្រង់។ កម្មវិធី​នេះ​ក៏​អាច​ណែនាំឱ្យ​អ្នកប្រើប្រាស់​ធ្វើបច្ចុប្បន្នភាព​ការចាក់សោ​អេក្រង់​ទៅកម្រិតជាក់លាក់​ផងដែរ ប៉ុន្តែ​អ្នកប្រើប្រាស់​អាច​មិនអើពើនឹង​ការណែនាំនេះ​ដោយសេរី។ សូម​ចំណាំថា ការចាក់សោអេក្រង់​មិន​ត្រូវបាន​រក្សាទុក​ជាអត្ថបទ​ធម្មតាទេ ដូច្នេះ​កម្មវិធីនេះ​មិន​ស្គាល់​ពាក្យសម្ងាត់​ពិតប្រាកដ​ឡើយ។"</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"បង្ហាញ​ការជូនដំណឹង"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"អនុញ្ញាតឱ្យ​កម្មវិធីបង្ហាញ​ការជូនដំណឹង"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"បើកអេក្រង់"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"អនុញ្ញាតឱ្យកម្មវិធីបើកអេក្រង់។"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ប្រើ​ឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ប្រើ​ឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ​សម្រាប់​ការផ្ទៀងផ្ទាត់"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"គ្រប់គ្រងផ្នែករឹងស្នាមម្រាមដៃ"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"មិនអាច​ចូលប្រើ​កាមេរ៉ាទូរសព្ទ​ពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"មិនអាច​ចូលប្រើ​កាមេរ៉ា​ថេប្លេតពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"លំនាំ​ដើម​ប្រព័ន្ធ"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

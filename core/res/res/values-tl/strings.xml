@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Pinapayagan ang app na malaman ang antas ng pagiging kumplikado ng lock ng screen (mataas, katamtaman, mababa, o wala), na nagsasaad ng posibleng hanay ng haba at uri ng lock ng screen. Puwede ring imungkahi ng app sa mga user na i-update nila ang lock ng screen sa isang partikular na antas ngunit malaya ang mga user na balewalain ito at mag-navigate palayo. Tandaang hindi naka-store bilang plaintext ang lock ng screen kaya hindi alam ng app ang eksaktong password."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"magpakita ng mga notification"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Pinapayagan ang app na magpakita ng mga notification"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"i-on ang screen"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Nagpapahintulot sa app na i-on ang screen."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"gumamit ng biometric hardware"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Pinapayagan ang app na gumamit ng biometric hardware para sa pag-authenticate"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"pamahalaan ang hardware ng fingerprint"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Matuto pa"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Pinalitan ng Mga pinahusay na notification ang Mga Adaptive na Notification ng Android sa Android 12. Nagpapakita ng mga iminumungkahing pagkilos at sagot ang feature na ito, at isinasaayos nito ang iyong mga notification.\n\nMaa-access ng Mga pinahusay na notification ang content ng notification, kabilang ang personal na impormasyon gaya ng mga pangalan ng contact at mensahe. Magagawa rin ng feature na ito na i-dismiss o tugunan ang mga notification, gaya ng pagsagot sa mga tawag sa telepono, at kontrolin ang Huwag Istorbohin."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification ng impormasyon ng Routine Mode"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Na-on ang Pantipid ng Baterya"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Binabawasan ang paggamit sa baterya para mapatagal ang baterya"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Pantipid ng Baterya"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Na-off ang Pantipid ng Baterya"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"May sapat na charge ang telepono. Hindi na pinaghihigpitan ang mga feature."</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Hindi ma-access ang camera ng telepono mula sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Hindi ma-access ang camera ng tablet mula sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Default ng system"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

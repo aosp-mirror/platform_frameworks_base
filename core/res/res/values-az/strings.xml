@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Tətbiqin ekran kilidinin uzunluğunu və növünü göstərən mürəkəblilik dərəcəsini (yüksək, orta, aşağı və ya heç biri) öyrənməsinə icazə verir. Tətbiq ekran kilidinin müəyyən səviyyəyə yenilənməsini təklif edə bilər. İstifadəçilər bu təklifdən imtina edə və davam edə bilər. Yadda saxlayın ekran kilidi açıq mətn formatında saxlanılmır, buna görə də tətbiq dəqiq parolu bilməyəcək."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"bildirişləri göstərmək"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Tətbiqə bildirişləri göstərmək icazəsi verir"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"ekranı aktiv etmək"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Tətbiqə ekranı aktiv etməyə icazə verir."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"biometrik proqramdan istifadə edin"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Doğrulama üçün biometrik proqramdan istifadə etməyə imkan verir"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"barmaq izi avadanlığını idarə edin"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Ətraflı məlumat"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12-də qabaqcıl bildirişlər var. Bu funksiya bütün bildirişləri qaydaya salır, cavab və əməliyyatlara dair tövsiyə verir.\n\nFunksiyanın kontaktlar, mesajlar və şəxsi məlumatlar daxil olmaqla bütün bildirişlərə girişi var. Zənglərə cavab verə, \"Narahat etməyin\" rejimini idarə edə, bildirişləri qapada və cavablaya bilər."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rejim üçün məlumat bildirişi"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Enerjiyə Qənaət aktivdir"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Batareyanın ömrünü uzatmaq üçün batareyadan istifadəni azaldın"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Enerjiyə qənaət"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Enerjiyə qənaət deaktivdir"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefonun kifayət qədər enerjisi var. Funksiyalar artıq məhdud deyil."</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan telefonun kamerasına giriş etmək olmur"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan planşetin kamerasına giriş etmək olmur"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Sistem defoltu"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

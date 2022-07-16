@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ਐਪ ਨੂੰ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਜਟਿਲਤਾ ਦੇ ਪੱਧਰ ਬਾਰੇ ਜਾਣਨ ਦਿਓ (ਉੱਚ, ਮੱਧਮ, ਘੱਟ ਜਾਂ ਕੋਈ ਨਹੀਂ), ਜੋ ਲੰਬਾਈ ਦੀ ਸੰਭਵ ਰੇਂਜ ਅਤੇ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਕਿਸਮ ਦਾ ਸੰਕੇਤ ਦਿੰਦਾ ਹੈ। ਐਪ ਵਰਤੋਂਕਾਰਾਂ ਨੂੰ ਇੱਕ ਖਾਸ ਪੱਧਰ ਤੱਕ ਸਕ੍ਰੀਨ ਲਾਕ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੁਝਾਅ ਵੀ ਦੇ ਸਕਦੀ ਹੈ ਪਰ ਵਰਤੋਂਕਾਰ ਇਸਨੂੰ ਅਣਡਿੱਠ ਕਰ ਸਕਦੇ ਹਨ। ਨੋਟ ਕਰੋ ਕਿ ਸਕ੍ਰੀਨ ਲਾਕ ਸਧਾਰਨ ਲਿਖਤ ਵਿੱਚ ਸਟੋਰ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਇਸ ਲਈ ਐਪ ਸਹੀ ਪਾਸਵਰਡ ਬਾਰੇ ਨਹੀਂ ਜਾਣਦੀ ਹੈ।"</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"ਇਸ ਨਾਲ ਐਪ ਨੂੰ ਸੂਚਨਾਵਾਂ ਦਿਖਾਉਣ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"ਸਕ੍ਰੀਨ ਚਾਲੂ ਕਰੋ"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"ਐਪ ਨੂੰ ਸਕ੍ਰੀਨ ਚਾਲੂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿਓ।"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ਬਾਇਓਮੈਟ੍ਰਿਕ ਹਾਰਡਵੇਅਰ ਵਰਤੋ"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ਐਪ ਨੂੰ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਬਾਇਓਮੈਟ੍ਰਿਕ ਹਾਰਡਵੇਅਰ ਵਰਤਣ ਦਿੰਦਾ ਹੈ"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਵਿਵਸਥਿਤ ਕਰੋ"</string>
@@ -1267,7 +1269,7 @@
     <string name="volume_ringtone" msgid="134784084629229029">"ਰਿੰਗਰ ਵੌਲਿਊਮ"</string>
     <string name="volume_music" msgid="7727274216734955095">"ਮੀਡੀਆ ਦੀ ਅਵਾਜ਼"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Bluetooth ਰਾਹੀਂ ਪਲੇ ਕਰ ਰਿਹਾ ਹੈ"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"ਖਾਮੋਸ਼ ਰਿੰਗਟੋਨ ਸੈੱਟ ਕੀਤੀ"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"ਸ਼ਾਂਤ ਰਿੰਗਟੋਨ ਸੈੱਟ ਕੀਤੀ"</string>
     <string name="volume_call" msgid="7625321655265747433">"ਇਨ-ਕਾਲ ਅਵਾਜ਼"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ਬਲੂਟੁੱਥ ਇਨ-ਕਾਲ ਅਵਾਜ਼"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"ਅਲਾਰਮ ਦੀ ਅਵਾਜ਼"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> ਤੋਂ ਫ਼ੋਨ ਦੇ ਕੈਮਰੇ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> ਤੋਂ ਟੈਬਲੈੱਟ ਦੇ ਕੈਮਰੇ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ਸਿਸਟਮ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

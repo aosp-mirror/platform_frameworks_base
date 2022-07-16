@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Lehetővé teszi az alkalmazás számára, hogy megismerje a képernyőzár összetettségi szintjét (magas, közepes, alacsony vagy nincs), amely jelzi a képernyőzár lehetséges típusát és hosszát. Az alkalmazás ezenkívül javaslatot tehet a felhasználóknak a képernyőzár bizonyos szintre való frissítésére, de ezt a javaslatot a felhasználók figyelmen kívül hagyhatják. A képernyőzárat nem egyszerű szöveges formátumban tárolja a rendszer, ezért az alkalmazás nem fogja tudni a pontos jelszót."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"értesítések megjelenítése"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Lehetővé teszi az alkalmazás számára az értesítések megjelenítését"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"képernyő bekapcsolása"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Engedélyezi az alkalmazásnak a képernyő bekapcsolását."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"biometrikus hardver használata"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Lehetővé teszi az alkalmazás számára a biometrikus hardver hitelesítésre való használatát"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ujjlenyomat-olvasó hardver kezelése"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nem lehet hozzáférni a telefon kamerájához a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nem lehet hozzáférni a táblagép kamerájához a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Rendszerbeállítás"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

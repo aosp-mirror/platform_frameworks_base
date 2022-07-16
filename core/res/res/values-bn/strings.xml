@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"এটি অ্যাপটিকে স্ক্রিন লকের জটিলতার লেভেল বুঝতে সাহায্য করে (খুব বেশি, মাঝারি, অল্প জটিল বা কোনও জটিলতা নেই), যা স্ক্রিন লকটি সম্ভবত কত দীর্ঘ ও সেটির ধরন কীরকম, তার ইঙ্গিত দেয়। এই অ্যাপটি একটি নির্দিষ্ট লেভেল পর্যন্ত স্ক্রিন লক আপডেট করার সাজেশনও দিতে পারে, তবে ব্যবহারকারী তা উপেক্ষা করে অন্য কোথাও চলে যেতে পারেন। মনে রাখবেন যে স্ক্রিন লক প্লেন টেক্সট হিসেবে সংরক্ষণ করা হয় না, তাই অ্যাপ কখনও আসল পাসওয়ার্ড জানতে পারে না।"</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"বিজ্ঞপ্তি দেখুন"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"অ্যাপকে বিজ্ঞপ্তি দেখানোর জন্য অনুমতি দেয়"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"স্ক্রিন চালু করতে চাই"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"অ্যাপকে স্ক্রিন চালু করার অনুমতি দেয়।"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"বায়োমেট্রিক হার্ডওয়্যার ব্যবহার করুন"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"অ্যাপটিকে যাচাইকরণের জন্য বায়োমেট্রিক হার্ডওয়্যার ব্যবহার করার অনুমতি দেয়"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"আঙ্গুলের ছাপ নেওয়ার হার্ডওয়্যার পরিচালনা করুন"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"আপনার <xliff:g id="DEVICE">%1$s</xliff:g> থেকে ফোনের ক্যামেরা অ্যাক্সেস করা যাচ্ছে না"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"আপনার <xliff:g id="DEVICE">%1$s</xliff:g> থেকে ট্যাবলেটের ক্যামেরা অ্যাক্সেস করা যাচ্ছে না"</string>
     <string name="system_locale_title" msgid="711882686834677268">"সিস্টেম ডিফল্ট"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

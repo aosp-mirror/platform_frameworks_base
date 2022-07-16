@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permite que la app conozca el nivel de complejidad del bloqueo de pantalla (alta, media, baja o ninguna), lo que indica el rango de duración posible y el tipo de bloqueo. La app también puede sugerirles a los usuarios que actualicen el bloqueo de pantalla a un determinado nivel, aunque ellos pueden ignorar esta sugerencia y seguir navegando. Ten en cuenta que el bloqueo de pantalla no se almacena como texto sin formato, por lo que la app no conoce la contraseña exacta."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"mostrar notificaciones"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Permite que la app muestre notificaciones"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"encender la pantalla"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Permite que la app encienda la pantalla."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"usar hardware biométrico"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permite que la app use hardware biométrico para realizar la autenticación"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"Administrar el hardware de huellas dactilares"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No se puede acceder a la cámara del dispositivo desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No se puede acceder a la cámara de la tablet desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predeterminado del sistema"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

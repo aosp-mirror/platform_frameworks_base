@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"앱이 화면 잠금 길이와 유형의 가능한 범위를 나타내는 잠금 화면 복잡도 수준(높음, 보통, 낮음 또는 없음)을 파악하도록 허용합니다. 앱이 사용자에게 화면 잠금을 특정 수준으로 업데이트할 것을 제안할 수도 있지만, 사용자는 자유롭게 이를 무시하고 다른 곳으로 이동할 수 있습니다. 화면 잠금은 일반 텍스트로 저장되지 않으므로 앱에서 정확한 비밀번호를 알 수 없습니다."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"알림 표시"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"앱에서 알림을 표시하도록 허용"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"화면 켜기"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"앱이 화면을 켜도록 허용합니다."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"생체 인식 하드웨어 사용"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"앱에서 생체 인식 하드웨어를 인증에 사용하도록 허용합니다."</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"지문 하드웨어 관리"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"자세히 알아보기"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12에서는 Android 적응형 알림이 개선된 알림으로 대체됩니다. 이 기능은 추천 작업과 답장을 표시하고 알림을 정리해 줍니다.\n\n개선된 알림은 연락처 이름과 메시지 등 개인 정보가 포함된 알림 내용에 액세스할 수 있습니다. 또한 전화를 받고 방해 금지 모드를 제어하는 등 알림을 닫거나 처리하는 것도 가능합니다."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"루틴 모드 정보 알림"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"절전 모드 사용 설정됨"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"배터리 사용량을 줄여서 배터리 수명을 늘립니다."</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"절전 모드"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"절전 모드가 사용 중지되었습니다"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"휴대전화의 배터리가 충분하므로 기능이 더 이상 제한되지 않습니다"</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 휴대전화 카메라에 액세스할 수 없습니다."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 태블릿 카메라에 액세스할 수 없습니다."</string>
     <string name="system_locale_title" msgid="711882686834677268">"시스템 기본값"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permite que la aplicación entienda el nivel de complejidad del bloqueo de pantalla (alto, medio, bajo o ninguno) que indica la longitud y el tipo del bloqueo de pantalla posibles. La aplicación también puede sugerir a los usuarios que actualicen el bloqueo de pantalla para que tenga un nivel concreto de complejidad, pero los usuarios pueden ignorar la advertencia libremente. El bloqueo de pantalla no se almacena en texto sin formato, así que la aplicación no puede saber cuál es la contraseña exacta."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"mostrar notificaciones"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Permite que la aplicación muestre notificaciones"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"encender la pantalla"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Permite que la aplicación active la pantalla."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"usar hardware biométrico"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permite que la aplicación utilice el hardware biométrico para realizar la autenticación"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"administrar hardware de huellas digitales"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Más información"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Las notificaciones mejoradas sustituyeron las notificaciones adaptativas en Android 12. Esta función te muestra acciones y respuestas sugeridas, y organiza tus notificaciones.\n\nLas notificaciones mejoradas pueden acceder al contenido de tus notificaciones, incluida información personal, como nombres de contactos y mensajes. También permiten descartar o responder a notificaciones; por ejemplo, es posible contestar llamadas telefónicas y controlar el modo No molestar."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación sobre el modo rutina"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Ahorro de batería activado"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Reduciendo el uso de batería para prolongar su duración"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Ahorro de batería"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Ahorro de batería desactivado"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"El teléfono tiene suficiente batería. Las funciones ya no están restringidas."</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No se puede acceder a la cámara del teléfono desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No se puede acceder a la cámara del tablet desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predeterminado del sistema"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

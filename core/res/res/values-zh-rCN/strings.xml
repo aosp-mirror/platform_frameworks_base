@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"允许应用了解屏幕锁定复杂度（高、中、低或无），即屏幕锁定的可能长度范围和类型。应用还可以建议用户将屏幕锁定更新为特定复杂度，但用户可以随意选择忽略该建议并离开应用。请注意，系统不会以纯文字形式存储屏幕锁定选项的内容，因此应用不会知道确切密码。"</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"显示通知"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"允许该应用显示通知"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"唤醒屏幕"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"允许应用唤醒屏幕。"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"使用生物特征硬件"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"允许该应用使用生物特征硬件进行身份验证"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"管理指纹硬件"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问手机的摄像头"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问平板电脑的摄像头"</string>
     <string name="system_locale_title" msgid="711882686834677268">"系统默认设置"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

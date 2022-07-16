@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permite que o app saiba o nível de complexidade do bloqueio de tela (alto, médio, baixo ou nenhum), que indica o intervalo possível de comprimento e o tipo de bloqueio de tela. O app também pode sugerir a atualização do bloqueio de tela até um certo nível, mas os usuários podem ignorar a sugestão. O bloqueio de tela não é armazenado em texto simples, então o app não tem acesso à senha exata."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"mostrar notificações"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Permite que o app mostre notificações"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"ligar a tela"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Permite que o app ligue a tela."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"Usar hardware de biometria"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permite que o app use hardware de biometria para autenticação"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"gerenciar hardware de impressão digital"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Não é possível acessar a câmera do smartphone pelo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Não é possível acessar a câmera do tablet pelo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Padrão do sistema"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

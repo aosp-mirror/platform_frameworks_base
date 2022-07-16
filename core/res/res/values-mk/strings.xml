@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Дозволува апликацијата да го научи нивото на сложеност за заклучувањето на екранот (високо, средно, ниско или нема), коешто ги означува можниот опсег на должината и типот на заклучувањето на екранот. Апликацијата може да им дава предлози на корисниците да го ажурираат заклучувањето на екранот на одредено ниво, но корисниците можат да го игнорираат и да продолжат понатаму. Имајте предвид дека заклучувањето на екранот не се складира како обичен текст, па апликацијата не ја знае точната лозинка."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"да прикажува известувања"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Ѝ дозволува на апликацијата да прикажува известувања"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"да го вклучува екранот"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Дозволува апликацијата да го вклучува екранот."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"користи биометриски хардвер"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Дозволува апликацијата да користи биометриски хардвер за проверка"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"управувај хардвер за отпечатоци"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Не може да се пристапи до камерата на вашиот телефон од <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не може да се пристапи до камерата на вашиот таблет од <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Стандардно за системот"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

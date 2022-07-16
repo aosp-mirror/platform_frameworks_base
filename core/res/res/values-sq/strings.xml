@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Lejo që aplikacioni të mësojë nivelin e kompleksitetit të kyçjes së ekranit (i lartë, i mesëm, i ulët ose asnjë), që tregon gamën e mundshme të gjatësisë dhe llojin e kyçjes së ekranit. Aplikacioni mund t\'u sugjerojë gjithashtu përdoruesve që të përditësojnë kyçjen e ekranit në një nivel të caktuar, por përdoruesit mund ta shpërfillin lirshëm dhe të navigojnë më tej. Ki parasysh se kyçja e ekranit nuk ruhet në tekst të thjeshtë, prandaj aplikacioni nuk e di fjalëkalimin e saktë."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"shfaq njoftimet"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Lejon që aplikacioni të shfaqë njoftime"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"aktivizo ekranin"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Lejon që aplikacioni të aktivizojë ekranin."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"përdor harduerin biometrik"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"E lejon aplikacionin që të përdorë harduerin biometrik për vërtetimin"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"të menaxhojë harduerin e gjurmës së gishtit"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nuk mund të qasesh në kamerën e telefonit tënd nga <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nuk mund të qasesh në kamerën e tabletit tënd nga <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Parazgjedhja e sistemit"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

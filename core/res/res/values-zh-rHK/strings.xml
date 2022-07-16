@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"允許應用程式瞭解螢幕鎖定的複雜程度 (高、中、低或無)，這項資料說明了螢幕鎖定的可能長度範圍和類型。應用程式亦能建議使用者將螢幕鎖定更新至某個複雜程度，但使用者可以隨意忽略並離開。請注意，螢幕鎖定並非以純文字儲存，因此應用程式不知道確切的密碼。"</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"顯示通知"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"允許應用程式顯示通知"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"開啟螢幕"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"允許應用程式開啟螢幕。"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"使用生物識別硬件"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"允許應用程式使用生物識別硬件驗證"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"管理指紋硬件"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取手機的相機"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取平板電腦的相機"</string>
     <string name="system_locale_title" msgid="711882686834677268">"系統預設"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>
