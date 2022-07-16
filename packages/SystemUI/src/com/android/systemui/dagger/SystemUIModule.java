@@ -26,7 +26,6 @@ import com.android.keyguard.clock.ClockModule;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.biometrics.AlternateUdfpsTouchProvider;
@@ -82,6 +81,7 @@ import com.android.systemui.unfold.SysUIUnfoldModule;
 import com.android.systemui.user.UserModule;
 import com.android.systemui.util.concurrency.SysUIConcurrencyModule;
 import com.android.systemui.util.dagger.UtilModule;
+import com.android.systemui.util.kotlin.CoroutinesModule;
 import com.android.systemui.util.sensors.SensorModule;
 import com.android.systemui.util.settings.SettingsUtilModule;
 import com.android.systemui.util.time.SystemClock;
@@ -114,6 +114,7 @@ import dagger.Provides;
             AssistModule.class,
             BiometricsModule.class,
             ClockModule.class,
+            CoroutinesModule.class,
             DreamModule.class,
             ControlsModule.class,
             DemoModeModule.class,
@@ -197,11 +198,6 @@ public abstract class SystemUIModule {
     @SysUISingleton
     @Binds
     abstract SystemClock bindSystemClock(SystemClockImpl systemClock);
-
-    @Provides
-    static SystemUIFactory getSystemUIFactory() {
-        return SystemUIFactory.getInstance();
-    }
 
     // TODO: This should provided by the WM component
     /** Provides Optional of BubbleManager */

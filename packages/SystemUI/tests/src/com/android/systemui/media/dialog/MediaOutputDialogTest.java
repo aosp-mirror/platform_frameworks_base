@@ -172,6 +172,39 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    public void getBroadcastIconVisibility_isBroadcasting_returnVisible() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(true);
+        when(mPlaybackState.getState()).thenReturn(PlaybackState.STATE_PLAYING);
+        when(mMediaDevice.isBLEDevice()).thenReturn(true);
+
+        assertThat(mMediaOutputDialog.getBroadcastIconVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void getBroadcastIconVisibility_noBroadcasting_returnGone() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(false);
+        when(mPlaybackState.getState()).thenReturn(PlaybackState.STATE_PLAYING);
+        when(mMediaDevice.isBLEDevice()).thenReturn(true);
+
+        assertThat(mMediaOutputDialog.getBroadcastIconVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void getBroadcastIconVisibility_remoteNonLeDevice_returnGone() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(false);
+        when(mPlaybackState.getState()).thenReturn(PlaybackState.STATE_PLAYING);
+        when(mMediaDevice.isBLEDevice()).thenReturn(false);
+
+        assertThat(mMediaOutputDialog.getBroadcastIconVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
     // Check the visibility metric logging by creating a new MediaOutput dialog,
     // and verify if the calling times increases.
     public void onCreate_ShouldLogVisibility() {

@@ -340,11 +340,17 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     }
 
     @Override
-    public void onTryAgainPressed() {
+    public void onTryAgainPressed(long requestId) {
         if (mReceiver == null) {
             Log.e(TAG, "onTryAgainPressed: Receiver is null");
             return;
         }
+
+        if (requestId != mCurrentDialog.getRequestId()) {
+            Log.w(TAG, "requestId doesn't match, skip onTryAgainPressed");
+            return;
+        }
+
         try {
             mReceiver.onTryAgainPressed();
         } catch (RemoteException e) {
@@ -353,11 +359,17 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     }
 
     @Override
-    public void onDeviceCredentialPressed() {
+    public void onDeviceCredentialPressed(long requestId) {
         if (mReceiver == null) {
             Log.e(TAG, "onDeviceCredentialPressed: Receiver is null");
             return;
         }
+
+        if (requestId != mCurrentDialog.getRequestId()) {
+            Log.w(TAG, "requestId doesn't match, skip onDeviceCredentialPressed");
+            return;
+        }
+
         try {
             mReceiver.onDeviceCredentialPressed();
         } catch (RemoteException e) {
@@ -366,11 +378,17 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     }
 
     @Override
-    public void onSystemEvent(int event) {
+    public void onSystemEvent(int event, long requestId) {
         if (mReceiver == null) {
             Log.e(TAG, "onSystemEvent(" + event + "): Receiver is null");
             return;
         }
+
+        if (requestId != mCurrentDialog.getRequestId()) {
+            Log.w(TAG, "requestId doesn't match, skip onSystemEvent");
+            return;
+        }
+
         try {
             mReceiver.onSystemEvent(event);
         } catch (RemoteException e) {
@@ -379,9 +397,14 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     }
 
     @Override
-    public void onDialogAnimatedIn() {
+    public void onDialogAnimatedIn(long requestId) {
         if (mReceiver == null) {
             Log.e(TAG, "onDialogAnimatedIn: Receiver is null");
+            return;
+        }
+
+        if (requestId != mCurrentDialog.getRequestId()) {
+            Log.w(TAG, "requestId doesn't match, skip onDialogAnimatedIn");
             return;
         }
 
@@ -393,7 +416,14 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     }
 
     @Override
-    public void onDismissed(@DismissedReason int reason, @Nullable byte[] credentialAttestation) {
+    public void onDismissed(@DismissedReason int reason,
+                            @Nullable byte[] credentialAttestation, long requestId) {
+
+        if (mCurrentDialog != null && requestId != mCurrentDialog.getRequestId()) {
+            Log.w(TAG, "requestId doesn't match, skip onDismissed");
+            return;
+        }
+
         switch (reason) {
             case AuthDialogCallback.DISMISSED_USER_CANCELED:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_USER_CANCEL,

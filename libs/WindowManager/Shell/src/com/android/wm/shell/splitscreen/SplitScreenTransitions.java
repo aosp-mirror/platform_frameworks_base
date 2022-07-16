@@ -246,7 +246,9 @@ class SplitScreenTransitions {
         return true;
     }
 
-    void onTransitionMerged(@NonNull IBinder transition) {
+    void onTransitionConsumed(@NonNull IBinder transition, boolean aborted) {
+        if (aborted) return;
+
         // Once a pending enter transition got merged, make sure to append the reset of finishing
         // operations to the finish transition.
         if (transition == mPendingEnter) {

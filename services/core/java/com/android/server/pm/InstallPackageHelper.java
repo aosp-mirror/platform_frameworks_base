@@ -3701,8 +3701,9 @@ final class InstallPackageHelper {
                     parsedPackage.getPackageName());
 
             boolean ignoreSharedUserId = false;
-            if (installedPkgSetting == null) {
-                // We can directly ignore sharedUserSetting for new installs
+            if (installedPkgSetting == null || !installedPkgSetting.hasSharedUser()) {
+                // Directly ignore sharedUserSetting for new installs, or if the app has
+                // already left shared UID
                 ignoreSharedUserId = parsedPackage.isLeavingSharedUid();
             }
 

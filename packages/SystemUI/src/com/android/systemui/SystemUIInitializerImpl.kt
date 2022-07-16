@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.tv;
+package com.android.systemui
 
-import com.android.systemui.SystemUIFactory;
-import com.android.systemui.dagger.GlobalRootComponent;
+import android.content.Context
+import com.android.systemui.dagger.DaggerGlobalRootComponent
+import com.android.systemui.dagger.GlobalRootComponent
 
 /**
- * TV variant {@link SystemUIFactory}, that substitutes default {@link GlobalRootComponent} for
- * {@link TvGlobalRootComponent}
+ * {@link SystemUIInitializer} that stands up AOSP SystemUI.
  */
-public class TvSystemUIFactory extends SystemUIFactory {
-    @Override
-    protected GlobalRootComponent.Builder getGlobalRootComponentBuilder() {
-        return DaggerTvGlobalRootComponent.builder();
+class SystemUIInitializerImpl(context: Context) : SystemUIInitializer(context) {
+    override fun getGlobalRootComponentBuilder(): GlobalRootComponent.Builder {
+        return DaggerGlobalRootComponent.builder()
     }
 }
