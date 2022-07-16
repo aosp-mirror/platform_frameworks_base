@@ -509,6 +509,7 @@ public class OomAdjuster {
         state.setCurBoundByNonBgRestrictedApp(false);
         // Check if this process is in the pending list too, remove from pending list if so.
         mPendingProcessSet.remove(app);
+        app.mOptRecord.setLastOomAdjChangeReason(oomAdjReason);
         boolean success = performUpdateOomAdjLSP(app, cachedAdj, topApp,
                 SystemClock.uptimeMillis());
         // The 'app' here itself might or might not be in the cycle, for example,
@@ -806,6 +807,7 @@ public class OomAdjuster {
             final ProcessStateRecord state = app.mState;
             if (!app.isKilledByAm() && app.getThread() != null) {
                 state.setProcStateChanged(false);
+                app.mOptRecord.setLastOomAdjChangeReason(oomAdjReason);
                 computeOomAdjLSP(app, ProcessList.UNKNOWN_ADJ, topApp, fullUpdate, now, false,
                         computeClients); // It won't enter cycle if not computing clients.
                 // if any app encountered a cycle, we need to perform an additional loop later

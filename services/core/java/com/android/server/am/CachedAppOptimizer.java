@@ -613,7 +613,7 @@ public final class CachedAppOptimizer {
                     + " processes.");
             pw.println("Last Compaction per process stats:");
             pw.println("    (ProcessName,Source,DeltaAnonRssKBs,ZramConsumedKBs,AnonMemFreedKBs,"
-                    + "CompactEfficiency,CompactCost(ms/MB),procState,oomAdj)");
+                    + "CompactEfficiency,CompactCost(ms/MB),procState,oomAdj,oomAdjReason)");
             for (Map.Entry<Integer, SingleCompactionStats> entry :
                     mLastCompactionStats.entrySet()) {
                 SingleCompactionStats stats = entry.getValue();
@@ -622,7 +622,7 @@ public final class CachedAppOptimizer {
             pw.println();
             pw.println("Last 20 Compactions Stats:");
             pw.println("    (ProcessName,Source,DeltaAnonRssKBs,ZramConsumedKBs,AnonMemFreedKBs,"
-                    + "CompactEfficiency,CompactCost(ms/MB),procState,oomAdj)");
+                    + "CompactEfficiency,CompactCost(ms/MB),procState,oomAdj,oomAdjReason)");
             for (SingleCompactionStats stats : mCompactionStatsHistory) {
                 stats.dump(pw);
             }
@@ -1482,10 +1482,11 @@ public final class CachedAppOptimizer {
         public long mOrigAnonRss;
         public int mProcState;
         public int mOomAdj;
+        public String mOomAdjReason;
 
         SingleCompactionStats(long[] rss, CompactSource source, String processName,
                 long deltaAnonRss, long zramConsumed, long anonMemFreed, long origAnonRss,
-                long cpuTimeMillis, int procState, int oomAdj) {
+                long cpuTimeMillis, int procState, int oomAdj, String oomAdjReason) {
             mRssAfterCompaction = rss;
             mSourceType = source;
             mProcessName = processName;
@@ -1496,6 +1497,7 @@ public final class CachedAppOptimizer {
             mOrigAnonRss = origAnonRss;
             mProcState = procState;
             mOomAdj = oomAdj;
+            mOomAdjReason = oomAdjReason;
         }
 
         double getCompactEfficiency() { return mAnonMemFreedKBs / (double) mOrigAnonRss; }
@@ -1512,7 +1514,8 @@ public final class CachedAppOptimizer {
         void dump(PrintWriter pw) {
             pw.println("    (" + mProcessName + "," + mSourceType.name() + "," + mDeltaAnonRssKBs
                     + "," + mZramConsumedKBs + "," + mAnonMemFreedKBs + "," + getCompactEfficiency()
-                    + "," + getCompactCost() + "," + mProcState + "," + mOomAdj + ")");
+                    + "," + getCompactCost() + "," + mProcState + "," + mOomAdj + ","
+                    + mOomAdjReason + ")");
         }
     }
 
@@ -1679,11 +1682,12 @@ public final class CachedAppOptimizer {
                     final String name;
                     CompactProfile lastCompactProfile;
                     long lastCompactTime;
-                    int lastOomAdj = msg.arg1;
+                    int newOomAdj = msg.arg1;
                     int procState = msg.arg2;
                     boolean forceCompaction;
                     CompactSource compactSource;
                     CompactProfile requestedProfile;
+                    String oomAdjReason;
                     synchronized (mProcLock) {
                         if (mPendingCompactionProcesses.isEmpty()) {
                             if (DEBUG_COMPACTION) {
@@ -1702,6 +1706,7 @@ public final class CachedAppOptimizer {
                         requestedProfile = opt.getReqCompactProfile();
                         lastCompactProfile = opt.getLastCompactProfile();
                         lastCompactTime = opt.getLastCompactTime();
+                        oomAdjReason = opt.getLastOomAdjChangeReason();
                     }
 
                     AggregatedSourceCompactionStats perSourceStats =
@@ -1756,7 +1761,8 @@ public final class CachedAppOptimizer {
 
                     try {
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                                "Compact " + resolvedAction.name() + ": " + name);
+                                "Compact " + resolvedAction.name() + ": " + name
+                                        + " lastOomAdjReason: " + oomAdjReason);
                         long zramUsedKbBefore = getUsedZramMemory();
                         long startCpuTime = threadCpuTimeNs();
                         mProcessDependencies.performCompaction(resolvedAction, pid);
@@ -1797,7 +1803,8 @@ public final class CachedAppOptimizer {
                                         origAnonRss, totalCpuTimeMillis);
                                 SingleCompactionStats memStats = new SingleCompactionStats(rssAfter,
                                         compactSource, name, anonRssSavings, zramConsumed, memFreed,
-                                        origAnonRss, totalCpuTimeMillis, procState, lastOomAdj);
+                                        origAnonRss, totalCpuTimeMillis, procState, newOomAdj,
+                                        oomAdjReason);
                                 mLastCompactionStats.remove(pid);
                                 mLastCompactionStats.put(pid, memStats);
                                 mCompactionStatsHistory.add(memStats);
@@ -1814,7 +1821,7 @@ public final class CachedAppOptimizer {
                                 rssBefore[RSS_FILE_INDEX], rssBefore[RSS_ANON_INDEX],
                                 rssBefore[RSS_SWAP_INDEX], deltaTotalRss, deltaFileRss,
                                 deltaAnonRss, deltaSwapRss, time, lastCompactProfile.name(),
-                                lastCompactTime, lastOomAdj, procState, zramUsedKbBefore,
+                                lastCompactTime, newOomAdj, procState, zramUsedKbBefore,
                                 zramUsedKbBefore - zramUsedKbAfter);
                         // Note that as above not taking mPhenoTypeFlagLock here to avoid locking
                         // on every single compaction for a flag that will seldom change and the
@@ -1826,7 +1833,7 @@ public final class CachedAppOptimizer {
                                     rssBefore[RSS_SWAP_INDEX], rssAfter[RSS_TOTAL_INDEX],
                                     rssAfter[RSS_FILE_INDEX], rssAfter[RSS_ANON_INDEX],
                                     rssAfter[RSS_SWAP_INDEX], time, lastCompactProfile.ordinal(),
-                                    lastCompactTime, lastOomAdj,
+                                    lastCompactTime, newOomAdj,
                                     ActivityManager.processStateAmToProto(procState),
                                     zramUsedKbBefore, zramUsedKbAfter);
                         }

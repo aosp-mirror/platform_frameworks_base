@@ -49,6 +49,11 @@ final class ProcessCachedOptimizerRecord {
     @GuardedBy("mProcLock") private CachedAppOptimizer.CompactSource mReqCompactSource;
 
     /**
+     * Last oom adjust change reason for this app.
+     */
+    @GuardedBy("mProcLock") private String mLastOomAdjChangeReason;
+
+    /**
      * The most recent compaction action performed for this app.
      */
     @GuardedBy("mProcLock") private CachedAppOptimizer.CompactProfile mLastCompactProfile;
@@ -125,6 +130,16 @@ final class ProcessCachedOptimizerRecord {
     @GuardedBy("mProcLock")
     void setReqCompactSource(CachedAppOptimizer.CompactSource stat) {
         mReqCompactSource = stat;
+    }
+
+    @GuardedBy("mProcLock")
+    void setLastOomAdjChangeReason(String reason) {
+        mLastOomAdjChangeReason = reason;
+    }
+
+    @GuardedBy("mProcLock")
+    String getLastOomAdjChangeReason() {
+        return mLastOomAdjChangeReason;
     }
 
     @GuardedBy("mProcLock")
