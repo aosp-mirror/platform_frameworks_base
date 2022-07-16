@@ -39,6 +39,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -61,6 +62,9 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implementation for the bottom area of the Keyguard, including camera/phone affordance and status
@@ -347,8 +351,17 @@ public class KeyguardBottomAreaView extends FrameLayout {
         dozeTimeTick();
     }
 
-    public View getIndicationArea() {
-        return mIndicationArea;
+    /**
+     * Returns a list of animators to use to animate the indication areas.
+     */
+    public List<ViewPropertyAnimator> getIndicationAreaAnimators() {
+        List<ViewPropertyAnimator> animators =
+                new ArrayList<>(mAmbientIndicationArea != null ? 2 : 1);
+        animators.add(mIndicationArea.animate());
+        if (mAmbientIndicationArea != null) {
+            animators.add(mAmbientIndicationArea.animate());
+        }
+        return animators;
     }
 
     @Override
@@ -418,9 +431,17 @@ public class KeyguardBottomAreaView extends FrameLayout {
     }
 
     /**
-     * Sets the alpha of the indication areas and affordances, excluding the lock icon.
+     * Sets the alpha of various sub-components, for example the indication areas and bottom quick
+     * action buttons. Does not set the alpha of the lock icon.
      */
-    public void setAffordanceAlpha(float alpha) {
+    public void setComponentAlphas(float alpha) {
+        setImportantForAccessibility(
+                alpha == 0f
+                        ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                        : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+        if (mAmbientIndicationArea != null) {
+            mAmbientIndicationArea.setAlpha(alpha);
+        }
         mIndicationArea.setAlpha(alpha);
         mWalletButton.setAlpha(alpha);
         mQRCodeScannerButton.setAlpha(alpha);
