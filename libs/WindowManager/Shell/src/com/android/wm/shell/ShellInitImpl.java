@@ -17,7 +17,15 @@
 package com.android.wm.shell;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_INIT;
 
+import android.os.Build;
+import android.os.SystemClock;
+import android.util.Pair;
+
+import androidx.annotation.VisibleForTesting;
+
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -37,10 +45,12 @@ import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
- * The entry point implementation into the shell for initializing shell internal state.
+ * The entry point implementation into the shell for initializing shell internal state.  Classes
+ * which need to setup on start should inject an instance of this class and add an init callback.
  */
 public class ShellInitImpl {
     private static final String TAG = ShellInitImpl.class.getSimpleName();
@@ -64,6 +74,9 @@ public class ShellInitImpl {
     private final Optional<RecentTasksController> mRecentTasks;
 
     private final InitImpl mImpl = new InitImpl();
+    // An ordered list of init callbacks to be made once shell is first started
+    private final ArrayList<Pair<String, Runnable>> mInitCallbacks = new ArrayList<>();
+    private boolean mHasInitialized;
 
     public ShellInitImpl(
             DisplayController displayController,
@@ -106,7 +119,7 @@ public class ShellInitImpl {
         return mImpl;
     }
 
-    private void init() {
+    private void legacyInit() {
         // Start listening for display and insets changes
         mDisplayController.initialize();
         mDisplayInsetsController.initialize();
@@ -153,12 +166,52 @@ public class ShellInitImpl {
         mKidsModeTaskOrganizer.initialize(mStartingWindow);
     }
 
+    /**
+     * Adds a callback to the ordered list of callbacks be made when Shell is first started.  This
+     * can be used in class constructors when dagger is used to ensure that the initialization order
+     * matches the dependency order.
+     */
+    public <T extends Object> void addInitCallback(Runnable r, T instance) {
+        if (mHasInitialized) {
+            if (Build.isDebuggable()) {
+                // All callbacks must be added prior to the Shell being initialized
+                throw new IllegalArgumentException("Can not add callback after init");
+            }
+            return;
+        }
+        final String className = instance.getClass().getSimpleName();
+        mInitCallbacks.add(new Pair<>(className, r));
+        ProtoLog.v(WM_SHELL_INIT, "Adding init callback for %s", className);
+    }
+
+    /**
+     * Calls all the init callbacks when the Shell is first starting.
+     */
+    @VisibleForTesting
+    public void init() {
+        ProtoLog.v(WM_SHELL_INIT, "Initializing Shell Components: %d", mInitCallbacks.size());
+        // Init in order of registration
+        for (int i = 0; i < mInitCallbacks.size(); i++) {
+            final Pair<String, Runnable> info = mInitCallbacks.get(i);
+            final long t1 = SystemClock.uptimeMillis();
+            info.second.run();
+            final long t2 = SystemClock.uptimeMillis();
+            ProtoLog.v(WM_SHELL_INIT, "\t%s took %dms", info.first, (t2 - t1));
+        }
+        mInitCallbacks.clear();
+
+        // TODO: To be removed
+        legacyInit();
+
+        mHasInitialized = true;
+    }
+
     @ExternalThread
     private class InitImpl implements ShellInit {
         @Override
         public void init() {
             try {
-                mMainExecutor.executeBlocking(() -> ShellInitImpl.this.init());
+                mMainExecutor.executeBlocking(ShellInitImpl.this::init);
             } catch (InterruptedException e) {
                 throw new RuntimeException("Failed to initialize the Shell in 2s", e);
             }
