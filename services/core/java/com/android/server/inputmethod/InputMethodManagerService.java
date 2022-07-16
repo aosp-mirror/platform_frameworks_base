@@ -4465,12 +4465,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * a stylus deviceId is not already registered on device.
      */
     @BinderThread
-    @RequiresPermission(Manifest.permission.INJECT_EVENTS)
+    @EnforcePermission(Manifest.permission.INJECT_EVENTS)
     @Override
     public void addVirtualStylusIdForTestSession(IInputMethodClient client) {
-        mContext.enforceCallingPermission(
-                Manifest.permission.INJECT_EVENTS,
-                "Using addVirtualStylusIdForTestSession() requires INJECT_EVENTS.");
         int uid = Binder.getCallingUid();
         synchronized (ImfLock.class) {
             if (!canInteractWithImeLocked(uid, client, "addVirtualStylusIdForTestSession")) {
