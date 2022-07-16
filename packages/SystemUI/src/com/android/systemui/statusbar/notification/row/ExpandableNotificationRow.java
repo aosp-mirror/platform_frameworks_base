@@ -141,7 +141,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public static final float DEFAULT_HEADER_VISIBLE_AMOUNT = 1.0f;
     private static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
 
-    private boolean mUpdateBackgroundOnUpdate;
+    // We don't correctly track dark mode until the content views are inflated, so always update
+    // the background on first content update just in case it happens to be during a theme change.
+    private boolean mUpdateBackgroundOnUpdate = true;
     private boolean mNotificationTranslationFinished = false;
     private boolean mIsSnoozed;
     private boolean mIsFaded;
