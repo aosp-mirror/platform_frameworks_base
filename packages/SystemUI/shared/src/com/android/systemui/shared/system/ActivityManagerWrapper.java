@@ -130,13 +130,6 @@ public class ActivityManagerWrapper {
     }
 
     /**
-     * @return a list of the recents tasks.
-     */
-    public List<RecentTaskInfo> getRecentTasks(int numTasks, int userId) {
-        return mAtm.getRecentTasks(numTasks, RECENT_IGNORE_UNAVAILABLE, userId);
-    }
-
-    /**
      * @return a {@link ThumbnailData} with {@link TaskSnapshot} for the given {@param taskId}.
      *         The snapshot will be triggered if no cached {@link TaskSnapshot} exists.
      */
@@ -247,25 +240,6 @@ public class ActivityManagerWrapper {
     }
 
     /**
-     * Starts a task from Recents.
-     *
-     * @param resultCallback The result success callback
-     * @param resultCallbackHandler The handler to receive the result callback
-     */
-    public void startActivityFromRecentsAsync(Task.TaskKey taskKey, ActivityOptions options,
-            Consumer<Boolean> resultCallback, Handler resultCallbackHandler) {
-        final boolean result = startActivityFromRecents(taskKey, options);
-        if (resultCallback != null) {
-            resultCallbackHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    resultCallback.accept(result);
-                }
-            });
-        }
-    }
-
-    /**
      * Starts a task from Recents synchronously.
      */
     public boolean startActivityFromRecents(Task.TaskKey taskKey, ActivityOptions options) {
@@ -283,20 +257,6 @@ public class ActivityManagerWrapper {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    /**
-     * @deprecated use {@link TaskStackChangeListeners#registerTaskStackListener}
-     */
-    public void registerTaskStackListener(TaskStackChangeListener listener) {
-        TaskStackChangeListeners.getInstance().registerTaskStackListener(listener);
-    }
-
-    /**
-     * @deprecated use {@link TaskStackChangeListeners#unregisterTaskStackListener}
-     */
-    public void unregisterTaskStackListener(TaskStackChangeListener listener) {
-        TaskStackChangeListeners.getInstance().unregisterTaskStackListener(listener);
     }
 
     /**

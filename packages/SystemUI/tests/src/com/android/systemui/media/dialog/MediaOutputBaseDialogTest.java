@@ -43,6 +43,8 @@ import android.widget.TextView;
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.filters.SmallTest;
 
+import com.android.settingslib.bluetooth.CachedBluetoothDevice;
+import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
@@ -98,10 +100,17 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     private CharSequence mHeaderSubtitle;
     private String mStopText;
     private boolean mIsBroadcasting;
+    private boolean mIsBroadcastIconVisibility;
+
 
     @Before
     public void setUp() {
         when(mLocalBluetoothManager.getProfileManager()).thenReturn(mLocalBluetoothProfileManager);
+        final CachedBluetoothDeviceManager cachedBluetoothDeviceManager = mock(
+                CachedBluetoothDeviceManager.class);
+        when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(
+                cachedBluetoothDeviceManager);
+        when(cachedBluetoothDeviceManager.findDevice(any())).thenReturn(null);
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(null);
         when(mMediaController.getPlaybackState()).thenReturn(mPlaybackState);
         when(mPlaybackState.getState()).thenReturn(PlaybackState.STATE_NONE);
@@ -150,6 +159,27 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
                 R.id.header_icon);
 
         assertThat(view.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void refresh_broadcastIconVisibilityOff_broadcastIconLayoutNotVisible() {
+        mIsBroadcastIconVisibility = false;
+
+        mMediaOutputBaseDialogImpl.refresh();
+        final ImageView view = mMediaOutputBaseDialogImpl.mDialogView.requireViewById(
+                R.id.broadcast_icon);
+
+        assertThat(view.getVisibility()).isEqualTo(View.GONE);
+    }
+    @Test
+    public void refresh_broadcastIconVisibilityOn_broadcastIconLayoutVisible() {
+        mIsBroadcastIconVisibility = true;
+
+        mMediaOutputBaseDialogImpl.refresh();
+        final ImageView view = mMediaOutputBaseDialogImpl.mDialogView.requireViewById(
+                R.id.broadcast_icon);
+
+        assertThat(view.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -307,6 +337,11 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         @Override
         public CharSequence getStopButtonText() {
             return mStopText;
+        }
+
+        @Override
+        public int getBroadcastIconVisibility() {
+            return mIsBroadcastIconVisibility ? View.VISIBLE : View.GONE;
         }
     }
 }

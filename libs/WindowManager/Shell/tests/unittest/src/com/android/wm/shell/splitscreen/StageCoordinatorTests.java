@@ -127,6 +127,9 @@ public class StageCoordinatorTests extends ShellTestCase {
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootLeash = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();
         mStageCoordinator.onTaskAppeared(mRootTask, mRootLeash);
+
+        mSideStage.mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
+        mMainStage.mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
     }
 
     @Test
@@ -224,8 +227,8 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator.exitSplitScreen(testTaskId, EXIT_REASON_RETURN_HOME);
         verify(mMainStage).reorderChild(eq(testTaskId), eq(true),
                 any(WindowContainerTransaction.class));
-        verify(mSideStage).removeAllTasks(any(WindowContainerTransaction.class), eq(false));
-        verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(true));
+        verify(mSideStage).dismiss(any(WindowContainerTransaction.class), eq(false));
+        verify(mMainStage).resetBounds(any(WindowContainerTransaction.class));
     }
 
     @Test
@@ -237,8 +240,8 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator.exitSplitScreen(testTaskId, EXIT_REASON_RETURN_HOME);
         verify(mSideStage).reorderChild(eq(testTaskId), eq(true),
                 any(WindowContainerTransaction.class));
-        verify(mSideStage).removeAllTasks(any(WindowContainerTransaction.class), eq(true));
-        verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(false));
+        verify(mSideStage).resetBounds(any(WindowContainerTransaction.class));
+        verify(mMainStage).dismiss(any(WindowContainerTransaction.class), eq(false));
     }
 
     @Test

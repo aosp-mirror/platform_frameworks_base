@@ -1149,7 +1149,6 @@ public class ActivityOptions extends ComponentOptions {
         opts.mLaunchIntoPipParams = new PictureInPictureParams.Builder(pictureInPictureParams)
                 .setIsLaunchIntoPip(true)
                 .build();
-        opts.mLaunchBounds = new Rect(pictureInPictureParams.getSourceRectHint());
         return opts;
     }
 
