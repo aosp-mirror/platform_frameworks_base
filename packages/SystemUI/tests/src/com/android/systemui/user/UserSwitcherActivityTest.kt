@@ -23,6 +23,7 @@ import android.view.LayoutInflater
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.UserSwitcherController
@@ -46,6 +47,8 @@ class UserSwitcherActivityTest : SysuiTestCase() {
     @Mock
     private lateinit var layoutInflater: LayoutInflater
     @Mock
+    private lateinit var falsingCollector: FalsingCollector
+    @Mock
     private lateinit var falsingManager: FalsingManager
     @Mock
     private lateinit var userManager: UserManager
@@ -59,6 +62,7 @@ class UserSwitcherActivityTest : SysuiTestCase() {
             userSwitcherController,
             broadcastDispatcher,
             layoutInflater,
+            falsingCollector,
             falsingManager,
             userManager,
             userTracker

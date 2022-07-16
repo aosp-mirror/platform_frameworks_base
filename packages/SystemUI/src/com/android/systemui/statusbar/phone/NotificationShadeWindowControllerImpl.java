@@ -44,6 +44,8 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
+import androidx.lifecycle.ViewTreeLifecycleOwner;
+
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -52,6 +54,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.lifecycle.WindowAddedViewLifecycleOwner;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -241,6 +244,16 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mLp.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 
         mWindowManager.addView(mNotificationShadeView, mLp);
+
+        // Set up and "inject" a LifecycleOwner bound to the Window-View relationship such that all
+        // views in the sub-tree rooted under this view can access the LifecycleOwner using
+        // ViewTreeLifecycleOwner.get(...).
+        if (ViewTreeLifecycleOwner.get(mNotificationShadeView) == null) {
+            ViewTreeLifecycleOwner.set(
+                    mNotificationShadeView,
+                    new WindowAddedViewLifecycleOwner(mNotificationShadeView));
+        }
+
         mLpChanged.copyFrom(mLp);
         onThemeChanged();
 
