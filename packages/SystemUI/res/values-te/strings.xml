@@ -50,7 +50,7 @@
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB డీబగ్గింగ్‌ను అనుమతించాలా?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"ఇది కంప్యూటర్ యొక్క RSA కీ వేలిముద్ర:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"ఈ కంప్యూటర్ నుండి ఎల్లప్పుడూ అనుమతించు"</string>
-    <string name="usb_debugging_allow" msgid="1722643858015321328">"అనుమతించు"</string>
+    <string name="usb_debugging_allow" msgid="1722643858015321328">"అనుమతించండి"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB డీబగ్గింగ్‌కి అనుమతి లేదు"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"ఈ పరికరానికి ప్రస్తుతం సైన్ ఇన్ చేసిన వినియోగదారు USB డీబగ్గింగ్ ఆన్ చేయలేరు. ఈ ఫీచర్ ఉపయోగించడానికి, ప్రాథమిక వినియోగదారుకి మారాలి."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"మీరు సిస్టమ్ భాషను <xliff:g id="LANGUAGE">%1$s</xliff:g> భాషకు మార్చాలనుకుంటున్నారా?"</string>
@@ -60,7 +60,7 @@
     <string name="wifi_debugging_title" msgid="7300007687492186076">"ఈ నెట్‌వర్క్ ద్వారా వైర్‌లెస్ డీబగ్గింగ్‌ను అనుమతించాలా?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"నెట్‌వర్క్ పేరు (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi అడ్రస్ (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"ఈ నెట్‌వర్క్ నుండి ఎల్లప్పుడూ అనుమతించు"</string>
-    <string name="wifi_debugging_allow" msgid="4573224609684957886">"అనుమతించు"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"అనుమతించండి"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"వైర్‌లెస్ డీబగ్గింగ్‌కి అనుమతి లేదు"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"ఈ పరికరానికి ప్రస్తుతం సైన్ ఇన్ చేసిన యూజర్, వైర్‌లెస్ డీబగ్గింగ్ ఆన్ చేయలేరు. ఈ ఫీచర్ ఉపయోగించడానికి, ప్రాథమిక యూజర్ కి స్విచ్ అవ్వండి."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB పోర్ట్‌ నిలిపివేయబడింది"</string>
@@ -719,7 +719,7 @@
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- ఇది <xliff:g id="APP">%1$s</xliff:g> నుండి సమాచారాన్ని చదువుతుంది"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- ఇది <xliff:g id="APP">%1$s</xliff:g> లోపల చర్యలు తీసుకుంటుంది"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"ఏ యాప్ నుండి అయినా స్లైస్‌లను చూపించడానికి <xliff:g id="APP">%1$s</xliff:g>ని అనుమతించండి"</string>
-    <string name="slice_permission_allow" msgid="6340449521277951123">"అనుమతించు"</string>
+    <string name="slice_permission_allow" msgid="6340449521277951123">"అనుమతించండి"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"తిరస్కరించు"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"బ్యాటరీ సేవర్‌ని షెడ్యూల్ చేయడానికి నొక్కండి"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"బ్యాటరీ ఛార్జింగ్ పూర్తిగా అయిపోతున్న తరుణంలో ఆన్ చేస్తుంది"</string>
@@ -828,7 +828,7 @@
     <string name="controls_error_timeout" msgid="794197289772728958">"ఇన్‌యాక్టివ్, యాప్ చెక్ చేయండి"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"కనుగొనబడలేదు"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"కంట్రోల్ అందుబాటులో లేదు"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>ను యాక్సెస్ చేయడం సాధ్యపడలేదు. <xliff:g id="APPLICATION">%2$s</xliff:g> యాప్‌ను తనిఖీ చేసి, కంట్రోల్ ఇప్పటికీ అందుబాటులో ఉందని, యాప్ సెట్టింగ్‌లు మారలేదని నిర్ధారించుకోండి."</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>ను యాక్సెస్ చేయడం సాధ్యపడలేదు. <xliff:g id="APPLICATION">%2$s</xliff:g> యాప్‌ను చెక్ చేసి, కంట్రోల్ ఇప్పటికీ అందుబాటులో ఉందని, యాప్ సెట్టింగ్‌లు మారలేదని నిర్ధారించుకోండి."</string>
     <string name="controls_open_app" msgid="483650971094300141">"యాప్‌ను తెరువు"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"స్టేటస్ లోడ్ చేయడం సాధ్యపడలేదు"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ఎర్రర్, మళ్లీ ప్రయత్నించండి"</string>
