@@ -248,9 +248,10 @@ ASystemFontIterator* ASystemFontIterator_open() {
     minikin::SystemFonts::getFontMap(
             [&fonts](const std::vector<std::shared_ptr<minikin::FontCollection>>& collections) {
                 for (const auto& fc : collections) {
-                    for (const auto& family : fc->getFamilies()) {
-                        for (uint32_t i = 0; i < family->getNumFonts(); ++i) {
-                            const minikin::Font* font = family->getFont(i);
+                    for (uint32_t i = 0; i < fc->getFamilyCount(); ++i) {
+                        const auto& family = fc->getFamilyAt(i);
+                        for (uint32_t j = 0; j < family->getNumFonts(); ++j) {
+                            const minikin::Font* font = family->getFont(j);
 
                             std::optional<std::string> locale;
                             uint32_t localeId = font->getLocaleListId();

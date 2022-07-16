@@ -111,15 +111,15 @@ static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArr
     std::vector<std::shared_ptr<minikin::FontFamily>> familyVec;
     Typeface* typeface = (fallbackPtr == 0) ? nullptr : toTypeface(fallbackPtr);
     if (typeface != nullptr) {
-        const std::vector<std::shared_ptr<minikin::FontFamily>>& fallbackFamilies =
-            toTypeface(fallbackPtr)->fFontCollection->getFamilies();
-        familyVec.reserve(families.size() + fallbackFamilies.size());
+        const std::shared_ptr<minikin::FontCollection>& fallbackCollection =
+                toTypeface(fallbackPtr)->fFontCollection;
+        familyVec.reserve(families.size() + fallbackCollection->getFamilyCount());
         for (size_t i = 0; i < families.size(); i++) {
             FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(families[i]);
             familyVec.emplace_back(family->family);
         }
-        for (size_t i = 0; i < fallbackFamilies.size(); i++) {
-            familyVec.emplace_back(fallbackFamilies[i]);
+        for (size_t i = 0; i < fallbackCollection->getFamilyCount(); i++) {
+            familyVec.emplace_back(fallbackCollection->getFamilyAt(i));
         }
     } else {
         familyVec.reserve(families.size());
@@ -360,13 +360,13 @@ static void Typeface_forceSetStaticFinalField(JNIEnv *env, jclass cls, jstring f
 
 // Critical Native
 static jint Typeface_getFamilySize(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
-    return toTypeface(faceHandle)->fFontCollection->getFamilies().size();
+    return toTypeface(faceHandle)->fFontCollection->getFamilyCount();
 }
 
 // Critical Native
 static jlong Typeface_getFamily(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle, jint index) {
     std::shared_ptr<minikin::FontFamily> family =
-            toTypeface(faceHandle)->fFontCollection->getFamilies()[index];
+            toTypeface(faceHandle)->fFontCollection->getFamilyAt(index);
     return reinterpret_cast<jlong>(new FontFamilyWrapper(std::move(family)));
 }
 
