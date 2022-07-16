@@ -48,10 +48,6 @@ class RegionSamplingInstance(
         }
     }
 
-    fun createRegionSamplingInstance(): Pair<RegionDarkness, Rect> {
-        return Pair(isDark, samplingBounds)
-    }
-
     fun currentClockDarkness(): RegionDarkness {
         return isDark
     }

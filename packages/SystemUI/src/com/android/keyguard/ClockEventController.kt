@@ -80,6 +80,9 @@ class ClockEventController @Inject constructor(
     }
 
     fun updateRegionSamplers(currentClock: Clock?) {
+        smallRegionSamplingInstance.stopRegionSampler()
+        largeRegionSamplingInstance.stopRegionSampler()
+
         smallRegionSamplingInstance = RegionSamplingInstance(
                 currentClock?.smallClock,
                 mainExecutor,
