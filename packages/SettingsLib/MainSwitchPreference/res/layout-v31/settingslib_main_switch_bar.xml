@@ -19,6 +19,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingTop="@dimen/settingslib_switchbar_margin"
+    android:paddingBottom="@dimen/settingslib_switchbar_margin"
     android:orientation="vertical">
 
     <LinearLayout
@@ -26,7 +31,6 @@
         android:minHeight="@dimen/settingslib_min_switch_bar_height"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_margin="@dimen/settingslib_switchbar_margin"
         android:paddingStart="@dimen/settingslib_switchbar_padding_left"
         android:paddingEnd="@dimen/settingslib_switchbar_padding_right">
 
