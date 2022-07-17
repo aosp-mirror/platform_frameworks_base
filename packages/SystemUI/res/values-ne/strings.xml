@@ -124,9 +124,6 @@
     <string name="accessibility_lock_icon" msgid="661492842417875775">"यन्त्र लक गरिएको छ"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"अनुहार स्क्यान गर्दै"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"पठाउनुहोस्"</string>
-    <string name="phone_label" msgid="5715229948920451352">"फोन खोल्नुहोस्"</string>
-    <string name="voice_assist_label" msgid="3725967093735929020">"आवाज सहायता खोल्नुहोस्"</string>
-    <string name="camera_label" msgid="8253821920931143699">"क्यामेरा खोल्नुहोस्"</string>
     <string name="cancel" msgid="1089011503403416730">"रद्द गर्नुहोस्"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"पुष्टि गर्नुहोस्"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"फेरि प्रयास गर्नुहोस्"</string>
@@ -310,6 +307,8 @@
     <string name="tap_again" msgid="1315420114387908655">"फेरि ट्याप गर्नुहोस्"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"खोल्न माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"खोल्न अनलक आइकनमा थिच्नुहोस्"</string>
+    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
+    <skip />
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"अनुहार प्रयोग गरी अनलक गरियो। खोल्न अनलक आइकनमा थिच्नुहोस्।"</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"अनुहार प्रयोग गरी अनलक गरियो। डिभाइस खोल्न थिच्नुहोस्।"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"अनुहार पहिचान गरियो। डिभाइस खोल्न थिच्नुहोस्।"</string>
@@ -953,4 +952,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ब्रोडकास्ट गर्नुहोस्"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"आउटपुट परिवर्तन गर्नुहोस्"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"अज्ञात"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
 </resources>

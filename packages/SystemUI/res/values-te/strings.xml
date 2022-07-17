@@ -50,7 +50,7 @@
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB డీబగ్గింగ్‌ను అనుమతించాలా?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"ఇది కంప్యూటర్ యొక్క RSA కీ వేలిముద్ర:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"ఈ కంప్యూటర్ నుండి ఎల్లప్పుడూ అనుమతించు"</string>
-    <string name="usb_debugging_allow" msgid="1722643858015321328">"అనుమతించు"</string>
+    <string name="usb_debugging_allow" msgid="1722643858015321328">"అనుమతించండి"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB డీబగ్గింగ్‌కి అనుమతి లేదు"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"ఈ పరికరానికి ప్రస్తుతం సైన్ ఇన్ చేసిన వినియోగదారు USB డీబగ్గింగ్ ఆన్ చేయలేరు. ఈ ఫీచర్ ఉపయోగించడానికి, ప్రాథమిక వినియోగదారుకి మారాలి."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"మీరు సిస్టమ్ భాషను <xliff:g id="LANGUAGE">%1$s</xliff:g> భాషకు మార్చాలనుకుంటున్నారా?"</string>
@@ -60,7 +60,7 @@
     <string name="wifi_debugging_title" msgid="7300007687492186076">"ఈ నెట్‌వర్క్ ద్వారా వైర్‌లెస్ డీబగ్గింగ్‌ను అనుమతించాలా?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"నెట్‌వర్క్ పేరు (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi అడ్రస్ (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"ఈ నెట్‌వర్క్ నుండి ఎల్లప్పుడూ అనుమతించు"</string>
-    <string name="wifi_debugging_allow" msgid="4573224609684957886">"అనుమతించు"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"అనుమతించండి"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"వైర్‌లెస్ డీబగ్గింగ్‌కి అనుమతి లేదు"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"ఈ పరికరానికి ప్రస్తుతం సైన్ ఇన్ చేసిన యూజర్, వైర్‌లెస్ డీబగ్గింగ్ ఆన్ చేయలేరు. ఈ ఫీచర్ ఉపయోగించడానికి, ప్రాథమిక యూజర్ కి స్విచ్ అవ్వండి."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB పోర్ట్‌ నిలిపివేయబడింది"</string>
@@ -124,9 +124,6 @@
     <string name="accessibility_lock_icon" msgid="661492842417875775">"పరికరం లాక్ చేయబడింది"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ముఖాన్ని స్కాన్ చేస్తోంది"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"పంపు"</string>
-    <string name="phone_label" msgid="5715229948920451352">"ఫోన్‌ను తెరువు"</string>
-    <string name="voice_assist_label" msgid="3725967093735929020">"వాయిస్ అసిస్టెంట్‌ను తెరువు"</string>
-    <string name="camera_label" msgid="8253821920931143699">"కెమెరాను తెరవండి"</string>
     <string name="cancel" msgid="1089011503403416730">"రద్దు చేయండి"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"నిర్ధారించు"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"మళ్లీ ప్రయత్నించు"</string>
@@ -310,6 +307,8 @@
     <string name="tap_again" msgid="1315420114387908655">"మళ్లీ ట్యాప్ చేయండి"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"తెరవడానికి, పైకి స్వైప్ చేయండి"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"తెరవడానికి అన్‌లాక్ చిహ్నాన్ని నొక్కండి"</string>
+    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
+    <skip />
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది. తెరవడానికి అన్‌లాక్ చిహ్నాన్ని నొక్కండి."</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది. తెరవడానికి నొక్కండి."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"ముఖం గుర్తించబడింది. తెరవడానికి నొక్కండి."</string>
@@ -480,7 +479,7 @@
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"హాట్‌స్పాట్"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ఆఫీస్ ప్రొఫైల్‌"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"కొందరికి సరదాగా ఉంటుంది కానీ అందరికీ అలాగే ఉండదు"</string>
-    <string name="tuner_warning" msgid="1861736288458481650">"సిస్టమ్ UI ట్యూనర్ Android వినియోగదారు ఇంటర్‌ఫేస్‌ను మెరుగుపరచడానికి మరియు అనుకూలీకరించడానికి మీకు మరిన్ని మార్గాలను అందిస్తుంది. ఈ ప్రయోగాత్మక లక్షణాలు భవిష్యత్తు విడుదలల్లో మార్పుకు లోనవ్వచ్చు, తాత్కాలికంగా లేదా పూర్తిగా నిలిపివేయవచ్చు. జాగ్రత్తగా కొనసాగండి."</string>
+    <string name="tuner_warning" msgid="1861736288458481650">"సిస్టమ్ UI ట్యూనర్ Android వినియోగదారు ఇంటర్‌ఫేస్‌ను మెరుగుపరచడానికి మరియు అనుకూలంగా మార్చడానికి మీకు మరిన్ని మార్గాలను అందిస్తుంది. ఈ ప్రయోగాత్మక లక్షణాలు భవిష్యత్తు విడుదలల్లో మార్పుకు లోనవ్వచ్చు, తాత్కాలికంగా లేదా పూర్తిగా నిలిపివేయవచ్చు. జాగ్రత్తగా కొనసాగండి."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"ఈ ప్రయోగాత్మక లక్షణాలు భవిష్యత్తు విడుదలల్లో మార్పుకు లోనవ్వచ్చు, తాత్కాలికంగా లేదా పూర్తిగా నిలిపివేయవచ్చు. జాగ్రత్తగా కొనసాగండి."</string>
     <string name="got_it" msgid="477119182261892069">"అర్థమైంది"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"అభినందనలు! సెట్టింగ్‌లకు సిస్టమ్ UI ట్యూనర్ జోడించబడింది"</string>
@@ -715,7 +714,7 @@
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- ఇది <xliff:g id="APP">%1$s</xliff:g> నుండి సమాచారాన్ని చదువుతుంది"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- ఇది <xliff:g id="APP">%1$s</xliff:g> లోపల చర్యలు తీసుకుంటుంది"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"ఏ యాప్ నుండి అయినా స్లైస్‌లను చూపించడానికి <xliff:g id="APP">%1$s</xliff:g>ని అనుమతించండి"</string>
-    <string name="slice_permission_allow" msgid="6340449521277951123">"అనుమతించు"</string>
+    <string name="slice_permission_allow" msgid="6340449521277951123">"అనుమతించండి"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"తిరస్కరించు"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"బ్యాటరీ సేవర్‌ని షెడ్యూల్ చేయడానికి నొక్కండి"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"బ్యాటరీ ఛార్జింగ్ పూర్తిగా అయిపోతున్న తరుణంలో ఆన్ చేస్తుంది"</string>
@@ -750,7 +749,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ఫుల్ స్క్రీన్‌ను మ్యాగ్నిఫై చేయండి"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"స్క్రీన్‌లో భాగాన్ని మాగ్నిఫై చేయండి"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"స్విచ్ చేయి"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"యాక్సెసిబిలిటీ ఫీచర్‌లను తెరవడానికి ట్యాప్ చేయండి. సెట్టింగ్‌లలో ఈ బటన్‌ను అనుకూలీకరించండి లేదా రీప్లేస్ చేయండి.\n\n"<annotation id="link">"వీక్షణ సెట్టింగ్‌లు"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"యాక్సెసిబిలిటీ ఫీచర్‌లను తెరవడానికి ట్యాప్ చేయండి. సెట్టింగ్‌లలో ఈ బటన్‌ను అనుకూలంగా మార్చండి లేదా రీప్లేస్ చేయండి.\n\n"<annotation id="link">"వీక్షణ సెట్టింగ్‌లు"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"తాత్కాలికంగా దానిని దాచడానికి బటన్‌ను చివరకు తరలించండి"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ఎగువ ఎడమ వైపునకు తరలించు"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ఎగువ కుడి వైపునకు తరలించు"</string>
@@ -821,7 +820,7 @@
     <string name="controls_error_timeout" msgid="794197289772728958">"ఇన్‌యాక్టివ్, యాప్ చెక్ చేయండి"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"కనుగొనబడలేదు"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"కంట్రోల్ అందుబాటులో లేదు"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>ను యాక్సెస్ చేయడం సాధ్యపడలేదు. <xliff:g id="APPLICATION">%2$s</xliff:g> యాప్‌ను తనిఖీ చేసి, కంట్రోల్ ఇప్పటికీ అందుబాటులో ఉందని, యాప్ సెట్టింగ్‌లు మారలేదని నిర్ధారించుకోండి."</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>ను యాక్సెస్ చేయడం సాధ్యపడలేదు. <xliff:g id="APPLICATION">%2$s</xliff:g> యాప్‌ను చెక్ చేసి, కంట్రోల్ ఇప్పటికీ అందుబాటులో ఉందని, యాప్ సెట్టింగ్‌లు మారలేదని నిర్ధారించుకోండి."</string>
     <string name="controls_open_app" msgid="483650971094300141">"యాప్‌ను తెరువు"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"స్టేటస్ లోడ్ చేయడం సాధ్యపడలేదు"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ఎర్రర్, మళ్లీ ప్రయత్నించండి"</string>
@@ -953,4 +952,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ప్రసారం చేయండి"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"అవుట్‌పుట్‌ను మార్చండి"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"తెలియదు"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
 </resources>

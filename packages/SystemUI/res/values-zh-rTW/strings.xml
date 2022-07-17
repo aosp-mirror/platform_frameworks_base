@@ -124,9 +124,6 @@
     <string name="accessibility_lock_icon" msgid="661492842417875775">"裝置已鎖定"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"掃描臉孔"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"傳送"</string>
-    <string name="phone_label" msgid="5715229948920451352">"開啟電話"</string>
-    <string name="voice_assist_label" msgid="3725967093735929020">"開啟語音小幫手"</string>
-    <string name="camera_label" msgid="8253821920931143699">"開啟攝影機"</string>
     <string name="cancel" msgid="1089011503403416730">"取消"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"確認"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"再試一次"</string>
@@ -310,6 +307,8 @@
     <string name="tap_again" msgid="1315420114387908655">"再輕觸一次"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑動即可開啟"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"按下「解鎖」圖示即可開啟"</string>
+    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
+    <skip />
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"裝置已透過人臉解鎖，按下「解鎖」圖示即可開啟。"</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"裝置已透過你的臉解鎖，按下即可開啟。"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"臉孔辨識完成，按下即可開啟。"</string>
@@ -953,4 +952,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"播送「<xliff:g id="SWITCHAPP">%1$s</xliff:g>」的內容"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"變更輸出來源"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"不明"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"MMM d EEE"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
 </resources>
