@@ -307,6 +307,8 @@
     <string name="tap_again" msgid="1315420114387908655">"다시 탭하세요."</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"위로 스와이프하여 열기"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"기기를 열려면 잠금 해제 아이콘을 누르세요."</string>
+    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
+    <skip />
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"얼굴 인식으로 잠금 해제되었습니다. 기기를 열려면 잠금 해제 아이콘을 누르세요."</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"얼굴 인식으로 잠금 해제되었습니다. 열려면 누르세요."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"얼굴이 인식되었습니다. 열려면 누르세요."</string>
