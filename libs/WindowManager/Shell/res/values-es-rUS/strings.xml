@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Cuadro"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Administrar"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Se descartó el cuadro."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Presiona para reiniciar esta app y acceder al modo de pantalla completa."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Presiona para reiniciar esta app y tener una mejor vista."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"¿Tienes problemas con la cámara?\nPresiona para reajustarla"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"¿No se resolvió?\nPresiona para revertir los cambios"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"¿No tienes problemas con la cámara? Presionar para descartar."</string>

@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"泡泡"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"已關閉泡泡。"</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"輕觸即可重新啟動這個應用程式並進入全螢幕模式。"</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"請輕觸並重新啟動此應用程式，取得更良好的觀看體驗。"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"相機有問題嗎？\n輕觸即可修正"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"未修正問題嗎？\n輕觸即可還原"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"相機沒問題嗎？輕觸即可關閉。"</string>

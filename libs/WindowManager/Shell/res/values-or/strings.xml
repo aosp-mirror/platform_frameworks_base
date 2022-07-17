@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"ବବଲ୍"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ବବଲ୍ ଖାରଜ କରାଯାଇଛି।"</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"ଏହି ଆପକୁ ରିଷ୍ଟାର୍ଟ କରି ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"ଏକ ଆହୁରି ଭଲ ଭ୍ୟୁ ପାଇଁ ଏହି ଆପ ରିଷ୍ଟାର୍ଟ କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"କ୍ୟାମେରାରେ ସମସ୍ୟା ଅଛି?\nପୁଣି ଫିଟ କରିବାକୁ ଟାପ କରନ୍ତୁ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ଏହାର ସମାଧାନ ହୋଇନାହିଁ?\nଫେରିଯିବା ପାଇଁ ଟାପ କରନ୍ତୁ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"କ୍ୟାମେରାରେ କିଛି ସମସ୍ୟା ନାହିଁ? ଖାରଜ କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
