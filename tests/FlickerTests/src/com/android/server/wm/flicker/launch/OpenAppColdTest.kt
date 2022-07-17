@@ -80,15 +80,8 @@ open class OpenAppColdTest(
     /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() {
+    override fun navBarLayerPositionAtStartAndEnd() =
         super.navBarLayerPositionAtStartAndEnd()
-    }
 
     /** {@inheritDoc} */
     @Presubmit

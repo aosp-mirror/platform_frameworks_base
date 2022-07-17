@@ -124,9 +124,6 @@
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Enheten er låst"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Skanning av ansikt"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Send"</string>
-    <string name="phone_label" msgid="5715229948920451352">"åpne telefonen"</string>
-    <string name="voice_assist_label" msgid="3725967093735929020">"åpne talehjelp"</string>
-    <string name="camera_label" msgid="8253821920931143699">"åpne kamera"</string>
     <string name="cancel" msgid="1089011503403416730">"Avbryt"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Bekreft"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Prøv på nytt"</string>
@@ -136,7 +133,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Ansiktet er autentisert"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bekreftet"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Trykk på Bekreft for å fullføre"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Låst opp med ansiktet. Trykk på lås opp-ikon for å fortsette"</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Låst opp med ansiktet. Trykk på lås opp-ikonet for å fortsette"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Låst opp med ansiktet. Trykk for å fortsette."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Ansiktet er gjenkjent. Trykk for å fortsette."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Ansiktet er gjenkjent. Trykk på lås opp-ikon for å fortsette"</string>
@@ -250,7 +247,7 @@
     <string name="quick_settings_connected" msgid="3873605509184830379">"Tilkoblet"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Tilkoblet, batterinivå <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Kobler til …"</string>
-    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Wi-Fi-sone"</string>
+    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Wifi-sone"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Slår på …"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Datasparing er på"</string>
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# enhet}other{# enheter}}"</string>
@@ -310,7 +307,9 @@
     <string name="tap_again" msgid="1315420114387908655">"Trykk igjen"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Sveip opp for å åpne"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Trykk på lås opp-ikonet for å åpne"</string>
-    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Låst opp med ansiktet. Trykk på lås opp-ikon for å fortsette"</string>
+    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
+    <skip />
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Låst opp med ansiktet. Trykk på lås opp-ikonet for å fortsette"</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Låst opp med ansiktet. Trykk for å åpne."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Ansiktet er gjenkjent. Trykk for å åpne."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Ansiktet er gjenkjent. Trykk på lås opp-ikon for å fortsette"</string>
@@ -477,7 +476,7 @@
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Du hører ikke neste innstilte alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Wi-Fi-sone"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Wifi-sone"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Work-profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Gøy for noen – ikke for alle"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Med System UI Tuner har du flere måter å justere og tilpasse Android-brukergrensesnittet på. Disse eksperimentelle funksjonene kan endres, avbrytes eller fjernes i fremtidige utgivelser. Fortsett med forbehold."</string>
@@ -912,7 +911,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi kobles ikke til automatisk inntil videre"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Se alle"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"For å bytte nettverk, koble fra Ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"For å forbedre brukeropplevelsen på enheten kan apper og tjenester søke etter Wi-Fi-nettverk når som helst – også når Wi-Fi er slått av. Du kan endre dette i innstillingene for Wi-Fi-skanning. "<annotation id="link">"Endre"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"For å forbedre brukeropplevelsen på enheten kan apper og tjenester søke etter Wi-Fi-nettverk når som helst – også når Wi-Fi er slått av. Du kan endre dette i innstillingene for wifi-skanning. "<annotation id="link">"Endre"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Slå av flymodus"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> vil legge til denne brikken i Hurtiginnstillinger"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Legg til brikke"</string>
@@ -953,4 +952,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Kringkast <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Endre utgang"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Ukjent"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE d. MMM"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"t:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"tt:mm"</string>
 </resources>

@@ -266,10 +266,10 @@ import java.util.function.Consumer;
 @SystemService(Context.INPUT_METHOD_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_INPUT_METHODS)
 public final class InputMethodManager {
-    static final boolean DEBUG = false;
-    static final String TAG = "InputMethodManager";
+    private static final boolean DEBUG = false;
+    private static final String TAG = "InputMethodManager";
 
-    static final String PENDING_EVENT_COUNTER = "aq:imm";
+    private static final String PENDING_EVENT_COUNTER = "aq:imm";
 
     private static final int NOT_A_SUBTYPE_ID = -1;
 
@@ -361,7 +361,7 @@ public final class InputMethodManager {
     /**
      * Timeout in milliseconds for delivering a key to an IME.
      */
-    static final long INPUT_METHOD_NOT_RESPONDING_TIMEOUT = 2500;
+    private static final long INPUT_METHOD_NOT_RESPONDING_TIMEOUT = 2500;
 
     /** @hide */
     public static final int DISPATCH_IN_PROGRESS = -1;
@@ -400,7 +400,7 @@ public final class InputMethodManager {
     @Deprecated
     @UnsupportedAppUsage
     final IInputMethodManager mService;
-    final Looper mMainLooper;
+    private final Looper mMainLooper;
 
     @NonNull
     private final IInputMethodManagerInvoker mServiceInvoker;
@@ -422,7 +422,7 @@ public final class InputMethodManager {
     /**
      * True if this input method client is active, initially false.
      */
-    boolean mActive = false;
+    private boolean mActive = false;
 
     /**
      * {@code true} if next {@link ImeFocusController#onPostWindowFocus} needs to
@@ -433,7 +433,7 @@ public final class InputMethodManager {
     /**
      * As reported by IME through InputConnection.
      */
-    boolean mFullscreenMode;
+    private boolean mFullscreenMode;
 
     // -----------------------------------------------------------
 
@@ -447,33 +447,33 @@ public final class InputMethodManager {
      * This is set when we are in the process of connecting, to determine
      * when we have actually finished.
      */
-    boolean mServedConnecting;
+    private boolean mServedConnecting;
     /**
      * This is non-null when we have connected the served view; it holds
      * the attributes that were last retrieved from the served view and given
      * to the input connection.
      */
-    EditorInfo mCurrentEditorInfo;
+    private EditorInfo mCurrentEditorInfo;
     /**
      * The InputConnection that was last retrieved from the served view.
      */
-    RemoteInputConnectionImpl mServedInputConnection;
+    private RemoteInputConnectionImpl mServedInputConnection;
     /**
      * The completions that were last provided by the served view.
      */
-    CompletionInfo[] mCompletions;
+    private CompletionInfo[] mCompletions;
 
     // Cursor position on the screen.
     @UnsupportedAppUsage
     Rect mTmpCursorRect = new Rect();
     @UnsupportedAppUsage
     Rect mCursorRect = new Rect();
-    int mCursorSelStart;
-    int mCursorSelEnd;
-    int mCursorCandStart;
-    int mCursorCandEnd;
-    int mInitialSelStart;
-    int mInitialSelEnd;
+    private int mCursorSelStart;
+    private int mCursorSelEnd;
+    private int mCursorCandStart;
+    private int mCursorCandEnd;
+    private int mInitialSelStart;
+    private int mInitialSelEnd;
 
     /**
      * Handler for {@link RemoteInputConnectionImpl#getInputConnection()}.
@@ -534,8 +534,8 @@ public final class InputMethodManager {
     private final SparseArray<IAccessibilityInputMethodSessionInvoker>
             mAccessibilityInputMethodSession = new SparseArray<>();
 
-    InputChannel mCurChannel;
-    ImeInputEventSender mCurSender;
+    private InputChannel mCurChannel;
+    private ImeInputEventSender mCurSender;
 
     private static final int REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE = 0x0;
 
@@ -551,25 +551,25 @@ public final class InputMethodManager {
      */
     private ImeInsetsSourceConsumer mImeInsetsConsumer;
 
-    final Pool<PendingEvent> mPendingEventPool = new SimplePool<>(20);
-    final SparseArray<PendingEvent> mPendingEvents = new SparseArray<>(20);
+    private final Pool<PendingEvent> mPendingEventPool = new SimplePool<>(20);
+    private final SparseArray<PendingEvent> mPendingEvents = new SparseArray<>(20);
 
-    final DelegateImpl mDelegate = new DelegateImpl();
+    private final DelegateImpl mDelegate = new DelegateImpl();
 
     // -----------------------------------------------------------
 
-    static final int MSG_DUMP = 1;
-    static final int MSG_BIND = 2;
-    static final int MSG_UNBIND = 3;
-    static final int MSG_SET_ACTIVE = 4;
-    static final int MSG_SEND_INPUT_EVENT = 5;
-    static final int MSG_TIMEOUT_INPUT_EVENT = 6;
-    static final int MSG_FLUSH_INPUT_EVENT = 7;
-    static final int MSG_REPORT_FULLSCREEN_MODE = 10;
-    static final int MSG_BIND_ACCESSIBILITY_SERVICE = 11;
-    static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
-    static final int MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX = 30;
-    static final int MSG_ON_SHOW_REQUESTED = 31;
+    private static final int MSG_DUMP = 1;
+    private static final int MSG_BIND = 2;
+    private static final int MSG_UNBIND = 3;
+    private static final int MSG_SET_ACTIVE = 4;
+    private static final int MSG_SEND_INPUT_EVENT = 5;
+    private static final int MSG_TIMEOUT_INPUT_EVENT = 6;
+    private static final int MSG_FLUSH_INPUT_EVENT = 7;
+    private static final int MSG_REPORT_FULLSCREEN_MODE = 10;
+    private static final int MSG_BIND_ACCESSIBILITY_SERVICE = 11;
+    private static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
+    private static final int MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX = 30;
+    private static final int MSG_ON_SHOW_REQUESTED = 31;
 
     private static boolean isAutofillUIShowing(View servedView) {
         AutofillManager afm = servedView.getContext().getSystemService(AutofillManager.class);
@@ -637,7 +637,7 @@ public final class InputMethodManager {
      * {@link android.view.WindowInsetsController}.
      * @hide
      */
-    public void reportPerceptible(IBinder windowToken, boolean perceptible) {
+    public void reportPerceptible(@NonNull IBinder windowToken, boolean perceptible) {
         mServiceInvoker.reportPerceptibleAsync(windowToken, perceptible);
     }
 
@@ -1142,7 +1142,7 @@ public final class InputMethodManager {
         }
     }
 
-    final IInputMethodClient.Stub mClient = new IInputMethodClient.Stub() {
+    private final IInputMethodClient.Stub mClient = new IInputMethodClient.Stub() {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
             // No need to check for dump permission, since we only give this
@@ -1396,6 +1396,7 @@ public final class InputMethodManager {
      *
      * @return {@link List} of {@link InputMethodInfo}.
      */
+    @NonNull
     public List<InputMethodInfo> getInputMethodList() {
         // We intentionally do not use UserHandle.getCallingUserId() here because for system
         // services InputMethodManagerInternal.getInputMethodListAsUser() should be used
@@ -1474,6 +1475,7 @@ public final class InputMethodManager {
      *
      * @return {@link List} of {@link InputMethodInfo}.
      */
+    @NonNull
     public List<InputMethodInfo> getEnabledInputMethodList() {
         // We intentionally do not use UserHandle.getCallingUserId() here because for system
         // services InputMethodManagerInternal.getEnabledInputMethodListAsUser() should be used
@@ -1498,12 +1500,14 @@ public final class InputMethodManager {
      *
      * <p>On multi user environment, this API returns a result for the calling process user.</p>
      *
-     * @param imi An input method info whose subtypes list will be returned.
+     * @param imi The {@link InputMethodInfo} whose subtypes list will be returned. If {@code null},
+     * returns enabled subtypes for the currently selected {@link InputMethodInfo}.
      * @param allowsImplicitlySelectedSubtypes A boolean flag to allow to return the implicitly
      * selected subtypes. If an input method info doesn't have enabled subtypes, the framework
      * will implicitly enable subtypes according to the current system language.
      */
-    public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi,
+    @NonNull
+    public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(@Nullable InputMethodInfo imi,
             boolean allowsImplicitlySelectedSubtypes) {
         return mServiceInvoker.getEnabledInputMethodSubtypeList(
                 imi == null ? null : imi.getId(),
@@ -2606,7 +2610,7 @@ public final class InputMethodManager {
      * @param windowToken The client window token that requests the IME to remove its surface.
      * @hide
      */
-    public void removeImeSurface(IBinder windowToken) {
+    public void removeImeSurface(@NonNull IBinder windowToken) {
         synchronized (mH) {
             mServiceInvoker.removeImeSurfaceFromWindowAsync(windowToken);
         }
@@ -3238,7 +3242,7 @@ public final class InputMethodManager {
      * @param imiId An input method, whose subtypes settings will be shown. If imiId is null,
      * subtypes of all input methods will be shown.
      */
-    public void showInputMethodAndSubtypeEnabler(String imiId) {
+    public void showInputMethodAndSubtypeEnabler(@Nullable String imiId) {
         mServiceInvoker.showInputMethodAndSubtypeEnablerFromClient(mClient, imiId);
     }
 
@@ -3247,6 +3251,7 @@ public final class InputMethodManager {
      * the current input method. This method returns null when the current input method doesn't
      * have any input method subtype.
      */
+    @Nullable
     public InputMethodSubtype getCurrentInputMethodSubtype() {
         return mServiceInvoker.getCurrentInputMethodSubtype();
     }
@@ -3481,10 +3486,12 @@ public final class InputMethodManager {
      *             of "Additional Subtype" may be completely dropped in a future version of Android.
      */
     @Deprecated
-    public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
+    public void setAdditionalInputMethodSubtypes(@NonNull String imiId,
+            @NonNull InputMethodSubtype[] subtypes) {
         mServiceInvoker.setAdditionalInputMethodSubtypes(imiId, subtypes);
     }
 
+    @Nullable
     public InputMethodSubtype getLastInputMethodSubtype() {
         return mServiceInvoker.getLastInputMethodSubtype();
     }

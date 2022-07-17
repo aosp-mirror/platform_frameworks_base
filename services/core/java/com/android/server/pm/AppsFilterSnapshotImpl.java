@@ -44,6 +44,10 @@ public final class AppsFilterSnapshotImpl extends AppsFilterBase {
             mQueryableViaUsesLibrary = orig.mQueryableViaUsesLibrarySnapshot.snapshot();
         }
         mQueryableViaUsesLibrarySnapshot = new SnapshotCache.Sealed<>();
+        synchronized (orig.mQueryableViaUsesPermissionLock) {
+            mQueryableViaUsesPermission = orig.mQueryableViaUsesPermissionSnapshot.snapshot();
+        }
+        mQueryableViaUsesPermissionSnapshot = new SnapshotCache.Sealed<>();
         synchronized (orig.mForceQueryableLock) {
             mForceQueryable = orig.mForceQueryableSnapshot.snapshot();
         }

@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Mehurček"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Upravljanje"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Oblaček je bil opuščen."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Dotaknite se za vnovični zagon te aplikacije in preklop v celozaslonski način."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Če želite boljši prikaz, se dotaknite za vnovični zagon te aplikacije."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Težave s fotoaparatom?\nDotaknite se za vnovično prilagoditev"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"To ni odpravilo težave?\nDotaknite se za povrnitev"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nimate težav s fotoaparatom? Dotaknite se za opustitev."</string>

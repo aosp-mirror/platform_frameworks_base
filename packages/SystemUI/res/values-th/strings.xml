@@ -124,9 +124,6 @@
     <string name="accessibility_lock_icon" msgid="661492842417875775">"อุปกรณ์ถูกล็อก"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"กำลังสแกนใบหน้า"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ส่ง"</string>
-    <string name="phone_label" msgid="5715229948920451352">"เปิดโทรศัพท์"</string>
-    <string name="voice_assist_label" msgid="3725967093735929020">"เปิดตัวช่วยเสียง"</string>
-    <string name="camera_label" msgid="8253821920931143699">"เปิดกล้อง"</string>
     <string name="cancel" msgid="1089011503403416730">"ยกเลิก"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ยืนยัน"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ลองอีกครั้ง"</string>
@@ -310,6 +307,8 @@
     <string name="tap_again" msgid="1315420114387908655">"แตะอีกครั้ง"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"เลื่อนขึ้นเพื่อเปิด"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"กดไอคอนปลดล็อกเพื่อเปิด"</string>
+    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
+    <skip />
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"ปลดล็อกด้วยใบหน้าแล้ว กดไอคอนปลดล็อกเพื่อเปิด"</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"ปลดล็อกด้วยใบหน้าแล้ว กดเพื่อเปิด"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"จดจำใบหน้าได้ กดเพื่อเปิด"</string>
@@ -915,12 +914,12 @@
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"เพื่อปรับปรุงประสบการณ์การใช้อุปกรณ์ แอปและบริการต่างๆ จะยังคงสแกนหาเครือข่าย Wi‑Fi ได้ทุกเมื่อแม้ว่า Wi‑Fi จะปิดอยู่ คุณเปลี่ยนตัวเลือกนี้ได้ในการตั้งค่าการสแกนหา Wi-Fi "<annotation id="link">"เปลี่ยนการตั้งค่า"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"ปิดโหมดบนเครื่องบิน"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ต้องการเพิ่มองค์ประกอบต่อไปนี้ในการตั้งค่าด่วน"</string>
-    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"เพิ่มชิ้นส่วน"</string>
-    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ไม่ต้องเพิ่มชิ้นส่วน"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"เพิ่มองค์ประกอบ"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ไม่เพิ่มองค์ประกอบ"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"เลือกผู้ใช้"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{ทำงานอยู่ # แอป}other{ทำงานอยู่ # แอป}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"ข้อมูลใหม่"</string>
-    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"แอปที่ใช้งานอยู่"</string>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"แอปที่ทำงานอยู่"</string>
     <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"แอปเหล่านี้กำลังทำงานแม้ว่าคุณจะไม่ได้ใช้งานอยู่ก็ตาม วิธีนี้ช่วยให้ฟังก์ชันการทำงานของแอปมีประสิทธิภาพมากขึ้น แต่ก็อาจส่งผลต่ออายุการใช้งานแบตเตอรี่ด้วย"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"หยุด"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"หยุดแล้ว"</string>
@@ -953,4 +952,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"ออกอากาศ <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"เปลี่ยนเอาต์พุต"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"ไม่ทราบ"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE d MMM"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"HH:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
 </resources>

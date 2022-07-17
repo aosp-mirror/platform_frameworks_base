@@ -133,6 +133,7 @@ static struct {
     jmethodID getContextForDisplay;
     jmethodID notifyDropWindow;
     jmethodID getParentSurfaceForPointers;
+    jmethodID isPerDisplayTouchModeEnabled;
 } gServiceClassInfo;
 
 static struct {
@@ -265,7 +266,7 @@ protected:
     virtual ~NativeInputManager();
 
 public:
-    NativeInputManager(jobject contextObj, jobject serviceObj, const sp<Looper>& looper);
+    NativeInputManager(jobject serviceObj, const sp<Looper>& looper);
 
     inline sp<InputManagerInterface> getInputManager() const { return mInputManager; }
 
@@ -355,6 +356,10 @@ public:
     virtual PointerIconStyle getCustomPointerIconId();
     virtual void onPointerDisplayIdChanged(int32_t displayId, float xPos, float yPos);
 
+    /* --- If touch mode is enabled per display or global --- */
+
+    virtual bool isPerDisplayTouchModeEnabled();
+
 private:
     sp<InputManagerInterface> mInputManager;
 
@@ -398,23 +403,17 @@ private:
     } mLocked GUARDED_BY(mLock);
 
     std::atomic<bool> mInteractive;
-
     void updateInactivityTimeoutLocked();
     void handleInterceptActions(jint wmActions, nsecs_t when, uint32_t& policyFlags);
     void ensureSpriteControllerLocked();
     sp<SurfaceControl> getParentSurfaceForPointers(int displayId);
     static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
 
-    static inline JNIEnv* jniEnv() {
-        return AndroidRuntime::getJNIEnv();
-    }
+    static inline JNIEnv* jniEnv() { return AndroidRuntime::getJNIEnv(); }
 };
 
-
-
-NativeInputManager::NativeInputManager(jobject contextObj,
-        jobject serviceObj, const sp<Looper>& looper) :
-        mLooper(looper), mInteractive(true) {
+NativeInputManager::NativeInputManager(jobject serviceObj, const sp<Looper>& looper)
+      : mLooper(looper), mInteractive(true) {
     JNIEnv* env = jniEnv();
 
     mServiceObj = env->NewGlobalRef(serviceObj);
@@ -429,7 +428,6 @@ NativeInputManager::NativeInputManager(jobject contextObj,
         mLocked.pointerDisplayId = ADISPLAY_ID_DEFAULT;
     }
     mInteractive = true;
-
     InputManager* im = new InputManager(this, this);
     mInputManager = im;
     defaultServiceManager()->addService(String16("inputflinger"), im);
@@ -1488,6 +1486,16 @@ void NativeInputManager::setMotionClassifierEnabled(bool enabled) {
     mInputManager->getClassifier().setMotionClassifierEnabled(enabled);
 }
 
+bool NativeInputManager::isPerDisplayTouchModeEnabled() {
+    JNIEnv* env = jniEnv();
+    jboolean enabled =
+            env->CallBooleanMethod(mServiceObj, gServiceClassInfo.isPerDisplayTouchModeEnabled);
+    if (checkAndClearExceptionFromCallback(env, "isPerDisplayTouchModeEnabled")) {
+        return false;
+    }
+    return static_cast<bool>(enabled);
+}
+
 // ----------------------------------------------------------------------------
 
 static NativeInputManager* getNativeInputManager(JNIEnv* env, jobject clazz) {
@@ -1495,16 +1503,15 @@ static NativeInputManager* getNativeInputManager(JNIEnv* env, jobject clazz) {
             env->GetLongField(clazz, gNativeInputManagerServiceImpl.mPtr));
 }
 
-static jlong nativeInit(JNIEnv* env, jclass /* clazz */,
-        jobject serviceObj, jobject contextObj, jobject messageQueueObj) {
+static jlong nativeInit(JNIEnv* env, jclass /* clazz */, jobject serviceObj,
+                        jobject messageQueueObj) {
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueObj);
     if (messageQueue == nullptr) {
         jniThrowRuntimeException(env, "MessageQueue is not initialized.");
         return 0;
     }
 
-    NativeInputManager* im = new NativeInputManager(contextObj, serviceObj,
-            messageQueue->getLooper());
+    NativeInputManager* im = new NativeInputManager(serviceObj, messageQueue->getLooper());
     im->incStrong(0);
     return reinterpret_cast<jlong>(im);
 }
@@ -1677,11 +1684,11 @@ static void nativeSetInputFilterEnabled(JNIEnv* env, jobject nativeImplObj, jboo
 }
 
 static jboolean nativeSetInTouchMode(JNIEnv* env, jobject nativeImplObj, jboolean inTouchMode,
-                                     jint pid, jint uid, jboolean hasPermission) {
+                                     jint pid, jint uid, jboolean hasPermission, jint displayId) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
     return im->getInputManager()->getDispatcher().setInTouchMode(inTouchMode, pid, uid,
-                                                                 hasPermission);
+                                                                 hasPermission, displayId);
 }
 
 static void nativeSetMaximumObscuringOpacityForTouch(JNIEnv* env, jobject nativeImplObj,
@@ -2312,7 +2319,7 @@ static void nativeSetPointerDisplayId(JNIEnv* env, jobject nativeImplObj, jint d
 static const JNINativeMethod gInputManagerMethods[] = {
         /* name, signature, funcPtr */
         {"init",
-         "(Lcom/android/server/input/InputManagerService;Landroid/content/Context;Landroid/os/"
+         "(Lcom/android/server/input/InputManagerService;Landroid/os/"
          "MessageQueue;)J",
          (void*)nativeInit},
         {"start", "()V", (void*)nativeStart},
@@ -2330,7 +2337,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"removeInputChannel", "(Landroid/os/IBinder;)V", (void*)nativeRemoveInputChannel},
         {"pilferPointers", "(Landroid/os/IBinder;)V", (void*)nativePilferPointers},
         {"setInputFilterEnabled", "(Z)V", (void*)nativeSetInputFilterEnabled},
-        {"setInTouchMode", "(ZIIZ)Z", (void*)nativeSetInTouchMode},
+        {"setInTouchMode", "(ZIIZI)Z", (void*)nativeSetInTouchMode},
         {"setMaximumObscuringOpacityForTouch", "(F)V",
          (void*)nativeSetMaximumObscuringOpacityForTouch},
         {"injectInputEvent", "(Landroid/view/InputEvent;ZIIII)I", (void*)nativeInjectInputEvent},
@@ -2535,6 +2542,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.getParentSurfaceForPointers, clazz,
                   "getParentSurfaceForPointers", "(I)J");
+
+    GET_METHOD_ID(gServiceClassInfo.isPerDisplayTouchModeEnabled, clazz,
+                  "isPerDisplayTouchModeEnabled", "()Z");
 
     // InputDevice
 

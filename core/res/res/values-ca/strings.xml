@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permet que l\'aplicació conegui el nivell de complexitat del bloqueig de pantalla (alt, mitjà, baix o cap), que indica la llargària i el tipus de bloqueig de pantalla possibles. L\'aplicació també pot suggerir que els usuaris actualitzin el bloqueig de pantalla a un nivell determinat, però els usuaris poden ignorar aquestes recomanacions. Tingues en compte que el bloqueig de pantalla no s\'emmagatzema com a text sense format, de manera que l\'aplicació no coneix la contrasenya exacta."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"mostra notificacions"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Permet que l\'aplicació mostri notificacions"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"activar la pantalla"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Permet a l\'aplicació activar la pantalla."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"utilitza maquinari biomètric"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permet que l\'aplicació faci servir maquinari biomètric per a l\'autenticació"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"Gestionar el maquinari d\'empremtes digitals"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No es pot accedir a la càmera del telèfon des del teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No es pot accedir a la càmera de la tauleta des del teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Valor predeterminat del sistema"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

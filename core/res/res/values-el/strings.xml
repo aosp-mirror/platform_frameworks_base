@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Επιτρέπει στην εφαρμογή να μάθει το επίπεδο πολυπλοκότητας του κλειδώματος οθόνης (υψηλό, μέσο, χαμηλό ή κανένα), το οποίο υποδεικνύει το πιθανό εύρος του μήκους και του τύπου κλειδώματος οθόνης. Η εφαρμογή μπορεί επίσης να προτείνει στους χρήστες να ενημερώσουν το κλείδωμα οθόνης σε ένα συγκεκριμένο επίπεδο, όμως οι χρήστες μπορούν να την αγνοήσουν και να συνεχίσουν. Λάβετε υπόψη ότι το κλείδωμα οθόνης δεν αποθηκεύεται σε απλό κείμενο. Συνεπώς, η εφαρμογή δεν γνωρίζει τον κωδικό."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"εμφάνιση ειδοποιήσεων"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Επιτρέπει στην εφαρμογή να εμφανίζει ειδοποιήσεις"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"ενεργοποίηση της οθόνης"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Επιτρέπει στην εφαρμογή να ενεργοποιεί την οθόνη."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"χρήση βιομετρικού εξοπλισμού"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί βιομετρικό εξοπλισμό για έλεγχο ταυτότητας"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"διαχείριση εξοπλισμού δακτυλικού αποτυπώματος"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του τηλεφώνου από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του tablet από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Προεπιλογή συστήματος"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

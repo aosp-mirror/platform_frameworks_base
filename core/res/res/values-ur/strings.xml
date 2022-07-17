@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"اپپ کو اسکرین لاک کی پیچیدگی (بہت زیادہ، درمیانی، کم یا کوئی بھی نہیں) کو جاننے کی اجازت دیتی ہے، جو طوالت کی ممکنہ حد اور اسکرین لاک کی قسم کو بتاتی ہے۔ اپپ صارفین کو یہ مشوره بھی دے سکتی ہے کہ وہ اسکرین لاک کو مخصوص لیول تک اپ ڈیٹ کریں لیکن صارفین آزادانہ طور پر نظر انداز اور نیویگیٹ کر سکتے ہیں۔ نوٹ کریں کہ اسکرین لاک پلین ٹیکسٹ میں اسٹور نہیں کیا جاتا ہے اس لیے اپپ کو صحیح پاس ورڈ نہیں معلوم ہوتا ہے۔"</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"اطلاعات دکھائیں"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"ایپ کو اطلاعات دکھانے کی اجازت دیتا ہے"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"سکرین آن کریں"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"ایپ کو اسکرین آن کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"بایومیٹرک ہارڈ ویئر استعمال کریں"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ایپ کو توثیق کے لیے بایومیٹرک ہارڈ ویئر استعمال کرنے کی اجازت دیتا ہے"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"فنگر پرنٹ ہارڈ ویئر کا نظم کریں"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"مزید جانیں"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"‏Android 12 میں بہتر کردہ اطلاعات کو Android اڈاپٹیو کی اطلاعات سے تبدیل کیا گیا۔ یہ خصوصیت تجویز کردہ کارروائیاں اور جوابات دکھاتی ہے اور آپ کی اطلاعات کا نظم کرتی ہے۔\n\nبہتر کردہ اطلاعات رابطوں کے نام اور پیغامات جیسی ذاتی معلومات سمیت اطلاعات کے مواد تک رسائی حاصل کر سکتی ہیں۔ یہ خصوصیت اطلاعات کو برخاست کر سکتی ہے یا ان کا جواب بھی دے سکتی ہے جیسے فون کالز کا جواب دینا اور ڈسٹرب نہ کریں کو کنٹرول کرنا۔"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"روٹین موڈ معلومات کی اطلاع"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"بیٹری سیور کو آن کیا گیا"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"بیٹری لائف کو بڑھانے کے لیے بیٹری کے استعمال کو کم کیا جا رہا ہے"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"بیٹری سیور"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"بیٹری سیور کو آف کر دیا گیا"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"فون میں کافی چارج ہے۔ خصوصیات پر اب پابندی نہیں ہے۔"</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"آپ کے <xliff:g id="DEVICE">%1$s</xliff:g> سے فون کے کیمرا تک رسائی حاصل نہیں کی جا سکتی"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"آپ کے <xliff:g id="DEVICE">%1$s</xliff:g> سے ٹیبلیٹ کے کیمرا تک رسائی حاصل نہیں کی جا سکتی"</string>
     <string name="system_locale_title" msgid="711882686834677268">"سسٹم ڈیفالٹ"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

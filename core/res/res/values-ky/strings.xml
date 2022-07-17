@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Колдонмого экранды бөгөттөөнүн татаалдыгын (татаал, орточо, оңой же такыр жок) үйрөнүүгө мүмкүнчүлүк берет. Татаалдык деңгээли сырсөздүн узундугу жана экранды бөгөттөөнүн түрү боюнча айырмаланат. Колдонмо экранды бөгөттөөнү белгилүү деңгээлге тууралоону колдонуучуларга сунуштай да алат, бирок колдонуучулар ага көңүл бурбай койсо болот. Сырсөздү колдонмо билбеши үчүн, экранды бөгөттөө сырсөзүн кадимки текстте сактоого болбойт."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"билдирмелерди көрсөтүү"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Колдонмолор билдирмелерди көрсөтө алат"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"экранды күйгүзүү"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Колдонмого экранды күйгүзүүгө уруксат берет."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"биометрикалык аппаратты колдонуу"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Колдонмого аныктыгын текшерүү үчүн биометрикалык аппаратты пайдалануу мүмкүндүгүн берет"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"манжа изинин аппараттык камсыздоосун башкаруу"</string>
@@ -1229,7 +1231,7 @@
     <string name="smv_process" msgid="1398801497130695446">"<xliff:g id="PROCESS">%1$s</xliff:g> процесси өзүнүн мажбурланган StrictMode саясатын бузуп койду."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Телефон жаңырууда…"</string>
     <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"Планшет жаңыртылууда…"</string>
-    <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"Түзмөк жаңыртылууда…"</string>
+    <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"Түзмөк жаңырууда…"</string>
     <string name="android_start_title" product="default" msgid="4036708252778757652">"Телефон күйгүзүлүүдө…"</string>
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android жүргүзүлүүдө…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Планшет күйгүзүлүүдө…"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн телефондун камерасына мүмкүнчүлүк жок"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн планшетиңиздин камерасына мүмкүнчүлүк жок"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Системанын демейки параметрлери"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

@@ -33,7 +33,6 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.ComponentMatcher
 import com.android.server.wm.traces.common.ComponentMatcher.Companion.LAUNCHER
 import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,11 +50,6 @@ import org.junit.runners.Parameterized
 @Group2
 open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
-
-    @Before
-    open fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {

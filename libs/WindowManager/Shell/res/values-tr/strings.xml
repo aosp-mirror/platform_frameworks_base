@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Baloncuk"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Yönet"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Balon kapatıldı."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Bu uygulamayı yeniden başlatmak ve tam ekrana geçmek için dokunun."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Bu uygulamayı yeniden başlatarak daha iyi bir görünüm elde etmek için dokunun."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Kameranızda sorun mu var?\nDüzeltmek için dokunun"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Bu işlem sorunu düzeltmedi mi?\nİşlemi geri almak için dokunun"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Kameranızda sorun yok mu? Kapatmak için dokunun."</string>

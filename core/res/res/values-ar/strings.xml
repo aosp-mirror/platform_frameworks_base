@@ -557,6 +557,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"للسماح للتطبيق بمعرفة مستوى صعوبة قفل الشاشة (عالي أو متوسط أو منخفض الصعوبة أو بدون)، والذي يحدّد النطاق المحتمل لطول ونوع قفل الشاشة. ويمكن أن يقترح التطبيق للمستخدمين أيضًا تعديل قفل الشاشة إلى مستوى معيّن، ولهم مطلق الحرية في تجاهل هذا الاقتراح ورفضه. وتجدر الإشارة إلى أنه لا يتم حفظ قفل الشاشة في نص عادي، لذا لا يعرف التطبيق كلمة المرور تحديدًا."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"عرض الإشعارات"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"السماح للتطبيق بعرض إشعارات"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"تفعيل الشاشة"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"يسمح هذا الإذن للتطبيق بتفعيل الشاشة."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"استخدام الأجهزة البيومترية"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"للسماح للتطبيق باستخدام الأجهزة البيومترية للمصادقة"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"لإدارة أجهزة بصمة الإصبع"</string>
@@ -2079,10 +2081,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"مزيد من المعلومات"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"‏تم إبدال الإشعارات التكيُّفية لنظام التشغيل Android في الإصدار 12 منه بالإشعارات المحسّنة. تعرض هذه الميزة إجراءات وردودًا مقترحة وتنظِّم الإشعارات.\n\nيمكن للإشعارات المحسّنة الوصول إلى محتوى الإشعارات، بما في ذلك المعلومات الشخصية، مثلاً أسماء جهات الاتصال والرسائل. يمكن لهذه الميزة أيضًا إغلاق الإشعارات أو الاستجابة لها، مثلاً الردّ على مكالمات الهاتف والتحكّم في ميزة \"عدم الإزعاج\"."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"إشعار معلومات \"وضع سلسلة الإجراءات\""</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"تم تفعيل ميزة توفير شحن البطارية"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"يتم تقليل استخدام البطارية لإطالة عمرها."</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"توفير شحن البطارية"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"تم تفعيل ميزة \"توفير شحن البطارية\""</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"تم شحن الهاتف بدرجة كافية وتفعيل الميزات مرة أخرى"</string>
@@ -2290,4 +2290,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"يتعذّر الوصول إلى كاميرا الهاتف من على جهاز <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"يتعذّر الوصول إلى كاميرا الجهاز اللوحي من على جهاز <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
     <string name="system_locale_title" msgid="711882686834677268">"الإعداد التلقائي للنظام"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

@@ -114,30 +114,6 @@ public class WindowManagerWrapper {
     }
 
     /**
-     *  Sets if app requested fixed orientation should be ignored for given displayId.
-     */
-    public void setIgnoreOrientationRequest(int displayId, boolean ignoreOrientationRequest) {
-        try {
-            WindowManagerGlobal.getWindowManagerService().setIgnoreOrientationRequest(
-                    displayId, ignoreOrientationRequest);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to setIgnoreOrientationRequest()", e);
-        }
-    }
-
-    /**
-     * @return the stable insets for the primary display.
-     */
-    public void getStableInsets(Rect outStableInsets) {
-        try {
-            WindowManagerGlobal.getWindowManagerService().getStableInsets(DEFAULT_DISPLAY,
-                    outStableInsets);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get stable insets", e);
-        }
-    }
-
-    /**
      * Overrides a pending app transition.
      */
     public void overridePendingAppTransitionMultiThumbFuture(
@@ -153,16 +129,6 @@ public class WindowManagerWrapper {
         }
     }
 
-    public void overridePendingAppTransitionRemote(
-            RemoteAnimationAdapterCompat remoteAnimationAdapter, int displayId) {
-        try {
-            WindowManagerGlobal.getWindowManagerService().overridePendingAppTransitionRemote(
-                    remoteAnimationAdapter.getWrapped(), displayId);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to override pending app transition (remote): ", e);
-        }
-    }
-
     /**
      * Enable or disable haptic feedback on the navigation bar buttons.
      */
@@ -173,19 +139,6 @@ public class WindowManagerWrapper {
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to enable or disable navigation bar button haptics: ", e);
         }
-    }
-
-    public void setRecentsVisibility(boolean visible) {
-        try {
-            WindowManagerGlobal.getWindowManagerService().setRecentsVisibility(visible);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to set recents visibility");
-        }
-    }
-
-    @Deprecated
-    public void setPipVisibility(final boolean visible) {
-        // To be removed
     }
 
     /**
@@ -199,22 +152,6 @@ public class WindowManagerWrapper {
         } catch (RemoteException e) {
             return false;
         }
-    }
-
-    /**
-     * @return The side of the screen where navigation bar is positioned.
-     * @see #NAV_BAR_POS_RIGHT
-     * @see #NAV_BAR_POS_LEFT
-     * @see #NAV_BAR_POS_BOTTOM
-     * @see #NAV_BAR_POS_INVALID
-     */
-    public int getNavBarPosition(int displayId) {
-        try {
-            return WindowManagerGlobal.getWindowManagerService().getNavBarPosition(displayId);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to get nav bar position");
-        }
-        return NAV_BAR_POS_INVALID;
     }
 
     /**

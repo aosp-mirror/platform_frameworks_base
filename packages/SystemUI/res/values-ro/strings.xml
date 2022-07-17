@@ -124,9 +124,6 @@
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispozitiv blocat"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Scanarea chipului"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Trimiteți"</string>
-    <string name="phone_label" msgid="5715229948920451352">"deschideți telefonul"</string>
-    <string name="voice_assist_label" msgid="3725967093735929020">"deschideți asistentul vocal"</string>
-    <string name="camera_label" msgid="8253821920931143699">"deschideți camera foto"</string>
     <string name="cancel" msgid="1089011503403416730">"Anulați"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Confirmați"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Încercați din nou"</string>
@@ -310,6 +307,8 @@
     <string name="tap_again" msgid="1315420114387908655">"Atingeți din nou"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Glisați în sus pentru a deschide"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Apăsați pictograma de deblocare pentru a deschide"</string>
+    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
+    <skip />
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"S-a deblocat cu ajutorul feței. Apăsați pictograma de deblocare pentru a deschide"</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"S-a deblocat cu ajutorul feței. Apăsați pentru a deschide."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Chipul a fost recunoscut. Apăsați pentru a deschide."</string>
@@ -374,7 +373,7 @@
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> deține acest dispozitiv și poate monitoriza traficul din rețea"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Acest dispozitiv este oferit de <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Acest dispozitiv aparține organizației dvs. și este conectat la internet prin aplicația <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Acest dispozitiv aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> și este conectat la internet prin aplicația <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Acest dispozitiv aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> și e conectat la internet prin <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Dispozitivul aparține organizației dvs."</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Acest dispozitiv aparține organizației <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Acest dispozitiv aparține organizației dvs. și este conectat la internet prin rețele VPN."</string>
@@ -953,4 +952,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Difuzați <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Schimbați rezultatul"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Necunoscută"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EE, z LLL"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
 </resources>

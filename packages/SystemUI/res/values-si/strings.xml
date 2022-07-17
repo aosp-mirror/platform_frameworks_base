@@ -124,9 +124,6 @@
     <string name="accessibility_lock_icon" msgid="661492842417875775">"උපාංගය අගුලු දමා ඇත"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"මුහුණ ස්කෑන් කිරීම"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"යවන්න"</string>
-    <string name="phone_label" msgid="5715229948920451352">"දුරකථනය විවෘත කරන්න"</string>
-    <string name="voice_assist_label" msgid="3725967093735929020">"විවෘත හඬ සහාය"</string>
-    <string name="camera_label" msgid="8253821920931143699">"කැමරාව විවෘත කරන්න"</string>
     <string name="cancel" msgid="1089011503403416730">"අවලංගු කරන්න"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"තහවුරු කරන්න"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"නැවත උත්සාහ කරන්න"</string>
@@ -310,6 +307,8 @@
     <string name="tap_again" msgid="1315420114387908655">"නැවත තට්ටු කරන්න"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"විවෘත කිරීමට ස්වයිප් කරන්න"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"විවෘත කිරීමට අගුලු හැරීමේ නිරූපකය ඔබන්න"</string>
+    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
+    <skip />
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"මුහුණ මගින් අගුලු හරින ලදි. විවෘත කිරීමට අගුලු හැරීමේ නිරූපකය ඔබන්න."</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"මුහුණ මගින් අගුලු හරින ලදි. විවෘත කිරීමට ඔබන්න."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"මුහුණ හඳුනා ගන්නා ලදි. විවෘත කිරීමට ඔබන්න."</string>
@@ -953,4 +952,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> විකාශනය"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"ප්‍රතිදානය වෙනස් කරන්න"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"නොදනී"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
 </resources>

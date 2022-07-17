@@ -1841,12 +1841,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
         return mDozeServiceHost.isPulsing();
     }
 
-    @androidx.annotation.Nullable
-    @Override
-    public View getAmbientIndicationContainer() {
-        return mAmbientIndicationContainer;
-    }
-
     /**
      * When the keyguard is showing and covered by a "showWhenLocked" activity it
      * is occluded. This is controlled by {@link com.android.server.policy.PhoneWindowManager}

@@ -71,7 +71,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
         void onChildTaskStatusChanged(int taskId, boolean present, boolean visible);
 
-        void onChildTaskEnterPip(int taskId);
+        void onChildTaskEnterPip();
 
         void onRootTaskVanished();
 
@@ -102,6 +102,11 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         mIconProvider = iconProvider;
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
     }
+
+    /**
+     * General function for dismiss this stage.
+     */
+    void dismiss(WindowContainerTransaction wct, boolean toTop) {}
 
     int getChildCount() {
         return mChildrenTaskInfo.size();
@@ -255,7 +260,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 return;
             }
             if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
-                mCallbacks.onChildTaskEnterPip(taskId);
+                mCallbacks.onChildTaskEnterPip();
             }
             sendStatusChanged();
         } else {
@@ -297,6 +302,14 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
     }
 
+    void fadeOutDecor(Runnable finishedCallback) {
+        if (mSplitDecorManager != null) {
+            mSplitDecorManager.fadeOutDecor(finishedCallback);
+        } else {
+            finishedCallback.run();
+        }
+    }
+
     void addTask(ActivityManager.RunningTaskInfo task, WindowContainerTransaction wct) {
         // Clear overridden bounds and windowing mode to make sure the child task can inherit
         // windowing mode and bounds from split root.
@@ -328,6 +341,11 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
             }
         }
+    }
+
+    void resetBounds(WindowContainerTransaction wct) {
+        wct.setBounds(mRootTaskInfo.token, null);
+        wct.setAppBounds(mRootTaskInfo.token, null);
     }
 
     void onSplitScreenListenerRegistered(SplitScreen.SplitScreenListener listener,

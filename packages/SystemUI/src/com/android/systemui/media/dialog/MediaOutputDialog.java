@@ -134,6 +134,17 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
         }
     }
 
+    @Override
+    public int getBroadcastIconVisibility() {
+        return (isBroadcastSupported() && mMediaOutputController.isBluetoothLeBroadcastEnabled())
+                ? View.VISIBLE : View.GONE;
+    }
+
+    @Override
+    public void onBroadcastIconClick() {
+        startLeBroadcastDialog();
+    }
+
     @VisibleForTesting
     public enum MediaOutputEvent implements UiEventLogger.UiEventEnum {
         @UiEvent(doc = "The MediaOutput dialog became visible on the screen.")

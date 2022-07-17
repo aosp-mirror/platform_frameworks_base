@@ -58,7 +58,6 @@ data class KeyguardFaceListenModel(
     val keyguardAwake: Boolean,
     val keyguardGoingAway: Boolean,
     val listeningForFaceAssistant: Boolean,
-    val lockIconPressed: Boolean,
     val occludingAppRequestingFaceAuth: Boolean,
     val primaryUser: Boolean,
     val scanningAllowedByStrongAuth: Boolean,

@@ -555,6 +555,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Leidžiama programai sužinoti ekrano užrakto sudėtingumo lygį (aukštas, vidutinis, žemas arba nėra), nurodantį galimą ekrano užrakto trukmės diapazoną ir tipą. Be to, programa gali pasiūlyti naudotojams atnaujinti ekrano užraktą į tam tikrą lygį, bet naudotojai gali laisvai nepaisyti ir išeiti. Atminkite, kad ekrano užraktas nesaugomas kaip grynasis tekstas, todėl programa nežino tikslaus slaptažodžio."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"rodyti pranešimus"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Programai leidžiama rodyti pranešimus"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"įjungti ekraną"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Programai leidžiama įjungti ekraną."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"naudoti biometrinę aparatinę įrangą"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Leidžiama programai naudoti biometrinę aparatinę įrangą tapatybei nustatyti"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"tvarkyti piršto antspaudo aparatinę įrangą"</string>
@@ -2286,4 +2288,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nepavyko pasiekti telefono fotoaparato iš „<xliff:g id="DEVICE">%1$s</xliff:g>“"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nepavyko pasiekti planšetinio kompiuterio fotoaparato iš „<xliff:g id="DEVICE">%1$s</xliff:g>“"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Numatytoji sistemos vertė"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

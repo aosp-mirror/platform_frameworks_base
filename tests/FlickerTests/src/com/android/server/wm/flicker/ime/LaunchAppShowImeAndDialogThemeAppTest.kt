@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
@@ -140,14 +139,14 @@ class LaunchAppShowImeAndDialogThemeAppTest(
     /**
      * Checks that [ComponentMatcher.IME] layer becomes visible during the transition
      */
-    @FlakyTest(bugId = 215884488)
+    @Presubmit
     @Test
     fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible()
 
     /**
      * Checks that [ComponentMatcher.IME] layer is visible at the end of the transition
      */
-    @FlakyTest(bugId = 227142436)
+    @Presubmit
     @Test
     fun imeLayerExistsEnd() {
         testSpec.assertLayersEnd {

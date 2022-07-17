@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Cho phép ứng dụng nắm được độ phức tạp của khóa màn hình (cao, trung bình, thấp hoặc không có). Mức độ này cho biết độ dài và loại khóa màn hình có thể có. Ngoài ra, ứng dụng có thể gợi ý người dùng cập nhật khóa màn hình lên một mức độ nhất định, nhưng người dùng có thể tùy ý bỏ qua và chuyển sang phần khác. Lưu ý rằng khóa màn hình không được lưu dưới dạng văn bản thuần túy, vì vậy, ứng dụng sẽ không biết mật khẩu chính xác."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"hiển thị thông báo"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Cho phép ứng dụng hiển thị thông báo"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"bật màn hình"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Cho phép ứng dụng bật màn hình."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"sử dụng phần cứng sinh trắc học"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Cho phép ứng dụng dùng phần cứng sinh trắc học để xác thực"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"quản lý phần cứng vân tay"</string>
@@ -2076,7 +2078,7 @@
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Thông báo nâng cao đã thay thế Thông báo thích ứng trên Android trong Android 12. Tính năng này hiển thị những thao tác và câu trả lời đề xuất, đồng thời sắp xếp các thông báo của bạn.\n\nThông báo nâng cao có thể đọc mọi nội dung thông báo, bao gồm cả thông tin cá nhân như tên liên hệ và tin nhắn. Tính năng này cũng có thể đóng hoặc phản hồi các thông báo, chẳng hạn như trả lời cuộc gọi điện thoại, đồng thời có thể kiểm soát chế độ Không làm phiền."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Thông báo cung cấp thông tin về chế độ sạc thông thường"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Đã bật Trình tiết kiệm pin"</string>
-    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Giảm mức sử dụng pin để kéo dài tuổi thọ pin"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Giảm mức sử dụng pin để kéo dài thời lượng pin"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Trình tiết kiệm pin"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Trình tiết kiệm pin đã tắt"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Điện thoại còn đủ pin. Các tính năng không bị hạn chế nữa."</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Không truy cập được vào máy ảnh trên điện thoại từ <xliff:g id="DEVICE">%1$s</xliff:g> của bạn"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Không truy cập được vào máy ảnh trên máy tính bảng từ <xliff:g id="DEVICE">%1$s</xliff:g> của bạn"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Theo chế độ mặc định của hệ thống"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Հավելվածին հասանելի կդառնան էկրանի կողպման բարդության մակարդակի մասին տեղեկությունները (բարձր, միջին, ցածր կամ ոչ մեկը), այդ թվում՝ կողպման տեսակի և գաղտնաբառի երկարության մասին տվյալները: Բացի այդ, հավելվածը կկարողանա առաջարկել օգտատերերին բարձրացնել կողպման բարդության մակարդակը: Օգտատերերը կարող են անտեսել այդ առաջարկները: Նկատի ունեցեք, որ գաղտնաբառը չի պահվում բաց տեքստի տեսքով և հասանելի չէ հավելվածին:"</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"ցուցադրել ծանուցումներ"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Թույլ է տալիս հավելվածին ցուցադրել ծանուցումներ"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"Էկրանի միացում"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Թույլ է տալիս հավելվածին միացնել էկրանը։"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"կենսաչափական սարքի օգտագործում"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Հավելվածին թույլ է տալիս օգտագործել նույնականացման համար նախատեսված կենսաչափական սարքը"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"կառավարել մատնահետքերի գրանցման սարքը"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Իմանալ ավելին"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12-ում ընդլայնված ծանուցումները փոխարինում են Android-ի հարմարվող ծանուցումներին։ Այս գործառույթը դասավորում է ձեր բոլոր ծանուցումները և առաջարկում գործողություններ և պատասխաններ։\n\nԸնդլայնված ծանուցումներին հասանելի է բոլոր ծանուցումների պարունակությունը, ներառյալ անձնական տվյալները, օրինակ՝ կոնտակտների անուններն ու հաղորդագրությունները։ Այս գործառույթը կարող է նաև փակել ծանուցումները կամ սեղմել դրանցում առկա կոճակները, այդ թվում՝ պատասխանել հեռախոսազանգերի և կառավարել «Չանհանգստացնել» ռեժիմը։"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ծանուցում լիցքավորման մասին"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Մարտկոցի տնտեսումը միացվել է"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Մարտկոցի օգտագործումը նվազեցվել է դրա աշխատաժամանակը երկարացնելու համար"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Մարտկոցի տնտեսում"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Մարտկոցի տնտեսումն անջատված է"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Հեռախոսի լիցքը բավարար է։ Գործառույթներն այլևս չեն սահմանափակվում։"</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Հնարավոր չէ օգտագործել հեռախոսի տեսախցիկը ձեր <xliff:g id="DEVICE">%1$s</xliff:g> սարքից"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Հնարավոր չէ օգտագործել պլանշետի տեսախցիկը ձեր <xliff:g id="DEVICE">%1$s</xliff:g> սարքից"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Կանխադրված"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

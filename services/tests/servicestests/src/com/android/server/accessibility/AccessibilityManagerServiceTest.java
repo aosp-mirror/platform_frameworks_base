@@ -57,7 +57,9 @@ import android.testing.TestableContext;
 import android.view.Display;
 import android.view.DisplayAdjustments;
 import android.view.DisplayInfo;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
+import android.view.accessibility.AccessibilityWindowAttributes;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -415,6 +417,20 @@ public class AccessibilityManagerServiceTest {
                 any(IPlatformCompat.class), any(AccessibilityServiceInfo.class));
         mAccessibilityServiceConnection.setServiceInfo(new AccessibilityServiceInfo());
         verify(mMockSystemSupport).unbindImeLocked(mAccessibilityServiceConnection);
+    }
+
+    @Test
+    public void testSetAccessibilityWindowAttributes_passThrough() {
+        final int displayId = Display.DEFAULT_DISPLAY;
+        final int userid = 10;
+        final int windowId = 100;
+        final AccessibilityWindowAttributes attributes = new AccessibilityWindowAttributes(
+                new WindowManager.LayoutParams());
+
+        mA11yms.setAccessibilityWindowAttributes(displayId, windowId, userid, attributes);
+
+        verify(mMockA11yWindowManager).setAccessibilityWindowAttributes(displayId, windowId, userid,
+                attributes);
     }
 
     public static class FakeInputFilter extends AccessibilityInputFilter {

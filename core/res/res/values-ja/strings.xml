@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"このアプリに画面ロックの複雑さレベル（高、中、低、なし）を認識することを許可します。複雑さレベルは、画面ロックの文字数の範囲やタイプを示すものです。アプリから一定レベルまで画面ロックを更新するよう推奨されることもありますが、ユーザーは無視したり別の操作を行ったりできます。画面ロックは平文で保存されないため、アプリが正確なパスワードを知ることはありません。"</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"通知の表示"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"通知の表示をアプリに許可"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"画面をオンにする"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"画面をオンにすることをアプリに許可します。"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"生体認証ハードウェアの使用"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"生体認証ハードウェアを認証に使用することをアプリに許可します"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"指紋認証ハードウェアの管理"</string>
@@ -1443,7 +1445,7 @@
     <string name="permdesc_route_media_output" msgid="1759683269387729675">"メディア出力を他の外部デバイスにルーティングすることをアプリに許可します。"</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"インストールセッションの読み取り"</string>
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"インストールセッションの読み取りをアプリに許可します。これにより、アプリはアクティブパッケージのインストールに関する詳細情報を参照できるようになります。"</string>
-    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"インストールパッケージのリクエスト"</string>
+    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"request install packages"</string>
     <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"パッケージのインストールをリクエストすることをアプリケーションに許可します。"</string>
     <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"パッケージの削除のリクエスト"</string>
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"パッケージの削除をリクエストすることをアプリに許可します。"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> からスマートフォンのカメラにアクセスできません"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> からタブレットのカメラにアクセスできません"</string>
     <string name="system_locale_title" msgid="711882686834677268">"システムのデフォルト"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

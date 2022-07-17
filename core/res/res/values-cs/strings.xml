@@ -555,6 +555,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Umožňuje aplikaci zjistit úroveň složitosti zámku obrazovky (vysoká, střední, nízká nebo žádná), která ukazuje možnou délku a typ zámku obrazovky. Aplikace také může uživatelům navrhovat, aby zámek obrazovky upravili na určitou úroveň, ale uživatelé mohou návrhy klidně ignorovat a odejít. Zámek obrazovky není uložen jako prostý text, a tak aplikace přesné heslo nezná."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"zobrazovat oznámení"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Povolí aplikaci zobrazovat oznámení"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"zapnutí obrazovky"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Umožňuje aplikaci zapnout obrazovku."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"použití biometrického hardwaru"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Umožňuje aplikaci použít k ověření biometrický hardware"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"správa hardwaru na čtení otisků prstů"</string>
@@ -2286,4 +2288,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ze zařízení <xliff:g id="DEVICE">%1$s</xliff:g> nelze získat přístup k fotoaparátu telefonu"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ze zařízení <xliff:g id="DEVICE">%1$s</xliff:g> nelze získat přístup k fotoaparátu tabletu"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Výchozí nastavení systému"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

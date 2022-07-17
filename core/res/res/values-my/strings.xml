@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ဖုန်းမျက်နှာပြင်လော့ခ်၏ ရှုပ်ထွေးမှုအဆင့် (မြင့်၊ အလယ်အလတ်၊ နိမ့် သို့မဟုတ် မရှိ) အား လေ့လာရန် အက်ပ်ကို ခွင့်ပြုသည်။ ၎င်းက သတ်မှတ်ထားနိုင်သော ဖုန်းမျက်နှာပြင်လော့ခ်၏ စာလုံးရေနှင့် အမျိုးအစားကို ညွှန်ပြပေးသည်။ အသုံးပြုသူများအနေနှင့် ဖုန်းမျက်နှာပြင်လော့ခ်ကို အတိုင်းအတာတစ်ခုအထိ အဆင့်မြှင့်ရန် အက်ပ်က အကြံပြုနိုင်သည်။ သို့သော်လည်း အသုံးပြုသူများက ၎င်းကို ဂရုပြုမနေဘဲ လွတ်လပ်စွာ ကြည့်ရှုနိုင်ပါသည်။ ဖုန်းမျက်နှာပြင်လော့ခ်ကို စာသားအတိုင်း သိမ်းမထားသဖြင့် အက်ပ်သည် စကားဝှက်အစစ်ကို မသိနိုင်ကြောင်း သတိပြုပါ။"</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"အကြောင်းကြားချက်များ ပြခြင်း"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"အကြောင်းကြားချက်များ ပြရန် အက်ပ်ကို ခွင့်ပြုနိုင်သည်"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"ဖန်သားပြင်ဖွင့်ခြင်း"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"ဖန်သားပြင်ဖွင့်ရန် အက်ပ်ကို ခွင့်ပြုနိုင်သည်။"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ဇီဝဗေဒဆိုင်ရာ အချက်အလက်သုံး ကွန်ပျူတာဆိုင်ရာ စက်ပစ္စည်းကို အသုံးပြုရန်"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"အထောက်အထားစိစစ်ခြင်းအတွက် ဇီဝဗေဒဆိုင်ရာ သတင်းအချက်အလက်များသုံးသည့် ကွန်ပျူတာဆိုင်ရာ စက်ပစ္စည်းကို အသုံးပြုရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"လက်ဗွေစစ်ပစ္စည်းကို စီမံခြင်း"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> မှ ဖုန်းကင်မရာကို သုံး၍မရပါ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> မှ တက်ဘလက်ကင်မရာကို သုံး၍မရပါ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"စနစ်မူရင်း"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

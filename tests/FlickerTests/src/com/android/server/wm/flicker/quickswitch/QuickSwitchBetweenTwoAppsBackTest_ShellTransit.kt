@@ -16,8 +16,8 @@
 
 package com.android.server.wm.flicker.quickswitch
 
-import android.platform.test.annotations.RequiresDevice
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group1
@@ -25,6 +25,7 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -45,11 +46,34 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-@FlakyTest(bugId = 228009808)
-open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(testSpec: FlickerTestParameter)
-    : QuickSwitchBetweenTwoAppsBackTest(testSpec) {
+open class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(
+    testSpec: FlickerTestParameter
+) : QuickSwitchBetweenTwoAppsBackTest(testSpec) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)
     }
+
+    @FlakyTest(bugId = 228009808)
+    @Test
+    override fun app1LayerIsVisibleOnceApp2LayerIsInvisible() =
+        super.app1LayerIsVisibleOnceApp2LayerIsInvisible()
+
+    @FlakyTest(bugId = 228009808)
+    @Test
+    override fun app1WindowBecomesAndStaysVisible() = super.app1WindowBecomesAndStaysVisible()
+
+    @FlakyTest(bugId = 228009808)
+    @Test
+    override fun endsWithApp1BeingOnTop() = super.endsWithApp1BeingOnTop()
+
+    @FlakyTest(bugId = 239147075)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    @FlakyTest(bugId = 239147075)
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 }

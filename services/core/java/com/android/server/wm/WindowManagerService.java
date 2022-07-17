@@ -1202,7 +1202,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_hasPermanentDpad);
         mInTouchMode = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_defaultInTouchMode);
-        inputManager.setInTouchMode(mInTouchMode, MY_PID, MY_UID, true /* hasPermission */);
+        inputManager.setInTouchMode(mInTouchMode, MY_PID, MY_UID, /* hasPermission= */ true,
+                DEFAULT_DISPLAY);
         mDrawLockTimeoutMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_drawLockTimeoutMillis);
         mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
@@ -2304,12 +2305,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (win.mActivityRecord != null && ((flagChanges & FLAG_SHOW_WHEN_LOCKED) != 0
                         || (flagChanges & FLAG_DISMISS_KEYGUARD) != 0)) {
                     win.mActivityRecord.checkKeyguardFlagsChanged();
-                }
-                if (((attrChanges & LayoutParams.ACCESSIBILITY_TITLE_CHANGED) != 0)
-                        && (mAccessibilityController.hasCallbacks())) {
-                    // No move or resize, but the controller checks for title changes as well
-                    mAccessibilityController.onSomeWindowResizedOrMovedWithCallingUid(
-                            uid, win.getDisplayContent().getDisplayId());
                 }
 
                 if ((privateFlagChanges & SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS) != 0) {
@@ -3825,7 +3820,9 @@ public class WindowManagerService extends IWindowManager.Stub
                                                       /* printlog= */ false);
             final long token = Binder.clearCallingIdentity();
             try {
-                if (mInputManager.setInTouchMode(mode, pid, uid, hasPermission)) {
+                // TODO(b/198499018): Add displayId parameter indicating the target display.
+                // For now, will just pass DEFAULT_DISPLAY for displayId.
+                if (mInputManager.setInTouchMode(mode, pid, uid, hasPermission, DEFAULT_DISPLAY)) {
                     mInTouchMode = mode;
                 }
             } finally {

@@ -554,6 +554,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Dozvoljava aplikaciji da sazna nivo složenosti zaključavanja ekrana (visoka, srednja, niska ili nijedna), što ukazuje na mogući opseg trajanja i tip zaključavanja ekrana. Aplikacija može i da predlaže korisnicima da ažuriraju zaključavanje ekrana na određeni nivo, ali korisnici slobodno mogu da zanemare to i da idu na druge stranice. Imajte na umu da se podaci za zaključavanje ekrana ne čuvaju kao običan tekst, pa aplikacija ne zna tačnu lozinku."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"prikazivanje obaveštenja"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Dozvoljava aplikaciji da prikazuje obaveštenja"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"uključivanje ekrana"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Dozvoljava aplikaciji da uključi ekran."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"koristi biometrijski hardver"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Dozvoljava aplikaciji da koristi biometrijski hardver za potvrdu identiteta"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"upravljaj hardverom za otiske prstiju"</string>
@@ -2285,4 +2287,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ne može da se pristupi kameri telefona sa <xliff:g id="DEVICE">%1$s</xliff:g> uređaja"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ne može da se pristupi kameri tableta sa <xliff:g id="DEVICE">%1$s</xliff:g> uređaja"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Podrazumevani sistemski"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

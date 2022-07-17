@@ -2116,7 +2116,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // entering content-pip animation.
                 mWindowManager.mTaskSnapshotController.recordTaskSnapshot(
                         task, false /* allowSnapshotHome */);
-                rootTask.setBounds(r.getOptions().getLaunchBounds());
+                rootTask.setBounds(r.pictureInPictureArgs.getSourceRectHint());
             }
             rootTask.setDeferTaskAppear(false);
 

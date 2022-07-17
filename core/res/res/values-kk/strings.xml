@@ -264,7 +264,7 @@
     <string name="global_action_lockdown" msgid="2475471405907902963">"Құлыптау"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Жаңа хабарландыру"</string>
-    <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Виртуалды пернетақта"</string>
+    <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Виртуалдық пернетақта"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Физикалық пернетақта"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Қауіпсіздік"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Көлік режимі"</string>
@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Қолданбаға экран құлпының күрделілік деңгейін (жоғары, орташа, төмен немесе жоқ), соның ішінде ұзындығының ықтимал ауқымын және оның түрін анықтауға мүмкіндік береді. Сонымен қатар қолданба пайдаланушыларға құлыпты белгілі бір деңгейге жаңартуды ұсынады. Бірақ бұл ұсыныстарды елемеуге болады. Экран құлпы қарапайым мәтін түрінде сақталмайтындықтан, құпия сөз қолданбаға белгісіз болатынын ескеріңіз."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"хабарландыруларды көрсету"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Қолданбаға хабарландыруларды көрсетуге мүмкіндік береді."</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"экранды қосу"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Қолдабаға экранды қосуға рұқсат етеді."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"биометрикалық жабдықты пайдалану"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Аутентификациялау үшін қолданбаға биометрикалық жабдықты пайдалануға рұқсат береді"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"саусақ ізі жабдығын басқару"</string>
@@ -1134,7 +1136,7 @@
     <string name="replace" msgid="7842675434546657444">"… сөзін алмастыру"</string>
     <string name="delete" msgid="1514113991712129054">"Жою"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URL мекенжайын көшіру"</string>
-    <string name="selectTextMode" msgid="3225108910999318778">"Мәтінді бөлектеу"</string>
+    <string name="selectTextMode" msgid="3225108910999318778">"Мәтінді ерекшелеу"</string>
     <string name="undo" msgid="3175318090002654673">"Қайтару"</string>
     <string name="redo" msgid="7231448494008532233">"Қайтару"</string>
     <string name="autofill" msgid="511224882647795296">"Aвтотолтыру"</string>
@@ -1379,7 +1381,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ҚАБЫЛДАМАУ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Енгізу әдісін таңдау"</string>
     <string name="show_ime" msgid="6406112007347443383">"Физикалық пернетақта қосулы кезде оны экранға шығару"</string>
-    <string name="hardware" msgid="1800597768237606953">"Виртуалды пернетақтаны көрсету"</string>
+    <string name="hardware" msgid="1800597768237606953">"Виртуалдық пернетақтаны көрсету"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Физикалық пернетақтаны конфигурациялау"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Тіл мен пернетақта схемасын таңдау үшін түртіңіз"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1478,7 +1480,7 @@
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Артқы фоны"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Артқы фонын өзгерту"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Хабар бақылағыш"</string>
-    <string name="vr_listener_binding_label" msgid="8013112996671206429">"Виртуалды шынайылық тыңдаушысы"</string>
+    <string name="vr_listener_binding_label" msgid="8013112996671206429">"Виртуалдық шынайылық тыңдаушысы"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Шарт провайдері"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Хабарландыруларды жіктеу қызметі"</string>
     <string name="vpn_title" msgid="5906991595291514182">"VPN белсенді"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Толығырақ"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 жүйесінде \"Бейімделетін хабарландырулар\" функциясын \"Кеңейтілген хабарландырулар\" алмастырды. Бұл функция ұсынылған әрекеттер мен жауаптарды көрсетіп, хабарландыруларыңызды ретке келтіреді.\n\nОл хабарландыру мазмұнын, соның ішінде жеке ақпаратыңызды (мысалы, контакт аттары мен хабарларды) пайдалана алады. Сондай-ақ бұл функция арқылы хабарландыруларды жабуға немесе оларға жауап беруге (мысалы, телефон қоңырауларына жауап беруге және Мазаламау режимін басқаруға) болады."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режим туралы хабарландыру"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Батареяны үнемдеу режимі қосулы"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Батарея шығынын азайтсаңыз, батареяның жұмысы ұзарады."</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Батареяны үнемдеу режимі"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Батареяны үнемдеу режимі өшірілді"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефонның заряды жеткілікті. Функцияларға енді шектеу қойылмайды."</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> құрылғысынан телефон камерасын пайдалану мүмкін емес."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> құрылғысынан планшет камерасын пайдалану мүмкін емес."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Жүйенің әдепкі параметрі"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

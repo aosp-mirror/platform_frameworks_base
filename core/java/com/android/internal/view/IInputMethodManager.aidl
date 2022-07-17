@@ -49,14 +49,14 @@ interface IInputMethodManager {
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     List<InputMethodInfo> getEnabledInputMethodList(int userId);
 
-    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
+    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in @nullable String imiId,
             boolean allowsImplicitlySelectedSubtypes);
-    InputMethodSubtype getLastInputMethodSubtype();
+    @nullable InputMethodSubtype getLastInputMethodSubtype();
 
-    boolean showSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
-            in ResultReceiver resultReceiver, int reason);
-    boolean hideSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
-            in ResultReceiver resultReceiver, int reason);
+    boolean showSoftInput(in IInputMethodClient client, @nullable IBinder windowToken, int flags,
+            in @nullable ResultReceiver resultReceiver, int reason);
+    boolean hideSoftInput(in IInputMethodClient client, @nullable IBinder windowToken, int flags,
+            in @nullable ResultReceiver resultReceiver, int reason);
 
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window
     // has gained focus, and if 'editorInfo' is non-null then also does startInput.
@@ -65,11 +65,12 @@ interface IInputMethodManager {
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     InputBindResult startInputOrWindowGainedFocus(
             /* @StartInputReason */ int startInputReason,
-            in IInputMethodClient client, in IBinder windowToken,
+            in IInputMethodClient client, in @nullable IBinder windowToken,
             /* @StartInputFlags */ int startInputFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
-            int windowFlags, in EditorInfo editorInfo, in IRemoteInputConnection inputConnection,
-            in IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
+            /* @android.view.WindowManager.LayoutParams.Flags */ int windowFlags,
+            in @nullable EditorInfo editorInfo, in @nullable IRemoteInputConnection inputConnection,
+            in @nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, in ImeOnBackInvokedDispatcher imeDispatcher);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
@@ -80,20 +81,21 @@ interface IInputMethodManager {
     void showInputMethodPickerFromSystem(in IInputMethodClient client,
             int auxiliarySubtypeMode, int displayId);
 
-    void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
+    void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client,
+            @nullable String topId);
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.TEST_INPUT_METHOD)")
     boolean isInputMethodPickerShownForTest();
 
-    InputMethodSubtype getCurrentInputMethodSubtype();
+    @nullable InputMethodSubtype getCurrentInputMethodSubtype();
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     // This is kept due to @UnsupportedAppUsage.
     // TODO(Bug 113914148): Consider removing this.
     int getInputMethodWindowVisibleHeight(in IInputMethodClient client);
 
     oneway void reportVirtualDisplayGeometryAsync(in IInputMethodClient parentClient,
-            int childDisplayId, in float[] matrixValues);
+            int childDisplayId, in @nullable float[] matrixValues);
 
     oneway void reportPerceptibleAsync(in IBinder windowToken, boolean perceptible);
 

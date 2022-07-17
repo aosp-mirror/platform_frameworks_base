@@ -555,6 +555,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Umožňuje aplikácii zapamätať si úroveň zložitosti zámky obrazovky (vysoká, stredná, nízka alebo žiadna), ktorá udáva pravdepodobný rozsah dĺžky a typu zámky obrazovky. Aplikácia tiež navrhuje používateľom aktualizáciu zámky obrazovky na určitú úroveň, používatelia sa však môžu na základe vlastného uváženia rozhodnúť tento návrh ignorovať a prejsť inam. Upozorňujeme, že zámka obrazovky nie je uložená vo forme obyčajného textu, takže aplikácia nepozná presné heslo."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"zobrazovať upozornenia"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Povolí aplikácii zobrazovať upozornenia"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"zapnúť obrazovku"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Umožňuje aplikácii zapnúť obrazovku."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"používať biometrický hardvér"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Umožňuje aplikácii používať na overenie totožnosti biometrický hardvér"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"spravovať hardvér na snímanie odtlačkov prstov"</string>
@@ -2062,7 +2064,7 @@
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Zavrieť"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systém"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Nastavenia"</string>
-    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotoaparát"</string>
+    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofón"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"sa zobrazuje cez ďalšie aplikácie na obrazovke"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Poskytnúť spätnú väzbu"</string>
@@ -2286,4 +2288,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> nemáte prístup ku kamere telefónu"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> nemáte prístup ku kamere tabletu"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predvolené systémom"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

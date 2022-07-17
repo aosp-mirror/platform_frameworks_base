@@ -16,8 +16,8 @@
 
 package com.android.server.wm.flicker.quickswitch
 
-import android.platform.test.annotations.RequiresDevice
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group1
@@ -25,6 +25,7 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -45,11 +46,24 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-@FlakyTest(bugId = 228009808)
-open class QuickSwitchBetweenTwoAppsForwardTest_ShellTransit(testSpec: FlickerTestParameter)
-    : QuickSwitchBetweenTwoAppsForwardTest(testSpec) {
+open class QuickSwitchBetweenTwoAppsForwardTest_ShellTransit(
+    testSpec: FlickerTestParameter
+) : QuickSwitchBetweenTwoAppsForwardTest(testSpec) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)
     }
+
+    @FlakyTest(bugId = 228009808)
+    @Test
+    override fun app2LayerIsVisibleOnceApp1LayerIsInvisible() =
+        super.app2LayerIsVisibleOnceApp1LayerIsInvisible()
+
+    @FlakyTest(bugId = 228009808)
+    @Test
+    override fun app2WindowBecomesAndStaysVisible() = super.app2WindowBecomesAndStaysVisible()
+
+    @FlakyTest(bugId = 228009808)
+    @Test
+    override fun endsWithApp2BeingOnTop() = super.endsWithApp2BeingOnTop()
 }

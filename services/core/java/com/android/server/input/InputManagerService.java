@@ -396,7 +396,7 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         NativeInputManagerService getNativeService(InputManagerService service) {
-            return new NativeInputManagerService.NativeImpl(service, mContext, mLooper.getQueue());
+            return new NativeInputManagerService.NativeImpl(service, mLooper.getQueue());
         }
 
         void registerLocalService(InputManagerInternal localService) {
@@ -843,14 +843,17 @@ public class InputManagerService extends IInputManager.Stub
      * When input dispatches focus to the apps, the touch mode state
      * will be sent together with the focus change (but each one in its own event).
      *
-     * @param inTouchMode true if the device is in touch mode
-     * @param pid the pid of the process that requested to switch touch mode state
-     * @param uid the uid of the process that requested to switch touch mode state
+     * @param inTouchMode   true if the device is in touch mode
+     * @param pid           the pid of the process that requested to switch touch mode state
+     * @param uid           the uid of the process that requested to switch touch mode state
      * @param hasPermission if set to {@code true} then no further authorization will be performed
+     * @param displayId     the target display (ignored if device is configured with per display
+     *                      touch mode enabled)
      * @return {@code true} if the touch mode was successfully changed, {@code false} otherwise
      */
-    public boolean setInTouchMode(boolean inTouchMode, int pid, int uid, boolean hasPermission) {
-        return mNative.setInTouchMode(inTouchMode, pid, uid, hasPermission);
+    public boolean setInTouchMode(boolean inTouchMode, int pid, int uid, boolean hasPermission,
+            int displayId) {
+        return mNative.setInTouchMode(inTouchMode, pid, uid, hasPermission, displayId);
     }
 
     @Override // Binder call
@@ -3029,6 +3032,13 @@ public class InputManagerService extends IInputManager.Stub
             }
         }
         return names.toArray(new String[0]);
+    }
+
+    // Native callback.
+    @SuppressWarnings("unused")
+    private boolean isPerDisplayTouchModeEnabled() {
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_perDisplayFocusEnabled);
     }
 
     /**

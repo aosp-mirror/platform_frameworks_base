@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Leyfir forritinu að læra hversu flókinn skjálásinn er (erfiður, miðlungs, léttur eða enginn), sem gefur til kynna lengd og tegund skjálássins. Forritið getur einnig lagt til að notendur geri skjálásinn flóknari upp að tilteknu marki, en notendur geta valið að hunsa það og halda áfram að vafra. Hafðu í huga að skjálásinn er ekki geymdur í ódulkóðuðum texta svo forritið veit ekki nákvæmt aðgangsorð."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"sýna tilkynningar"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Leyfir forritinu að sýna tilkynningar"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"kveikja á skjánum"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Leyfir forritinu að kveikja á skjánum."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"nota búnað fyrir líffræðileg gögn"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Leyfir forritinu að nota búnað fyrir líffræðileg gögn til auðkenningar"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"stjórna fingrafarabúnaði"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Nánar"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Auknar tilkynningar hafa leyst breytilegar tilkynningar í Android af hólmi í Android 12. Eiginleikinn birtir tillögur að aðgerðum og svörum og flokkar tilkynningar.\n\nAuknar tilkynningar hafa aðgang að efni tilkynninga, þ. á m. persónuupplýsingum á borð við nöfn tengiliða og skilaboð. Eiginleikinn getur einnig hunsað eða svarað tilkynningum, til dæmis svarað símtölum og stjórnað „Ónáðið ekki“."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Upplýsingatilkynning aðgerðastillingar"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Kveikt á rafhlöðusparnaði"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Dregur úr rafhlöðunotkun til að auka endingu rafhlöðunnar"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Rafhlöðusparnaður"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Slökkt á rafhlöðusparnaði"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Síminn er með næga hleðslu. Eiginleikar eru ekki lengur takmarkaðir."</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ekki er hægt að opna myndavél símans úr <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ekki er hægt að opna myndavél spjaldtölvunnar úr <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Sjálfgildi kerfis"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

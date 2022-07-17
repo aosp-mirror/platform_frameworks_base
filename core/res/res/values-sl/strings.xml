@@ -555,6 +555,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Aplikaciji dovoljuje, da pridobi raven zapletenosti zaklepanja zaslona (visoka, srednja, nizka ali brez), ki označuje možen obseg dolžine in vrsto zaklepanja zaslona. Aplikacija lahko tudi predlaga uporabnikom, da posodobijo zaklepanje zaslona na določeno raven, vendar lahko uporabniki to opozorilo prezrejo in ga zaprejo tako, da se pomaknejo stran. Upoštevajte, da zaklepanje zaslona ni shranjeno v golem besedilu, tako da aplikacija ne pozna točnega gesla."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"prikaz obvestil"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Aplikaciji dovoli prikaz obvestil."</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"vklop zaslona"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Aplikaciji dovoli vklop zaslona."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"uporaba strojne opreme za biometrične podatke"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Aplikaciji omogoča uporabo strojne opreme za biometrične podatke za preverjanje pristnosti"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"upravljanje strojne opreme za prstne odtise"</string>
@@ -2077,10 +2079,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Več o tem"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Pametna obvestila so v Androidu 12 zamenjala prilagodljiva obvestila Android. Ta funkcija prikazuje predlagana dejanja in odgovore ter organizira vaša obvestila.\n\nPametna obvestila lahko preberejo vso vsebino obvestil, vključno z osebnimi podatki, kot so imena in sporočila stikov. Ta funkcija lahko tudi opusti obvestila ali se odziva nanje (npr. sprejema telefonske klice in upravlja način Ne moti)."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutinsko informativno obvestilo o načinu delovanja"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Varčevanje z energijo baterije je vklopljeno"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Manjša poraba energije baterije za podaljšanje časa delovanja baterije"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Varčevanje z energijo baterije"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Varčevanje z energijo baterije je izklopljeno"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Baterija v telefonu je dovolj napolnjena. Funkcije niso več omejene."</string>
@@ -2288,4 +2288,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ni mogoče dostopati do fotoaparata telefona prek naprave <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ni mogoče dostopati do fotoaparata tabličnega računalnika prek naprave <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Sistemsko privzeto"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

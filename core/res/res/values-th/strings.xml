@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"อนุญาตให้แอปเรียนรู้ระดับความซับซ้อนของการล็อกหน้าจอ (สูง ปานกลาง ต่ำ หรือไม่มี) ซึ่งแสดงให้เห็นช่วงความยาวและประเภทของการล็อกหน้าจอที่เป็นไปได้ นอกจากนี้แอปยังแนะนำให้ผู้ใช้อัปเดตการล็อกหน้าจอเป็นระดับหนึ่งๆ ได้ด้วย แต่ผู้ใช้จะปฏิเสธและไปยังส่วนต่างๆ ต่อได้ โปรดทราบว่าระบบไม่ได้จัดเก็บการล็อกหน้าจอไว้เป็นข้อความธรรมดา เพื่อให้แอปไม่รู้รหัสผ่าน"</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"แสดงการแจ้งเตือน"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"อนุญาตให้แอปแสดงการแจ้งเตือน"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"เปิดหน้าจอ"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"อนุญาตให้แอปเปิดหน้าจอ"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ใช้ฮาร์ดแวร์ชีวมิติ"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"อนุญาตให้แอปใช้ฮาร์ดแวร์ชีวมิติเพื่อตรวจสอบสิทธิ์"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"จัดการฮาร์ดแวร์ลายนิ้วมือ"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ดูข้อมูลเพิ่มเติม"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"การแจ้งเตือนที่เพิ่มประสิทธิภาพมาแทนที่การแจ้งเตือนแบบปรับอัตโนมัติของ Android ใน Android 12 ฟีเจอร์นี้จะแสดงการดำเนินการและการตอบกลับที่แนะนำ ตลอดจนจัดระเบียบการแจ้งเตือน\n\nการแจ้งเตือนที่เพิ่มประสิทธิภาพจะเข้าถึงเนื้อหาของการแจ้งเตือนได้ ซึ่งรวมถึงข้อมูลส่วนบุคคล เช่น ชื่อผู้ติดต่อและข้อความ ฟีเจอร์นี้ยังปิดหรือตอบสนองต่อการแจ้งเตือนได้ด้วย เช่น การรับสายโทรศัพท์และการควบคุมโหมดห้ามรบกวน"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"การแจ้งเตือนข้อมูลโหมดกิจวัตร"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"เปิดโหมดประหยัดแบตเตอรี่แล้ว"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ลดการใช้งานแบตเตอรี่เพื่อยืดอายุการใช้งานแบตเตอรี่"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"โหมดประหยัดแบตเตอรี่"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ปิดโหมดประหยัดแบตเตอรี่แล้ว"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"โทรศัพท์มีแบตเตอรี่เพียงพอ ไม่มีการจำกัดฟีเจอร์แล้ว"</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"เข้าถึงกล้องของโทรศัพท์จาก <xliff:g id="DEVICE">%1$s</xliff:g> ไม่ได้"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"เข้าถึงกล้องของแท็บเล็ตจาก <xliff:g id="DEVICE">%1$s</xliff:g> ไม่ได้"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ค่าเริ่มต้นของระบบ"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

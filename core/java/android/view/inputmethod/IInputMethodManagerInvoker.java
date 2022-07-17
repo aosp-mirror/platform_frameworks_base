@@ -18,10 +18,13 @@ package android.view.inputmethod;
 
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.DirectBootAwareness;
@@ -54,8 +57,8 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    void addClient(IInputMethodClient client, IRemoteInputConnection fallbackInputConnection,
-            int untrustedDisplayId) {
+    void addClient(@NonNull IInputMethodClient client,
+            @NonNull IRemoteInputConnection fallbackInputConnection, int untrustedDisplayId) {
         try {
             mTarget.addClient(client, fallbackInputConnection, untrustedDisplayId);
         } catch (RemoteException e) {
@@ -64,6 +67,7 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
+    @NonNull
     List<InputMethodInfo> getInputMethodList(@UserIdInt int userId) {
         try {
             return mTarget.getInputMethodList(userId);
@@ -73,6 +77,7 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
+    @NonNull
     List<InputMethodInfo> getAwareLockedInputMethodList(@UserIdInt int userId,
             @DirectBootAwareness int directBootAwareness) {
         try {
@@ -83,6 +88,7 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
+    @NonNull
     List<InputMethodInfo> getEnabledInputMethodList(@UserIdInt int userId) {
         try {
             return mTarget.getEnabledInputMethodList(userId);
@@ -92,7 +98,8 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
+    @NonNull
+    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(@Nullable String imiId,
             boolean allowsImplicitlySelectedSubtypes) {
         try {
             return mTarget.getEnabledInputMethodSubtypeList(imiId,
@@ -103,6 +110,7 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
+    @Nullable
     InputMethodSubtype getLastInputMethodSubtype() {
         try {
             return mTarget.getLastInputMethodSubtype();
@@ -112,8 +120,9 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    boolean showSoftInput(IInputMethodClient client, IBinder windowToken,
-            int flags, ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+    boolean showSoftInput(@NonNull IInputMethodClient client, @Nullable IBinder windowToken,
+            int flags, @Nullable ResultReceiver resultReceiver,
+            @SoftInputShowHideReason int reason) {
         try {
             return mTarget.showSoftInput(client, windowToken, flags, resultReceiver, reason);
         } catch (RemoteException e) {
@@ -122,8 +131,9 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    boolean hideSoftInput(IInputMethodClient client, IBinder windowToken,
-            int flags, ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+    boolean hideSoftInput(@NonNull IInputMethodClient client, @Nullable IBinder windowToken,
+            int flags, @Nullable ResultReceiver resultReceiver,
+            @SoftInputShowHideReason int reason) {
         try {
             return mTarget.hideSoftInput(client, windowToken, flags, resultReceiver, reason);
         } catch (RemoteException e) {
@@ -132,13 +142,14 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
+    @NonNull
     InputBindResult startInputOrWindowGainedFocus(@StartInputReason int startInputReason,
-            IInputMethodClient client, IBinder windowToken,
-            @StartInputFlags int startInputFlags,
-            @android.view.WindowManager.LayoutParams.SoftInputModeFlags int softInputMode,
-            int windowFlags, EditorInfo editorInfo, IRemoteInputConnection remoteInputConnection,
-            IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
-            int unverifiedTargetSdkVersion, ImeOnBackInvokedDispatcher imeDispatcher) {
+            @NonNull IInputMethodClient client, @Nullable IBinder windowToken,
+            @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
+            @WindowManager.LayoutParams.Flags int windowFlags, @Nullable EditorInfo editorInfo,
+            @Nullable IRemoteInputConnection remoteInputConnection,
+            @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
+            int unverifiedTargetSdkVersion, @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         try {
             return mTarget.startInputOrWindowGainedFocus(startInputReason, client, windowToken,
                     startInputFlags, softInputMode, windowFlags, editorInfo, remoteInputConnection,
@@ -149,7 +160,8 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    void showInputMethodPickerFromClient(IInputMethodClient client, int auxiliarySubtypeMode) {
+    void showInputMethodPickerFromClient(@NonNull IInputMethodClient client,
+            int auxiliarySubtypeMode) {
         try {
             mTarget.showInputMethodPickerFromClient(client, auxiliarySubtypeMode);
         } catch (RemoteException e) {
@@ -158,8 +170,8 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    void showInputMethodPickerFromSystem(IInputMethodClient client, int auxiliarySubtypeMode,
-            int displayId) {
+    void showInputMethodPickerFromSystem(@NonNull IInputMethodClient client,
+            int auxiliarySubtypeMode, int displayId) {
         try {
             mTarget.showInputMethodPickerFromSystem(client, auxiliarySubtypeMode, displayId);
         } catch (RemoteException e) {
@@ -168,7 +180,8 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    void showInputMethodAndSubtypeEnablerFromClient(IInputMethodClient client, String imeId) {
+    void showInputMethodAndSubtypeEnablerFromClient(@NonNull IInputMethodClient client,
+            @Nullable String imeId) {
         try {
             mTarget.showInputMethodAndSubtypeEnablerFromClient(client, imeId);
         } catch (RemoteException e) {
@@ -186,6 +199,7 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
+    @Nullable
     InputMethodSubtype getCurrentInputMethodSubtype() {
         try {
             return mTarget.getCurrentInputMethodSubtype();
@@ -195,7 +209,8 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    void setAdditionalInputMethodSubtypes(String imeId, InputMethodSubtype[] subtypes) {
+    void setAdditionalInputMethodSubtypes(@NonNull String imeId,
+            @NonNull InputMethodSubtype[] subtypes) {
         try {
             mTarget.setAdditionalInputMethodSubtypes(imeId, subtypes);
         } catch (RemoteException e) {
@@ -204,7 +219,7 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    int getInputMethodWindowVisibleHeight(IInputMethodClient client) {
+    int getInputMethodWindowVisibleHeight(@NonNull IInputMethodClient client) {
         try {
             return mTarget.getInputMethodWindowVisibleHeight(client);
         } catch (RemoteException e) {
@@ -213,8 +228,8 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    void reportVirtualDisplayGeometryAsync(IInputMethodClient client, int childDisplayId,
-            float[] matrixValues) {
+    void reportVirtualDisplayGeometryAsync(@NonNull IInputMethodClient client, int childDisplayId,
+            @Nullable float[] matrixValues) {
         try {
             mTarget.reportVirtualDisplayGeometryAsync(client, childDisplayId, matrixValues);
         } catch (RemoteException e) {
@@ -223,7 +238,7 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    void reportPerceptibleAsync(IBinder windowToken, boolean perceptible) {
+    void reportPerceptibleAsync(@NonNull IBinder windowToken, boolean perceptible) {
         try {
             mTarget.reportPerceptibleAsync(windowToken, perceptible);
         } catch (RemoteException e) {
@@ -232,7 +247,7 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    void removeImeSurfaceFromWindowAsync(IBinder windowToken) {
+    void removeImeSurfaceFromWindowAsync(@NonNull IBinder windowToken) {
         try {
             mTarget.removeImeSurfaceFromWindowAsync(windowToken);
         } catch (RemoteException e) {
@@ -241,7 +256,7 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    void startStylusHandwriting(IInputMethodClient client) {
+    void startStylusHandwriting(@NonNull IInputMethodClient client) {
         try {
             mTarget.startStylusHandwriting(client);
         } catch (RemoteException e) {

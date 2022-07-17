@@ -284,9 +284,9 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Апп батарей ашиглаж байна"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Томруулах"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Хандалтын ашиглалт"</string>
-    <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> батерей ашиглаж байна"</string>
-    <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> апп батерей ашиглаж байна"</string>
-    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батерей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
+    <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> батарей ашиглаж байна"</string>
+    <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> апп батарей ашиглаж байна"</string>
+    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батарей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Аюулгүй горим"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Андройд систем"</string>
@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Аппад дэлгэцийн түгжээний боломжтой уртын хэмжээ болон төрлийг заадаг дэлгэцийн түгжээний төвөгтэй байдлын түвшнийг (өндөр, дундаж, бага эсвэл байхгүй) мэдэж авахыг зөвшөөрдөг. Түүнчлэн, апп хэрэглэгчдэд дэлгэцийн түгжээг тодорхой түвшинд шинэчлэхийг санал болгох боломжтой хэдий ч хэрэглэгч үүнийг чөлөөтэй үл хэрэгсэж, орхих боломжтой. Дэлгэцийн түгжээг ил бичвэрээр хадгалдаггүй тул энэ апп тодорхой нууц үгийг мэддэггүй болохыг анхаарна уу."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"мэдэгдэл харуулах"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Аппад мэдэгдэл харуулахыг зөвшөөрнө"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"дэлгэцийг асаах"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Аппад дэлгэцийг асаахыг зөвшөөрнө."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"биометрийн техник хангамжийг ашиглах"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Aппад биометрийн техник хангамжийг баталгаажуулалтад ашиглахыг зөвшөөрдөг"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"хурууны хээний төхөөрөмжийг удирдах"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Таны <xliff:g id="DEVICE">%1$s</xliff:g>-с утасны камерт хандах боломжгүй"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Таны <xliff:g id="DEVICE">%1$s</xliff:g>-с таблетын камерт хандах боломжгүй"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Системийн өгөгдмөл"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

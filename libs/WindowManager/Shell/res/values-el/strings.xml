@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Συννεφάκι"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Διαχείριση"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Το συννεφάκι παραβλέφθηκε."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Πατήστε για επανεκκίνηση αυτής της εφαρμογής και ενεργοποίηση πλήρους οθόνης."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Πατήστε για να επανεκκινήσετε αυτή την εφαρμογή για καλύτερη προβολή."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Προβλήματα με την κάμερα;\nΠατήστε για επιδιόρθωση."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Δεν διορθώθηκε;\nΠατήστε για επαναφορά."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Δεν αντιμετωπίζετε προβλήματα με την κάμερα; Πατήστε για παράβλεψη."</string>

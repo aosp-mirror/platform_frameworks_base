@@ -1040,7 +1040,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
 
         if (occluded != mLastOccluded || mFirstUpdate) {
-            mKeyguardUpdateManager.onKeyguardOccludedChanged(occluded);
             mKeyguardStateController.notifyKeyguardState(showing, occluded);
         }
         if ((showing && !occluded) != (mLastShowing && !mLastOccluded) || mFirstUpdate) {
@@ -1067,11 +1066,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mLastGesturalNav = mGesturalNav;
         mLastIsDocked = mIsDocked;
         mCentralSurfaces.onKeyguardViewManagerStatesUpdated();
-    }
-
-    private View getCurrentNavBarView() {
-        final NavigationBarView navBarView = mCentralSurfaces.getNavigationBarView();
-        return navBarView != null ? navBarView.getCurrentView() : null;
     }
 
     /**

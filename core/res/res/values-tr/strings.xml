@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Uygulamanın, ekran kilidi karmaşıklık seviyesini (yüksek, orta, düşük veya yok) öğrenmesini sağlar. Ekran kilidi karmaşıklık seviyesi, ekran kilidinin olası uzunluk aralığını ve türünü gösterir. Uygulama, kullanıcılara ekran kilidini belirli bir seviyeye güncellemelerini de önerebilir, ancak kullanıcılar bunu istedikleri gibi yoksayabilir ve geçebilirler. Ekran kilidi şifrelenmemiş metin olarak saklanmadığı için uygulamanın şifreyi tam olarak bilmediğini unutmayın."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"bildirimleri göster"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Uygulamanın bildirimleri göstermesine izin verir"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"ekranı aç"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Uygulamaya ekranı açma izni verir."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"biyometrik donanım kullan"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Uygulamanın kimlik doğrulama için biyometrik donanım kullanmasına izin verir"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"parmak izi donanımını yönetme"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Daha fazla bilgi"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Gelişmiş bildirimler, Android 12\'de Android Uyarlanabilir Bildirimler\'in yerini aldı. Bu özellik, önerilen işlem ve yanıtları gösterir ve bildirimlerinizi organize eder.\n\nGelişmiş bildirimler, kişiler ve mesajlar gibi kişisel bilgiler dahil olmak üzere tüm bildirim içeriklerine erişebilir. Bu özellik ayrıca bildirimleri kapatabilir veya telefon aramalarını yanıtlamak ve Rahatsız Etmeyin modunu kontrol etmek gibi işlemlerle bildirimlere yanıt verebilir."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutin Modu bilgi bildirimi"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Pil Tasarrufu açıldı"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Pil ömrünü uzatmak için pil kullanımını azaltma"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Pil Tasarrufu"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Pil Tasarrufu kapatıldı"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefon yeterince şarj oldu. Özellikler artık kısıtlanmış değil."</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan telefonun kamerasına erişilemiyor"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan tabletin kamerasına erişilemiyor"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Sistem varsayılanı"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

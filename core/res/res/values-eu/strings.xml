@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Pantailaren blokeoaren konplexutasun-maila (handia, ertaina, txikia edo bat ere ez) jakiteko baimena ematen die aplikazioei. Informazio horrekin, pantailaren blokeoaren luzera-barruti edo mota posiblea ondoriozta liteke. Halaber, pantailaren blokeoa maila jakin batera igotzeko iradoki diezaiekete aplikazioek erabiltzaileei, baina horri ez ikusi egin eta aplikazioak erabiltzen jarraitzeko aukera dute erabiltzaileek. Kontuan izan pantailaren blokeoa ez dela gordetzen testu arrunt gisa; beraz, aplikazioek ez dute jakingo pasahitz zehatza zein den."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"jakinarazpenak erakutsi"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Jakinarazpenak erakusteko baimena ematen die aplikazioei"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"piztu pantaila"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Pantaila pizteko baimena ematen dio aplikazioari."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"erabili hardware biometrikoa"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Autentifikatzeko hardware biometrikoa erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"kudeatu hatz-marken hardwarea"</string>
@@ -2284,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ezin da atzitu telefonoaren kamera <xliff:g id="DEVICE">%1$s</xliff:g> gailutik"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ezin da atzitu tabletaren kamera <xliff:g id="DEVICE">%1$s</xliff:g> gailutik"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Sistemaren balio lehenetsia"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

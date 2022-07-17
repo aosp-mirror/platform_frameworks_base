@@ -72,7 +72,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Балонче"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Управление"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Балончето е отхвърлено."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Докоснете, за да рестартирате това приложение в режим на цял екран."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Докоснете, за да рестартирате това приложение с цел по-добър изглед."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Имате проблеми с камерата?\nДокоснете за ремонтиране"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Проблемът не се отстрани?\nДокоснете за връщане в предишното състояние"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Нямате проблеми с камерата? Докоснете, за да отхвърлите."</string>

@@ -25,6 +25,7 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -38,7 +39,6 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-@FlakyTest(bugId = 228012334)
 class SwitchImeWindowsFromGestureNavTest_ShellTransit(
     testSpec: FlickerTestParameter
 ) : SwitchImeWindowsFromGestureNavTest(testSpec) {
@@ -46,4 +46,23 @@ class SwitchImeWindowsFromGestureNavTest_ShellTransit(
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)
     }
+
+    @FlakyTest(bugId = 228012334)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
+
+    @FlakyTest(bugId = 228012334)
+    @Test
+    override fun imeLayerIsVisibleWhenSwitchingToImeApp() =
+        super.imeLayerIsVisibleWhenSwitchingToImeApp()
+
+    @FlakyTest(bugId = 228012334)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    @FlakyTest(bugId = 228012334)
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 }

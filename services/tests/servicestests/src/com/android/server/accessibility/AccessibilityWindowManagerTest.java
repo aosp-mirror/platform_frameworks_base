@@ -34,6 +34,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,12 +43,15 @@ import android.graphics.Region;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWindow;
 import android.view.WindowInfo;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowAttributes;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 
@@ -135,6 +139,11 @@ public class AccessibilityWindowManagerTest {
                 USER_SYSTEM_ID)).thenReturn(USER_SYSTEM_ID);
         when(mMockA11ySecurityPolicy.resolveValidReportedPackageLocked(
                 anyString(), anyInt(), anyInt(), anyInt())).thenReturn(PACKAGE_NAME);
+
+        doAnswer((invocation) -> {
+            onWindowsForAccessibilityChanged(invocation.getArgument(0), false);
+            return null;
+        }).when(mMockWindowManagerInternal).computeWindowsForAccessibility(anyInt());
 
         mA11yWindowManager = new AccessibilityWindowManager(new Object(), mHandler,
                 mMockWindowManagerInternal,
@@ -833,6 +842,23 @@ public class AccessibilityWindowManagerTest {
     public void getTokenLocked_windowIsNotRegistered_shouldReturnNull() {
         final IBinder token = mA11yWindowManager.getTokenLocked(OTHER_WINDOW_ID);
         assertNull(token);
+    }
+
+    @Test
+    public void setAccessibilityWindowAttributes_windowIsNotRegistered_titleIsChanged() {
+        final int windowId =
+                getWindowIdFromWindowInfosForDisplay(Display.DEFAULT_DISPLAY, 0);
+        final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+        layoutParams.accessibilityTitle = "accessibility window title";
+        final AccessibilityWindowAttributes attributes = new AccessibilityWindowAttributes(
+                layoutParams);
+
+        mA11yWindowManager.setAccessibilityWindowAttributes(Display.DEFAULT_DISPLAY, windowId,
+                USER_SYSTEM_ID, attributes);
+
+        final AccessibilityWindowInfo a11yWindow = mA11yWindowManager.findA11yWindowInfoByIdLocked(
+                windowId);
+        assertTrue(TextUtils.equals(layoutParams.accessibilityTitle, a11yWindow.getTitle()));
     }
 
     private void registerLeashedTokenAndWindowId() {

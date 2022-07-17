@@ -71,6 +71,7 @@ import android.testing.TestableLooper;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -265,6 +266,8 @@ public class BubblesTest extends SysuiTestCase {
         ShellExecutor syncExecutor = new SyncExecutor();
 
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
+        when(mNotificationShadeWindowView.getViewTreeObserver())
+                .thenReturn(mock(ViewTreeObserver.class));
 
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,

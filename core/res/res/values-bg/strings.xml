@@ -553,6 +553,8 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Разрешава на приложението да разбере нивото на сложност на опцията за заключване на екрана (високо, средно, ниско или липса на такова), което указва възможния диапазон на дължината и типа на опцията. Приложението може също да предложи на потребителите да актуализират опцията за заключване на екрана до определено ниво, но те могат да пренебрегнат това и да излязат от него. Обърнете внимание, че опцията за заключване на екрана не се съхранява като обикновен текст, така че приложението не знае точната парола."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"показване на известията"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Разрешава на приложението да показва известия"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"включване на екрана"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Разрешава на приложението да включва екрана."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"използване на хардуера за биометрични данни"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Разрешава на приложението да използва хардуера за биометрични данни с цел удостоверяване"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"управление на хардуера за отпечатъци"</string>
@@ -2075,10 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Научете повече"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Адаптивните известия бяха заменени от функцията за подобрени известия в Android 12. Тя показва предложени действия и отговори и организира известията ви.\n\nФункцията може да осъществява достъп до съдържанието в известията, включително личната информация, като например имената на контактите и текстовите съобщения. Тя има възможност да отхвърля известията или да предприема действия в тях, като например приемане на телефонни обаждания или контролиране на режима „Не безпокойте“."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Известие с информация за режима на поредица"</string>
-    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
-    <skip />
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Режимът за запазване на батерията е включен"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Използването на батерията се намалява с цел удължаване на живота ѝ"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Режим за запазване на батерията"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Режимът за запазване на батерията е изключен"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Батерията на телефона има достатъчно заряд. Функциите вече не са ограничени."</string>
@@ -2286,4 +2286,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Няма достъп до камерата на телефона от вашия <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Няма достъп до камерата на таблета от вашия <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Стандартно за системата"</string>
+    <!-- no translation found for default_card_name (9198284935962911468) -->
+    <skip />
 </resources>

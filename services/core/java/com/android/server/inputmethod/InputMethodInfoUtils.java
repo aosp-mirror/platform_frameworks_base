@@ -22,7 +22,6 @@ import static com.android.server.inputmethod.SubtypeUtils.SUBTYPE_MODE_KEYBOARD;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -199,7 +198,8 @@ final class InputMethodInfoUtils {
      * @param methodMap Map from the IME ID to {@link InputMethodInfo}.
      * @param systemSpeechRecognizerPackageName System speech recognizer configured by the system
      *                                          config.
-     * @param currentDefaultVoiceImeId IME ID currently set to
+     * @param currentDefaultVoiceImeId the default voice IME id, which may be {@code null} or
+     *                                 the value assigned for
      *                                 {@link Settings.Secure#DEFAULT_VOICE_INPUT_METHOD}
      * @return {@link InputMethodInfo} that is found in {@code methodMap} and most suitable for
      *                                 the system voice IME.
@@ -294,7 +294,7 @@ final class InputMethodInfoUtils {
             for (int i = 0; i < imis.size(); ++i) {
                 if (isSystemImeThatHasSubtypeOf(imis.get(i), context,
                         true /* checkDefaultAttribute */, fallbackLocale,
-                        true /* checkCountry */, SubtypeUtils.SUBTYPE_MODE_KEYBOARD)) {
+                        true /* checkCountry */, SUBTYPE_MODE_KEYBOARD)) {
                     return fallbackLocale;
                 }
             }
@@ -305,7 +305,7 @@ final class InputMethodInfoUtils {
             for (int i = 0; i < imis.size(); ++i) {
                 if (isSystemImeThatHasSubtypeOf(imis.get(i), context,
                         false /* checkDefaultAttribute */, fallbackLocale,
-                        true /* checkCountry */, SubtypeUtils.SUBTYPE_MODE_KEYBOARD)) {
+                        true /* checkCountry */, SUBTYPE_MODE_KEYBOARD)) {
                     return fallbackLocale;
                 }
             }
@@ -323,10 +323,7 @@ final class InputMethodInfoUtils {
         if (checkDefaultAttribute && !imi.isDefault(context)) {
             return false;
         }
-        if (!SubtypeUtils.containsSubtypeOf(imi, requiredLocale, checkCountry,
-                requiredSubtypeMode)) {
-            return false;
-        }
-        return true;
+        return SubtypeUtils.containsSubtypeOf(imi, requiredLocale, checkCountry,
+                requiredSubtypeMode);
     }
 }
