@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.shade
 
 /** Provides certain notification panel events.  */
 interface NotifPanelEvents {

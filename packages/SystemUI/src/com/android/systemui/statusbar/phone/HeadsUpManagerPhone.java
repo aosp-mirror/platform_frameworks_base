@@ -221,8 +221,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
      * Notify that the status bar panel gets expanded or collapsed.
      *
      * @param isExpanded True to notify expanded, false to notify collapsed.
+     * TODO(b/237811427) replace with a listener
      */
-    void setIsPanelExpanded(boolean isExpanded) {
+    public void setIsPanelExpanded(boolean isExpanded) {
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
             if (isExpanded) {
