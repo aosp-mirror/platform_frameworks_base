@@ -96,7 +96,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
     private final NotificationPanelViewController mNotificationPanelViewController;
-    private LinearLayout mEndSideContent;
+    private LinearLayout mSystemIconArea;
     private View mClockView;
     private View mOngoingCallChip;
     private View mNotificationIconAreaInner;
@@ -217,15 +217,15 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mDarkIconManager.setShouldLog(true);
         updateBlockedIcons();
         mStatusBarIconController.addIconGroup(mDarkIconManager);
-        mEndSideContent = mStatusBar.findViewById(R.id.status_bar_end_side_content);
+        mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
         mClockView = mStatusBar.findViewById(R.id.clock);
         mOngoingCallChip = mStatusBar.findViewById(R.id.ongoing_call_chip);
-        showEndSideContent(false);
+        showSystemIconArea(false);
         showClock(false);
         initOperatorName();
         initNotificationIconArea();
         mSystemEventAnimator =
-                new StatusBarSystemEventAnimator(mEndSideContent, getResources());
+                new StatusBarSystemEventAnimator(mSystemIconArea, getResources());
         mCarrierConfigTracker.addCallback(mCarrierConfigCallback);
         mCarrierConfigTracker.addDefaultDataSubscriptionChangedListener(mDefaultDataListener);
     }
@@ -351,10 +351,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mDisabled2 = state2;
         if ((diff1 & DISABLE_SYSTEM_INFO) != 0 || ((diff2 & DISABLE2_SYSTEM_ICONS) != 0)) {
             if ((state1 & DISABLE_SYSTEM_INFO) != 0 || ((state2 & DISABLE2_SYSTEM_ICONS) != 0)) {
-                hideEndSideContent(animate);
+                hideSystemIconArea(animate);
                 hideOperatorName(animate);
             } else {
-                showEndSideContent(animate);
+                showSystemIconArea(animate);
                 showOperatorName(animate);
             }
         }
@@ -438,15 +438,15 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         return mStatusBarHideIconsForBouncerManager.getShouldHideStatusBarIconsForBouncer();
     }
 
-    private void hideEndSideContent(boolean animate) {
-        animateHide(mEndSideContent, animate);
+    private void hideSystemIconArea(boolean animate) {
+        animateHide(mSystemIconArea, animate);
     }
 
-    private void showEndSideContent(boolean animate) {
+    private void showSystemIconArea(boolean animate) {
         // Only show the system icon area if we are not currently animating
         int state = mAnimationScheduler.getAnimationState();
         if (state == IDLE || state == SHOWING_PERSISTENT_DOT) {
-            animateShow(mEndSideContent, animate);
+            animateShow(mSystemIconArea, animate);
         }
     }
 

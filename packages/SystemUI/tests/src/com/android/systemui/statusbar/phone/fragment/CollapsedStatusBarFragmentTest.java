@@ -122,7 +122,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
@@ -132,11 +132,11 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_SYSTEM_INFO, 0, false);
 
-        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
+        assertEquals(View.INVISIBLE, getSystemIconAreaView().getVisibility());
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
     }
 
     @Test
@@ -231,7 +231,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
@@ -242,7 +242,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
@@ -379,7 +379,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         return mFragment.getView().findViewById(R.id.clock);
     }
 
-    private View getEndSideContentView() {
-        return mFragment.getView().findViewById(R.id.status_bar_end_side_content);
+    private View getSystemIconAreaView() {
+        return mFragment.getView().findViewById(R.id.system_icon_area);
     }
 }
