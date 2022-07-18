@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker
 
 import android.app.Instrumentation
+import android.platform.test.annotations.Presubmit
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -34,6 +35,7 @@ import com.android.server.wm.flicker.taskBarWindowIsAlwaysVisible
 import com.android.server.wm.traces.common.ComponentMatcher
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume
+import org.junit.Test
 
 /**
  * Base test class containing common assertions for [ComponentMatcher.NAV_BAR],
@@ -80,6 +82,8 @@ abstract class BaseTest @JvmOverloads constructor(
     /**
      * Checks that the [ComponentMatcher.NAV_BAR] layer is visible during the whole transition
      */
+    @Presubmit
+    @Test
     open fun navBarLayerIsVisibleAtStartAndEnd() {
         Assume.assumeFalse(testSpec.isTablet)
         testSpec.navBarLayerIsVisibleAtStartAndEnd()
@@ -88,6 +92,8 @@ abstract class BaseTest @JvmOverloads constructor(
     /**
      * Checks the position of the [ComponentMatcher.NAV_BAR] at the start and end of the transition
      */
+    @Presubmit
+    @Test
     open fun navBarLayerPositionAtStartAndEnd() {
         Assume.assumeFalse(testSpec.isTablet)
         testSpec.navBarLayerPositionAtStartAndEnd()
@@ -98,6 +104,8 @@ abstract class BaseTest @JvmOverloads constructor(
      *
      * Note: Phones only
      */
+    @Presubmit
+    @Test
     open fun navBarWindowIsAlwaysVisible() {
         Assume.assumeFalse(testSpec.isTablet)
         testSpec.navBarWindowIsAlwaysVisible()
@@ -106,6 +114,8 @@ abstract class BaseTest @JvmOverloads constructor(
     /**
      * Checks that the [ComponentMatcher.TASK_BAR] layer is visible during the whole transition
      */
+    @Presubmit
+    @Test
     open fun taskBarLayerIsVisibleAtStartAndEnd() {
         Assume.assumeTrue(testSpec.isTablet)
         testSpec.taskBarLayerIsVisibleAtStartAndEnd()
@@ -116,6 +126,8 @@ abstract class BaseTest @JvmOverloads constructor(
      *
      * Note: Large screen only
      */
+    @Presubmit
+    @Test
     open fun taskBarWindowIsAlwaysVisible() {
         Assume.assumeTrue(testSpec.isTablet)
         testSpec.taskBarWindowIsAlwaysVisible()
@@ -124,25 +136,31 @@ abstract class BaseTest @JvmOverloads constructor(
     /**
      * Checks that the [ComponentMatcher.STATUS_BAR] layer is visible during the whole transition
      */
+    @Presubmit
+    @Test
     open fun statusBarLayerIsVisibleAtStartAndEnd() =
         testSpec.statusBarLayerIsVisibleAtStartAndEnd()
 
     /**
      * Checks the position of the [ComponentMatcher.STATUS_BAR] at the start and end of the transition
      */
+    @Presubmit
+    @Test
     open fun statusBarLayerPositionAtStartAndEnd() = testSpec.statusBarLayerPositionAtStartAndEnd()
 
     /**
      * Checks that the [ComponentMatcher.STATUS_BAR] window is visible during the whole transition
      */
-    open fun statusBarWindowIsAlwaysVisible() {
-        testSpec.statusBarWindowIsAlwaysVisible()
-    }
+    @Presubmit
+    @Test
+    open fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
     /**
      * Checks that all layers that are visible on the trace, are visible for at least 2
      * consecutive entries.
      */
+    @Presubmit
+    @Test
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry()
@@ -153,6 +171,8 @@ abstract class BaseTest @JvmOverloads constructor(
      * Checks that all windows that are visible on the trace, are visible for at least 2
      * consecutive entries.
      */
+    @Presubmit
+    @Test
     open fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry()
