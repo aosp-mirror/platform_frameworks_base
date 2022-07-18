@@ -76,6 +76,7 @@ interface IInputMethodManager {
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);
 
+    @EnforcePermission("WRITE_SECURE_SETTINGS")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.WRITE_SECURE_SETTINGS)")
     void showInputMethodPickerFromSystem(in IInputMethodClient client,
