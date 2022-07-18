@@ -29,7 +29,7 @@ android_test {
         "androidx.test.rules",
         "androidx.annotation_annotation",
         "apct-perftests-utils",
-        "collector-device-lib",
+        "collector-device-lib-platform",
         "compatibility-device-util-axt",
         "platform-test-annotations",
         "adservices-service-core",
