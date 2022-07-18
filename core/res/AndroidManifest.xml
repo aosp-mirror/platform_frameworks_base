@@ -6498,6 +6498,13 @@
     <permission android:name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an app to set gesture exclusion without restrictions on the vertical extent of the
+         exclusions (see {@link android.view.View#setSystemGestureExclusionRects}).
+         @hide
+    -->
+    <permission android:name="android.permission.SET_UNRESTRICTED_GESTURE_EXCLUSION"
+                android:protectionLevel="signature|privileged|recents" />
+
     <!-- @SystemApi Allows TV input apps and TV apps to use TIS extension interfaces for
          domain-specific features.
          <p>Protection level: signature|privileged|vendorPrivileged

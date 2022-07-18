@@ -2367,6 +2367,14 @@ public interface WindowManager extends ViewManager {
         public static final int SYSTEM_FLAG_SHOW_FOR_ALL_USERS = 0x00000010;
 
         /**
+         * Flag to allow this window to have unrestricted gesture exclusion.
+         *
+         * @see View#setSystemGestureExclusionRects(List)
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION = 0x00000020;
+
+        /**
          * Never animate position changes of the window.
          *
          * {@hide}
@@ -2586,6 +2594,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED,
                 PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS,
                 SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
+                PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION,
                 PRIVATE_FLAG_NO_MOVE_ANIMATION,
                 PRIVATE_FLAG_COMPATIBLE_WINDOW,
                 PRIVATE_FLAG_SYSTEM_ERROR,
@@ -2632,6 +2641,10 @@ public interface WindowManager extends ViewManager {
                         mask = SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
                         equals = SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
                         name = "SHOW_FOR_ALL_USERS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION,
+                        equals = PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION,
+                        name = "UNRESTRICTED_GESTURE_EXCLUSION"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_NO_MOVE_ANIMATION,
                         equals = PRIVATE_FLAG_NO_MOVE_ANIMATION,
