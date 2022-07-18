@@ -298,6 +298,7 @@ java_defaults {
         "contacts-provider-platform-compat-config",
     ],
     libs: [
+        "androidx.annotation_annotation",
         "app-compat-annotations",
         "ext",
         "framework-updatable-stubs-module_libs_api",

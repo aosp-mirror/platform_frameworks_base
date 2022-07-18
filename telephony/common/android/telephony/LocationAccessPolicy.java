@@ -361,13 +361,24 @@ public final class LocationAccessPolicy {
         return isCurrentProfile(context, uid) || checkInteractAcrossUsersFull(context, pid, uid);
     }
 
-    private static boolean isLocationModeEnabled(@NonNull Context context, @UserIdInt int userId) {
+    /**
+     * @return Whether location is enabled for the given user.
+     */
+    public static boolean isLocationModeEnabled(@NonNull Context context, @UserIdInt int userId) {
         LocationManager locationManager = context.getSystemService(LocationManager.class);
         if (locationManager == null) {
             Log.w(TAG, "Couldn't get location manager, denying location access");
             return false;
         }
         return locationManager.isLocationEnabledForUser(UserHandle.of(userId));
+    }
+
+    /**
+     * @return An array of packages that are always allowed to access location.
+     */
+    public static @NonNull String[] getLocationBypassPackages(@NonNull Context context) {
+        return context.getResources().getStringArray(
+                com.android.internal.R.array.config_serviceStateLocationAllowedPackages);
     }
 
     private static boolean checkInteractAcrossUsersFull(
