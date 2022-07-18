@@ -1236,6 +1236,12 @@ public class RecentsAnimationController implements DeathRecipient {
                     mLocalBounds, mBounds, mTask.getWindowConfiguration(),
                     mIsRecentTaskInvisible, null, null, mTask.getTaskInfo(),
                     topApp.checkEnterPictureInPictureAppOpsState());
+
+            final ActivityRecord topActivity = mTask.getTopNonFinishingActivity();
+            if (topActivity != null && topActivity.mStartingData != null
+                    && topActivity.mStartingData.hasImeSurface()) {
+                mTarget.setWillShowImeOnTarget(true);
+            }
             return mTarget;
         }
 

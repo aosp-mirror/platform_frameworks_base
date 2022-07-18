@@ -54,6 +54,7 @@ import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
+import static android.window.TransitionInfo.FLAG_WILL_IME_SHOWN;
 
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
@@ -1727,6 +1728,13 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final Task task = wc.asTask();
             if (task != null && task.voiceSession != null) {
                 flags |= FLAG_IS_VOICE_INTERACTION;
+            }
+            if (task != null) {
+                final ActivityRecord topActivity = task.getTopNonFinishingActivity();
+                if (topActivity != null && topActivity.mStartingData != null
+                        && topActivity.mStartingData.hasImeSurface()) {
+                    flags |= FLAG_WILL_IME_SHOWN;
+                }
             }
             final ActivityRecord record = wc.asActivityRecord();
             if (record != null) {
