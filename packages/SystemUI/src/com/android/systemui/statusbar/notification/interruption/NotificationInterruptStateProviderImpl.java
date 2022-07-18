@@ -175,9 +175,86 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
      */
     @Override
     public boolean shouldLaunchFullScreenIntentWhenAdded(NotificationEntry entry) {
-        return entry.getSbn().getNotification().fullScreenIntent != null
-                && (!shouldHeadsUp(entry)
-                || mStatusBarStateController.getState() == StatusBarState.KEYGUARD);
+        if (entry.getSbn().getNotification().fullScreenIntent == null) {
+            return false;
+        }
+
+        // Never show FSI when suppressed by DND
+        if (entry.shouldSuppressFullScreenIntent()) {
+            if (DEBUG) {
+                Log.d(TAG, "No FullScreenIntent: Suppressed by DND: " + entry.getKey());
+            }
+            return false;
+        }
+
+        // Never show FSI if importance is not HIGH
+        if (entry.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
+            if (DEBUG) {
+                Log.d(TAG, "No FullScreenIntent: Not important enough: " + entry.getKey());
+            }
+            return false;
+        }
+
+        // If the notification has suppressive GroupAlertBehavior, block FSI and warn.
+        StatusBarNotification sbn = entry.getSbn();
+        if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
+            // b/231322873: Detect and report an event when a notification has both an FSI and a
+            // suppressive groupAlertBehavior, and now correctly block the FSI from firing.
+            final int uid = entry.getSbn().getUid();
+            android.util.EventLog.writeEvent(0x534e4554, "231322873", uid, "groupAlertBehavior");
+            if (DEBUG) {
+                Log.w(TAG, "No FullScreenIntent: WARNING: GroupAlertBehavior will prevent HUN: "
+                        + entry.getKey());
+            }
+            return false;
+        }
+
+        // If the screen is off, then launch the FullScreenIntent
+        if (!mPowerManager.isInteractive()) {
+            if (DEBUG) {
+                Log.d(TAG, "FullScreenIntent: Device is not interactive: " + entry.getKey());
+            }
+            return true;
+        }
+
+        // If the device is currently dreaming, then launch the FullScreenIntent
+        if (isDreaming()) {
+            if (DEBUG) {
+                Log.d(TAG, "FullScreenIntent: Device is dreaming: " + entry.getKey());
+            }
+            return true;
+        }
+
+        // If the keyguard is showing, then launch the FullScreenIntent
+        if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
+            if (DEBUG) {
+                Log.d(TAG, "FullScreenIntent: Keyguard is showing: " + entry.getKey());
+            }
+            return true;
+        }
+
+        // If the notification should HUN, then we don't need FSI
+        if (shouldHeadsUp(entry)) {
+            if (DEBUG) {
+                Log.d(TAG, "No FullScreenIntent: Expected to HUN: " + entry.getKey());
+            }
+            return false;
+        }
+
+        // If the notification won't HUN for some other reason (DND/snooze/etc), launch FSI.
+        if (DEBUG) {
+            Log.d(TAG, "FullScreenIntent: Expected not to HUN: " + entry.getKey());
+        }
+        return true;
+    }
+
+    private boolean isDreaming() {
+        try {
+            return mDreamManager.isDreaming();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query dream manager.", e);
+            return false;
+        }
     }
 
     private boolean shouldHeadsUpWhenAwake(NotificationEntry entry) {
@@ -228,13 +305,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
-        boolean isDreaming = false;
-        try {
-            isDreaming = mDreamManager.isDreaming();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to query dream manager.", e);
-        }
-        boolean inUse = mPowerManager.isScreenOn() && !isDreaming;
+        boolean inUse = mPowerManager.isScreenOn() && !isDreaming();
 
         if (!inUse) {
             if (DEBUG_HEADS_UP) {
