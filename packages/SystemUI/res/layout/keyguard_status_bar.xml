@@ -60,8 +60,9 @@
         </com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer>
 
         <FrameLayout android:id="@+id/system_icons_container"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:layout_marginEnd="@dimen/status_bar_padding_end"
             android:gravity="center_vertical|end">
             <include layout="@layout/system_icons" />
