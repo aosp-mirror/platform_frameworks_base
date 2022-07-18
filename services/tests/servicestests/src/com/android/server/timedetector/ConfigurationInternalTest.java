@@ -45,7 +45,9 @@ public class ConfigurationInternalTest {
 
     private static final int ARBITRARY_USER_ID = 99999;
     private static final int ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS = 1234;
-    private static final Instant ARBITRARY_AUTO_TIME_LOWER_BOUND = Instant.ofEpochMilli(0);
+    private static final Instant ARBITRARY_SUGGESTION_LOWER_BOUND = Instant.ofEpochMilli(0);
+    private static final Instant ARBITRARY_SUGGESTION_UPPER_BOUND =
+            Instant.ofEpochMilli(Long.MAX_VALUE);
     private static final @Origin int[] ARBITRARY_ORIGIN_PRIORITIES = { ORIGIN_NETWORK };
 
     /**
@@ -59,9 +61,10 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(true)
                 .setAutoDetectionSupported(true)
                 .setSystemClockUpdateThresholdMillis(ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS)
-                .setAutoTimeLowerBound(ARBITRARY_AUTO_TIME_LOWER_BOUND)
+                .setAutoSuggestionLowerBound(ARBITRARY_SUGGESTION_LOWER_BOUND)
+                .setManualSuggestionLowerBound(ARBITRARY_SUGGESTION_LOWER_BOUND)
+                .setSuggestionUpperBound(ARBITRARY_SUGGESTION_UPPER_BOUND)
                 .setOriginPriorities(ARBITRARY_ORIGIN_PRIORITIES)
-                .setDeviceHasY2038Issue(true)
                 .setAutoDetectionEnabledSetting(true)
                 .build();
         {
@@ -110,9 +113,10 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(false)
                 .setAutoDetectionSupported(true)
                 .setSystemClockUpdateThresholdMillis(ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS)
-                .setAutoTimeLowerBound(ARBITRARY_AUTO_TIME_LOWER_BOUND)
+                .setAutoSuggestionLowerBound(ARBITRARY_SUGGESTION_LOWER_BOUND)
+                .setManualSuggestionLowerBound(ARBITRARY_SUGGESTION_LOWER_BOUND)
+                .setSuggestionUpperBound(ARBITRARY_SUGGESTION_UPPER_BOUND)
                 .setOriginPriorities(ARBITRARY_ORIGIN_PRIORITIES)
-                .setDeviceHasY2038Issue(true)
                 .setAutoDetectionEnabledSetting(true)
                 .build();
         {
@@ -159,9 +163,10 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(true)
                 .setAutoDetectionSupported(false)
                 .setSystemClockUpdateThresholdMillis(ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS)
-                .setAutoTimeLowerBound(ARBITRARY_AUTO_TIME_LOWER_BOUND)
+                .setAutoSuggestionLowerBound(ARBITRARY_SUGGESTION_LOWER_BOUND)
+                .setManualSuggestionLowerBound(ARBITRARY_SUGGESTION_LOWER_BOUND)
+                .setSuggestionUpperBound(ARBITRARY_SUGGESTION_UPPER_BOUND)
                 .setOriginPriorities(ARBITRARY_ORIGIN_PRIORITIES)
-                .setDeviceHasY2038Issue(true)
                 .setAutoDetectionEnabledSetting(true)
                 .build();
         {

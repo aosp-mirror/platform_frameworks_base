@@ -31,6 +31,7 @@ import android.app.ActivityManagerInternal;
 import android.app.time.TimeCapabilities;
 import android.app.time.TimeCapabilitiesAndConfig;
 import android.app.time.TimeConfiguration;
+import android.app.timedetector.TimeDetectorHelper;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -38,7 +39,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
-import android.os.Build;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -73,13 +73,6 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
      */
     private static final @Origin int[]
             DEFAULT_AUTOMATIC_TIME_ORIGIN_PRIORITIES = { ORIGIN_TELEPHONY, ORIGIN_NETWORK };
-
-    /**
-     * Time in the past. If an automatic time suggestion is before this point, it is sure to be
-     * incorrect.
-     */
-    private static final Instant TIME_LOWER_BOUND_DEFAULT = Instant.ofEpochMilli(
-            Long.max(android.os.Environment.getRootDirectory().lastModified(), Build.TIME));
 
     /** Device config keys that affect the {@link TimeDetectorService}. */
     private static final Set<String> SERVER_FLAGS_KEYS_TO_WATCH = Set.of(
@@ -237,14 +230,16 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     @Override
     @NonNull
     public synchronized ConfigurationInternal getConfigurationInternal(@UserIdInt int userId) {
+        TimeDetectorHelper timeDetectorHelper = TimeDetectorHelper.INSTANCE;
         return new ConfigurationInternal.Builder(userId)
                 .setUserConfigAllowed(isUserConfigAllowed(userId))
                 .setAutoDetectionSupported(isAutoDetectionSupported())
                 .setAutoDetectionEnabledSetting(getAutoDetectionEnabledSetting())
                 .setSystemClockUpdateThresholdMillis(getSystemClockUpdateThresholdMillis())
-                .setAutoTimeLowerBound(getAutoTimeLowerBound())
+                .setAutoSuggestionLowerBound(getAutoSuggestionLowerBound())
+                .setManualSuggestionLowerBound(timeDetectorHelper.getManualSuggestionLowerBound())
+                .setSuggestionUpperBound(timeDetectorHelper.getSuggestionUpperBound())
                 .setOriginPriorities(getOriginPriorities())
-                .setDeviceHasY2038Issue(getDeviceHasY2038Issue())
                 .build();
     }
 
@@ -291,9 +286,9 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     }
 
     @NonNull
-    private Instant getAutoTimeLowerBound() {
+    private Instant getAutoSuggestionLowerBound() {
         return mServerFlags.getOptionalInstant(KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE)
-                .orElse(TIME_LOWER_BOUND_DEFAULT);
+                .orElse(TimeDetectorHelper.INSTANCE.getAutoSuggestionLowerBoundDefault());
     }
 
     @NonNull
@@ -308,10 +303,6 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
             return configValue;
         }
         return DEFAULT_AUTOMATIC_TIME_ORIGIN_PRIORITIES;
-    }
-
-    private boolean getDeviceHasY2038Issue() {
-        return Build.SUPPORTED_32_BIT_ABIS.length > 0;
     }
 
     /**

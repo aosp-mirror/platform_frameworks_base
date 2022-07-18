@@ -46,9 +46,10 @@ public final class ConfigurationInternal {
 
     private final boolean mAutoDetectionSupported;
     private final int mSystemClockUpdateThresholdMillis;
-    private final Instant mAutoTimeLowerBound;
+    private final Instant mAutoSuggestionLowerBound;
+    private final Instant mManualSuggestionLowerBound;
+    private final Instant mSuggestionUpperBound;
     private final @Origin int[] mOriginPriorities;
-    private final boolean mDeviceHasY2038Issue;
     private final boolean mAutoDetectionEnabledSetting;
     private final @UserIdInt int mUserId;
     private final boolean mUserConfigAllowed;
@@ -56,9 +57,10 @@ public final class ConfigurationInternal {
     private ConfigurationInternal(Builder builder) {
         mAutoDetectionSupported = builder.mAutoDetectionSupported;
         mSystemClockUpdateThresholdMillis = builder.mSystemClockUpdateThresholdMillis;
-        mAutoTimeLowerBound = Objects.requireNonNull(builder.mAutoTimeLowerBound);
+        mAutoSuggestionLowerBound = Objects.requireNonNull(builder.mAutoSuggestionLowerBound);
+        mManualSuggestionLowerBound = Objects.requireNonNull(builder.mManualSuggestionLowerBound);
+        mSuggestionUpperBound = Objects.requireNonNull(builder.mSuggestionUpperBound);
         mOriginPriorities = Objects.requireNonNull(builder.mOriginPriorities);
-        mDeviceHasY2038Issue = builder.mDeviceHasY2038Issue;
         mAutoDetectionEnabledSetting = builder.mAutoDetectionEnabledSetting;
 
         mUserId = builder.mUserId;
@@ -80,14 +82,31 @@ public final class ConfigurationInternal {
     }
 
     /**
-     * Returns the lower bound for valid automatic times. It is guaranteed to be in the past,
-     * i.e. it is unrelated to the current system clock time.
+     * Returns the lower bound for valid automatic time suggestions. It is guaranteed to be in the
+     * past, i.e. it is unrelated to the current system clock time.
      * It holds no other meaning; it could be related to when the device system image was built,
      * or could be updated by a mainline module.
      */
     @NonNull
-    public Instant getAutoTimeLowerBound() {
-        return mAutoTimeLowerBound;
+    public Instant getAutoSuggestionLowerBound() {
+        return mAutoSuggestionLowerBound;
+    }
+
+    /**
+     * Returns the lower bound for valid manual time suggestions. It is guaranteed to be in the
+     * past, i.e. it is unrelated to the current system clock time.
+     */
+    @NonNull
+    public Instant getManualSuggestionLowerBound() {
+        return mManualSuggestionLowerBound;
+    }
+
+    /**
+     * Returns the upper bound for valid time suggestions (manual and automatic).
+     */
+    @NonNull
+    public Instant getSuggestionUpperBound() {
+        return mSuggestionUpperBound;
     }
 
     /**
@@ -96,14 +115,6 @@ public final class ConfigurationInternal {
      */
     public @Origin int[] getAutoOriginPriorities() {
         return mOriginPriorities;
-    }
-
-    /**
-     * Returns {@code true} if the device may be at risk of time_t overflow (because bionic
-     * defines time_t as a 32-bit signed integer for 32-bit processes).
-     */
-    public boolean getDeviceHasY2038Issue() {
-        return mDeviceHasY2038Issue;
     }
 
     /** Returns the value of the auto time detection enabled setting. */
@@ -207,16 +218,17 @@ public final class ConfigurationInternal {
                 && mAutoDetectionEnabledSetting == that.mAutoDetectionEnabledSetting
                 && mUserId == that.mUserId && mUserConfigAllowed == that.mUserConfigAllowed
                 && mSystemClockUpdateThresholdMillis == that.mSystemClockUpdateThresholdMillis
-                && mAutoTimeLowerBound.equals(that.mAutoTimeLowerBound)
-                && mDeviceHasY2038Issue == that.mDeviceHasY2038Issue
+                && mAutoSuggestionLowerBound.equals(that.mAutoSuggestionLowerBound)
+                && mManualSuggestionLowerBound.equals(that.mManualSuggestionLowerBound)
+                && mSuggestionUpperBound.equals(that.mSuggestionUpperBound)
                 && Arrays.equals(mOriginPriorities, that.mOriginPriorities);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(mAutoDetectionSupported, mAutoDetectionEnabledSetting, mUserId,
-                mUserConfigAllowed, mSystemClockUpdateThresholdMillis, mAutoTimeLowerBound,
-                mDeviceHasY2038Issue);
+                mUserConfigAllowed, mSystemClockUpdateThresholdMillis, mAutoSuggestionLowerBound,
+                mManualSuggestionLowerBound, mSuggestionUpperBound);
         result = 31 * result + Arrays.hashCode(mOriginPriorities);
         return result;
     }
@@ -230,10 +242,13 @@ public final class ConfigurationInternal {
         return "ConfigurationInternal{"
                 + "mAutoDetectionSupported=" + mAutoDetectionSupported
                 + ", mSystemClockUpdateThresholdMillis=" + mSystemClockUpdateThresholdMillis
-                + ", mAutoTimeLowerBound=" + mAutoTimeLowerBound
-                + "(" + mAutoTimeLowerBound.toEpochMilli() + ")"
+                + ", mAutoSuggestionLowerBound=" + mAutoSuggestionLowerBound
+                + "(" + mAutoSuggestionLowerBound.toEpochMilli() + ")"
+                + ", mManualSuggestionLowerBound=" + mManualSuggestionLowerBound
+                + "(" + mManualSuggestionLowerBound.toEpochMilli() + ")"
+                + ", mSuggestionUpperBound=" + mSuggestionUpperBound
+                + "(" + mSuggestionUpperBound.toEpochMilli() + ")"
                 + ", mOriginPriorities=" + originPrioritiesString
-                + ", mDeviceHasY2038Issue=" + mDeviceHasY2038Issue
                 + ", mAutoDetectionEnabled=" + mAutoDetectionEnabledSetting
                 + ", mUserId=" + mUserId
                 + ", mUserConfigAllowed=" + mUserConfigAllowed
@@ -243,9 +258,10 @@ public final class ConfigurationInternal {
     static final class Builder {
         private boolean mAutoDetectionSupported;
         private int mSystemClockUpdateThresholdMillis;
-        @NonNull private Instant mAutoTimeLowerBound;
+        @NonNull private Instant mAutoSuggestionLowerBound;
+        @NonNull private Instant mManualSuggestionLowerBound;
+        @NonNull private Instant mSuggestionUpperBound;
         @NonNull private @Origin int[] mOriginPriorities;
-        private boolean mDeviceHasY2038Issue;
         private boolean mAutoDetectionEnabledSetting;
 
         private final @UserIdInt int mUserId;
@@ -263,9 +279,10 @@ public final class ConfigurationInternal {
             this.mUserConfigAllowed = toCopy.mUserConfigAllowed;
             this.mAutoDetectionSupported = toCopy.mAutoDetectionSupported;
             this.mSystemClockUpdateThresholdMillis = toCopy.mSystemClockUpdateThresholdMillis;
-            this.mAutoTimeLowerBound = toCopy.mAutoTimeLowerBound;
+            this.mAutoSuggestionLowerBound = toCopy.mAutoSuggestionLowerBound;
+            this.mManualSuggestionLowerBound = toCopy.mManualSuggestionLowerBound;
+            this.mSuggestionUpperBound = toCopy.mSuggestionUpperBound;
             this.mOriginPriorities = toCopy.mOriginPriorities;
-            this.mDeviceHasY2038Issue = toCopy.mDeviceHasY2038Issue;
             this.mAutoDetectionEnabledSetting = toCopy.mAutoDetectionEnabledSetting;
         }
 
@@ -296,10 +313,26 @@ public final class ConfigurationInternal {
         }
 
         /**
-         * Sets the lower bound for valid automatic times.
+         * Sets the lower bound for valid automatic time suggestions.
          */
-        public Builder setAutoTimeLowerBound(@NonNull Instant autoTimeLowerBound) {
-            mAutoTimeLowerBound = Objects.requireNonNull(autoTimeLowerBound);
+        public Builder setAutoSuggestionLowerBound(@NonNull Instant autoSuggestionLowerBound) {
+            mAutoSuggestionLowerBound = Objects.requireNonNull(autoSuggestionLowerBound);
+            return this;
+        }
+
+        /**
+         * Sets the lower bound for valid manual time suggestions.
+         */
+        public Builder setManualSuggestionLowerBound(@NonNull Instant manualSuggestionLowerBound) {
+            mManualSuggestionLowerBound = Objects.requireNonNull(manualSuggestionLowerBound);
+            return this;
+        }
+
+        /**
+         * Sets the upper bound for valid time suggestions (manual and automatic).
+         */
+        public Builder setSuggestionUpperBound(@NonNull Instant suggestionUpperBound) {
+            mSuggestionUpperBound = Objects.requireNonNull(suggestionUpperBound);
             return this;
         }
 
@@ -317,15 +350,6 @@ public final class ConfigurationInternal {
          */
         Builder setAutoDetectionEnabledSetting(boolean autoDetectionEnabledSetting) {
             mAutoDetectionEnabledSetting = autoDetectionEnabledSetting;
-            return this;
-        }
-
-        /**
-         * Returns {@code true} if the device may be at risk of time_t overflow (because bionic
-         * defines time_t as a 32-bit signed integer for 32-bit processes).
-         */
-        Builder setDeviceHasY2038Issue(boolean deviceHasY2038Issue) {
-            mDeviceHasY2038Issue = deviceHasY2038Issue;
             return this;
         }
 
