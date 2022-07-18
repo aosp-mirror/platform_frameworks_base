@@ -22,10 +22,11 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArrayMap;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,7 +42,7 @@ public final class ProgramList implements AutoCloseable {
 
     private final Object mLock = new Object();
     private final Map<ProgramSelector.Identifier, RadioManager.ProgramInfo> mPrograms =
-            new HashMap<>();
+            new ArrayMap<>();
 
     private final List<ListCallback> mListCallbacks = new ArrayList<>();
     private final List<OnCompleteListener> mOnCompleteListeners = new ArrayList<>();
@@ -184,8 +185,14 @@ public final class ProgramList implements AutoCloseable {
             listCallbacksCopied = new ArrayList<>(mListCallbacks);
 
             if (chunk.isPurge()) {
-                for (ProgramSelector.Identifier id : mPrograms.keySet()) {
-                    removeLocked(id, removedList);
+                Iterator<Map.Entry<ProgramSelector.Identifier, RadioManager.ProgramInfo>>
+                        programsIterator = mPrograms.entrySet().iterator();
+                while (programsIterator.hasNext()) {
+                    RadioManager.ProgramInfo removed = programsIterator.next().getValue();
+                    if (removed != null) {
+                        removedList.add(removed.getSelector().getPrimaryId());
+                    }
+                    programsIterator.remove();
                 }
             }
 

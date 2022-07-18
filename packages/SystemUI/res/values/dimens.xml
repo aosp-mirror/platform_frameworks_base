@@ -1449,6 +1449,7 @@
         @*android:dimen/status_bar_system_icon_size</dimen>
     <dimen name="dream_overlay_camera_mic_off_indicator_size">8dp</dimen>
     <dimen name="dream_overlay_notification_indicator_size">6dp</dimen>
+    <dimen name="dream_overlay_grey_chip_width">56dp</dimen>
 
     <!-- Dream overlay complications related dimensions -->
     <dimen name="dream_overlay_complication_clock_time_text_size">100sp</dimen>

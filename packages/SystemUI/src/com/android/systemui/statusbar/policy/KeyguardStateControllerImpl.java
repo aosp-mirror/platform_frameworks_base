@@ -424,11 +424,6 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         }
 
         @Override
-        public void onFaceUnlockStateChanged(boolean running, int userId) {
-            update(false /* updateAlways */);
-        }
-
-        @Override
         public void onStrongAuthStateChanged(int userId) {
             update(false /* updateAlways */);
         }

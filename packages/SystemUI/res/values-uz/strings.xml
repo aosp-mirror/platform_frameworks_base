@@ -307,6 +307,8 @@
     <string name="tap_again" msgid="1315420114387908655">"Yana bosing"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Ochish uchun tepaga suring"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Ochish uchun ochish belgisini bosing"</string>
+    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
+    <skip />
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Yuz orqali ochilgan. Ochish uchun ochish belgisini bosing."</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Yuz orqali ochildi. Ochish uchun bosing."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Yuz aniqlandi. Ochish uchun bosing."</string>
