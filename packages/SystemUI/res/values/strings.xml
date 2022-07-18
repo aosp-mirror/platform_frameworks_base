@@ -2297,8 +2297,8 @@
     <string name="media_output_dialog_disconnected">(disconnected)</string>
     <!-- Summary for connecting error message [CHAR LIMIT=NONE] -->
     <string name="media_output_dialog_connect_failed">Can\'t switch. Tap to try again.</string>
-    <!-- Title for pairing item [CHAR LIMIT=60] -->
-    <string name="media_output_dialog_pairing_new">Pair new device</string>
+    <!-- Title for connecting item [CHAR LIMIT=60] -->
+    <string name="media_output_dialog_pairing_new">Connect a device</string>
     <!-- Title for launch app [CHAR LIMIT=60] -->
     <string name="media_output_dialog_launch_app_text">To cast this session, please open the app.</string>
     <!-- App name when can't get app name [CHAR LIMIT=60] -->
@@ -2555,6 +2555,10 @@
     <string name="dream_overlay_status_bar_priority_mode">Priority mode</string>
     <!-- Content description for the alarm set icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_alarm_set">Alarm set</string>
+    <!-- Content description for the camera off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
+    <string name="dream_overlay_status_bar_camera_off">Camera is off</string>
+    <!-- Content description for the mic off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
+    <string name="dream_overlay_status_bar_mic_off">Mic is off</string>
     <!-- Content description for the camera and mic off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_camera_mic_off">Camera and mic are off</string>
     <!-- Content description for the notifications indicator icon in the dream overlay status bar [CHAR LIMIT=NONE] -->

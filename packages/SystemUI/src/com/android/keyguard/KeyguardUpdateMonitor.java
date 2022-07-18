@@ -41,7 +41,6 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.UserSwitchObserver;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
@@ -150,11 +149,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final boolean DEBUG_SPEW = false;
     private static final int BIOMETRIC_LOCKOUT_RESET_DELAY_MS = 600;
 
-    private static final String ACTION_FACE_UNLOCK_STARTED
-            = "com.android.facelock.FACE_UNLOCK_STARTED";
-    private static final String ACTION_FACE_UNLOCK_STOPPED
-            = "com.android.facelock.FACE_UNLOCK_STOPPED";
-
     // Callback messages
     private static final int MSG_TIME_UPDATE = 301;
     private static final int MSG_BATTERY_UPDATE = 302;
@@ -170,7 +164,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int MSG_FINISHED_GOING_TO_SLEEP = 320;
     private static final int MSG_STARTED_GOING_TO_SLEEP = 321;
     private static final int MSG_KEYGUARD_BOUNCER_CHANGED = 322;
-    private static final int MSG_FACE_UNLOCK_STATE_CHANGED = 327;
     private static final int MSG_SIM_SUBSCRIPTION_INFO_CHANGED = 328;
     private static final int MSG_AIRPLANE_MODE_CHANGED = 329;
     private static final int MSG_SERVICE_STATE_CHANGE = 330;
@@ -404,7 +397,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private SparseBooleanArray mUserHasTrust = new SparseBooleanArray();
     private SparseBooleanArray mUserTrustIsManaged = new SparseBooleanArray();
     private SparseBooleanArray mUserTrustIsUsuallyManaged = new SparseBooleanArray();
-    private SparseBooleanArray mUserFaceUnlockRunning = new SparseBooleanArray();
     private Map<Integer, Intent> mSecondaryLockscreenRequirement = new HashMap<Integer, Intent>();
 
     @VisibleForTesting
@@ -1131,21 +1123,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
-    private void handleFaceUnlockStateChanged(boolean running, int userId) {
-        Assert.isMainThread();
-        mUserFaceUnlockRunning.put(userId, running);
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onFaceUnlockStateChanged(running, userId);
-            }
-        }
-    }
-
-    public boolean isFaceUnlockRunning(int userId) {
-        return mUserFaceUnlockRunning.get(userId);
-    }
-
     public boolean isFingerprintDetectionRunning() {
         return mFingerprintRunningState == BIOMETRIC_STATE_RUNNING;
     }
@@ -1369,16 +1346,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
-    static class DisplayClientState {
-        public int clientGeneration;
-        public boolean clearing;
-        public PendingIntent intent;
-        public int playbackState;
-        public long playbackEventTime;
-    }
-
-    private DisplayClientState mDisplayClientState = new DisplayClientState();
-
     @VisibleForTesting
     protected final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -1452,16 +1419,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             final String action = intent.getAction();
             if (AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED.equals(action)) {
                 mHandler.sendEmptyMessage(MSG_TIME_UPDATE);
-            } else if (ACTION_FACE_UNLOCK_STARTED.equals(action)) {
-                Trace.beginSection(
-                        "KeyguardUpdateMonitor.mBroadcastAllReceiver#onReceive "
-                                + "ACTION_FACE_UNLOCK_STARTED");
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_FACE_UNLOCK_STATE_CHANGED, 1,
-                        getSendingUserId()));
-                Trace.endSection();
-            } else if (ACTION_FACE_UNLOCK_STOPPED.equals(action)) {
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_FACE_UNLOCK_STATE_CHANGED, 0,
-                        getSendingUserId()));
             } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
                     .equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_DPM_STATE_CHANGED,
@@ -1938,12 +1895,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         handleStartedWakingUp();
                         Trace.endSection();
                         break;
-                    case MSG_FACE_UNLOCK_STATE_CHANGED:
-                        Trace.beginSection(
-                                "KeyguardUpdateMonitor#handler MSG_FACE_UNLOCK_STATE_CHANGED");
-                        handleFaceUnlockStateChanged(msg.arg1 != 0, msg.arg2);
-                        Trace.endSection();
-                        break;
                     case MSG_SIM_SUBSCRIPTION_INFO_CHANGED:
                         handleSimSubscriptionInfoChanged();
                         break;
@@ -2035,8 +1986,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         final IntentFilter allUserFilter = new IntentFilter();
         allUserFilter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
-        allUserFilter.addAction(ACTION_FACE_UNLOCK_STARTED);
-        allUserFilter.addAction(ACTION_FACE_UNLOCK_STOPPED);
         allUserFilter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         allUserFilter.addAction(ACTION_USER_UNLOCKED);
         allUserFilter.addAction(ACTION_USER_STOPPED);
@@ -3347,7 +3296,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         callback.onTimeChanged();
         callback.onPhoneStateChanged(mPhoneState);
         callback.onRefreshCarrierInfo();
-        callback.onClockVisibilityChanged();
         callback.onKeyguardVisibilityChangedRaw(mKeyguardIsVisible);
         callback.onTelephonyCapable(mTelephonyCapable);
 
@@ -3522,10 +3470,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         return (state == TelephonyManager.SIM_STATE_PIN_REQUIRED
                 || state == TelephonyManager.SIM_STATE_PUK_REQUIRED
                 || state == TelephonyManager.SIM_STATE_PERM_DISABLED);
-    }
-
-    public DisplayClientState getCachedDisplayClientState() {
-        return mDisplayClientState;
     }
 
     // TODO: use these callbacks elsewhere in place of the existing notifyScreen*()
