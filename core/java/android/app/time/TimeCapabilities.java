@@ -39,16 +39,15 @@ import java.util.Objects;
  */
 public final class TimeCapabilities implements Parcelable {
 
-    public static final @NonNull Creator<TimeCapabilities> CREATOR =
-            new Creator<TimeCapabilities>() {
-                public TimeCapabilities createFromParcel(Parcel in) {
-                    return TimeCapabilities.createFromParcel(in);
-                }
+    public static final @NonNull Creator<TimeCapabilities> CREATOR = new Creator<>() {
+        public TimeCapabilities createFromParcel(Parcel in) {
+            return TimeCapabilities.createFromParcel(in);
+        }
 
-                public TimeCapabilities[] newArray(int size) {
-                    return new TimeCapabilities[size];
-                }
-            };
+        public TimeCapabilities[] newArray(int size) {
+            return new TimeCapabilities[size];
+        }
+    };
 
 
     /**
