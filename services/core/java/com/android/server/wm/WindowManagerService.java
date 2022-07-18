@@ -316,7 +316,6 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
-import com.android.server.wm.utils.WmDisplayCutout;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -1848,8 +1847,7 @@ public class WindowManagerService extends IWindowManager.Stub
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "addWindow: New client %s"
                     + ": window=%s Callers=%s", client.asBinder(), win, Debug.getCallers(5));
 
-            if ((win.isVisibleRequestedOrAdding() && displayContent.updateOrientation())
-                    || win.providesNonDecorInsets()) {
+            if (win.isVisibleRequestedOrAdding() && displayContent.updateOrientation()) {
                 displayContent.sendNewConfiguration();
             }
 
@@ -6368,8 +6366,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " callers=" + Debug.getCallers(3));
                 return NAV_BAR_INVALID;
             }
-            return displayContent.getDisplayPolicy().navigationBarPosition(
-                    displayContent.getDisplayRotation().getRotation());
+            return displayContent.getDisplayPolicy().getNavBarPosition();
         }
     }
 
@@ -7209,9 +7206,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent dc = mRoot.getDisplayContent(displayId);
         if (dc != null) {
             final DisplayInfo di = dc.getDisplayInfo();
-            final WmDisplayCutout cutout = dc.calculateDisplayCutoutForRotation(di.rotation);
-            dc.getDisplayPolicy().getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                    cutout, outInsets);
+            dc.getDisplayPolicy().getStableInsetsLw(di.rotation, di.displayCutout, outInsets);
         }
     }
 
