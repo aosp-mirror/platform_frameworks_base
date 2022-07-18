@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.content.ComponentName.createRelative;
+import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -75,6 +76,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     private ActivityRecord mTrampolineActivity;
     private ActivityRecord mTopActivity;
     private ActivityOptions mActivityOptions;
+    private Transition mTransition;
     private boolean mLaunchTopByTrampoline;
     private boolean mNewActivityCreated = true;
     private long mExpectedStartedId;
@@ -98,6 +100,11 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
                 .setTask(mTrampolineActivity.getTask())
                 .setComponent(createRelative(DEFAULT_COMPONENT_PACKAGE_NAME, "TopActivity"))
                 .build();
+        mTopActivity.mDisplayContent.mOpeningApps.add(mTopActivity);
+        mTransition = new Transition(TRANSIT_OPEN, 0 /* flags */,
+                mTopActivity.mTransitionController, createTestBLASTSyncEngine());
+        mTransition.mParticipants.add(mTopActivity);
+        mTopActivity.mTransitionController.moveToCollecting(mTransition);
         // becomes invisible when covered by mTopActivity
         mTrampolineActivity.mVisibleRequested = false;
     }
@@ -437,17 +444,31 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     @Test
     public void testActivityDrawnBeforeTransition() {
         mTopActivity.setVisible(false);
-        notifyActivityLaunching(mTopActivity.intent);
+        onIntentStarted(mTopActivity.intent);
         // Assume the activity is launched the second time consecutively. The drawn event is from
         // the first time (omitted in test) launch that is earlier than transition.
         doReturn(true).when(mTopActivity).isReportedDrawn();
         notifyWindowsDrawn(mTopActivity);
+        verifyNoMoreInteractions(mLaunchObserver);
+
         notifyActivityLaunched(START_SUCCESS, mTopActivity);
         // If the launching activity was drawn when starting transition, the launch event should
         // be reported successfully.
         notifyTransitionStarting(mTopActivity);
 
         verifyOnActivityLaunched(mTopActivity);
+        verifyOnActivityLaunchFinished(mTopActivity);
+    }
+
+    @Test
+    public void testActivityDrawnWithoutTransition() {
+        mTopActivity.mDisplayContent.mOpeningApps.remove(mTopActivity);
+        mTransition.mParticipants.remove(mTopActivity);
+        onIntentStarted(mTopActivity.intent);
+        notifyAndVerifyActivityLaunched(mTopActivity);
+        notifyWindowsDrawn(mTopActivity);
+        // Even if there is no notifyTransitionStarting, the launch event can still be reported
+        // because the drawn activity is not involved in transition.
         verifyOnActivityLaunchFinished(mTopActivity);
     }
 
