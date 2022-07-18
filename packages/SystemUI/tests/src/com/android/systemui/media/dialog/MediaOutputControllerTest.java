@@ -383,62 +383,6 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void isZeroMode_onlyFromPhoneOutput_returnTrue() {
-        // Multiple available devices
-        assertThat(mMediaOutputController.isZeroMode()).isFalse();
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE);
-        mMediaDevices.clear();
-        mMediaDevices.add(mMediaDevice1);
-        mMediaOutputController.start(mCb);
-        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
-
-        assertThat(mMediaOutputController.isZeroMode()).isTrue();
-
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE);
-
-        assertThat(mMediaOutputController.isZeroMode()).isTrue();
-
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE);
-
-        assertThat(mMediaOutputController.isZeroMode()).isTrue();
-    }
-
-    @Test
-    public void isZeroMode_notFromPhoneOutput_returnFalse() {
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_UNKNOWN);
-        mMediaDevices.clear();
-        mMediaDevices.add(mMediaDevice1);
-        mMediaOutputController.start(mCb);
-        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
-
-        assertThat(mMediaOutputController.isZeroMode()).isFalse();
-
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_FAST_PAIR_BLUETOOTH_DEVICE);
-
-        assertThat(mMediaOutputController.isZeroMode()).isFalse();
-
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE);
-
-        assertThat(mMediaOutputController.isZeroMode()).isFalse();
-
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE);
-
-        assertThat(mMediaOutputController.isZeroMode()).isFalse();
-
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_CAST_GROUP_DEVICE);
-
-        assertThat(mMediaOutputController.isZeroMode()).isFalse();
-    }
-
-    @Test
     public void getGroupMediaDevices_differentDeviceOrder_showingSameOrder() {
         final MediaDevice selectedMediaDevice1 = mock(MediaDevice.class);
         final MediaDevice selectedMediaDevice2 = mock(MediaDevice.class);

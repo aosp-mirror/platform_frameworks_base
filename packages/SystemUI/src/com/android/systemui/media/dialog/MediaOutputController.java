@@ -16,7 +16,7 @@
 
 package com.android.systemui.media.dialog;
 
-import static android.provider.Settings.ACTION_BLUETOOTH_PAIRING_SETTINGS;
+import static android.provider.Settings.ACTION_BLUETOOTH_SETTINGS;
 
 import android.annotation.CallbackExecutor;
 import android.app.AlertDialog;
@@ -300,6 +300,9 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             return;
         }
         try {
+            synchronized (mMediaDevicesLock) {
+                mMediaDevices.removeIf(MediaDevice::isMutingExpectedDevice);
+            }
             mAudioManager.cancelMuteAwaitConnection(mAudioManager.getMutingExpectedDevice());
         } catch (Exception e) {
             Log.d(TAG, "Unable to cancel mute await connection");
@@ -711,22 +714,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return false;
     }
 
-    boolean isZeroMode() {
-        synchronized (mMediaDevicesLock) {
-            if (mMediaDevices.size() == 1) {
-                final MediaDevice device = mMediaDevices.iterator().next();
-                // Add "pair new" only when local output device exists
-                final int type = device.getDeviceType();
-                if (type == MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE
-                        || type == MediaDevice.MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE
-                        || type == MediaDevice.MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
     void launchBluetoothPairing(View view) {
         ActivityLaunchAnimator.Controller controller =
                 mDialogLaunchAnimator.createActivityLaunchController(view);
@@ -736,7 +723,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         }
 
         Intent launchIntent =
-                new Intent(ACTION_BLUETOOTH_PAIRING_SETTINGS)
+                new Intent(ACTION_BLUETOOTH_SETTINGS)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         final Intent deepLinkIntent =
                 new Intent(Settings.ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY);
