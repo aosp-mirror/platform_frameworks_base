@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.shade;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
@@ -106,6 +106,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -131,8 +132,28 @@ import com.android.systemui.statusbar.notification.stack.NotificationRoundnessMa
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
+import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
+import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
+import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
+import com.android.systemui.statusbar.phone.KeyguardBottomAreaViewController;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
+import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
+import com.android.systemui.statusbar.phone.LargeScreenShadeHeaderController;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
+import com.android.systemui.statusbar.phone.PanelViewController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.phone.TapAgainViewController;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
-import com.android.systemui.statusbar.phone.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -563,7 +584,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(View.AccessibilityDelegate.class);
         verify(mView).setAccessibilityDelegate(accessibilityDelegateArgumentCaptor.capture());
         mAccessibiltyDelegate = accessibilityDelegateArgumentCaptor.getValue();
-        mNotificationPanelViewController.mStatusBarStateController
+        mNotificationPanelViewController.getStatusBarStateController()
                 .addCallback(mNotificationPanelViewController.mStatusBarStateListener);
         mNotificationPanelViewController
                 .setHeadsUpAppearanceController(mock(HeadsUpAppearanceController.class));
@@ -998,7 +1019,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mNotificationPanelViewController.flingToHeight(
                 0f,
                 true,
-                mNotificationPanelViewController.mExpandedHeight,
+                mNotificationPanelViewController.getExpandedHeight(),
                 1f,
                 false);
         // Verify that the NSSL is notified that the panel is *not* flinging.
@@ -1192,14 +1213,14 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mPowerManager.isPowerSaveMode()).thenReturn(false);
         when(mAmbientState.getDozeAmount()).thenReturn(0f);
         mNotificationPanelViewController.startUnlockHintAnimation();
-        assertThat(mNotificationPanelViewController.mHintAnimationRunning).isTrue();
+        assertThat(mNotificationPanelViewController.isHintAnimationRunning()).isTrue();
     }
 
     @Test
     public void testUnlockHintAnimation_doesNotRun_inPowerSaveMode() {
         when(mPowerManager.isPowerSaveMode()).thenReturn(true);
         mNotificationPanelViewController.startUnlockHintAnimation();
-        assertThat(mNotificationPanelViewController.mHintAnimationRunning).isFalse();
+        assertThat(mNotificationPanelViewController.isHintAnimationRunning()).isFalse();
     }
 
     @Test
@@ -1207,7 +1228,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mPowerManager.isPowerSaveMode()).thenReturn(false);
         when(mAmbientState.getDozeAmount()).thenReturn(0.5f);
         mNotificationPanelViewController.startUnlockHintAnimation();
-        assertThat(mNotificationPanelViewController.mHintAnimationRunning).isFalse();
+        assertThat(mNotificationPanelViewController.isHintAnimationRunning()).isFalse();
     }
 
     @Test
