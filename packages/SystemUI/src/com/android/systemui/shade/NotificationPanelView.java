@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.shade;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -25,6 +25,8 @@ import android.graphics.PorterDuffXfermode;
 import android.util.AttributeSet;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.PanelView;
+import com.android.systemui.statusbar.phone.TapAgainView;
 
 public class NotificationPanelView extends PanelView {
 
@@ -35,8 +37,8 @@ public class NotificationPanelView extends PanelView {
      */
     public static final int FLING_EXPAND = 0;
 
-    static final String COUNTER_PANEL_OPEN = "panel_open";
-    static final String COUNTER_PANEL_OPEN_QS = "panel_open_qs";
+    public static final String COUNTER_PANEL_OPEN = "panel_open";
+    public static final String COUNTER_PANEL_OPEN_QS = "panel_open_qs";
 
     private int mCurrentPanelAlpha;
     private final Paint mAlphaPaint = new Paint();

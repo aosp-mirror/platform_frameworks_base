@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.shade;
 
 import com.android.systemui.dagger.SysUISingleton;
 

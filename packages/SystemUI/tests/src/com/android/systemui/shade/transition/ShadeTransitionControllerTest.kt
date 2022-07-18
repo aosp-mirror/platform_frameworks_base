@@ -1,4 +1,4 @@
-package com.android.systemui.statusbar.phone.shade.transition
+package com.android.systemui.shade.transition
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
@@ -6,8 +6,8 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
+import com.android.systemui.shade.NotificationPanelViewController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.statusbar.phone.panelstate.STATE_OPENING

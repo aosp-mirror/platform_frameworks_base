@@ -717,7 +717,7 @@ public abstract class PanelViewController {
         animator.start();
     }
 
-    void onFlingEnd(boolean cancelled) {
+    protected void onFlingEnd(boolean cancelled) {
         mIsFlinging = false;
         // No overshoot when the animation ends
         setOverExpansionInternal(0, false /* isFromGesture */);
@@ -1113,7 +1113,7 @@ public abstract class PanelViewController {
     }
 
     /** Returns true if {@link PanelView} should be visible. */
-    abstract boolean shouldPanelBeVisible();
+    abstract protected boolean shouldPanelBeVisible();
 
     /**
      * Updates the panel expansion and {@link PanelView} visibility if necessary.

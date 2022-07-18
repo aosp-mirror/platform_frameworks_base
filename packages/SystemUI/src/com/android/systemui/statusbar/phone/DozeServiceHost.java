@@ -40,6 +40,8 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;

@@ -1,4 +1,4 @@
-package com.android.systemui.statusbar.phone.shade.transition
+package com.android.systemui.shade.transition
 
 import javax.inject.Inject
 
