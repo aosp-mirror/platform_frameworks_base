@@ -271,7 +271,7 @@ final class DeletePackageHelper {
         // other processes clean up before deleting resources.
         synchronized (mPm.mInstallLock) {
             if (info.mArgs != null) {
-                info.mArgs.doPostDeleteLI(true);
+                mRemovePackageHelper.cleanUpResources(info.mArgs);
             }
 
             boolean reEnableStub = false;
@@ -341,6 +341,7 @@ final class DeletePackageHelper {
     /*
      * This method handles package deletion in general
      */
+    @GuardedBy("mPm.mInstallLock")
     public boolean deletePackageLIF(@NonNull String packageName, UserHandle user,
             boolean deleteCodeAndResources, @NonNull int[] allUserHandles, int flags,
             PackageRemovedInfo outInfo, boolean writeSettings) {
@@ -393,8 +394,18 @@ final class DeletePackageHelper {
         return new DeletePackageAction(ps, disabledPs, outInfo, flags, user);
     }
 
+    public void executeDeletePackage(DeletePackageAction action, String packageName,
+            boolean deleteCodeAndResources, @NonNull int[] allUserHandles, boolean writeSettings)
+            throws SystemDeleteException {
+        synchronized (mPm.mInstallLock) {
+            executeDeletePackageLIF(action, packageName, deleteCodeAndResources, allUserHandles,
+                    writeSettings);
+        }
+    }
+
     /** Deletes a package. Only throws when install of a disabled package fails. */
-    public void executeDeletePackageLIF(DeletePackageAction action,
+    @GuardedBy("mPm.mInstallLock")
+    private void executeDeletePackageLIF(DeletePackageAction action,
             String packageName, boolean deleteCodeAndResources,
             @NonNull int[] allUserHandles, boolean writeSettings) throws SystemDeleteException {
         final PackageSetting ps = action.mDeletingPs;
@@ -487,7 +498,9 @@ final class DeletePackageHelper {
 
         // Take a note whether we deleted the package for all users
         if (outInfo != null) {
-            outInfo.mRemovedForAllUsers = mPm.mPackages.get(ps.getPackageName()) == null;
+            synchronized (mPm.mLock) {
+                outInfo.mRemovedForAllUsers = mPm.mPackages.get(ps.getPackageName()) == null;
+            }
         }
     }
 
@@ -538,6 +551,7 @@ final class DeletePackageHelper {
         }
     }
 
+    @GuardedBy("mPm.mInstallLock")
     private void deleteInstalledPackageLIF(PackageSetting ps,
             boolean deleteCodeAndResources, int flags, @NonNull int[] allUserHandles,
             PackageRemovedInfo outInfo, boolean writeSettings) {
@@ -556,7 +570,7 @@ final class DeletePackageHelper {
 
         // Delete application code and resources only for parent packages
         if (deleteCodeAndResources && (outInfo != null)) {
-            outInfo.mArgs = new FileInstallArgs(
+            outInfo.mArgs = new InstallArgs(
                     ps.getPathString(), getAppDexInstructionSets(
                             ps.getPrimaryCpuAbi(), ps.getSecondaryCpuAbi()), mPm);
             if (DEBUG_SD_INSTALL) Slog.i(TAG, "args=" + outInfo.mArgs);
@@ -636,7 +650,10 @@ final class DeletePackageHelper {
             flags |= PackageManager.DELETE_KEEP_DATA;
         }
 
-        deleteInstalledPackageLIF(deletedPs, true, flags, allUserHandles, outInfo, writeSettings);
+        synchronized (mPm.mInstallLock) {
+            deleteInstalledPackageLIF(deletedPs, true, flags, allUserHandles, outInfo,
+                    writeSettings);
+        }
     }
 
     public void deletePackageVersionedInternal(VersionedPackage versionedPackage,

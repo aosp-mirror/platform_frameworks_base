@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
@@ -75,7 +76,7 @@ final class ReconciledPackage {
      * with the package(s) currently being installed. The to-be installed packages take
      * precedence and may shadow already installed packages.
      */
-    Map<String, AndroidPackage> getCombinedAvailablePackages() {
+    @NonNull Map<String, AndroidPackage> getCombinedAvailablePackages() {
         final ArrayMap<String, AndroidPackage> combined =
                 new ArrayMap<>(mRequest.mAllPackages.size() + mRequest.mScannedPackages.size());
 
