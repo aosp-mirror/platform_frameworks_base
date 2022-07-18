@@ -265,12 +265,14 @@ class InsetsPolicy {
                 return state;
             }
         } else if (w.mActivityRecord != null && w.mActivityRecord.mImeInsetsFrozenUntilStartInput) {
-            // During switching tasks with gestural navigation, before the next IME input target
-            // starts the input, we should adjust and freeze the last IME visibility of the window
-            // in case delivering obsoleted IME insets state during transitioning.
+            // During switching tasks with gestural navigation, if the IME is attached to
+            // one app window on that time, even the next app window is behind the IME window,
+            // conceptually the window should not receive the IME insets if the next window is
+            // not eligible IME requester and ready to show IME on top of it.
+            final boolean shouldImeAttachedToApp = mDisplayContent.shouldImeAttachedToApp();
             final InsetsSource originalImeSource = originalState.peekSource(ITYPE_IME);
 
-            if (originalImeSource != null) {
+            if (shouldImeAttachedToApp && originalImeSource != null) {
                 final boolean imeVisibility =
                         w.mActivityRecord.mLastImeShown || w.getRequestedVisibility(ITYPE_IME);
                 final InsetsState state = copyState ? new InsetsState(originalState)

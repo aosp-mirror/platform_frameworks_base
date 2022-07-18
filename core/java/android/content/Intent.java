@@ -3836,7 +3836,7 @@ public class Intent implements Parcelable, Cloneable {
      * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @SystemApi
     public static final String ACTION_USER_SWITCHED =
             "android.intent.action.USER_SWITCHED";
 
@@ -5970,6 +5970,8 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @SystemApi
+    @SuppressLint("ActionValue")
     public static final String EXTRA_USER_HANDLE =
             "android.intent.extra.user_handle";
 
@@ -6824,6 +6826,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @SystemApi
     public static final int FLAG_RECEIVER_INCLUDE_BACKGROUND = 0x01000000;
     /**
      * If set, the broadcast will never go to manifest receivers in background (cached

@@ -122,6 +122,9 @@ public final class HdmiPlaybackClient extends HdmiClient {
     }
 
     private IHdmiControlCallback getCallbackWrapper(final OneTouchPlayCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("OneTouchPlayCallback cannot be null.");
+        }
         return new IHdmiControlCallback.Stub() {
             @Override
             public void onComplete(int result) {
@@ -131,6 +134,9 @@ public final class HdmiPlaybackClient extends HdmiClient {
     }
 
     private IHdmiControlCallback getCallbackWrapper(final DisplayStatusCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("DisplayStatusCallback cannot be null.");
+        }
         return new IHdmiControlCallback.Stub() {
             @Override
             public void onComplete(int status) {

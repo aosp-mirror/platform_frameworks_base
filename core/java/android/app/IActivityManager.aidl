@@ -138,7 +138,7 @@ interface IActivityManager {
     int broadcastIntentWithFeature(in IApplicationThread caller, in String callingFeatureId,
             in Intent intent, in String resolvedType, in IIntentReceiver resultTo, int resultCode,
             in String resultData, in Bundle map, in String[] requiredPermissions, in String[] excludePermissions,
-            int appOp, in Bundle options, boolean serialized, boolean sticky, int userId);
+            in String[] excludePackages, int appOp, in Bundle options, boolean serialized, boolean sticky, int userId);
     void unbroadcastIntent(in IApplicationThread caller, in Intent intent, int userId);
     @UnsupportedAppUsage
     oneway void finishReceiver(in IBinder who, int resultCode, in String resultData, in Bundle map,

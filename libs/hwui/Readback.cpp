@@ -90,11 +90,36 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRec
 
     SkRect srcRect = inSrcRect.toSkRect();
 
-    SkRect imageSrcRect =
-            SkRect::MakeLTRB(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom);
-    if (imageSrcRect.isEmpty()) {
-        imageSrcRect = SkRect::MakeIWH(description.width, description.height);
+    SkRect imageSrcRect = SkRect::MakeIWH(description.width, description.height);
+    SkISize imageWH = SkISize::Make(description.width, description.height);
+    if (cropRect.left < cropRect.right && cropRect.top < cropRect.bottom) {
+        imageSrcRect =
+                SkRect::MakeLTRB(cropRect.left, cropRect.top, cropRect.right, cropRect.bottom);
+        imageWH = SkISize::Make(cropRect.right - cropRect.left, cropRect.bottom - cropRect.top);
+
+        // Chroma channels of YUV420 images are subsampled we may need to shrink the crop region by
+        // a whole texel on each side. Since skia still adds its own 0.5 inset, we apply an
+        // additional 0.5 inset. See GLConsumer::computeTransformMatrix for details.
+        float shrinkAmount = 0.0f;
+        switch (description.format) {
+            // Use HAL formats since some AHB formats are only available in vndk
+            case HAL_PIXEL_FORMAT_YCBCR_420_888:
+            case HAL_PIXEL_FORMAT_YV12:
+            case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
+                shrinkAmount = 0.5f;
+                break;
+            default:
+                break;
+        }
+
+        // Shrink the crop if it has more than 1-px and differs from the buffer size.
+        if (imageWH.width() > 1 && imageWH.width() < (int32_t)description.width)
+            imageSrcRect = imageSrcRect.makeInset(shrinkAmount, 0);
+
+        if (imageWH.height() > 1 && imageWH.height() < (int32_t)description.height)
+            imageSrcRect = imageSrcRect.makeInset(0, shrinkAmount);
     }
+
     ALOGV("imageSrcRect = " RECT_STRING, SK_RECT_ARGS(imageSrcRect));
 
     // Represents the "logical" width/height of the texture. That is, the dimensions of the buffer
@@ -153,7 +178,7 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRec
      */
 
     SkMatrix m;
-    const SkRect imageDstRect = SkRect::MakeIWH(imageSrcRect.width(), imageSrcRect.height());
+    const SkRect imageDstRect = SkRect::Make(imageWH);
     const float px = imageDstRect.centerX();
     const float py = imageDstRect.centerY();
     if (windowTransform & NATIVE_WINDOW_TRANSFORM_FLIP_H) {

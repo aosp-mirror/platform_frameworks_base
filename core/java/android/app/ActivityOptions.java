@@ -21,6 +21,7 @@ import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -206,6 +207,14 @@ public class ActivityOptions {
      */
     private static final String KEY_LAUNCH_TASK_DISPLAY_AREA_TOKEN =
             "android.activity.launchTaskDisplayAreaToken";
+
+    /**
+     * The task display area feature id the activity should be launched into.
+     * @see #setLaunchTaskDisplayAreaFeatureId(int)
+     * @hide
+     */
+    private static final String KEY_LAUNCH_TASK_DISPLAY_AREA_FEATURE_ID =
+            "android.activity.launchTaskDisplayAreaFeatureId";
 
     /**
      * The root task token the activity should be launched into.
@@ -404,6 +413,7 @@ public class ActivityOptions {
     private int mLaunchDisplayId = INVALID_DISPLAY;
     private int mCallerDisplayId = INVALID_DISPLAY;
     private WindowContainerToken mLaunchTaskDisplayArea;
+    private int mLaunchTaskDisplayAreaFeatureId = FEATURE_UNDEFINED;
     private WindowContainerToken mLaunchRootTask;
     private IBinder mLaunchTaskFragmentToken;
     @WindowConfiguration.WindowingMode
@@ -1147,6 +1157,8 @@ public class ActivityOptions {
         mLaunchDisplayId = opts.getInt(KEY_LAUNCH_DISPLAY_ID, INVALID_DISPLAY);
         mCallerDisplayId = opts.getInt(KEY_CALLER_DISPLAY_ID, INVALID_DISPLAY);
         mLaunchTaskDisplayArea = opts.getParcelable(KEY_LAUNCH_TASK_DISPLAY_AREA_TOKEN);
+        mLaunchTaskDisplayAreaFeatureId = opts.getInt(KEY_LAUNCH_TASK_DISPLAY_AREA_FEATURE_ID,
+                FEATURE_UNDEFINED);
         mLaunchRootTask = opts.getParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN);
         mLaunchTaskFragmentToken = opts.getBinder(KEY_LAUNCH_TASK_FRAGMENT_TOKEN);
         mLaunchWindowingMode = opts.getInt(KEY_LAUNCH_WINDOWING_MODE, WINDOWING_MODE_UNDEFINED);
@@ -1469,6 +1481,23 @@ public class ActivityOptions {
             WindowContainerToken windowContainerToken) {
         mLaunchTaskDisplayArea = windowContainerToken;
         return this;
+    }
+
+    /** @hide */
+    public int getLaunchTaskDisplayAreaFeatureId() {
+        return mLaunchTaskDisplayAreaFeatureId;
+    }
+
+    /**
+     * Sets the TaskDisplayArea feature Id the activity should launch into.
+     * Note: It is possible to have TaskDisplayAreas with the same featureId on multiple displays.
+     * If launch display id is not specified, the TaskDisplayArea on the default display will be
+     * used.
+     * @hide
+     */
+    @TestApi
+    public void setLaunchTaskDisplayAreaFeatureId(int launchTaskDisplayAreaFeatureId) {
+        mLaunchTaskDisplayAreaFeatureId = launchTaskDisplayAreaFeatureId;
     }
 
     /** @hide */
@@ -1901,6 +1930,9 @@ public class ActivityOptions {
         }
         if (mLaunchTaskDisplayArea != null) {
             b.putParcelable(KEY_LAUNCH_TASK_DISPLAY_AREA_TOKEN, mLaunchTaskDisplayArea);
+        }
+        if (mLaunchTaskDisplayAreaFeatureId != FEATURE_UNDEFINED) {
+            b.putInt(KEY_LAUNCH_TASK_DISPLAY_AREA_FEATURE_ID, mLaunchTaskDisplayAreaFeatureId);
         }
         if (mLaunchRootTask != null) {
             b.putParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, mLaunchRootTask);

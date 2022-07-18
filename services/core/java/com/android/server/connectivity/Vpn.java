@@ -186,7 +186,7 @@ public class Vpn {
     private static final boolean LOGD = true;
     private static final String ANDROID_KEYSTORE_PROVIDER = "AndroidKeyStore";
     /** Key containing prefix of vpn app excluded list */
-    @VisibleForTesting static final String VPN_APP_EXCLUDED = "VPN_APP_EXCLUDED_";
+    @VisibleForTesting static final String VPN_APP_EXCLUDED = "VPNAPPEXCLUDED_";
 
     // Length of time (in milliseconds) that an app hosting an always-on VPN is placed on
     // the device idle allowlist during service launch and VPN bootstrap.
@@ -1182,20 +1182,9 @@ public class Vpn {
                 cleanupVpnStateLocked();
             } else if (mVpnRunner != null) {
                 if (!VpnConfig.LEGACY_VPN.equals(mPackage)) {
-                    mAppOpsManager.finishOp(
-                            AppOpsManager.OPSTR_ESTABLISH_VPN_MANAGER, mOwnerUID, mPackage, null);
-                    // The underlying network, NetworkCapabilities and LinkProperties are not
-                    // necessary to send to VPN app since the purpose of this event is to notify
-                    // VPN app that VPN is deactivated by the user.
-                    // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
-                    //  ConnectivityServiceTest.
-                    if (SdkLevel.isAtLeastT()) {
-                        sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_DEACTIVATED_BY_USER,
-                                -1 /* errorClass */, -1 /* errorCode*/, mPackage,
-                                getSessionKeyLocked(), makeVpnProfileStateLocked(),
-                                null /* underlyingNetwork */, null /* nc */, null /* lp */);
-                    }
+                    notifyVpnManagerVpnStopped(mPackage, mOwnerUID);
                 }
+
                 // cleanupVpnStateLocked() is called from mVpnRunner.exit()
                 mVpnRunner.exit();
             }
@@ -4043,7 +4032,25 @@ public class Vpn {
         // To stop the VPN profile, the caller must be the current prepared package and must be
         // running an Ikev2VpnProfile.
         if (isCurrentIkev2VpnLocked(packageName)) {
-            prepareInternal(VpnConfig.LEGACY_VPN);
+            notifyVpnManagerVpnStopped(packageName, mOwnerUID);
+
+            mVpnRunner.exit();
+        }
+    }
+
+    private synchronized void notifyVpnManagerVpnStopped(String packageName, int ownerUID) {
+        mAppOpsManager.finishOp(
+                AppOpsManager.OPSTR_ESTABLISH_VPN_MANAGER, ownerUID, packageName, null);
+        // The underlying network, NetworkCapabilities and LinkProperties are not
+        // necessary to send to VPN app since the purpose of this event is to notify
+        // VPN app that VPN is deactivated by the user.
+        // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
+        //  ConnectivityServiceTest.
+        if (SdkLevel.isAtLeastT()) {
+            sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_DEACTIVATED_BY_USER,
+                    -1 /* errorClass */, -1 /* errorCode*/, packageName,
+                    getSessionKeyLocked(), makeVpnProfileStateLocked(),
+                    null /* underlyingNetwork */, null /* nc */, null /* lp */);
         }
     }
 
@@ -4085,6 +4092,20 @@ public class Vpn {
             @NonNull List<String> excludedApps) {
         enforceNotRestrictedUser();
         if (!storeAppExclusionList(packageName, excludedApps)) return false;
+
+        updateAppExclusionList(excludedApps);
+
+        return true;
+    }
+
+    /**
+     * Triggers an update of the VPN network's excluded UIDs if a VPN is running.
+     */
+    public synchronized void refreshPlatformVpnAppExclusionList() {
+        updateAppExclusionList(getAppExclusionList(mPackage));
+    }
+
+    private synchronized void updateAppExclusionList(@NonNull List<String> excludedApps) {
         // Re-build and update NetworkCapabilities via NetworkAgent.
         if (mNetworkAgent != null) {
             // Only update the platform VPN
@@ -4097,8 +4118,6 @@ public class Vpn {
                 mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
             }
         }
-
-        return true;
     }
 
     /**
