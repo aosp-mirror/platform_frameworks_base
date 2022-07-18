@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
@@ -325,10 +324,7 @@ final class PackageSessionVerifier {
         // APEX checks. For single-package sessions, check if they contain an APEX. For
         // multi-package sessions, find all the child sessions that contain an APEX.
         if (hasApex) {
-            final List<String> apexPackageNames = submitSessionToApexService(session, rollbackId);
-            final PackageManagerInternal packageManagerInternal =
-                    LocalServices.getService(PackageManagerInternal.class);
-            packageManagerInternal.pruneCachedApksInApex(apexPackageNames);
+            submitSessionToApexService(session, rollbackId);
         }
     }
 
@@ -372,7 +368,7 @@ final class PackageSessionVerifier {
         }
     }
 
-    private List<String> submitSessionToApexService(StagingManager.StagedSession session,
+    private void submitSessionToApexService(StagingManager.StagedSession session,
             int rollbackId) throws PackageManagerException {
         final IntArray childSessionIds = new IntArray();
         if (session.isMultiPackage()) {
@@ -412,7 +408,6 @@ final class PackageSessionVerifier {
         }
         Slog.d(TAG, "Session " + session.sessionId() + " has following APEX packages: "
                 + apexPackageNames);
-        return apexPackageNames;
     }
 
     private int retrieveRollbackIdForCommitSession(int sessionId) throws PackageManagerException {
