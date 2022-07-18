@@ -1448,7 +1448,7 @@
     <string name="permdesc_route_media_output" msgid="1759683269387729675">"メディア出力を他の外部デバイスにルーティングすることをアプリに許可します。"</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"インストールセッションの読み取り"</string>
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"インストールセッションの読み取りをアプリに許可します。これにより、アプリはアクティブパッケージのインストールに関する詳細情報を参照できるようになります。"</string>
-    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"インストールパッケージのリクエスト"</string>
+    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"request install packages"</string>
     <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"パッケージのインストールをリクエストすることをアプリケーションに許可します。"</string>
     <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"パッケージの削除のリクエスト"</string>
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"パッケージの削除をリクエストすることをアプリに許可します。"</string>

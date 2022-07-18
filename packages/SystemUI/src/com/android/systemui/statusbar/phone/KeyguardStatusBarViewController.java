@@ -42,6 +42,7 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;

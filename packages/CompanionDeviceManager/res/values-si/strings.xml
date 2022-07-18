@@ -25,7 +25,7 @@
     <string name="permission_apps_summary" msgid="798718816711515431">"ඔබගේ දුරකථනයේ යෙදුම් ප්‍රවාහ කරන්න"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; හට ඔබගේ දුරකථනයෙන් මෙම තොරතුරුවලට ප්‍රවේශ වීමට ඉඩ දෙන්න"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"හරස්-උපාංග සේවා"</string>
-    <string name="helper_summary_app_streaming" msgid="7380294597268573523">"<xliff:g id="APP_NAME">%1$s</xliff:g> ඔබගේ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> වෙනුවෙන් ඔබගේ දුරකථනයෙහි ඡායාරූප, මාධ්‍ය සහ දැනුම්දීම් වෙත ප්‍රවේශ වීමට අවසරය ඉල්ලමින් සිටී"</string>
+    <string name="helper_summary_app_streaming" msgid="5977509499890099">"<xliff:g id="APP_NAME">%1$s</xliff:g> ඔබගේ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> වෙනුවෙන් ඔබගේ උපාංග අතර යෙදුම් ප්‍රවාහ කිරීමට අවසරය ඉල්ලමින් සිටියි"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; හට ඔබගේ දුරකථනයෙන් මෙම තොරතුරුවලට ප්‍රවේශ වීමට ඉඩ දෙන්න"</string>
@@ -35,7 +35,7 @@
     <string name="permission_storage" msgid="6831099350839392343">"ඡායාරූප සහ මාධ්‍ය"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play සේවා"</string>
-    <string name="helper_summary_computer" msgid="1676407599909474428">"<xliff:g id="APP_NAME">%1$s</xliff:g> ඔබගේ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> වෙනුවෙන් ඔබගේ උපාංග අතර යෙදුම් ප්‍රවාහ කිරීමට අවසරය ඉල්ලමින් සිටී"</string>
+    <string name="helper_summary_computer" msgid="9050724687678157852">"<xliff:g id="APP_NAME">%1$s</xliff:g> ඔබගේ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> වෙනුවෙන් ඔබගේ දුරකථනයෙහි ඡායාරූප, මාධ්‍ය සහ දැනුම්දීම් වෙත ප්‍රවේශ වීමට අවසරය ඉල්ලමින් සිටියි"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"උපාංගය"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"ඉඩ දෙන්න"</string>

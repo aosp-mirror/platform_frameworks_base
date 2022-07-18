@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.shade
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -32,7 +32,10 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.phone.NotificationShadeWindowView.InteractionEventHandler
+import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
+import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.tuner.TunerService

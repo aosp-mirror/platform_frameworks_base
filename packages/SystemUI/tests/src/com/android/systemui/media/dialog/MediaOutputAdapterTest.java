@@ -78,7 +78,6 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
         when(mMediaOutputController.getMediaDevices()).thenReturn(mMediaDevices);
         when(mMediaOutputController.hasAdjustVolumeUserRestriction()).thenReturn(false);
-        when(mMediaOutputController.isZeroMode()).thenReturn(false);
         when(mMediaOutputController.isTransferring()).thenReturn(false);
         when(mMediaOutputController.getDeviceIconCompat(mMediaDevice1)).thenReturn(mIconCompat);
         when(mMediaOutputController.getDeviceIconCompat(mMediaDevice2)).thenReturn(mIconCompat);
@@ -98,28 +97,12 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void getItemCount_nonZeroMode_isDeviceSize() {
-        assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(mMediaDevices.size());
-    }
-
-    @Test
-    public void getItemCount_zeroMode_containExtraOneForPairNew() {
-        when(mMediaOutputController.isZeroMode()).thenReturn(true);
-
+    public void getItemCount_containExtraOneForPairNew() {
         assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(mMediaDevices.size() + 1);
     }
 
     @Test
-    public void getItemCount_withDynamicGroup_containExtraOneForGroup() {
-        when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(mMediaDevices);
-        when(mMediaOutputController.isZeroMode()).thenReturn(false);
-
-        assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(mMediaDevices.size());
-    }
-
-    @Test
-    public void onBindViewHolder_zeroMode_bindPairNew_verifyView() {
-        when(mMediaOutputController.isZeroMode()).thenReturn(true);
+    public void onBindViewHolder_bindPairNew_verifyView() {
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 2);
 
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
@@ -133,7 +116,6 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     @Test
     public void onBindViewHolder_bindGroup_withSessionName_verifyView() {
         when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(mMediaDevices);
-        when(mMediaOutputController.isZeroMode()).thenReturn(false);
         when(mMediaOutputController.getSessionName()).thenReturn(TEST_SESSION_NAME);
         mMediaOutputAdapter.getItemCount();
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
@@ -148,7 +130,6 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     @Test
     public void onBindViewHolder_bindGroup_noSessionName_verifyView() {
         when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(mMediaDevices);
-        when(mMediaOutputController.isZeroMode()).thenReturn(false);
         when(mMediaOutputController.getSessionName()).thenReturn(null);
         mMediaOutputAdapter.getItemCount();
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
@@ -257,7 +238,6 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     @Test
     public void onItemClick_clickPairNew_verifyLaunchBluetoothPairing() {
-        when(mMediaOutputController.isZeroMode()).thenReturn(true);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 2);
         mViewHolder.mContainerLayout.performClick();
 

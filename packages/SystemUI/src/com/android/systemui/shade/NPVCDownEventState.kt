@@ -11,7 +11,7 @@
  * KIND, either express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package com.android.systemui.statusbar.phone
+package com.android.systemui.shade
 
 import android.view.MotionEvent
 import com.android.systemui.dump.DumpsysTableLogger

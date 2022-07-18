@@ -1,4 +1,4 @@
-package com.android.systemui.statusbar.phone
+package com.android.systemui.shade
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper

@@ -24,6 +24,7 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -90,12 +91,13 @@ public class SplitScreenControllerTests extends ShellTestCase {
     @Test
     public void testIsLaunchingAdjacently_notInSplitScreen() {
         doReturn(false).when(mSplitScreenController).isSplitScreenVisible();
+        doReturn(true).when(mSplitScreenController).isValidToEnterSplitScreen(any());
 
         // Verify launching the same activity returns true.
         Intent startIntent = createStartIntent("startActivity");
         ActivityManager.RunningTaskInfo focusTaskInfo =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, startIntent);
-        mSplitScreenController.onFocusTaskChanged(focusTaskInfo);
+        doReturn(focusTaskInfo).when(mSplitScreenController).getFocusingTaskInfo();
         assertTrue(mSplitScreenController.isLaunchingAdjacently(
                 startIntent, SPLIT_POSITION_TOP_OR_LEFT));
 
@@ -103,7 +105,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
         Intent diffIntent = createStartIntent("diffActivity");
         focusTaskInfo =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, diffIntent);
-        mSplitScreenController.onFocusTaskChanged(focusTaskInfo);
+        doReturn(focusTaskInfo).when(mSplitScreenController).getFocusingTaskInfo();
         assertFalse(mSplitScreenController.isLaunchingAdjacently(
                 startIntent, SPLIT_POSITION_TOP_OR_LEFT));
     }

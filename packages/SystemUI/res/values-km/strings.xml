@@ -307,6 +307,8 @@
     <string name="tap_again" msgid="1315420114387908655">"ចុច​ម្ដងទៀត"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"អូសឡើងលើ​ដើម្បីបើក"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"ចុចរូបដោះសោ ដើម្បីបើក"</string>
+    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
+    <skip />
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"បានដោះសោ​ដោយប្រើមុខ។ សូមចុចរូបដោះសោ ដើម្បីបើក។"</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"បានដោះសោដោយប្រើមុខ។ សូមចុច ដើម្បីបើក។"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"បានស្គាល់មុខ។ សូមចុច ដើម្បីបើក។"</string>

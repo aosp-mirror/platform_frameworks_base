@@ -43,6 +43,8 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
             STATUS_ICON_NOTIFICATIONS,
             STATUS_ICON_WIFI_UNAVAILABLE,
             STATUS_ICON_ALARM_SET,
+            STATUS_ICON_CAMERA_DISABLED,
+            STATUS_ICON_MIC_DISABLED,
             STATUS_ICON_MIC_CAMERA_DISABLED,
             STATUS_ICON_PRIORITY_MODE_ON
     })
@@ -50,8 +52,10 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
     public static final int STATUS_ICON_NOTIFICATIONS = 0;
     public static final int STATUS_ICON_WIFI_UNAVAILABLE = 1;
     public static final int STATUS_ICON_ALARM_SET = 2;
-    public static final int STATUS_ICON_MIC_CAMERA_DISABLED = 3;
-    public static final int STATUS_ICON_PRIORITY_MODE_ON = 4;
+    public static final int STATUS_ICON_CAMERA_DISABLED = 3;
+    public static final int STATUS_ICON_MIC_DISABLED = 4;
+    public static final int STATUS_ICON_MIC_CAMERA_DISABLED = 5;
+    public static final int STATUS_ICON_PRIORITY_MODE_ON = 6;
 
     private final Map<Integer, View> mStatusIcons = new HashMap<>();
 
@@ -80,6 +84,10 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
                 fetchStatusIconForResId(R.id.dream_overlay_wifi_status));
         mStatusIcons.put(STATUS_ICON_ALARM_SET,
                 fetchStatusIconForResId(R.id.dream_overlay_alarm_set));
+        mStatusIcons.put(STATUS_ICON_CAMERA_DISABLED,
+                fetchStatusIconForResId(R.id.dream_overlay_camera_off));
+        mStatusIcons.put(STATUS_ICON_MIC_DISABLED,
+                fetchStatusIconForResId(R.id.dream_overlay_mic_off));
         mStatusIcons.put(STATUS_ICON_MIC_CAMERA_DISABLED,
                 fetchStatusIconForResId(R.id.dream_overlay_camera_mic_off));
         mStatusIcons.put(STATUS_ICON_NOTIFICATIONS,

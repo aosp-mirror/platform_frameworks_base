@@ -111,12 +111,6 @@ public class KeyguardUpdateMonitorCallback {
     public void onKeyguardDismissAnimationFinished() { }
 
     /**
-     * Called when visibility of lockscreen clock changes, such as when
-     * obscured by a widget.
-     */
-    public void onClockVisibilityChanged() { }
-
-    /**
      * Called when the device becomes provisioned
      */
     public void onDeviceProvisioned() { }
@@ -247,11 +241,6 @@ public class KeyguardUpdateMonitorCallback {
      */
     public void onBiometricError(int msgId, String errString,
             BiometricSourceType biometricSourceType) { }
-
-    /**
-     * Called when the state of face unlock changed.
-     */
-    public void onFaceUnlockStateChanged(boolean running, int userId) { }
 
     /**
      * Called when biometric running state changed.

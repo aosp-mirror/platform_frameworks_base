@@ -122,6 +122,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -131,7 +132,6 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -553,11 +553,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                     dismiss(null /* callback */, null /* message */);
                 }
             }
-        }
-
-        @Override
-        public void onClockVisibilityChanged() {
-            adjustStatusBarLocked();
         }
 
         @Override
@@ -1193,6 +1188,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             mSystemReady = true;
             doKeyguardLocked(null);
             mUpdateMonitor.registerCallback(mUpdateCallback);
+            adjustStatusBarLocked();
             mDreamOverlayStateController.addCallback(mDreamOverlayStateCallback);
         }
         // Most services aren't available until the system reaches the ready state, so we
