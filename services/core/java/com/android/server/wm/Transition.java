@@ -68,6 +68,7 @@ import android.app.ActivityManager;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -205,6 +206,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     /** @see #setCanPipOnFinish */
     private boolean mCanPipOnFinish = true;
 
+    private boolean mIsSeamlessRotation = false;
+    private IContainerFreezer mContainerFreezer = null;
+
     Transition(@TransitionType int type, @TransitionFlags int flags,
             TransitionController controller, BLASTSyncEngine syncEngine) {
         mType = type;
@@ -265,10 +269,31 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return mTargetDisplays.contains(dc);
     }
 
+    /** Set a transition to be a seamless-rotation. */
     void setSeamlessRotation(@NonNull WindowContainer wc) {
         final ChangeInfo info = mChanges.get(wc);
         if (info == null) return;
         info.mFlags = info.mFlags | ChangeInfo.FLAG_SEAMLESS_ROTATION;
+        onSeamlessRotating(wc.getDisplayContent());
+    }
+
+    /**
+     * Called when it's been determined that this is transition is a seamless rotation. This should
+     * be called before any WM changes have happened.
+     */
+    void onSeamlessRotating(@NonNull DisplayContent dc) {
+        // Don't need to do anything special if everything is using BLAST sync already.
+        if (mSyncEngine.getSyncSet(mSyncId).mSyncMethod == BLASTSyncEngine.METHOD_BLAST) return;
+        if (mContainerFreezer == null) {
+            mContainerFreezer = new ScreenshotFreezer();
+        }
+        mIsSeamlessRotation = true;
+        final WindowState top = dc.getDisplayPolicy().getTopFullscreenOpaqueWindow();
+        if (top != null) {
+            top.mSyncMethodOverride = BLASTSyncEngine.METHOD_BLAST;
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Override sync-method for %s "
+                    + "because seamless rotating", top.getName());
+        }
     }
 
     /**
@@ -283,6 +308,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final ChangeInfo info = mChanges.get(curr);
             info.mFlags = info.mFlags | ChangeInfo.FLAG_TRANSIENT_LAUNCH;
         }
+    }
+
+    /** Only for testing. */
+    void setContainerFreezer(IContainerFreezer freezer) {
+        mContainerFreezer = freezer;
     }
 
     @TransitionState
@@ -314,13 +344,18 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return mState == STATE_COLLECTING || mState == STATE_STARTED;
     }
 
-    /** Starts collecting phase. Once this starts, all relevant surface operations are sync. */
+    @VisibleForTesting
     void startCollecting(long timeoutMs) {
+        startCollecting(timeoutMs, TransitionController.SYNC_METHOD);
+    }
+
+    /** Starts collecting phase. Once this starts, all relevant surface operations are sync. */
+    void startCollecting(long timeoutMs, int method) {
         if (mState != STATE_PENDING) {
             throw new IllegalStateException("Attempting to re-use a transition");
         }
         mState = STATE_COLLECTING;
-        mSyncId = mSyncEngine.startSyncSet(this, timeoutMs, TAG);
+        mSyncId = mSyncEngine.startSyncSet(this, timeoutMs, TAG, method);
 
         mController.mTransitionTracer.logState(this);
     }
@@ -412,6 +447,37 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 + " %s", mSyncId, wc);
         collect(wc);
         mChanges.get(wc).mExistenceChanged = true;
+    }
+
+    /**
+     * Records that a particular container is changing visibly (ie. something about it is changing
+     * while it remains visible). This only effects windows that are already in the collecting
+     * transition.
+     */
+    void collectVisibleChange(WindowContainer wc) {
+        if (mSyncEngine.getSyncSet(mSyncId).mSyncMethod == BLASTSyncEngine.METHOD_BLAST) {
+            // All windows are synced already.
+            return;
+        }
+        if (!isInTransition(wc)) return;
+
+        if (mContainerFreezer == null) {
+            mContainerFreezer = new ScreenshotFreezer();
+        }
+        Transition.ChangeInfo change = mChanges.get(wc);
+        if (change == null || !change.mVisible || !wc.isVisibleRequested()) return;
+        // Note: many more tests have already been done by caller.
+        mContainerFreezer.freeze(wc, change.mAbsoluteBounds);
+    }
+
+    /**
+     * @return {@code true} if `wc` is a participant or is a descendant of one.
+     */
+    boolean isInTransition(WindowContainer wc) {
+        for (WindowContainer p = wc; p != null; p = p.getParent()) {
+            if (mParticipants.contains(p)) return true;
+        }
+        return false;
     }
 
     /**
@@ -530,6 +596,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 }
                 displays.add(target.getDisplayContent());
             }
+        }
+        // Remove screenshot layers if necessary
+        if (mContainerFreezer != null) {
+            mContainerFreezer.cleanUp(t);
         }
         // Need to update layers on involved displays since they were all paused while
         // the animation played. This puts the layers back into the correct order.
@@ -1978,6 +2048,113 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 sortedTargets.add(arrayByZ.valueAt(i));
             }
             return sortedTargets;
+        }
+    }
+
+    /**
+     * Interface for freezing a container's content during sync preparation. Really just one impl
+     * but broken into an interface for testing (since you can't take screenshots in unit tests).
+     */
+    interface IContainerFreezer {
+        /**
+         * Makes sure a particular window is "frozen" for the remainder of a sync.
+         *
+         * @return whether the freeze was successful. It fails if `wc` is already in a frozen window
+         *         or is not visible/ready.
+         */
+        boolean freeze(@NonNull WindowContainer wc, @NonNull Rect bounds);
+
+        /** Populates `t` with operations that clean-up any state created to set-up the freeze. */
+        void cleanUp(SurfaceControl.Transaction t);
+    }
+
+    /**
+     * Freezes container content by taking a screenshot. Because screenshots are heavy, usage of
+     * any container "freeze" is currently explicit. WM code needs to be prudent about which
+     * containers to freeze.
+     */
+    @VisibleForTesting
+    private class ScreenshotFreezer implements IContainerFreezer {
+        /** Values are the screenshot "surfaces" or null if it was frozen via BLAST override. */
+        private final ArrayMap<WindowContainer, SurfaceControl> mSnapshots = new ArrayMap<>();
+
+        /** Takes a screenshot and puts it at the top of the container's surface. */
+        @Override
+        public boolean freeze(@NonNull WindowContainer wc, @NonNull Rect bounds) {
+            if (!wc.isVisibleRequested()) return false;
+
+            // Check if any parents have already been "frozen". If so, `wc` is already part of that
+            // snapshot, so just skip it.
+            for (WindowContainer p = wc; p != null; p = p.getParent()) {
+                if (mSnapshots.containsKey(p)) return false;
+            }
+
+            if (mIsSeamlessRotation) {
+                WindowState top = wc.getDisplayContent() == null ? null
+                        : wc.getDisplayContent().getDisplayPolicy().getTopFullscreenOpaqueWindow();
+                if (top != null && (top == wc || top.isDescendantOf(wc))) {
+                    // Don't use screenshots for seamless windows: these will use BLAST even if not
+                    // BLAST mode.
+                    mSnapshots.put(wc, null);
+                    return true;
+                }
+            }
+
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Screenshotting %s [%s]",
+                    wc.toString(), bounds.toString());
+
+            Rect cropBounds = new Rect(bounds);
+            cropBounds.offsetTo(0, 0);
+            SurfaceControl.LayerCaptureArgs captureArgs =
+                    new SurfaceControl.LayerCaptureArgs.Builder(wc.getSurfaceControl())
+                            .setSourceCrop(cropBounds)
+                            .setCaptureSecureLayers(true)
+                            .setAllowProtected(true)
+                            .build();
+            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+                    SurfaceControl.captureLayers(captureArgs);
+            final HardwareBuffer buffer = screenshotBuffer == null ? null
+                    : screenshotBuffer.getHardwareBuffer();
+            if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
+                // This can happen when display is not ready.
+                Slog.w(TAG, "Failed to capture screenshot for " + wc);
+                return false;
+            }
+            SurfaceControl snapshotSurface = wc.makeAnimationLeash()
+                    .setName("transition snapshot: " + wc.toString())
+                    .setOpaque(true)
+                    .setParent(wc.getSurfaceControl())
+                    .setSecure(screenshotBuffer.containsSecureLayers())
+                    .setCallsite("Transition.ScreenshotSync")
+                    .setBLASTLayer()
+                    .build();
+            mSnapshots.put(wc, snapshotSurface);
+            SurfaceControl.Transaction t = wc.mWmService.mTransactionFactory.get();
+
+            t.setBuffer(snapshotSurface, buffer);
+            t.setDataSpace(snapshotSurface, screenshotBuffer.getColorSpace().getDataSpace());
+            t.show(snapshotSurface);
+
+            // Place it on top of anything else in the container.
+            t.setLayer(snapshotSurface, Integer.MAX_VALUE);
+            t.apply();
+            t.close();
+
+            // Detach the screenshot on the sync transaction (the screenshot is just meant to
+            // freeze the window until the sync transaction is applied (with all its other
+            // corresponding changes), so this is how we unfreeze it.
+            wc.getSyncTransaction().reparent(snapshotSurface, null /* newParent */);
+            return true;
+        }
+
+        @Override
+        public void cleanUp(SurfaceControl.Transaction t) {
+            for (int i = 0; i < mSnapshots.size(); ++i) {
+                SurfaceControl snap = mSnapshots.valueAt(i);
+                // May be null if it was frozen via BLAST override.
+                if (snap == null) continue;
+                t.remove(snap);
+            }
         }
     }
 }

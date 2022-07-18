@@ -1405,7 +1405,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     private BLASTSyncEngine.SyncGroup prepareSyncWithOrganizer(
             IWindowContainerTransactionCallback callback) {
         final BLASTSyncEngine.SyncGroup s = mService.mWindowManager.mSyncEngine
-                .prepareSyncSet(this, "");
+                .prepareSyncSet(this, "", BLASTSyncEngine.METHOD_BLAST);
         mTransactionCallbacksByPendingSyncId.put(s.mSyncId, callback);
         return s;
     }
