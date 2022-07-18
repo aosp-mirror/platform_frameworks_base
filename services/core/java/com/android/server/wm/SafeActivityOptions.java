@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.CONTROL_KEYGUARD;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
@@ -246,6 +247,14 @@ public class SafeActivityOptions {
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             }
+        }
+        if (options.getTransientLaunch() && !supervisor.mRecentTasks.isCallerRecents(callingUid)
+                && ActivityTaskManagerService.checkPermission(
+                        MANAGE_ACTIVITY_TASKS, callingPid, callingUid) == PERMISSION_DENIED) {
+            final String msg = "Permission Denial: starting transient launch from " + callerApp
+                    + ", pid=" + callingPid + ", uid=" + callingUid;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
         }
         // Check if the caller is allowed to launch on the specified display area.
         final WindowContainerToken daToken = options.getLaunchTaskDisplayArea();
