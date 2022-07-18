@@ -37,9 +37,7 @@ import java.nio.charset.Charset;
 public class CharsetUtf8PerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    private final int mNoOfBytes = 0x100; // 4MB
-
-    private void makeUnicodeRange(int startingCodePoint, int endingCodePoint, int repeated) {
+    private void makeUnicodeRange(int startingCodePoint, int endingCodePoint) {
         StringBuilder builder = new StringBuilder();
         for (int codePoint = startingCodePoint; codePoint <= endingCodePoint; codePoint++) {
             if (codePoint < Character.MIN_SURROGATE || codePoint > Character.MAX_SURROGATE) {
@@ -48,35 +46,30 @@ public class CharsetUtf8PerfTest {
         }
 
         String str = builder.toString();
-        StringBuilder builder2 = new StringBuilder();
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            for (int i = 0; i < repeated; i++) {
-                builder2.append(str);
-            }
+            StringBuilder builder2 = new StringBuilder();
+            builder2.append(str);
         }
     }
 
     @Test
     public void time_ascii() {
-        makeUnicodeRange(0, 0x7f, mNoOfBytes / 0x80);
+        makeUnicodeRange(0, 0x7f);
     }
 
     @Test
     public void time_bmp2() {
-        makeUnicodeRange(0x0080, 0x07ff, mNoOfBytes / 2 / 0x780);
+        makeUnicodeRange(0x0080, 0x07ff);
     }
 
     @Test
     public void time_bmp3() {
-        makeUnicodeRange(
-                0x0800,
-                0xffff,
-                mNoOfBytes / 3 / 0xf000 /* 0x10000 - 0x0800 - no of surrogate code points */);
+        makeUnicodeRange(0x0800, 0xffff);
     }
 
     @Test
     public void time_supplementary() {
-        makeUnicodeRange(0x10000, 0x10ffff, mNoOfBytes / 4 / 0x100000);
+        makeUnicodeRange(0x10000, 0x10ffff);
     }
 }
