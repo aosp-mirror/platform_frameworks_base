@@ -214,9 +214,17 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
                 .isSensorBlocked(SensorPrivacyManager.Sensors.MICROPHONE);
         final boolean cameraBlocked = mSensorPrivacyController
                 .isSensorBlocked(SensorPrivacyManager.Sensors.CAMERA);
-        showIcon(
-                DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED,
-                micBlocked && cameraBlocked);
+        @DreamOverlayStatusBarView.StatusIconType int iconType = Resources.ID_NULL;
+        if (micBlocked && cameraBlocked) {
+            iconType = DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED;
+        } else if (!micBlocked && cameraBlocked) {
+            iconType = DreamOverlayStatusBarView.STATUS_ICON_CAMERA_DISABLED;
+        } else if (micBlocked && !cameraBlocked) {
+            iconType = DreamOverlayStatusBarView.STATUS_ICON_MIC_DISABLED;
+        }
+        if (iconType != Resources.ID_NULL) {
+            showIcon(iconType, true);
+        }
     }
 
     private String buildNotificationsContentDescription(int notificationCount) {
