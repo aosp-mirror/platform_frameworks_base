@@ -639,7 +639,7 @@
     <string name="face_acquired_too_dark" msgid="7919016380747701228">"ಪ್ರಕಾಶಮಾನವಾದ ಲೈಟಿಂಗ್ ಬಳಸಿ"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ಫೋನ್ ಅನ್ನು ದೂರಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ಫೋನ್ ಅನ್ನು ಸಮೀಪಕ್ಕೆ ತನ್ನಿ"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"ಫೋನ್ ಅನ್ನು ಎತ್ತರಕ್ಕೆ ಹಿಡಿಯಿರಿ"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ಫೋನ್ ಅನ್ನು ಮೇಲಕ್ಕೆ ಎತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"ಫೋನ್ ಅನ್ನು ಕೆಳಗೆ ಸರಿಸಿ"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"ಫೋನ್ ಅನ್ನು ನಿಮ್ಮ ಎಡಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"ಫೋನ್ ಅನ್ನು ನಿಮ್ಮ ಬಲಕ್ಕೆ ಸರಿಸಿ"</string>
