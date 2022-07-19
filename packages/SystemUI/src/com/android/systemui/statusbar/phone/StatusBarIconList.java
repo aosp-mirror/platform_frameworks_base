@@ -25,60 +25,72 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+/** A class holding the list of all the system icons that could be shown in the status bar. */
 public class StatusBarIconList {
-    private ArrayList<Slot> mSlots = new ArrayList<>();
+    private final ArrayList<Slot> mSlots = new ArrayList<>();
+    private final List<Slot> mViewOnlySlots = Collections.unmodifiableList(mSlots);
 
     public StatusBarIconList(String[] slots) {
         final int N = slots.length;
-        for (int i=0; i < N; i++) {
+        for (int i = 0; i < N; i++) {
             mSlots.add(new Slot(slots[i], null));
         }
     }
 
-    public int getSlotIndex(String slot) {
-        final int N = mSlots.size();
-        for (int i=0; i<N; i++) {
-            Slot item = mSlots.get(i);
-            if (item.getName().equals(slot)) {
-                return i;
-            }
-        }
-        // Auto insert new items at the beginning.
-        mSlots.add(0, new Slot(slot, null));
-        return 0;
+    /** Returns the list of current slots. */
+    public List<Slot> getSlots() {
+        return mViewOnlySlots;
     }
 
-    protected ArrayList<Slot> getSlots() {
-        return new ArrayList<>(mSlots);
+    /**
+     * Gets the slot with the given {@code name}, or creates a new slot if we don't already have a
+     * slot by that name.
+     *
+     * If a new slot is created, that slot will be inserted at the front of the list.
+     *
+     * TODO(b/237533036): Rename this to getOrCreateSlot to make it more clear that it could create
+     *   a new slot. Other methods in this class will also create a new slot if we don't have one,
+     *   should those be re-named too?
+     */
+    public Slot getSlot(String name) {
+        return mSlots.get(findOrInsertSlot(name));
     }
 
-    protected Slot getSlot(String name) {
-        return mSlots.get(getSlotIndex(name));
+    /**
+     * Sets the icon in {@code holder} to be associated with the slot with the given
+     * {@code slotName}.
+     */
+    public void setIcon(String slotName, @NonNull StatusBarIconHolder holder) {
+        mSlots.get(findOrInsertSlot(slotName)).addHolder(holder);
     }
 
-    public int size() {
-        return mSlots.size();
+    /**
+     * Removes the icon holder that we had associated with {@code slotName}'s slot at the given
+     * {@code tag}.
+     */
+    public void removeIcon(String slotName, int tag) {
+        mSlots.get(findOrInsertSlot(slotName)).removeForTag(tag);
     }
 
-    public void setIcon(int index, @NonNull StatusBarIconHolder holder) {
-        mSlots.get(index).addHolder(holder);
+    /**
+     * Returns the icon holder currently associated with {@code slotName}'s slot at the given
+     * {@code tag}, or null if we don't have one.
+     */
+    @Nullable
+    public StatusBarIconHolder getIconHolder(String slotName, int tag) {
+        return mSlots.get(findOrInsertSlot(slotName)).getHolderForTag(tag);
     }
 
-    public void removeIcon(int index, int tag) {
-        mSlots.get(index).removeForTag(tag);
-    }
-
-    public String getSlotName(int index) {
-        return mSlots.get(index).getName();
-    }
-
-    public StatusBarIconHolder getIcon(int index, int tag) {
-        return mSlots.get(index).getHolderForTag(tag);
-    }
-
-    public int getViewIndex(int slotIndex, int tag) {
+    /**
+     * Returns the index of the icon in {@code slotName}'s slot at the given {@code tag}.
+     *
+     * Note that a single slot can have multiple icons, and this function takes that into account.
+     */
+    public int getViewIndex(String slotName, int tag) {
+        int slotIndex = findOrInsertSlot(slotName);
         int count = 0;
         for (int i = 0; i < slotIndex; i++) {
             Slot item = mSlots.get(i);
@@ -100,6 +112,25 @@ public class StatusBarIconList {
         }
     }
 
+    private int findOrInsertSlot(String slot) {
+        final int N = mSlots.size();
+        for (int i = 0; i < N; i++) {
+            Slot item = mSlots.get(i);
+            if (item.getName().equals(slot)) {
+                return i;
+            }
+        }
+        // Auto insert new items at the beginning.
+        mSlots.add(0, new Slot(slot, null));
+        return 0;
+    }
+
+
+    /**
+     * A class representing one slot in the status bar system icons view.
+     *
+     * Note that one slot can have multiple icons associated with it.
+     */
     public static class Slot {
         private final String mName;
         private StatusBarIconHolder mHolder;
