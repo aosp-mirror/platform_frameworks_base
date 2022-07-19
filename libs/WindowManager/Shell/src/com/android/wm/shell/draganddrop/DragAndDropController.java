@@ -60,6 +60,8 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
+import com.android.wm.shell.sysui.ShellController;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -68,11 +70,12 @@ import java.util.Optional;
  * Handles the global drag and drop handling for the Shell.
  */
 public class DragAndDropController implements DisplayController.OnDisplaysChangedListener,
-        View.OnDragListener {
+        View.OnDragListener, ConfigurationChangeListener {
 
     private static final String TAG = DragAndDropController.class.getSimpleName();
 
     private final Context mContext;
+    private final ShellController mShellController;
     private final DisplayController mDisplayController;
     private final DragAndDropEventLogger mLogger;
     private final IconProvider mIconProvider;
@@ -92,9 +95,14 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         void onDragStarted();
     }
 
-    public DragAndDropController(Context context, DisplayController displayController,
-            UiEventLogger uiEventLogger, IconProvider iconProvider, ShellExecutor mainExecutor) {
+    public DragAndDropController(Context context,
+            ShellController shellController,
+            DisplayController displayController,
+            UiEventLogger uiEventLogger,
+            IconProvider iconProvider,
+            ShellExecutor mainExecutor) {
         mContext = context;
+        mShellController = shellController;
         mDisplayController = displayController;
         mLogger = new DragAndDropEventLogger(uiEventLogger);
         mIconProvider = iconProvider;
@@ -109,6 +117,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
     public void initialize(Optional<SplitScreenController> splitscreen) {
         mSplitScreen = splitscreen.orElse(null);
         mDisplayController.addDisplayWindowListener(this);
+        mShellController.addConfigurationChangeListener(this);
     }
 
     /** Adds a listener to be notified of drag and drop events. */
@@ -310,13 +319,15 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         return mimeTypes;
     }
 
-    private void onThemeChange() {
+    @Override
+    public void onThemeChanged() {
         for (int i = 0; i < mDisplayDropTargets.size(); i++) {
             mDisplayDropTargets.get(i).dragLayout.onThemeChange();
         }
     }
 
-    private void onConfigChanged(Configuration newConfig) {
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
         for (int i = 0; i < mDisplayDropTargets.size(); i++) {
             mDisplayDropTargets.get(i).dragLayout.onConfigChanged(newConfig);
         }
@@ -344,19 +355,6 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
     }
 
     private class DragAndDropImpl implements DragAndDrop {
-
-        @Override
-        public void onThemeChanged() {
-            mMainExecutor.execute(() -> {
-                DragAndDropController.this.onThemeChange();
-            });
-        }
-
-        @Override
-        public void onConfigChanged(Configuration newConfig) {
-            mMainExecutor.execute(() -> {
-                DragAndDropController.this.onConfigChanged(newConfig);
-            });
-        }
+        // TODO: To be removed
     }
 }
