@@ -70,15 +70,32 @@
             android:visibility="gone"
             android:contentDescription="@string/dream_overlay_status_bar_wifi_off" />
 
-        <com.android.systemui.dreams.DreamOverlayDotImageView
-            android:id="@+id/dream_overlay_camera_mic_off"
-            android:layout_width="@dimen/dream_overlay_camera_mic_off_indicator_size"
-            android:layout_height="@dimen/dream_overlay_camera_mic_off_indicator_size"
-            android:layout_gravity="center_vertical"
+        <ImageView
+            android:id="@+id/dream_overlay_mic_off"
+            android:layout_width="@dimen/dream_overlay_grey_chip_width"
+            android:layout_height="match_parent"
             android:layout_marginEnd="@dimen/dream_overlay_status_icon_margin"
+            android:src="@drawable/dream_overlay_mic_off"
             android:visibility="gone"
-            android:contentDescription="@string/dream_overlay_status_bar_camera_mic_off"
-            app:dotColor="@color/dream_overlay_camera_mic_off_dot_color" />
+            android:contentDescription="@string/dream_overlay_status_bar_mic_off" />
+
+        <ImageView
+            android:id="@+id/dream_overlay_camera_off"
+            android:layout_width="@dimen/dream_overlay_grey_chip_width"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/dream_overlay_status_icon_margin"
+            android:src="@drawable/dream_overlay_camera_off"
+            android:visibility="gone"
+            android:contentDescription="@string/dream_overlay_status_bar_camera_off" />
+
+        <ImageView
+            android:id="@+id/dream_overlay_camera_mic_off"
+            android:layout_width="@dimen/dream_overlay_grey_chip_width"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/dream_overlay_status_icon_margin"
+            android:src="@drawable/dream_overlay_mic_and_camera_off"
+            android:visibility="gone"
+            android:contentDescription="@string/dream_overlay_status_bar_camera_mic_off" />
 
     </LinearLayout>
 </com.android.systemui.dreams.DreamOverlayStatusBarView>

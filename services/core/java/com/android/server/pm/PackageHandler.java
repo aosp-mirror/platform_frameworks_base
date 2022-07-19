@@ -62,11 +62,13 @@ import java.io.IOException;
 final class PackageHandler extends Handler {
     private final PackageManagerService mPm;
     private final InstallPackageHelper mInstallPackageHelper;
+    private final RemovePackageHelper mRemovePackageHelper;
 
     PackageHandler(Looper looper, PackageManagerService pm) {
         super(looper);
         mPm = pm;
         mInstallPackageHelper = new InstallPackageHelper(mPm);
+        mRemovePackageHelper = new RemovePackageHelper(mPm);
     }
 
     @Override
@@ -107,11 +109,9 @@ final class PackageHandler extends Handler {
                 Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "postInstall", msg.arg1);
             } break;
             case DEFERRED_NO_KILL_POST_DELETE: {
-                synchronized (mPm.mInstallLock) {
-                    InstallArgs args = (InstallArgs) msg.obj;
-                    if (args != null) {
-                        args.doPostDeleteLI(true);
-                    }
+                InstallArgs args = (InstallArgs) msg.obj;
+                if (args != null) {
+                    mRemovePackageHelper.cleanUpResources(args);
                 }
             } break;
             case DEFERRED_NO_KILL_INSTALL_OBSERVER:

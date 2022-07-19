@@ -15,6 +15,7 @@
  */
 package android.multiuser;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 
 import android.annotation.NonNull;
@@ -42,6 +43,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.perftests.utils.ShellHelper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
 
@@ -116,13 +118,14 @@ public class UserLifecycleTests {
     private boolean mHasManagedUserFeature;
     private BroadcastWaiter mBroadcastWaiter;
     private UserSwitchWaiter mUserSwitchWaiter;
+    private String mUserSwitchTimeoutMs;
 
     private final BenchmarkRunner mRunner = new BenchmarkRunner();
     @Rule
     public BenchmarkResultsReporter mReporter = new BenchmarkResultsReporter(mRunner);
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         final Context context = InstrumentationRegistry.getContext();
         mUm = UserManager.get(context);
         mAm = context.getSystemService(ActivityManager.class);
@@ -141,10 +144,16 @@ public class UserLifecycleTests {
             Log.w(TAG, "WARNING: Tests are being run from user " + mAm.getCurrentUser()
                     + " rather than the system user");
         }
+        mUserSwitchTimeoutMs = setSystemProperty("debug.usercontroller.user_switch_timeout_ms",
+                "100000");
+        if (TextUtils.isEmpty(mUserSwitchTimeoutMs)) {
+            mUserSwitchTimeoutMs = "invalid";
+        }
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
+        setSystemProperty("debug.usercontroller.user_switch_timeout_ms", mUserSwitchTimeoutMs);
         mBroadcastWaiter.close();
         for (int userId : mUsersToRemove) {
             try {
@@ -236,7 +245,7 @@ public class UserLifecycleTests {
 
     /** Tests switching to an uninitialized user. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
-    public void switchUser() throws RemoteException {
+    public void switchUser() throws Exception {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
@@ -866,5 +875,11 @@ public class UserLifecycleTests {
 
     private void attestFalse(@NonNull String message, boolean assertion) {
         attestTrue(message, !assertion);
+    }
+
+    private String setSystemProperty(String name, String value) throws Exception {
+        final String oldValue = ShellHelper.runShellCommand("getprop " + name);
+        assertEquals("", ShellHelper.runShellCommand("setprop " + name + " " + value));
+        return oldValue;
     }
 }

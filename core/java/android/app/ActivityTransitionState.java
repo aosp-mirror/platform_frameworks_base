@@ -263,6 +263,11 @@ class ActivityTransitionState {
         // After orientation change, the onResume can come in before the top Activity has
         // left, so if the Activity is not top, wait a second for the top Activity to exit.
         if (mEnterTransitionCoordinator == null || activity.isTopOfTask()) {
+            if (mEnterTransitionCoordinator != null) {
+                mEnterTransitionCoordinator.runAfterTransitionsComplete(() -> {
+                    mEnterTransitionCoordinator = null;
+                });
+            }
             restoreExitedViews();
             restoreReenteringViews();
         } else {
@@ -271,6 +276,11 @@ class ActivityTransitionState {
                 public void run() {
                     if (mEnterTransitionCoordinator == null ||
                             mEnterTransitionCoordinator.isWaitingForRemoteExit()) {
+                        if (mEnterTransitionCoordinator != null) {
+                            mEnterTransitionCoordinator.runAfterTransitionsComplete(() -> {
+                                mEnterTransitionCoordinator = null;
+                            });
+                        }
                         restoreExitedViews();
                         restoreReenteringViews();
                     } else if (mEnterTransitionCoordinator.isReturning()) {

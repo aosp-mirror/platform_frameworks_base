@@ -76,6 +76,7 @@ interface IInputMethodManager {
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);
 
+    @EnforcePermission("WRITE_SECURE_SETTINGS")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.WRITE_SECURE_SETTINGS)")
     void showInputMethodPickerFromSystem(in IInputMethodClient client,
@@ -123,6 +124,7 @@ interface IInputMethodManager {
     boolean isStylusHandwritingAvailableAsUser(int userId);
 
     /** add virtual stylus id for test Stylus handwriting session **/
+    @EnforcePermission("INJECT_EVENTS")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INJECT_EVENTS)")
     void addVirtualStylusIdForTestSession(in IInputMethodClient client);

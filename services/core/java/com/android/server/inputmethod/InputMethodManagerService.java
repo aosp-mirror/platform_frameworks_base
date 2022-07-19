@@ -3993,15 +3993,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @EnforcePermission(Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
     public void showInputMethodPickerFromSystem(IInputMethodClient client, int auxiliarySubtypeMode,
             int displayId) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(
-                    "showInputMethodPickerFromSystem requires WRITE_SECURE_SETTINGS "
-                            + "permission");
-        }
         // Always call subtype picker, because subtype picker is a superset of input method
         // picker.
         mHandler.obtainMessage(MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode, displayId)
@@ -4465,12 +4460,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * a stylus deviceId is not already registered on device.
      */
     @BinderThread
-    @RequiresPermission(Manifest.permission.INJECT_EVENTS)
+    @EnforcePermission(Manifest.permission.INJECT_EVENTS)
     @Override
     public void addVirtualStylusIdForTestSession(IInputMethodClient client) {
-        mContext.enforceCallingPermission(
-                Manifest.permission.INJECT_EVENTS,
-                "Using addVirtualStylusIdForTestSession() requires INJECT_EVENTS.");
         int uid = Binder.getCallingUid();
         synchronized (ImfLock.class) {
             if (!canInteractWithImeLocked(uid, client, "addVirtualStylusIdForTestSession")) {

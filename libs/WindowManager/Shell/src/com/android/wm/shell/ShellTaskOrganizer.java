@@ -501,7 +501,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                     || (taskInfo.topActivityType == WindowConfiguration.ACTIVITY_TYPE_HOME
                     && taskInfo.isVisible);
             final boolean focusTaskChanged = (mLastFocusedTaskInfo == null
-                    || mLastFocusedTaskInfo.taskId != taskInfo.taskId) && isFocusedOrHome;
+                    || mLastFocusedTaskInfo.taskId != taskInfo.taskId
+                    || mLastFocusedTaskInfo.getWindowingMode() != taskInfo.getWindowingMode())
+                    && isFocusedOrHome;
             if (focusTaskChanged) {
                 for (int i = 0; i < mFocusListeners.size(); i++) {
                     mFocusListeners.valueAt(i).onFocusTaskChanged(taskInfo);

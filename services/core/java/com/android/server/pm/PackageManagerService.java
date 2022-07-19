@@ -201,7 +201,6 @@ import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.ArtUtils;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.ViewCompiler;
-import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -6170,26 +6169,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             for (int i = 0; i < sz; i++) {
                 if (profileOwnerPackages.valueAt(i) != null) {
                     removeAllNonSystemPackageSuspensions(profileOwnerPackages.keyAt(i));
-                }
-            }
-        }
-
-        @Override
-        public void pruneCachedApksInApex(@NonNull List<String> apexPackageNames) {
-            if (mCacheDir == null) {
-                return;
-            }
-
-            final PackageCacher cacher = new PackageCacher(mCacheDir);
-            synchronized (mLock) {
-                final Computer snapshot = snapshot();
-                for (int i = 0, size = apexPackageNames.size(); i < size; i++) {
-                    final List<String> apkNames =
-                            mApexManager.getApksInApex(apexPackageNames.get(i));
-                    for (int j = 0, apksInApex = apkNames.size(); j < apksInApex; j++) {
-                        final AndroidPackage pkg = snapshot.getPackage(apkNames.get(j));
-                        cacher.cleanCachedResult(new File(pkg.getPath()));
-                    }
                 }
             }
         }

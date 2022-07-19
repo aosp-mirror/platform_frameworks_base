@@ -556,11 +556,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         }
 
         @Override
-        public void onClockVisibilityChanged() {
-            adjustStatusBarLocked();
-        }
-
-        @Override
         public void onDeviceProvisioned() {
             sendUserPresentBroadcast();
             synchronized (KeyguardViewMediator.this) {
@@ -1193,6 +1188,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             mSystemReady = true;
             doKeyguardLocked(null);
             mUpdateMonitor.registerCallback(mUpdateCallback);
+            adjustStatusBarLocked();
             mDreamOverlayStateController.addCallback(mDreamOverlayStateCallback);
         }
         // Most services aren't available until the system reaches the ready state, so we

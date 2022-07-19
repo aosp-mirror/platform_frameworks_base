@@ -88,6 +88,7 @@ final class AppDataHelper {
      * <p>
      * <em>Note: To avoid a deadlock, do not call this method with {@code mLock} lock held</em>
      */
+    @GuardedBy("mPm.mInstallLock")
     public void prepareAppDataAfterInstallLIF(AndroidPackage pkg) {
         prepareAppDataPostCommitLIF(pkg, 0 /* previousAppId */);
     }
@@ -97,6 +98,7 @@ final class AppDataHelper {
      * {@link #prepareAppData(Installer.Batch, AndroidPackage, int, int, int)}
      * @see #prepareAppDataAfterInstallLIF(AndroidPackage)
      */
+    @GuardedBy("mPm.mInstallLock")
     public void prepareAppDataPostCommitLIF(AndroidPackage pkg, int previousAppId) {
         final PackageSetting ps;
         synchronized (mPm.mLock) {

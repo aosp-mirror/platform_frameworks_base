@@ -379,9 +379,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         // Clean up orphaned staging directories
         for (File stage : stagingDirsToRemove) {
             Slog.w(TAG, "Deleting orphan stage " + stage);
-            synchronized (mPm.mInstallLock) {
-                removePackageHelper.removeCodePathLI(stage);
-            }
+            removePackageHelper.removeCodePath(stage);
         }
     }
 

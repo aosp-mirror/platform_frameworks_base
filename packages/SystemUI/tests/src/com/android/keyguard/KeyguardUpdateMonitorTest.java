@@ -1109,8 +1109,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // THEN face unlock is not running b/c status bar state changes don't cause biometric
         // listening state to update
-        assertThat(mKeyguardUpdateMonitor.isFaceUnlockRunning(
-                KeyguardUpdateMonitor.getCurrentUser())).isEqualTo(false);
+        assertThat(mKeyguardUpdateMonitor.isFaceDetectionRunning()).isEqualTo(false);
 
         // WHEN biometric listening state is updated
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);

@@ -39,6 +39,10 @@ import com.android.server.testutils.spy
 import com.android.server.testutils.whenever
 import com.android.server.utils.WatchedLongSparseArray
 import com.google.common.truth.Truth.assertThat
+import java.io.File
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import libcore.util.HexEncoding
 import org.junit.Before
 import org.junit.Rule
@@ -51,10 +55,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import java.io.File
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 @RunWith(JUnit4::class)
 class SharedLibrariesImplTest {
@@ -186,7 +186,7 @@ class SharedLibrariesImplTest {
         val staticInfo = mSharedLibrariesImpl
             .getSharedLibraryInfo(STATIC_LIB_NAME, STATIC_LIB_VERSION)!!
 
-        mSharedLibrariesImpl.removeSharedLibraryLPw(STATIC_LIB_NAME, STATIC_LIB_VERSION)
+        mSharedLibrariesImpl.removeSharedLibrary(STATIC_LIB_NAME, STATIC_LIB_VERSION)
 
         assertThat(mSharedLibrariesImpl.getSharedLibraryInfos(STATIC_LIB_NAME)).isNull()
         assertThat(mSharedLibrariesImpl
@@ -208,7 +208,7 @@ class SharedLibrariesImplTest {
             staticLibrary = STATIC_LIB_NAME, staticLibraryVersion = 10L)
 
         val latestInfo =
-            mSharedLibrariesImpl.getLatestStaticSharedLibraVersionLPr(pair.second)!!
+            mSharedLibrariesImpl.getLatestStaticSharedLibraVersion(pair.second)!!
 
         assertThat(latestInfo).isNotNull()
         assertThat(latestInfo.name).isEqualTo(STATIC_LIB_NAME)
@@ -237,7 +237,7 @@ class SharedLibrariesImplTest {
         testPackageSetting.setPkgStateLibraryFiles(listOf())
         assertThat(testPackageSetting.usesLibraryFiles).isEmpty()
 
-        mSharedLibrariesImpl.updateSharedLibrariesLPw(testPackageSetting.pkg, testPackageSetting,
+        mSharedLibrariesImpl.updateSharedLibraries(testPackageSetting.pkg, testPackageSetting,
                 null /* changingLib */, null /* changingLibSetting */, mExistingPackages)
 
         assertThat(testPackageSetting.usesLibraryFiles).hasSize(1)
@@ -250,7 +250,7 @@ class SharedLibrariesImplTest {
         testPackageSetting.setPkgStateLibraryFiles(listOf())
         assertThat(testPackageSetting.usesLibraryFiles).isEmpty()
 
-        mSharedLibrariesImpl.updateSharedLibrariesLPw(testPackageSetting.pkg, testPackageSetting,
+        mSharedLibrariesImpl.updateSharedLibraries(testPackageSetting.pkg, testPackageSetting,
                 null /* changingLib */, null /* changingLibSetting */, mExistingPackages)
 
         assertThat(testPackageSetting.usesLibraryFiles).hasSize(2)
@@ -264,7 +264,7 @@ class SharedLibrariesImplTest {
         testPackageSetting.setPkgStateLibraryFiles(listOf())
         assertThat(testPackageSetting.usesLibraryFiles).isEmpty()
 
-        mSharedLibrariesImpl.updateSharedLibrariesLPw(testPackageSetting.pkg, testPackageSetting,
+        mSharedLibrariesImpl.updateSharedLibraries(testPackageSetting.pkg, testPackageSetting,
                 null /* changingLib */, null /* changingLibSetting */, mExistingPackages)
 
         assertThat(testPackageSetting.usesLibraryFiles).hasSize(3)
