@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
+
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DELAY;
@@ -30,7 +31,6 @@ import android.util.MathUtils;
 import android.util.Property;
 import android.view.ContextThemeWrapper;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 
 import androidx.annotation.VisibleForTesting;
@@ -40,6 +40,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.statusbar.AlphaOptimizedFrameLayout;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.stack.AnimationFilter;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -53,7 +54,7 @@ import java.util.function.Consumer;
  * A container for notification icons. It handles overflowing icons properly and positions them
  * correctly on the screen.
  */
-public class NotificationIconContainer extends ViewGroup {
+public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     /**
      * A float value indicating how much before the overflow start the icons should transform into
      * a dot. A value of 0 means that they are exactly at the end and a value of 1 means it starts
@@ -228,31 +229,6 @@ public class NotificationIconContainer extends ViewGroup {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         initDimens();
-    }
-
-    @Override
-    public boolean hasOverlappingRendering() {
-        // Does the same as "AlphaOptimizedFrameLayout".
-        return false;
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int childCount = getChildCount();
-        final int maxVisibleIcons = getMaxVisibleIcons(childCount);
-        final int width = MeasureSpec.getSize(widthMeasureSpec);
-        final int childWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.UNSPECIFIED);
-        int totalWidth = (int) (getActualPaddingStart() + getActualPaddingEnd());
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            measureChild(child, childWidthSpec, heightMeasureSpec);
-            if (i <= maxVisibleIcons) {
-                totalWidth += child.getMeasuredWidth();
-            }
-        }
-        final int measuredWidth = resolveSize(totalWidth, widthMeasureSpec);
-        final int measuredHeight = MeasureSpec.getSize(heightMeasureSpec);
-        setMeasuredDimension(measuredWidth, measuredHeight);
     }
 
     @Override
@@ -432,7 +408,8 @@ public class NotificationIconContainer extends ViewGroup {
         float translationX = getActualPaddingStart();
         int firstOverflowIndex = -1;
         int childCount = getChildCount();
-        int maxVisibleIcons = getMaxVisibleIcons(childCount);
+        int maxVisibleIcons = mOnLockScreen ? MAX_ICONS_ON_AOD :
+                mIsStaticLayout ? MAX_STATIC_ICONS : childCount;
         float layoutEnd = getLayoutEnd();
         mVisualOverflowStart = 0;
         mFirstVisibleIconState = null;
@@ -514,11 +491,6 @@ public class NotificationIconContainer extends ViewGroup {
                 iconState.visibleState = StatusBarIconView.STATE_ICON;
             }
         }
-    }
-
-    private int getMaxVisibleIcons(int childCount) {
-        return mOnLockScreen ? MAX_ICONS_ON_AOD :
-                mIsStaticLayout ? MAX_STATIC_ICONS : childCount;
     }
 
     private float getLayoutEnd() {
