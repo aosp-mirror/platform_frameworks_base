@@ -82,9 +82,6 @@ interface IInputMethodManager {
     void showInputMethodPickerFromSystem(in IInputMethodClient client,
             int auxiliarySubtypeMode, int displayId);
 
-    void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client,
-            @nullable String topId);
-
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.TEST_INPUT_METHOD)")
     boolean isInputMethodPickerShownForTest();
