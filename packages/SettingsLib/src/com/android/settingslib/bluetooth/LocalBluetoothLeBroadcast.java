@@ -87,9 +87,11 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             if (DEBUG) {
                 Log.d(TAG, "Bluetooth service connected");
             }
-            mService = (BluetoothLeBroadcast) proxy;
-            mIsProfileReady = true;
-            registerServiceCallBack(mExecutor, mBroadcastCallback);
+            if(!mIsProfileReady) {
+                mService = (BluetoothLeBroadcast) proxy;
+                mIsProfileReady = true;
+                registerServiceCallBack(mExecutor, mBroadcastCallback);
+            }
         }
 
         @Override
@@ -97,8 +99,10 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             if (DEBUG) {
                 Log.d(TAG, "Bluetooth service disconnected");
             }
-            mIsProfileReady = false;
-            unregisterServiceCallBack(mBroadcastCallback);
+            if(mIsProfileReady) {
+                mIsProfileReady = false;
+                unregisterServiceCallBack(mBroadcastCallback);
+            }
         }
     };
 
