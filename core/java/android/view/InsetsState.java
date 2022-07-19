@@ -349,6 +349,20 @@ public class InsetsState implements Parcelable {
         return insets;
     }
 
+    // TODO: Remove this once the task bar is treated as navigation bar.
+    public Insets calculateInsetsWithInternalTypes(Rect frame, @InternalInsetsType int[] types,
+            boolean ignoreVisibility) {
+        Insets insets = Insets.NONE;
+        for (int i = types.length - 1; i >= 0; i--) {
+            InsetsSource source = mSources[types[i]];
+            if (source == null) {
+                continue;
+            }
+            insets = Insets.max(source.calculateInsets(frame, ignoreVisibility), insets);
+        }
+        return insets;
+    }
+
     public Insets calculateInsets(Rect frame, @InsetsType int types,
             InsetsVisibilities overrideVisibilities) {
         Insets insets = Insets.NONE;

@@ -93,7 +93,6 @@ import static android.view.WindowManager.fixScale;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
@@ -322,6 +321,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
+import com.android.server.wm.utils.WmDisplayCutout;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -1870,7 +1870,8 @@ public class WindowManagerService extends IWindowManager.Stub
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "addWindow: New client %s"
                     + ": window=%s Callers=%s", client.asBinder(), win, Debug.getCallers(5));
 
-            if (win.isVisibleRequestedOrAdding() && displayContent.updateOrientation()) {
+            if ((win.isVisibleRequestedOrAdding() && displayContent.updateOrientation())
+                    || win.providesNonDecorInsets()) {
                 displayContent.sendNewConfiguration();
             }
 
@@ -6383,27 +6384,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * Used by ActivityManager to determine where to position an app with aspect ratio shorter then
-     * the screen is.
-     * @see DisplayPolicy#getNavBarPosition()
-     */
-    @Override
-    @WindowManagerPolicy.NavigationBarPosition
-    public int getNavBarPosition(int displayId) {
-        synchronized (mGlobalLock) {
-            // Perform layout if it was scheduled before to make sure that we get correct nav bar
-            // position when doing rotations.
-            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            if (displayContent == null) {
-                Slog.w(TAG, "getNavBarPosition with invalid displayId=" + displayId
-                        + " callers=" + Debug.getCallers(3));
-                return NAV_BAR_INVALID;
-            }
-            return displayContent.getDisplayPolicy().getNavBarPosition();
-        }
-    }
-
     @Override
     public void createInputConsumer(IBinder token, String name, int displayId,
             InputChannel inputChannel) {
@@ -7242,7 +7222,9 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent dc = mRoot.getDisplayContent(displayId);
         if (dc != null) {
             final DisplayInfo di = dc.getDisplayInfo();
-            dc.getDisplayPolicy().getStableInsetsLw(di.rotation, di.displayCutout, outInsets);
+            final WmDisplayCutout cutout = dc.calculateDisplayCutoutForRotation(di.rotation);
+            dc.getDisplayPolicy().getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
+                    cutout, outInsets);
         }
     }
 

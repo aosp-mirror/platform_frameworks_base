@@ -98,6 +98,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.am.HostingRecord;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -2211,11 +2212,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mTmpBounds.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
 
         final DisplayPolicy policy = rootTask.mDisplayContent.getDisplayPolicy();
-        policy.getNonDecorInsetsLw(displayInfo.rotation,
-                displayInfo.displayCutout, mTmpInsets);
+        final WmDisplayCutout cutout =
+                rootTask.mDisplayContent.calculateDisplayCutoutForRotation(displayInfo.rotation);
+        final DisplayFrames displayFrames = policy.getSimulatedDisplayFrames(displayInfo.rotation,
+                displayInfo.logicalWidth, displayInfo.logicalHeight, cutout);
+        policy.getNonDecorInsetsWithSimulatedFrame(displayFrames, mTmpInsets);
         intersectWithInsetsIfFits(outNonDecorBounds, mTmpBounds, mTmpInsets);
-
-        policy.convertNonDecorInsetsToStableInsets(mTmpInsets, displayInfo.rotation);
+        policy.getStableInsetsWithSimulatedFrame(displayFrames, mTmpInsets);
         intersectWithInsetsIfFits(outStableBounds, mTmpBounds, mTmpInsets);
     }
 
