@@ -820,6 +820,33 @@ public interface WindowManager extends ViewManager {
     public static final String PARCEL_KEY_SHORTCUTS_ARRAY = "shortcuts_array";
 
     /**
+     * Application level {@link android.content.pm.PackageManager.Property} tag for developers to
+     * provide consent for their app to allow OEMs to manually provide ActivityEmbedding split
+     * rule configuration on behalf of the app.
+     *
+     * <p>If {@code true}, the system CAN override the windowing behaviors for the app, such as
+     * showing some activities side-by-side. In this case, it will report that ActivityEmbedding
+     * APIs are disabled for the app to avoid conflict.
+     *
+     * <p>If {@code false}, the system MUST NOT override the window behavior for the app. It should
+     * be used if the app wants to provide their own ActivityEmbedding split rules, or if the app
+     * wants to opt-out of system overrides for any other reason.
+     *
+     * <p>Default is {@code false}.
+     *
+     * <p>Example usage:
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_ACTIVITY_EMBEDDING_ALLOW_SYSTEM_OVERRIDE"
+     *     android:value="true|false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     */
+    String PROPERTY_ACTIVITY_EMBEDDING_ALLOW_SYSTEM_OVERRIDE =
+            "android.window.PROPERTY_ACTIVITY_EMBEDDING_ALLOW_SYSTEM_OVERRIDE";
+
+    /**
      * Request for keyboard shortcuts to be retrieved asynchronously.
      *
      * @param receiver The callback to be triggered when the result is ready.
