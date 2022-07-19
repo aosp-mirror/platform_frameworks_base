@@ -335,12 +335,18 @@ public class AlarmManagerService extends SystemService {
             "REORDER_ALARMS_FOR_TARE",
     });
 
-    BroadcastOptions mOptsWithFgs = BroadcastOptions.makeBasic();
-    BroadcastOptions mOptsWithFgsForAlarmClock = BroadcastOptions.makeBasic();
-    BroadcastOptions mOptsWithoutFgs = BroadcastOptions.makeBasic();
-    BroadcastOptions mOptsTimeBroadcast = BroadcastOptions.makeBasic();
+    BroadcastOptions mOptsWithFgs = makeBasicAlarmBroadcastOptions();
+    BroadcastOptions mOptsWithFgsForAlarmClock = makeBasicAlarmBroadcastOptions();
+    BroadcastOptions mOptsWithoutFgs = makeBasicAlarmBroadcastOptions();
+    BroadcastOptions mOptsTimeBroadcast = makeBasicAlarmBroadcastOptions();
     ActivityOptions mActivityOptsRestrictBal = ActivityOptions.makeBasic();
-    BroadcastOptions mBroadcastOptsRestrictBal = BroadcastOptions.makeBasic();
+    BroadcastOptions mBroadcastOptsRestrictBal = makeBasicAlarmBroadcastOptions();
+
+    private static BroadcastOptions makeBasicAlarmBroadcastOptions() {
+        final BroadcastOptions b = BroadcastOptions.makeBasic();
+        b.setAlarmBroadcast(true);
+        return b;
+    }
 
     // TODO(b/172085676): Move inside alarm store.
     private final SparseArray<AlarmManager.AlarmClockInfo> mNextAlarmClockForUser =
