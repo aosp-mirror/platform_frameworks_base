@@ -128,6 +128,10 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.domain.usecase.SetClockPositionUseCase;
+import com.android.systemui.keyguard.domain.usecase.SetKeyguardBottomAreaAlphaUseCase;
+import com.android.systemui.keyguard.domain.usecase.SetKeyguardBottomAreaAnimateDozingTransitionsUseCase;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
@@ -702,6 +706,12 @@ public final class NotificationPanelViewController extends PanelViewController {
     };
 
     private final CameraGestureHelper mCameraGestureHelper;
+    private final Provider<KeyguardBottomAreaViewModel> mKeyguardBottomAreaViewModelProvider;
+    private final Provider<SetClockPositionUseCase> mSetClockPositionUseCaseProvider;
+    private final Provider<SetKeyguardBottomAreaAlphaUseCase>
+            mSetKeyguardBottomAreaAlphaUseCaseProvider;
+    private final Provider<SetKeyguardBottomAreaAnimateDozingTransitionsUseCase>
+            mSetKeyguardBottomAreaAnimateDozingTransitionsUseCaseProvider;
 
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
@@ -772,7 +782,12 @@ public final class NotificationPanelViewController extends PanelViewController {
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             ShadeTransitionController shadeTransitionController,
             SystemClock systemClock,
-            CameraGestureHelper cameraGestureHelper) {
+            CameraGestureHelper cameraGestureHelper,
+            Provider<KeyguardBottomAreaViewModel> keyguardBottomAreaViewModelProvider,
+            Provider<SetClockPositionUseCase> setClockPositionUseCaseProvider,
+            Provider<SetKeyguardBottomAreaAlphaUseCase> setKeyguardBottomAreaAlphaUseCaseProvider,
+            Provider<SetKeyguardBottomAreaAnimateDozingTransitionsUseCase>
+                    setKeyguardBottomAreaAnimateDozingTransitionsUseCaseProvider) {
         super(view,
                 falsingManager,
                 dozeLog,
@@ -902,6 +917,7 @@ public final class NotificationPanelViewController extends PanelViewController {
 
         mQsFrameTranslateController = qsFrameTranslateController;
         updateUserSwitcherFlags();
+        mKeyguardBottomAreaViewModelProvider = keyguardBottomAreaViewModelProvider;
         onFinishInflate();
         keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
@@ -955,6 +971,10 @@ public final class NotificationPanelViewController extends PanelViewController {
                     }
                 });
         mCameraGestureHelper = cameraGestureHelper;
+        mSetClockPositionUseCaseProvider = setClockPositionUseCaseProvider;
+        mSetKeyguardBottomAreaAlphaUseCaseProvider = setKeyguardBottomAreaAlphaUseCaseProvider;
+        mSetKeyguardBottomAreaAnimateDozingTransitionsUseCaseProvider =
+                setKeyguardBottomAreaAnimateDozingTransitionsUseCaseProvider;
     }
 
     @VisibleForTesting
@@ -1286,11 +1306,17 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     private void initBottomArea() {
-        mKeyguardBottomArea.init(
-                mFalsingManager,
-                mQuickAccessWalletController,
-                mControlsComponent,
-                mQRCodeScannerController);
+        if (mFeatureFlags.isEnabled(Flags.MODERN_BOTTOM_AREA)) {
+            mKeyguardBottomArea.init(mKeyguardBottomAreaViewModelProvider.get(), mFalsingManager);
+        } else {
+            // TODO(b/235403546): remove this method call when the new implementation is complete
+            //  and these are not needed.
+            mKeyguardBottomArea.init(
+                    mFalsingManager,
+                    mQuickAccessWalletController,
+                    mControlsComponent,
+                    mQRCodeScannerController);
+        }
     }
 
     @VisibleForTesting
@@ -1466,6 +1492,8 @@ public final class NotificationPanelViewController extends PanelViewController {
                 mKeyguardStatusViewController.getClockBottom(mStatusBarHeaderHeightKeyguard),
                 mKeyguardStatusViewController.isClockTopAligned());
         mClockPositionAlgorithm.run(mClockPositionResult);
+        mSetClockPositionUseCaseProvider.get().invoke(
+                mClockPositionResult.clockX, mClockPositionResult.clockY);
         boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
         boolean animateClock = (animate || mAnimateNextPositionUpdate) && shouldAnimateClockChange;
         mKeyguardStatusViewController.updatePosition(
@@ -3232,6 +3260,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         float alpha = Math.min(expansionAlpha, 1 - computeQsExpansionFraction());
         alpha *= mBottomAreaShadeAlpha;
         mKeyguardBottomArea.setComponentAlphas(alpha);
+        mSetKeyguardBottomAreaAlphaUseCaseProvider.get().invoke(alpha);
         mLockIconViewController.setAlpha(alpha);
     }
 
@@ -3431,6 +3460,7 @@ public final class NotificationPanelViewController extends PanelViewController {
 
     private void updateDozingVisibilities(boolean animate) {
         mKeyguardBottomArea.setDozing(mDozing, animate);
+        mSetKeyguardBottomAreaAnimateDozingTransitionsUseCaseProvider.get().invoke(animate);
         if (!mDozing && animate) {
             mKeyguardStatusBarViewController.animateKeyguardStatusBarIn();
         }
@@ -3733,6 +3763,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         mDozing = dozing;
         mNotificationStackScrollLayoutController.setDozing(mDozing, animate, wakeUpTouchLocation);
         mKeyguardBottomArea.setDozing(mDozing, animate);
+        mSetKeyguardBottomAreaAnimateDozingTransitionsUseCaseProvider.get().invoke(animate);
         mKeyguardStatusBarViewController.setDozing(mDozing);
 
         if (dozing) {
