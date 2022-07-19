@@ -734,10 +734,10 @@ public final class JobServiceContext implements ServiceConnection {
     @GuardedBy("mLock")
     private void doCancelLocked(@JobParameters.StopReason int stopReasonCode,
             int internalStopReasonCode, @Nullable String debugReason) {
-        if (mVerb == VERB_FINISHED) {
+        if (mVerb == VERB_FINISHED || mVerb == VERB_STOPPING) {
             if (DEBUG) {
                 Slog.d(TAG,
-                        "Trying to process cancel for torn-down context, ignoring.");
+                        "Too late to process cancel for context (verb=" + mVerb + "), ignoring.");
             }
             return;
         }
