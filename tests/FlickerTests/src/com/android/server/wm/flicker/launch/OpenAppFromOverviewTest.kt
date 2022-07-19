@@ -110,33 +110,12 @@ open class OpenAppFromOverviewTest(
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
     override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
 
     /** {@inheritDoc} */
     @Presubmit
     @Test
     override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appWindowReplacesLauncherAsTopWindow() =
-        super.appWindowReplacesLauncherAsTopWindow()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
 
     companion object {
         /**
