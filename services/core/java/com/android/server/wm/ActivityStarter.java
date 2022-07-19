@@ -724,13 +724,15 @@ class ActivityStarter {
                 // used here because it may be cleared in setTargetRootTaskIfNeeded.
                 final ActivityOptions originalOptions = mRequest.activityOptions != null
                         ? mRequest.activityOptions.getOriginalOptions() : null;
+                // Only track the launch time of activity that will be resumed.
+                final ActivityRecord launchingRecord = mDoResume ? mLastStartActivityRecord : null;
                 // If the new record is the one that started, a new activity has created.
-                final boolean newActivityCreated = mStartActivity == mLastStartActivityRecord;
+                final boolean newActivityCreated = mStartActivity == launchingRecord;
                 // Notify ActivityMetricsLogger that the activity has launched.
                 // ActivityMetricsLogger will then wait for the windows to be drawn and populate
                 // WaitResult.
                 mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState, res,
-                        newActivityCreated, mLastStartActivityRecord, originalOptions);
+                        newActivityCreated, launchingRecord, originalOptions);
                 if (mRequest.waitResult != null) {
                     mRequest.waitResult.result = res;
                     res = waitResultIfNeeded(mRequest.waitResult, mLastStartActivityRecord,
@@ -1214,7 +1216,7 @@ class ActivityStarter {
         }
 
         mLastStartActivityResult = startActivityUnchecked(r, sourceRecord, voiceSession,
-                request.voiceInteractor, startFlags, true /* doResume */, checkedOptions,
+                request.voiceInteractor, startFlags, checkedOptions,
                 inTask, inTaskFragment, restrictedBgActivity, intentGrants);
 
         if (request.outActivity != null) {
@@ -1640,7 +1642,7 @@ class ActivityStarter {
      */
     private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            int startFlags, boolean doResume, ActivityOptions options, Task inTask,
+            int startFlags, ActivityOptions options, Task inTask,
             TaskFragment inTaskFragment, boolean restrictedBgActivity,
             NeededUriGrants intentGrants) {
         int result = START_CANCELED;
@@ -1664,7 +1666,7 @@ class ActivityStarter {
             try {
                 Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
                 result = startActivityInner(r, sourceRecord, voiceSession, voiceInteractor,
-                        startFlags, doResume, options, inTask, inTaskFragment, restrictedBgActivity,
+                        startFlags, options, inTask, inTaskFragment, restrictedBgActivity,
                         intentGrants);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
@@ -1808,10 +1810,10 @@ class ActivityStarter {
     @VisibleForTesting
     int startActivityInner(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            int startFlags, boolean doResume, ActivityOptions options, Task inTask,
+            int startFlags, ActivityOptions options, Task inTask,
             TaskFragment inTaskFragment, boolean restrictedBgActivity,
             NeededUriGrants intentGrants) {
-        setInitialState(r, options, inTask, inTaskFragment, doResume, startFlags, sourceRecord,
+        setInitialState(r, options, inTask, inTaskFragment, startFlags, sourceRecord,
                 voiceSession, voiceInteractor, restrictedBgActivity);
 
         computeLaunchingTaskFlags();
@@ -2429,7 +2431,7 @@ class ActivityStarter {
     }
 
     private void setInitialState(ActivityRecord r, ActivityOptions options, Task inTask,
-            TaskFragment inTaskFragment, boolean doResume, int startFlags,
+            TaskFragment inTaskFragment, int startFlags,
             ActivityRecord sourceRecord, IVoiceInteractionSession voiceSession,
             IVoiceInteractor voiceInteractor, boolean restrictedBgActivity) {
         reset(false /* clearRequest */);
@@ -2494,10 +2496,11 @@ class ActivityStarter {
         // If the caller has asked not to resume at this point, we make note
         // of this in the record so that we can skip it when trying to find
         // the top running activity.
-        mDoResume = doResume;
-        if (!doResume || !r.showToCurrentUser() || mLaunchTaskBehind) {
+        if (!r.showToCurrentUser() || mLaunchTaskBehind) {
             r.delayedResume = true;
             mDoResume = false;
+        } else {
+            mDoResume = true;
         }
 
         if (mOptions != null) {
