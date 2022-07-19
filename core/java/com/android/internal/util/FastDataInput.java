@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Optimized implementation of {@link DataInput} which buffers data in memory
@@ -41,13 +42,18 @@ import java.util.Objects;
 public class FastDataInput implements DataInput, Closeable {
     private static final int MAX_UNSIGNED_SHORT = 65_535;
 
+    private static final int DEFAULT_BUFFER_SIZE = 32_768;
+
+    private static AtomicReference<FastDataInput> sInCache = new AtomicReference<>();
+
     private final VMRuntime mRuntime;
-    private final InputStream mIn;
 
     private final byte[] mBuffer;
     private final long mBufferPtr;
     private final int mBufferCap;
+    private final boolean mUse4ByteSequence;
 
+    private InputStream mIn;
     private int mBufferPos;
     private int mBufferLim;
 
@@ -57,7 +63,18 @@ public class FastDataInput implements DataInput, Closeable {
     private int mStringRefCount = 0;
     private String[] mStringRefs = new String[32];
 
+    /**
+     * @deprecated callers must specify {@code use4ByteSequence} so they make a
+     *             clear choice about working around a long-standing ART bug, as
+     *             described by the {@code kUtfUse4ByteSequence} comments in
+     *             {@code art/runtime/jni/jni_internal.cc}.
+     */
+    @Deprecated
     public FastDataInput(@NonNull InputStream in, int bufferSize) {
+        this(in, bufferSize, true /* use4ByteSequence */);
+    }
+
+    public FastDataInput(@NonNull InputStream in, int bufferSize, boolean use4ByteSequence) {
         mRuntime = VMRuntime.getRuntime();
         mIn = Objects.requireNonNull(in);
         if (bufferSize < 8) {
@@ -67,6 +84,64 @@ public class FastDataInput implements DataInput, Closeable {
         mBuffer = (byte[]) mRuntime.newNonMovableArray(byte.class, bufferSize);
         mBufferPtr = mRuntime.addressOf(mBuffer);
         mBufferCap = mBuffer.length;
+        mUse4ByteSequence = use4ByteSequence;
+    }
+
+    /**
+     * Obtain a {@link FastDataInput} configured with the given
+     * {@link InputStream} and which encodes large code-points using 3-byte
+     * sequences.
+     * <p>
+     * This <em>is</em> compatible with the {@link DataInput} API contract,
+     * which specifies that large code-points must be encoded with 3-byte
+     * sequences.
+     */
+    public static FastDataInput obtainUsing3ByteSequences(@NonNull InputStream in) {
+        return new FastDataInput(in, DEFAULT_BUFFER_SIZE, false /* use4ByteSequence */);
+    }
+
+    /**
+     * Obtain a {@link FastDataInput} configured with the given
+     * {@link InputStream} and which decodes large code-points using 4-byte
+     * sequences.
+     * <p>
+     * This <em>is not</em> compatible with the {@link DataInput} API contract,
+     * which specifies that large code-points must be encoded with 3-byte
+     * sequences.
+     */
+    public static FastDataInput obtainUsing4ByteSequences(@NonNull InputStream in) {
+        FastDataInput instance = sInCache.getAndSet(null);
+        if (instance != null) {
+            instance.setInput(in);
+            return instance;
+        }
+        return new FastDataInput(in, DEFAULT_BUFFER_SIZE, true /* use4ByteSequence */);
+    }
+
+    /**
+     * Release a {@link FastDataInput} to potentially be recycled. You must not
+     * interact with the object after releasing it.
+     */
+    public void release() {
+        mIn = null;
+        mBufferPos = 0;
+        mBufferLim = 0;
+        mStringRefCount = 0;
+
+        if (mBufferCap == DEFAULT_BUFFER_SIZE && mUse4ByteSequence) {
+            // Try to return to the cache.
+            sInCache.compareAndSet(null, this);
+        }
+    }
+
+    /**
+     * Re-initializes the object for the new input.
+     */
+    private void setInput(@NonNull InputStream in) {
+        mIn = Objects.requireNonNull(in);
+        mBufferPos = 0;
+        mBufferLim = 0;
+        mStringRefCount = 0;
     }
 
     private void fill(int need) throws IOException {
@@ -90,6 +165,7 @@ public class FastDataInput implements DataInput, Closeable {
     @Override
     public void close() throws IOException {
         mIn.close();
+        release();
     }
 
     @Override
@@ -126,6 +202,14 @@ public class FastDataInput implements DataInput, Closeable {
 
     @Override
     public String readUTF() throws IOException {
+        if (mUse4ByteSequence) {
+            return readUTFUsing4ByteSequences();
+        } else {
+            return readUTFUsing3ByteSequences();
+        }
+    }
+
+    private String readUTFUsing4ByteSequences() throws IOException {
         // Attempt to read directly from buffer space if there's enough room,
         // otherwise fall back to chunking into place
         final int len = readUnsignedShort();
@@ -138,6 +222,22 @@ public class FastDataInput implements DataInput, Closeable {
             final byte[] tmp = (byte[]) mRuntime.newNonMovableArray(byte.class, len + 1);
             readFully(tmp, 0, len);
             return CharsetUtils.fromModifiedUtf8Bytes(mRuntime.addressOf(tmp), 0, len);
+        }
+    }
+
+    private String readUTFUsing3ByteSequences() throws IOException {
+        // Attempt to read directly from buffer space if there's enough room,
+        // otherwise fall back to chunking into place
+        final int len = readUnsignedShort();
+        if (mBufferCap > len) {
+            if (mBufferLim - mBufferPos < len) fill(len);
+            final String res = ModifiedUtf8.decode(mBuffer, new char[len], mBufferPos, len);
+            mBufferPos += len;
+            return res;
+        } else {
+            final byte[] tmp = (byte[]) mRuntime.newNonMovableArray(byte.class, len + 1);
+            readFully(tmp, 0, len);
+            return ModifiedUtf8.decode(tmp, new char[len], 0, len);
         }
     }
 
