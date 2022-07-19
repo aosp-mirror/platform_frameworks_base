@@ -20,17 +20,19 @@
 #include <minikin/FontCollection.h>
 #include <minikin/FontFamily.h>
 #include <minikin/FontFileParser.h>
+#include <minikin/LocaleList.h>
 #include <minikin/SystemFonts.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
+
+#include <mutex>
+#include <unordered_map>
+
 #include "FontUtils.h"
 #include "GraphicsJNI.h"
 #include "SkData.h"
 #include "SkTypeface.h"
 #include "fonts/Font.h"
-
-#include <mutex>
-#include <unordered_map>
 
 #ifdef __ANDROID__
 #include <sys/stat.h>
@@ -380,6 +382,12 @@ static void Typeface_addFontCollection(CRITICAL_JNI_PARAMS_COMMA jlong faceHandl
     minikin::SystemFonts::addFontMap(std::move(collection));
 }
 
+// Fast Native
+static void Typeface_registerLocaleList(JNIEnv* env, jobject, jstring jLocales) {
+    ScopedUtfChars locales(env, jLocales);
+    minikin::registerLocaleList(locales.c_str());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gTypefaceMethods[] = {
@@ -405,6 +413,7 @@ static const JNINativeMethod gTypefaceMethods[] = {
         {"nativeGetFamily", "(JI)J", (void*)Typeface_getFamily},
         {"nativeWarmUpCache", "(Ljava/lang/String;)V", (void*)Typeface_warmUpCache},
         {"nativeAddFontCollections", "(J)V", (void*)Typeface_addFontCollection},
+        {"nativeRegisterLocaleList", "(Ljava/lang/String;)V", (void*)Typeface_registerLocaleList},
 };
 
 int register_android_graphics_Typeface(JNIEnv* env)
