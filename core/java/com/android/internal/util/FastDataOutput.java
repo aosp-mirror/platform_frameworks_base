@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class FastDataOutput implements DataOutput, Flushable, Closeable {
     private static final int MAX_UNSIGNED_SHORT = 65_535;
 
-    private static final int BUFFER_SIZE = 32_768;
+    private static final int DEFAULT_BUFFER_SIZE = 32_768;
 
     private static AtomicReference<FastDataOutput> sOutCache = new AtomicReference<>();
 
@@ -51,6 +51,7 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
     private final byte[] mBuffer;
     private final long mBufferPtr;
     private final int mBufferCap;
+    private final boolean mUse4ByteSequence;
 
     private OutputStream mOut;
     private int mBufferPos;
@@ -60,7 +61,18 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
      */
     private final HashMap<String, Short> mStringRefs = new HashMap<>();
 
+    /**
+     * @deprecated callers must specify {@code use4ByteSequence} so they make a
+     *             clear choice about working around a long-standing ART bug, as
+     *             described by the {@code kUtfUse4ByteSequence} comments in
+     *             {@code art/runtime/jni/jni_internal.cc}.
+     */
+    @Deprecated
     public FastDataOutput(@NonNull OutputStream out, int bufferSize) {
+        this(out, bufferSize, true /* use4ByteSequence */);
+    }
+
+    public FastDataOutput(@NonNull OutputStream out, int bufferSize, boolean use4ByteSequence) {
         mRuntime = VMRuntime.getRuntime();
         if (bufferSize < 8) {
             throw new IllegalArgumentException();
@@ -69,25 +81,45 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
         mBuffer = (byte[]) mRuntime.newNonMovableArray(byte.class, bufferSize);
         mBufferPtr = mRuntime.addressOf(mBuffer);
         mBufferCap = mBuffer.length;
+        mUse4ByteSequence = use4ByteSequence;
 
         setOutput(out);
     }
 
     /**
-     * Create a new FastDataOutput object or retrieve one from cache.
+     * Obtain a {@link FastDataOutput} configured with the given
+     * {@link OutputStream} and which encodes large code-points using 3-byte
+     * sequences.
+     * <p>
+     * This <em>is</em> compatible with the {@link DataOutput} API contract,
+     * which specifies that large code-points must be encoded with 3-byte
+     * sequences.
      */
-    public static FastDataOutput obtain(@NonNull OutputStream out) {
+    public static FastDataOutput obtainUsing3ByteSequences(@NonNull OutputStream out) {
+        return new FastDataOutput(out, DEFAULT_BUFFER_SIZE, false /* use4ByteSequence */);
+    }
+
+    /**
+     * Obtain a {@link FastDataOutput} configured with the given
+     * {@link OutputStream} and which encodes large code-points using 4-byte
+     * sequences.
+     * <p>
+     * This <em>is not</em> compatible with the {@link DataOutput} API contract,
+     * which specifies that large code-points must be encoded with 3-byte
+     * sequences.
+     */
+    public static FastDataOutput obtainUsing4ByteSequences(@NonNull OutputStream out) {
         FastDataOutput instance = sOutCache.getAndSet(null);
         if (instance != null) {
             instance.setOutput(out);
             return instance;
         }
-        return new FastDataOutput(out, BUFFER_SIZE);
+        return new FastDataOutput(out, DEFAULT_BUFFER_SIZE, true /* use4ByteSequence */);
     }
 
     /**
-     * Put a FastDataOutput object back into the cache.
-     * You must not touch the object after this call.
+     * Release a {@link FastDataOutput} to potentially be recycled. You must not
+     * interact with the object after releasing it.
      */
     public void release() {
         if (mBufferPos > 0) {
@@ -98,7 +130,7 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
         mBufferPos = 0;
         mStringRefs.clear();
 
-        if (mBufferCap == BUFFER_SIZE) {
+        if (mBufferCap == DEFAULT_BUFFER_SIZE && mUse4ByteSequence) {
             // Try to return to the cache.
             sOutCache.compareAndSet(null, this);
         }
@@ -156,6 +188,14 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
 
     @Override
     public void writeUTF(String s) throws IOException {
+        if (mUse4ByteSequence) {
+            writeUTFUsing4ByteSequences(s);
+        } else {
+            writeUTFUsing3ByteSequences(s);
+        }
+    }
+
+    private void writeUTFUsing4ByteSequences(String s) throws IOException {
         // Attempt to write directly to buffer space if there's enough room,
         // otherwise fall back to chunking into place
         if (mBufferCap - mBufferPos < 2 + s.length()) drain();
@@ -178,6 +218,27 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
             len = -len;
             final byte[] tmp = (byte[]) mRuntime.newNonMovableArray(byte.class, len + 1);
             CharsetUtils.toModifiedUtf8Bytes(s, mRuntime.addressOf(tmp), 0, tmp.length);
+            writeShort(len);
+            write(tmp, 0, len);
+        }
+    }
+
+    private void writeUTFUsing3ByteSequences(String s) throws IOException {
+        final int len = (int) ModifiedUtf8.countBytes(s, false);
+        if (len > MAX_UNSIGNED_SHORT) {
+            throw new IOException("Modified UTF-8 length too large: " + len);
+        }
+
+        // Attempt to write directly to buffer space if there's enough room,
+        // otherwise fall back to chunking into place
+        if (mBufferCap >= 2 + len) {
+            if (mBufferCap - mBufferPos < 2 + len) drain();
+            writeShort(len);
+            ModifiedUtf8.encode(mBuffer, mBufferPos, s);
+            mBufferPos += len;
+        } else {
+            final byte[] tmp = (byte[]) mRuntime.newNonMovableArray(byte.class, len + 1);
+            ModifiedUtf8.encode(tmp, 0, s);
             writeShort(len);
             write(tmp, 0, len);
         }
