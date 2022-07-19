@@ -180,16 +180,6 @@ final class IInputMethodManagerInvoker {
     }
 
     @AnyThread
-    void showInputMethodAndSubtypeEnablerFromClient(@NonNull IInputMethodClient client,
-            @Nullable String imeId) {
-        try {
-            mTarget.showInputMethodAndSubtypeEnablerFromClient(client, imeId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    @AnyThread
     boolean isInputMethodPickerShownForTest() {
         try {
             return mTarget.isInputMethodPickerShownForTest();
