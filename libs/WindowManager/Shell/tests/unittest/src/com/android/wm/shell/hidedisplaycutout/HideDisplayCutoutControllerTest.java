@@ -16,7 +16,9 @@
 
 package com.android.wm.shell.hidedisplaycutout;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.testing.AndroidTestingRunner;
@@ -28,6 +30,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.sysui.ShellController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,17 +45,25 @@ public class HideDisplayCutoutControllerTest extends ShellTestCase {
     private TestableContext mContext = new TestableContext(
             InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
 
-    private HideDisplayCutoutController mHideDisplayCutoutController;
+    @Mock
+    private ShellController mShellController;
     @Mock
     private HideDisplayCutoutOrganizer mMockDisplayAreaOrganizer;
     @Mock
     private ShellExecutor mMockMainExecutor;
 
+    private HideDisplayCutoutController mHideDisplayCutoutController;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mHideDisplayCutoutController = new HideDisplayCutoutController(
-                mContext, mMockDisplayAreaOrganizer, mMockMainExecutor);
+                mContext, mShellController, mMockDisplayAreaOrganizer, mMockMainExecutor);
+    }
+
+    @Test
+    public void instantiateController_registerConfigChangeListener() {
+        verify(mShellController, times(1)).addConfigurationChangeListener(any());
     }
 
     @Test

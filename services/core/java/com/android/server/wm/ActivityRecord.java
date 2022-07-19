@@ -3528,7 +3528,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final boolean isCurrentVisible = mVisibleRequested || isState(PAUSED, STARTED);
-        if (updateVisibility && isCurrentVisible) {
+        if (updateVisibility && isCurrentVisible
+                // Avoid intermediate lifecycle change when launching with clearing task.
+                && !task.isClearingToReuseTask()) {
             boolean ensureVisibility = false;
             if (occludesParent(true /* includingFinishing */)) {
                 // If the current activity is not opaque, we need to make sure the visibilities of

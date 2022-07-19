@@ -38,6 +38,7 @@ import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.TaskViewFactoryController;
 import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.back.BackAnimationController;
 import com.android.wm.shell.bubbles.BubbleController;
@@ -82,6 +83,8 @@ import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.startingsurface.StartingWindowController;
 import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
 import com.android.wm.shell.startingsurface.phone.PhoneStartingWindowTypeAlgorithm;
+import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelper;
 import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelperController;
 import com.android.wm.shell.transition.ShellTransitions;
@@ -159,10 +162,13 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static DragAndDropController provideDragAndDropController(Context context,
-            DisplayController displayController, UiEventLogger uiEventLogger,
-            IconProvider iconProvider, @ShellMainThread ShellExecutor mainExecutor) {
-        return new DragAndDropController(context, displayController, uiEventLogger, iconProvider,
-                mainExecutor);
+            ShellController shellController,
+            DisplayController displayController,
+            UiEventLogger uiEventLogger,
+            IconProvider iconProvider,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new DragAndDropController(context, shellController, displayController, uiEventLogger,
+                iconProvider, mainExecutor);
     }
 
     @WMSingleton
@@ -377,9 +383,11 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Optional<HideDisplayCutoutController> provideHideDisplayCutoutController(Context context,
-            DisplayController displayController, @ShellMainThread ShellExecutor mainExecutor) {
+            ShellController shellController, DisplayController displayController,
+            @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(
-                HideDisplayCutoutController.create(context, displayController, mainExecutor));
+                HideDisplayCutoutController.create(context, shellController, displayController,
+                        mainExecutor));
     }
 
     //
@@ -621,6 +629,34 @@ public abstract class WMShellBaseModule {
                 taskViewTransitions);
     }
 
+
+    //
+    // ActivityEmbedding
+    //
+
+    @WMSingleton
+    @Provides
+    static Optional<ActivityEmbeddingController> provideActivityEmbeddingController(
+            Context context, Transitions transitions) {
+        return Optional.of(new ActivityEmbeddingController(context, transitions));
+    }
+
+    //
+    // SysUI -> Shell interface
+    //
+
+    @WMSingleton
+    @Provides
+    static ShellInterface provideShellSysuiCallbacks(ShellController shellController) {
+        return shellController.asShell();
+    }
+
+    @WMSingleton
+    @Provides
+    static ShellController provideShellController(@ShellMainThread ShellExecutor mainExecutor) {
+        return new ShellController(mainExecutor);
+    }
+
     //
     // Misc
     //
@@ -647,6 +683,7 @@ public abstract class WMShellBaseModule {
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformTaskListener<?>> freeformTaskListener,
             Optional<RecentTasksController> recentTasksOptional,
+            Optional<ActivityEmbeddingController> activityEmbeddingOptional,
             Transitions transitions,
             StartingWindowController startingWindow,
             @ShellMainThread ShellExecutor mainExecutor) {
@@ -664,6 +701,7 @@ public abstract class WMShellBaseModule {
                 unfoldTransitionHandler,
                 freeformTaskListener,
                 recentTasksOptional,
+                activityEmbeddingOptional,
                 transitions,
                 startingWindow,
                 mainExecutor);

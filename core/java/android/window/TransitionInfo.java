@@ -110,8 +110,11 @@ public final class TransitionInfo implements Parcelable {
     /** The container is an input-method window. */
     public static final int FLAG_IS_INPUT_METHOD = 1 << 8;
 
+    /** The container is ActivityEmbedding embedded. */
+    public static final int FLAG_IS_EMBEDDED = 1 << 9;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 9;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 10;
 
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
@@ -125,6 +128,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_OCCLUDES_KEYGUARD,
             FLAG_DISPLAY_HAS_ALERT_WINDOWS,
             FLAG_IS_INPUT_METHOD,
+            FLAG_IS_EMBEDDED,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
@@ -324,6 +328,9 @@ public final class TransitionInfo implements Parcelable {
         }
         if ((flags & FLAG_DISPLAY_HAS_ALERT_WINDOWS) != 0) {
             sb.append((sb.length() == 0 ? "" : "|") + "DISPLAY_HAS_ALERT_WINDOWS");
+        }
+        if ((flags & FLAG_IS_EMBEDDED) != 0) {
+            sb.append((sb.length() == 0 ? "" : "|") + "IS_EMBEDDED");
         }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append((sb.length() == 0 ? "" : "|") + "FIRST_CUSTOM");

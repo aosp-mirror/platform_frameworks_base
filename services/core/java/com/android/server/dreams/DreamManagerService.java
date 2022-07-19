@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 
 import static com.android.server.wm.ActivityInterceptorCallback.DREAM_MANAGER_ORDERED_ID;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
@@ -45,6 +46,9 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
+import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -221,6 +225,10 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
+    protected void requestStartDreamFromShell() {
+        requestDreamInternal();
+    }
+
     private void requestDreamInternal() {
         // Ask the power manager to nap.  It will eventually call back into
         // startDream() if/when it is appropriate to start dreaming.
@@ -273,6 +281,10 @@ public final class DreamManagerService extends SystemService {
                 startDreamLocked(dream, false /*isPreviewMode*/, doze, userId);
             }
         }
+    }
+
+    protected void requestStopDreamFromShell() {
+        stopDreamInternal(true, "stopping dream from shell");
     }
 
     private void stopDreamInternal(boolean immediate, String reason) {
@@ -591,6 +603,14 @@ public final class DreamManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
+                @Nullable FileDescriptor err,
+                @NonNull String[] args, @Nullable ShellCallback callback,
+                @NonNull ResultReceiver resultReceiver) throws RemoteException {
+            new DreamShellCommand(DreamManagerService.this, mPowerManager)
+                    .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
         @Override // Binder call
