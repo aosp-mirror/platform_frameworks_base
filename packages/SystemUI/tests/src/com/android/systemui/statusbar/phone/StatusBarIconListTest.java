@@ -1,4 +1,4 @@
-package com.android.systemui.statusbar;
+package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.statusbar.phone.StatusBarIconController.TAG_PRIMARY;
 
