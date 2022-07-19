@@ -70,7 +70,6 @@ import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -326,26 +325,6 @@ public class RecentsAnimationController implements DeathRecipient {
                         }
                     }
                     InputMethodManagerInternal.get().maybeFinishStylusHandwriting();
-                    if (!behindSystemBars) {
-                        // Hiding IME if IME window is not attached to app.
-                        // Since some windowing mode is not proper to snapshot Task with IME window
-                        // while the app transitioning to the next task (e.g. split-screen mode)
-                        if (!mDisplayContent.isImeAttachedToApp()) {
-                            final InputMethodManagerInternal inputMethodManagerInternal =
-                                    LocalServices.getService(InputMethodManagerInternal.class);
-                            if (inputMethodManagerInternal != null) {
-                                inputMethodManagerInternal.hideCurrentInputMethod(
-                                        SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
-                            }
-                        } else {
-                            // Disable IME icon explicitly when IME attached to the app in case
-                            // IME icon might flickering while swiping to the next app task still
-                            // in animating before the next app window focused, or IME icon
-                            // persists on the bottom when swiping the task to recents.
-                            InputMethodManagerInternal.get().updateImeWindowStatus(
-                                    true /* disableImeIcon */);
-                        }
-                    }
                     mService.mWindowPlacerLocked.requestTraversal();
                 }
             } finally {

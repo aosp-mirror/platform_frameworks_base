@@ -133,6 +133,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
+import com.android.wm.shell.sysui.ShellController;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -213,6 +214,8 @@ public class BubblesTest extends SysuiTestCase {
     private BubbleEntry mBubbleEntryUser11;
     private BubbleEntry mBubbleEntry2User11;
 
+    @Mock
+    private ShellController mShellController;
     @Mock
     private Bubbles.BubbleExpandListener mBubbleExpandListener;
     @Mock
@@ -328,6 +331,7 @@ public class BubblesTest extends SysuiTestCase {
         when(mShellTaskOrganizer.getExecutor()).thenReturn(syncExecutor);
         mBubbleController = new TestableBubbleController(
                 mContext,
+                mShellController,
                 mBubbleData,
                 mFloatingContentCoordinator,
                 mDataRepository,
@@ -356,7 +360,6 @@ public class BubblesTest extends SysuiTestCase {
                 mNotificationShadeWindowController,
                 mock(KeyguardStateController.class),
                 mShadeController,
-                mConfigurationController,
                 mStatusBarService,
                 mock(INotificationManager.class),
                 mVisibilityProvider,
@@ -375,6 +378,11 @@ public class BubblesTest extends SysuiTestCase {
         verify(mNotifPipeline, atLeastOnce())
                 .addCollectionListener(mNotifListenerCaptor.capture());
         mEntryListener = mNotifListenerCaptor.getValue();
+    }
+
+    @Test
+    public void instantiateController_registerConfigChangeListener() {
+        verify(mShellController, times(1)).addConfigurationChangeListener(any());
     }
 
     @Test

@@ -170,11 +170,12 @@ class KeyguardController {
 
         final KeyguardDisplayState state = getDisplayState(displayId);
         final boolean aodChanged = aodShowing != state.mAodShowing;
+        final boolean aodRemoved = state.mAodShowing && !aodShowing;
         // If keyguard is going away, but SystemUI aborted the transition, need to reset state.
-        // Do not reset keyguardChanged status if this is aodChanged.
+        // Do not reset keyguardChanged status when only AOD is removed.
         final boolean keyguardChanged = (keyguardShowing != state.mKeyguardShowing)
-                || (state.mKeyguardGoingAway && keyguardShowing && !aodChanged);
-        if (aodChanged && !aodShowing) {
+                || (state.mKeyguardGoingAway && keyguardShowing && !aodRemoved);
+        if (aodRemoved) {
             updateDeferWakeTransition(false /* waiting */);
         }
         if (!keyguardChanged && !aodChanged) {

@@ -577,6 +577,21 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
     }
 
+    /**
+     * Returns the windowing mode of the task that hosts the activity, or {@code -1} if task is not
+     * found.
+     */
+    @Override
+    public int getTaskWindowingMode(IBinder activityToken) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord ar = ActivityRecord.isInAnyTask(activityToken);
+            if (ar == null) {
+                return -1;
+            }
+            return ar.getTask().getWindowingMode();
+        }
+    }
+
     @Override
     @Nullable
     public IBinder getActivityTokenBelow(IBinder activityToken) {

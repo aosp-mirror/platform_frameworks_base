@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.pip;
 
-import android.content.res.Configuration;
 import android.graphics.Rect;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
@@ -41,24 +40,6 @@ public interface Pip {
      * Expand PIP, it's possible that specific request to activate the window via Alt-tab.
      */
     default void expandPip() {
-    }
-
-    /**
-     * Called when configuration is changed.
-     */
-    default void onConfigurationChanged(Configuration newConfig) {
-    }
-
-    /**
-     * Called when display size or font size of settings changed
-     */
-    default void onDensityOrFontScaleChanged() {
-    }
-
-    /**
-     * Called when overlay package change invoked.
-     */
-    default void onOverlayChanged() {
     }
 
     /**

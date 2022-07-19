@@ -24,6 +24,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -69,6 +70,7 @@ public class ShellInitImplTest extends ShellTestCase {
     @Mock private Optional<UnfoldTransitionHandler> mUnfoldTransitionHandler;
     @Mock private Optional<FreeformTaskListener<?>> mFreeformTaskListenerOptional;
     @Mock private Optional<RecentTasksController> mRecentTasks;
+    @Mock private Optional<ActivityEmbeddingController> mActivityEmbeddingController;
     @Mock private Transitions mTransitions;
     @Mock private StartingWindowController mStartingWindow;
     @Mock private ShellExecutor mMainExecutor;
@@ -82,8 +84,8 @@ public class ShellInitImplTest extends ShellTestCase {
                 mDisplayInsetsController, mDragAndDropController, mShellTaskOrganizer,
                 mKidsModeTaskOrganizer, mBubblesOptional, mSplitScreenOptional,
                 mPipTouchHandlerOptional, mFullscreenTaskListener, mUnfoldAnimationController,
-                mUnfoldTransitionHandler, mFreeformTaskListenerOptional, mRecentTasks, mTransitions,
-                mStartingWindow, mMainExecutor);
+                mUnfoldTransitionHandler, mFreeformTaskListenerOptional, mRecentTasks,
+                mActivityEmbeddingController, mTransitions, mStartingWindow, mMainExecutor);
     }
 
     @Test
