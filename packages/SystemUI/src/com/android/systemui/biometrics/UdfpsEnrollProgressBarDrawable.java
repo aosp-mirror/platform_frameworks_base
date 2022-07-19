@@ -99,12 +99,11 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
         mProgressColor = context.getColor(R.color.udfps_enroll_progress);
         final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
         mIsAccessibilityEnabled = am.isTouchExplorationEnabled();
+        mOnFirstBucketFailedColor = context.getColor(R.color.udfps_moving_target_fill_error);
         if (!mIsAccessibilityEnabled) {
             mHelpColor = context.getColor(R.color.udfps_enroll_progress_help);
-            mOnFirstBucketFailedColor = context.getColor(R.color.udfps_moving_target_fill_error);
         } else {
             mHelpColor = context.getColor(R.color.udfps_enroll_progress_help_with_talkback);
-            mOnFirstBucketFailedColor = mHelpColor;
         }
         mCheckmarkDrawable = context.getDrawable(R.drawable.udfps_enroll_checkmark);
         mCheckmarkDrawable.mutate();
@@ -197,6 +196,7 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
             }
         }
 
+        mShowingHelp = showingHelp;
         mRemainingSteps = remainingSteps;
         mTotalSteps = totalSteps;
 
