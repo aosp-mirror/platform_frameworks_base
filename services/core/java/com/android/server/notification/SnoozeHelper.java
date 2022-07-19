@@ -122,6 +122,15 @@ public final class SnoozeHelper {
         return true;
     }
 
+    protected boolean canSnooze(int numberToSnooze) {
+        synchronized (mLock) {
+            if ((mPackages.size() + numberToSnooze) > CONCURRENT_SNOOZE_LIMIT) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @NonNull
     protected Long getSnoozeTimeForUnpostedNotification(int userId, String pkg, String key) {
         Long time = null;
