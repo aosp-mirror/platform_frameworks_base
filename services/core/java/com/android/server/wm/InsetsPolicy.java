@@ -46,6 +46,7 @@ import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.StatusBarManager;
 import android.app.WindowConfiguration;
+import android.content.ComponentName;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.ArrayMap;
@@ -548,8 +549,10 @@ class InsetsPolicy {
             return focusedWin;
         }
         if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
+            ComponentName component = focusedWin.mActivityRecord != null
+                    ? focusedWin.mActivityRecord.mActivityComponent : null;
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    focusedWin.mAttrs.packageName, focusedWin.getRequestedVisibilities());
+                    component, focusedWin.getRequestedVisibilities());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (mPolicy.areSystemBarsForcedShownLw()) {
@@ -606,8 +609,10 @@ class InsetsPolicy {
             return null;
         }
         if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
+            ComponentName component = focusedWin.mActivityRecord != null
+                    ? focusedWin.mActivityRecord.mActivityComponent : null;
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    focusedWin.mAttrs.packageName, focusedWin.getRequestedVisibilities());
+                    component, focusedWin.getRequestedVisibilities());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (mPolicy.areSystemBarsForcedShownLw()) {
