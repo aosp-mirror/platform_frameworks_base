@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.START_SUCCESS;
 
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_LIGHT;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -34,6 +35,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerWhitelistManager;
 import android.os.PowerWhitelistManager.ReasonCode;
+import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
@@ -416,6 +418,22 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
 
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
+
+        // Only system senders can declare a broadcast to be alarm-originated.  We check
+        // this here rather than in the general case handling below to fail before the other
+        // invocation side effects such as allowlisting.
+        if (options != null && callingUid != Process.SYSTEM_UID
+                && key.type == ActivityManager.INTENT_SENDER_BROADCAST) {
+            if (options.containsKey(BroadcastOptions.KEY_ALARM_BROADCAST)) {
+                if (DEBUG_BROADCAST_LIGHT) {
+                    Slog.w(TAG, "Non-system caller " + callingUid
+                            + " may not flag broadcast as alarm-related");
+                }
+                throw new SecurityException(
+                        "Non-system callers may not flag broadcasts as alarm-related");
+            }
+        }
+
         final long origId = Binder.clearCallingIdentity();
 
         int res = START_SUCCESS;

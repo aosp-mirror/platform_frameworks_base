@@ -14389,6 +14389,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             final int callingPid = Binder.getCallingPid();
             final int callingUid = Binder.getCallingUid();
 
+            // Non-system callers can't declare that a broadcast is alarm-related.
+            // The PendingIntent invocation case is handled in PendingIntentRecord.
+            if (bOptions != null && callingUid != SYSTEM_UID) {
+                if (bOptions.containsKey(BroadcastOptions.KEY_ALARM_BROADCAST)) {
+                    if (DEBUG_BROADCAST) {
+                        Slog.w(TAG, "Non-system caller " + callingUid
+                                + " may not flag broadcast as alarm-related");
+                    }
+                    throw new SecurityException(
+                            "Non-system callers may not flag broadcasts as alarm-related");
+                }
+            }
+
             final long origId = Binder.clearCallingIdentity();
             try {
                 return broadcastIntentLocked(callerApp,
@@ -14402,6 +14415,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    // Not the binder call surface
     int broadcastIntentInPackage(String packageName, @Nullable String featureId, int uid,
             int realCallingUid, int realCallingPid, Intent intent, String resolvedType,
             IIntentReceiver resultTo, int resultCode, String resultData, Bundle resultExtras,
