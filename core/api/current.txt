@@ -45090,6 +45090,7 @@ package android.text {
     ctor protected Layout(CharSequence, android.text.TextPaint, int, android.text.Layout.Alignment, float, float);
     method public void draw(android.graphics.Canvas);
     method public void draw(android.graphics.Canvas, android.graphics.Path, android.graphics.Paint, int);
+    method public void fillCharacterBounds(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull float[], @IntRange(from=0) int);
     method public final android.text.Layout.Alignment getAlignment();
     method public abstract int getBottomPadding();
     method public void getCursorPath(int, android.graphics.Path, CharSequence);
