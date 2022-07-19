@@ -183,7 +183,7 @@ public class PipAnimationController {
         return mCurrentAnimator;
     }
 
-    PipTransitionAnimator getCurrentAnimator() {
+    public PipTransitionAnimator getCurrentAnimator() {
         return mCurrentAnimator;
     }
 
