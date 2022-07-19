@@ -70,6 +70,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.LogBufferEulogizer;
@@ -112,6 +113,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -146,6 +148,7 @@ public class NotifCollection implements Dumpable {
     private final NotifPipelineFlags mNotifPipelineFlags;
     private final NotifCollectionLogger mLogger;
     private final Handler mMainHandler;
+    private final Executor mBgExecutor;
     private final LogBufferEulogizer mEulogizer;
     private final DumpManager mDumpManager;
 
@@ -174,6 +177,7 @@ public class NotifCollection implements Dumpable {
             NotifPipelineFlags notifPipelineFlags,
             NotifCollectionLogger logger,
             @Main Handler mainHandler,
+            @Background Executor bgExecutor,
             LogBufferEulogizer logBufferEulogizer,
             DumpManager dumpManager) {
         mStatusBarService = statusBarService;
@@ -181,6 +185,7 @@ public class NotifCollection implements Dumpable {
         mNotifPipelineFlags = notifPipelineFlags;
         mLogger = logger;
         mMainHandler = mainHandler;
+        mBgExecutor = bgExecutor;
         mEulogizer = logBufferEulogizer;
         mDumpManager = dumpManager;
     }
@@ -294,18 +299,20 @@ public class NotifCollection implements Dumpable {
             entriesToLocallyDismiss.add(entry);
             if (!isCanceled(entry)) {
                 // send message to system server if this notification hasn't already been cancelled
-                try {
-                    mStatusBarService.onNotificationClear(
-                            entry.getSbn().getPackageName(),
-                            entry.getSbn().getUser().getIdentifier(),
-                            entry.getSbn().getKey(),
-                            stats.dismissalSurface,
-                            stats.dismissalSentiment,
-                            stats.notificationVisibility);
-                } catch (RemoteException e) {
-                    // system process is dead if we're here.
-                    mLogger.logRemoteExceptionOnNotificationClear(entry, e);
-                }
+                mBgExecutor.execute(() -> {
+                    try {
+                        mStatusBarService.onNotificationClear(
+                                entry.getSbn().getPackageName(),
+                                entry.getSbn().getUser().getIdentifier(),
+                                entry.getSbn().getKey(),
+                                stats.dismissalSurface,
+                                stats.dismissalSentiment,
+                                stats.notificationVisibility);
+                    } catch (RemoteException e) {
+                        // system process is dead if we're here.
+                        mLogger.logRemoteExceptionOnNotificationClear(entry, e);
+                    }
+                });
             }
         }
 
