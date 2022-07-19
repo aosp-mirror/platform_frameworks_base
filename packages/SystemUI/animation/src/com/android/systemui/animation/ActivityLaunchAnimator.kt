@@ -494,9 +494,10 @@ class ActivityLaunchAnimator(
         }
 
         private fun applyStateToWindow(window: RemoteAnimationTarget, state: LaunchAnimator.State) {
-            if (transactionApplierView.viewRootImpl == null) {
-                // If the view root we synchronize with was detached, don't apply any transaction
-                // (as [SyncRtSurfaceTransactionApplier.scheduleApply] would otherwise throw).
+            if (transactionApplierView.viewRootImpl == null || !window.leash.isValid) {
+                // Don't apply any transaction if the view root we synchronize with was detached or
+                // if the SurfaceControl associated with [window] is not valid, as
+                // [SyncRtSurfaceTransactionApplier.scheduleApply] would otherwise throw.
                 return
             }
 
@@ -557,9 +558,10 @@ class ActivityLaunchAnimator(
             state: LaunchAnimator.State,
             linearProgress: Float
         ) {
-            if (transactionApplierView.viewRootImpl == null) {
-                // If the view root we synchronize with was detached, don't apply any transaction
-                // (as [SyncRtSurfaceTransactionApplier.scheduleApply] would otherwise throw).
+            if (transactionApplierView.viewRootImpl == null || !navigationBar.leash.isValid) {
+                // Don't apply any transaction if the view root we synchronize with was detached or
+                // if the SurfaceControl associated with [navigationBar] is not valid, as
+                // [SyncRtSurfaceTransactionApplier.scheduleApply] would otherwise throw.
                 return
             }
 
