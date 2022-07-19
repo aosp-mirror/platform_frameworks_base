@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.interruption
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.LogLevel.INFO
+import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.NotificationInterruptLog
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
@@ -208,6 +209,33 @@ class NotificationInterruptLogger @Inject constructor(
             str1 = entry.logKey
         }, {
             "Pulsing: $str1"
+        })
+    }
+
+    fun logNoFullscreen(entry: NotificationEntry, reason: String) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+            str2 = reason
+        }, {
+            "No FullScreenIntent: $str2: $str1"
+        })
+    }
+
+    fun logNoFullscreenWarning(entry: NotificationEntry, reason: String) {
+        buffer.log(TAG, WARNING, {
+            str1 = entry.logKey
+            str2 = reason
+        }, {
+            "No FullScreenIntent: WARNING: $str2: $str1"
+        })
+    }
+
+    fun logFullscreen(entry: NotificationEntry, reason: String) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+            str2 = reason
+        }, {
+            "FullScreenIntent: $str2: $str1"
         })
     }
 
