@@ -54,7 +54,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.statusbar.phone.NotificationShadeWindowView
+import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.telephony.TelephonyListenerManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any

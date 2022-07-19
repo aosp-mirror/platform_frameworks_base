@@ -49,6 +49,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserInfoTracker;
