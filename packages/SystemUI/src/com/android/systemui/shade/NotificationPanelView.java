@@ -25,7 +25,6 @@ import android.graphics.PorterDuffXfermode;
 import android.util.AttributeSet;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.PanelView;
 import com.android.systemui.statusbar.phone.TapAgainView;
 
 public class NotificationPanelView extends PanelView {
