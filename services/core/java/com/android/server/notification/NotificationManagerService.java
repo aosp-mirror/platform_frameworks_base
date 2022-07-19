@@ -7031,7 +7031,6 @@ public class NotificationManagerService extends SystemService {
 
         @GuardedBy("mNotificationLock")
         void snoozeLocked(NotificationRecord r) {
-            final List<NotificationRecord> recordsToSnooze = new ArrayList<>();
             if (r.getSbn().isGroup()) {
                 final List<NotificationRecord> groupNotifications =
                         findCurrentAndSnoozedGroupNotificationsLocked(
@@ -7040,8 +7039,8 @@ public class NotificationManagerService extends SystemService {
                 if (r.getNotification().isGroupSummary()) {
                     // snooze all children
                     for (int i = 0; i < groupNotifications.size(); i++) {
-                        if (!mKey.equals(groupNotifications.get(i).getKey())) {
-                            recordsToSnooze.add(groupNotifications.get(i));
+                        if (mKey != groupNotifications.get(i).getKey()) {
+                            snoozeNotificationLocked(groupNotifications.get(i));
                         }
                     }
                 } else {
@@ -7051,8 +7050,8 @@ public class NotificationManagerService extends SystemService {
                         if (groupNotifications.size() == 2) {
                             // snooze summary and the one child
                             for (int i = 0; i < groupNotifications.size(); i++) {
-                                if (!mKey.equals(groupNotifications.get(i).getKey())) {
-                                    recordsToSnooze.add(groupNotifications.get(i));
+                                if (mKey != groupNotifications.get(i).getKey()) {
+                                    snoozeNotificationLocked(groupNotifications.get(i));
                                 }
                             }
                         }
@@ -7060,15 +7059,7 @@ public class NotificationManagerService extends SystemService {
                 }
             }
             // snooze the notification
-            recordsToSnooze.add(r);
-
-            if (mSnoozeHelper.canSnooze(recordsToSnooze.size())) {
-                for (int i = 0; i < recordsToSnooze.size(); i++) {
-                    snoozeNotificationLocked(recordsToSnooze.get(i));
-                }
-            } else {
-                Log.w(TAG, "Cannot snooze " + r.getKey() + ": too many snoozed notifications");
-            }
+            snoozeNotificationLocked(r);
 
         }
 
