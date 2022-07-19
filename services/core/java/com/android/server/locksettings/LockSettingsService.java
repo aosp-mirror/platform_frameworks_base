@@ -95,7 +95,6 @@ import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
-import android.provider.Settings.SettingNotFoundException;
 import android.security.AndroidKeyStoreMaintenance;
 import android.security.Authorization;
 import android.security.KeyStore;
@@ -888,123 +887,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void migrateOldData() {
-        // These Settings moved before multi-user was enabled, so we only have to do it for the
-        // root user.
-        if (getString("migrated", null, 0) == null) {
-            final ContentResolver cr = mContext.getContentResolver();
-            for (String validSetting : VALID_SETTINGS) {
-                String value = Settings.Secure.getStringForUser(cr, validSetting, cr.getUserId());
-                if (value != null) {
-                    setString(validSetting, value, 0);
-                }
-            }
-            // No need to move the password / pattern files. They're already in the right place.
-            setString("migrated", "true", 0);
-            Slog.i(TAG, "Migrated lock settings to new location");
-        }
-
-        // These Settings changed after multi-user was enabled, hence need to be moved per user.
-        if (getString("migrated_user_specific", null, 0) == null) {
-            final ContentResolver cr = mContext.getContentResolver();
-            List<UserInfo> users = mUserManager.getUsers();
-            for (int user = 0; user < users.size(); user++) {
-                // Migrate owner info
-                final int userId = users.get(user).id;
-                final String OWNER_INFO = Secure.LOCK_SCREEN_OWNER_INFO;
-                String ownerInfo = Settings.Secure.getStringForUser(cr, OWNER_INFO, userId);
-                if (!TextUtils.isEmpty(ownerInfo)) {
-                    setString(OWNER_INFO, ownerInfo, userId);
-                    Settings.Secure.putStringForUser(cr, OWNER_INFO, "", userId);
-                }
-
-                // Migrate owner info enabled. Note there was a bug where older platforms only
-                // stored this value if the checkbox was toggled at least once. The code detects
-                // this case by handling the exception.
-                final String OWNER_INFO_ENABLED = Secure.LOCK_SCREEN_OWNER_INFO_ENABLED;
-                boolean enabled;
-                try {
-                    int ivalue = Settings.Secure.getIntForUser(cr, OWNER_INFO_ENABLED, userId);
-                    enabled = ivalue != 0;
-                    setLong(OWNER_INFO_ENABLED, enabled ? 1 : 0, userId);
-                } catch (SettingNotFoundException e) {
-                    // Setting was never stored. Store it if the string is not empty.
-                    if (!TextUtils.isEmpty(ownerInfo)) {
-                        setLong(OWNER_INFO_ENABLED, 1, userId);
-                    }
-                }
-                Settings.Secure.putIntForUser(cr, OWNER_INFO_ENABLED, 0, userId);
-            }
-            // No need to move the password / pattern files. They're already in the right place.
-            setString("migrated_user_specific", "true", 0);
-            Slog.i(TAG, "Migrated per-user lock settings to new location");
-        }
-
-        // Migrates biometric weak such that the fallback mechanism becomes the primary.
-        if (getString("migrated_biometric_weak", null, 0) == null) {
-            List<UserInfo> users = mUserManager.getUsers();
-            for (int i = 0; i < users.size(); i++) {
-                int userId = users.get(i).id;
-                long type = getLong(LockPatternUtils.PASSWORD_TYPE_KEY,
-                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
-                        userId);
-                long alternateType = getLong(LockPatternUtils.PASSWORD_TYPE_ALTERNATE_KEY,
-                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
-                        userId);
-                if (type == DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK) {
-                    setLong(LockPatternUtils.PASSWORD_TYPE_KEY,
-                            alternateType,
-                            userId);
-                }
-                setLong(LockPatternUtils.PASSWORD_TYPE_ALTERNATE_KEY,
-                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
-                        userId);
-            }
-            setString("migrated_biometric_weak", "true", 0);
-            Slog.i(TAG, "Migrated biometric weak to use the fallback instead");
-        }
-
-        // Migrates lockscreen.disabled. Prior to M, the flag was ignored when more than one
-        // user was present on the system, so if we're upgrading to M and there is more than one
-        // user we disable the flag to remain consistent.
-        if (getString("migrated_lockscreen_disabled", null, 0) == null) {
-            final List<UserInfo> users = mUserManager.getUsers();
-            final int userCount = users.size();
-            int switchableUsers = 0;
-            for (int i = 0; i < userCount; i++) {
-                if (users.get(i).supportsSwitchTo()) {
-                    switchableUsers++;
-                }
-            }
-
-            if (switchableUsers > 1) {
-                for (int i = 0; i < userCount; i++) {
-                    int id = users.get(i).id;
-
-                    if (getBoolean(LockPatternUtils.DISABLE_LOCKSCREEN_KEY, false, id)) {
-                        setBoolean(LockPatternUtils.DISABLE_LOCKSCREEN_KEY, false, id);
-                    }
-                }
-            }
-
-            setString("migrated_lockscreen_disabled", "true", 0);
-            Slog.i(TAG, "Migrated lockscreen disabled flag");
-        }
-
-        boolean isWatch = mContext.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_WATCH);
-        // Wear used to set DISABLE_LOCKSCREEN to 'true', but because Wear now allows accounts
-        // and device management the lockscreen must be re-enabled now for users that upgrade.
-        if (isWatch && getString("migrated_wear_lockscreen_disabled", null, 0) == null) {
-            final List<UserInfo> users = mUserManager.getUsers();
-            final int userCount = users.size();
-            for (int i = 0; i < userCount; i++) {
-                int id = users.get(i).id;
-                setBoolean(LockPatternUtils.DISABLE_LOCKSCREEN_KEY, false, id);
-            }
-            setString("migrated_wear_lockscreen_disabled", "true", 0);
-            Slog.i(TAG, "Migrated lockscreen_disabled for Wear devices");
-        }
-
         if (getString("migrated_keystore_namespace", null, 0) == null) {
             boolean success = true;
             synchronized (mSpManager) {
@@ -2575,24 +2457,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     public @Nullable String getKey(@NonNull String alias) throws RemoteException {
         return mRecoverableKeyStoreManager.getKey(alias);
     }
-
-    private static final String[] VALID_SETTINGS = new String[] {
-            LockPatternUtils.LOCKOUT_PERMANENT_KEY,
-            LockPatternUtils.PATTERN_EVER_CHOSEN_KEY,
-            LockPatternUtils.PASSWORD_TYPE_KEY,
-            LockPatternUtils.PASSWORD_TYPE_ALTERNATE_KEY,
-            LockPatternUtils.LOCK_PASSWORD_SALT_KEY,
-            LockPatternUtils.DISABLE_LOCKSCREEN_KEY,
-            LockPatternUtils.LOCKSCREEN_OPTIONS,
-            LockPatternUtils.LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK,
-            LockPatternUtils.BIOMETRIC_WEAK_EVER_CHOSEN_KEY,
-            LockPatternUtils.LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS,
-            LockPatternUtils.PASSWORD_HISTORY_KEY,
-            Secure.LOCK_PATTERN_ENABLED,
-            Secure.LOCK_BIOMETRIC_WEAK_FLAGS,
-            Secure.LOCK_PATTERN_VISIBLE,
-            Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED
-    };
 
     // Reading these settings needs the contacts permission
     private static final String[] READ_CONTACTS_PROTECTED_SETTINGS = new String[] {
