@@ -17,5 +17,6 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.systemui.compose.gallery">
-
+    <!-- To emulate a display size and density. -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
 </manifest>
