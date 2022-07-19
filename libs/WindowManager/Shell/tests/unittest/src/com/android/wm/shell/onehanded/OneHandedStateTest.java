@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Rect;
 import android.os.Handler;
-import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.util.ArrayMap;
 import android.view.Display;
@@ -42,6 +41,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.sysui.ShellController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +52,6 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class OneHandedStateTest extends OneHandedTestCase {
-    private int mCurrentUser = UserHandle.myUserId();
 
     Display mDisplay;
     DisplayLayout mDisplayLayout;
@@ -61,6 +60,8 @@ public class OneHandedStateTest extends OneHandedTestCase {
     OneHandedTimeoutHandler mSpiedTimeoutHandler;
     OneHandedState mSpiedState;
 
+    @Mock
+    ShellController mMockShellController;
     @Mock
     DisplayController mMockDisplayController;
     @Mock
@@ -110,6 +111,7 @@ public class OneHandedStateTest extends OneHandedTestCase {
         mOneHandedAccessibilityUtil = new OneHandedAccessibilityUtil(mContext);
         mSpiedOneHandedController = spy(new OneHandedController(
                 mContext,
+                mMockShellController,
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,

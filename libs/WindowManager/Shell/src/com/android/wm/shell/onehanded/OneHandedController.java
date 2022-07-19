@@ -54,6 +54,8 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
+import com.android.wm.shell.sysui.ShellController;
 
 import java.io.PrintWriter;
 
@@ -61,7 +63,7 @@ import java.io.PrintWriter;
  * Manages and manipulates the one handed states, transitions, and gesture for phones.
  */
 public class OneHandedController implements RemoteCallable<OneHandedController>,
-        DisplayChangeController.OnDisplayChangingListener {
+        DisplayChangeController.OnDisplayChangingListener, ConfigurationChangeListener {
     private static final String TAG = "OneHandedController";
 
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
@@ -81,6 +83,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
 
     private Context mContext;
 
+    private final ShellController mShellController;
     private final AccessibilityManager mAccessibilityManager;
     private final DisplayController mDisplayController;
     private final OneHandedSettingsUtil mOneHandedSettingsUtil;
@@ -188,8 +191,9 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
      * Creates {@link OneHandedController}, returns {@code null} if the feature is not supported.
      */
     public static OneHandedController create(
-            Context context, WindowManager windowManager, DisplayController displayController,
-            DisplayLayout displayLayout, TaskStackListenerImpl taskStackListener,
+            Context context, ShellController shellController, WindowManager windowManager,
+            DisplayController displayController, DisplayLayout displayLayout,
+            TaskStackListenerImpl taskStackListener,
             InteractionJankMonitor jankMonitor, UiEventLogger uiEventLogger,
             ShellExecutor mainExecutor, Handler mainHandler) {
         OneHandedSettingsUtil settingsUtil = new OneHandedSettingsUtil();
@@ -207,14 +211,15 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
                 context, displayLayout, settingsUtil, animationController, tutorialHandler,
                 jankMonitor, mainExecutor);
         OneHandedUiEventLogger oneHandedUiEventsLogger = new OneHandedUiEventLogger(uiEventLogger);
-        return new OneHandedController(context, displayController, organizer, touchHandler,
-                tutorialHandler, settingsUtil, accessibilityUtil, timeoutHandler, oneHandedState,
-                oneHandedUiEventsLogger, taskStackListener,
+        return new OneHandedController(context, shellController, displayController, organizer,
+                touchHandler, tutorialHandler, settingsUtil, accessibilityUtil, timeoutHandler,
+                oneHandedState, oneHandedUiEventsLogger, taskStackListener,
                 mainExecutor, mainHandler);
     }
 
     @VisibleForTesting
     OneHandedController(Context context,
+            ShellController shellController,
             DisplayController displayController,
             OneHandedDisplayAreaOrganizer displayAreaOrganizer,
             OneHandedTouchHandler touchHandler,
@@ -228,6 +233,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
             ShellExecutor mainExecutor,
             Handler mainHandler) {
         mContext = context;
+        mShellController = shellController;
         mOneHandedSettingsUtil = settingsUtil;
         mOneHandedAccessibilityUtil = oneHandedAccessibilityUtil;
         mDisplayAreaOrganizer = displayAreaOrganizer;
@@ -272,6 +278,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
                 mAccessibilityStateChangeListener);
 
         mState.addSListeners(mTutorialHandler);
+        mShellController.addConfigurationChangeListener(this);
     }
 
     public OneHanded asOneHanded() {
@@ -587,7 +594,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         mLockedDisabled = locked && !enabled;
     }
 
-    private void onConfigChanged(Configuration newConfig) {
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
         if (mTutorialHandler == null) {
             return;
         }
@@ -739,13 +747,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         public void registerTransitionCallback(OneHandedTransitionCallback callback) {
             mMainExecutor.execute(() -> {
                 OneHandedController.this.registerTransitionCallback(callback);
-            });
-        }
-
-        @Override
-        public void onConfigChanged(Configuration newConfig) {
-            mMainExecutor.execute(() -> {
-                OneHandedController.this.onConfigChanged(newConfig);
             });
         }
 

@@ -53,3 +53,13 @@ For example, you might have:
 
 Adding an interface to a Shell component may seem like a lot of boiler plate, but is currently
 necessary to maintain proper threading and logic isolation.
+
+## Configuration changes & other SysUI events
+
+Aside from direct calls into Shell controllers for exposed features, the Shell also receives 
+common event callbacks from SysUI via the `ShellController`.  This includes things like:
+
+- Configuration changes
+- TODO: Shell init
+- TODO: Shell command
+- TODO: Keyguard events

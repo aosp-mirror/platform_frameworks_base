@@ -72,7 +72,6 @@ import com.android.systemui.statusbar.notification.collection.render.Notificatio
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.wm.shell.bubbles.Bubble;
@@ -126,7 +125,6 @@ public class BubblesManager implements Dumpable {
             NotificationShadeWindowController notificationShadeWindowController,
             KeyguardStateController keyguardStateController,
             ShadeController shadeController,
-            ConfigurationController configurationController,
             @Nullable IStatusBarService statusBarService,
             INotificationManager notificationManager,
             NotificationVisibilityProvider visibilityProvider,
@@ -145,7 +143,6 @@ public class BubblesManager implements Dumpable {
                     notificationShadeWindowController,
                     keyguardStateController,
                     shadeController,
-                    configurationController,
                     statusBarService,
                     notificationManager,
                     visibilityProvider,
@@ -169,7 +166,6 @@ public class BubblesManager implements Dumpable {
             NotificationShadeWindowController notificationShadeWindowController,
             KeyguardStateController keyguardStateController,
             ShadeController shadeController,
-            ConfigurationController configurationController,
             @Nullable IStatusBarService statusBarService,
             INotificationManager notificationManager,
             NotificationVisibilityProvider visibilityProvider,
@@ -210,23 +206,6 @@ public class BubblesManager implements Dumpable {
                 boolean isUnlockedShade = !keyguardStateController.isShowing()
                         && !keyguardStateController.isOccluded();
                 bubbles.onStatusBarStateChanged(isUnlockedShade);
-            }
-        });
-
-        configurationController.addCallback(new ConfigurationController.ConfigurationListener() {
-            @Override
-            public void onConfigChanged(Configuration newConfig) {
-                mBubbles.onConfigChanged(newConfig);
-            }
-
-            @Override
-            public void onUiModeChanged() {
-                mBubbles.updateForThemeChanges();
-            }
-
-            @Override
-            public void onThemeChanged() {
-                mBubbles.updateForThemeChanges();
             }
         });
 

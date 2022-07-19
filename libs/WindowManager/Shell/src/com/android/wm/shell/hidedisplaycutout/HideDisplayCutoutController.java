@@ -19,7 +19,6 @@ package com.android.wm.shell.hidedisplaycutout;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.SystemProperties;
-import android.util.Slog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,17 +26,19 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
+import com.android.wm.shell.sysui.ShellController;
 
 import java.io.PrintWriter;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Manages the hide display cutout status.
  */
-public class HideDisplayCutoutController {
+public class HideDisplayCutoutController implements ConfigurationChangeListener {
     private static final String TAG = "HideDisplayCutoutController";
 
     private final Context mContext;
+    private final ShellController mShellController;
     private final HideDisplayCutoutOrganizer mOrganizer;
     private final ShellExecutor mMainExecutor;
     private final HideDisplayCutoutImpl mImpl = new HideDisplayCutoutImpl();
@@ -49,8 +50,9 @@ public class HideDisplayCutoutController {
      * supported.
      */
     @Nullable
-    public static HideDisplayCutoutController create(
-            Context context, DisplayController displayController, ShellExecutor mainExecutor) {
+    public static HideDisplayCutoutController create(Context context,
+            ShellController shellController, DisplayController displayController,
+            ShellExecutor mainExecutor) {
         // The SystemProperty is set for devices that support this feature and is used to control
         // whether to create the HideDisplayCutout instance.
         // It's defined in the device.mk (e.g. device/google/crosshatch/device.mk).
@@ -60,15 +62,17 @@ public class HideDisplayCutoutController {
 
         HideDisplayCutoutOrganizer organizer =
                 new HideDisplayCutoutOrganizer(context, displayController, mainExecutor);
-        return new HideDisplayCutoutController(context, organizer, mainExecutor);
+        return new HideDisplayCutoutController(context, shellController, organizer, mainExecutor);
     }
 
-    HideDisplayCutoutController(Context context, HideDisplayCutoutOrganizer organizer,
-            ShellExecutor mainExecutor) {
+    HideDisplayCutoutController(Context context, ShellController shellController,
+            HideDisplayCutoutOrganizer organizer, ShellExecutor mainExecutor) {
         mContext = context;
+        mShellController = shellController;
         mOrganizer = organizer;
         mMainExecutor = mainExecutor;
         updateStatus();
+        mShellController.addConfigurationChangeListener(this);
     }
 
     public HideDisplayCutout asHideDisplayCutout() {
@@ -94,7 +98,8 @@ public class HideDisplayCutoutController {
         }
     }
 
-    private void onConfigurationChanged(Configuration newConfig) {
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
         updateStatus();
     }
 
@@ -109,11 +114,6 @@ public class HideDisplayCutoutController {
     }
 
     private class HideDisplayCutoutImpl implements HideDisplayCutout {
-        @Override
-        public void onConfigurationChanged(Configuration newConfig) {
-            mMainExecutor.execute(() -> {
-                HideDisplayCutoutController.this.onConfigurationChanged(newConfig);
-            });
-        }
+        // TODO: To be removed
     }
 }
