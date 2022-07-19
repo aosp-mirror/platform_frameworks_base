@@ -46,7 +46,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.PersistentDataBlockManagerInternal;
-import com.android.server.utils.WatchableImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -66,7 +65,7 @@ import java.util.Map;
 /**
  * Storage for the lock settings service.
  */
-class LockSettingsStorage extends WatchableImpl {
+class LockSettingsStorage {
 
     private static final String TAG = "LockSettingsStorage";
     private static final String TABLE = "locksettings";
@@ -136,7 +135,6 @@ class LockSettingsStorage extends WatchableImpl {
         } finally {
             db.endTransaction();
         }
-        dispatchChange(this);
     }
 
     @VisibleForTesting
@@ -194,7 +192,6 @@ class LockSettingsStorage extends WatchableImpl {
         } finally {
             db.endTransaction();
         }
-        dispatchChange(this);
     }
 
     public void prefetchUser(int userId) {
@@ -337,7 +334,6 @@ class LockSettingsStorage extends WatchableImpl {
                 }
             }
             mCache.putFile(path, data);
-            dispatchChange(this);
         }
     }
 
@@ -353,7 +349,6 @@ class LockSettingsStorage extends WatchableImpl {
                     Slog.w(TAG, "Failed to zeroize " + path, e);
                 }
                 path.delete();
-                dispatchChange(this);
                 mCache.putFile(path, null);
             }
         }
@@ -472,7 +467,6 @@ class LockSettingsStorage extends WatchableImpl {
         } finally {
             db.endTransaction();
         }
-        dispatchChange(this);
     }
 
     public void setBoolean(String key, boolean value, int userId) {
@@ -551,7 +545,6 @@ class LockSettingsStorage extends WatchableImpl {
         }
         persistentDataBlock.setFrpCredentialHandle(PersistentData.toBytes(
                 persistentType, userId, qualityForUi, payload));
-        dispatchChange(this);
     }
 
     public PersistentData readPersistentDataBlock() {

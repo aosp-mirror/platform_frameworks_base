@@ -143,8 +143,6 @@ import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationTo
 import com.android.server.locksettings.SyntheticPasswordManager.TokenType;
 import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.utils.Watchable;
-import com.android.server.utils.Watcher;
 import com.android.server.wm.WindowManagerInternal;
 
 import libcore.util.HexEncoding;
@@ -226,7 +224,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     protected final Handler mHandler;
     @VisibleForTesting
     protected final LockSettingsStorage mStorage;
-    private final Watcher mStorageWatcher;
     private final LockSettingsStrongAuth mStrongAuth;
     private final SynchronizedStrongAuthTracker mStrongAuthTracker;
     private final BiometricDeferredQueue mBiometricDeferredQueue;
@@ -563,12 +560,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private class StorageWatcher extends Watcher {
-        public void onChange(Watchable what) {
-            LockSettingsService.this.onChange();
-        }
-    }
-
     public LockSettingsService(Context context) {
         this(new Injector(context));
     }
@@ -608,16 +599,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 mStorage);
 
         LocalServices.addService(LockSettingsInternal.class, new LocalService());
-
-        mStorageWatcher = new StorageWatcher();
-        mStorage.registerObserver(mStorageWatcher);
-    }
-
-    /**
-     * Invalidate caches if the storage has changed.
-     */
-    private void onChange() {
-        LockPatternUtils.invalidateCredentialTypeCache();
     }
 
     /**
@@ -2732,6 +2713,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             removeBiometricsForUser(userId);
         }
         setSyntheticPasswordHandleLocked(newHandle, userId);
+        LockPatternUtils.invalidateCredentialTypeCache();
         synchronizeUnifiedWorkChallengeForProfiles(userId, profilePasswords);
 
         setUserPasswordMetrics(credential, userId);
