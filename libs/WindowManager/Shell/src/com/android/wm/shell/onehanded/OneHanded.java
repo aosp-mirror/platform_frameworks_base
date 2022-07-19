@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.onehanded;
 
-import android.content.res.Configuration;
 import android.os.SystemProperties;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
@@ -81,11 +80,6 @@ public interface OneHanded {
      * transition start or finish
      */
     void registerTransitionCallback(OneHandedTransitionCallback callback);
-
-    /**
-     * Receive onConfigurationChanged() events
-     */
-    void onConfigChanged(Configuration newConfig);
 
     /**
      * Notifies when user switch complete

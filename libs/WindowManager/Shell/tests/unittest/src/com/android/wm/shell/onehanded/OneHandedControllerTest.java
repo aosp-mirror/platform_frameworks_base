@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,6 +49,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.sysui.ShellController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -67,6 +69,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     OneHandedTimeoutHandler mSpiedTimeoutHandler;
     OneHandedState mSpiedTransitionState;
 
+    @Mock
+    ShellController mMockShellController;
     @Mock
     DisplayLayout mDisplayLayout;
     @Mock
@@ -123,6 +127,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         mOneHandedAccessibilityUtil = new OneHandedAccessibilityUtil(mContext);
         mSpiedOneHandedController = spy(new OneHandedController(
                 mContext,
+                mMockShellController,
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,
@@ -136,6 +141,11 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 mMockShellMainExecutor,
                 mMockShellMainHandler)
         );
+    }
+
+    @Test
+    public void testControllerRegistersConfigChangeListener() {
+        verify(mMockShellController, times(1)).addConfigurationChangeListener(any());
     }
 
     @Test

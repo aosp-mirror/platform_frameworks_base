@@ -48,6 +48,7 @@ import com.android.wm.shell.pip.tv.TvPipNotificationController;
 import com.android.wm.shell.pip.tv.TvPipTaskOrganizer;
 import com.android.wm.shell.pip.tv.TvPipTransition;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -64,6 +65,7 @@ public abstract class TvPipModule {
     @Provides
     static Optional<Pip> providePip(
             Context context,
+            ShellController shellController,
             TvPipBoundsState tvPipBoundsState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsController tvPipBoundsController,
@@ -81,6 +83,7 @@ public abstract class TvPipModule {
         return Optional.of(
                 TvPipController.create(
                         context,
+                        shellController,
                         tvPipBoundsState,
                         tvPipBoundsAlgorithm,
                         tvPipBoundsController,

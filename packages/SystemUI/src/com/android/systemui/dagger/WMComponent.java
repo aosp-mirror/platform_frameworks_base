@@ -41,6 +41,7 @@ import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
+import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelper;
 import com.android.wm.shell.transition.ShellTransitions;
 
@@ -86,6 +87,9 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<ShellCommandHandler> getShellCommandHandler();
+
+    @WMSingleton
+    ShellInterface getShell();
 
     @WMSingleton
     Optional<OneHanded> getOneHanded();
