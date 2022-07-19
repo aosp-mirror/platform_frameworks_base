@@ -1404,7 +1404,7 @@ public final class InputMethodManager {
         // We intentionally do not use UserHandle.getCallingUserId() here because for system
         // services InputMethodManagerInternal.getInputMethodListAsUser() should be used
         // instead.
-        return mServiceInvoker.getInputMethodList(UserHandle.myUserId());
+        return mServiceInvoker.getInputMethodList(UserHandle.myUserId(), DirectBootAwareness.AUTO);
     }
 
     /**
@@ -1452,7 +1452,7 @@ public final class InputMethodManager {
     @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
     @NonNull
     public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
-        return mServiceInvoker.getInputMethodList(userId);
+        return mServiceInvoker.getInputMethodList(userId, DirectBootAwareness.AUTO);
     }
 
     /**
@@ -1468,7 +1468,7 @@ public final class InputMethodManager {
     @NonNull
     public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId,
             @DirectBootAwareness int directBootAwareness) {
-        return mServiceInvoker.getAwareLockedInputMethodList(userId, directBootAwareness);
+        return mServiceInvoker.getInputMethodList(userId, directBootAwareness);
     }
 
     /**

@@ -38,11 +38,7 @@ interface IInputMethodManager {
     // TODO: Use ParceledListSlice instead
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
-    List<InputMethodInfo> getInputMethodList(int userId);
-
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
-            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
-    List<InputMethodInfo> getAwareLockedInputMethodList(int userId, int directBootAwareness);
+    List<InputMethodInfo> getInputMethodList(int userId, int directBootAwareness);
 
     // TODO: Use ParceledListSlice instead
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
