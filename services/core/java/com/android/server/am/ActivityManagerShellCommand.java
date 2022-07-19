@@ -1003,13 +1003,17 @@ final class ActivityManagerShellCommand extends ShellCommand {
             if (isFullCompact) {
                 pw.println("Executing full compaction for " + app.mPid);
                 synchronized (mInternal.mProcLock) {
-                    mInternal.mOomAdjuster.mCachedAppOptimizer.compactAppFull(app, true);
+                    mInternal.mOomAdjuster.mCachedAppOptimizer.compactApp(app,
+                            CachedAppOptimizer.CompactProfile.FULL,
+                            CachedAppOptimizer.CompactSource.APP, true);
                 }
                 pw.println("Finished full compaction for " + app.mPid);
             } else if (isSomeCompact) {
                 pw.println("Executing some compaction for " + app.mPid);
                 synchronized (mInternal.mProcLock) {
-                    mInternal.mOomAdjuster.mCachedAppOptimizer.compactAppSome(app, true);
+                    mInternal.mOomAdjuster.mCachedAppOptimizer.compactApp(app,
+                            CachedAppOptimizer.CompactProfile.SOME,
+                            CachedAppOptimizer.CompactSource.APP, true);
                 }
                 pw.println("Finished some compaction for " + app.mPid);
             }

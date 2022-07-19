@@ -901,7 +901,9 @@ public final class CachedAppOptimizerTest {
         mProcessDependencies.setRss(rssBefore1);
         mProcessDependencies.setRssAfterCompaction(rssAfter1); //
         // WHEN we try to run compaction
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
+        mCachedAppOptimizerUnderTest.compactApp(processRecord,
+                CachedAppOptimizer.CompactProfile.FULL, CachedAppOptimizer.CompactSource.APP,
+                false);
         waitForHandler();
         // THEN process IS compacted.
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
@@ -916,7 +918,9 @@ public final class CachedAppOptimizerTest {
         processRecord.mOptRecord.setLastCompactTime(
                 processRecord.mOptRecord.getLastCompactTime() - 10_000);
         // WHEN we try to run compaction.
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
+        mCachedAppOptimizerUnderTest.compactApp(processRecord,
+                CachedAppOptimizer.CompactProfile.FULL, CachedAppOptimizer.CompactSource.APP,
+                false);
         waitForHandler();
         // THEN process IS NOT compacted - values after compaction for process 1 should remain the
         // same as from the last compaction.
@@ -932,7 +936,9 @@ public final class CachedAppOptimizerTest {
         processRecord.mOptRecord.setLastCompactTime(
                 processRecord.mOptRecord.getLastCompactTime() - 10_000);
         // WHEN we try to run compaction
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
+        mCachedAppOptimizerUnderTest.compactApp(processRecord,
+                CachedAppOptimizer.CompactProfile.FULL, CachedAppOptimizer.CompactSource.APP,
+                false);
         waitForHandler();
         // THEN process IS compacted - values after compaction for process 1 should be updated.
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
@@ -973,7 +979,9 @@ public final class CachedAppOptimizerTest {
         mProcessDependencies.setRss(rssBelowThreshold);
         mProcessDependencies.setRssAfterCompaction(rssBelowThresholdAfter);
         // WHEN we try to run compaction
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
+        mCachedAppOptimizerUnderTest.compactApp(processRecord,
+                CachedAppOptimizer.CompactProfile.FULL, CachedAppOptimizer.CompactSource.APP,
+                false);
         waitForHandler();
         // THEN process IS NOT compacted.
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNull();
@@ -982,7 +990,9 @@ public final class CachedAppOptimizerTest {
         mProcessDependencies.setRss(rssAboveThreshold);
         mProcessDependencies.setRssAfterCompaction(rssAboveThresholdAfter);
         // WHEN we try to run compaction
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
+        mCachedAppOptimizerUnderTest.compactApp(processRecord,
+                CachedAppOptimizer.CompactProfile.FULL, CachedAppOptimizer.CompactSource.APP,
+                false);
         waitForHandler();
         // THEN process IS compacted.
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
@@ -1059,13 +1069,17 @@ public final class CachedAppOptimizerTest {
         processRecord.mState.setCurAdj(100);
 
         // Compact process full
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
+        mCachedAppOptimizerUnderTest.compactApp(processRecord,
+                CachedAppOptimizer.CompactProfile.FULL, CachedAppOptimizer.CompactSource.APP,
+                false);
         waitForHandler();
         // the process is not compacted
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNull();
 
         // Compact process some
-        mCachedAppOptimizerUnderTest.compactAppSome(processRecord, false);
+        mCachedAppOptimizerUnderTest.compactApp(processRecord,
+                CachedAppOptimizer.CompactProfile.SOME, CachedAppOptimizer.CompactSource.APP,
+                false);
         waitForHandler();
         // the process is not compacted
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNull();
@@ -1074,7 +1088,9 @@ public final class CachedAppOptimizerTest {
         processRecord.mState.setCurAdj(100);
 
         // We force a full compaction
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, true);
+        mCachedAppOptimizerUnderTest.compactApp(processRecord,
+                CachedAppOptimizer.CompactProfile.FULL, CachedAppOptimizer.CompactSource.APP,
+                true);
         waitForHandler();
         // then process is compacted.
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
@@ -1082,7 +1098,8 @@ public final class CachedAppOptimizerTest {
         mCachedAppOptimizerUnderTest.mLastCompactionStats.clear();
 
         // We force a some compaction
-        mCachedAppOptimizerUnderTest.compactAppSome(processRecord, true);
+        mCachedAppOptimizerUnderTest.compactApp(processRecord,
+                CachedAppOptimizer.CompactProfile.SOME, CachedAppOptimizer.CompactSource.APP, true);
         waitForHandler();
         // then process is compacted.
         CachedAppOptimizer.CompactProfile executedCompactProfile =

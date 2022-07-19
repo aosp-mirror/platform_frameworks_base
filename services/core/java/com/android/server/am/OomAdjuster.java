@@ -2584,11 +2584,13 @@ public class OomAdjuster {
                         // processing of the requests. As a result, there is throttling both here
                         // and in CachedAppOptimizer.
                         && mCachedAppOptimizer.shouldCompactPersistent(app, now)) {
-                    mCachedAppOptimizer.compactAppPersistent(app);
+                    mCachedAppOptimizer.compactApp(app, CachedAppOptimizer.CompactProfile.FULL,
+                            CachedAppOptimizer.CompactSource.PERSISTENT, false);
                 } else if (state.getCurProcState()
                                 == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
                         && mCachedAppOptimizer.shouldCompactBFGS(app, now)) {
-                    mCachedAppOptimizer.compactAppBfgs(app);
+                    mCachedAppOptimizer.compactApp(app, CachedAppOptimizer.CompactProfile.FULL,
+                            CachedAppOptimizer.CompactSource.BFGS, false);
                 }
             }
         }

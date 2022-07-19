@@ -168,6 +168,11 @@ public final class CachedAppOptimizer {
     // This indicates the process OOM memory state that initiated the compaction request
     public enum CompactSource { APP, PERSISTENT, BFGS }
 
+    public enum CancelCompactReason {
+        SCREEN_ON, // screen was turned on which cancels all compactions.
+        OOM_IMPROVEMENT // process moved out of cached state and into a more perceptible state.
+    }
+
     // Handler constants.
     static final int COMPACT_PROCESS_MSG = 1;
     static final int COMPACT_SYSTEM_MSG = 2;
@@ -485,6 +490,8 @@ public final class CachedAppOptimizer {
     private long mTotalCompactionDowngrades;
     private long mSystemCompactionsPerformed;
     private long mSystemTotalMemFreed;
+    private EnumMap<CancelCompactReason, Integer> mTotalCompactionsCancelled =
+            new EnumMap<>(CancelCompactReason.class);
 
     private final ProcessDependencies mProcessDependencies;
     private final ProcLocksReader mProcLocksReader;
@@ -599,6 +606,10 @@ public final class CachedAppOptimizer {
             pw.println("Total Compactions Performed by profile: " + totalCompactPerformedSome
                     + " some, " + totalCompactPerformedFull + " full");
             pw.println("Total compactions downgraded: " + mTotalCompactionDowngrades);
+            pw.println("Total compactions cancelled by reason: ");
+            for (CancelCompactReason reason : mTotalCompactionsCancelled.keySet()) {
+                pw.println("    " + reason + ": " + mTotalCompactionsCancelled.get(reason));
+            }
             pw.println();
 
             pw.println(" System Compaction Memory Stats");
@@ -653,13 +664,6 @@ public final class CachedAppOptimizer {
         }
     }
 
-    @GuardedBy("mProcLock")
-    void compactAppSome(ProcessRecord app, boolean force) {
-        app.mOptRecord.setReqCompactProfile(CompactProfile.SOME);
-        app.mOptRecord.setReqCompactSource(CompactSource.APP);
-        compactApp(app, force);
-    }
-
     // This method returns true only if requirements are met. Note, that requirements are different
     // from throttles applied at the time a compaction is trying to be executed in the sense that
     // these are not subject to change dependent on time or memory as throttles usually do.
@@ -687,31 +691,13 @@ public final class CachedAppOptimizer {
     }
 
     @GuardedBy("mProcLock")
-    void compactAppFull(ProcessRecord app, boolean force) {
-        // Apply OOM adj score throttle for Full App Compaction.
-        if (DEBUG_COMPACTION) {
-            Slog.d(TAG_AM, " compactAppFull requested for " + app.processName + " force: " + force);
-        }
-        app.mOptRecord.setReqCompactSource(CompactSource.APP);
-        app.mOptRecord.setReqCompactProfile(CompactProfile.FULL);
-        compactApp(app, force);
-    }
-
-    @GuardedBy("mProcLock")
-    void compactAppPersistent(ProcessRecord app) {
-        app.mOptRecord.setReqCompactSource(CompactSource.PERSISTENT);
-        // Currently persistent processes only do full compactions.
-        app.mOptRecord.setReqCompactProfile(CompactProfile.FULL);
-        compactApp(app, false);
-    }
-
-    @GuardedBy("mProcLock")
-    boolean compactApp(ProcessRecord app, boolean force) {
-        CompactSource source = app.mOptRecord.getReqCompactSource();
+    boolean compactApp(
+            ProcessRecord app, CompactProfile compactProfile, CompactSource source, boolean force) {
+        app.mOptRecord.setReqCompactSource(source);
+        app.mOptRecord.setReqCompactProfile(compactProfile);
         AggregatedSourceCompactionStats perSourceStats = getPerSourceAggregatedCompactStat(source);
         AggregatedCompactionStats perProcStats =
                 getPerProcessAggregatedCompactStat(app.processName);
-        CompactProfile compactProfile = app.mOptRecord.getReqCompactProfile();
         switch (compactProfile) {
             case SOME:
                 ++perProcStats.mSomeCompactRequested;
@@ -798,14 +784,6 @@ public final class CachedAppOptimizer {
     boolean shouldCompactPersistent(ProcessRecord app, long now) {
         return (app.mOptRecord.getLastCompactTime() == 0
                 || (now - app.mOptRecord.getLastCompactTime()) > mCompactThrottlePersistent);
-    }
-
-    @GuardedBy("mProcLock")
-    void compactAppBfgs(ProcessRecord app) {
-        app.mOptRecord.setReqCompactSource(CompactSource.BFGS);
-        // Currently bfgs only do full compactions.
-        app.mOptRecord.setReqCompactProfile(CompactProfile.FULL);
-        compactApp(app, false);
     }
 
     @GuardedBy("mProcLock")
@@ -1408,16 +1386,17 @@ public final class CachedAppOptimizer {
         if(wakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE) {
             // Remove any pending compaction we may have scheduled to happen while screen was off
             Slog.e(TAG_AM, "Cancel pending or running compactions as system is awake");
-            cancelAllCompactions();
+            cancelAllCompactions(CancelCompactReason.SCREEN_ON);
         }
     }
 
-    void cancelAllCompactions() {
+    void cancelAllCompactions(CancelCompactReason reason) {
         synchronized (mProcLock) {
             int size = mPendingCompactionProcesses.size();
             ProcessRecord record;
             for (int i=0; i < size; ++i) {
                 record = mPendingCompactionProcesses.get(i);
+                cancelCompactionForProcess(record, reason);
                 // The process record is kept alive after compactions are cleared,
                 // so make sure to reset the compaction state to avoid skipping any future
                 // compactions due to a stale value here.
@@ -1428,24 +1407,51 @@ public final class CachedAppOptimizer {
         cancelCompaction();
     }
 
+    @GuardedBy("mProcLock")
+    void cancelCompactionForProcess(ProcessRecord app, CancelCompactReason cancelReason) {
+        boolean cancelled = false;
+        if (!mPendingCompactionProcesses.isEmpty() && mPendingCompactionProcesses.contains(app)) {
+            app.mOptRecord.setHasPendingCompact(false);
+            mPendingCompactionProcesses.remove(app);
+            cancelled = true;
+        }
+        if (DefaultProcessDependencies.mPidCompacting == app.mPid) {
+            cancelCompaction();
+            cancelled = true;
+        }
+        if (cancelled) {
+            if (mTotalCompactionsCancelled.containsKey(cancelReason)) {
+                int count = mTotalCompactionsCancelled.get(cancelReason);
+                mTotalCompactionsCancelled.put(cancelReason, count + 1);
+            } else {
+                mTotalCompactionsCancelled.put(cancelReason, 1);
+            }
+            if (DEBUG_COMPACTION) {
+                Slog.d(TAG_AM,
+                        "Cancelled pending or running compactions for process: " +
+                                app.processName != null ? app.processName : "" +
+                                " reason: " + cancelReason.name());
+            }
+        }
+    }
+
     @GuardedBy({"mService", "mProcLock"})
     void onOomAdjustChanged(int oldAdj, int newAdj, ProcessRecord app) {
         // Cancel any currently executing compactions
         // if the process moved out of cached state
-        if (DefaultProcessDependencies.mPidCompacting == app.mPid && newAdj < oldAdj
-                && newAdj < ProcessList.CACHED_APP_MIN_ADJ) {
-            cancelCompaction();
+        if (newAdj < oldAdj && newAdj < ProcessList.CACHED_APP_MIN_ADJ) {
+            cancelCompactionForProcess(app, CancelCompactReason.OOM_IMPROVEMENT);
         }
 
         if (oldAdj <= ProcessList.PERCEPTIBLE_APP_ADJ
                 && (newAdj == ProcessList.PREVIOUS_APP_ADJ || newAdj == ProcessList.HOME_APP_ADJ)) {
             // Perform a minor compaction when a perceptible app becomes the prev/home app
-            compactAppSome(app, false);
+            compactApp(app, CompactProfile.SOME, CompactSource.APP, false);
         } else if (oldAdj < ProcessList.CACHED_APP_MIN_ADJ
                 && newAdj >= ProcessList.CACHED_APP_MIN_ADJ
                 && newAdj <= ProcessList.CACHED_APP_MAX_ADJ) {
             // Perform a major compaction when any app enters cached
-            compactAppFull(app, false);
+            compactApp(app, CompactProfile.FULL, CompactSource.APP, false);
         }
     }
 
