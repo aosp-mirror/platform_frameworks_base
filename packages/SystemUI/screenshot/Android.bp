@@ -38,6 +38,7 @@ android_library {
         "androidx.test.espresso.core",
         "androidx.appcompat_appcompat",
         "platform-screenshot-diff-core",
+        "guava",
     ],
 
     kotlincflags: ["-Xjvm-default=all"],
