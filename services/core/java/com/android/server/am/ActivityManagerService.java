@@ -8858,6 +8858,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Do the rest in a worker thread to avoid blocking the caller on I/O
         // (After this point, we shouldn't access AMS internal data structures.)
+        //
+        // If process is null, we are being called from some internal code
+        // and may be about to die -- run this synchronously.
+        final boolean runSynchronously = process == null;
         Thread worker = new Thread("Error dump: " + dropboxTag) {
             @Override
             public void run() {
@@ -8885,7 +8889,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     sb.append(crashInfo.stackTrace);
                 }
 
-                if (lines > 0) {
+                if (lines > 0 && !runSynchronously) {
                     sb.append("\n");
 
                     InputStreamReader input = null;
@@ -8917,9 +8921,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         };
 
-        if (process == null) {
-            // If process is null, we are being called from some internal code
-            // and may be about to die -- run this synchronously.
+        if (runSynchronously) {
             final int oldMask = StrictMode.allowThreadDiskWritesMask();
             try {
                 worker.run();
