@@ -13,18 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
-
-package com.android.keyguard.clock
+package com.android.systemui.shared.clocks
 
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.plugins.Clock
-import com.android.systemui.plugins.ClockId
-import com.android.systemui.plugins.ClockMetadata
-import com.android.systemui.plugins.ClockProviderPlugin
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.shared.plugins.PluginManager
 import com.android.systemui.util.mockito.argumentCaptor
