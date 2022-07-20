@@ -19,6 +19,12 @@
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
 
+        <!-- We make the status and navigation bars transparent so that the screenshotted content is
+             not clipped by the status bar height when drawn into the Bitmap (which is what happens
+             given that we draw the view into the Bitmap using hardware acceleration). -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+
         <!-- Make sure that device specific cutouts don't impact the outcome of screenshot tests -->
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>

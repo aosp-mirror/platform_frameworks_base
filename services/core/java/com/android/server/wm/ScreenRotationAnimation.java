@@ -173,11 +173,6 @@ class ScreenRotationAnimation {
 
             if (isSizeChanged) {
                 mRoundedCornerOverlay = displayContent.findRoundedCornerOverlays();
-            } else {
-                // Exclude rounded corner overlay from screenshot buffer. Rounded
-                // corner overlay windows are un-rotated during rotation animation
-                // for a seamless transition.
-                builder.setExcludeLayers(displayContent.findRoundedCornerOverlays());
             }
 
             SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
@@ -600,7 +595,7 @@ class ScreenRotationAnimation {
         }
 
         private SurfaceAnimator startDisplayRotation() {
-            return startAnimation(initializeBuilder()
+            SurfaceAnimator animator = startAnimation(initializeBuilder()
                             .setAnimationLeashParent(mDisplayContent.getSurfaceControl())
                             .setSurfaceControl(mDisplayContent.getWindowingLayer())
                             .setParentSurfaceControl(mDisplayContent.getSurfaceControl())
@@ -609,6 +604,13 @@ class ScreenRotationAnimation {
                             .build(),
                     createWindowAnimationSpec(mRotateEnterAnimation),
                     this::onAnimationEnd);
+
+            // Crop the animation leash to avoid extended wallpaper from showing over
+            // mBackColorSurface
+            Rect displayBounds = mDisplayContent.getBounds();
+            mDisplayContent.getPendingTransaction()
+                    .setWindowCrop(animator.mLeash, displayBounds.width(), displayBounds.height());
+            return animator;
         }
 
         private SurfaceAnimator startScreenshotAlphaAnimation() {

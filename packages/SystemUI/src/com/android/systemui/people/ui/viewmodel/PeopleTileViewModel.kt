@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.draganddrop;
+package com.android.systemui.people.ui.viewmodel
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import android.graphics.Bitmap
+import com.android.systemui.people.widget.PeopleTileKey
 
-/**
- * Interface for telling DragAndDrop stuff.
- */
-@ExternalThread
-public interface DragAndDrop {
-}
+/** Models UI state for a single tile/conversation. */
+data class PeopleTileViewModel(
+    val key: PeopleTileKey,
+    val icon: Bitmap,
+    val username: String?,
+)

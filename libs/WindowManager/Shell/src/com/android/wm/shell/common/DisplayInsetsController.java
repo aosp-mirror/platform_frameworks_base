@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.common;
 
+import android.content.ComponentName;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -171,14 +172,14 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
             }
         }
 
-        private void topFocusedWindowChanged(String packageName,
+        private void topFocusedWindowChanged(ComponentName component,
                 InsetsVisibilities requestedVisibilities) {
             CopyOnWriteArrayList<OnInsetsChangedListener> listeners = mListeners.get(mDisplayId);
             if (listeners == null) {
                 return;
             }
             for (OnInsetsChangedListener listener : listeners) {
-                listener.topFocusedWindowChanged(packageName, requestedVisibilities);
+                listener.topFocusedWindowChanged(component, requestedVisibilities);
             }
         }
 
@@ -186,10 +187,10 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
         private class DisplayWindowInsetsControllerImpl
                 extends IDisplayWindowInsetsController.Stub {
             @Override
-            public void topFocusedWindowChanged(String packageName,
+            public void topFocusedWindowChanged(ComponentName component,
                     InsetsVisibilities requestedVisibilities) throws RemoteException {
                 mMainExecutor.execute(() -> {
-                    PerDisplay.this.topFocusedWindowChanged(packageName, requestedVisibilities);
+                    PerDisplay.this.topFocusedWindowChanged(component, requestedVisibilities);
                 });
             }
 
@@ -234,10 +235,10 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
         /**
          * Called when top focused window changes to determine whether or not to take over insets
          * control. Won't be called if config_remoteInsetsControllerControlsSystemBars is false.
-         * @param packageName The name of the package that is open in the top focussed window.
+         * @param component The application component that is open in the top focussed window.
          * @param requestedVisibilities The insets visibilities requested by the focussed window.
          */
-        default void topFocusedWindowChanged(String packageName,
+        default void topFocusedWindowChanged(ComponentName component,
                 InsetsVisibilities requestedVisibilities) {}
 
         /**

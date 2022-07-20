@@ -21,7 +21,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-
 import com.android.systemui.R
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController
@@ -32,9 +31,7 @@ import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.util.ViewController
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.util.view.ViewUtil
-
 import java.util.Optional
-
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -58,8 +55,8 @@ class PhoneStatusBarViewController private constructor(
     override fun onViewAttached() {
         if (moveFromCenterAnimationController == null) return
 
-        val statusBarLeftSide: View = mView.findViewById(R.id.status_bar_left_side)
-        val systemIconArea: ViewGroup = mView.findViewById(R.id.system_icon_area)
+        val statusBarLeftSide: View = mView.findViewById(R.id.status_bar_start_side_except_heads_up)
+        val systemIconArea: ViewGroup = mView.findViewById(R.id.status_bar_end_side_content)
 
         val viewsToAnimate = arrayOf(
             statusBarLeftSide,
@@ -126,11 +123,11 @@ class PhoneStatusBarViewController private constructor(
     class StatusBarViewsCenterProvider : UnfoldMoveFromCenterAnimator.ViewCenterProvider {
         override fun getViewCenter(view: View, outPoint: Point) =
             when (view.id) {
-                R.id.status_bar_left_side -> {
+                R.id.status_bar_start_side_except_heads_up -> {
                     // items aligned to the start, return start center point
                     getViewEdgeCenter(view, outPoint, isStart = true)
                 }
-                R.id.system_icon_area -> {
+                R.id.status_bar_end_side_content -> {
                     // items aligned to the end, return end center point
                     getViewEdgeCenter(view, outPoint, isStart = false)
                 }

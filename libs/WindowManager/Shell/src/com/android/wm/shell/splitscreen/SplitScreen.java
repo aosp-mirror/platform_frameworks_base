@@ -77,12 +77,6 @@ public interface SplitScreen {
         return null;
     }
 
-    /**
-     * Called when the visibility of the keyguard changes.
-     * @param showing Indicates if the keyguard is now visible.
-     */
-    void onKeyguardVisibilityChanged(boolean showing);
-
     /** Called when device waking up finished. */
     void onFinishedWakingUp();
 
