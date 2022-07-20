@@ -41,6 +41,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
@@ -73,6 +74,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import dagger.Lazy;
 
@@ -113,6 +115,7 @@ public class NotificationEntryManager implements
     private final IStatusBarService mStatusBarService;
     private final NotifLiveDataStoreImpl mNotifLiveDataStore;
     private final DumpManager mDumpManager;
+    private final Executor mBgExecutor;
 
     private final Set<NotificationEntry> mAllNotifications = new ArraySet<>();
     private final Set<NotificationEntry> mReadOnlyAllNotifications =
@@ -159,7 +162,8 @@ public class NotificationEntryManager implements
             LeakDetector leakDetector,
             IStatusBarService statusBarService,
             NotifLiveDataStoreImpl notifLiveDataStore,
-            DumpManager dumpManager
+            DumpManager dumpManager,
+            @Background Executor bgExecutor
     ) {
         mLogger = logger;
         mGroupManager = groupManager;
@@ -170,6 +174,7 @@ public class NotificationEntryManager implements
         mStatusBarService = statusBarService;
         mNotifLiveDataStore = notifLiveDataStore;
         mDumpManager = dumpManager;
+        mBgExecutor = bgExecutor;
     }
 
     /** Once called, the NEM will start processing notification events from system server. */
@@ -566,17 +571,19 @@ public class NotificationEntryManager implements
     private void sendNotificationRemovalToServer(
             StatusBarNotification notification,
             DismissedByUserStats dismissedByUserStats) {
-        try {
-            mStatusBarService.onNotificationClear(
-                    notification.getPackageName(),
-                    notification.getUser().getIdentifier(),
-                    notification.getKey(),
-                    dismissedByUserStats.dismissalSurface,
-                    dismissedByUserStats.dismissalSentiment,
-                    dismissedByUserStats.notificationVisibility);
-        } catch (RemoteException ex) {
-            // system process is dead if we're here.
-        }
+        mBgExecutor.execute(() -> {
+            try {
+                mStatusBarService.onNotificationClear(
+                        notification.getPackageName(),
+                        notification.getUser().getIdentifier(),
+                        notification.getKey(),
+                        dismissedByUserStats.dismissalSurface,
+                        dismissedByUserStats.dismissalSentiment,
+                        dismissedByUserStats.notificationVisibility);
+            } catch (RemoteException ex) {
+                // system process is dead if we're here.
+            }
+        });
     }
 
     /**

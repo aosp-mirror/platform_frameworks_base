@@ -194,7 +194,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 mLeakDetector,
                 mock(IStatusBarService.class),
                 NotifLiveDataStoreMocksKt.createNotifLiveDataStoreImplMock(),
-                mock(DumpManager.class)
+                mock(DumpManager.class),
+                mBgExecutor
         );
         mEntryManager.initialize(
                 mNotificationListener,
