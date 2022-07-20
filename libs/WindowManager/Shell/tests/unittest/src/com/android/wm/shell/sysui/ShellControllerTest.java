@@ -46,12 +46,14 @@ public class ShellControllerTest extends ShellTestCase {
     private ShellExecutor mExecutor;
 
     private ShellController mController;
-    private TestConfigurationChangeListener mListener;
+    private TestConfigurationChangeListener mConfigChangeListener;
+    private TestKeyguardChangeListener mKeyguardChangeListener;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mListener = new TestConfigurationChangeListener();
+        mKeyguardChangeListener = new TestKeyguardChangeListener();
+        mConfigChangeListener = new TestConfigurationChangeListener();
         mController = new ShellController(mExecutor);
         mController.onConfigurationChanged(getConfigurationCopy());
     }
@@ -62,47 +64,97 @@ public class ShellControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void testAddKeyguardChangeListener_ensureCallback() {
+        mController.addKeyguardChangeListener(mKeyguardChangeListener);
+
+        mController.onKeyguardVisibilityChanged(true, false, false);
+        assertTrue(mKeyguardChangeListener.visibilityChanged == 1);
+        assertTrue(mKeyguardChangeListener.dismissAnimationFinished == 0);
+    }
+
+    @Test
+    public void testDoubleAddKeyguardChangeListener_ensureSingleCallback() {
+        mController.addKeyguardChangeListener(mKeyguardChangeListener);
+        mController.addKeyguardChangeListener(mKeyguardChangeListener);
+
+        mController.onKeyguardVisibilityChanged(true, false, false);
+        assertTrue(mKeyguardChangeListener.visibilityChanged == 1);
+        assertTrue(mKeyguardChangeListener.dismissAnimationFinished == 0);
+    }
+
+    @Test
+    public void testAddRemoveKeyguardChangeListener_ensureNoCallback() {
+        mController.addKeyguardChangeListener(mKeyguardChangeListener);
+        mController.removeKeyguardChangeListener(mKeyguardChangeListener);
+
+        mController.onKeyguardVisibilityChanged(true, false, false);
+        assertTrue(mKeyguardChangeListener.visibilityChanged == 0);
+        assertTrue(mKeyguardChangeListener.dismissAnimationFinished == 0);
+    }
+
+    @Test
+    public void testKeyguardVisibilityChanged() {
+        mController.addKeyguardChangeListener(mKeyguardChangeListener);
+
+        mController.onKeyguardVisibilityChanged(true, true, true);
+        assertTrue(mKeyguardChangeListener.visibilityChanged == 1);
+        assertTrue(mKeyguardChangeListener.lastAnimatingDismiss);
+        assertTrue(mKeyguardChangeListener.lastOccluded);
+        assertTrue(mKeyguardChangeListener.lastAnimatingDismiss);
+        assertTrue(mKeyguardChangeListener.dismissAnimationFinished == 0);
+    }
+
+    @Test
+    public void testKeyguardDismissAnimationFinished() {
+        mController.addKeyguardChangeListener(mKeyguardChangeListener);
+
+        mController.onKeyguardDismissAnimationFinished();
+        assertTrue(mKeyguardChangeListener.visibilityChanged == 0);
+        assertTrue(mKeyguardChangeListener.dismissAnimationFinished == 1);
+    }
+
+    @Test
     public void testAddConfigurationChangeListener_ensureCallback() {
-        mController.addConfigurationChangeListener(mListener);
+        mController.addConfigurationChangeListener(mConfigChangeListener);
 
         Configuration newConfig = getConfigurationCopy();
         newConfig.densityDpi = 200;
         mController.onConfigurationChanged(newConfig);
-        assertTrue(mListener.configChanges == 1);
+        assertTrue(mConfigChangeListener.configChanges == 1);
     }
 
     @Test
     public void testDoubleAddConfigurationChangeListener_ensureSingleCallback() {
-        mController.addConfigurationChangeListener(mListener);
-        mController.addConfigurationChangeListener(mListener);
+        mController.addConfigurationChangeListener(mConfigChangeListener);
+        mController.addConfigurationChangeListener(mConfigChangeListener);
 
         Configuration newConfig = getConfigurationCopy();
         newConfig.densityDpi = 200;
         mController.onConfigurationChanged(newConfig);
-        assertTrue(mListener.configChanges == 1);
+        assertTrue(mConfigChangeListener.configChanges == 1);
     }
 
     @Test
     public void testAddRemoveConfigurationChangeListener_ensureNoCallback() {
-        mController.addConfigurationChangeListener(mListener);
-        mController.removeConfigurationChangeListener(mListener);
+        mController.addConfigurationChangeListener(mConfigChangeListener);
+        mController.removeConfigurationChangeListener(mConfigChangeListener);
 
         Configuration newConfig = getConfigurationCopy();
         newConfig.densityDpi = 200;
         mController.onConfigurationChanged(newConfig);
-        assertTrue(mListener.configChanges == 0);
+        assertTrue(mConfigChangeListener.configChanges == 0);
     }
 
     @Test
     public void testMultipleConfigurationChangeListeners() {
         TestConfigurationChangeListener listener2 = new TestConfigurationChangeListener();
-        mController.addConfigurationChangeListener(mListener);
+        mController.addConfigurationChangeListener(mConfigChangeListener);
         mController.addConfigurationChangeListener(listener2);
 
         Configuration newConfig = getConfigurationCopy();
         newConfig.densityDpi = 200;
         mController.onConfigurationChanged(newConfig);
-        assertTrue(mListener.configChanges == 1);
+        assertTrue(mConfigChangeListener.configChanges == 1);
         assertTrue(listener2.configChanges == 1);
     }
 
@@ -115,7 +167,7 @@ public class ShellControllerTest extends ShellTestCase {
             }
         };
         mController.addConfigurationChangeListener(badListener);
-        mController.addConfigurationChangeListener(mListener);
+        mController.addConfigurationChangeListener(mConfigChangeListener);
 
         // Ensure we don't fail just because a listener was removed mid-callback
         Configuration newConfig = getConfigurationCopy();
@@ -125,77 +177,77 @@ public class ShellControllerTest extends ShellTestCase {
 
     @Test
     public void testDensityChangeCallback() {
-        mController.addConfigurationChangeListener(mListener);
+        mController.addConfigurationChangeListener(mConfigChangeListener);
 
         Configuration newConfig = getConfigurationCopy();
         newConfig.densityDpi = 200;
         mController.onConfigurationChanged(newConfig);
-        assertTrue(mListener.configChanges == 1);
-        assertTrue(mListener.densityChanges == 1);
-        assertTrue(mListener.smallestWidthChanges == 0);
-        assertTrue(mListener.themeChanges == 0);
-        assertTrue(mListener.localeChanges == 0);
+        assertTrue(mConfigChangeListener.configChanges == 1);
+        assertTrue(mConfigChangeListener.densityChanges == 1);
+        assertTrue(mConfigChangeListener.smallestWidthChanges == 0);
+        assertTrue(mConfigChangeListener.themeChanges == 0);
+        assertTrue(mConfigChangeListener.localeChanges == 0);
     }
 
     @Test
     public void testFontScaleChangeCallback() {
-        mController.addConfigurationChangeListener(mListener);
+        mController.addConfigurationChangeListener(mConfigChangeListener);
 
         Configuration newConfig = getConfigurationCopy();
         newConfig.fontScale = 2;
         mController.onConfigurationChanged(newConfig);
-        assertTrue(mListener.configChanges == 1);
-        assertTrue(mListener.densityChanges == 1);
-        assertTrue(mListener.smallestWidthChanges == 0);
-        assertTrue(mListener.themeChanges == 0);
-        assertTrue(mListener.localeChanges == 0);
+        assertTrue(mConfigChangeListener.configChanges == 1);
+        assertTrue(mConfigChangeListener.densityChanges == 1);
+        assertTrue(mConfigChangeListener.smallestWidthChanges == 0);
+        assertTrue(mConfigChangeListener.themeChanges == 0);
+        assertTrue(mConfigChangeListener.localeChanges == 0);
     }
 
     @Test
     public void testSmallestWidthChangeCallback() {
-        mController.addConfigurationChangeListener(mListener);
+        mController.addConfigurationChangeListener(mConfigChangeListener);
 
         Configuration newConfig = getConfigurationCopy();
         newConfig.smallestScreenWidthDp = 100;
         mController.onConfigurationChanged(newConfig);
-        assertTrue(mListener.configChanges == 1);
-        assertTrue(mListener.densityChanges == 0);
-        assertTrue(mListener.smallestWidthChanges == 1);
-        assertTrue(mListener.themeChanges == 0);
-        assertTrue(mListener.localeChanges == 0);
+        assertTrue(mConfigChangeListener.configChanges == 1);
+        assertTrue(mConfigChangeListener.densityChanges == 0);
+        assertTrue(mConfigChangeListener.smallestWidthChanges == 1);
+        assertTrue(mConfigChangeListener.themeChanges == 0);
+        assertTrue(mConfigChangeListener.localeChanges == 0);
     }
 
     @Test
     public void testThemeChangeCallback() {
-        mController.addConfigurationChangeListener(mListener);
+        mController.addConfigurationChangeListener(mConfigChangeListener);
 
         Configuration newConfig = getConfigurationCopy();
         newConfig.assetsSeq++;
         mController.onConfigurationChanged(newConfig);
-        assertTrue(mListener.configChanges == 1);
-        assertTrue(mListener.densityChanges == 0);
-        assertTrue(mListener.smallestWidthChanges == 0);
-        assertTrue(mListener.themeChanges == 1);
-        assertTrue(mListener.localeChanges == 0);
+        assertTrue(mConfigChangeListener.configChanges == 1);
+        assertTrue(mConfigChangeListener.densityChanges == 0);
+        assertTrue(mConfigChangeListener.smallestWidthChanges == 0);
+        assertTrue(mConfigChangeListener.themeChanges == 1);
+        assertTrue(mConfigChangeListener.localeChanges == 0);
     }
 
     @Test
     public void testNightModeChangeCallback() {
-        mController.addConfigurationChangeListener(mListener);
+        mController.addConfigurationChangeListener(mConfigChangeListener);
 
         Configuration newConfig = getConfigurationCopy();
         newConfig.uiMode = Configuration.UI_MODE_NIGHT_YES;
         mController.onConfigurationChanged(newConfig);
-        assertTrue(mListener.configChanges == 1);
-        assertTrue(mListener.densityChanges == 0);
-        assertTrue(mListener.smallestWidthChanges == 0);
-        assertTrue(mListener.themeChanges == 1);
-        assertTrue(mListener.localeChanges == 0);
+        assertTrue(mConfigChangeListener.configChanges == 1);
+        assertTrue(mConfigChangeListener.densityChanges == 0);
+        assertTrue(mConfigChangeListener.smallestWidthChanges == 0);
+        assertTrue(mConfigChangeListener.themeChanges == 1);
+        assertTrue(mConfigChangeListener.localeChanges == 0);
     }
 
     @Test
     public void testLocaleChangeCallback() {
-        mController.addConfigurationChangeListener(mListener);
+        mController.addConfigurationChangeListener(mConfigChangeListener);
 
         Configuration newConfig = getConfigurationCopy();
         // Just change the locales to be different
@@ -205,11 +257,11 @@ public class ShellControllerTest extends ShellTestCase {
             newConfig.locale = Locale.CANADA;
         }
         mController.onConfigurationChanged(newConfig);
-        assertTrue(mListener.configChanges == 1);
-        assertTrue(mListener.densityChanges == 0);
-        assertTrue(mListener.smallestWidthChanges == 0);
-        assertTrue(mListener.themeChanges == 0);
-        assertTrue(mListener.localeChanges == 1);
+        assertTrue(mConfigChangeListener.configChanges == 1);
+        assertTrue(mConfigChangeListener.densityChanges == 0);
+        assertTrue(mConfigChangeListener.smallestWidthChanges == 0);
+        assertTrue(mConfigChangeListener.themeChanges == 0);
+        assertTrue(mConfigChangeListener.localeChanges == 1);
     }
 
     private Configuration getConfigurationCopy() {
@@ -251,6 +303,29 @@ public class ShellControllerTest extends ShellTestCase {
         @Override
         public void onLocaleOrLayoutDirectionChanged() {
             localeChanges++;
+        }
+    }
+
+    private class TestKeyguardChangeListener implements KeyguardChangeListener {
+        // Counts of number of times each of the callbacks are called
+        public int visibilityChanged;
+        public boolean lastVisibility;
+        public boolean lastOccluded;
+        public boolean lastAnimatingDismiss;
+        public int dismissAnimationFinished;
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
+                boolean animatingDismiss) {
+            lastVisibility = visible;
+            lastOccluded = occluded;
+            lastAnimatingDismiss = animatingDismiss;
+            visibilityChanged++;
+        }
+
+        @Override
+        public void onKeyguardDismissAnimationFinished() {
+            dismissAnimationFinished++;
         }
     }
 }

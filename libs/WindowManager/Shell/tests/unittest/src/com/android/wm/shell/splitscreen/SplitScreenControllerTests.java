@@ -28,6 +28,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -44,10 +47,12 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -65,6 +70,7 @@ import java.util.Optional;
 @RunWith(AndroidJUnit4.class)
 public class SplitScreenControllerTests extends ShellTestCase {
 
+    @Mock ShellController mShellController;
     @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock SyncTransactionQueue mSyncQueue;
     @Mock RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
@@ -82,10 +88,17 @@ public class SplitScreenControllerTests extends ShellTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mSplitScreenController = spy(new SplitScreenController(mTaskOrganizer, mSyncQueue, mContext,
-                mRootTDAOrganizer, mMainExecutor, mDisplayController, mDisplayImeController,
-                mDisplayInsetsController, mTransitions, mTransactionPool, mIconProvider,
-                mRecentTasks));
+        mSplitScreenController = spy(new SplitScreenController(mShellController, mTaskOrganizer,
+                mSyncQueue, mContext, mRootTDAOrganizer, mMainExecutor, mDisplayController,
+                mDisplayImeController, mDisplayInsetsController, mTransitions, mTransactionPool,
+                mIconProvider, mRecentTasks));
+    }
+
+    @Test
+    public void testControllerRegistersKeyguardChangeListener() {
+        when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());
+        mSplitScreenController.onOrganizerRegistered();
+        verify(mShellController, times(1)).addKeyguardChangeListener(any());
     }
 
     @Test
