@@ -225,6 +225,7 @@ public abstract class WMShellModule {
     @Provides
     @DynamicOverride
     static SplitScreenController provideSplitScreenController(
+            ShellController shellController,
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, Context context,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
@@ -234,7 +235,7 @@ public abstract class WMShellModule {
             DisplayInsetsController displayInsetsController, Transitions transitions,
             TransactionPool transactionPool, IconProvider iconProvider,
             Optional<RecentTasksController> recentTasks) {
-        return new SplitScreenController(shellTaskOrganizer, syncQueue, context,
+        return new SplitScreenController(shellController, shellTaskOrganizer, syncQueue, context,
                 rootTaskDisplayAreaOrganizer, mainExecutor, displayController, displayImeController,
                 displayInsetsController, transitions, transactionPool, iconProvider,
                 recentTasks);

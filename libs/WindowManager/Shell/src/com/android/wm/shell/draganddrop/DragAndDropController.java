@@ -81,11 +81,9 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
     private final IconProvider mIconProvider;
     private SplitScreenController mSplitScreen;
     private ShellExecutor mMainExecutor;
-    private DragAndDropImpl mImpl;
     private ArrayList<DragAndDropListener> mListeners = new ArrayList<>();
 
     private final SparseArray<PerDisplay> mDisplayDropTargets = new SparseArray<>();
-    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
     /**
      * Listener called during drag events, currently just onDragStarted.
@@ -107,11 +105,6 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         mLogger = new DragAndDropEventLogger(uiEventLogger);
         mIconProvider = iconProvider;
         mMainExecutor = mainExecutor;
-        mImpl = new DragAndDropImpl();
-    }
-
-    public DragAndDrop asDragAndDrop() {
-        return mImpl;
     }
 
     public void initialize(Optional<SplitScreenController> splitscreen) {
@@ -352,9 +345,5 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
             rootView = rv;
             dragLayout = dl;
         }
-    }
-
-    private class DragAndDropImpl implements DragAndDrop {
-        // TODO: To be removed
     }
 }

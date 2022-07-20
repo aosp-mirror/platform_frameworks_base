@@ -40,8 +40,6 @@ public class HideDisplayCutoutController implements ConfigurationChangeListener 
     private final Context mContext;
     private final ShellController mShellController;
     private final HideDisplayCutoutOrganizer mOrganizer;
-    private final ShellExecutor mMainExecutor;
-    private final HideDisplayCutoutImpl mImpl = new HideDisplayCutoutImpl();
     @VisibleForTesting
     boolean mEnabled;
 
@@ -62,21 +60,16 @@ public class HideDisplayCutoutController implements ConfigurationChangeListener 
 
         HideDisplayCutoutOrganizer organizer =
                 new HideDisplayCutoutOrganizer(context, displayController, mainExecutor);
-        return new HideDisplayCutoutController(context, shellController, organizer, mainExecutor);
+        return new HideDisplayCutoutController(context, shellController, organizer);
     }
 
     HideDisplayCutoutController(Context context, ShellController shellController,
-            HideDisplayCutoutOrganizer organizer, ShellExecutor mainExecutor) {
+            HideDisplayCutoutOrganizer organizer) {
         mContext = context;
         mShellController = shellController;
         mOrganizer = organizer;
-        mMainExecutor = mainExecutor;
         updateStatus();
         mShellController.addConfigurationChangeListener(this);
-    }
-
-    public HideDisplayCutout asHideDisplayCutout() {
-        return mImpl;
     }
 
     @VisibleForTesting
@@ -111,9 +104,5 @@ public class HideDisplayCutoutController implements ConfigurationChangeListener 
         pw.print("mEnabled=");
         pw.println(mEnabled);
         mOrganizer.dump(pw);
-    }
-
-    private class HideDisplayCutoutImpl implements HideDisplayCutout {
-        // TODO: To be removed
     }
 }
