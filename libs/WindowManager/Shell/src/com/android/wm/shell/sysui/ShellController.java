@@ -47,7 +47,9 @@ public class ShellController {
     private final ShellExecutor mMainExecutor;
     private final ShellInterfaceImpl mImpl = new ShellInterfaceImpl();
 
-    private final CopyOnWriteArrayList<ConfigurationChangeListener> mListeners =
+    private final CopyOnWriteArrayList<ConfigurationChangeListener> mConfigChangeListeners =
+            new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<KeyguardChangeListener> mKeyguardChangeListeners =
             new CopyOnWriteArrayList<>();
     private Configuration mLastConfiguration;
 
@@ -68,15 +70,31 @@ public class ShellController {
      * particular order.
      */
     public void addConfigurationChangeListener(ConfigurationChangeListener listener) {
-        mListeners.remove(listener);
-        mListeners.add(listener);
+        mConfigChangeListeners.remove(listener);
+        mConfigChangeListeners.add(listener);
     }
 
     /**
      * Removes an existing configuration listener.
      */
     public void removeConfigurationChangeListener(ConfigurationChangeListener listener) {
-        mListeners.remove(listener);
+        mConfigChangeListeners.remove(listener);
+    }
+
+    /**
+     * Adds a new Keyguard listener. The Keyguard change callbacks are not made in any
+     * particular order.
+     */
+    public void addKeyguardChangeListener(KeyguardChangeListener listener) {
+        mKeyguardChangeListeners.remove(listener);
+        mKeyguardChangeListeners.add(listener);
+    }
+
+    /**
+     * Removes an existing Keyguard listener.
+     */
+    public void removeKeyguardChangeListener(KeyguardChangeListener listener) {
+        mKeyguardChangeListeners.remove(listener);
     }
 
     @VisibleForTesting
@@ -102,7 +120,7 @@ public class ShellController {
 
         // Update the last configuration and call listeners
         mLastConfiguration.updateFrom(newConfig);
-        for (ConfigurationChangeListener listener : mListeners) {
+        for (ConfigurationChangeListener listener : mConfigChangeListeners) {
             listener.onConfigurationChanged(newConfig);
             if (densityFontScaleChanged) {
                 listener.onDensityOrFontScaleChanged();
@@ -119,11 +137,26 @@ public class ShellController {
         }
     }
 
+    @VisibleForTesting
+    void onKeyguardVisibilityChanged(boolean visible, boolean occluded, boolean animatingDismiss) {
+        for (KeyguardChangeListener listener : mKeyguardChangeListeners) {
+            listener.onKeyguardVisibilityChanged(visible, occluded, animatingDismiss);
+        }
+    }
+
+    @VisibleForTesting
+    void onKeyguardDismissAnimationFinished() {
+        for (KeyguardChangeListener listener : mKeyguardChangeListeners) {
+            listener.onKeyguardDismissAnimationFinished();
+        }
+    }
+
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
-        pw.println(innerPrefix + "mListeners=" + mListeners.size());
+        pw.println(innerPrefix + "mConfigChangeListeners=" + mConfigChangeListeners.size());
         pw.println(innerPrefix + "mLastConfiguration=" + mLastConfiguration);
+        pw.println(innerPrefix + "mKeyguardChangeListeners=" + mKeyguardChangeListeners.size());
     }
 
     /**
@@ -135,6 +168,20 @@ public class ShellController {
         public void onConfigurationChanged(Configuration newConfiguration) {
             mMainExecutor.execute(() ->
                     ShellController.this.onConfigurationChanged(newConfiguration));
+        }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
+                boolean animatingDismiss) {
+            mMainExecutor.execute(() ->
+                    ShellController.this.onKeyguardVisibilityChanged(visible, occluded,
+                            animatingDismiss));
+        }
+
+        @Override
+        public void onKeyguardDismissAnimationFinished() {
+            mMainExecutor.execute(() ->
+                    ShellController.this.onKeyguardDismissAnimationFinished());
         }
     }
 }

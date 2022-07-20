@@ -29,7 +29,6 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.ShellTestCase;
-import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.sysui.ShellController;
 
 import org.junit.Before;
@@ -49,8 +48,6 @@ public class HideDisplayCutoutControllerTest extends ShellTestCase {
     private ShellController mShellController;
     @Mock
     private HideDisplayCutoutOrganizer mMockDisplayAreaOrganizer;
-    @Mock
-    private ShellExecutor mMockMainExecutor;
 
     private HideDisplayCutoutController mHideDisplayCutoutController;
 
@@ -58,7 +55,7 @@ public class HideDisplayCutoutControllerTest extends ShellTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mHideDisplayCutoutController = new HideDisplayCutoutController(
-                mContext, mShellController, mMockDisplayAreaOrganizer, mMockMainExecutor);
+                mContext, mShellController, mMockDisplayAreaOrganizer);
     }
 
     @Test

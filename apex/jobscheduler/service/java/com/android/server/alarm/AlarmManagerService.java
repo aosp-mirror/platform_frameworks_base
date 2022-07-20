@@ -112,6 +112,7 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.LongArrayQueue;
@@ -334,12 +335,18 @@ public class AlarmManagerService extends SystemService {
             "REORDER_ALARMS_FOR_TARE",
     });
 
-    BroadcastOptions mOptsWithFgs = BroadcastOptions.makeBasic();
-    BroadcastOptions mOptsWithFgsForAlarmClock = BroadcastOptions.makeBasic();
-    BroadcastOptions mOptsWithoutFgs = BroadcastOptions.makeBasic();
-    BroadcastOptions mOptsTimeBroadcast = BroadcastOptions.makeBasic();
+    BroadcastOptions mOptsWithFgs = makeBasicAlarmBroadcastOptions();
+    BroadcastOptions mOptsWithFgsForAlarmClock = makeBasicAlarmBroadcastOptions();
+    BroadcastOptions mOptsWithoutFgs = makeBasicAlarmBroadcastOptions();
+    BroadcastOptions mOptsTimeBroadcast = makeBasicAlarmBroadcastOptions();
     ActivityOptions mActivityOptsRestrictBal = ActivityOptions.makeBasic();
-    BroadcastOptions mBroadcastOptsRestrictBal = BroadcastOptions.makeBasic();
+    BroadcastOptions mBroadcastOptsRestrictBal = makeBasicAlarmBroadcastOptions();
+
+    private static BroadcastOptions makeBasicAlarmBroadcastOptions() {
+        final BroadcastOptions b = BroadcastOptions.makeBasic();
+        b.setAlarmBroadcast(true);
+        return b;
+    }
 
     // TODO(b/172085676): Move inside alarm store.
     private final SparseArray<AlarmManager.AlarmClockInfo> mNextAlarmClockForUser =
@@ -2299,7 +2306,11 @@ public class AlarmManagerService extends SystemService {
                                 + " reached for uid: " + UserHandle.formatUid(callingUid)
                                 + ", callingPackage: " + callingPackage;
                 Slog.w(TAG, errorMsg);
-                throw new IllegalStateException(errorMsg);
+                if (callingUid != Process.SYSTEM_UID) {
+                    throw new IllegalStateException(errorMsg);
+                } else {
+                    EventLog.writeEvent(0x534e4554, "234441463", -1, errorMsg);
+                }
             }
             setImplLocked(type, triggerAtTime, triggerElapsed, windowLength, interval, operation,
                     directReceiver, listenerTag, flags, workSource, alarmClock, callingUid,

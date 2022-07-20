@@ -7,6 +7,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.shade.NotificationPanelViewController
+import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
@@ -27,7 +29,8 @@ constructor(
     private val context: Context,
     private val splitShadeOverScrollerFactory: SplitShadeOverScroller.Factory,
     private val noOpOverScroller: NoOpOverScroller,
-    private val scrimShadeTransitionController: ScrimShadeTransitionController
+    private val scrimShadeTransitionController: ScrimShadeTransitionController,
+    private val statusBarStateController: SysuiStatusBarStateController,
 ) {
 
     lateinit var notificationPanelViewController: NotificationPanelViewController
@@ -43,7 +46,7 @@ constructor(
     }
     private val shadeOverScroller: ShadeOverScroller
         get() =
-            if (inSplitShade && propertiesInitialized()) {
+            if (inSplitShade && isScreenUnlocked() && propertiesInitialized()) {
                 splitShadeOverScroller
             } else {
                 noOpOverScroller
@@ -90,6 +93,7 @@ constructor(
             """
             ShadeTransitionController:
                 inSplitShade: $inSplitShade
+                isScreenUnlocked: ${isScreenUnlocked()}
                 currentPanelState: ${currentPanelState?.panelStateToString()}
                 lastPanelExpansionChangeEvent: $lastPanelExpansionChangeEvent
                 qs.isInitialized: ${this::qs.isInitialized}
@@ -97,4 +101,7 @@ constructor(
                 nssl.isInitialized: ${this::notificationStackScrollLayoutController.isInitialized}
             """.trimIndent())
     }
+
+    private fun isScreenUnlocked() =
+        statusBarStateController.currentOrUpcomingState == StatusBarState.SHADE
 }

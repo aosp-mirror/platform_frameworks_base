@@ -85,9 +85,4 @@ public interface OneHanded {
      * Notifies when user switch complete
      */
     void onUserSwitch(int userId);
-
-    /**
-     * Notifies when keyguard visibility changed
-     */
-    void onKeyguardVisibilityChanged(boolean showing);
 }

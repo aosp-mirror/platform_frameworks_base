@@ -123,6 +123,11 @@ public class PipControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void instantiatePipController_registerKeyguardChangeListener() {
+        verify(mMockShellController, times(1)).addKeyguardChangeListener(any());
+    }
+
+    @Test
     public void instantiatePipController_registersPipTransitionCallback() {
         verify(mMockPipTransitionController).registerPipTransitionCallback(any());
     }

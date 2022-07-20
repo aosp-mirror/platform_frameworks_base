@@ -369,10 +369,6 @@ public class RemoteTransitionCompat implements Parcelable {
             if (mWrapped != null) mWrapped.setAnimationTargetsBehindSystemBars(behindSystemBars);
         }
 
-        @Override public void hideCurrentInputMethod() {
-            mWrapped.hideCurrentInputMethod();
-        }
-
         @Override public void setFinishTaskTransaction(int taskId,
                 PictureInPictureSurfaceTransaction finishTransaction, SurfaceControl overlay) {
             mPipTransaction = finishTransaction;

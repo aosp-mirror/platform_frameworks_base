@@ -1709,7 +1709,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             // Wrap the animation controller to dismiss the shade and set
             // mIsLaunchingActivityOverLockscreen during the animation.
             ActivityLaunchAnimator.Controller delegate = wrapAnimationController(
-                    animationController, dismissShade);
+                    animationController, dismissShade, /* isLaunchForActivity= */ true);
             controller = new DelegateLaunchAnimatorController(delegate) {
                 @Override
                 public void onIntentStarted(boolean willAnimate) {
@@ -2457,7 +2457,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
                         true /* isActivityIntent */);
         ActivityLaunchAnimator.Controller animController =
                 animationController != null ? wrapAnimationController(animationController,
-                        dismissShade) : null;
+                        dismissShade, /* isLaunchForActivity= */ true) : null;
 
         // If we animate, we will dismiss the shade only once the animation is done. This is taken
         // care of by the StatusBarLaunchAnimationController.
@@ -2535,9 +2535,25 @@ public class CentralSurfacesImpl extends CoreStartable implements
                 willLaunchResolverActivity, deferred /* deferred */, animate);
     }
 
+    /**
+     * Return a {@link ActivityLaunchAnimator.Controller} wrapping {@code animationController} so
+     * that:
+     *  - if it launches in the notification shade window and {@code dismissShade} is true, then
+     *    the shade will be instantly dismissed at the end of the animation.
+     *  - if it launches in status bar window, it will make the status bar window match the device
+     *    size during the animation (that way, the animation won't be clipped by the status bar
+     *    size).
+     *
+     * @param animationController the controller that is wrapped and will drive the main animation.
+     * @param dismissShade whether the notification shade will be dismissed at the end of the
+     *                     animation. This is ignored if {@code animationController} is not
+     *                     animating in the shade window.
+     * @param isLaunchForActivity whether the launch is for an activity.
+     */
     @Nullable
     private ActivityLaunchAnimator.Controller wrapAnimationController(
-            ActivityLaunchAnimator.Controller animationController, boolean dismissShade) {
+            ActivityLaunchAnimator.Controller animationController, boolean dismissShade,
+            boolean isLaunchForActivity) {
         View rootView = animationController.getLaunchContainer().getRootView();
 
         Optional<ActivityLaunchAnimator.Controller> controllerFromStatusBar =
@@ -2551,7 +2567,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             // If the view is not in the status bar, then we are animating a view in the shade.
             // We have to make sure that we collapse it when the animation ends or is cancelled.
             return new StatusBarLaunchAnimatorController(animationController, this,
-                    true /* isLaunchForActivity */);
+                    isLaunchForActivity);
         }
 
         return animationController;
@@ -4083,8 +4099,9 @@ public class CentralSurfacesImpl extends CoreStartable implements
                 // We wrap animationCallback with a StatusBarLaunchAnimatorController so that the
                 // shade is collapsed after the animation (or when it is cancelled, aborted, etc).
                 ActivityLaunchAnimator.Controller controller =
-                        animationController != null ? new StatusBarLaunchAnimatorController(
-                                animationController, this, intent.isActivity()) : null;
+                        animationController != null ? wrapAnimationController(
+                                animationController, /* dismissShade= */ true, intent.isActivity())
+                                : null;
 
                 mActivityLaunchAnimator.startPendingIntentWithAnimation(
                         controller, animate, intent.getCreatorPackage(),

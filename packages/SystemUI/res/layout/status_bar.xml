@@ -47,52 +47,63 @@
         android:paddingStart="@dimen/status_bar_padding_start"
         android:paddingEnd="@dimen/status_bar_padding_end"
         android:paddingTop="@dimen/status_bar_padding_top"
-        android:orientation="horizontal"
-        >
+        android:orientation="horizontal">
+
+        <!-- Container for the entire start half of the status bar. It will always use the same
+             width, independent of the number of visible children and sub-children. -->
         <FrameLayout
+            android:id="@+id/status_bar_start_side_container"
             android:layout_height="match_parent"
             android:layout_width="0dp"
             android:layout_weight="1">
 
-            <include layout="@layout/heads_up_status_bar_layout" />
+            <!-- Container that is wrapped around the views on the start half of the status bar.
+                 Its width will change with the number of visible children and sub-children.
+                 It is useful when we want to know the visible bounds of the content. -->
+            <FrameLayout
+                android:id="@+id/status_bar_start_side_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clipChildren="false">
 
-            <!-- The alpha of the left side is controlled by PhoneStatusBarTransitions, and the
-             individual views are controlled by StatusBarManager disable flags DISABLE_CLOCK and
-             DISABLE_NOTIFICATION_ICONS, respectively -->
-            <LinearLayout
-                android:id="@+id/status_bar_left_side"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
-                android:clipChildren="false"
-            >
-                <ViewStub
-                    android:id="@+id/operator_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout="@layout/operator_name" />
+                <include layout="@layout/heads_up_status_bar_layout" />
 
-                <com.android.systemui.statusbar.policy.Clock
-                    android:id="@+id/clock"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Clock"
-                    android:singleLine="true"
-                    android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
-                    android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
-                    android:gravity="center_vertical|start"
-                />
+                <!-- The alpha of the start side is controlled by PhoneStatusBarTransitions, and the
+                     individual views are controlled by StatusBarManager disable flags DISABLE_CLOCK
+                     and DISABLE_NOTIFICATION_ICONS, respectively -->
+                <LinearLayout
+                    android:id="@+id/status_bar_start_side_except_heads_up"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:clipChildren="false">
+                    <ViewStub
+                        android:id="@+id/operator_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout="@layout/operator_name" />
 
-                <include layout="@layout/ongoing_call_chip" />
+                    <com.android.systemui.statusbar.policy.Clock
+                        android:id="@+id/clock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+                        android:singleLine="true"
+                        android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
+                        android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
+                        android:gravity="center_vertical|start"
+                    />
 
-                <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
-                    android:id="@+id/notification_icon_area"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="horizontal"
-                    android:clipChildren="false"/>
+                    <include layout="@layout/ongoing_call_chip" />
 
-            </LinearLayout>
+                    <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
+                        android:id="@+id/notification_icon_area"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:clipChildren="false"/>
+
+                </LinearLayout>
+            </FrameLayout>
         </FrameLayout>
 
         <!-- Space should cover the notch (if it exists) and let other views lay out around it -->
@@ -103,42 +114,57 @@
             android:gravity="center_horizontal|center_vertical"
         />
 
-        <com.android.keyguard.AlphaOptimizedLinearLayout android:id="@+id/system_icon_area"
+        <!-- Container for the entire end half of the status bar. It will always use the same
+             width, independent of the number of visible children and sub-children. -->
+        <FrameLayout
+            android:id="@+id/status_bar_end_side_container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="horizontal"
-            android:gravity="center_vertical|end"
-            >
+            android:clipChildren="false">
 
-            <com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer
-                android:id="@+id/user_switcher_container"
+            <!-- Container that is wrapped around the views on the end half of the
+                 status bar. Its width will change with the number of visible children and
+                 sub-children.
+                 It is useful when we want know the visible bounds of the content.-->
+            <com.android.keyguard.AlphaOptimizedLinearLayout
+                android:id="@+id/status_bar_end_side_content"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
                 android:orientation="horizontal"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/status_bar_user_chip_bg"
-                android:visibility="visible" >
-                <ImageView android:id="@+id/current_user_avatar"
-                    android:layout_width="@dimen/multi_user_avatar_keyguard_size"
-                    android:layout_height="@dimen/multi_user_avatar_keyguard_size"
-                    android:scaleType="centerInside"
-                    android:paddingEnd="4dp" />
+                android:gravity="center_vertical|end"
+                android:clipChildren="false">
 
-                <TextView android:id="@+id/current_user_name"
+                <com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer
+                    android:id="@+id/user_switcher_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Clock"
-                    />
-            </com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer>
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/status_bar_user_chip_bg"
+                    android:visibility="visible" >
+                    <ImageView android:id="@+id/current_user_avatar"
+                        android:layout_width="@dimen/multi_user_avatar_keyguard_size"
+                        android:layout_height="@dimen/multi_user_avatar_keyguard_size"
+                        android:scaleType="centerInside"
+                        android:paddingEnd="4dp" />
 
-            <include layout="@layout/system_icons" />
-        </com.android.keyguard.AlphaOptimizedLinearLayout>
+                    <TextView android:id="@+id/current_user_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+                        />
+                </com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer>
+
+                <include layout="@layout/system_icons" />
+            </com.android.keyguard.AlphaOptimizedLinearLayout>
+        </FrameLayout>
     </LinearLayout>
 
     <ViewStub

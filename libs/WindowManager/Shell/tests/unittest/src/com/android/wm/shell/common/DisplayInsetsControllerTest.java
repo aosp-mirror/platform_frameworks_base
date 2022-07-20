@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.content.ComponentName;
 import android.os.RemoteException;
 import android.util.SparseArray;
 import android.view.IDisplayWindowInsetsController;
@@ -165,7 +166,7 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         int hideInsetsCount = 0;
 
         @Override
-        public void topFocusedWindowChanged(String packageName,
+        public void topFocusedWindowChanged(ComponentName component,
                 InsetsVisibilities requestedVisibilities) {
             topFocusedWindowChangedCount++;
         }
