@@ -16,18 +16,21 @@
 
 package com.android.systemui.screenrecord;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 
@@ -66,6 +69,8 @@ public class RecordingServiceTest extends SysuiTestCase {
     @Mock
     private Executor mExecutor;
     @Mock
+    private Handler mHandler;
+    @Mock
     private UserContextProvider mUserContextTracker;
     private KeyguardDismissUtil mKeyguardDismissUtil = new KeyguardDismissUtil() {
         public void executeWhenUnlocked(ActivityStarter.OnDismissAction action,
@@ -79,8 +84,8 @@ public class RecordingServiceTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mRecordingService = Mockito.spy(new RecordingService(mController, mExecutor, mUiEventLogger,
-                mNotificationManager, mUserContextTracker, mKeyguardDismissUtil));
+        mRecordingService = Mockito.spy(new RecordingService(mController, mExecutor, mHandler,
+                mUiEventLogger, mNotificationManager, mUserContextTracker, mKeyguardDismissUtil));
 
         // Return actual context info
         doReturn(mContext).when(mRecordingService).getApplicationContext();
@@ -142,5 +147,55 @@ public class RecordingServiceTest extends SysuiTestCase {
 
         // Then the state is set to not recording
         verify(mController).updateState(false);
+    }
+
+    @Test
+    public void testOnSystemRequestedStop_recordingInProgress_endsRecording() throws IOException {
+        doReturn(true).when(mController).isRecording();
+
+        mRecordingService.onStopped();
+
+        verify(mScreenMediaRecorder).end();
+    }
+
+    @Test
+    public void testOnSystemRequestedStop_recordingInProgress_updatesState() {
+        doReturn(true).when(mController).isRecording();
+
+        mRecordingService.onStopped();
+
+        verify(mController).updateState(false);
+    }
+
+    @Test
+    public void testOnSystemRequestedStop_recordingIsNotInProgress_doesNotEndRecording()
+            throws IOException {
+        doReturn(false).when(mController).isRecording();
+
+        mRecordingService.onStopped();
+
+        verify(mScreenMediaRecorder, never()).end();
+    }
+
+    @Test
+    public void testOnSystemRequestedStop_recorderEndThrowsRuntimeException_releasesRecording()
+            throws IOException {
+        doReturn(true).when(mController).isRecording();
+        doThrow(new RuntimeException()).when(mScreenMediaRecorder).end();
+
+        mRecordingService.onStopped();
+
+        verify(mScreenMediaRecorder).release();
+    }
+
+    @Test
+    public void testOnSystemRequestedStop_recorderEndThrowsOOMError_releasesRecording()
+            throws IOException {
+        doReturn(true).when(mController).isRecording();
+        doThrow(new OutOfMemoryError()).when(mScreenMediaRecorder).end();
+
+        assertThrows(Throwable.class, () -> mRecordingService.onStopped());
+
+        verify(mScreenMediaRecorder).release();
     }
 }
