@@ -7,6 +7,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.shade.NotificationPanelViewController
+import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
@@ -19,6 +21,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -32,6 +35,7 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
     @Mock private lateinit var splitShadeOverScroller: SplitShadeOverScroller
     @Mock private lateinit var scrimShadeTransitionController: ScrimShadeTransitionController
     @Mock private lateinit var dumpManager: DumpManager
+    @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
 
     private lateinit var controller: ShadeTransitionController
 
@@ -50,7 +54,9 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
                 context,
                 splitShadeOverScrollerFactory = { _, _ -> splitShadeOverScroller },
                 noOpOverScroller,
-                scrimShadeTransitionController)
+                scrimShadeTransitionController,
+                statusBarStateController,
+            )
 
         // Resetting as they are notified upon initialization.
         reset(noOpOverScroller, splitShadeOverScroller)
@@ -77,6 +83,45 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
         verify(noOpOverScroller).onPanelStateChanged(STATE_OPENING)
         verify(noOpOverScroller).onDragDownAmountChanged(DEFAULT_DRAG_DOWN_AMOUNT)
         verifyZeroInteractions(splitShadeOverScroller)
+    }
+
+    @Test
+    fun onPanelStateChanged_inSplitShade_onKeyguard_forwardsToNoOpOverScroller() {
+        initLateProperties()
+        enableSplitShade()
+        setOnKeyguard()
+
+        startPanelExpansion()
+
+        verify(noOpOverScroller).onPanelStateChanged(STATE_OPENING)
+        verify(noOpOverScroller).onDragDownAmountChanged(DEFAULT_DRAG_DOWN_AMOUNT)
+        verifyZeroInteractions(splitShadeOverScroller)
+    }
+
+    @Test
+    fun onPanelStateChanged_inSplitShade_onLockedShade_forwardsToNoOpOverScroller() {
+        initLateProperties()
+        enableSplitShade()
+        setOnLockedShade()
+
+        startPanelExpansion()
+
+        verify(noOpOverScroller).onPanelStateChanged(STATE_OPENING)
+        verify(noOpOverScroller).onDragDownAmountChanged(DEFAULT_DRAG_DOWN_AMOUNT)
+        verifyZeroInteractions(splitShadeOverScroller)
+    }
+
+    @Test
+    fun onPanelExpansionChanged_inSplitShade_onUnlockedShade_forwardsToSplitShadeOverScroller() {
+        initLateProperties()
+        enableSplitShade()
+        setOnUnlockedShade()
+
+        startPanelExpansion()
+
+        verify(splitShadeOverScroller).onPanelStateChanged(STATE_OPENING)
+        verify(splitShadeOverScroller).onDragDownAmountChanged(DEFAULT_DRAG_DOWN_AMOUNT)
+        verifyZeroInteractions(noOpOverScroller)
     }
 
     @Test
@@ -127,6 +172,23 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
             DEFAULT_EXPANSION_EVENT.tracking,
             DEFAULT_EXPANSION_EVENT.dragDownPxAmount,
         )
+    }
+
+    private fun setOnKeyguard() {
+        setShadeState(StatusBarState.KEYGUARD)
+    }
+
+    private fun setOnLockedShade() {
+        setShadeState(StatusBarState.SHADE_LOCKED)
+    }
+
+    private fun setOnUnlockedShade() {
+        setShadeState(StatusBarState.SHADE)
+    }
+
+    private fun setShadeState(state: Int) {
+        whenever(statusBarStateController.state).thenReturn(state)
+        whenever(statusBarStateController.currentOrUpcomingState).thenReturn(state)
     }
 
     companion object {
