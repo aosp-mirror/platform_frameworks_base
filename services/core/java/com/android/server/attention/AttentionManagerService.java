@@ -856,9 +856,6 @@ public class AttentionManagerService extends SystemService {
     @GuardedBy("mLock")
     private void cancelAndUnbindLocked() {
         synchronized (mLock) {
-            if (mCurrentAttentionCheck == null && mCurrentProximityUpdate == null) {
-                return;
-            }
             if (mCurrentAttentionCheck != null) {
                 cancel();
             }
@@ -940,7 +937,7 @@ public class AttentionManagerService extends SystemService {
             }
         }
 
-        class TestableProximityUpdateCallbackInternal extends ProximityUpdateCallbackInternal {
+        class TestableProximityUpdateCallbackInternal implements ProximityUpdateCallbackInternal {
             private double mLastCallbackCode = PROXIMITY_UNKNOWN;
 
             @Override
@@ -1072,6 +1069,7 @@ public class AttentionManagerService extends SystemService {
         private void resetStates() {
             synchronized (mLock) {
                 mCurrentProximityUpdate = null;
+                cancelAndUnbindLocked();
             }
             mComponentName = resolveAttentionService(mContext);
         }
