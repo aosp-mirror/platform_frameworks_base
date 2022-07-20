@@ -128,7 +128,8 @@ public interface NotificationsModule {
             LeakDetector leakDetector,
             IStatusBarService statusBarService,
             NotifLiveDataStoreImpl notifLiveDataStore,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            @Background Executor bgExecutor) {
         return new NotificationEntryManager(
                 logger,
                 groupManager,
@@ -138,7 +139,8 @@ public interface NotificationsModule {
                 leakDetector,
                 statusBarService,
                 notifLiveDataStore,
-                dumpManager);
+                dumpManager,
+                bgExecutor);
     }
 
     /** Provides an instance of {@link NotificationGutsManager} */
