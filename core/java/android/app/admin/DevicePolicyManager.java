@@ -379,8 +379,8 @@ public class DevicePolicyManager {
      * Only one {@link ComponentName} in the entire system should be enabled, and the rest of the
      * components are not started by this intent.
      *
-     * @deprecated Starting from Android T, the system no longer launches an intent with this action
-     * when user provisioning completes.
+     * @deprecated Starting from Android 13, the system no longer launches an intent with this
+     * action when user provisioning completes.
      * @hide
      */
     @Deprecated
@@ -14626,7 +14626,8 @@ public class DevicePolicyManager {
     /**
      * Called by a device owner or a profile owner to disable user control over apps. User will not
      * be able to clear app data or force-stop packages. When called by a device owner, applies to
-     * all users on the device.
+     * all users on the device. Starting from Android 13, packages with user control disabled are
+     * exempted from being put in the "restricted" App Standby Bucket.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param packages The package names for the apps.
