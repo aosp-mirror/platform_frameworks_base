@@ -106,6 +106,11 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
         super.focusChanges()
     }
 
+    /** {@inheritDoc}  */
+    @Postsubmit
+    @Test
+    override fun pipAppWindowAlwaysVisible() = super.pipAppWindowAlwaysVisible()
+
     @Presubmit
     @Test
     override fun entireScreenCovered() {

@@ -79,7 +79,7 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
      */
     @Presubmit
     @Test
-    fun pipAppWindowAlwaysVisible() {
+    open fun pipAppWindowAlwaysVisible() {
         testSpec.assertWm {
             this.isAppWindowVisible(pipApp)
         }
