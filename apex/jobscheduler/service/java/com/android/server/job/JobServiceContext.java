@@ -303,7 +303,9 @@ public final class JobServiceContext implements ServiceConnection {
                     getStartActionId(job), String.valueOf(job.getJobId()));
             mVerb = VERB_BINDING;
             scheduleOpTimeOutLocked();
-            final Intent intent = new Intent().setComponent(job.getServiceComponent());
+            // Use FLAG_FROM_BACKGROUND to avoid resetting the bad-app tracking.
+            final Intent intent = new Intent().setComponent(job.getServiceComponent())
+                    .setFlags(Intent.FLAG_FROM_BACKGROUND);
             boolean binding = false;
             try {
                 final int bindFlags;

@@ -53,9 +53,11 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
 import android.os.Build;
@@ -71,6 +73,7 @@ import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
 import android.util.Log;
 import android.util.Pools.Pool;
@@ -3243,7 +3246,26 @@ public final class InputMethodManager {
      * subtypes of all input methods will be shown.
      */
     public void showInputMethodAndSubtypeEnabler(@Nullable String imiId) {
-        mServiceInvoker.showInputMethodAndSubtypeEnablerFromClient(mClient, imiId);
+        Context context = null;
+        synchronized (mH) {
+            if (mCurRootView != null) {
+                context = mCurRootView.mContext;
+            }
+        }
+        if (context == null) {
+            final Context appContext = ActivityThread.currentApplication();
+            final DisplayManager displayManager = appContext.getSystemService(DisplayManager.class);
+            context = appContext.createDisplayContext(displayManager.getDisplay(mDisplayId));
+        }
+
+        final Intent intent = new Intent(Settings.ACTION_INPUT_METHOD_SUBTYPE_SETTINGS);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (!TextUtils.isEmpty(imiId)) {
+            intent.putExtra(Settings.EXTRA_INPUT_METHOD_ID, imiId);
+        }
+        context.startActivity(intent);
     }
 
     /**

@@ -4051,18 +4051,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public void showInputMethodAndSubtypeEnablerFromClient(
-            IInputMethodClient client, String inputMethodId) {
-        synchronized (ImfLock.class) {
-            // TODO(yukawa): Should we verify the display ID?
-            if (!calledFromValidUserLocked()) {
-                return;
-            }
-            showInputMethodAndSubtypeEnabler(inputMethodId);
-        }
-    }
-
     @BinderThread
     private boolean switchToPreviousInputMethod(@NonNull IBinder token) {
         synchronized (ImfLock.class) {
@@ -5215,23 +5203,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
         setInputMethodEnabledLocked(newSystemVoiceIme.getId(), true);
         mSettings.putDefaultVoiceInputMethod(newSystemVoiceIme.getId());
-    }
-
-    // ----------------------------------------------------------------------
-
-    private void showInputMethodAndSubtypeEnabler(String inputMethodId) {
-        Intent intent = new Intent(Settings.ACTION_INPUT_METHOD_SUBTYPE_SETTINGS);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        if (!TextUtils.isEmpty(inputMethodId)) {
-            intent.putExtra(Settings.EXTRA_INPUT_METHOD_ID, inputMethodId);
-        }
-        final int userId;
-        synchronized (ImfLock.class) {
-            userId = mSettings.getCurrentUserId();
-        }
-        mContext.startActivityAsUser(intent, null, UserHandle.of(userId));
     }
 
     // ----------------------------------------------------------------------

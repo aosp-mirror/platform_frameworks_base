@@ -146,6 +146,17 @@ public abstract class SettingBase implements Watchable, Snappable {
         return this;
     }
 
+    /**
+     * Unconditionally set both mPkgFlags and mPkgPrivateFlags.
+     * Should not be used outside pkgSetting initialization or update.
+     */
+    SettingBase setPkgFlags(int flags, int privateFlags) {
+        this.mPkgFlags = flags;
+        this.mPkgPrivateFlags = privateFlags;
+        onChanged();
+        return this;
+    }
+
     public int getFlags() {
         return mPkgFlags;
     }
