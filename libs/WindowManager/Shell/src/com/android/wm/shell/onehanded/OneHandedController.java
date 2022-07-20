@@ -675,9 +675,12 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
             return;
         }
 
+        if (mState.getState() == STATE_ACTIVE) {
+            mOneHandedUiEventLogger.writeEvent(
+                    OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_ROTATION_OUT);
+        }
+
         mDisplayAreaOrganizer.onRotateDisplay(mContext, toRotation, wct);
-        mOneHandedUiEventLogger.writeEvent(
-                OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_ROTATION_OUT);
     }
 
     /**
