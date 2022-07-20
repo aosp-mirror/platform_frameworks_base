@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.notification;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
+import static android.service.notification.NotificationStats.DISMISSAL_SHADE;
+import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
 import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 
@@ -41,6 +43,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -50,6 +53,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -91,7 +95,9 @@ import com.android.systemui.statusbar.notification.row.NotificationEntryManagerI
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.leak.LeakDetector;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -138,9 +144,14 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private NotificationMediaManager mNotificationMediaManager;
     @Mock private NotificationRowBinder mNotificationRowBinder;
     @Mock private NotificationListener mNotificationListener;
+    @Mock private IStatusBarService mStatusBarService;
+
+    private FakeSystemClock mFakeSystemClock = new FakeSystemClock();
+    private FakeExecutor mBgExecutor = new FakeExecutor(mFakeSystemClock);
 
     private int mId;
     private NotificationEntry mEntry;
+    private DismissedByUserStats mStats;
     private StatusBarNotification mSbn;
     private NotificationEntryManager mEntryManager;
 
@@ -191,6 +202,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 Handler.createAsync(TestableLooper.get(this).getLooper()));
 
         mEntry = createNotification();
+        mStats = defaultStats(mEntry);
         mSbn = mEntry.getSbn();
 
         when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(false);
@@ -201,9 +213,10 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 () -> mNotificationRowBinder,
                 () -> mRemoteInputManager,
                 mLeakDetector,
-                mock(IStatusBarService.class),
+                mStatusBarService,
                 NotifLiveDataStoreMocksKt.createNotifLiveDataStoreImplMock(),
-                mock(DumpManager.class)
+                mock(DumpManager.class),
+                mBgExecutor
         );
         mEntryManager.initialize(
                 mNotificationListener,
@@ -313,6 +326,31 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         // THEN the entry is still removed from the allNotifications list
         assertFalse(entriesContainKey(mEntryManager.getAllNotifs(), mSbn.getKey()));
+    }
+
+    @Test
+    public void testPerformRemoveNotification_sendRemovalToServer() throws RemoteException {
+        // GIVEN an entry manager with a notification
+        mEntryManager.addActiveNotificationForTest(mEntry);
+
+        // GIVEN interceptor that doesn't intercept
+        when(mRemoveInterceptor.onNotificationRemoveRequested(
+                eq(mEntry.getKey()), argThat(matchEntryOnKey()), anyInt()))
+                .thenReturn(false);
+
+        // WHEN the notification entry is removed
+        mEntryManager.performRemoveNotification(mSbn, mStats, REASON_CANCEL);
+
+        // THEN notification removal is sent to the server
+        FakeExecutor.exhaustExecutors(mBgExecutor);
+        verify(mStatusBarService).onNotificationClear(
+                mSbn.getPackageName(),
+                mSbn.getUser().getIdentifier(),
+                mSbn.getKey(),
+                mStats.dismissalSurface,
+                mStats.dismissalSentiment,
+                mStats.notificationVisibility);
+        verifyNoMoreInteractions(mStatusBarService);
     }
 
     @Test
@@ -573,23 +611,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 any(NotificationVisibility.class), anyBoolean(), eq(UNDEFINED_DISMISS_REASON));
     }
 
-    private NotificationEntry createNotification() {
-        Notification.Builder n = new Notification.Builder(mContext, "id")
-                .setSmallIcon(R.drawable.ic_person)
-                .setContentTitle("Title")
-                .setContentText("Text");
-
-        return new NotificationEntryBuilder()
-                .setPkg(TEST_PACKAGE_NAME)
-                .setOpPkg(TEST_PACKAGE_NAME)
-                .setUid(TEST_UID)
-                .setId(mId++)
-                .setNotification(n.build())
-                .setChannel(new NotificationChannel("id", "", IMPORTANCE_DEFAULT))
-                .setUser(new UserHandle(ActivityManager.getCurrentUser()))
-                .build();
-    }
-
     /* Tests annexed from NotificationDataTest go here */
 
     @Test
@@ -712,5 +733,29 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         public boolean isManaging(String notificationKey) {
             return mManagedNotifs.contains(notificationKey);
         }
+    }
+
+    private NotificationEntry createNotification() {
+        Notification.Builder n = new Notification.Builder(mContext, "id")
+                .setSmallIcon(R.drawable.ic_person)
+                .setContentTitle("Title")
+                .setContentText("Text");
+
+        return new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_NAME)
+                .setOpPkg(TEST_PACKAGE_NAME)
+                .setUid(TEST_UID)
+                .setId(mId++)
+                .setNotification(n.build())
+                .setChannel(new NotificationChannel("id", "", IMPORTANCE_DEFAULT))
+                .setUser(new UserHandle(ActivityManager.getCurrentUser()))
+                .build();
+    }
+
+    private static DismissedByUserStats defaultStats(NotificationEntry entry) {
+        return new DismissedByUserStats(
+                DISMISSAL_SHADE,
+                DISMISS_SENTIMENT_NEUTRAL,
+                NotificationVisibility.obtain(entry.getKey(), 7, 2, true));
     }
 }

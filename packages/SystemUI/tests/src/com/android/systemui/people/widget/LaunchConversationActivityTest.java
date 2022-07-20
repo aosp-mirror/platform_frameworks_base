@@ -48,6 +48,8 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubble;
 
@@ -106,6 +108,9 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
 
     private Intent mIntent;
 
+    private FakeSystemClock mFakeSystemClock = new FakeSystemClock();
+    private FakeExecutor mBgExecutor = new FakeExecutor(mFakeSystemClock);
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -114,7 +119,8 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
                 mNotifCollection,
                 Optional.of(mBubblesManager),
                 mUserManager,
-                mCommandQueue
+                mCommandQueue,
+                mBgExecutor
         );
         verify(mCommandQueue, times(1)).addCallback(mCallbacksCaptor.capture());
 
@@ -193,6 +199,7 @@ public class LaunchConversationActivityTest extends SysuiTestCase {
         // Ensure callback removed
         verify(mCommandQueue).removeCallback(any());
         // Clear the notification for bubbles.
+        FakeExecutor.exhaustExecutors(mBgExecutor);
         verify(mIStatusBarService, times(1)).onNotificationClear(any(),
                 anyInt(), any(), anyInt(), anyInt(), mNotificationVisibilityCaptor.capture());
         // Do not select the bubble.
