@@ -16,6 +16,7 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.app.ActivityManager.START_CANCELED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
@@ -290,6 +291,26 @@ public class SplitControllerTest {
         mSplitController.updateContainer(mTransaction, tf);
 
         verify(mSplitPresenter).updateSplitContainer(splitContainer, tf, mTransaction);
+    }
+
+    @Test
+    public void testOnStartActivityResultError() {
+        final Intent intent = new Intent();
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                intent, taskContainer, mSplitController);
+        final SplitController.ActivityStartMonitor monitor =
+                mSplitController.getActivityStartMonitor();
+
+        container.setPendingAppearedIntent(intent);
+        final Bundle bundle = new Bundle();
+        bundle.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
+                container.getTaskFragmentToken());
+        monitor.mCurrentIntent = intent;
+        doReturn(container).when(mSplitController).getContainer(any());
+
+        monitor.onStartActivityResult(START_CANCELED, bundle);
+        assertNull(container.getPendingAppearedIntent());
     }
 
     @Test
