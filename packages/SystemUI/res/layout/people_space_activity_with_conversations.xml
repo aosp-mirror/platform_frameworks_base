@@ -1,0 +1,115 @@
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:id="@+id/top_level_with_conversations"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp">
+    <TextView
+        android:id="@+id/select_conversation_title"
+        android:text="@string/select_conversation_title"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="24sp"/>
+
+    <TextView
+        android:id="@+id/select_conversation"
+        android:text="@string/select_conversation_text"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:paddingVertical="24dp"
+        android:paddingHorizontal="48dp"/>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/scroll_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/priority"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="35dp">
+                <TextView
+                    android:id="@+id/priority_header"
+                    android:text="@string/priority_conversations"
+                    android:layout_width="wrap_content"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
+                    android:textColor="?androidprv:attr/colorAccentPrimaryVariant"
+                    android:textSize="14sp"
+                    android:paddingStart="16dp"
+                    android:layout_height="wrap_content"/>
+
+                <LinearLayout
+                    android:id="@+id/priority_tiles"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical"
+                    android:background="@drawable/rounded_bg_full_large_radius"
+                    android:clipToOutline="true">
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/recent"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/recent_header"
+                    android:gravity="start"
+                    android:text="@string/recent_conversations"
+                    android:layout_width="wrap_content"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
+                    android:textColor="?androidprv:attr/colorAccentPrimaryVariant"
+                    android:textSize="14sp"
+                    android:paddingStart="16dp"
+                    android:layout_height="wrap_content"/>
+
+                <LinearLayout
+                    android:id="@+id/recent_tiles"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical"
+                    android:background="@drawable/rounded_bg_full_large_radius"
+                    android:clipToOutline="true">
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>
