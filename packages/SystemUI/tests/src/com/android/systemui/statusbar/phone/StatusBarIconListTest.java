@@ -1,4 +1,20 @@
-package com.android.systemui.statusbar;
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.statusbar.phone.StatusBarIconController.TAG_PRIMARY;
 
@@ -9,13 +25,10 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.test.suitebuilder.annotation.SmallTest;
-
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.phone.StatusBarIconHolder;
-import com.android.systemui.statusbar.phone.StatusBarIconList;
 import com.android.systemui.statusbar.phone.StatusBarIconList.Slot;
 
 import org.junit.Test;
@@ -33,28 +46,39 @@ public class StatusBarIconListTest extends SysuiTestCase {
     @Test
     public void testGetExistingSlot() {
         StatusBarIconList statusBarIconList = new StatusBarIconList(STATUS_BAR_SLOTS);
-        assertEquals(1, statusBarIconList.getSlotIndex("bbb"));
-        assertEquals(2, statusBarIconList.getSlotIndex("ccc"));
+
+        List<Slot> slots = statusBarIconList.getSlots();
+        assertEquals(3, slots.size());
+        assertEquals("aaa", slots.get(0).getName());
+        assertEquals("bbb", slots.get(1).getName());
+        assertEquals("ccc", slots.get(2).getName());
     }
 
     @Test
     public void testGetNonexistingSlot() {
         StatusBarIconList statusBarIconList = new StatusBarIconList(STATUS_BAR_SLOTS);
-        assertEquals(0, statusBarIconList.getSlotIndex("aaa"));
-        assertEquals(3, statusBarIconList.size());
-        assertEquals(0, statusBarIconList.getSlotIndex("zzz")); // new content added in front
-        assertEquals(1, statusBarIconList.getSlotIndex("aaa")); // slid back
-        assertEquals(4, statusBarIconList.size());
+
+        statusBarIconList.getSlot("zzz");
+
+        List<Slot> slots = statusBarIconList.getSlots();
+        assertEquals(4, slots.size());
+        // new content added in front, so zzz should be first and aaa should slide back to second
+        assertEquals("zzz", slots.get(0).getName());
+        assertEquals("aaa", slots.get(1).getName());
     }
 
     @Test
     public void testAddSlotSlidesIcons() {
         StatusBarIconList statusBarIconList = new StatusBarIconList(STATUS_BAR_SLOTS);
         StatusBarIconHolder sbHolder = mock(StatusBarIconHolder.class);
-        statusBarIconList.setIcon(0, sbHolder);
-        statusBarIconList.getSlotIndex("zzz"); // new content added in front
-        assertNull(statusBarIconList.getIcon(0, TAG_PRIMARY));
-        assertEquals(sbHolder, statusBarIconList.getIcon(1, TAG_PRIMARY));
+        statusBarIconList.setIcon("aaa", sbHolder);
+
+        statusBarIconList.getSlot("zzz");
+
+        List<Slot> slots = statusBarIconList.getSlots();
+        // new content added in front, so the holder we set on "aaa" should show up at index 1
+        assertNull(slots.get(0).getHolderForTag(TAG_PRIMARY));
+        assertEquals(sbHolder, slots.get(1).getHolderForTag(TAG_PRIMARY));
     }
 
     @Test
@@ -62,11 +86,13 @@ public class StatusBarIconListTest extends SysuiTestCase {
         StatusBarIconList statusBarIconList = new StatusBarIconList(STATUS_BAR_SLOTS);
         StatusBarIconHolder sbHolderA = mock(StatusBarIconHolder.class);
         StatusBarIconHolder sbHolderB = mock(StatusBarIconHolder.class);
-        statusBarIconList.setIcon(0, sbHolderA);
-        statusBarIconList.setIcon(1, sbHolderB);
-        assertEquals(sbHolderA, statusBarIconList.getIcon(0, TAG_PRIMARY));
-        assertEquals(sbHolderB, statusBarIconList.getIcon(1, TAG_PRIMARY));
-        assertNull(statusBarIconList.getIcon(2, TAG_PRIMARY)); // icon not set
+
+        statusBarIconList.setIcon("aaa", sbHolderA);
+        statusBarIconList.setIcon("bbb", sbHolderB);
+
+        assertEquals(sbHolderA, statusBarIconList.getIconHolder("aaa", TAG_PRIMARY));
+        assertEquals(sbHolderB, statusBarIconList.getIconHolder("bbb", TAG_PRIMARY));
+        assertNull(statusBarIconList.getIconHolder("ccc", TAG_PRIMARY)); // icon not set
     }
 
     @Test
@@ -74,24 +100,31 @@ public class StatusBarIconListTest extends SysuiTestCase {
         StatusBarIconList statusBarIconList = new StatusBarIconList(STATUS_BAR_SLOTS);
         StatusBarIconHolder sbHolderA = mock(StatusBarIconHolder.class);
         StatusBarIconHolder sbHolderB = mock(StatusBarIconHolder.class);
-        statusBarIconList.setIcon(0, sbHolderA);
-        statusBarIconList.setIcon(1, sbHolderB);
-        statusBarIconList.removeIcon(0, TAG_PRIMARY);
-        assertNull(statusBarIconList.getIcon(0, TAG_PRIMARY)); // icon not set
+
+        statusBarIconList.setIcon("aaa", sbHolderA);
+        statusBarIconList.setIcon("bbb", sbHolderB);
+
+        statusBarIconList.removeIcon("aaa", TAG_PRIMARY);
+
+        assertNull(statusBarIconList.getIconHolder("aaa", TAG_PRIMARY)); // icon not set
     }
 
     @Test
     public void testGetViewIndex_NoMultiples() {
         StatusBarIconList statusBarIconList = new StatusBarIconList(STATUS_BAR_SLOTS);
         StatusBarIconHolder sbHolder = mock(StatusBarIconHolder.class);
-        statusBarIconList.setIcon(2, sbHolder);
-        // Icon for item 2 is 0th child view.
-        assertEquals(0, statusBarIconList.getViewIndex(2, TAG_PRIMARY));
-        statusBarIconList.setIcon(0, sbHolder);
-        // Icon for item 0 is 0th child view,
-        assertEquals(0, statusBarIconList.getViewIndex(0, TAG_PRIMARY));
-        // and item 2 is now 1st child view.
-        assertEquals(1, statusBarIconList.getViewIndex(2, TAG_PRIMARY));
+
+        statusBarIconList.setIcon("ccc", sbHolder);
+
+        // Since only "ccc" has a holder set, it should be first
+        assertEquals(0, statusBarIconList.getViewIndex("ccc", TAG_PRIMARY));
+
+        // Now, also set a holder for "aaa"
+        statusBarIconList.setIcon("aaa", sbHolder);
+
+        // Then "aaa" gets the first view index and "ccc" gets the second
+        assertEquals(0, statusBarIconList.getViewIndex("aaa", TAG_PRIMARY));
+        assertEquals(1, statusBarIconList.getViewIndex("ccc", TAG_PRIMARY));
     }
 
     @Test
@@ -99,7 +132,7 @@ public class StatusBarIconListTest extends SysuiTestCase {
         StatusBarIconList statusBarIconList = new StatusBarIconList(STATUS_BAR_SLOTS);
         StatusBarIconHolder sbHolder = mock(StatusBarIconHolder.class);
 
-        statusBarIconList.setIcon(2, sbHolder); // item 2, one icon 0th child
+        statusBarIconList.setIcon("ccc", sbHolder);
 
         // All of these can be added to the same slot
         // no tag bc it defaults to 0
@@ -111,23 +144,23 @@ public class StatusBarIconListTest extends SysuiTestCase {
         int sb4Tag = 2;
         when(sbHolder4.getTag()).thenReturn(sb4Tag);
 
-        // Put a holder at slot 1, verify that it is first
-        statusBarIconList.setIcon(1, sbHolder2);
-        assertEquals(0, statusBarIconList.getViewIndex(1, TAG_PRIMARY));
+        // Put a holder for "bbb", verify that it is first
+        statusBarIconList.setIcon("bbb", sbHolder2);
+        assertEquals(0, statusBarIconList.getViewIndex("bbb", TAG_PRIMARY));
 
-        // Put another holder at slot 1, verify it's index 0 and the rest come after
-        statusBarIconList.setIcon(1, sbHolder3);
-        assertEquals(0, statusBarIconList.getViewIndex(1, sb3Tag));
-        assertEquals(1, statusBarIconList.getViewIndex(1, TAG_PRIMARY));
-        // First icon should be at the end
-        assertEquals(2, statusBarIconList.getViewIndex(2, TAG_PRIMARY));
+        // Put another holder for "bbb" at slot 1, verify its index 0 and the rest come after
+        statusBarIconList.setIcon("bbb", sbHolder3);
+        assertEquals(0, statusBarIconList.getViewIndex("bbb", sb3Tag));
+        assertEquals(1, statusBarIconList.getViewIndex("bbb", TAG_PRIMARY));
+        // "ccc" should appear at the end
+        assertEquals(2, statusBarIconList.getViewIndex("ccc", TAG_PRIMARY));
 
-        // Put another one in there just for good measure
-        statusBarIconList.setIcon(1, sbHolder4);
-        assertEquals(0, statusBarIconList.getViewIndex(1, sb4Tag));
-        assertEquals(1, statusBarIconList.getViewIndex(1, sb3Tag));
-        assertEquals(2, statusBarIconList.getViewIndex(1, TAG_PRIMARY));
-        assertEquals(3, statusBarIconList.getViewIndex(2, TAG_PRIMARY));
+        // Put another one in "bbb" just for good measure
+        statusBarIconList.setIcon("bbb", sbHolder4);
+        assertEquals(0, statusBarIconList.getViewIndex("bbb", sb4Tag));
+        assertEquals(1, statusBarIconList.getViewIndex("bbb", sb3Tag));
+        assertEquals(2, statusBarIconList.getViewIndex("bbb", TAG_PRIMARY));
+        assertEquals(3, statusBarIconList.getViewIndex("ccc", TAG_PRIMARY));
     }
 
     /**

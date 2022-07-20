@@ -1,0 +1,146 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+package com.android.systemui.shared.clocks
+
+import android.content.Context
+import android.database.ContentObserver
+import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.os.Handler
+import android.os.UserHandle
+import android.provider.Settings
+import android.util.Log
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.PluginListener
+import com.android.systemui.shared.plugins.PluginManager
+import com.google.gson.Gson
+import javax.inject.Inject
+
+private val TAG = ClockRegistry::class.simpleName
+private val DEBUG = true
+const val DEFAULT_CLOCK_ID = "DEFAULT"
+
+typealias ClockChangeListener = () -> Unit
+
+/** ClockRegistry aggregates providers and plugins */
+open class ClockRegistry @Inject constructor(
+    val context: Context,
+    val pluginManager: PluginManager,
+    @Main val handler: Handler
+) {
+    private val gson = Gson()
+    private val availableClocks = mutableMapOf<ClockId, ClockInfo>()
+    private val clockChangeListeners = mutableListOf<ClockChangeListener>()
+    private val settingObserver = object : ContentObserver(handler) {
+        override fun onChange(selfChange: Boolean, uris: Collection<Uri>, flags: Int, userId: Int) =
+            clockChangeListeners.forEach { it() }
+    }
+
+    private val pluginListener = object : PluginListener<ClockProviderPlugin> {
+        override fun onPluginConnected(plugin: ClockProviderPlugin, context: Context) {
+            val currentId = currentClockId
+            for (clock in plugin.getClocks()) {
+                val id = clock.clockId
+                val current = availableClocks[id]
+                if (current != null) {
+                    Log.e(TAG, "Clock Id conflict: $id is registered by both " +
+                            "${plugin::class.simpleName} and ${current.provider::class.simpleName}")
+                    return
+                }
+
+                availableClocks[id] = ClockInfo(clock, plugin)
+
+                if (currentId == id) {
+                    if (DEBUG) {
+                        Log.i(TAG, "Current clock ($currentId) was connected")
+                    }
+                    clockChangeListeners.forEach { it() }
+                }
+            }
+        }
+
+        override fun onPluginDisconnected(plugin: ClockProviderPlugin) {
+            val currentId = currentClockId
+            for (clock in plugin.getClocks()) {
+                availableClocks.remove(clock.clockId)
+
+                if (currentId == clock.clockId) {
+                    Log.w(TAG, "Current clock ($currentId) was disconnected")
+                    clockChangeListeners.forEach { it() }
+                }
+            }
+        }
+    }
+
+    open var currentClockId: ClockId
+        get() {
+            val json = Settings.Secure.getString(context.contentResolver,
+                Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE)
+            return gson.fromJson(json, ClockSetting::class.java).clockId
+        }
+        set(value) {
+            val json = gson.toJson(ClockSetting(value, System.currentTimeMillis()))
+            Settings.Secure.putString(context.contentResolver,
+                Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE, json)
+        }
+
+    init {
+        pluginManager.addPluginListener(pluginListener, ClockProviderPlugin::class.java)
+        context.contentResolver.registerContentObserver(
+            Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE),
+            false,
+            settingObserver,
+            UserHandle.USER_ALL)
+    }
+
+    fun getClocks(): List<ClockMetadata> = availableClocks.map { (_, clock) -> clock.metadata }
+
+    fun getClockThumbnail(clockId: ClockId): Drawable? =
+        availableClocks[clockId]?.provider?.getClockThumbnail(clockId)
+
+    fun createExampleClock(clockId: ClockId): Clock? = createClock(clockId)
+
+    fun registerClockChangeListener(listener: ClockChangeListener) =
+        clockChangeListeners.add(listener)
+
+    fun unregisterClockChangeListener(listener: ClockChangeListener) =
+        clockChangeListeners.remove(listener)
+
+    fun createCurrentClock(): Clock {
+        val clockId = currentClockId
+        if (!clockId.isNullOrEmpty()) {
+            val clock = createClock(clockId)
+            if (clock != null) {
+                return clock
+            } else {
+                Log.e(TAG, "Clock $clockId not found; using default")
+            }
+        }
+
+        return createClock(DEFAULT_CLOCK_ID)!!
+    }
+
+    private fun createClock(clockId: ClockId): Clock? =
+        availableClocks[clockId]?.provider?.createClock(clockId)
+
+    private data class ClockInfo(
+        val metadata: ClockMetadata,
+        val provider: ClockProvider
+    )
+
+    private data class ClockSetting(
+        val clockId: ClockId,
+        val _applied_timestamp: Long
+    )
+}

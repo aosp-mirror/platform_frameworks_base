@@ -34,7 +34,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.UserInfo;
-import android.content.res.Configuration;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;

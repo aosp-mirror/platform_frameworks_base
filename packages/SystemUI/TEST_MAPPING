@@ -102,7 +102,7 @@
   //
   // If you don't use @Staging or @Postsubmit, your new test will immediately
   // block presubmit, which is probably not what you want!
-  "platinum-postsubmit": [
+  "sysui-platinum-postsubmit": [
     {
       "name": "PlatformScenarioTests",
       "options": [
@@ -121,7 +121,7 @@
       ]
     }
   ],
-  "staged-platinum-postsubmit": [
+  "sysui-staged-platinum-postsubmit": [
     {
       "name": "PlatformScenarioTests",
       "options": [

@@ -88,6 +88,7 @@ import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
+import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.transition.Transitions;
 
@@ -102,7 +103,7 @@ import java.util.function.Consumer;
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
 public class PipController implements PipTransitionController.PipTransitionCallback,
-        RemoteCallable<PipController>, ConfigurationChangeListener {
+        RemoteCallable<PipController>, ConfigurationChangeListener, KeyguardChangeListener {
     private static final String TAG = "PipController";
 
     private Context mContext;
@@ -527,6 +528,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         });
 
         mShellController.addConfigurationChangeListener(this);
+        mShellController.addKeyguardChangeListener(this);
     }
 
     @Override
@@ -661,21 +663,24 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      * finished first to reset the visibility of PiP window.
      * See also {@link #onKeyguardDismissAnimationFinished()}
      */
-    private void onKeyguardVisibilityChanged(boolean keyguardShowing, boolean animating) {
+    @Override
+    public void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
+            boolean animatingDismiss) {
         if (!mPipTaskOrganizer.isInPip()) {
             return;
         }
-        if (keyguardShowing) {
+        if (visible) {
             mIsKeyguardShowingOrAnimating = true;
             hidePipMenu(null /* onStartCallback */, null /* onEndCallback */);
             mPipTaskOrganizer.setPipVisibility(false);
-        } else if (!animating) {
+        } else if (!animatingDismiss) {
             mIsKeyguardShowingOrAnimating = false;
             mPipTaskOrganizer.setPipVisibility(true);
         }
     }
 
-    private void onKeyguardDismissAnimationFinished() {
+    @Override
+    public void onKeyguardDismissAnimationFinished() {
         if (mPipTaskOrganizer.isInPip()) {
             mIsKeyguardShowingOrAnimating = false;
             mPipTaskOrganizer.setPipVisibility(true);
@@ -993,18 +998,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             mMainExecutor.execute(() -> {
                 PipController.this.showPictureInPictureMenu();
             });
-        }
-
-        @Override
-        public void onKeyguardVisibilityChanged(boolean showing, boolean animating) {
-            mMainExecutor.execute(() -> {
-                PipController.this.onKeyguardVisibilityChanged(showing, animating);
-            });
-        }
-
-        @Override
-        public void onKeyguardDismissAnimationFinished() {
-            mMainExecutor.execute(PipController.this::onKeyguardDismissAnimationFinished);
         }
 
         @Override

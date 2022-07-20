@@ -811,7 +811,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             @Override
-            public void topFocusedWindowChanged(String packageName,
+            public void topFocusedWindowChanged(ComponentName component,
                     InsetsVisibilities requestedVisibilities) {
             }
         };

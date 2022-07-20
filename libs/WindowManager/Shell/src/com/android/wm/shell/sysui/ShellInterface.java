@@ -30,4 +30,16 @@ public interface ShellInterface {
      * Notifies the Shell that the configuration has changed.
      */
     default void onConfigurationChanged(Configuration newConfiguration) {}
+
+    /**
+     * Notifies the Shell that the keyguard is showing (and if so, whether it is occluded) or not
+     * showing, and whether it is animating a dismiss.
+     */
+    default void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
+            boolean animatingDismiss) {}
+
+    /**
+     * Notifies the Shell when the keyguard dismiss animation has finished.
+     */
+    default void onKeyguardDismissAnimationFinished() {}
 }

@@ -80,6 +80,8 @@ import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
+import com.android.wm.shell.sysui.KeyguardChangeListener;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.transition.LegacyTransitions;
 import com.android.wm.shell.transition.Transitions;
 
@@ -99,7 +101,7 @@ import java.util.concurrent.Executor;
  */
 // TODO(b/198577848): Implement split screen flicker test to consolidate CUJ of split screen.
 public class SplitScreenController implements DragAndDropPolicy.Starter,
-        RemoteCallable<SplitScreenController> {
+        RemoteCallable<SplitScreenController>, KeyguardChangeListener {
     private static final String TAG = SplitScreenController.class.getSimpleName();
 
     public static final int EXIT_REASON_UNKNOWN = 0;
@@ -127,6 +129,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     @Retention(RetentionPolicy.SOURCE)
     @interface ExitReason{}
 
+    private final ShellController mShellController;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final SyncTransactionQueue mSyncQueue;
     private final Context mContext;
@@ -147,7 +150,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     // outside the bounds of the roots by being reparented into a higher level fullscreen container
     private SurfaceControl mSplitTasksContainerLayer;
 
-    public SplitScreenController(ShellTaskOrganizer shellTaskOrganizer,
+    public SplitScreenController(ShellController shellController,
+            ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, Context context,
             RootTaskDisplayAreaOrganizer rootTDAOrganizer,
             ShellExecutor mainExecutor, DisplayController displayController,
@@ -155,6 +159,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             DisplayInsetsController displayInsetsController,
             Transitions transitions, TransactionPool transactionPool, IconProvider iconProvider,
             Optional<RecentTasksController> recentTasks) {
+        mShellController = shellController;
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
         mContext = context;
@@ -185,6 +190,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     public void onOrganizerRegistered() {
+        mShellController.addKeyguardChangeListener(this);
         if (mStageCoordinator == null) {
             // TODO: Multi-display
             mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
@@ -283,8 +289,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mStageCoordinator.exitSplitScreen(toTopTaskId, exitReason);
     }
 
-    public void onKeyguardVisibilityChanged(boolean showing) {
-        mStageCoordinator.onKeyguardVisibilityChanged(showing);
+    @Override
+    public void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
+            boolean animatingDismiss) {
+        mStageCoordinator.onKeyguardVisibilityChanged(visible);
     }
 
     public void onFinishedWakingUp() {
@@ -654,13 +662,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 if (mExecutors.size() == 0) {
                     SplitScreenController.this.unregisterSplitScreenListener(mListener);
                 }
-            });
-        }
-
-        @Override
-        public void onKeyguardVisibilityChanged(boolean showing) {
-            mMainExecutor.execute(() -> {
-                SplitScreenController.this.onKeyguardVisibilityChanged(showing);
             });
         }
 
