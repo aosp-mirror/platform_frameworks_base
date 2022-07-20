@@ -65,6 +65,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.incremental.IncrementalManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -426,10 +427,11 @@ final class VerifyingSession {
 
         final String baseCodePath = mPackageLite.getBaseApkPath();
         final String[] splitCodePaths = mPackageLite.getSplitApkPaths();
-        final String rootHashString = PackageManagerServiceUtils.buildVerificationRootHashString(
-                baseCodePath, splitCodePaths);
 
-        if (rootHashString != null) {
+        if (IncrementalManager.isIncrementalPath(baseCodePath)) {
+            final String rootHashString =
+                    PackageManagerServiceUtils.buildVerificationRootHashString(
+                            baseCodePath, splitCodePaths);
             verification.putExtra(PackageManager.EXTRA_VERIFICATION_ROOT_HASH, rootHashString);
         }
 
