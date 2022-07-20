@@ -1155,6 +1155,8 @@ public final class Debug
      * consequences.
      *
      * To temporarily enable tracing, use {@link #startNativeTracing()}.
+     *
+     * @deprecated Please use other tracing method in this class.
      */
     public static void enableEmulatorTraceOutput() {
         Log.w(TAG, "Unimplemented");
