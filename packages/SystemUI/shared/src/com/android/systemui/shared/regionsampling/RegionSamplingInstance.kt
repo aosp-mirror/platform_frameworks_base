@@ -15,10 +15,8 @@
  */
 package com.android.systemui.shared.regionsampling
 
-import android.content.res.Resources
 import android.graphics.Rect
 import android.view.View
-import com.android.systemui.plugins.Clock
 import com.android.systemui.plugins.RegionDarkness
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper.SamplingCallback
@@ -33,12 +31,22 @@ class RegionSamplingInstance(
         mainExecutor: Executor?,
         bgExecutor: Executor?,
         regionSamplingEnabled: Boolean,
-        clock: Clock?,
-        resources: Resources
+        updateFun: UpdateColorCallback
 ) {
     private var isDark = RegionDarkness.DEFAULT
     private var samplingBounds = Rect()
     private var regionSampler: RegionSamplingHelper? = null
+
+    /**
+     * Interface for method to be passed into RegionSamplingHelper
+     */
+    @FunctionalInterface
+    interface UpdateColorCallback {
+        /**
+         * Method to update the text colors after clock darkness changed.
+         */
+        fun updateColors()
+    }
 
     private fun convertToClockDarkness(isRegionDark: Boolean): RegionDarkness {
         return if (isRegionDark) {
@@ -48,7 +56,7 @@ class RegionSamplingInstance(
         }
     }
 
-    fun currentClockDarkness(): RegionDarkness {
+    fun currentRegionDarkness(): RegionDarkness {
         return isDark
     }
 
@@ -86,7 +94,7 @@ class RegionSamplingInstance(
                     object : SamplingCallback {
                         override fun onRegionDarknessChanged(isRegionDark: Boolean) {
                             isDark = convertToClockDarkness(isRegionDark)
-                            clock?.events?.onColorPaletteChanged(resources, isDark, isDark)
+                            updateFun.updateColors()
                         }
 
                         override fun getSampledRegion(sampledView: View): Rect {
