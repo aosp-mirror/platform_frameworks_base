@@ -1095,7 +1095,7 @@ public class Vpn {
         // Except for Settings and VpnDialogs, the caller should be matched one of oldPackage or
         // newPackage. Otherwise, non VPN owner might get the VPN always-on status of the VPN owner.
         // See b/191382886.
-        if (mContext.checkCallingOrSelfPermission(CONTROL_VPN) != PERMISSION_GRANTED) {
+        if (!hasControlVpnPermission()) {
             if (oldPackage != null) {
                 verifyCallingUidAndPackage(oldPackage);
             }
@@ -2043,6 +2043,10 @@ public class Vpn {
     private void enforceSettingsPermission() {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.NETWORK_SETTINGS,
                 "Unauthorized Caller");
+    }
+
+    private boolean hasControlVpnPermission() {
+        return mContext.checkCallingOrSelfPermission(CONTROL_VPN) == PERMISSION_GRANTED;
     }
 
     private class Connection implements ServiceConnection {
@@ -3846,8 +3850,10 @@ public class Vpn {
             Binder.restoreCallingIdentity(token);
         }
 
-        // TODO: if package has CONTROL_VPN, grant the ACTIVATE_PLATFORM_VPN appop.
-        // This mirrors the prepareAndAuthorize that is used by VpnService.
+        // If package has CONTROL_VPN, grant the ACTIVATE_PLATFORM_VPN appop.
+        if (hasControlVpnPermission()) {
+            setPackageAuthorization(packageName, VpnManager.TYPE_VPN_PLATFORM);
+        }
 
         // Return whether the app is already pre-consented
         return isVpnProfilePreConsented(mContext, packageName);
