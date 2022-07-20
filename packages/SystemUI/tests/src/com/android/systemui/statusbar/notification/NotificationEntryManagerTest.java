@@ -77,10 +77,8 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
-import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment;
-import com.android.systemui.statusbar.notification.collection.NotifLiveDataStoreMocksKt;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
@@ -91,7 +89,6 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.row.NotificationEntryManagerInflationTest;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -115,9 +112,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Unit tests for {@link NotificationEntryManager}. This test will not test any interactions with
- * inflation. Instead, for functional inflation tests, see
- * {@link NotificationEntryManagerInflationTest}.
+ * Unit tests for {@link NotificationEntryManager}.
  */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -205,7 +200,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mStats = defaultStats(mEntry);
         mSbn = mEntry.getSbn();
 
-        when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(false);
         mEntryManager = new NotificationEntryManager(
                 mLogger,
                 mGroupManager,
@@ -214,7 +208,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 () -> mRemoteInputManager,
                 mLeakDetector,
                 mStatusBarService,
-                NotifLiveDataStoreMocksKt.createNotifLiveDataStoreImplMock(),
                 mock(DumpManager.class),
                 mBgExecutor
         );
@@ -230,7 +223,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                         mock(PeopleNotificationIdentifier.class),
                         mock(HighPriorityProvider.class),
                         mEnvironment));
-        mEntryManager.setUpWithPresenter(mPresenter);
         mEntryManager.addNotificationEntryListener(mEntryListener);
         mEntryManager.addCollectionListener(mNotifCollectionListener);
         mEntryManager.addNotificationRemoveInterceptor(mRemoveInterceptor);
@@ -273,17 +265,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateNotification_updatesUserSentiment() {
-        mEntryManager.addActiveNotificationForTest(mEntry);
-        setUserSentiment(
-                mEntry.getKey(), Ranking.USER_SENTIMENT_NEGATIVE);
-
-        mEntryManager.updateNotification(mSbn, mRankingMap);
-
-        assertEquals(Ranking.USER_SENTIMENT_NEGATIVE, mEntry.getUserSentiment());
-    }
-
-    @Test
     public void testUpdateNotification_prePostEntryOrder() throws Exception {
         TestableLooper.get(this).processAllMessages();
 
@@ -294,7 +275,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         // Ensure that update callbacks happen in correct order
         InOrder order = inOrder(mEntryListener, mPresenter, mEntryListener);
         order.verify(mEntryListener).onPreEntryUpdated(mEntry);
-        order.verify(mPresenter).updateNotificationViews(any());
         order.verify(mEntryListener).onPostEntryUpdated(mEntry);
     }
 
@@ -305,7 +285,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntryManager.removeNotification(mSbn.getKey(), mRankingMap, UNDEFINED_DISMISS_REASON);
 
-        verify(mPresenter).updateNotificationViews(any());
         verify(mEntryListener).onEntryRemoved(
                 argThat(matchEntryOnKey()), any(),
                 eq(false) /* removedByUser */, eq(UNDEFINED_DISMISS_REASON));
@@ -379,23 +358,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateNotificationRanking() {
-        when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
-        when(mEnvironment.isDeviceProvisioned()).thenReturn(true);
-        when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
-
-        mEntry.setRow(mRow);
-        mEntry.setInflationTask(mAsyncInflationTask);
-        mEntryManager.addActiveNotificationForTest(mEntry);
-        setSmartActions(mEntry.getKey(), new ArrayList<>(Arrays.asList(createAction())));
-
-        mEntryManager.updateNotificationRanking(mRankingMap);
-        assertEquals(1, mEntry.getSmartActions().size());
-        assertEquals("action", mEntry.getSmartActions().get(0).title);
-        verify(mEntryListener).onNotificationRankingUpdated(mRankingMap);
-    }
-
-    @Test
     public void testUpdateNotificationRanking_noChange() {
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
@@ -406,20 +368,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntryManager.updateNotificationRanking(mRankingMap);
         assertThat(mEntry.getSmartActions()).isEmpty();
-    }
-
-    @Test
-    public void testUpdateNotificationRanking_rowNotInflatedYet() {
-        when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
-        when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
-
-        mEntry.setRow(null);
-        mEntryManager.addActiveNotificationForTest(mEntry);
-        setSmartActions(mEntry.getKey(), new ArrayList<>(Arrays.asList(createAction())));
-
-        mEntryManager.updateNotificationRanking(mRankingMap);
-        assertEquals(1, mEntry.getSmartActions().size());
-        assertEquals("action", mEntry.getSmartActions().get(0).title);
     }
 
     @Test
@@ -612,31 +560,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     }
 
     /* Tests annexed from NotificationDataTest go here */
-
-    @Test
-    public void testChannelIsSetWhenAdded() {
-        NotificationChannel nc = new NotificationChannel(
-                "testId",
-                "testName",
-                IMPORTANCE_DEFAULT);
-
-        Ranking r = new RankingBuilder()
-                .setKey(mEntry.getKey())
-                .setChannel(nc)
-                .build();
-
-        RankingMap rm = new RankingMap(new Ranking[] { r });
-
-        // GIVEN: a notification is added, and the ranking updated
-        mEntryManager.addActiveNotificationForTest(mEntry);
-        mEntryManager.updateRanking(rm, "testReason");
-
-        // THEN the notification entry better have a channel on it
-        assertEquals(
-                "Channel must be set when adding a notification",
-                nc.getName(),
-                mEntry.getChannel().getName());
-    }
 
     @Test
     public void testGetNotificationsForCurrentUser_shouldFilterNonCurrentUserNotifications() {
