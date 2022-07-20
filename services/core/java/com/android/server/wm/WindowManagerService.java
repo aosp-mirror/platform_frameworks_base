@@ -8262,7 +8262,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         .setContainerLayer()
                         .setName("IME Handwriting Surface")
                         .setCallsite("getHandwritingSurfaceForDisplay")
-                        .setParent(dc.getOverlayLayer())
+                        .setParent(dc.getSurfaceControl())
                         .build();
             }
         }
