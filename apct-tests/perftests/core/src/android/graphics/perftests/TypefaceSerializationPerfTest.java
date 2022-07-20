@@ -42,9 +42,17 @@ public class TypefaceSerializationPerfTest {
 
     private static final String TAG = "TypefaceSerializationPerfTest";
 
+    // Those values were taken from android.perftests.utils.BenchmarkState.
+    // Note: we cannot use TimeUnit.toNanos() because these constants are used in annotation.
+    private static final long WARMUP_DURATION_NS = 250_000_000; // 250ms
+    private static final long TARGET_TEST_DURATION_NS = 500_000_000; // 500ms
+
     @Rule
     public PerfManualStatusReporter mPerfManualStatusReporter = new PerfManualStatusReporter();
 
+    @ManualBenchmarkState.ManualBenchmarkTest(
+            warmupDurationNs = WARMUP_DURATION_NS,
+            targetTestDurationNs = TARGET_TEST_DURATION_NS)
     @Test
     public void testSerializeFontMap() throws Exception {
         Map<String, Typeface> systemFontMap = Typeface.getSystemFontMap();
@@ -58,6 +66,9 @@ public class TypefaceSerializationPerfTest {
         }
     }
 
+    @ManualBenchmarkState.ManualBenchmarkTest(
+            warmupDurationNs = WARMUP_DURATION_NS,
+            targetTestDurationNs = TARGET_TEST_DURATION_NS)
     @Test
     public void testSerializeFontMap_memory() throws Exception {
         Map<String, Typeface> systemFontMap = Typeface.getSystemFontMap();
@@ -70,6 +81,9 @@ public class TypefaceSerializationPerfTest {
         }
     }
 
+    @ManualBenchmarkState.ManualBenchmarkTest(
+            warmupDurationNs = WARMUP_DURATION_NS,
+            targetTestDurationNs = TARGET_TEST_DURATION_NS)
     @Test
     public void testDeserializeFontMap() throws Exception {
         SharedMemory memory = Typeface.serializeFontMap(Typeface.getSystemFontMap());
@@ -86,6 +100,9 @@ public class TypefaceSerializationPerfTest {
         }
     }
 
+    @ManualBenchmarkState.ManualBenchmarkTest(
+            warmupDurationNs = WARMUP_DURATION_NS,
+            targetTestDurationNs = TARGET_TEST_DURATION_NS)
     @Test
     public void testDeserializeFontMap_memory() throws Exception {
         SharedMemory memory = Typeface.serializeFontMap(Typeface.getSystemFontMap());
@@ -115,6 +132,9 @@ public class TypefaceSerializationPerfTest {
         }
     }
 
+    @ManualBenchmarkState.ManualBenchmarkTest(
+            warmupDurationNs = WARMUP_DURATION_NS,
+            targetTestDurationNs = TARGET_TEST_DURATION_NS)
     @Test
     public void testSetSystemFontMap() throws Exception {
         SharedMemory memory = null;
