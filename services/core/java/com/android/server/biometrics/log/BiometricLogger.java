@@ -28,8 +28,10 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.Utils;
@@ -41,6 +43,10 @@ public class BiometricLogger {
 
     public static final String TAG = "BiometricLogger";
     public static final boolean DEBUG = false;
+    private static final Object sLock = new Object();
+
+    @GuardedBy("sLock")
+    private static int sAlsCounter;
 
     private final int mStatsModality;
     private final int mStatsAction;
@@ -345,13 +351,33 @@ public class BiometricLogger {
             if (!mLightSensorEnabled) {
                 mLightSensorEnabled = true;
                 mLastAmbientLux = 0;
-                mSensorManager.registerListener(mLightSensorListener, lightSensor,
-                        SensorManager.SENSOR_DELAY_NORMAL);
+                int localAlsCounter;
+                synchronized (sLock) {
+                    localAlsCounter = sAlsCounter++;
+                }
+
+                if (localAlsCounter == 0) {
+                    mSensorManager.registerListener(mLightSensorListener, lightSensor,
+                            SensorManager.SENSOR_DELAY_NORMAL);
+                } else {
+                    Slog.e(TAG, "Ignoring request to subscribe to ALSProbe due to non-zero ALS"
+                            + " counter: " + localAlsCounter);
+                    Slog.e(TAG, Log.getStackTraceString(new Throwable()));
+                }
             }
         } else {
             mLightSensorEnabled = false;
             mLastAmbientLux = 0;
             mSensorManager.unregisterListener(mLightSensorListener);
+            int localAlsCounter;
+            synchronized (sLock) {
+                localAlsCounter = --sAlsCounter;
+            }
+            if (localAlsCounter != 0) {
+                Slog.e(TAG, "Non-zero ALS counter after unsubscribing from ALSProbe: "
+                        + localAlsCounter);
+                Slog.e(TAG, Log.getStackTraceString(new Throwable()));
+            }
         }
     }
 }
