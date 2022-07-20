@@ -1929,6 +1929,7 @@ public final class InputMethodManager {
                     mClient,
                     view.getWindowToken(),
                     flags,
+                    mCurRootView.getLastClickToolType(),
                     resultReceiver,
                     reason);
         }
@@ -1960,6 +1961,7 @@ public final class InputMethodManager {
                     mClient,
                     mCurRootView.getView().getWindowToken(),
                     flags,
+                    mCurRootView.getLastClickToolType(),
                     resultReceiver,
                     SoftInputShowHideReason.SHOW_SOFT_INPUT);
         }
@@ -2339,6 +2341,9 @@ public final class InputMethodManager {
         editorInfo.packageName = view.getContext().getOpPackageName();
         editorInfo.autofillId = view.getAutofillId();
         editorInfo.fieldId = view.getId();
+        synchronized (mH) {
+            editorInfo.setInitialToolType(mCurRootView.getLastClickToolType());
+        }
         InputConnection ic = view.onCreateInputConnection(editorInfo);
         if (DEBUG) Log.v(TAG, "Starting input: editorInfo=" + editorInfo + " ic=" + ic);
 

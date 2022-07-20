@@ -132,6 +132,7 @@ import android.view.DisplayInfo;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputDevice;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
@@ -3359,7 +3360,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public boolean showSoftInput(IInputMethodClient client, IBinder windowToken, int flags,
-            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+            int lastClickTooType, ResultReceiver resultReceiver,
+            @SoftInputShowHideReason int reason) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInput");
         int uid = Binder.getCallingUid();
         ImeTracing.getInstance().triggerManagerServiceDump(
@@ -3371,7 +3373,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
-                return showCurrentInputLocked(windowToken, flags, resultReceiver, reason);
+                return showCurrentInputLocked(
+                        windowToken, flags, lastClickTooType, resultReceiver, reason);
             } finally {
                 Binder.restoreCallingIdentity(ident);
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -3443,8 +3446,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
-    boolean showCurrentInputLocked(IBinder windowToken, int flags, ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {
+    boolean showCurrentInputLocked(IBinder windowToken, int flags,
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+        return showCurrentInputLocked(
+                windowToken, flags, MotionEvent.TOOL_TYPE_UNKNOWN, resultReceiver, reason);
+    }
+
+    @GuardedBy("ImfLock.class")
+    private boolean showCurrentInputLocked(IBinder windowToken, int flags, int lastClickToolType,
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         mShowRequested = true;
         if (mAccessibilityRequestingNoSoftKeyboard || mImeHiddenByDisplayPolicy) {
             return false;
@@ -3472,6 +3482,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 Slog.v(TAG, "Calling " + curMethod + ".showSoftInput(" + showInputToken
                         + ", " + showFlags + ", " + resultReceiver + ") for reason: "
                         + InputMethodDebug.softInputDisplayReasonToString(reason));
+            }
+
+            if (lastClickToolType != MotionEvent.TOOL_TYPE_UNKNOWN) {
+                curMethod.updateEditorToolType(lastClickToolType);
             }
             // TODO(b/192412909): Check if we can always call onShowHideSoftInputRequested() or not.
             if (curMethod.showSoftInput(showInputToken, showFlags, resultReceiver)) {

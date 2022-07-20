@@ -732,6 +732,8 @@ public final class ViewRootImpl implements ViewParent,
     final PointF mDragPoint = new PointF();
     final PointF mLastTouchPoint = new PointF();
     int mLastTouchSource;
+    /** Tracks last {@link MotionEvent#getToolType(int)} with {@link MotionEvent#ACTION_UP}. **/
+    private int mLastClickToolType;
 
     private boolean mProfileRendering;
     private Choreographer.FrameCallback mRenderProfiler;
@@ -6392,11 +6394,16 @@ public final class ViewRootImpl implements ViewParent,
                 event.offsetLocation(0, mCurScrollY);
             }
 
-            // Remember the touch position for possible drag-initiation.
             if (event.isTouchEvent()) {
+                // Remember the touch position for possible drag-initiation.
                 mLastTouchPoint.x = event.getRawX();
                 mLastTouchPoint.y = event.getRawY();
                 mLastTouchSource = event.getSource();
+
+                // Register last ACTION_UP. This will be propagated to IME.
+                if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                    mLastClickToolType = event.getToolType(event.getActionIndex());
+                }
             }
             return FORWARD;
         }
@@ -7990,6 +7997,14 @@ public final class ViewRootImpl implements ViewParent,
 
     public int getLastTouchSource() {
         return mLastTouchSource;
+    }
+
+    /**
+     * Used by InputMethodManager.
+     * @hide
+     */
+    public int getLastClickToolType() {
+        return mLastClickToolType;
     }
 
     public void setDragFocus(View newDragTarget, DragEvent event) {

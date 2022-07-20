@@ -111,10 +111,11 @@ final class IInputMethodManagerInvoker {
 
     @AnyThread
     boolean showSoftInput(@NonNull IInputMethodClient client, @Nullable IBinder windowToken,
-            int flags, @Nullable ResultReceiver resultReceiver,
+            int flags, int lastClickToolType, @Nullable ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
         try {
-            return mTarget.showSoftInput(client, windowToken, flags, resultReceiver, reason);
+            return mTarget.showSoftInput(
+                    client, windowToken, flags, lastClickToolType, resultReceiver, reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
