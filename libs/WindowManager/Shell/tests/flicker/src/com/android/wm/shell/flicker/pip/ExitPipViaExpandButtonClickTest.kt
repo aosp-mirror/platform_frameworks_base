@@ -84,6 +84,11 @@ class ExitPipViaExpandButtonClickTest(
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 
+    /** {@inheritDoc}  */
+    @FlakyTest(bugId = 197726610)
+    @Test
+    override fun pipLayerExpands() = super.pipLayerExpands()
+
     companion object {
         /**
          * Creates the test configurations.
