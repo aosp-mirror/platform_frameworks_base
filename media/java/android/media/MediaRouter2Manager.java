@@ -82,6 +82,7 @@ public final class MediaRouter2Manager {
     @GuardedBy("sLock")
     private Client mClient;
     private final IMediaRouterService mMediaRouterService;
+    private final AtomicInteger mScanRequestCount = new AtomicInteger(/* initialValue= */ 0);
     final Handler mHandler;
     final CopyOnWriteArrayList<CallbackRecord> mCallbackRecords = new CopyOnWriteArrayList<>();
 
@@ -155,20 +156,17 @@ public final class MediaRouter2Manager {
     }
 
     /**
-     * Starts scanning remote routes.
-     * <p>
-     * Route discovery can happen even when the {@link #startScan()} is not called.
-     * This is because the scanning could be started before by other apps.
-     * Therefore, calling this method after calling {@link #stopScan()} does not necessarily mean
-     * that the routes found before are removed and added again.
-     * <p>
-     * Use {@link Callback} to get the route related events.
-     * <p>
-     * @see #stopScan()
+     * Registers a request to scan for remote routes.
+     *
+     * <p>Increases the count of active scanning requests. When the count transitions from zero to
+     * one, sends a request to the system server to start scanning.
+     *
+     * <p>Clients must {@link #unregisterScanRequest() unregister their scan requests} when scanning
+     * is no longer needed, to avoid unnecessary resource usage.
      */
-    public void startScan() {
-        Client client = getOrCreateClient();
-        if (client != null) {
+    public void registerScanRequest() {
+        if (mScanRequestCount.getAndIncrement() == 0) {
+            Client client = getOrCreateClient();
             try {
                 mMediaRouterService.startScan(client);
             } catch (RemoteException ex) {
@@ -178,21 +176,25 @@ public final class MediaRouter2Manager {
     }
 
     /**
-     * Stops scanning remote routes to reduce resource consumption.
-     * <p>
-     * Route discovery can be continued even after this method is called.
-     * This is because the scanning is only turned off when all the apps stop scanning.
-     * Therefore, calling this method does not necessarily mean the routes are removed.
-     * Also, for the same reason it does not mean that {@link Callback#onRoutesAdded(List)}
-     * is not called afterwards.
-     * <p>
-     * Use {@link Callback} to get the route related events.
+     * Unregisters a scan request made by {@link #registerScanRequest()}.
      *
-     * @see #startScan()
+     * <p>Decreases the count of active scanning requests. When the count transitions from one to
+     * zero, sends a request to the system server to stop scanning.
+     *
+     * @throws IllegalStateException If called while there are no active scan requests.
      */
-    public void stopScan() {
-        Client client = getOrCreateClient();
-        if (client != null) {
+    public void unregisterScanRequest() {
+        if (mScanRequestCount.updateAndGet(
+                count -> {
+                    if (count == 0) {
+                        throw new IllegalStateException(
+                                "No active scan requests to unregister.");
+                    } else {
+                        return --count;
+                    }
+                })
+                == 0) {
+            Client client = getOrCreateClient();
             try {
                 mMediaRouterService.stopScan(client);
             } catch (RemoteException ex) {
