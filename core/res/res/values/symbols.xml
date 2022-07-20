@@ -697,7 +697,7 @@
   <java-symbol type="string" name="config_forceVoiceInteractionServicePackage" />
   <java-symbol type="string" name="config_mms_user_agent" />
   <java-symbol type="string" name="config_mms_user_agent_profile_url" />
-  <java-symbol type="string" name="config_ntpServer" />
+  <java-symbol type="array" name="config_ntpServers" />
   <java-symbol type="string" name="config_useragentprofile_url" />
   <java-symbol type="string" name="config_appsNotReportingCrashes" />
   <java-symbol type="string" name="contentServiceSync" />

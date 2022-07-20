@@ -40,6 +40,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -54,6 +57,9 @@ import java.util.function.Supplier;
 public abstract class NtpTrustedTime implements TrustedTime {
 
     private static final String URI_SCHEME_NTP = "ntp";
+    @VisibleForTesting
+    public static final String NTP_SETTING_SERVER_NAME_DELIMITER = "|";
+    private static final String NTP_SETTING_SERVER_NAME_DELIMITER_REGEXP = "\\|";
 
     /**
      * NTP server configuration.
@@ -62,21 +68,36 @@ public abstract class NtpTrustedTime implements TrustedTime {
      */
     public static final class NtpConfig {
 
-        @NonNull private final URI mServerUri;
+        @NonNull private final List<URI> mServerUris;
         @NonNull private final Duration mTimeout;
 
         /**
-         * Creates an instance. If the arguments are invalid then an {@link
-         * IllegalArgumentException} will be thrown. See {@link #parseNtpUriStrict(String)} and
-         * {@link #parseNtpServerSetting(String)} to create valid URIs.
+         * Creates an instance with the supplied properties. There must be at least one NTP server
+         * URI and the timeout must be non-zero / non-negative.
+         *
+         * <p>If the arguments are invalid then an {@link IllegalArgumentException} will be thrown.
+         * See {@link #parseNtpUriStrict(String)} and {@link #parseNtpServerSetting(String)} to
+         * create valid URIs.
          */
-        public NtpConfig(@NonNull URI serverUri, @NonNull Duration timeout)
+        public NtpConfig(@NonNull List<URI> serverUris, @NonNull Duration timeout)
                 throws IllegalArgumentException {
-            try {
-                mServerUri = validateNtpServerUri(Objects.requireNonNull(serverUri));
-            } catch (URISyntaxException e) {
-                throw new IllegalArgumentException("Bad URI", e);
+
+            Objects.requireNonNull(serverUris);
+            if (serverUris.isEmpty()) {
+                throw new IllegalArgumentException("Server URIs is empty");
             }
+
+            List<URI> validatedServerUris = new ArrayList<>();
+            for (URI serverUri : serverUris) {
+                try {
+                    URI validatedServerUri = validateNtpServerUri(
+                            Objects.requireNonNull(serverUri));
+                    validatedServerUris.add(validatedServerUri);
+                } catch (URISyntaxException e) {
+                    throw new IllegalArgumentException("Bad server URI", e);
+                }
+            }
+            mServerUris = Collections.unmodifiableList(validatedServerUris);
 
             if (timeout.isNegative() || timeout.isZero()) {
                 throw new IllegalArgumentException("timeout < 0");
@@ -84,9 +105,10 @@ public abstract class NtpTrustedTime implements TrustedTime {
             mTimeout = timeout;
         }
 
+        /** Returns a non-empty, immutable list of NTP server URIs. */
         @NonNull
-        public URI getServerUri() {
-            return mServerUri;
+        public List<URI> getServerUris() {
+            return mServerUris;
         }
 
         @NonNull
@@ -97,7 +119,7 @@ public abstract class NtpTrustedTime implements TrustedTime {
         @Override
         public String toString() {
             return "NtpConnectionInfo{"
-                    + "mServerUri=" + mServerUri
+                    + "mServerUris=" + mServerUris
                     + ", mTimeout=" + mTimeout
                     + '}';
         }
@@ -199,6 +221,10 @@ public abstract class NtpTrustedTime implements TrustedTime {
     @Nullable
     private NtpConfig mNtpConfigForTests;
 
+    @GuardedBy("this")
+    @Nullable
+    private URI mLastSuccessfulNtpServerUri;
+
     // Declared volatile and accessed outside synchronized blocks to avoid blocking reads during
     // forceRefresh().
     private volatile TimeResult mTimeResult;
@@ -245,13 +271,59 @@ public abstract class NtpTrustedTime implements TrustedTime {
                 Log.d(TAG, "forceRefresh: NTP request network=" + network
                         + " ntpConfig=" + ntpConfig);
             }
-            TimeResult timeResult =
-                    queryNtpServer(network, ntpConfig.getServerUri(), ntpConfig.getTimeout());
-            if (timeResult != null) {
-                // Keep any previous time result.
-                mTimeResult = timeResult;
+
+            List<URI> unorderedServerUris = ntpConfig.getServerUris();
+
+            // Android supports multiple NTP server URIs for situations where servers might be
+            // unreachable for some devices due to network topology, e.g. we understand that devices
+            // travelling to China often have difficulty accessing "time.android.com". Android
+            // partners may want to configure alternative URIs for devices sold globally, or those
+            // that are likely to travel to part of the world without access to the full internet.
+            //
+            // The server URI list is expected to contain one element in the general case, with two
+            // or three as the anticipated maximum. The list is never empty. Server URIs are
+            // considered to be in a rough priority order of servers to try initially (no
+            // randomization), but besides that there is assumed to be no preference.
+            //
+            // The server selection algorithm below tries to stick with a successfully accessed NTP
+            // server's URI where possible:
+            //
+            // The algorithm based on the assumption that a cluster of NTP servers sharing the same
+            // host name, particularly commercially run ones, are likely to agree more closely on
+            // the time than servers from different URIs, so it's best to be sticky. Switching
+            // between URIs could result in flip-flopping between reference clocks or involve
+            // talking to server clusters with different approaches to leap second handling.
+            //
+            // Stickiness may also be useful if some server URIs early in the list are permanently
+            // black-holing requests, or if the responses are not routed back. In those cases it's
+            // best not to try those URIs more than we have to, as might happen if the algorithm
+            // always started at the beginning of the list.
+            //
+            // Generally, we have to assume that any of the configured servers are going to be "good
+            // enough" as an external reference clock when reachable, so the stickiness is a very
+            // lightly applied bias. There's no tracking of failure rates or back-off on a per-URI
+            // basis; higher level code is expected to handle rate limiting of NTP requests in the
+            // event of failure to contact any server.
+
+            List<URI> orderedServerUris = new ArrayList<>();
+            for (URI serverUri : unorderedServerUris) {
+                if (serverUri.equals(mLastSuccessfulNtpServerUri)) {
+                    orderedServerUris.add(0, serverUri);
+                } else {
+                    orderedServerUris.add(serverUri);
+                }
             }
-            return timeResult != null;
+
+            for (URI serverUri : orderedServerUris) {
+                TimeResult timeResult = queryNtpServer(network, serverUri, ntpConfig.getTimeout());
+                // Only overwrite previous state if the request was successful.
+                if (timeResult != null) {
+                    mLastSuccessfulNtpServerUri = serverUri;
+                    mTimeResult = timeResult;
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -388,7 +460,9 @@ public abstract class NtpTrustedTime implements TrustedTime {
      * <p>NTP server config URIs are in the form "ntp://{hostname}[:port]". This is not a registered
      * IANA URI scheme.
      */
-    public static URI parseNtpUriStrict(String ntpServerUriString) throws URISyntaxException {
+    @NonNull
+    public static URI parseNtpUriStrict(@NonNull String ntpServerUriString)
+            throws URISyntaxException {
         // java.net.URI is used in preference to android.net.Uri, since android.net.Uri is very
         // forgiving of obvious errors. URI catches issues sooner.
         URI unvalidatedUri = new URI(ntpServerUriString);
@@ -396,41 +470,58 @@ public abstract class NtpTrustedTime implements TrustedTime {
     }
 
     /**
-     * Parses a setting string and returns a URI that will be accepted by {@link NtpConfig}, or
-     * {@code null} if the string does not produce a URI considered valid.
+     * Parses a setting string and returns a list of URIs that will be accepted by {@link
+     * NtpConfig}, or {@code null} if the string is invalid.
+     *
+     * <p>The setting string is expected to be one or more server values separated by a pipe ("|")
+     * character.
      *
      * <p>NTP server config URIs are in the form "ntp://{hostname}[:port]". This is not a registered
      * IANA URI scheme.
      *
      * <p>Unlike {@link #parseNtpUriStrict(String)} this method will not throw an exception. It
-     * checks for a leading "ntp:" and will call through to {@link #parseNtpUriStrict(String)} to
-     * attempt to parse it, returning {@code null} if it fails. To support legacy settings values,
-     * it will also accept a string that only consists of a server name, which will be coerced into
-     * a URI in the form "ntp://{server name}".
+     * checks each value for a leading "ntp:" and will call through to {@link
+     * #parseNtpUriStrict(String)} to attempt to parse it, returning {@code null} if it fails.
+     * To support legacy settings values, it will also accept string values that only consists of a
+     * server name, which will be coerced into a URI in the form "ntp://{server name}".
      */
     @VisibleForTesting
-    public static URI parseNtpServerSetting(String ntpServerSetting) {
+    @Nullable
+    public static List<URI> parseNtpServerSetting(@Nullable String ntpServerSetting) {
         if (TextUtils.isEmpty(ntpServerSetting)) {
             return null;
-        } else if (ntpServerSetting.startsWith(URI_SCHEME_NTP + ":")) {
-            try {
-                return parseNtpUriStrict(ntpServerSetting);
-            } catch (URISyntaxException e) {
-                Log.w(TAG, "Rejected NTP uri setting=" + ntpServerSetting, e);
-                return null;
-            }
         } else {
-            // This is the legacy settings path. Assumes that the string is just a host name and
-            // creates a URI in the form ntp://<host name>
-            try {
-                URI uri = new URI(URI_SCHEME_NTP, /*host=*/ntpServerSetting,
-                        /*path=*/null, /*fragment=*/null);
-                // Paranoia: validate just in case the host name somehow results in a bad URI.
-                return validateNtpServerUri(uri);
-            } catch (URISyntaxException e) {
-                Log.w(TAG, "Rejected NTP legacy setting=" + ntpServerSetting, e);
+            String[] values = ntpServerSetting.split(NTP_SETTING_SERVER_NAME_DELIMITER_REGEXP);
+            if (values.length == 0) {
                 return null;
             }
+
+            List<URI> uris = new ArrayList<>();
+            for (String value : values) {
+                if (value.startsWith(URI_SCHEME_NTP + ":")) {
+                    try {
+                        uris.add(parseNtpUriStrict(value));
+                    } catch (URISyntaxException e) {
+                        Log.w(TAG, "Rejected NTP uri setting=" + ntpServerSetting, e);
+                        return null;
+                    }
+                } else {
+                    // This is the legacy settings path. Assumes that the string is just a host name
+                    // and creates a URI in the form ntp://<host name>
+                    try {
+                        URI uri = new URI(URI_SCHEME_NTP, /*host=*/value,
+                                /*path=*/null, /*fragment=*/null);
+                        // Paranoia: validate just in case the host name somehow results in a bad
+                        // URI.
+                        URI validatedUri = validateNtpServerUri(uri);
+                        uris.add(validatedUri);
+                    } catch (URISyntaxException e) {
+                        Log.w(TAG, "Rejected NTP legacy setting=" + ntpServerSetting, e);
+                        return null;
+                    }
+                }
+            }
+            return uris;
         }
     }
 
@@ -439,7 +530,8 @@ public abstract class NtpTrustedTime implements TrustedTime {
      * This method currently ignores Uri components that are not used, only checking the parts that
      * must be present. Returns the supplied {@code uri} if validation is successful.
      */
-    private static URI validateNtpServerUri(URI uri) throws URISyntaxException {
+    @NonNull
+    private static URI validateNtpServerUri(@NonNull URI uri) throws URISyntaxException {
         if (!uri.isAbsolute()) {
             throw new URISyntaxException(uri.toString(), "Relative URI not supported");
         }
@@ -457,6 +549,8 @@ public abstract class NtpTrustedTime implements TrustedTime {
     public void dump(PrintWriter pw) {
         synchronized (this) {
             pw.println("getNtpConfig()=" + getNtpConfig());
+            pw.println("mNtpConfigForTests=" + mNtpConfigForTests);
+            pw.println("mLastSuccessfulNtpServerUri=" + mLastSuccessfulNtpServerUri);
             pw.println("mTimeResult=" + mTimeResult);
             if (mTimeResult != null) {
                 pw.println("mTimeResult.getAgeMillis()="
@@ -508,17 +602,22 @@ public abstract class NtpTrustedTime implements TrustedTime {
             // The Settings value has priority over static config. Check settings first.
             final String serverGlobalSetting =
                     Settings.Global.getString(resolver, Settings.Global.NTP_SERVER);
-            final URI settingsServerInfo = parseNtpServerSetting(serverGlobalSetting);
+            final List<URI> settingsServerUris = parseNtpServerSetting(serverGlobalSetting);
 
-            URI ntpServerUri;
-            if (settingsServerInfo != null) {
-                ntpServerUri = settingsServerInfo;
+            List<URI> ntpServerUris;
+            if (settingsServerUris != null) {
+                ntpServerUris = settingsServerUris;
             } else {
-                String configValue = res.getString(com.android.internal.R.string.config_ntpServer);
+                String[] configValues =
+                        res.getStringArray(com.android.internal.R.array.config_ntpServers);
                 try {
-                    ntpServerUri = parseNtpUriStrict(configValue);
+                    List<URI> configServerUris = new ArrayList<>();
+                    for (String configValue : configValues) {
+                        configServerUris.add(parseNtpUriStrict(configValue));
+                    }
+                    ntpServerUris = configServerUris;
                 } catch (URISyntaxException e) {
-                    ntpServerUri = null;
+                    ntpServerUris = null;
                 }
             }
 
@@ -526,7 +625,7 @@ public abstract class NtpTrustedTime implements TrustedTime {
                     res.getInteger(com.android.internal.R.integer.config_ntpTimeout);
             final Duration timeout = Duration.ofMillis(Settings.Global.getInt(
                     resolver, Settings.Global.NTP_TIMEOUT, defaultTimeoutMillis));
-            return ntpServerUri == null ? null : new NtpConfig(ntpServerUri, timeout);
+            return ntpServerUris == null ? null : new NtpConfig(ntpServerUris, timeout);
         }
 
         @Override
