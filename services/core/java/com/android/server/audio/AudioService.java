@@ -550,6 +550,10 @@ public class AudioService extends IAudioService.Stub
                     if (mRecordMonitor != null) {
                         mRecordMonitor.onAudioServerDied();
                     }
+                    // Notify the playback monitor that the audio server has died
+                    if (mPlaybackMonitor != null) {
+                        mPlaybackMonitor.onAudioServerDied();
+                    }
                     sendMsg(mAudioHandler, MSG_AUDIO_SERVER_DIED,
                             SENDMSG_NOOP, 0, 0, null, 0);
                     sendMsg(mAudioHandler, MSG_DISPATCH_AUDIO_SERVER_STATE,
@@ -11023,10 +11027,10 @@ public class AudioService extends IAudioService.Stub
      * Update player event
      * @param piid Player id to update
      * @param event The new player event
-     * @param deviceId The new player device id
+     * @param eventValue The value associated with this event
      */
-    public void playerEvent(int piid, int event, int deviceId) {
-        mPlaybackMonitor.playerEvent(piid, event, deviceId, Binder.getCallingUid());
+    public void playerEvent(int piid, int event, int eventValue) {
+        mPlaybackMonitor.playerEvent(piid, event, eventValue, Binder.getCallingUid());
     }
 
     public void playerHasOpPlayAudio(int piid, boolean hasOpPlayAudio) {
