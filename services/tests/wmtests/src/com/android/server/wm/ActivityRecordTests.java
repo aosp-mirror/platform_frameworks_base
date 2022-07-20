@@ -2415,7 +2415,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.removeImmediately();
     }
 
-    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testLandscapeSeascapeRotationByApp() {
         final Task task = new TaskBuilder(mSupervisor)
@@ -2448,14 +2448,14 @@ public class ActivityRecordTests extends WindowTestsBase {
         appWindow.removeImmediately();
     }
 
-    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testLandscapeSeascapeRotationByPolicy() {
         final Task task = new TaskBuilder(mSupervisor)
                 .setDisplay(mDisplayContent).setCreateActivity(true).build();
         final ActivityRecord activity = task.getTopNonFinishingActivity();
-        // This instance has been spied in {@link TestDisplayContent}.
         final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        spyOn(displayRotation);
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);
@@ -2572,7 +2572,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         mWm.mDisplayFrozen = false;
     }
 
-    @UseTestDisplay
     @Test
     public void testRespectTopFullscreenOrientation() {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
@@ -2595,7 +2594,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(Configuration.ORIENTATION_LANDSCAPE, activityConfig.orientation);
     }
 
-    @UseTestDisplay
     @Test
     public void testReportOrientationChange() {
         final Task task = new TaskBuilder(mSupervisor)
@@ -3119,7 +3117,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testImeInsetsFrozenFlag_resetWhenResized() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
@@ -3137,7 +3135,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testImeInsetsFrozenFlag_resetWhenNoImeFocusableInActivity() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
@@ -3165,7 +3163,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testImeInsetsFrozenFlag_resetWhenReportedToBeImeInputTarget() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
@@ -3202,7 +3200,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(state.getSource(ITYPE_IME).getFrame(), imeSource.getFrame());
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
     @Test
     public void testImeInsetsFrozenFlag_noDispatchVisibleInsetsWhenAppNotRequest()
             throws RemoteException {

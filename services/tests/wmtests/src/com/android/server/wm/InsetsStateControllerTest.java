@@ -131,7 +131,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNull(app.getInsetsState().peekSource(ITYPE_NAVIGATION_BAR));
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testStripForDispatch_independentSources() {
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
@@ -148,7 +148,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 .isVisible());
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testStripForDispatch_belowIme() {
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
@@ -161,7 +161,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testStripForDispatch_aboveIme() {
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
@@ -173,7 +173,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 .isVisible());
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testStripForDispatch_imeOrderChanged() {
         // This can be the IME z-order target while app cannot be the IME z-order target.
@@ -228,7 +228,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testStripForDispatch_childWindow_altFocusable() {
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
@@ -249,7 +249,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 .isVisible());
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testStripForDispatch_childWindow_splitScreen() {
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
@@ -456,7 +456,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNotNull(app.getInsetsState().peekSource(ITYPE_NAVIGATION_BAR));
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testGetInsetsHintForNewControl() {
         final WindowState app1 = createTestWindow("app1");
