@@ -70,6 +70,7 @@ public interface BiometricFaceConstants {
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
             BIOMETRIC_ERROR_RE_ENROLL,
             FACE_ERROR_UNKNOWN,
+            BIOMETRIC_ERROR_POWER_PRESSED,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface FaceError {}
@@ -182,6 +183,12 @@ public interface BiometricFaceConstants {
      * Unknown error received from the HAL.
      */
     int FACE_ERROR_UNKNOWN = 17;
+
+    /**
+     * A power press stopped this biometric operation.
+     * @hide
+     */
+    int BIOMETRIC_ERROR_POWER_PRESSED = 19;
 
     /**
      * Vendor codes received from the HAL start at 0. Codes that the framework exposes to keyguard

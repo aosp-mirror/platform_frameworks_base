@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
+import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
@@ -151,6 +152,8 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
                 controller.onEnrollmentHelp(getSensorId());
             }
         });
+
+        mCallback.onBiometricAction(BiometricStateListener.ACTION_SENSOR_TOUCH);
     }
 
     @Override
