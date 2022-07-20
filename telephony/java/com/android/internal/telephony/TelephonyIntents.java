@@ -212,23 +212,6 @@ public class TelephonyIntents {
     public static final String SECRET_CODE_ACTION = "android.provider.Telephony.SECRET_CODE";
 
     /**
-     * <p>Broadcast Action: It indicates one column of a subinfo record has been changed
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     */
-    public static final String ACTION_SUBINFO_CONTENT_CHANGE
-            = "android.intent.action.ACTION_SUBINFO_CONTENT_CHANGE";
-
-    /**
-     * <p>Broadcast Action: It indicates subinfo record update is completed
-     * when SIM inserted state change
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     */
-    public static final String ACTION_SUBINFO_RECORD_UPDATED
-            = "android.intent.action.ACTION_SUBINFO_RECORD_UPDATED";
-
-    /**
      * Broadcast Action: The default subscription has changed.  This has the following
      * extra values:</p>
      * <ul>
