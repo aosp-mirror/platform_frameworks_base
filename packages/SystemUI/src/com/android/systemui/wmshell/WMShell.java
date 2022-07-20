@@ -55,9 +55,6 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.ShellCommandHandler;
-import com.android.wm.shell.compatui.CompatUI;
-import com.android.wm.shell.draganddrop.DragAndDrop;
-import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
@@ -110,10 +107,7 @@ public final class WMShell extends CoreStartable
     private final Optional<Pip> mPipOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
-    private final Optional<HideDisplayCutout> mHideDisplayCutoutOptional;
     private final Optional<ShellCommandHandler> mShellCommandHandler;
-    private final Optional<CompatUI> mCompatUIOptional;
-    private final Optional<DragAndDrop> mDragAndDropOptional;
 
     private final CommandQueue mCommandQueue;
     private final ConfigurationController mConfigurationController;
@@ -127,10 +121,7 @@ public final class WMShell extends CoreStartable
     private final Executor mSysUiMainExecutor;
 
     private boolean mIsSysUiStateValid;
-    private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
-    private KeyguardUpdateMonitorCallback mPipKeyguardCallback;
     private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
-    private KeyguardStateController.Callback mCompatUIKeyguardCallback;
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
 
     @Inject
@@ -139,10 +130,7 @@ public final class WMShell extends CoreStartable
             Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
-            Optional<HideDisplayCutout> hideDisplayCutoutOptional,
             Optional<ShellCommandHandler> shellCommandHandler,
-            Optional<CompatUI> sizeCompatUIOptional,
-            Optional<DragAndDrop> dragAndDropOptional,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
             KeyguardStateController keyguardStateController,
@@ -164,12 +152,9 @@ public final class WMShell extends CoreStartable
         mPipOptional = pipOptional;
         mSplitScreenOptional = splitScreenOptional;
         mOneHandedOptional = oneHandedOptional;
-        mHideDisplayCutoutOptional = hideDisplayCutoutOptional;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mProtoTracer = protoTracer;
         mShellCommandHandler = shellCommandHandler;
-        mCompatUIOptional = sizeCompatUIOptional;
-        mDragAndDropOptional = dragAndDropOptional;
         mUserInfoController = userInfoController;
         mSysUiMainExecutor = sysUiMainExecutor;
     }
@@ -185,6 +170,22 @@ public final class WMShell extends CoreStartable
             }
         });
 
+        // Subscribe to keyguard changes
+        mKeyguardStateController.addCallback(new KeyguardStateController.Callback() {
+            @Override
+            public void onKeyguardShowingChanged() {
+                mShell.onKeyguardVisibilityChanged(mKeyguardStateController.isShowing(),
+                        mKeyguardStateController.isOccluded(),
+                        mKeyguardStateController.isAnimatingBetweenKeyguardAndSurfaceBehind());
+            }
+        });
+        mKeyguardUpdateMonitor.registerCallback(new KeyguardUpdateMonitorCallback() {
+            @Override
+            public void onKeyguardDismissAnimationFinished() {
+                mShell.onKeyguardDismissAnimationFinished();
+            }
+        });
+
         // TODO: Consider piping config change and other common calls to a shell component to
         //  delegate internally
         mProtoTracer.add(this);
@@ -192,7 +193,6 @@ public final class WMShell extends CoreStartable
         mPipOptional.ifPresent(this::initPip);
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);
-        mCompatUIOptional.ifPresent(this::initCompatUi);
     }
 
     @VisibleForTesting
@@ -203,20 +203,6 @@ public final class WMShell extends CoreStartable
                 pip.showPictureInPictureMenu();
             }
         });
-
-        mPipKeyguardCallback = new KeyguardUpdateMonitorCallback() {
-            @Override
-            public void onKeyguardVisibilityChanged(boolean showing) {
-                pip.onKeyguardVisibilityChanged(showing,
-                        mKeyguardStateController.isAnimatingBetweenKeyguardAndSurfaceBehind());
-            }
-
-            @Override
-            public void onKeyguardDismissAnimationFinished() {
-                pip.onKeyguardDismissAnimationFinished();
-            }
-        };
-        mKeyguardUpdateMonitor.registerCallback(mPipKeyguardCallback);
 
         mSysUiState.addCallback(sysUiStateFlag -> {
             mIsSysUiStateValid = (sysUiStateFlag & INVALID_SYSUI_STATE_MASK) == 0;
@@ -230,14 +216,6 @@ public final class WMShell extends CoreStartable
 
     @VisibleForTesting
     void initSplitScreen(SplitScreen splitScreen) {
-        mSplitScreenKeyguardCallback = new KeyguardUpdateMonitorCallback() {
-            @Override
-            public void onKeyguardVisibilityChanged(boolean showing) {
-                splitScreen.onKeyguardVisibilityChanged(showing);
-            }
-        };
-        mKeyguardUpdateMonitor.registerCallback(mSplitScreenKeyguardCallback);
-
         mWakefulnessLifecycle.addObserver(new WakefulnessLifecycle.Observer() {
             @Override
             public void onFinishedWakingUp() {
@@ -283,13 +261,8 @@ public final class WMShell extends CoreStartable
             }
         });
 
+        // TODO: Either move into ShellInterface or register a receiver on the Shell side directly
         mOneHandedKeyguardCallback = new KeyguardUpdateMonitorCallback() {
-            @Override
-            public void onKeyguardVisibilityChanged(boolean showing) {
-                oneHanded.onKeyguardVisibilityChanged(showing);
-                oneHanded.stopOneHanded();
-            }
-
             @Override
             public void onUserSwitchComplete(int userId) {
                 oneHanded.onUserSwitch(userId);
@@ -338,17 +311,6 @@ public final class WMShell extends CoreStartable
                 }
             }
         });
-    }
-
-    @VisibleForTesting
-    void initCompatUi(CompatUI sizeCompatUI) {
-        mCompatUIKeyguardCallback = new KeyguardStateController.Callback() {
-            @Override
-            public void onKeyguardShowingChanged() {
-                sizeCompatUI.onKeyguardShowingChanged(mKeyguardStateController.isShowing());
-            }
-        };
-        mKeyguardStateController.addCallback(mCompatUIKeyguardCallback);
     }
 
     @Override

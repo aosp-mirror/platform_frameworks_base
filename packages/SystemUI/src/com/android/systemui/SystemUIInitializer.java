@@ -96,16 +96,12 @@ public abstract class SystemUIInitializer {
                     .setSplitScreen(mWMComponent.getSplitScreen())
                     .setOneHanded(mWMComponent.getOneHanded())
                     .setBubbles(mWMComponent.getBubbles())
-                    .setHideDisplayCutout(mWMComponent.getHideDisplayCutout())
                     .setShellCommandHandler(mWMComponent.getShellCommandHandler())
                     .setTaskViewFactory(mWMComponent.getTaskViewFactory())
                     .setTransitions(mWMComponent.getTransitions())
                     .setStartingSurface(mWMComponent.getStartingSurface())
                     .setDisplayAreaHelper(mWMComponent.getDisplayAreaHelper())
-                    .setTaskSurfaceHelper(mWMComponent.getTaskSurfaceHelper())
                     .setRecentTasks(mWMComponent.getRecentTasks())
-                    .setCompatUI(mWMComponent.getCompatUI())
-                    .setDragAndDrop(mWMComponent.getDragAndDrop())
                     .setBackAnimation(mWMComponent.getBackAnimation());
         } else {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
@@ -116,16 +112,12 @@ public abstract class SystemUIInitializer {
                     .setSplitScreen(Optional.ofNullable(null))
                     .setOneHanded(Optional.ofNullable(null))
                     .setBubbles(Optional.ofNullable(null))
-                    .setHideDisplayCutout(Optional.ofNullable(null))
                     .setShellCommandHandler(Optional.ofNullable(null))
                     .setTaskViewFactory(Optional.ofNullable(null))
                     .setTransitions(new ShellTransitions() {})
                     .setDisplayAreaHelper(Optional.ofNullable(null))
                     .setStartingSurface(Optional.ofNullable(null))
-                    .setTaskSurfaceHelper(Optional.ofNullable(null))
                     .setRecentTasks(Optional.ofNullable(null))
-                    .setCompatUI(Optional.ofNullable(null))
-                    .setDragAndDrop(Optional.ofNullable(null))
                     .setBackAnimation(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();
