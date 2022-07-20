@@ -33,7 +33,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
-import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
@@ -73,7 +72,6 @@ public class WMShellTest extends SysuiTestCase {
     @Mock OneHanded mOneHanded;
     @Mock WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock ProtoTracer mProtoTracer;
-    @Mock ShellCommandHandler mShellCommandHandler;
     @Mock UserInfoController mUserInfoController;
     @Mock ShellExecutor mSysUiMainExecutor;
 
@@ -82,10 +80,10 @@ public class WMShellTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mWMShell = new WMShell(mContext, mShellInterface, Optional.of(mPip),
-                Optional.of(mSplitScreen), Optional.of(mOneHanded),
-                Optional.of(mShellCommandHandler), mCommandQueue, mConfigurationController,
-                mKeyguardStateController, mKeyguardUpdateMonitor, mScreenLifecycle, mSysUiState,
-                mProtoTracer, mWakefulnessLifecycle, mUserInfoController, mSysUiMainExecutor);
+                Optional.of(mSplitScreen), Optional.of(mOneHanded), mCommandQueue,
+                mConfigurationController, mKeyguardStateController, mKeyguardUpdateMonitor,
+                mScreenLifecycle, mSysUiState, mProtoTracer, mWakefulnessLifecycle,
+                mUserInfoController, mSysUiMainExecutor);
     }
 
     @Test
