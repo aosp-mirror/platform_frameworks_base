@@ -7737,6 +7737,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // relatively fixed.
         overrideConfig.colorMode = fullConfig.colorMode;
         overrideConfig.densityDpi = fullConfig.densityDpi;
+        // The smallest screen width is the short side of screen bounds. Because the bounds
+        // and density won't be changed, smallestScreenWidthDp is also fixed.
+        overrideConfig.smallestScreenWidthDp = fullConfig.smallestScreenWidthDp;
         if (info.isFixedOrientation()) {
             // lock rotation too. When in size-compat, onConfigurationChanged will watch for and
             // apply runtime rotation changes.
@@ -7833,7 +7836,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // computed accordingly.
             if (!matchParentBounds()) {
                 getTaskFragment().computeConfigResourceOverrides(resolvedConfig,
-                        newParentConfiguration, areBoundsLetterboxed());
+                        newParentConfiguration);
             }
         // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
         // are already calculated in resolveFixedOrientationConfiguration.
@@ -8004,8 +8007,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Since bounds has changed, the configuration needs to be computed accordingly.
-        getTaskFragment().computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
-                areBoundsLetterboxed());
+        getTaskFragment().computeConfigResourceOverrides(resolvedConfig, newParentConfiguration);
     }
 
     void recomputeConfiguration() {
@@ -8221,7 +8223,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Calculate app bounds using fixed orientation bounds because they will be needed later
         // for comparison with size compat app bounds in {@link resolveSizeCompatModeConfiguration}.
         getTaskFragment().computeConfigResourceOverrides(getResolvedOverrideConfiguration(),
-                newParentConfig, mCompatDisplayInsets, areBoundsLetterboxed());
+                newParentConfig);
         mLetterboxBoundsForFixedOrientationAndAspectRatio = new Rect(resolvedBounds);
     }
 
@@ -8249,7 +8251,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // Compute the configuration based on the resolved bounds. If aspect ratio doesn't
             // restrict, the bounds should be the requested override bounds.
             getTaskFragment().computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
-                    getFixedRotationTransformDisplayInfo(), areBoundsLetterboxed());
+                    getFixedRotationTransformDisplayInfo());
         }
     }
 
@@ -8313,7 +8315,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // are calculated in compat container space. The actual position on screen will be applied
         // later, so the calculation is simpler that doesn't need to involve offset from parent.
         getTaskFragment().computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
-                mCompatDisplayInsets,  areBoundsLetterboxed());
+                mCompatDisplayInsets);
         // Use current screen layout as source because the size of app is independent to parent.
         resolvedConfig.screenLayout = TaskFragment.computeScreenLayoutOverride(
                 getConfiguration().screenLayout, resolvedConfig.screenWidthDp,
