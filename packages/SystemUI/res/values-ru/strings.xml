@@ -379,7 +379,7 @@
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Организация \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\" управляет этим устройством и может отслеживать сетевой трафик"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Устройство предоставлено компанией \"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>\"."</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Это устройство принадлежит вашей организации и подключено к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Это устройство принадлежит организации \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\" и подключено к интернету через сервис \"<xliff:g id="VPN_APP">%2$s</xliff:g>\""</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Это устр-во принадлежит организации \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\" и подключено к интернету через сервис \"<xliff:g id="VPN_APP">%2$s</xliff:g>\""</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Это устройство принадлежит вашей организации"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Это устройство принадлежит организации \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\""</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Это устройство принадлежит вашей организации и подключено к интернету через сети VPN"</string>
