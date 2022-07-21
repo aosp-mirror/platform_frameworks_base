@@ -26,6 +26,10 @@ import static android.hardware.camera2.marshal.MarshalHelpers.getPrimitiveTypeCl
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.util.ArrayList;
 
 /**
@@ -51,28 +55,36 @@ public class MarshalQueryableArray<T> implements MarshalQueryable<T> {
                 return new PrimitiveArrayFiller() {
                       @Override
                       public void fillArray(Object arr, int size, ByteBuffer buffer) {
-                          buffer.asIntBuffer().get(int[].class.cast(arr), 0, size);
+                          IntBuffer ib = buffer.asIntBuffer().get(int[].class.cast(arr), 0, size);
+                          // Update buffer position since the IntBuffer has independent position.
+                          buffer.position(buffer.position() + ib.position() * Integer.BYTES);
                       }
                 };
             } else if (componentType == float.class) {
                 return new PrimitiveArrayFiller() {
                       @Override
                       public void fillArray(Object arr, int size, ByteBuffer buffer) {
-                          buffer.asFloatBuffer().get(float[].class.cast(arr), 0, size);
+                          FloatBuffer fb =
+                                  buffer.asFloatBuffer().get(float[].class.cast(arr), 0, size);
+                          buffer.position(buffer.position() + fb.position() * Float.BYTES);
                       }
                 };
             } else if (componentType == long.class) {
                 return new PrimitiveArrayFiller() {
                       @Override
                       public void fillArray(Object arr, int size, ByteBuffer buffer) {
-                          buffer.asLongBuffer().get(long[].class.cast(arr), 0, size);
+                          LongBuffer lb =
+                                  buffer.asLongBuffer().get(long[].class.cast(arr), 0, size);
+                          buffer.position(buffer.position() + lb.position() * Long.BYTES);
                       }
                 };
             } else if (componentType == double.class) {
                 return new PrimitiveArrayFiller() {
                       @Override
                       public void fillArray(Object arr, int size, ByteBuffer buffer) {
-                          buffer.asDoubleBuffer().get(double[].class.cast(arr), 0, size);
+                          DoubleBuffer db =
+                                  buffer.asDoubleBuffer().get(double[].class.cast(arr), 0, size);
+                          buffer.position(buffer.position() + db.position() * Double.BYTES);
                       }
                 };
             } else if (componentType == byte.class) {
