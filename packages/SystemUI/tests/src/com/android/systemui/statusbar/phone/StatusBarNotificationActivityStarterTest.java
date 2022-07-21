@@ -178,10 +178,10 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         bubbleSbn.getNotification().contentIntent = mContentIntent;
         bubbleSbn.getNotification().flags |= Notification.FLAG_AUTO_CANCEL;
 
-        ArrayList<NotificationEntry> activeNotifications = new ArrayList<>();
-        activeNotifications.add(mNotificationRow.getEntry());
-        activeNotifications.add(mBubbleNotificationRow.getEntry());
-        when(mEntryManager.getVisibleNotifications()).thenReturn(activeNotifications);
+//        ArrayList<NotificationEntry> activeNotifications = new ArrayList<>();
+//        activeNotifications.add(mNotificationRow.getEntry());
+//        activeNotifications.add(mBubbleNotificationRow.getEntry());
+//        when(mEntryManager.getVisibleNotifications()).thenReturn(activeNotifications);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mOnUserInteractionCallback.registerFutureDismissal(eq(mNotificationRow.getEntry()),
                 anyInt())).thenReturn(mFutureDismissalRunnable);
@@ -347,9 +347,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         // The content intent should NOT be sent on click.
         verifyZeroInteractions(mContentIntent);
-
-        // Notification should not be cancelled.
-        verify(mEntryManager, never()).performRemoveNotification(eq(sbn), any(), anyInt());
     }
 
     @Test
@@ -380,9 +377,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verify(mContentIntent).getIntent();
         verify(mContentIntent).isActivity();
         verifyNoMoreInteractions(mContentIntent);
-
-        // Notification should not be cancelled.
-        verify(mEntryManager, never()).performRemoveNotification(eq(sbn), any(), anyInt());
     }
 
     @Test
