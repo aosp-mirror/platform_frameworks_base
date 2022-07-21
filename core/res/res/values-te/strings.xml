@@ -1684,7 +1684,7 @@
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"స్క్రీన్‌పై ఉండే కంటెంట్‌ మొత్తాన్ని చదవగలుగుతుంది మరియు ఇతర యాప్‌లలో కూడా ఈ కంటెంట్‌ను ప్రదర్శిస్తుంది."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"చర్యలను చూసి, అమలు చేయగలగడం"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"మీరు ఒక యాప్‌‌తో చేసే ఇంటరాక్షన్‌లను లేదా హార్డ్‌వేర్ సెన్సార్‌ను ట్రాక్ చేస్తూ మీ త‌ర‌ఫున యాప్‌లతో ఇంటరాక్ట్ చేయగలదు."</string>
-    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"అనుమతించు"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"అనుమతించండి"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"నిరాకరించు"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ఫీచర్‌ని ఉపయోగించడం ప్రారంభించడానికి, దాన్ని ట్యాప్ చేయండి:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"యాక్సెసిబిలిటీ బటన్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
@@ -1970,7 +1970,7 @@
     <string name="tooltip_popup_title" msgid="7863719020269945722">"సాధనం చిట్కా"</string>
     <string name="app_category_game" msgid="4534216074910244790">"గేమ్‌లు"</string>
     <string name="app_category_audio" msgid="8296029904794676222">"సంగీతం &amp; ఆడియో"</string>
-    <string name="app_category_video" msgid="2590183854839565814">"చలనచిత్రాలు &amp; వీడియో"</string>
+    <string name="app_category_video" msgid="2590183854839565814">"సినిమాలు &amp; వీడియో"</string>
     <string name="app_category_image" msgid="7307840291864213007">"ఫోటోలు, ఇమేజ్‌లు"</string>
     <string name="app_category_social" msgid="2278269325488344054">"సామాజికం &amp; కమ్యూనికేషన్"</string>
     <string name="app_category_news" msgid="1172762719574964544">"వార్తలు &amp; వార్తాపత్రికలు"</string>
