@@ -100,6 +100,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private int mListMaxHeight;
     private WallpaperColors mWallpaperColors;
     private Executor mExecutor;
+    private boolean mShouldLaunchLeBroadcastDialog;
 
     MediaOutputBaseAdapter mAdapter;
 
@@ -394,7 +395,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     }
 
     public void handleLeBroadcastStarted() {
-        startLeBroadcastDialog();
+        // Waiting for the onBroadcastMetadataChanged. The UI launchs the broadcast dialog when
+        // the metadata is ready.
+        mShouldLaunchLeBroadcastDialog = true;
     }
 
     public void handleLeBroadcastStartFailed() {
@@ -404,10 +407,15 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     }
 
     public void handleLeBroadcastMetadataChanged() {
+        if (mShouldLaunchLeBroadcastDialog) {
+            startLeBroadcastDialog();
+            mShouldLaunchLeBroadcastDialog = false;
+        }
         refresh();
     }
 
     public void handleLeBroadcastStopped() {
+        mShouldLaunchLeBroadcastDialog = false;
         refresh();
     }
 
