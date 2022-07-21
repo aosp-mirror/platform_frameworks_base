@@ -49,7 +49,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     private static final String TAG = "CellSignalStrengthNr";
 
     // Lifted from Default carrier configs and max range of SSRSRP
-    // Boundaries: [-140 dB, -44 dB]
+    // Boundaries: [-156 dB, -31 dB]
     private int[] mSsRsrpThresholds = new int[] {
             -110, /* SIGNAL_STRENGTH_POOR */
             -90, /* SIGNAL_STRENGTH_MODERATE */
@@ -173,14 +173,14 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
      */
     public CellSignalStrengthNr(int csiRsrp, int csiRsrq, int csiSinr, int csiCqiTableIndex,
             List<Byte> csiCqiReport, int ssRsrp, int ssRsrq, int ssSinr) {
-        mCsiRsrp = inRangeOrUnavailable(csiRsrp, -140, -44);
+        mCsiRsrp = inRangeOrUnavailable(csiRsrp, -156, -31);
         mCsiRsrq = inRangeOrUnavailable(csiRsrq, -20, -3);
         mCsiSinr = inRangeOrUnavailable(csiSinr, -23, 23);
         mCsiCqiTableIndex = inRangeOrUnavailable(csiCqiTableIndex, 1, 3);
         mCsiCqiReport = csiCqiReport.stream()
-                .map(cqi -> new Integer(inRangeOrUnavailable(Byte.toUnsignedInt(cqi), 0, 15)))
+                .map(cqi -> inRangeOrUnavailable(Byte.toUnsignedInt(cqi), 0, 15))
                 .collect(Collectors.toList());
-        mSsRsrp = inRangeOrUnavailable(ssRsrp, -140, -44);
+        mSsRsrp = inRangeOrUnavailable(ssRsrp, -156, -31);
         mSsRsrq = inRangeOrUnavailable(ssRsrq, -43, 20);
         mSsSinr = inRangeOrUnavailable(ssSinr, -23, 40);
         updateLevel(null, null);
@@ -212,8 +212,8 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     }
 
     /**
-     * Reference: 3GPP TS 38.215.
-     * Range: -140 dBm to -44 dBm.
+     * Reference: 3GPP TS 38.133 10.1.6.1.
+     * Range: -156 dBm to -31 dBm.
      * @return SS reference signal received power, {@link CellInfo#UNAVAILABLE} means unreported
      * value.
      */
@@ -242,8 +242,8 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     }
 
     /**
-     * Reference: 3GPP TS 38.215.
-     * Range: -140 dBm to -44 dBm.
+     * Reference: 3GPP TS 38.133 10.1.6.1.
+     * Range: -156 dBm to -31 dBm.
      * @return CSI reference signal received power, {@link CellInfo#UNAVAILABLE} means unreported
      * value.
      */
