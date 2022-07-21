@@ -37,7 +37,6 @@ import com.android.systemui.unfold.FoldStateLoggingProvider;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.unfold.UnfoldLatencyTracker;
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
-import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -94,9 +93,6 @@ public interface SysUIComponent {
 
         @BindsInstance
         Builder setTaskViewFactory(Optional<TaskViewFactory> t);
-
-        @BindsInstance
-        Builder setShellCommandHandler(Optional<ShellCommandHandler> shellDump);
 
         @BindsInstance
         Builder setTransitions(ShellTransitions t);

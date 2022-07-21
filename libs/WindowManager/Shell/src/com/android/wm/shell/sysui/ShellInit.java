@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell;
+package com.android.wm.shell.sysui;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_INIT;
@@ -26,13 +26,13 @@ import android.util.Pair;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
@@ -53,8 +53,8 @@ import java.util.Optional;
  * The entry point implementation into the shell for initializing shell internal state.  Classes
  * which need to setup on start should inject an instance of this class and add an init callback.
  */
-public class ShellInitImpl {
-    private static final String TAG = ShellInitImpl.class.getSimpleName();
+public class ShellInit {
+    private static final String TAG = ShellInit.class.getSimpleName();
 
     private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
@@ -75,12 +75,12 @@ public class ShellInitImpl {
     private final Optional<RecentTasksController> mRecentTasks;
     private final Optional<ActivityEmbeddingController> mActivityEmbeddingOptional;
 
-    private final InitImpl mImpl = new InitImpl();
     // An ordered list of init callbacks to be made once shell is first started
     private final ArrayList<Pair<String, Runnable>> mInitCallbacks = new ArrayList<>();
     private boolean mHasInitialized;
 
-    public ShellInitImpl(
+    public ShellInit(
+            ShellController shellController,
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
@@ -117,10 +117,8 @@ public class ShellInitImpl {
         mTransitions = transitions;
         mMainExecutor = mainExecutor;
         mStartingWindow = startingWindow;
-    }
-
-    public ShellInit asShellInit() {
-        return mImpl;
+        // TODO(238217847): To be removed once the init dependencies are inverted
+        shellController.setShellInit(this);
     }
 
     private void legacyInit() {
@@ -209,17 +207,5 @@ public class ShellInitImpl {
         legacyInit();
 
         mHasInitialized = true;
-    }
-
-    @ExternalThread
-    private class InitImpl implements ShellInit {
-        @Override
-        public void init() {
-            try {
-                mMainExecutor.executeBlocking(ShellInitImpl.this::init);
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Failed to initialize the Shell in 2s", e);
-            }
-        }
     }
 }

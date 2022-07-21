@@ -54,7 +54,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
-import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
@@ -107,7 +106,6 @@ public final class WMShell extends CoreStartable
     private final Optional<Pip> mPipOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
-    private final Optional<ShellCommandHandler> mShellCommandHandler;
 
     private final CommandQueue mCommandQueue;
     private final ConfigurationController mConfigurationController;
@@ -130,7 +128,6 @@ public final class WMShell extends CoreStartable
             Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
-            Optional<ShellCommandHandler> shellCommandHandler,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
             KeyguardStateController keyguardStateController,
@@ -154,7 +151,6 @@ public final class WMShell extends CoreStartable
         mOneHandedOptional = oneHandedOptional;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mProtoTracer = protoTracer;
-        mShellCommandHandler = shellCommandHandler;
         mUserInfoController = userInfoController;
         mSysUiMainExecutor = sysUiMainExecutor;
     }
@@ -325,8 +321,7 @@ public final class WMShell extends CoreStartable
     @Override
     public void dump(PrintWriter pw, String[] args) {
         // Handle commands if provided
-        if (mShellCommandHandler.isPresent()
-                && mShellCommandHandler.get().handleCommand(args, pw)) {
+        if (mShell.handleCommand(args, pw)) {
             return;
         }
         // Handle logging commands if provided
@@ -334,8 +329,7 @@ public final class WMShell extends CoreStartable
             return;
         }
         // Dump WMShell stuff here if no commands were handled
-        mShellCommandHandler.ifPresent(
-                shellCommandHandler -> shellCommandHandler.dump(pw));
+        mShell.dump(pw);
     }
 
     @Override
