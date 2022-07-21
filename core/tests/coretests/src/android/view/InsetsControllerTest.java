@@ -223,7 +223,7 @@ public class InsetsControllerTest {
 
             InsetsSourceControl control =
                     new InsetsSourceControl(
-                            ITYPE_STATUS_BAR, mLeash, new Point(), Insets.of(0, 10, 0, 0));
+                            ITYPE_STATUS_BAR, mLeash, true, new Point(), Insets.of(0, 10, 0, 0));
             mController.onControlsChanged(new InsetsSourceControl[]{control});
             mController.controlWindowInsetsAnimation(0, 0 /* durationMs */,
                     new LinearInterpolator(),
@@ -926,7 +926,8 @@ public class InsetsControllerTest {
         // Simulate binder behavior by copying SurfaceControl. Otherwise, InsetsController will
         // attempt to release mLeash directly.
         SurfaceControl copy = new SurfaceControl(mLeash, "InsetsControllerTest.createControl");
-        return new InsetsSourceControl(type, copy, new Point(), Insets.NONE);
+        return new InsetsSourceControl(type, copy, InsetsState.getDefaultVisibility(type),
+                new Point(), Insets.NONE);
     }
 
     private InsetsSourceControl[] createSingletonControl(@InternalInsetsType int type) {

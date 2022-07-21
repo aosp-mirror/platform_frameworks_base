@@ -110,7 +110,8 @@ public class InsetsSourceConsumerTest {
         instrumentation.waitForIdleSync();
 
         mConsumer.setControl(
-                new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point(), Insets.NONE),
+                new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, true /* initialVisible */,
+                        new Point(), Insets.NONE),
                 new int[1], new int[1]);
     }
 
@@ -180,7 +181,8 @@ public class InsetsSourceConsumerTest {
             verifyZeroInteractions(mMockTransaction);
             int[] hideTypes = new int[1];
             mConsumer.setControl(
-                    new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point(), Insets.NONE),
+                    new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, true /* initialVisible */,
+                            new Point(), Insets.NONE),
                     new int[1], hideTypes);
             assertEquals(statusBars(), hideTypes[0]);
             assertFalse(mRemoveSurfaceCalled);
@@ -191,14 +193,14 @@ public class InsetsSourceConsumerTest {
     public void testRestore_noAnimation() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mConsumer.hide();
-            mController.onStateChanged(mState);
             mConsumer.setControl(null, new int[1], new int[1]);
             reset(mMockTransaction);
             verifyZeroInteractions(mMockTransaction);
             mRemoveSurfaceCalled = false;
             int[] hideTypes = new int[1];
             mConsumer.setControl(
-                    new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point(), Insets.NONE),
+                    new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, false /* initialVisible */,
+                            new Point(), Insets.NONE),
                     new int[1], hideTypes);
             assertTrue(mRemoveSurfaceCalled);
             assertEquals(0, hideTypes[0]);
