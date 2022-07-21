@@ -202,7 +202,7 @@ status_t NativeInputEventSender::processConsumerResponse(JNIEnv* env) {
         ALOGD("channel '%s' ~ Receiving finished signals.", getInputChannelName().c_str());
     }
 
-    ScopedLocalRef<jobject> senderObj(env, jniGetReferent(env, mSenderWeakGlobal));
+    ScopedLocalRef<jobject> senderObj(env, GetReferent(env, mSenderWeakGlobal));
     if (!senderObj.get()) {
         ALOGW("channel '%s' ~ Sender object was finalized without being disposed.",
               getInputChannelName().c_str());
