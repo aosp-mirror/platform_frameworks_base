@@ -19,8 +19,8 @@ package com.android.server.backup.encryption.tasks;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
@@ -41,13 +41,6 @@ import com.android.server.backup.encryption.protos.nano.KeyValueListingProto;
 import com.android.server.backup.encryption.protos.nano.WrappedKeyProto;
 import com.android.server.backup.testing.CryptoTestUtils;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.crypto.SecretKey;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -58,6 +51,14 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.crypto.SecretKey;
+
 
 @RunWith(RobolectricTestRunner.class)
 public class EncryptedKvBackupTaskTest {
