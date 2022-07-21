@@ -223,12 +223,12 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
 
         boolean isActivityIntent = intent != null && intent.isActivity() && !isBubble;
         final boolean willLaunchResolverActivity = isActivityIntent
-                && mActivityIntentHelper.wouldLaunchResolverActivity(intent.getIntent(),
+                && mActivityIntentHelper.wouldPendingLaunchResolverActivity(intent,
                 mLockscreenUserManager.getCurrentUserId());
         final boolean animate = !willLaunchResolverActivity
                 && mCentralSurfaces.shouldAnimateLaunch(isActivityIntent);
         boolean showOverLockscreen = mKeyguardStateController.isShowing() && intent != null
-                && mActivityIntentHelper.wouldShowOverLockscreen(intent.getIntent(),
+                && mActivityIntentHelper.wouldPendingShowOverLockscreen(intent,
                 mLockscreenUserManager.getCurrentUserId());
         ActivityStarter.OnDismissAction postKeyguardAction = new ActivityStarter.OnDismissAction() {
             @Override
