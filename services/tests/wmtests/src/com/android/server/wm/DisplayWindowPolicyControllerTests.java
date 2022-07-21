@@ -184,7 +184,6 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 /* voiceSession */null,
                 /* voiceInteractor */ null,
                 /* startFlags */ 0,
-                /* doResume */true,
                 /* options */null,
                 /* inTask */null,
                 /* inTaskFragment */ null,
