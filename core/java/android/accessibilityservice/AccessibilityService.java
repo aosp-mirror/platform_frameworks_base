@@ -56,7 +56,7 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.SurfaceView;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityCache;
@@ -2467,8 +2467,8 @@ public abstract class AccessibilityService extends Service {
      * </p>
      * <p>
      * <strong>Note:</strong> If the view with {@link AccessibilityNodeInfo#FOCUS_INPUT}
-     * is on an embedded view hierarchy which is embedded in a {@link SurfaceView} via
-     * {@link SurfaceView#setChildSurfacePackage}, there is a limitation that this API
+     * is on an embedded view hierarchy which is embedded in a {@link android.view.SurfaceView} via
+     * {@link android.view.SurfaceView#setChildSurfacePackage}, there is a limitation that this API
      * won't be able to find the node for the view. It's because views don't know about
      * the embedded hierarchies. Instead, you could traverse all the nodes to find the
      * focus.
@@ -3377,6 +3377,30 @@ public abstract class AccessibilityService extends Service {
         }
         if (controller != null) {
             controller.onStateChanged(state);
+        }
+    }
+
+    /**
+     * Attaches a {@link android.view.SurfaceControl} containing an accessibility overlay to the
+     * specified display. This type of overlay should be used for content that does not need to
+     * track the location and size of Views in the currently active app e.g. service configuration
+     * or general service UI. To remove this overlay and free the associated resources, use
+     * <code> new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.
+     *
+     * @param displayId the display to which the SurfaceControl should be attached.
+     * @param sc the SurfaceControl containing the overlay content
+     */
+    public void attachAccessibilityOverlayToDisplay(int displayId, @NonNull SurfaceControl sc) {
+        Preconditions.checkNotNull(sc, "SurfaceControl cannot be null");
+        final IAccessibilityServiceConnection connection =
+                AccessibilityInteractionClient.getConnection(mConnectionId);
+        if (connection == null) {
+            return;
+        }
+        try {
+            connection.attachAccessibilityOverlayToDisplay(displayId, sc);
+        } catch (RemoteException re) {
+            throw new RuntimeException(re);
         }
     }
 }

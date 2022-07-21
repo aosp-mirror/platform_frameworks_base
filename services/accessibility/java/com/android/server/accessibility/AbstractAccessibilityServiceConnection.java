@@ -76,6 +76,7 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowInfo;
 import android.view.accessibility.AccessibilityCache;
@@ -289,6 +290,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         void requestImeLocked(AbstractAccessibilityServiceConnection connection);
 
         void unbindImeLocked(AbstractAccessibilityServiceConnection connection);
+
+        void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc);
     }
 
     public AbstractAccessibilityServiceConnection(Context context, ComponentName componentName,
@@ -2485,5 +2488,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
+    }
+
+    @Override
+    public void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc) {
+        mSystemSupport.attachAccessibilityOverlayToDisplay(displayId, sc);
     }
 }
