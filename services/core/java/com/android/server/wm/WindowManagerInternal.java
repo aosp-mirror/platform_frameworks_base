@@ -50,6 +50,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import java.lang.annotation.Retention;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Window manager local system service interface.
@@ -303,12 +304,13 @@ public abstract class WindowManagerInternal {
      * An interface to customize drag and drop behaviors.
      */
     public interface IDragDropCallback {
-        default boolean registerInputChannel(
+        default CompletableFuture<Boolean> registerInputChannel(
                 DragState state, Display display, InputManagerService service,
                 InputChannel source) {
-            state.register(display);
-            return service.transferTouchFocus(source, state.getInputChannel(),
-                    true /* isDragDrop */);
+            return state.register(display)
+                .thenApply(unused ->
+                    service.transferTouchFocus(source, state.getInputChannel(),
+                            true /* isDragDrop */));
         }
 
         /**

@@ -34,6 +34,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.MY_PID;
 import static com.android.server.wm.WindowManagerService.MY_UID;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
+
 import android.animation.Animator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
@@ -70,6 +72,7 @@ import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Drag/drop state
@@ -160,7 +163,10 @@ class DragState {
         return mIsClosing;
     }
 
-    private void showInputSurface() {
+    /**
+     * @return a future that completes after window info is sent.
+     */
+    private CompletableFuture<Void> showInputSurface() {
         if (mInputSurface == null) {
             mInputSurface = mService.makeSurfaceBuilder(mDisplayContent.getSession())
                     .setContainerLayer()
@@ -173,7 +179,7 @@ class DragState {
         if (h == null) {
             Slog.w(TAG_WM, "Drag is in progress but there is no "
                     + "drag window handle.");
-            return;
+            return completedFuture(null);
         }
 
         // Crop the input surface to the display size.
@@ -184,10 +190,13 @@ class DragState {
                 .setLayer(mInputSurface, Integer.MAX_VALUE)
                 .setCrop(mInputSurface, mTmpClipRect);
 
-        // syncInputWindows here to ensure the input window info is sent before the
+        // A completableFuture is returned to ensure that input window info is sent before the
         // transferTouchFocus is called.
-        mTransaction.syncInputWindows()
-                .apply(true /*sync*/);
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        mTransaction
+            .addWindowInfosReportedListener(() -> result.complete(null))
+            .apply();
+        return result;
     }
 
     /**
@@ -416,14 +425,15 @@ class DragState {
     /**
      * @param display The Display that the window being dragged is on.
      */
-    void register(Display display) {
+    CompletableFuture<Void> register(Display display) {
         display.getRealSize(mDisplaySize);
         if (DEBUG_DRAG) Slog.d(TAG_WM, "registering drag input channel");
         if (mInputInterceptor != null) {
             Slog.e(TAG_WM, "Duplicate register of drag input channel");
+            return completedFuture(null);
         } else {
             mInputInterceptor = new InputInterceptor(display);
-            showInputSurface();
+            return showInputSurface();
         }
     }
 
