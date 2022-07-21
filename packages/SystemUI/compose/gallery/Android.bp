@@ -27,6 +27,7 @@ android_library {
 
     srcs: [
         "src/**/*.kt",
+        ":SystemUI-tests-utils",
     ],
 
     resource_dirs: [
@@ -45,6 +46,14 @@ android_library {
         "androidx.navigation_navigation-compose",
 
         "androidx.appcompat_appcompat",
+
+        // TODO(b/240431193): Remove the dependencies and depend on
+        // SystemUI-test-utils directly.
+        "androidx.test.runner",
+        "mockito-target-extended-minus-junit4",
+        "testables",
+        "truth-prebuilt",
+        "androidx.test.uiautomator",
     ],
 
     kotlincflags: ["-Xjvm-default=all"],

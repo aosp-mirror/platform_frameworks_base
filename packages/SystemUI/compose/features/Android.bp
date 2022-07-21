@@ -30,6 +30,7 @@ android_library {
     ],
 
     static_libs: [
+        "SystemUI-core",
         "SystemUIComposeCore",
 
         "androidx.compose.runtime_runtime",

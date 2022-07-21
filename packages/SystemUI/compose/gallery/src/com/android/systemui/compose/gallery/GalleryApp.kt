@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -33,6 +33,28 @@ object GalleryAppScreens {
     val AndroidColors = ChildScreen("android_colors") { AndroidColorsScreen() }
     val ExampleFeature = ChildScreen("example_feature") { ExampleFeatureScreen() }
 
+    val PeopleEmpty =
+        ChildScreen("people_empty") { navController ->
+            EmptyPeopleScreen(onResult = { navController.popBackStack() })
+        }
+    val PeopleFew =
+        ChildScreen("people_few") { navController ->
+            FewPeopleScreen(onResult = { navController.popBackStack() })
+        }
+    val PeopleFull =
+        ChildScreen("people_full") { navController ->
+            FullPeopleScreen(onResult = { navController.popBackStack() })
+        }
+    val People =
+        ParentScreen(
+            "people",
+            mapOf(
+                "Empty" to PeopleEmpty,
+                "Few" to PeopleFew,
+                "Full" to PeopleFull,
+            )
+        )
+
     val Home =
         ParentScreen(
             "home",
@@ -41,20 +63,21 @@ object GalleryAppScreens {
                 "Material colors" to MaterialColors,
                 "Android colors" to AndroidColors,
                 "Example feature" to ExampleFeature,
+                "People" to People,
             )
         )
 }
 
 /** The main content of the app, that shows [GalleryAppScreens.Home] by default. */
 @Composable
-private fun MainContent() {
+private fun MainContent(onControlToggleRequested: () -> Unit) {
     Box(Modifier.fillMaxSize()) {
         val navController = rememberNavController()
         NavHost(
             navController = navController,
             startDestination = GalleryAppScreens.Home.identifier,
         ) {
-            screen(GalleryAppScreens.Home, navController)
+            screen(GalleryAppScreens.Home, navController, onControlToggleRequested)
         }
     }
 }
@@ -69,7 +92,7 @@ fun GalleryApp(
     onChangeTheme: () -> Unit,
 ) {
     val systemFontScale = LocalDensity.current.fontScale
-    var fontScale: FontScale by remember {
+    var fontScale: FontScale by rememberSaveable {
         mutableStateOf(
             FontScale.values().firstOrNull { it.scale == systemFontScale } ?: FontScale.Normal
         )
@@ -87,7 +110,7 @@ fun GalleryApp(
     }
 
     val systemLayoutDirection = LocalLayoutDirection.current
-    var layoutDirection by remember { mutableStateOf(systemLayoutDirection) }
+    var layoutDirection by rememberSaveable { mutableStateOf(systemLayoutDirection) }
     val onChangeLayoutDirection = {
         layoutDirection =
             when (layoutDirection) {
@@ -105,19 +128,24 @@ fun GalleryApp(
                 Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background,
             ) {
-                Column(Modifier.fillMaxSize().systemBarsPadding().padding(16.dp)) {
-                    ConfigurationControls(
-                        theme,
-                        fontScale,
-                        layoutDirection,
-                        onChangeTheme,
-                        onChangeLayoutDirection,
-                        onChangeFontScale,
-                    )
+                Column(Modifier.fillMaxSize().systemBarsPadding()) {
+                    var showControls by rememberSaveable { mutableStateOf(true) }
 
-                    Spacer(Modifier.height(4.dp))
+                    if (showControls) {
+                        ConfigurationControls(
+                            theme,
+                            fontScale,
+                            layoutDirection,
+                            onChangeTheme,
+                            onChangeLayoutDirection,
+                            onChangeFontScale,
+                            Modifier.padding(horizontal = 16.dp),
+                        )
 
-                    MainContent()
+                        Spacer(Modifier.height(4.dp))
+                    }
+
+                    MainContent(onControlToggleRequested = { showControls = !showControls })
                 }
             }
         }
