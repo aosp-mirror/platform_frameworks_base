@@ -1957,37 +1957,29 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
             @NonNull Configuration parentConfig) {
         computeConfigResourceOverrides(inOutConfig, parentConfig, null /* overrideDisplayInfo */,
-                null /* compatInsets */, false /* areBoundsLetterboxed */);
+                null /* compatInsets */);
     }
 
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
-            @NonNull Configuration parentConfig, boolean areBoundsLetterboxed) {
-        computeConfigResourceOverrides(inOutConfig, parentConfig, null /* overrideDisplayInfo */,
-                null /* compatInsets */, areBoundsLetterboxed);
-    }
-
-    void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
-            @NonNull Configuration parentConfig, @Nullable DisplayInfo overrideDisplayInfo,
-            boolean areBoundsLetterboxed) {
+            @NonNull Configuration parentConfig, @Nullable DisplayInfo overrideDisplayInfo) {
         if (overrideDisplayInfo != null) {
             // Make sure the screen related configs can be computed by the provided display info.
             inOutConfig.screenLayout = Configuration.SCREENLAYOUT_UNDEFINED;
             invalidateAppBoundsConfig(inOutConfig);
         }
         computeConfigResourceOverrides(inOutConfig, parentConfig, overrideDisplayInfo,
-                null /* compatInsets */, areBoundsLetterboxed);
+                null /* compatInsets */);
     }
 
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
             @NonNull Configuration parentConfig,
-            @Nullable ActivityRecord.CompatDisplayInsets compatInsets,
-            boolean areBoundsLetterboxed) {
+            @Nullable ActivityRecord.CompatDisplayInsets compatInsets) {
         if (compatInsets != null) {
             // Make sure the app bounds can be computed by the compat insets.
             invalidateAppBoundsConfig(inOutConfig);
         }
         computeConfigResourceOverrides(inOutConfig, parentConfig, null /* overrideDisplayInfo */,
-                compatInsets, areBoundsLetterboxed);
+                compatInsets);
     }
 
     /**
@@ -2014,8 +2006,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      **/
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
             @NonNull Configuration parentConfig, @Nullable DisplayInfo overrideDisplayInfo,
-            @Nullable ActivityRecord.CompatDisplayInsets compatInsets,
-            boolean areBoundsLetterboxed) {
+            @Nullable ActivityRecord.CompatDisplayInsets compatInsets) {
         int windowingMode = inOutConfig.windowConfiguration.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
             windowingMode = parentConfig.windowConfiguration.getWindowingMode();
@@ -2122,7 +2113,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         : overrideScreenHeightDp;
             }
 
-            // TODO(b/238331848): Consider simplifying logic that computes smallestScreenWidthDp.
             if (inOutConfig.smallestScreenWidthDp
                     == Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
                 // When entering to or exiting from Pip, the PipTaskOrganizer will set the
@@ -2138,10 +2128,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     // task, because they should not be affected by insets.
                     inOutConfig.smallestScreenWidthDp = (int) (0.5f
                             + Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
-                } else if (isEmbedded() || areBoundsLetterboxed || customContainerPolicy) {
-                    // For embedded TFs and activities that are letteboxed or eligible for size
-                    // compat mode, the smallest width should be updated. Otherwise, inherit from
-                    // the parent task would result in applications loaded wrong resource.
+                } else if (isEmbedded()) {
+                    // For embedded TFs, the smallest width should be updated. Otherwise, inherit
+                    // from the parent task would result in applications loaded wrong resource.
                     inOutConfig.smallestScreenWidthDp =
                             Math.min(inOutConfig.screenWidthDp, inOutConfig.screenHeightDp);
                 }

@@ -30,10 +30,13 @@ import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.biometrics.AuthRippleView;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.privacy.OngoingPrivacyChip;
+import com.android.systemui.shade.CombinedShadeHeadersConstraintManager;
+import com.android.systemui.shade.CombinedShadeHeadersConstraintManagerImpl;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
@@ -178,6 +181,14 @@ public abstract class StatusBarViewModule {
     /** */
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
+    public static CombinedShadeHeadersConstraintManager
+            provideCombinedShadeHeadersConstraintManager() {
+        return CombinedShadeHeadersConstraintManagerImpl.INSTANCE;
+    }
+
+    /** */
+    @Provides
+    @CentralSurfacesComponent.CentralSurfacesScope
     public static OngoingPrivacyChip getSplitShadeOngoingPrivacyChip(
             @Named(LARGE_SCREEN_SHADE_HEADER) View header) {
         return header.findViewById(R.id.privacy_chip);
@@ -269,7 +280,8 @@ public abstract class StatusBarViewModule {
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             OperatorNameViewController.Factory operatorNameViewControllerFactory,
             SecureSettings secureSettings,
-            @Main Executor mainExecutor
+            @Main Executor mainExecutor,
+            DumpManager dumpManager
     ) {
         return new CollapsedStatusBarFragment(statusBarFragmentComponentFactory,
                 ongoingCallController,
@@ -289,7 +301,8 @@ public abstract class StatusBarViewModule {
                 collapsedStatusBarFragmentLogger,
                 operatorNameViewControllerFactory,
                 secureSettings,
-                mainExecutor);
+                mainExecutor,
+                dumpManager);
     }
 
     /**
