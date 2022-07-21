@@ -611,6 +611,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"या डिव्हाइसमध्ये फिंगरप्रिंट सेन्सर नाही."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"सेन्सर तात्पुरता बंद केला आहे."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"फिंगरप्रिंट सेन्सर वापरू शकत नाही. दुरुस्तीच्या सेवा पुरवठादाराला भेट द्या"</string>
+    <!-- no translation found for fingerprint_error_power_pressed (5479524500542129414) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> बोट"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"फिंगरप्रिंट वापरा"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"फिंगरप्रिंट किंवा स्क्रीन लॉक वापरा"</string>
@@ -649,7 +651,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"तुमच्या फोनकडे आणखी थेट पहा"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"तुमच्या फोनकडे आणखी थेट पहा"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"तुमच्या फोनकडे आणखी थेट पहा"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"तुमचा चहेरा लपवणारे काहीही काढून टाका."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"तुमचा चेहरा लपवणारे काहीही काढून टाका."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ब्लॅक बार सह तुमच्या स्क्रीनची वरची बाजू साफ करा"</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"तुमचा चेहरा पूर्णपणे दृश्यमान असणे आवश्यक आहे"</string>
     <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"तुमचा चेहरा पूर्णपणे दृश्यमान असणे आवश्यक आहे"</string>
@@ -2286,6 +2288,5 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"तुमच्या <xliff:g id="DEVICE">%1$s</xliff:g> वरून फोनचा कॅमेरा अ‍ॅक्सेस करू शकत नाही"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"तुमच्या <xliff:g id="DEVICE">%1$s</xliff:g> वरून टॅबलेटचा कॅमेरा अ‍ॅक्सेस करू शकत नाही"</string>
     <string name="system_locale_title" msgid="711882686834677268">"सिस्टीम डीफॉल्ट"</string>
-    <!-- no translation found for default_card_name (9198284935962911468) -->
-    <skip />
+    <string name="default_card_name" msgid="9198284935962911468">"कार्ड <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>
