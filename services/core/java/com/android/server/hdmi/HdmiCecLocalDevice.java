@@ -559,7 +559,9 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
 
         HdmiDeviceInfo cecDeviceInfo = mService.getHdmiCecNetwork().getCecDeviceInfo(address);
         // If no non-default display name is available for the device, request the devices OSD name.
-        if (cecDeviceInfo != null && cecDeviceInfo.getDisplayName().equals(
+        // On TV devices, the OSD name is queried in NewDeviceAction instead.
+        if (!mService.isTvDevice() && cecDeviceInfo != null
+                && cecDeviceInfo.getDisplayName().equals(
                 HdmiUtils.getDefaultDeviceName(address))) {
             mService.sendCecCommand(
                     HdmiCecMessageBuilder.buildGiveOsdNameCommand(
