@@ -697,7 +697,7 @@
   <java-symbol type="string" name="config_forceVoiceInteractionServicePackage" />
   <java-symbol type="string" name="config_mms_user_agent" />
   <java-symbol type="string" name="config_mms_user_agent_profile_url" />
-  <java-symbol type="string" name="config_ntpServer" />
+  <java-symbol type="array" name="config_ntpServers" />
   <java-symbol type="string" name="config_useragentprofile_url" />
   <java-symbol type="string" name="config_appsNotReportingCrashes" />
   <java-symbol type="string" name="contentServiceSync" />
@@ -2616,10 +2616,15 @@
   <java-symbol type="string" name="fingerprint_recalibrate_notification_name" />
   <java-symbol type="string" name="fingerprint_recalibrate_notification_title" />
   <java-symbol type="string" name="fingerprint_recalibrate_notification_content" />
+  <java-symbol type="string" name="fingerprint_error_power_pressed" />
 
   <!-- Fingerprint config -->
   <java-symbol type="integer" name="config_fingerprintMaxTemplatesPerUser"/>
   <java-symbol type="bool" name="config_fingerprintSupportsGestures"/>
+  <java-symbol type="integer" name="config_sidefpsBpPowerPressWindow"/>
+  <java-symbol type="integer" name="config_sidefpsKeyguardPowerPressWindow"/>
+  <java-symbol type="integer" name="config_sidefpsPostAuthDowntime"/>
+  <java-symbol type="integer" name="config_sidefpsEnrollPowerPressWindow"/>
 
   <!-- Face authentication messages -->
   <java-symbol type="string" name="face_recalibrate_notification_name" />

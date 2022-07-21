@@ -167,6 +167,11 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * The state used to update device id, does not actually change the state of the player
      */
     public static final int PLAYER_UPDATE_DEVICE_ID = 5;
+    /**
+     * @hide
+     * The state used to update port id, does not actually change the state of the player
+     */
+    public static final int PLAYER_UPDATE_PORT_ID = 6;
 
     /** @hide */
     @IntDef({
@@ -176,7 +181,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         PLAYER_STATE_STARTED,
         PLAYER_STATE_PAUSED,
         PLAYER_STATE_STOPPED,
-        PLAYER_UPDATE_DEVICE_ID
+        PLAYER_UPDATE_DEVICE_ID,
+        PLAYER_UPDATE_PORT_ID,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlayerState {}
@@ -191,6 +197,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
             case PLAYER_STATE_PAUSED: return "PLAYER_STATE_PAUSED";
             case PLAYER_STATE_STOPPED: return "PLAYER_STATE_STOPPED";
             case PLAYER_UPDATE_DEVICE_ID: return "PLAYER_UPDATE_DEVICE_ID";
+            case PLAYER_UPDATE_PORT_ID: return "PLAYER_UPDATE_PORT_ID";
             default:
                 return "invalid state " + state;
         }
@@ -669,7 +676,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
             case PLAYER_STATE_STARTED: return "started";
             case PLAYER_STATE_PAUSED: return "paused";
             case PLAYER_STATE_STOPPED: return "stopped";
-            case PLAYER_UPDATE_DEVICE_ID: return "device";
+            case PLAYER_UPDATE_DEVICE_ID: return "device updated";
+            case PLAYER_UPDATE_PORT_ID: return "port updated";
             default:
                 return "unknown player state - FIXME";
         }

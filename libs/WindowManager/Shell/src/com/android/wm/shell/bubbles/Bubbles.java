@@ -107,9 +107,6 @@ public interface Bubbles {
     /** Tell the stack of bubbles to collapse. */
     void collapseStack();
 
-    /** Tell the controller need update its UI to fit theme. */
-    void updateForThemeChanges();
-
     /**
      * Request the stack expand if needed, then select the specified Bubble as current.
      * If no bubble exists for this entry, one is created.
@@ -254,13 +251,6 @@ public interface Bubbles {
      * @param removedUserId the id of the removed user.
      */
     void onUserRemoved(int removedUserId);
-
-    /**
-     * Called when config changed.
-     *
-     * @param newConfig the new config.
-     */
-    void onConfigChanged(Configuration newConfig);
 
     /** Description of current bubble state. */
     void dump(PrintWriter pw, String[] args);

@@ -101,6 +101,8 @@ import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
+import com.android.wm.shell.sysui.ShellController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -119,7 +121,7 @@ import java.util.function.IntConsumer;
  *
  * The controller manages addition, removal, and visible state of bubbles on screen.
  */
-public class BubbleController {
+public class BubbleController implements ConfigurationChangeListener {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
 
@@ -155,6 +157,7 @@ public class BubbleController {
     private final DisplayController mDisplayController;
     private final TaskViewTransitions mTaskViewTransitions;
     private final SyncTransactionQueue mSyncQueue;
+    private final ShellController mShellController;
 
     // Used to post to main UI thread
     private final ShellExecutor mMainExecutor;
@@ -224,6 +227,7 @@ public class BubbleController {
 
   
     public BubbleController(Context context,
+            ShellController shellController,
             BubbleData data,
             @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
             FloatingContentCoordinator floatingContentCoordinator,
@@ -246,6 +250,7 @@ public class BubbleController {
             TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue) {
         mContext = context;
+        mShellController = shellController;
         mLauncherApps = launcherApps;
         mBarService = statusBarService == null
                 ? IStatusBarService.Stub.asInterface(
@@ -414,6 +419,8 @@ public class BubbleController {
         // Clear out any persisted bubbles on disk that no longer have a valid user.
         List<UserInfo> users = mUserManager.getAliveUsers();
         mDataRepository.sanitizeBubbles(users);
+
+        mShellController.addConfigurationChangeListener(this);
     }
 
     @VisibleForTesting
@@ -798,7 +805,8 @@ public class BubbleController {
         mSavedBubbleKeysPerUser.remove(userId);
     }
 
-    private void updateForThemeChanges() {
+    @Override
+    public void onThemeChanged() {
         if (mStackView != null) {
             mStackView.onThemeChanged();
         }
@@ -818,7 +826,8 @@ public class BubbleController {
         }
     }
 
-    private void onConfigChanged(Configuration newConfig) {
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
         if (mBubblePositioner != null) {
             mBubblePositioner.update();
         }
@@ -1678,13 +1687,6 @@ public class BubbleController {
         }
 
         @Override
-        public void updateForThemeChanges() {
-            mMainExecutor.execute(() -> {
-                BubbleController.this.updateForThemeChanges();
-            });
-        }
-
-        @Override
         public void expandStackAndSelectBubble(BubbleEntry entry) {
             mMainExecutor.execute(() -> {
                 BubbleController.this.expandStackAndSelectBubble(entry);
@@ -1819,13 +1821,6 @@ public class BubbleController {
         public void onUserRemoved(int removedUserId) {
             mMainExecutor.execute(() -> {
                 BubbleController.this.onUserRemoved(removedUserId);
-            });
-        }
-
-        @Override
-        public void onConfigChanged(Configuration newConfig) {
-            mMainExecutor.execute(() -> {
-                BubbleController.this.onConfigChanged(newConfig);
             });
         }
 

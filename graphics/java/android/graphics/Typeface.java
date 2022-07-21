@@ -57,6 +57,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import dalvik.annotation.optimization.CriticalNative;
+import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -1406,6 +1407,9 @@ public class Typeface {
         FontConfig config = SystemFonts.getSystemPreinstalledFontConfig();
         for (int i = 0; i < config.getFontFamilies().size(); ++i) {
             FontConfig.FontFamily family = config.getFontFamilies().get(i);
+            if (!family.getLocaleList().isEmpty()) {
+                nativeRegisterLocaleList(family.getLocaleList().toLanguageTags());
+            }
             boolean loadFamily = false;
             for (int j = 0; j < family.getLocaleList().size(); ++j) {
                 String fontScript = ULocale.addLikelySubtags(
@@ -1568,4 +1572,7 @@ public class Typeface {
     private static native void nativeAddFontCollections(long nativePtr);
 
     private static native void nativeWarmUpCache(String fileName);
+
+    @FastNative
+    private static native void nativeRegisterLocaleList(String locales);
 }

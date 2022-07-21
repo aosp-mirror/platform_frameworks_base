@@ -29,6 +29,7 @@ import android.graphics.drawable.Icon;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -40,6 +41,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.LongRunning;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.screenrecord.ScreenMediaRecorder.ScreenMediaRecorderListener;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
@@ -51,9 +54,10 @@ import javax.inject.Inject;
 /**
  * A service which records the device screen and optionally microphone input.
  */
-public class RecordingService extends Service implements MediaRecorder.OnInfoListener {
+public class RecordingService extends Service implements ScreenMediaRecorderListener {
     public static final int REQUEST_CODE = 2;
 
+    private static final int USER_ID_NOT_SPECIFIED = -1;
     private static final int NOTIFICATION_RECORDING_ID = 4274;
     private static final int NOTIFICATION_PROCESSING_ID = 4275;
     private static final int NOTIFICATION_VIEW_ID = 4273;
@@ -73,6 +77,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
 
     private final RecordingController mController;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
+    private final Handler mMainHandler;
     private ScreenRecordingAudioSource mAudioSource;
     private boolean mShowTaps;
     private boolean mOriginalShowTaps;
@@ -84,10 +89,12 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
 
     @Inject
     public RecordingService(RecordingController controller, @LongRunning Executor executor,
-            UiEventLogger uiEventLogger, NotificationManager notificationManager,
+            @Main Handler handler, UiEventLogger uiEventLogger,
+            NotificationManager notificationManager,
             UserContextProvider userContextTracker, KeyguardDismissUtil keyguardDismissUtil) {
         mController = controller;
         mLongExecutor = executor;
+        mMainHandler = handler;
         mUiEventLogger = uiEventLogger;
         mNotificationManager = notificationManager;
         mUserContextTracker = userContextTracker;
@@ -138,6 +145,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
 
                 mRecorder = new ScreenMediaRecorder(
                         mUserContextTracker.getUserContext(),
+                        mMainHandler,
                         currentUserId,
                         mAudioSource,
                         this
@@ -166,14 +174,8 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 }
                 // Check user ID - we may be getting a stop intent after user switch, in which case
                 // we want to post the notifications for that user, which is NOT current user
-                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                if (userId == -1) {
-                    userId = mUserContextTracker.getUserContext().getUserId();
-                }
-                Log.d(TAG, "notifying for user " + userId);
-                stopRecording(userId);
-                mNotificationManager.cancel(NOTIFICATION_RECORDING_ID);
-                stopSelf();
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_ID_NOT_SPECIFIED);
+                stopService(userId);
                 break;
 
             case ACTION_SHARE:
@@ -378,15 +380,39 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
         return builder.build();
     }
 
-    private void stopRecording(int userId) {
+    private void stopService() {
+        stopService(USER_ID_NOT_SPECIFIED);
+    }
+
+    private void stopService(int userId) {
+        if (userId == USER_ID_NOT_SPECIFIED) {
+            userId = mUserContextTracker.getUserContext().getUserId();
+        }
+        Log.d(TAG, "notifying for user " + userId);
         setTapsVisible(mOriginalShowTaps);
         if (getRecorder() != null) {
-            getRecorder().end();
-            saveRecording(userId);
+            try {
+                getRecorder().end();
+                saveRecording(userId);
+            } catch (RuntimeException exception) {
+                // RuntimeException could happen if the recording stopped immediately after starting
+                // let's release the recorder and delete all temporary files in this case
+                getRecorder().release();
+                showErrorToast(R.string.screenrecord_start_error);
+                Log.e(TAG, "stopRecording called, but there was an error when ending"
+                        + "recording");
+                exception.printStackTrace();
+            } catch (Throwable throwable) {
+                // Something unexpected happen, SystemUI will crash but let's delete
+                // the temporary files anyway
+                getRecorder().release();
+                throw new RuntimeException(throwable);
+            }
         } else {
             Log.e(TAG, "stopRecording called, but recorder was null");
         }
         updateState(false);
+        stopSelf();
     }
 
     private void saveRecording(int userId) {
@@ -445,5 +471,13 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
     public void onInfo(MediaRecorder mr, int what, int extra) {
         Log.d(TAG, "Media recorder info: " + what);
         onStartCommand(getStopIntent(this), 0, 0);
+    }
+
+    @Override
+    public void onStopped() {
+        if (mController.isRecording()) {
+            Log.d(TAG, "Stopping recording because the system requested the stop");
+            stopService();
+        }
     }
 }

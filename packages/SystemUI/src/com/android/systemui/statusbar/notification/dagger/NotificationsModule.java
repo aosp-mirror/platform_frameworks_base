@@ -35,6 +35,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserContextProvider;
+import com.android.systemui.shade.NotifPanelEventsModule;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
@@ -84,7 +85,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationSectionsMan
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotifPanelEventsModule;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.wmshell.BubblesManager;
@@ -128,7 +128,8 @@ public interface NotificationsModule {
             LeakDetector leakDetector,
             IStatusBarService statusBarService,
             NotifLiveDataStoreImpl notifLiveDataStore,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            @Background Executor bgExecutor) {
         return new NotificationEntryManager(
                 logger,
                 groupManager,
@@ -138,7 +139,8 @@ public interface NotificationsModule {
                 leakDetector,
                 statusBarService,
                 notifLiveDataStore,
-                dumpManager);
+                dumpManager,
+                bgExecutor);
     }
 
     /** Provides an instance of {@link NotificationGutsManager} */

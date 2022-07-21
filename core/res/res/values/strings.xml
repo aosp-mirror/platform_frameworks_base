@@ -1744,6 +1744,8 @@
     <string name="fingerprint_error_security_update_required">Sensor temporarily disabled.</string>
     <!-- Generic error message shown when fingerprint needs calibration [CHAR LIMIT=150] -->
     <string name="fingerprint_error_bad_calibration">Can\u2019t use fingerprint sensor. Visit a repair provider</string>
+    <!-- Generic error message shown when the power button has been pressed. [CHAR LIMIT=150] -->
+    <string name="fingerprint_error_power_pressed">Power button pressed</string>
 
     <!-- Template to be used to name enrolled fingerprints by default. -->
     <string name="fingerprint_name_template">Finger <xliff:g id="fingerId" example="1">%d</xliff:g></string>

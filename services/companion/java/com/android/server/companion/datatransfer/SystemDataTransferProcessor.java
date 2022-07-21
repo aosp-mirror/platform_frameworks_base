@@ -182,7 +182,11 @@ public class SystemDataTransferProcessor {
             }
         }
         if (!hasConsented) {
-            Slog.e(LOG_TAG, "User " + userId + " hasn't consented permission sync.");
+            String message = "User " + userId + " hasn't consented permission sync.";
+            Slog.e(LOG_TAG, message);
+            try {
+                callback.onError(message);
+            } catch (RemoteException ignored) { }
             return;
         }
 

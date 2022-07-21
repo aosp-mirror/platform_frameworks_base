@@ -24,6 +24,8 @@ import platform.test.screenshot.matchers.MSSIMMatcher
 import platform.test.screenshot.matchers.PixelPerfectMatcher
 
 /** Draw this [View] into a [Bitmap]. */
+// TODO(b/195673633): Remove this once Compose screenshot tests use hardware rendering for their
+// tests.
 fun View.drawIntoBitmap(): Bitmap {
     val bitmap =
         Bitmap.createBitmap(

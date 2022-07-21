@@ -8858,6 +8858,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Do the rest in a worker thread to avoid blocking the caller on I/O
         // (After this point, we shouldn't access AMS internal data structures.)
+        //
+        // If process is null, we are being called from some internal code
+        // and may be about to die -- run this synchronously.
+        final boolean runSynchronously = process == null;
         Thread worker = new Thread("Error dump: " + dropboxTag) {
             @Override
             public void run() {
@@ -8885,7 +8889,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     sb.append(crashInfo.stackTrace);
                 }
 
-                if (lines > 0) {
+                if (lines > 0 && !runSynchronously) {
                     sb.append("\n");
 
                     InputStreamReader input = null;
@@ -8917,9 +8921,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         };
 
-        if (process == null) {
-            // If process is null, we are being called from some internal code
-            // and may be about to die -- run this synchronously.
+        if (runSynchronously) {
             final int oldMask = StrictMode.allowThreadDiskWritesMask();
             try {
                 worker.run();
@@ -12513,20 +12515,26 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
                 "*** startService: " + service + " type=" + resolvedType + " fg=" + requireForeground);
-        synchronized(this) {
-            final int callingPid = Binder.getCallingPid();
-            final int callingUid = Binder.getCallingUid();
-            final long origId = Binder.clearCallingIdentity();
-            ComponentName res;
-            try {
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        ComponentName res;
+        try {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "startService: "
+                        + "intent=" + service + ", caller=" + callingPackage
+                        + ", fgRequired=" + requireForeground);
+            }
+            synchronized (this) {
                 res = mServices.startServiceLocked(caller, service,
                         resolvedType, callingPid, callingUid,
                         requireForeground, callingPackage, callingFeatureId, userId);
-            } finally {
-                Binder.restoreCallingIdentity(origId);
             }
-            return res;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            Binder.restoreCallingIdentity(origId);
         }
+        return res;
     }
 
     @Override
@@ -12538,8 +12546,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
-        synchronized(this) {
-            return mServices.stopServiceLocked(caller, service, resolvedType, userId);
+        try {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "stopService: " + service);
+            }
+            synchronized (this) {
+                return mServices.stopServiceLocked(caller, service, resolvedType, userId);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
@@ -12563,8 +12578,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public boolean stopServiceToken(ComponentName className, IBinder token,
             int startId) {
-        synchronized(this) {
-            return mServices.stopServiceTokenLocked(className, token, startId);
+        try {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "stopServiceToken: "
+                        + (className != null ? className.toShortString()
+                        : ("from " + Binder.getCallingPid())));
+            }
+            synchronized (this) {
+                return mServices.stopServiceTokenLocked(className, token, startId);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
@@ -12712,8 +12736,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     public boolean unbindService(IServiceConnection connection) {
-        synchronized (this) {
-            return mServices.unbindServiceLocked(connection);
+        try {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "unbindService");
+            }
+            synchronized (this) {
+                return mServices.unbindServiceLocked(connection);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
@@ -17040,21 +17071,29 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int userId, boolean allowBackgroundActivityStarts,
                 @Nullable IBinder backgroundActivityStartsToken)
                 throws TransactionTooLargeException {
-            synchronized(ActivityManagerService.this) {
-                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
+            if (DEBUG_SERVICE) {
+                Slog.v(TAG_SERVICE,
                         "startServiceInPackage: " + service + " type=" + resolvedType);
-                final long origId = Binder.clearCallingIdentity();
-                ComponentName res;
-                try {
+            }
+            final long origId = Binder.clearCallingIdentity();
+            ComponentName res;
+            try {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "startServiceInPackage: "
+                            + "intent=" + service + ", caller=" + callingPackage
+                            + ", fgRequired=" + fgRequired);
+                }
+                synchronized (ActivityManagerService.this) {
                     res = mServices.startServiceLocked(null, service,
                             resolvedType, -1, uid, fgRequired, callingPackage,
                             callingFeatureId, userId, allowBackgroundActivityStarts,
                             backgroundActivityStartsToken);
-                } finally {
-                    Binder.restoreCallingIdentity(origId);
                 }
-                return res;
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                Binder.restoreCallingIdentity(origId);
             }
+            return res;
         }
 
         // The arguments here are untyped because the base ActivityManagerInternal class

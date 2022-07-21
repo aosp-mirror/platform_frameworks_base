@@ -47,7 +47,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -56,9 +55,6 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.ShellCommandHandler;
-import com.android.wm.shell.compatui.CompatUI;
-import com.android.wm.shell.draganddrop.DragAndDrop;
-import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
@@ -67,6 +63,7 @@ import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
 import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.sysui.ShellInterface;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -106,19 +103,16 @@ public final class WMShell extends CoreStartable
                     | SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 
     // Shell interfaces
+    private final ShellInterface mShell;
     private final Optional<Pip> mPipOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
-    private final Optional<HideDisplayCutout> mHideDisplayCutoutOptional;
     private final Optional<ShellCommandHandler> mShellCommandHandler;
-    private final Optional<CompatUI> mCompatUIOptional;
-    private final Optional<DragAndDrop> mDragAndDropOptional;
 
     private final CommandQueue mCommandQueue;
     private final ConfigurationController mConfigurationController;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final NavigationModeController mNavigationModeController;
     private final ScreenLifecycle mScreenLifecycle;
     private final SysUiState mSysUiState;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
@@ -127,26 +121,20 @@ public final class WMShell extends CoreStartable
     private final Executor mSysUiMainExecutor;
 
     private boolean mIsSysUiStateValid;
-    private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
-    private KeyguardUpdateMonitorCallback mPipKeyguardCallback;
     private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
-    private KeyguardStateController.Callback mCompatUIKeyguardCallback;
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
 
     @Inject
     public WMShell(Context context,
+            ShellInterface shell,
             Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
-            Optional<HideDisplayCutout> hideDisplayCutoutOptional,
             Optional<ShellCommandHandler> shellCommandHandler,
-            Optional<CompatUI> sizeCompatUIOptional,
-            Optional<DragAndDrop> dragAndDropOptional,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
             KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            NavigationModeController navigationModeController,
             ScreenLifecycle screenLifecycle,
             SysUiState sysUiState,
             ProtoTracer protoTracer,
@@ -154,28 +142,50 @@ public final class WMShell extends CoreStartable
             UserInfoController userInfoController,
             @Main Executor sysUiMainExecutor) {
         super(context);
+        mShell = shell;
         mCommandQueue = commandQueue;
         mConfigurationController = configurationController;
         mKeyguardStateController = keyguardStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mNavigationModeController = navigationModeController;
         mScreenLifecycle = screenLifecycle;
         mSysUiState = sysUiState;
         mPipOptional = pipOptional;
         mSplitScreenOptional = splitScreenOptional;
         mOneHandedOptional = oneHandedOptional;
-        mHideDisplayCutoutOptional = hideDisplayCutoutOptional;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mProtoTracer = protoTracer;
         mShellCommandHandler = shellCommandHandler;
-        mCompatUIOptional = sizeCompatUIOptional;
-        mDragAndDropOptional = dragAndDropOptional;
         mUserInfoController = userInfoController;
         mSysUiMainExecutor = sysUiMainExecutor;
     }
 
     @Override
     public void start() {
+        // Notify with the initial configuration and subscribe for new config changes
+        mShell.onConfigurationChanged(mContext.getResources().getConfiguration());
+        mConfigurationController.addCallback(new ConfigurationController.ConfigurationListener() {
+            @Override
+            public void onConfigChanged(Configuration newConfig) {
+                mShell.onConfigurationChanged(newConfig);
+            }
+        });
+
+        // Subscribe to keyguard changes
+        mKeyguardStateController.addCallback(new KeyguardStateController.Callback() {
+            @Override
+            public void onKeyguardShowingChanged() {
+                mShell.onKeyguardVisibilityChanged(mKeyguardStateController.isShowing(),
+                        mKeyguardStateController.isOccluded(),
+                        mKeyguardStateController.isAnimatingBetweenKeyguardAndSurfaceBehind());
+            }
+        });
+        mKeyguardUpdateMonitor.registerCallback(new KeyguardUpdateMonitorCallback() {
+            @Override
+            public void onKeyguardDismissAnimationFinished() {
+                mShell.onKeyguardDismissAnimationFinished();
+            }
+        });
+
         // TODO: Consider piping config change and other common calls to a shell component to
         //  delegate internally
         mProtoTracer.add(this);
@@ -183,9 +193,6 @@ public final class WMShell extends CoreStartable
         mPipOptional.ifPresent(this::initPip);
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);
-        mHideDisplayCutoutOptional.ifPresent(this::initHideDisplayCutout);
-        mCompatUIOptional.ifPresent(this::initCompatUi);
-        mDragAndDropOptional.ifPresent(this::initDragAndDrop);
     }
 
     @VisibleForTesting
@@ -197,40 +204,9 @@ public final class WMShell extends CoreStartable
             }
         });
 
-        mPipKeyguardCallback = new KeyguardUpdateMonitorCallback() {
-            @Override
-            public void onKeyguardVisibilityChanged(boolean showing) {
-                pip.onKeyguardVisibilityChanged(showing,
-                        mKeyguardStateController.isAnimatingBetweenKeyguardAndSurfaceBehind());
-            }
-
-            @Override
-            public void onKeyguardDismissAnimationFinished() {
-                pip.onKeyguardDismissAnimationFinished();
-            }
-        };
-        mKeyguardUpdateMonitor.registerCallback(mPipKeyguardCallback);
-
         mSysUiState.addCallback(sysUiStateFlag -> {
             mIsSysUiStateValid = (sysUiStateFlag & INVALID_SYSUI_STATE_MASK) == 0;
             pip.onSystemUiStateChanged(mIsSysUiStateValid, sysUiStateFlag);
-        });
-
-        mConfigurationController.addCallback(new ConfigurationController.ConfigurationListener() {
-            @Override
-            public void onConfigChanged(Configuration newConfig) {
-                pip.onConfigurationChanged(newConfig);
-            }
-
-            @Override
-            public void onDensityOrFontScaleChanged() {
-                pip.onDensityOrFontScaleChanged();
-            }
-
-            @Override
-            public void onThemeChanged() {
-                pip.onOverlayChanged();
-            }
         });
 
         // The media session listener needs to be re-registered when switching users
@@ -240,14 +216,6 @@ public final class WMShell extends CoreStartable
 
     @VisibleForTesting
     void initSplitScreen(SplitScreen splitScreen) {
-        mSplitScreenKeyguardCallback = new KeyguardUpdateMonitorCallback() {
-            @Override
-            public void onKeyguardVisibilityChanged(boolean showing) {
-                splitScreen.onKeyguardVisibilityChanged(showing);
-            }
-        };
-        mKeyguardUpdateMonitor.registerCallback(mSplitScreenKeyguardCallback);
-
         mWakefulnessLifecycle.addObserver(new WakefulnessLifecycle.Observer() {
             @Override
             public void onFinishedWakingUp() {
@@ -293,13 +261,8 @@ public final class WMShell extends CoreStartable
             }
         });
 
+        // TODO: Either move into ShellInterface or register a receiver on the Shell side directly
         mOneHandedKeyguardCallback = new KeyguardUpdateMonitorCallback() {
-            @Override
-            public void onKeyguardVisibilityChanged(boolean showing) {
-                oneHanded.onKeyguardVisibilityChanged(showing);
-                oneHanded.stopOneHanded();
-            }
-
             @Override
             public void onUserSwitchComplete(int userId) {
                 oneHanded.onUserSwitch(userId);
@@ -346,48 +309,6 @@ public final class WMShell extends CoreStartable
                     oneHanded.stopOneHanded(
                             OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_POP_IME_OUT);
                 }
-            }
-        });
-
-        mConfigurationController.addCallback(new ConfigurationController.ConfigurationListener() {
-            @Override
-            public void onConfigChanged(Configuration newConfig) {
-                oneHanded.onConfigChanged(newConfig);
-            }
-        });
-    }
-
-    @VisibleForTesting
-    void initHideDisplayCutout(HideDisplayCutout hideDisplayCutout) {
-        mConfigurationController.addCallback(new ConfigurationController.ConfigurationListener() {
-            @Override
-            public void onConfigChanged(Configuration newConfig) {
-                hideDisplayCutout.onConfigurationChanged(newConfig);
-            }
-        });
-    }
-
-    @VisibleForTesting
-    void initCompatUi(CompatUI sizeCompatUI) {
-        mCompatUIKeyguardCallback = new KeyguardStateController.Callback() {
-            @Override
-            public void onKeyguardShowingChanged() {
-                sizeCompatUI.onKeyguardShowingChanged(mKeyguardStateController.isShowing());
-            }
-        };
-        mKeyguardStateController.addCallback(mCompatUIKeyguardCallback);
-    }
-
-    void initDragAndDrop(DragAndDrop dragAndDrop) {
-        mConfigurationController.addCallback(new ConfigurationController.ConfigurationListener() {
-            @Override
-            public void onConfigChanged(Configuration newConfig) {
-                dragAndDrop.onConfigChanged(newConfig);
-            }
-
-            @Override
-            public void onThemeChanged() {
-                dragAndDrop.onThemeChanged();
             }
         });
     }

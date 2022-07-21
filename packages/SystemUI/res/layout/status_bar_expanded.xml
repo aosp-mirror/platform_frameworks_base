@@ -18,7 +18,7 @@
 -->
 
 
-<com.android.systemui.statusbar.phone.NotificationPanelView
+<com.android.systemui.shade.NotificationPanelView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/notification_panel"
@@ -67,7 +67,7 @@
 
     </com.android.keyguard.LockIconView>
 
-    <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
+    <com.android.systemui.shade.NotificationsQuickSettingsContainer
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="@integer/notification_panel_layout_gravity"
@@ -143,11 +143,11 @@
             android:text="@string/tap_again"
             android:visibility="gone"
         />
-    </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
+    </com.android.systemui.shade.NotificationsQuickSettingsContainer>
 
     <FrameLayout
         android:id="@+id/preview_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </FrameLayout>
-</com.android.systemui.statusbar.phone.NotificationPanelView>
+</com.android.systemui.shade.NotificationPanelView>

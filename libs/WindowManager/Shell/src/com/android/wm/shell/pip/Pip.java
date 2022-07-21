@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.pip;
 
-import android.content.res.Configuration;
 import android.graphics.Rect;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
@@ -41,24 +40,6 @@ public interface Pip {
      * Expand PIP, it's possible that specific request to activate the window via Alt-tab.
      */
     default void expandPip() {
-    }
-
-    /**
-     * Called when configuration is changed.
-     */
-    default void onConfigurationChanged(Configuration newConfig) {
-    }
-
-    /**
-     * Called when display size or font size of settings changed
-     */
-    default void onDensityOrFontScaleChanged() {
-    }
-
-    /**
-     * Called when overlay package change invoked.
-     */
-    default void onOverlayChanged() {
     }
 
     /**
@@ -118,23 +99,6 @@ public interface Pip {
      * view hierarchy or destroyed.
      */
     default void removePipExclusionBoundsChangeListener(Consumer<Rect> listener) { }
-
-    /**
-     * Called when the visibility of keyguard is changed.
-     * @param showing {@code true} if keyguard is now showing, {@code false} otherwise.
-     * @param animating {@code true} if system is animating between keyguard and surface behind,
-     *                              this only makes sense when showing is {@code false}.
-     */
-    default void onKeyguardVisibilityChanged(boolean showing, boolean animating) { }
-
-    /**
-     * Called when the dismissing animation keyguard and surfaces behind is finished.
-     * See also {@link #onKeyguardVisibilityChanged(boolean, boolean)}.
-     *
-     * TODO(b/206741900) deprecate this path once we're able to animate the PiP window as part of
-     * keyguard dismiss animation.
-     */
-    default void onKeyguardDismissAnimationFinished() { }
 
     /**
      * Dump the current state and information if need.

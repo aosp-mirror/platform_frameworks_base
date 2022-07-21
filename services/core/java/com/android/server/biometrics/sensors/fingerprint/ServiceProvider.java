@@ -153,6 +153,8 @@ public interface ServiceProvider {
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 
+    void onPowerPressed();
+
     /**
      * Sets side-fps controller
      * @param controller side-fps controller

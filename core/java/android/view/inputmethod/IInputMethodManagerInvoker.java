@@ -68,20 +68,10 @@ final class IInputMethodManagerInvoker {
 
     @AnyThread
     @NonNull
-    List<InputMethodInfo> getInputMethodList(@UserIdInt int userId) {
-        try {
-            return mTarget.getInputMethodList(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    @AnyThread
-    @NonNull
-    List<InputMethodInfo> getAwareLockedInputMethodList(@UserIdInt int userId,
+    List<InputMethodInfo> getInputMethodList(@UserIdInt int userId,
             @DirectBootAwareness int directBootAwareness) {
         try {
-            return mTarget.getAwareLockedInputMethodList(userId, directBootAwareness);
+            return mTarget.getInputMethodList(userId, directBootAwareness);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

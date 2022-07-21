@@ -203,4 +203,7 @@ interface IFingerprintService {
 
     // Registers BiometricStateListener.
     void registerBiometricStateListener(IBiometricStateListener listener);
+
+    // Sends a power button pressed event to all listeners.
+    oneway void onPowerPressed();
 }

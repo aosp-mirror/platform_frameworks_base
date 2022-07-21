@@ -72,11 +72,13 @@ class ClockEventController @Inject constructor(
     private val regionSamplingEnabled =
             featureFlags.isEnabled(com.android.systemui.flags.Flags.REGION_SAMPLING)
 
-    private fun updateColors(currentClock: Clock?) {
-        smallClockIsDark = smallRegionSamplingInstance.currentClockDarkness()
-        largeClockIsDark = largeRegionSamplingInstance.currentClockDarkness()
+    private val updateFun = object : RegionSamplingInstance.UpdateColorCallback {
+        override fun updateColors() {
+            smallClockIsDark = smallRegionSamplingInstance.currentRegionDarkness()
+            largeClockIsDark = largeRegionSamplingInstance.currentRegionDarkness()
 
-        currentClock?.events?.onColorPaletteChanged(resources, smallClockIsDark, largeClockIsDark)
+            clock?.events?.onColorPaletteChanged(resources, smallClockIsDark, largeClockIsDark)
+        }
     }
 
     fun updateRegionSamplers(currentClock: Clock?) {
@@ -88,8 +90,7 @@ class ClockEventController @Inject constructor(
                 mainExecutor,
                 bgExecutor,
                 regionSamplingEnabled,
-                currentClock,
-                resources
+                updateFun
         )
 
         largeRegionSamplingInstance = RegionSamplingInstance(
@@ -97,14 +98,13 @@ class ClockEventController @Inject constructor(
                 mainExecutor,
                 bgExecutor,
                 regionSamplingEnabled,
-                currentClock,
-                resources
+                updateFun
         )
 
         smallRegionSamplingInstance.startRegionSampler()
         largeRegionSamplingInstance.startRegionSampler()
 
-        updateColors(currentClock)
+        updateFun.updateColors()
     }
 
     var smallRegionSamplingInstance: RegionSamplingInstance = RegionSamplingInstance(
@@ -112,8 +112,7 @@ class ClockEventController @Inject constructor(
             mainExecutor,
             bgExecutor,
             regionSamplingEnabled,
-            clock,
-            resources
+            updateFun
     )
 
     var largeRegionSamplingInstance: RegionSamplingInstance = RegionSamplingInstance(
@@ -121,16 +120,15 @@ class ClockEventController @Inject constructor(
             mainExecutor,
             bgExecutor,
             regionSamplingEnabled,
-            clock,
-            resources
+            updateFun
     )
 
-    private var smallClockIsDark = smallRegionSamplingInstance.currentClockDarkness()
-    private var largeClockIsDark = largeRegionSamplingInstance.currentClockDarkness()
+    private var smallClockIsDark = smallRegionSamplingInstance.currentRegionDarkness()
+    private var largeClockIsDark = largeRegionSamplingInstance.currentRegionDarkness()
 
     private val configListener = object : ConfigurationController.ConfigurationListener {
         override fun onThemeChanged() {
-            updateColors(clock)
+            updateFun.updateColors()
         }
     }
 

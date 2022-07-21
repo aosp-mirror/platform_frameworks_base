@@ -45,6 +45,7 @@ import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.media.dagger.MediaProjectionModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarComponent;
+import com.android.systemui.people.PeopleModule;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.privacy.PrivacyModule;
 import com.android.systemui.recents.Recents;
@@ -90,6 +91,7 @@ import com.android.systemui.wallet.dagger.WalletModule;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.dagger.DynamicOverride;
+import com.android.wm.shell.sysui.ShellController;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -123,6 +125,7 @@ import dagger.Provides;
             LogModule.class,
             MediaProjectionModule.class,
             PeopleHubModule.class,
+            PeopleModule.class,
             PluginModule.class,
             PrivacyModule.class,
             QsFrameTranslateModule.class,
@@ -208,7 +211,6 @@ public abstract class SystemUIModule {
             NotificationShadeWindowController notificationShadeWindowController,
             KeyguardStateController keyguardStateController,
             ShadeController shadeController,
-            ConfigurationController configurationController,
             @Nullable IStatusBarService statusBarService,
             INotificationManager notificationManager,
             NotificationVisibilityProvider visibilityProvider,
@@ -226,7 +228,6 @@ public abstract class SystemUIModule {
                 notificationShadeWindowController,
                 keyguardStateController,
                 shadeController,
-                configurationController,
                 statusBarService,
                 notificationManager,
                 visibilityProvider,

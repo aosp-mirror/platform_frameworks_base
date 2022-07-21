@@ -26,6 +26,7 @@ import android.util.Pair;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -72,6 +73,7 @@ public class ShellInitImpl {
     private final Transitions mTransitions;
     private final StartingWindowController mStartingWindow;
     private final Optional<RecentTasksController> mRecentTasks;
+    private final Optional<ActivityEmbeddingController> mActivityEmbeddingOptional;
 
     private final InitImpl mImpl = new InitImpl();
     // An ordered list of init callbacks to be made once shell is first started
@@ -93,6 +95,7 @@ public class ShellInitImpl {
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformTaskListener<?>> freeformTaskListenerOptional,
             Optional<RecentTasksController> recentTasks,
+            Optional<ActivityEmbeddingController> activityEmbeddingOptional,
             Transitions transitions,
             StartingWindowController startingWindow,
             ShellExecutor mainExecutor) {
@@ -110,6 +113,7 @@ public class ShellInitImpl {
         mUnfoldTransitionHandler = unfoldTransitionHandler;
         mFreeformTaskListenerOptional = freeformTaskListenerOptional;
         mRecentTasks = recentTasks;
+        mActivityEmbeddingOptional = activityEmbeddingOptional;
         mTransitions = transitions;
         mMainExecutor = mainExecutor;
         mStartingWindow = startingWindow;
@@ -139,6 +143,7 @@ public class ShellInitImpl {
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTransitions.register(mShellTaskOrganizer);
+            mActivityEmbeddingOptional.ifPresent(ActivityEmbeddingController::init);
             mUnfoldTransitionHandler.ifPresent(UnfoldTransitionHandler::init);
             if (mSplitScreenOptional.isPresent() && mPipTouchHandlerOptional.isPresent()) {
                 final DefaultMixedHandler mixedHandler = new DefaultMixedHandler(mTransitions,

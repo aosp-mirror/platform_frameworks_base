@@ -71,6 +71,7 @@ import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
@@ -134,6 +135,7 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static BubbleController provideBubbleController(Context context,
+            ShellController shellController,
             BubbleData data,
             FloatingContentCoordinator floatingContentCoordinator,
             IStatusBarService statusBarService,
@@ -153,7 +155,7 @@ public abstract class WMShellModule {
             @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue) {
-        return new BubbleController(context, data, null /* synchronizer */,
+        return new BubbleController(context, shellController, data, null /* synchronizer */,
                 floatingContentCoordinator,
                 new BubbleDataRepository(context, launcherApps, mainExecutor),
                 statusBarService, windowManager, windowManagerShellWrapper, userManager,
@@ -205,12 +207,14 @@ public abstract class WMShellModule {
     @Provides
     @DynamicOverride
     static OneHandedController provideOneHandedController(Context context,
+            ShellController shellController,
             WindowManager windowManager, DisplayController displayController,
             DisplayLayout displayLayout, TaskStackListenerImpl taskStackListener,
             UiEventLogger uiEventLogger, InteractionJankMonitor jankMonitor,
             @ShellMainThread ShellExecutor mainExecutor, @ShellMainThread Handler mainHandler) {
-        return OneHandedController.create(context, windowManager, displayController, displayLayout,
-                taskStackListener, jankMonitor, uiEventLogger, mainExecutor, mainHandler);
+        return OneHandedController.create(context, shellController, windowManager,
+                displayController, displayLayout, taskStackListener, jankMonitor, uiEventLogger,
+                mainExecutor, mainHandler);
     }
 
     //
@@ -221,6 +225,7 @@ public abstract class WMShellModule {
     @Provides
     @DynamicOverride
     static SplitScreenController provideSplitScreenController(
+            ShellController shellController,
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, Context context,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
@@ -230,7 +235,7 @@ public abstract class WMShellModule {
             DisplayInsetsController displayInsetsController, Transitions transitions,
             TransactionPool transactionPool, IconProvider iconProvider,
             Optional<RecentTasksController> recentTasks) {
-        return new SplitScreenController(shellTaskOrganizer, syncQueue, context,
+        return new SplitScreenController(shellController, shellTaskOrganizer, syncQueue, context,
                 rootTaskDisplayAreaOrganizer, mainExecutor, displayController, displayImeController,
                 displayInsetsController, transitions, transactionPool, iconProvider,
                 recentTasks);
@@ -242,7 +247,8 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static Optional<Pip> providePip(Context context, DisplayController displayController,
+    static Optional<Pip> providePip(Context context,
+            ShellController shellController, DisplayController displayController,
             PipAppOpsListener pipAppOpsListener, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipKeepClearAlgorithm pipKeepClearAlgorithm, PipBoundsState pipBoundsState,
             PipMotionHelper pipMotionHelper, PipMediaController pipMediaController,
@@ -254,7 +260,7 @@ public abstract class WMShellModule {
             PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<OneHandedController> oneHandedController,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return Optional.ofNullable(PipController.create(context, displayController,
+        return Optional.ofNullable(PipController.create(context, shellController, displayController,
                 pipAppOpsListener, pipBoundsAlgorithm, pipKeepClearAlgorithm, pipBoundsState,
                 pipMotionHelper,
                 pipMediaController, phonePipMenuController, pipTaskOrganizer, pipTransitionState,

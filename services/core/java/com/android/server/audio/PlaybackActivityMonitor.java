@@ -34,7 +34,9 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
@@ -114,6 +116,9 @@ public final class PlaybackActivityMonitor
     @GuardedBy("mPlayerLock")
     private final HashMap<Integer, AudioPlaybackConfiguration> mPlayers =
             new HashMap<Integer, AudioPlaybackConfiguration>();
+
+    @GuardedBy("mPlayerLock")
+    private final SparseIntArray mPortIdToPiid = new SparseIntArray();
 
     private final Context mContext;
     private int mSavedAlarmVolume = -1;
@@ -290,22 +295,29 @@ public final class PlaybackActivityMonitor
      * Update player event
      * @param piid Player id to update
      * @param event The new player event
-     * @param deviceId The new player device id
+     * @param eventValue The value associated with this event
      * @param binderUid Calling binder uid
      */
-    public void playerEvent(int piid, int event, int deviceId, int binderUid) {
+    public void playerEvent(int piid, int event, int eventValue, int binderUid) {
         if (DEBUG) {
-            Log.v(TAG, String.format("playerEvent(piid=%d, deviceId=%d, event=%s)",
-                    piid, deviceId, AudioPlaybackConfiguration.playerStateToString(event)));
+            Log.v(TAG, TextUtils.formatSimple("playerEvent(piid=%d, event=%s, eventValue=%d)",
+                    piid, AudioPlaybackConfiguration.playerStateToString(event), eventValue));
         }
+
         final boolean change;
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (apc == null) {
                 return;
             }
-            sEventLogger.log(new PlayerEvent(piid, event, deviceId));
-            if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
+
+            sEventLogger.log(new PlayerEvent(piid, event, eventValue));
+
+            if (event == AudioPlaybackConfiguration.PLAYER_UPDATE_PORT_ID) {
+                mEventHandler.sendMessage(
+                        mEventHandler.obtainMessage(MSG_L_UPDATE_PORT_EVENT, eventValue, piid));
+                return;
+            } else if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
                 for (Integer uidInteger: mBannedUids) {
                     if (checkBanPlayer(apc, uidInteger.intValue())) {
                         // player was banned, do not update its state
@@ -322,7 +334,7 @@ public final class PlaybackActivityMonitor
             if (checkConfigurationCaller(piid, apc, binderUid)) {
                 //TODO add generation counter to only update to the latest state
                 checkVolumeForPrivilegedAlarm(apc, event);
-                change = apc.handleStateEvent(event, deviceId);
+                change = apc.handleStateEvent(event, eventValue);
             } else {
                 Log.e(TAG, "Error handling event " + event);
                 change = false;
@@ -357,10 +369,27 @@ public final class PlaybackActivityMonitor
                 checkVolumeForPrivilegedAlarm(apc, AudioPlaybackConfiguration.PLAYER_STATE_RELEASED);
                 change = apc.handleStateEvent(AudioPlaybackConfiguration.PLAYER_STATE_RELEASED,
                         AudioPlaybackConfiguration.PLAYER_DEVICEID_INVALID);
+
+                // remove all port ids mapped to the released player
+                mEventHandler.sendMessage(
+                        mEventHandler.obtainMessage(MSG_L_CLEAR_PORTS_FOR_PIID, piid, /*arg2=*/0));
+
             }
         }
         if (change) {
             dispatchPlaybackChange(true /*iplayerreleased*/);
+        }
+    }
+
+    /*package*/ void onAudioServerDied() {
+        sEventLogger.log(
+                new AudioEventLogger.StringEvent(
+                        "clear port id to piid map"));
+        synchronized (mPlayerLock) {
+            if (DEBUG) {
+                Log.v(TAG, "clear port id to piid map:\n" + mPortIdToPiid);
+            }
+            mPortIdToPiid.clear();
         }
     }
 
@@ -499,9 +528,18 @@ public final class PlaybackActivityMonitor
                 pw.print(" " + piid);
             }
             pw.println("\n");
+            // portId to piid mappings:
+            pw.println("\n  current portId to piid map:");
+            for (int i = 0; i < mPortIdToPiid.size(); ++i) {
+                pw.println(
+                        "  portId: " + mPortIdToPiid.keyAt(i) + " piid: " + mPortIdToPiid.valueAt(
+                                i));
+            }
+            pw.println("\n");
             // log
             sEventLogger.dump(pw);
         }
+
         synchronized (mAllowedCapturePolicies) {
             pw.println("\n  allowed capture policies:");
             for (HashMap.Entry<Integer, Integer> entry : mAllowedCapturePolicies.entrySet()) {
@@ -1010,27 +1048,36 @@ public final class PlaybackActivityMonitor
 
     //=================================================================
     // For logging
-    private final static class PlayerEvent extends AudioEventLogger.Event {
+    private static final class PlayerEvent extends AudioEventLogger.Event {
         // only keeping the player interface ID as it uniquely identifies the player in the event
         final int mPlayerIId;
-        final int mState;
-        final int mDeviceId;
+        final int mEvent;
+        final int mEventValue;
 
-        PlayerEvent(int piid, int state, int deviceId) {
+        PlayerEvent(int piid, int event, int eventValue) {
             mPlayerIId = piid;
-            mState = state;
-            mDeviceId = deviceId;
+            mEvent = event;
+            mEventValue = eventValue;
         }
 
         @Override
         public String eventToString() {
-            return new StringBuilder("player piid:").append(mPlayerIId).append(" state:")
-                    .append(AudioPlaybackConfiguration.toLogFriendlyPlayerState(mState))
-                    .append(" DeviceId:").append(mDeviceId).toString();
+            if (mEvent == AudioPlaybackConfiguration.PLAYER_UPDATE_PORT_ID) {
+                return AudioPlaybackConfiguration.toLogFriendlyPlayerState(mEvent) + " portId:"
+                        + mEventValue + " mapped to player piid:" + mPlayerIId;
+            }
+
+            StringBuilder builder = new StringBuilder("player piid:").append(mPlayerIId).append(
+                            " state:")
+                    .append(AudioPlaybackConfiguration.toLogFriendlyPlayerState(mEvent));
+            if (mEventValue != 0) {
+                builder.append(" DeviceId:").append(mEventValue);
+            }
+            return builder.toString();
         }
     }
 
-    private final static class PlayerOpPlayAudioEvent extends AudioEventLogger.Event {
+    private static final class PlayerOpPlayAudioEvent extends AudioEventLogger.Event {
         // only keeping the player interface ID as it uniquely identifies the player in the event
         final int mPlayerIId;
         final boolean mHasOp;
@@ -1050,7 +1097,7 @@ public final class PlaybackActivityMonitor
         }
     }
 
-    private final static class NewPlayerEvent extends AudioEventLogger.Event {
+    private static final class NewPlayerEvent extends AudioEventLogger.Event {
         private final int mPlayerIId;
         private final int mPlayerType;
         private final int mClientUid;
@@ -1267,6 +1314,21 @@ public final class PlaybackActivityMonitor
      */
     private static final int MSG_L_TIMEOUT_MUTE_AWAIT_CONNECTION = 1;
 
+    /**
+     * assign new port id to piid
+     * args:
+     *     msg.arg1: port id
+     *     msg.arg2: piid
+     */
+    private static final int MSG_L_UPDATE_PORT_EVENT = 2;
+
+    /**
+     * clear all ports assigned to a given piid
+     * args:
+     *     msg.arg1: the piid
+     */
+    private static final int MSG_L_CLEAR_PORTS_FOR_PIID = 3;
+
     private void initEventHandler() {
         mEventThread = new HandlerThread(TAG);
         mEventThread.start();
@@ -1281,6 +1343,25 @@ public final class PlaybackActivityMonitor
                             unmutePlayersExpectingDevice();
                         }
                         mMuteAwaitConnectionTimeoutCb.accept((AudioDeviceAttributes) msg.obj);
+                        break;
+                    case MSG_L_UPDATE_PORT_EVENT:
+                        synchronized (mPlayerLock) {
+                            mPortIdToPiid.put(/*portId*/msg.arg1, /*piid*/msg.arg2);
+                        }
+                        break;
+                    case MSG_L_CLEAR_PORTS_FOR_PIID:
+                        int piid = msg.arg1;
+                        if (piid == AudioPlaybackConfiguration.PLAYER_PIID_INVALID) {
+                            Log.w(TAG, "Received clear ports with invalid piid");
+                            break;
+                        }
+
+                        synchronized (mPlayerLock) {
+                            int portIdx;
+                            while ((portIdx = mPortIdToPiid.indexOfValue(piid)) >= 0) {
+                                mPortIdToPiid.removeAt(portIdx);
+                            }
+                        }
                         break;
                     default:
                         break;

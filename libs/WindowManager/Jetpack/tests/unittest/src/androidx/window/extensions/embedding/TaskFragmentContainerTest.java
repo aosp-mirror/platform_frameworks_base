@@ -209,20 +209,20 @@ public class TaskFragmentContainerTest {
 
         assertNull(container.mAppearEmptyTimeout);
 
-        // Not set if it is not appeared empty.
-        final TaskFragmentInfo info = mock(TaskFragmentInfo.class);
-        doReturn(new ArrayList<>()).when(info).getActivities();
-        doReturn(false).when(info).isEmpty();
-        container.setInfo(info);
-
-        assertNull(container.mAppearEmptyTimeout);
-
         // Set timeout if the first info set is empty.
+        final TaskFragmentInfo info = mock(TaskFragmentInfo.class);
         container.mInfo = null;
         doReturn(true).when(info).isEmpty();
         container.setInfo(info);
 
         assertNotNull(container.mAppearEmptyTimeout);
+
+        // Not set if it is not appeared empty.
+        doReturn(new ArrayList<>()).when(info).getActivities();
+        doReturn(false).when(info).isEmpty();
+        container.setInfo(info);
+
+        assertNull(container.mAppearEmptyTimeout);
 
         // Remove timeout after the container becomes non-empty.
         doReturn(false).when(info).isEmpty();
@@ -232,6 +232,7 @@ public class TaskFragmentContainerTest {
 
         // Running the timeout will call into SplitController.onTaskFragmentAppearEmptyTimeout.
         container.mInfo = null;
+        container.setPendingAppearedIntent(mIntent);
         doReturn(true).when(info).isEmpty();
         container.setInfo(info);
         container.mAppearEmptyTimeout.run();

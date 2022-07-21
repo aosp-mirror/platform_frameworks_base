@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.onehanded;
 
-import android.content.res.Configuration;
 import android.os.SystemProperties;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
@@ -83,17 +82,7 @@ public interface OneHanded {
     void registerTransitionCallback(OneHandedTransitionCallback callback);
 
     /**
-     * Receive onConfigurationChanged() events
-     */
-    void onConfigChanged(Configuration newConfig);
-
-    /**
      * Notifies when user switch complete
      */
     void onUserSwitch(int userId);
-
-    /**
-     * Notifies when keyguard visibility changed
-     */
-    void onKeyguardVisibilityChanged(boolean showing);
 }

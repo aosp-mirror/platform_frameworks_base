@@ -74,7 +74,7 @@ interface IAudioService {
 
     oneway void playerAttributes(in int piid, in AudioAttributes attr);
 
-    oneway void playerEvent(in int piid, in int event, in int deviceId);
+    oneway void playerEvent(in int piid, in int event, in int eventId);
 
     oneway void releasePlayer(in int piid);
 

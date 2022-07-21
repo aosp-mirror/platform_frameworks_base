@@ -27,6 +27,7 @@ import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.util.InitializationChecker;
 import com.android.wm.shell.dagger.WMShellConcurrencyModule;
+import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.transition.ShellTransitions;
 
 import java.util.Optional;
@@ -90,39 +91,33 @@ public abstract class SystemUIInitializer {
             // Only initialize when not starting from tests since this currently initializes some
             // components that shouldn't be run in the test environment
             builder = prepareSysUIComponentBuilder(builder, mWMComponent)
+                    .setShell(mWMComponent.getShell())
                     .setPip(mWMComponent.getPip())
                     .setSplitScreen(mWMComponent.getSplitScreen())
                     .setOneHanded(mWMComponent.getOneHanded())
                     .setBubbles(mWMComponent.getBubbles())
-                    .setHideDisplayCutout(mWMComponent.getHideDisplayCutout())
                     .setShellCommandHandler(mWMComponent.getShellCommandHandler())
                     .setTaskViewFactory(mWMComponent.getTaskViewFactory())
                     .setTransitions(mWMComponent.getTransitions())
                     .setStartingSurface(mWMComponent.getStartingSurface())
                     .setDisplayAreaHelper(mWMComponent.getDisplayAreaHelper())
-                    .setTaskSurfaceHelper(mWMComponent.getTaskSurfaceHelper())
                     .setRecentTasks(mWMComponent.getRecentTasks())
-                    .setCompatUI(mWMComponent.getCompatUI())
-                    .setDragAndDrop(mWMComponent.getDragAndDrop())
                     .setBackAnimation(mWMComponent.getBackAnimation());
         } else {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
             // is separating this logic into newly creating SystemUITestsFactory.
             builder = prepareSysUIComponentBuilder(builder, mWMComponent)
+                    .setShell(new ShellInterface() {})
                     .setPip(Optional.ofNullable(null))
                     .setSplitScreen(Optional.ofNullable(null))
                     .setOneHanded(Optional.ofNullable(null))
                     .setBubbles(Optional.ofNullable(null))
-                    .setHideDisplayCutout(Optional.ofNullable(null))
                     .setShellCommandHandler(Optional.ofNullable(null))
                     .setTaskViewFactory(Optional.ofNullable(null))
                     .setTransitions(new ShellTransitions() {})
                     .setDisplayAreaHelper(Optional.ofNullable(null))
                     .setStartingSurface(Optional.ofNullable(null))
-                    .setTaskSurfaceHelper(Optional.ofNullable(null))
                     .setRecentTasks(Optional.ofNullable(null))
-                    .setCompatUI(Optional.ofNullable(null))
-                    .setDragAndDrop(Optional.ofNullable(null))
                     .setBackAnimation(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();

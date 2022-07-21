@@ -113,7 +113,7 @@ uint64_t consumeBytes(VmaBatch& batch, uint64_t bytesToConsume) {
 
     uint64_t bytesConsumed = 0;
     while (bytesConsumed < bytesToConsume) {
-        if (CC_UNLIKELY(batch.totalVmas > 0)) {
+        if (CC_UNLIKELY(batch.totalVmas == 0)) {
             // No more vmas to consume
             break;
         }

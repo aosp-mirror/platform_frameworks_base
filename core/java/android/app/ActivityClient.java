@@ -227,6 +227,18 @@ public class ActivityClient {
     }
 
     /**
+     * Returns the windowing mode of the task that hosts the activity, or {@code -1} if task is not
+     * found.
+     */
+    public int getTaskWindowingMode(IBinder activityToken) {
+        try {
+            return getActivityClientController().getTaskWindowingMode(activityToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the non-finishing activity token below in the same task if it belongs to the same
      * process.
      */

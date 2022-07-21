@@ -144,21 +144,12 @@ public class LockPatternUtils {
      */
     public static final int USER_FRP = UserHandle.USER_NULL + 1;
 
-    @Deprecated
-    public final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
     public final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
     public final static String PASSWORD_TYPE_KEY = "lockscreen.password_type";
     @Deprecated
     public final static String PASSWORD_TYPE_ALTERNATE_KEY = "lockscreen.password_type_alternate";
     public final static String LOCK_PASSWORD_SALT_KEY = "lockscreen.password_salt";
     public final static String DISABLE_LOCKSCREEN_KEY = "lockscreen.disabled";
-    public final static String LOCKSCREEN_OPTIONS = "lockscreen.options";
-    @Deprecated
-    public final static String LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK
-            = "lockscreen.biometric_weak_fallback";
-    @Deprecated
-    public final static String BIOMETRIC_WEAK_EVER_CHOSEN_KEY
-            = "lockscreen.biometricweakeverchosen";
     public final static String LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS
             = "lockscreen.power_button_instantly_locks";
     @Deprecated
