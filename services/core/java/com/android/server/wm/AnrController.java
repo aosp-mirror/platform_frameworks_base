@@ -31,6 +31,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.InputApplicationHandle;
 
+import com.android.internal.os.TimeoutRecord;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.criticalevents.CriticalEventLog;
 
@@ -60,7 +61,8 @@ class AnrController {
         mService = service;
     }
 
-    void notifyAppUnresponsive(InputApplicationHandle applicationHandle, String reason) {
+    void notifyAppUnresponsive(InputApplicationHandle applicationHandle,
+            TimeoutRecord timeoutRecord) {
         preDumpIfLockTooSlow();
         final ActivityRecord activity;
         synchronized (mService.mGlobalLock) {
@@ -70,31 +72,31 @@ class AnrController {
                         + ". Dropping notifyNoFocusedWindowAnr request");
                 return;
             }
-            Slog.i(TAG_WM, "ANR in " + activity.getName() + ".  Reason: " + reason);
-            dumpAnrStateLocked(activity, null /* windowState */, reason);
+            Slog.i(TAG_WM, "ANR in " + activity.getName() + ".  Reason: " + timeoutRecord.mReason);
+            dumpAnrStateLocked(activity, null /* windowState */, timeoutRecord.mReason);
             mUnresponsiveAppByDisplay.put(activity.getDisplayId(), activity);
         }
-        activity.inputDispatchingTimedOut(reason, INVALID_PID);
+        activity.inputDispatchingTimedOut(timeoutRecord, INVALID_PID);
     }
 
 
     /**
      * Notify a window was unresponsive.
      *
-     * @param token - the input token of the window
-     * @param pid - the pid of the window, if known
-     * @param reason - the reason for the window being unresponsive
+     * @param token         - the input token of the window
+     * @param pid           - the pid of the window, if known
+     * @param timeoutRecord - details for the timeout
      */
     void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull OptionalInt pid,
-            @NonNull String reason) {
-        if (notifyWindowUnresponsive(token, reason)) {
+            @NonNull TimeoutRecord timeoutRecord) {
+        if (notifyWindowUnresponsive(token, timeoutRecord)) {
             return;
         }
         if (!pid.isPresent()) {
             Slog.w(TAG_WM, "Failed to notify that window token=" + token + " was unresponsive.");
             return;
         }
-        notifyWindowUnresponsive(pid.getAsInt(), reason);
+        notifyWindowUnresponsive(pid.getAsInt(), timeoutRecord);
     }
 
     /**
@@ -103,7 +105,8 @@ class AnrController {
      * @return true if the window was identified by the given input token and the request was
      *         handled, false otherwise.
      */
-    private boolean notifyWindowUnresponsive(@NonNull IBinder inputToken, String reason) {
+    private boolean notifyWindowUnresponsive(@NonNull IBinder inputToken,
+            TimeoutRecord timeoutRecord) {
         preDumpIfLockTooSlow();
         final int pid;
         final boolean aboveSystem;
@@ -119,14 +122,14 @@ class AnrController {
             // embedded, then we will blame the pid instead.
             activity = (windowState.mInputChannelToken == inputToken)
                     ? windowState.mActivityRecord : null;
-            Slog.i(TAG_WM, "ANR in " + target + ". Reason:" + reason);
+            Slog.i(TAG_WM, "ANR in " + target + ". Reason:" + timeoutRecord.mReason);
             aboveSystem = isWindowAboveSystem(windowState);
-            dumpAnrStateLocked(activity, windowState, reason);
+            dumpAnrStateLocked(activity, windowState, timeoutRecord.mReason);
         }
         if (activity != null) {
-            activity.inputDispatchingTimedOut(reason, pid);
+            activity.inputDispatchingTimedOut(timeoutRecord, pid);
         } else {
-            mService.mAmInternal.inputDispatchingTimedOut(pid, aboveSystem, reason);
+            mService.mAmInternal.inputDispatchingTimedOut(pid, aboveSystem, timeoutRecord);
         }
         return true;
     }
@@ -134,15 +137,16 @@ class AnrController {
     /**
      * Notify a window owned by the provided pid was unresponsive.
      */
-    private void notifyWindowUnresponsive(int pid, String reason) {
+    private void notifyWindowUnresponsive(int pid, TimeoutRecord timeoutRecord) {
+        Slog.i(TAG_WM,
+                "ANR in input window owned by pid=" + pid + ". Reason: " + timeoutRecord.mReason);
         synchronized (mService.mGlobalLock) {
-            Slog.i(TAG_WM, "ANR in input window owned by pid=" + pid + ". Reason: " + reason);
-            dumpAnrStateLocked(null /* activity */, null /* windowState */, reason);
+            dumpAnrStateLocked(null /* activity */, null /* windowState */, timeoutRecord.mReason);
         }
 
         // We cannot determine the z-order of the window, so place the anr dialog as high
         // as possible.
-        mService.mAmInternal.inputDispatchingTimedOut(pid, true /*aboveSystem*/, reason);
+        mService.mAmInternal.inputDispatchingTimedOut(pid, true /*aboveSystem*/, timeoutRecord);
     }
 
     /**

@@ -82,6 +82,7 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
@@ -2134,7 +2135,7 @@ public final class BroadcastQueue {
         }
 
         ProcessRecord app = null;
-        String anrMessage = null;
+        TimeoutRecord timeoutRecord = null;
 
         Object curReceiver;
         if (r.nextReceiver > 0) {
@@ -2159,9 +2160,10 @@ public final class BroadcastQueue {
         }
 
         if (app != null) {
-            anrMessage =
+            String anrMessage =
                     "Broadcast of " + r.intent.toString() + ", waited " + timeoutDurationMs
                             + "ms";
+            timeoutRecord = TimeoutRecord.forBroadcastReceiver(anrMessage);
         }
 
         if (mPendingBroadcast == r) {
@@ -2173,8 +2175,8 @@ public final class BroadcastQueue {
                 r.resultExtras, r.resultAbort, false);
         scheduleBroadcastsLocked();
 
-        if (!debugging && anrMessage != null) {
-            mService.mAnrHelper.appNotResponding(app, anrMessage);
+        if (!debugging && timeoutRecord != null) {
+            mService.mAnrHelper.appNotResponding(app, timeoutRecord);
         }
     }
 
