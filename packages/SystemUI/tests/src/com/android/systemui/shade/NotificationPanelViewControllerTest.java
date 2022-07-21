@@ -143,7 +143,6 @@ import com.android.systemui.statusbar.phone.KeyguardBottomAreaViewController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
-import com.android.systemui.statusbar.phone.LargeScreenShadeHeaderController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.PanelViewController;
@@ -1182,11 +1181,11 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mStatusBarStateController.setState(SHADE);
         when(mResources.getBoolean(R.bool.config_use_large_screen_shade_header)).thenReturn(true);
         mNotificationPanelViewController.updateResources();
-        verify(mLargeScreenShadeHeaderController).setActive(true);
+        verify(mLargeScreenShadeHeaderController).setLargeScreenActive(true);
 
         when(mResources.getBoolean(R.bool.config_use_large_screen_shade_header)).thenReturn(false);
         mNotificationPanelViewController.updateResources();
-        verify(mLargeScreenShadeHeaderController).setActive(false);
+        verify(mLargeScreenShadeHeaderController).setLargeScreenActive(false);
     }
 
     @Test
