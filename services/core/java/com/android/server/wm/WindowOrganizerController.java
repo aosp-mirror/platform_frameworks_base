@@ -36,6 +36,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
@@ -1065,6 +1066,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 WindowContainer.fromBinder(hop.getContainer())
                         .removeLocalInsetsSourceProvider(hop.getInsetsTypes());
                 break;
+            case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP:
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
+                if (container == null || container.asDisplayArea() == null
+                        || !container.isAttached()) {
+                    Slog.e(TAG, "Attempt to operate on unknown or detached display area: "
+                            + container);
+                    break;
+                }
+                container.setAlwaysOnTop(hop.isAlwaysOnTop());
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                break;
+
         }
         return effects;
     }
