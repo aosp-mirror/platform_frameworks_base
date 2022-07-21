@@ -51,7 +51,7 @@ final class ProcessCachedOptimizerRecord {
     /**
      * Last oom adjust change reason for this app.
      */
-    @GuardedBy("mProcLock") private String mLastOomAdjChangeReason;
+    @GuardedBy("mProcLock") private @OomAdjuster.OomAdjReason int mLastOomAdjChangeReason;
 
     /**
      * The most recent compaction action performed for this app.
@@ -133,12 +133,13 @@ final class ProcessCachedOptimizerRecord {
     }
 
     @GuardedBy("mProcLock")
-    void setLastOomAdjChangeReason(String reason) {
+    void setLastOomAdjChangeReason(@OomAdjuster.OomAdjReason int reason) {
         mLastOomAdjChangeReason = reason;
     }
 
     @GuardedBy("mProcLock")
-    String getLastOomAdjChangeReason() {
+    @OomAdjuster.OomAdjReason
+    int getLastOomAdjChangeReason() {
         return mLastOomAdjChangeReason;
     }
 

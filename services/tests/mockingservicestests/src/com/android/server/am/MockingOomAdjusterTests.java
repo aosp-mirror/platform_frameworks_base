@@ -40,6 +40,7 @@ import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_ACTIVITY;
 import static com.android.server.am.ProcessList.BACKUP_APP_ADJ;
 import static com.android.server.am.ProcessList.CACHED_APP_MAX_ADJ;
 import static com.android.server.am.ProcessList.CACHED_APP_MIN_ADJ;
@@ -146,6 +147,7 @@ public class MockingOomAdjusterTests {
     private static PackageManagerInternal sPackageManagerInternal;
     private static ActivityManagerService sService;
 
+    @SuppressWarnings("GuardedBy")
     @BeforeClass
     public static void setUpOnce() {
         sContext = getInstrumentation().getTargetContext();
@@ -196,7 +198,7 @@ public class MockingOomAdjusterTests {
                 new ActivityManagerService.Injector(sContext));
         doReturn(mock(AppOpsManager.class)).when(sService).getAppOpsManager();
         doCallRealMethod().when(sService).enqueueOomAdjTargetLocked(any(ProcessRecord.class));
-        doCallRealMethod().when(sService).updateOomAdjPendingTargetsLocked(any(String.class));
+        doCallRealMethod().when(sService).updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_ACTIVITY);
         setFieldValue(AppProfiler.class, profiler, "mProfilerLock", new Object());
         doReturn(new ActivityManagerService.ProcessChangeItem()).when(pr)
                 .enqueueProcessChangeItemLocked(anyInt(), anyInt());

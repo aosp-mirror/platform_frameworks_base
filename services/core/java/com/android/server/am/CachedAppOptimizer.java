@@ -1488,11 +1488,12 @@ public final class CachedAppOptimizer {
         public long mOrigAnonRss;
         public int mProcState;
         public int mOomAdj;
-        public String mOomAdjReason;
+        public @OomAdjuster.OomAdjReason int mOomAdjReason;
 
         SingleCompactionStats(long[] rss, CompactSource source, String processName,
                 long deltaAnonRss, long zramConsumed, long anonMemFreed, long origAnonRss,
-                long cpuTimeMillis, int procState, int oomAdj, String oomAdjReason) {
+                long cpuTimeMillis, int procState, int oomAdj,
+                @OomAdjuster.OomAdjReason int oomAdjReason) {
             mRssAfterCompaction = rss;
             mSourceType = source;
             mProcessName = processName;
@@ -1521,7 +1522,7 @@ public final class CachedAppOptimizer {
             pw.println("    (" + mProcessName + "," + mSourceType.name() + "," + mDeltaAnonRssKBs
                     + "," + mZramConsumedKBs + "," + mAnonMemFreedKBs + "," + getCompactEfficiency()
                     + "," + getCompactCost() + "," + mProcState + "," + mOomAdj + ","
-                    + mOomAdjReason + ")");
+                    + OomAdjuster.oomAdjReasonToString(mOomAdjReason) + ")");
         }
     }
 
@@ -1693,7 +1694,7 @@ public final class CachedAppOptimizer {
                     boolean forceCompaction;
                     CompactSource compactSource;
                     CompactProfile requestedProfile;
-                    String oomAdjReason;
+                    int oomAdjReason;
                     synchronized (mProcLock) {
                         if (mPendingCompactionProcesses.isEmpty()) {
                             if (DEBUG_COMPACTION) {
