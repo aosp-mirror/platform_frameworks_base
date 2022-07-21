@@ -68,6 +68,7 @@ import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 
 import java.io.PrintWriter;
@@ -136,6 +137,15 @@ final class LetterboxUiController {
     void getLetterboxInnerBounds(Rect outBounds) {
         if (mLetterbox != null) {
             outBounds.set(mLetterbox.getInnerFrame());
+        } else {
+            outBounds.setEmpty();
+        }
+    }
+
+    /** Gets the outer bounds of letterbox. The bounds will be empty if there is no letterbox. */
+    private void getLetterboxOuterBounds(Rect outBounds) {
+        if (mLetterbox != null) {
+            outBounds.set(mLetterbox.getOuterFrame());
         } else {
             outBounds.setEmpty();
         }
@@ -682,5 +692,27 @@ final class LetterboxUiController {
     private void logLetterboxPositionChange(int letterboxPositionChange) {
         mActivityRecord.mTaskSupervisor.getActivityMetricsLogger()
                 .logLetterboxPositionChange(mActivityRecord, letterboxPositionChange);
+    }
+
+    @Nullable
+    LetterboxDetails getLetterboxDetails() {
+        final WindowState w = mActivityRecord.findMainWindow();
+        if (mLetterbox == null || w == null || w.isLetterboxedForDisplayCutout()) {
+            return null;
+        }
+        Rect letterboxInnerBounds = new Rect();
+        Rect letterboxOuterBounds = new Rect();
+        getLetterboxInnerBounds(letterboxInnerBounds);
+        getLetterboxOuterBounds(letterboxOuterBounds);
+
+        if (letterboxInnerBounds.isEmpty() || letterboxOuterBounds.isEmpty()) {
+            return null;
+        }
+
+        return new LetterboxDetails(
+                letterboxInnerBounds,
+                letterboxOuterBounds,
+                w.mAttrs.insetsFlags.appearance
+        );
     }
 }
