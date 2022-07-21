@@ -22,6 +22,8 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Nastavení"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Aktivovat rozdělenou obrazovku"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Nabídka"</string>
+    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
+    <skip />
     <string name="pip_notification_title" msgid="1347104727641353453">"Aplikace <xliff:g id="NAME">%s</xliff:g> je v režimu obraz v obraze"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Pokud nechcete, aby aplikace <xliff:g id="NAME">%s</xliff:g> tuto funkci používala, klepnutím otevřete nastavení a funkci vypněte."</string>
     <string name="pip_play" msgid="3496151081459417097">"Přehrát"</string>
@@ -36,6 +38,8 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikace na sekundárním displeji nemusí fungovat."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikace nepodporuje spuštění na sekundárních displejích."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Čára rozdělující obrazovku"</string>
+    <!-- no translation found for divider_title (5482989479865361192) -->
+    <skip />
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Levá část na celou obrazovku"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"70 % vlevo"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"50 % vlevo"</string>

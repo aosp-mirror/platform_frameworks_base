@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Ρυθμίσεις"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Μετάβαση σε διαχωρισμό οθόνης"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Μενού"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Μενού λειτουργίας Picture-in-Picture"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"Η λειτουργία picture-in-picture είναι ενεργή σε <xliff:g id="NAME">%s</xliff:g>."</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Εάν δεν θέλετε να χρησιμοποιείται αυτή η λειτουργία από την εφαρμογή <xliff:g id="NAME">%s</xliff:g>, πατήστε για να ανοίξετε τις ρυθμίσεις και απενεργοποιήστε την."</string>
     <string name="pip_play" msgid="3496151081459417097">"Αναπαραγωγή"</string>
@@ -36,6 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Η εφαρμογή ίσως να μην λειτουργήσει σε δευτερεύουσα οθόνη."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Η εφαρμογή δεν υποστηρίζει την εκκίνηση σε δευτερεύουσες οθόνες."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Διαχωριστικό οθόνης"</string>
+    <string name="divider_title" msgid="5482989479865361192">"Διαχωριστικό οθόνης"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Αριστερή πλήρης οθόνη"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Αριστερή 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Αριστερή 50%"</string>

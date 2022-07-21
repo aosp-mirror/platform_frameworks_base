@@ -22,6 +22,8 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Innstillinger"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Aktivér delt skjerm"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Meny"</string>
+    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
+    <skip />
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> er i bilde-i-bilde"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Hvis du ikke vil at <xliff:g id="NAME">%s</xliff:g> skal bruke denne funksjonen, kan du trykke for å åpne innstillingene og slå den av."</string>
     <string name="pip_play" msgid="3496151081459417097">"Spill av"</string>
@@ -36,6 +38,8 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Appen fungerer kanskje ikke på en sekundær skjerm."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Appen kan ikke kjøres på sekundære skjermer."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Skilleelement for delt skjerm"</string>
+    <!-- no translation found for divider_title (5482989479865361192) -->
+    <skip />
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Utvid den venstre delen av skjermen til hele skjermen"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Sett størrelsen på den venstre delen av skjermen til 70 %"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Sett størrelsen på den venstre delen av skjermen til 50 %"</string>

@@ -22,6 +22,8 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Налаштування"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Розділити екран"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Меню"</string>
+    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
+    <skip />
     <string name="pip_notification_title" msgid="1347104727641353453">"У додатку <xliff:g id="NAME">%s</xliff:g> є функція \"Картинка в картинці\""</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Щоб додаток <xliff:g id="NAME">%s</xliff:g> не використовував цю функцію, вимкніть її в налаштуваннях."</string>
     <string name="pip_play" msgid="3496151081459417097">"Відтворити"</string>
@@ -36,6 +38,8 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Додаток може не працювати на додатковому екрані."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Додаток не підтримує запуск на додаткових екранах."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Розділювач екрана"</string>
+    <!-- no translation found for divider_title (5482989479865361192) -->
+    <skip />
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Ліве вікно на весь екран"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Ліве вікно на 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Ліве вікно на 50%"</string>

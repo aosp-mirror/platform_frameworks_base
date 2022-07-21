@@ -22,6 +22,8 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"設定"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"分割画面に切り替え"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"メニュー"</string>
+    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
+    <skip />
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g>はピクチャー イン ピクチャーで表示中です"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g>でこの機能を使用しない場合は、タップして設定を開いて OFF にしてください。"</string>
     <string name="pip_play" msgid="3496151081459417097">"再生"</string>
@@ -36,6 +38,8 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"アプリはセカンダリ ディスプレイでは動作しないことがあります。"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"アプリはセカンダリ ディスプレイでの起動に対応していません。"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"分割画面の分割線"</string>
+    <!-- no translation found for divider_title (5482989479865361192) -->
+    <skip />
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"左全画面"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"左 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"左 50%"</string>
