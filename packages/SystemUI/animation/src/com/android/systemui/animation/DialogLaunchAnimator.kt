@@ -515,11 +515,20 @@ private class AnimatedDialog(
         dialogContentWithBackground.setTransitionVisibility(View.INVISIBLE)
 
         // Make sure the dialog is visible instantly and does not do any window animation.
-        window.attributes.windowAnimations = R.style.Animation_LaunchAnimation
+        val attributes = window.attributes
+        attributes.windowAnimations = R.style.Animation_LaunchAnimation
 
         // Ensure that the animation is not clipped by the display cut-out when animating this
         // dialog into an app.
-        window.attributes.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        attributes.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+
+        // Ensure that the animation is not clipped by the navigation/task bars when animating this
+        // dialog into an app.
+        val wasFittingNavigationBars =
+            attributes.fitInsetsTypes and WindowInsets.Type.navigationBars() != 0
+        attributes.fitInsetsTypes =
+            attributes.fitInsetsTypes and WindowInsets.Type.navigationBars().inv()
+
         window.attributes = window.attributes
 
         // We apply the insets ourselves to make sure that the paddings are set on the correct
@@ -527,7 +536,13 @@ private class AnimatedDialog(
         window.setDecorFitsSystemWindows(false)
         val viewWithInsets = (dialogContentWithBackground.parent as ViewGroup)
         viewWithInsets.setOnApplyWindowInsetsListener { view, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsets.Type.displayCutout())
+            val type = if (wasFittingNavigationBars) {
+                WindowInsets.Type.displayCutout() or WindowInsets.Type.navigationBars()
+            } else {
+                WindowInsets.Type.displayCutout()
+            }
+
+            val insets = windowInsets.getInsets(type)
             view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
             WindowInsets.CONSUMED
         }
