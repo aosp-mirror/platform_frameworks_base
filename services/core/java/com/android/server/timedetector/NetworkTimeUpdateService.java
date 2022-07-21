@@ -51,6 +51,7 @@ import com.android.server.LocalServices;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.time.Duration;
+import java.util.Objects;
 
 /**
  * Monitors the network time. If looking up the network time fails for some reason, it tries a few
@@ -74,8 +75,6 @@ public class NetworkTimeUpdateService extends Binder {
 
     private static final int POLL_REQUEST = 0;
 
-    private Network mDefaultNetwork = null;
-
     private final Context mContext;
     private final NtpTrustedTime mTime;
     private final AlarmManager mAlarmManager;
@@ -84,21 +83,12 @@ public class NetworkTimeUpdateService extends Binder {
     private final PendingIntent mPendingPollIntent;
     private final PowerManager.WakeLock mWakeLock;
 
-    // NTP lookup is done on this thread and handler
-    private Handler mHandler;
-    private AutoTimeSettingObserver mAutoTimeSettingObserver;
-    private NetworkTimeUpdateCallback mNetworkTimeUpdateCallback;
-
     // Normal polling frequency
     private final long mPollingIntervalMs;
     // Try-again polling interval, in case the network request failed
     private final long mPollingIntervalShorterMs;
     // Number of times to try again
     private final int mTryAgainTimesMax;
-    // Keeps track of how many quick attempts were made to fetch NTP time.
-    // During bootup, the network may not have been up yet, or it's taking time for the
-    // connection to happen.
-    private int mTryAgainCounter;
 
     /**
      * A log that records the decisions to fetch a network time update.
@@ -107,8 +97,26 @@ public class NetworkTimeUpdateService extends Binder {
     @NonNull
     private final LocalLog mLocalLog = new LocalLog(30, false /* useLocalTimestamps */);
 
-    public NetworkTimeUpdateService(Context context) {
-        mContext = context;
+    // NTP lookup is done on this thread and handler
+    // @NonNull after systemRunning()
+    private Handler mHandler;
+    // @NonNull after systemRunning()
+    private AutoTimeSettingObserver mAutoTimeSettingObserver;
+    // @NonNull after systemRunning()
+    private NetworkTimeUpdateCallback mNetworkTimeUpdateCallback;
+
+    // This field is only updated and accessed by the mHandler thread (except dump()).
+    @Nullable
+    private Network mDefaultNetwork = null;
+
+    // Keeps track of how many quick attempts were made to fetch NTP time.
+    // During bootup, the network may not have been up yet, or it's taking time for the
+    // connection to happen.
+    // This field is only updated and accessed by the mHandler thread (except dump()).
+    private int mTryAgainCounter;
+
+    public NetworkTimeUpdateService(@NonNull Context context) {
+        mContext = Objects.requireNonNull(context);
         mTime = NtpTrustedTime.getInstance(context);
         mAlarmManager = mContext.getSystemService(AlarmManager.class);
         mTimeDetectorInternal = LocalServices.getService(TimeDetectorInternal.class);
@@ -205,23 +213,26 @@ public class NetworkTimeUpdateService extends Binder {
 
     private void onPollNetworkTime(int event) {
         // If we don't have any default network, don't bother.
-        if (mDefaultNetwork == null) return;
+        Network network = mDefaultNetwork;
+        if (network == null) return;
+
         mWakeLock.acquire();
         try {
-            onPollNetworkTimeUnderWakeLock(event);
+            onPollNetworkTimeUnderWakeLock(network, event);
         } finally {
             mWakeLock.release();
         }
     }
 
-    private void onPollNetworkTimeUnderWakeLock(int event) {
+    private void onPollNetworkTimeUnderWakeLock(@NonNull Network network, int event) {
         long currentElapsedRealtimeMillis = SystemClock.elapsedRealtime();
+
         // Force an NTP fix when outdated
         NtpTrustedTime.TimeResult cachedNtpResult = mTime.getCachedTimeResult();
         if (cachedNtpResult == null || cachedNtpResult.getAgeMillis(currentElapsedRealtimeMillis)
                 >= mPollingIntervalMs) {
-            if (DBG) Log.d(TAG, "Stale NTP fix; forcing refresh");
-            boolean isSuccessful = mTime.forceRefresh();
+            if (DBG) Log.d(TAG, "Stale NTP fix; forcing refresh using network=" + network);
+            boolean isSuccessful = mTime.forceRefresh(network);
             if (isSuccessful) {
                 mTryAgainCounter = 0;
             } else {
@@ -265,7 +276,8 @@ public class NetworkTimeUpdateService extends Binder {
     }
 
     /** Suggests the time to the time detector. It may choose use it to set the system clock. */
-    private void makeNetworkTimeSuggestion(TimeResult ntpResult, String debugInfo) {
+    private void makeNetworkTimeSuggestion(
+            @NonNull TimeResult ntpResult, @NonNull String debugInfo) {
         TimestampedValue<Long> timeSignal = new TimestampedValue<>(
                 ntpResult.getElapsedRealtimeMillis(), ntpResult.getTimeMillis());
         NetworkTimeSuggestion timeSuggestion =
@@ -295,7 +307,7 @@ public class NetworkTimeUpdateService extends Binder {
         }
 
         @Override
-        public void handleMessage(Message msg) {
+        public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
                 case EVENT_AUTO_TIME_ENABLED:
                 case EVENT_POLL_NETWORK_TIME:
@@ -308,7 +320,7 @@ public class NetworkTimeUpdateService extends Binder {
 
     private class NetworkTimeUpdateCallback extends NetworkCallback {
         @Override
-        public void onAvailable(Network network) {
+        public void onAvailable(@NonNull Network network) {
             Log.d(TAG, String.format("New default network %s; checking time.", network));
             mDefaultNetwork = network;
             // Running on mHandler so invoke directly.
@@ -316,7 +328,7 @@ public class NetworkTimeUpdateService extends Binder {
         }
 
         @Override
-        public void onLost(Network network) {
+        public void onLost(@NonNull Network network) {
             if (network.equals(mDefaultNetwork)) mDefaultNetwork = null;
         }
     }
@@ -331,10 +343,10 @@ public class NetworkTimeUpdateService extends Binder {
         private final int mMsg;
         private final Handler mHandler;
 
-        AutoTimeSettingObserver(Context context, Handler handler, int msg) {
+        AutoTimeSettingObserver(@NonNull Context context, @NonNull Handler handler, int msg) {
             super(handler);
-            mContext = context;
-            mHandler = handler;
+            mContext = Objects.requireNonNull(context);
+            mHandler = Objects.requireNonNull(handler);
             mMsg = msg;
         }
 
@@ -366,6 +378,7 @@ public class NetworkTimeUpdateService extends Binder {
         pw.println("mPollingIntervalMs=" + Duration.ofMillis(mPollingIntervalMs));
         pw.println("mPollingIntervalShorterMs=" + Duration.ofMillis(mPollingIntervalShorterMs));
         pw.println("mTryAgainTimesMax=" + mTryAgainTimesMax);
+        pw.println("mDefaultNetwork=" + mDefaultNetwork);
         pw.println("mTryAgainCounter=" + mTryAgainCounter);
         pw.println();
         pw.println("NtpTrustedTime:");
