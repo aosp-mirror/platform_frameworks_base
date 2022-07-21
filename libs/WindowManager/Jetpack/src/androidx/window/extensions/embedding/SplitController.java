@@ -18,6 +18,8 @@ package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 
 import static androidx.window.extensions.embedding.SplitContainer.getFinishPrimaryWithSecondaryBehavior;
 import static androidx.window.extensions.embedding.SplitContainer.getFinishSecondaryWithPrimaryBehavior;
@@ -290,6 +292,37 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             mPresenter.applyTransaction(wct);
             // Because the activity does not belong to the organizer process, we wait until
             // onTaskFragmentAppeared to trigger updateCallbackIfNecessary().
+        }
+    }
+
+    @Override
+    public void onTaskFragmentError(@Nullable TaskFragmentInfo taskFragmentInfo, int opType) {
+        synchronized (mLock) {
+            switch (opType) {
+                case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
+                case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT: {
+                    final TaskFragmentContainer container;
+                    if (taskFragmentInfo != null) {
+                        container = getContainer(taskFragmentInfo.getFragmentToken());
+                    } else {
+                        container = null;
+                    }
+                    if (container == null) {
+                        break;
+                    }
+
+                    // Update the latest taskFragmentInfo and perform necessary clean-up
+                    container.setInfo(taskFragmentInfo);
+                    container.clearPendingAppearedActivities();
+                    if (container.isEmpty()) {
+                        mPresenter.cleanupContainer(container, false /* shouldFinishDependent */);
+                    }
+                    break;
+                }
+                default:
+                    Log.e(TAG, "onTaskFragmentError: taskFragmentInfo = " + taskFragmentInfo
+                            + ", opType = " + opType);
+            }
         }
     }
 

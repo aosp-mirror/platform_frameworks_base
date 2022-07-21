@@ -193,6 +193,11 @@ class TaskFragmentContainer {
         mPendingAppearedActivities.remove(pendingAppearedActivity);
     }
 
+    void clearPendingAppearedActivities() {
+        mPendingAppearedActivities.clear();
+        mPendingAppearedIntent = null;
+    }
+
     @Nullable
     Intent getPendingAppearedIntent() {
         return mPendingAppearedIntent;
