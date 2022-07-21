@@ -125,6 +125,7 @@ interface IUserManager {
     boolean isUserUnlocked(int userId);
     boolean isUserRunning(int userId);
     boolean isUserForeground(int userId);
+    boolean isUserVisible(int userId);
     boolean isUserNameSet(int userId);
     boolean hasRestrictedProfiles(int userId);
     boolean requestQuietModeEnabled(String callingPackage, boolean enableQuietMode, int userId, in IntentSender target, int flags);
