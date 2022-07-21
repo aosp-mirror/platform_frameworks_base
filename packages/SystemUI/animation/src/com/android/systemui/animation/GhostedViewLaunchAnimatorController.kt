@@ -49,16 +49,15 @@ private const val TAG = "GhostedViewLaunchAnimatorController"
  * Note: Avoid instantiating this directly and call [ActivityLaunchAnimator.Controller.fromView]
  * whenever possible instead.
  */
-open class GhostedViewLaunchAnimatorController(
+open class GhostedViewLaunchAnimatorController @JvmOverloads constructor(
     /** The view that will be ghosted and from which the background will be extracted. */
     private val ghostedView: View,
 
     /** The [InteractionJankMonitor.CujType] associated to this animation. */
     private val cujType: Int? = null,
-    private var interactionJankMonitor: InteractionJankMonitor? = null
+    private var interactionJankMonitor: InteractionJankMonitor =
+        InteractionJankMonitor.getInstance(),
 ) : ActivityLaunchAnimator.Controller {
-
-    constructor(view: View, type: Int) : this(view, type, null)
 
     /** The container to which we will add the ghost view and expanding background. */
     override var launchContainer = ghostedView.rootView as ViewGroup
@@ -203,7 +202,7 @@ open class GhostedViewLaunchAnimatorController(
         val matrix = ghostView?.animationMatrix ?: Matrix.IDENTITY_MATRIX
         matrix.getValues(initialGhostViewMatrixValues)
 
-        cujType?.let { interactionJankMonitor?.begin(ghostedView, it) }
+        cujType?.let { interactionJankMonitor.begin(ghostedView, it) }
     }
 
     override fun onLaunchAnimationProgress(
@@ -289,7 +288,7 @@ open class GhostedViewLaunchAnimatorController(
             return
         }
 
-        cujType?.let { interactionJankMonitor?.end(it) }
+        cujType?.let { interactionJankMonitor.end(it) }
 
         backgroundDrawable?.wrapped?.alpha = startBackgroundAlpha
 
