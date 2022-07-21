@@ -48,6 +48,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.json.JSONArray;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -84,6 +85,11 @@ public class JSScriptEnginePerfTests {
         // Warm up the sandbox env.
         callJSEngine(
                 "function test() { return \"hello world\";" + " }", ImmutableList.of(), "test");
+    }
+
+    @After
+    public void after() {
+        sJSScriptEngine.shutdown();
     }
 
     @Test
