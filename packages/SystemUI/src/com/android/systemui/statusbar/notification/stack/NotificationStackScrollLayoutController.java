@@ -333,6 +333,13 @@ public class NotificationStackScrollLayoutController {
     };
 
     /**
+     * Recalculate sensitiveness without animation; called when waking up while keyguard occluded.
+     */
+    public void updateSensitivenessForOccludedWakeup() {
+        mView.updateSensitiveness(false, mLockscreenUserManager.isAnyProfilePublicMode());
+    }
+
+    /**
      * Set the overexpansion of the panel to be applied to the view.
      */
     public void setOverExpansion(float overExpansion) {
