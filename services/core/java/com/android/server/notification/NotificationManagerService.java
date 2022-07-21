@@ -2460,11 +2460,11 @@ public class NotificationManagerService extends SystemService {
         SnoozeHelper snoozeHelper = new SnoozeHelper(getContext(), (userId, r, muteOnReturn) -> {
             try {
                 if (DBG) {
-                    Slog.d(TAG, "Reposting " + r.getKey());
+                    Slog.d(TAG, "Reposting " + r.getKey() + " " + muteOnReturn);
                 }
                 enqueueNotificationInternal(r.getSbn().getPackageName(), r.getSbn().getOpPkg(),
                         r.getSbn().getUid(), r.getSbn().getInitialPid(), r.getSbn().getTag(),
-                        r.getSbn().getId(),  r.getSbn().getNotification(), userId, true);
+                        r.getSbn().getId(),  r.getSbn().getNotification(), userId, muteOnReturn);
             } catch (Exception e) {
                 Slog.e(TAG, "Cannot un-snooze notification", e);
             }
