@@ -3341,7 +3341,7 @@ public class Vpn {
 
                 // TODO(b/230548427): Remove SDK check once VPN related stuff are
                 //  decoupled from ConnectivityServiceTest.
-                if (SdkLevel.isAtLeastT() && category != null) {
+                if (SdkLevel.isAtLeastT() && category != null && isVpnApp(mPackage)) {
                     sendEventToVpnManagerApp(category, errorClass, errorCode,
                             getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                             mActiveNetwork,
