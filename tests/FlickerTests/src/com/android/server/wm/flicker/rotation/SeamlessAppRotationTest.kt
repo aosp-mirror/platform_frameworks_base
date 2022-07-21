@@ -164,14 +164,17 @@ open class SeamlessAppRotationTest(
     }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. App is full screen")
     override fun statusBarLayerPositionAtStartAndEnd() { }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. App is full screen")
     override fun statusBarLayerIsVisibleAtStartAndEnd() { }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. App is full screen")
     override fun statusBarWindowIsAlwaysVisible() { }
 

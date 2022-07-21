@@ -193,18 +193,22 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
     override fun navBarLayerIsVisibleAtStartAndEnd() { }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
     override fun navBarLayerPositionAtStartAndEnd() { }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
     override fun statusBarLayerPositionAtStartAndEnd() { }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
     override fun statusBarLayerIsVisibleAtStartAndEnd() { }
 
