@@ -84,9 +84,6 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
      */
     private static final int KEEP_SUGGESTION_HISTORY_SIZE = 10;
 
-    /** The value in Unix epoch milliseconds of the Y2038 issue. */
-    private static final long Y2038_LIMIT_IN_MILLIS = 1000L * Integer.MAX_VALUE;
-
     /**
      * A log that records the decisions / decision metadata that affected the device's system clock
      * time. This is logged in bug reports to assist with debugging issues with detection.
@@ -248,7 +245,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
         final TimestampedValue<Long> newUnixEpochTime = suggestion.getUnixEpochTime();
 
-        if (!validateSuggestionTime(newUnixEpochTime, suggestion)) {
+        if (!validateManualSuggestionTime(newUnixEpochTime, suggestion)) {
             return false;
         }
 
@@ -424,7 +421,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @GuardedBy("this")
-    private boolean validateSuggestionTime(
+    private boolean validateSuggestionCommon(
             @NonNull TimestampedValue<Long> newUnixEpochTime, @NonNull Object suggestion) {
         if (newUnixEpochTime.getValue() == null) {
             Slog.w(LOG_TAG, "Suggested time value is null. suggestion=" + suggestion);
@@ -441,8 +438,8 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             return false;
         }
 
-        if (newUnixEpochTime.getValue() > Y2038_LIMIT_IN_MILLIS
-                && mCurrentConfigurationInternal.getDeviceHasY2038Issue()) {
+        if (newUnixEpochTime.getValue()
+                > mCurrentConfigurationInternal.getSuggestionUpperBound().toEpochMilli()) {
             // This check won't prevent a device's system clock exceeding Integer.MAX_VALUE Unix
             // seconds through the normal passage of time, but it will stop it jumping above 2038
             // because of a "bad" suggestion. b/204193177
@@ -453,20 +450,40 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         return true;
     }
 
+    /**
+     * Returns {@code true} if an automatic time suggestion time is valid.
+     * See also {@link #validateManualSuggestionTime(TimestampedValue, Object)}.
+     */
     @GuardedBy("this")
     private boolean validateAutoSuggestionTime(
             @NonNull TimestampedValue<Long> newUnixEpochTime, @NonNull Object suggestion)  {
-        return validateSuggestionTime(newUnixEpochTime, suggestion)
-                && validateSuggestionAgainstLowerBound(newUnixEpochTime, suggestion);
+        Instant lowerBound = mCurrentConfigurationInternal.getAutoSuggestionLowerBound();
+        return validateSuggestionCommon(newUnixEpochTime, suggestion)
+                && validateSuggestionAgainstLowerBound(newUnixEpochTime, suggestion,
+                lowerBound);
+    }
+
+    /**
+     * Returns {@code true} if a manual time suggestion time is valid.
+     * See also {@link #validateAutoSuggestionTime(TimestampedValue, Object)}.
+     */
+    @GuardedBy("this")
+    private boolean validateManualSuggestionTime(
+            @NonNull TimestampedValue<Long> newUnixEpochTime, @NonNull Object suggestion)  {
+        Instant lowerBound = mCurrentConfigurationInternal.getManualSuggestionLowerBound();
+
+        // Suggestion is definitely wrong if it comes before lower time bound.
+        return validateSuggestionCommon(newUnixEpochTime, suggestion)
+                && validateSuggestionAgainstLowerBound(newUnixEpochTime, suggestion, lowerBound);
     }
 
     @GuardedBy("this")
     private boolean validateSuggestionAgainstLowerBound(
-            @NonNull TimestampedValue<Long> newUnixEpochTime, @NonNull Object suggestion) {
-        Instant lowerBound = mCurrentConfigurationInternal.getAutoTimeLowerBound();
+            @NonNull TimestampedValue<Long> newUnixEpochTime, @NonNull Object suggestion,
+            @NonNull Instant lowerBound) {
 
         // Suggestion is definitely wrong if it comes before lower time bound.
-        if (lowerBound.isAfter(Instant.ofEpochMilli(newUnixEpochTime.getValue()))) {
+        if (lowerBound.toEpochMilli() > newUnixEpochTime.getValue()) {
             Slog.w(LOG_TAG, "Suggestion points to time before lower bound, skipping it. "
                     + "suggestion=" + suggestion + ", lower bound=" + lowerBound);
             return false;
