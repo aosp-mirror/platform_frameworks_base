@@ -28,6 +28,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.BinderThread;
 
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -47,10 +48,15 @@ public class DisplayChangeController {
     private final CopyOnWriteArrayList<OnDisplayChangingListener> mDisplayChangeListener =
             new CopyOnWriteArrayList<>();
 
-    public DisplayChangeController(IWindowManager wmService, ShellExecutor mainExecutor) {
+    public DisplayChangeController(IWindowManager wmService, ShellInit shellInit,
+            ShellExecutor mainExecutor) {
         mMainExecutor = mainExecutor;
         mWmService = wmService;
         mControllerImpl = new DisplayChangeWindowControllerImpl();
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    private void onInit() {
         try {
             mWmService.setDisplayChangeWindowController(mControllerImpl);
         } catch (RemoteException e) {

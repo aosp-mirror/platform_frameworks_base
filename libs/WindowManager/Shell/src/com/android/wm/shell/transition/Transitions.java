@@ -59,13 +59,13 @@ import androidx.annotation.BinderThread;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -111,6 +111,7 @@ public class Transitions implements RemoteCallable<Transitions> {
     private final ShellExecutor mMainExecutor;
     private final ShellExecutor mAnimExecutor;
     private final TransitionPlayerImpl mPlayerImpl;
+    private final DefaultTransitionHandler mDefaultTransitionHandler;
     private final RemoteTransitionHandler mRemoteTransitionHandler;
     private final DisplayController mDisplayController;
     private final ShellTransitionImpl mImpl = new ShellTransitionImpl();
@@ -136,8 +137,11 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** Keeps track of currently playing transitions in the order of receipt. */
     private final ArrayList<ActiveTransition> mActiveTransitions = new ArrayList<>();
 
-    public Transitions(@NonNull WindowOrganizer organizer, @NonNull TransactionPool pool,
-            @NonNull DisplayController displayController, @NonNull Context context,
+    public Transitions(@NonNull Context context,
+            @NonNull ShellInit shellInit,
+            @NonNull WindowOrganizer organizer,
+            @NonNull TransactionPool pool,
+            @NonNull DisplayController displayController,
             @NonNull ShellExecutor mainExecutor, @NonNull Handler mainHandler,
             @NonNull ShellExecutor animExecutor) {
         mOrganizer = organizer;
@@ -146,33 +150,35 @@ public class Transitions implements RemoteCallable<Transitions> {
         mAnimExecutor = animExecutor;
         mDisplayController = displayController;
         mPlayerImpl = new TransitionPlayerImpl();
+        mDefaultTransitionHandler = new DefaultTransitionHandler(context, shellInit,
+                displayController, pool, mainExecutor, mainHandler, animExecutor);
+        mRemoteTransitionHandler = new RemoteTransitionHandler(mMainExecutor);
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    private void onInit() {
         // The very last handler (0 in the list) should be the default one.
-        mHandlers.add(new DefaultTransitionHandler(displayController, pool, context, mainExecutor,
-                mainHandler, animExecutor));
+        mHandlers.add(mDefaultTransitionHandler);
         // Next lowest priority is remote transitions.
-        mRemoteTransitionHandler = new RemoteTransitionHandler(mainExecutor);
         mHandlers.add(mRemoteTransitionHandler);
 
-        ContentResolver resolver = context.getContentResolver();
+        ContentResolver resolver = mContext.getContentResolver();
         mTransitionAnimationScaleSetting = Settings.Global.getFloat(resolver,
                 Settings.Global.TRANSITION_ANIMATION_SCALE,
-                context.getResources().getFloat(
+                mContext.getResources().getFloat(
                         R.dimen.config_appTransitionAnimationDurationScaleDefault));
         dispatchAnimScaleSetting(mTransitionAnimationScaleSetting);
 
         resolver.registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.TRANSITION_ANIMATION_SCALE), false,
                 new SettingsObserver());
-    }
 
-    private Transitions() {
-        mOrganizer = null;
-        mContext = null;
-        mMainExecutor = null;
-        mAnimExecutor = null;
-        mDisplayController = null;
-        mPlayerImpl = null;
-        mRemoteTransitionHandler = null;
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            // Register this transition handler with Core
+            mOrganizer.registerTransitionPlayer(mPlayerImpl);
+            // Pre-load the instance.
+            TransitionMetrics.getInstance();
+        }
     }
 
     public ShellTransitions asRemoteTransitions() {
@@ -193,14 +199,6 @@ public class Transitions implements RemoteCallable<Transitions> {
         for (int i = mHandlers.size() - 1; i >= 0; --i) {
             mHandlers.get(i).setAnimScaleSetting(scale);
         }
-    }
-
-    /** Register this transition handler with Core */
-    public void register(ShellTaskOrganizer taskOrganizer) {
-        if (mPlayerImpl == null) return;
-        taskOrganizer.registerTransitionPlayer(mPlayerImpl);
-        // Pre-load the instance.
-        TransitionMetrics.getInstance();
     }
 
     /**

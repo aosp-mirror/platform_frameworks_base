@@ -36,11 +36,11 @@ import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
-import android.content.Context;
 import android.content.LocusId;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
@@ -58,9 +58,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.compatui.CompatUIController;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -84,13 +83,11 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
     @Mock
     private ITaskOrganizerController mTaskOrganizerController;
     @Mock
-    private Context mContext;
-    @Mock
     private CompatUIController mCompatUI;
+    @Mock
+    private ShellInit mShellInit;
 
     ShellTaskOrganizer mOrganizer;
-    private final SyncTransactionQueue mSyncTransactionQueue = mock(SyncTransactionQueue.class);
-    private final TransactionPool mTransactionPool = mock(TransactionPool.class);
     private final ShellExecutor mTestExecutor = mock(ShellExecutor.class);
 
     private class TrackingTaskListener implements ShellTaskOrganizer.TaskListener {
@@ -135,8 +132,13 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
             doReturn(ParceledListSlice.<TaskAppearedInfo>emptyList())
                     .when(mTaskOrganizerController).registerTaskOrganizer(any());
         } catch (RemoteException e) {}
-        mOrganizer = spy(new ShellTaskOrganizer(mTaskOrganizerController, mTestExecutor, mContext,
-                mCompatUI, Optional.empty(), Optional.empty()));
+        mOrganizer = spy(new ShellTaskOrganizer(mShellInit, mTaskOrganizerController,
+                mCompatUI, Optional.empty(), Optional.empty(), mTestExecutor));
+    }
+
+    @Test
+    public void instantiate_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
     }
 
     @Test

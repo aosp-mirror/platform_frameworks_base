@@ -32,6 +32,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
@@ -49,17 +50,26 @@ public class FreeformTaskTransitionHandler
 
     private final Transitions mTransitions;
     private final FreeformTaskListener<?> mFreeformTaskListener;
+    private final WindowDecorViewModel<?> mWindowDecorViewModel;
 
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
 
     public FreeformTaskTransitionHandler(
+            ShellInit shellInit,
             Transitions transitions,
             WindowDecorViewModel<?> windowDecorViewModel,
             FreeformTaskListener<?> freeformTaskListener) {
         mTransitions = transitions;
         mFreeformTaskListener = freeformTaskListener;
+        mWindowDecorViewModel = windowDecorViewModel;
+        if (shellInit != null && Transitions.ENABLE_SHELL_TRANSITIONS) {
+            shellInit.addInitCallback(this::onInit, this);
+        }
+    }
 
-        windowDecorViewModel.setFreeformTaskTransitionStarter(this);
+    private void onInit() {
+        mWindowDecorViewModel.setFreeformTaskTransitionStarter(this);
+        mTransitions.addHandler(this);
     }
 
     @Override
