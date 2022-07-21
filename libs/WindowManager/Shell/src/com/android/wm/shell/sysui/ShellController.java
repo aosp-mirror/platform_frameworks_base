@@ -47,6 +47,9 @@ public class ShellController {
     private final ShellExecutor mMainExecutor;
     private final ShellInterfaceImpl mImpl = new ShellInterfaceImpl();
 
+    private ShellInit mShellInit;
+    private ShellCommandHandler mShellCommandHandler;
+
     private final CopyOnWriteArrayList<ConfigurationChangeListener> mConfigChangeListeners =
             new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<KeyguardChangeListener> mKeyguardChangeListeners =
@@ -63,6 +66,24 @@ public class ShellController {
      */
     public ShellInterface asShell() {
         return mImpl;
+    }
+
+    /**
+     * Sets the init handler to call back to.
+     * TODO(238217847): This is only exposed this way until we can remove the dependencies from the
+     *                  init handler to other classes.
+     */
+    public void setShellInit(ShellInit shellInit) {
+        mShellInit = shellInit;
+    }
+
+    /**
+     * Sets the command handler to call back to.
+     * TODO(238217847): This is only exposed this way until we can remove the dependencies from the
+     *                  command handler to other classes.
+     */
+    public void setShellCommandHandler(ShellCommandHandler shellCommandHandler) {
+        mShellCommandHandler = shellCommandHandler;
     }
 
     /**
@@ -164,6 +185,38 @@ public class ShellController {
      */
     @ExternalThread
     private class ShellInterfaceImpl implements ShellInterface {
+
+        @Override
+        public void onInit() {
+            try {
+                mMainExecutor.executeBlocking(() -> mShellInit.init());
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Failed to initialize the Shell in 2s", e);
+            }
+        }
+
+        @Override
+        public void dump(PrintWriter pw) {
+            try {
+                mMainExecutor.executeBlocking(() -> mShellCommandHandler.dump(pw));
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Failed to dump the Shell in 2s", e);
+            }
+        }
+
+        @Override
+        public boolean handleCommand(String[] args, PrintWriter pw) {
+            try {
+                boolean[] result = new boolean[1];
+                mMainExecutor.executeBlocking(() -> {
+                    result[0] = mShellCommandHandler.handleCommand(args, pw);
+                });
+                return result[0];
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Failed to handle Shell command in 2s", e);
+            }
+        }
+
         @Override
         public void onConfigurationChanged(Configuration newConfiguration) {
             mMainExecutor.execute(() ->
