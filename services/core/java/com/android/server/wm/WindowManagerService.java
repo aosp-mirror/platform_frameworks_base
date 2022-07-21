@@ -5780,7 +5780,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
                 if (displayContent != null) {
                     displayContent.setForcedSize(displayContent.mInitialDisplayWidth,
-                            displayContent.mInitialDisplayHeight);
+                            displayContent.mInitialDisplayHeight,
+                            displayContent.mInitialPhysicalXDpi,
+                            displayContent.mInitialPhysicalXDpi);
                 }
             }
         } finally {
