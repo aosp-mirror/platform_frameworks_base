@@ -63,6 +63,9 @@ public class Flags {
     public static final BooleanFlag REMOVE_UNRANKED_NOTIFICATIONS =
             new BooleanFlag(109, false);
 
+    public static final BooleanFlag FSI_REQUIRES_KEYGUARD =
+            new BooleanFlag(110, false, true);
+
     /***************************************/
     // 200 - keyguard/lockscreen
 

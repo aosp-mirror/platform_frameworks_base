@@ -59,4 +59,7 @@ class NotifPipelineFlags @Inject constructor(
 
     fun removeUnrankedNotifs(): Boolean =
         featureFlags.isEnabled(Flags.REMOVE_UNRANKED_NOTIFICATIONS)
+
+    fun fullScreenIntentRequiresKeyguard(): Boolean =
+        featureFlags.isEnabled(Flags.FSI_REQUIRES_KEYGUARD)
 }
