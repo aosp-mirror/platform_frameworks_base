@@ -27,6 +27,8 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static junit.framework.Assert.assertEquals;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -1722,5 +1724,25 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(activeSourceFromTv);
+    }
+
+    @Test
+    public void newDeviceConnectedIfOnlyOneGiveOsdNameSent() {
+        mHdmiControlService.getHdmiCecNetwork().clearDeviceList();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .isEmpty();
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                ADDR_PLAYBACK_2, 0x1000, HdmiDeviceInfo.DEVICE_PLAYBACK);
+        HdmiCecMessage giveOsdName = HdmiCecMessageBuilder.buildGiveOsdNameCommand(
+                ADDR_TV, ADDR_PLAYBACK_2);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        // Wait until HdmiCecNetwork or NewDeviceAction is in progress
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+
+        // TV should only send <Give Osd Name> once
+        assertEquals(1, Collections.frequency(mNativeWrapper.getResultMessages(), giveOsdName));
     }
 }
