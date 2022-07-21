@@ -43,4 +43,9 @@ class RippleViewTest : SysuiTestCase() {
     fun testSetupShader_compilesRoundedBox() {
         rippleView.setupShader(RippleShader.RippleShape.ROUNDED_BOX)
     }
+
+    @Test
+    fun testSetupShader_compilesEllipse() {
+        rippleView.setupShader(RippleShader.RippleShape.ELLIPSE)
+    }
 }

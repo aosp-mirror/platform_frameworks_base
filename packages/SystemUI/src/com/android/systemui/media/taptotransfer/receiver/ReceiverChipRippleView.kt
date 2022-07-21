@@ -25,6 +25,7 @@ import com.android.systemui.ripple.RippleView
  */
 class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleView(context, attrs) {
     init {
+        // TODO: use RippleShape#ELLIPSE when calling setupShader.
         setupShader()
         setRippleFill(true)
         duration = 3000L
