@@ -37,7 +37,7 @@ public class TimeDetectorHelper {
      * See {@link #getManualDateSelectionYearMin()}. Chosen to produce Unix epoch times be greater
      * than {@link #MANUAL_SUGGESTION_LOWER_BOUND}.
      */
-    private static final int MANUAL_SUGGESTION_YEAR_MIN = 2008;
+    private static final int MANUAL_SUGGESTION_YEAR_MIN = 2015;
 
     /**
      * The maximum gregorian calendar year to allow for manual date selection on devices unlikely to
@@ -80,7 +80,7 @@ public class TimeDetectorHelper {
 
     /** See {@link #getManualSuggestionLowerBound()}. */
     private static final Instant MANUAL_SUGGESTION_LOWER_BOUND =
-            Instant.ofEpochMilli(1194220800000L); // Nov 5, 2007, 0:00 UTC
+            Instant.ofEpochMilli(1415491200000L); // Nov 5, 2014, 0:00 UTC
 
     /**
      * The lowest value in Unix epoch milliseconds that is considered a valid automatic suggestion.
