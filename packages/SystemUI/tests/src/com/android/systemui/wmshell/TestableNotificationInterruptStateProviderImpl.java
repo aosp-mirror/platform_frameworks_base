@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 public class TestableNotificationInterruptStateProviderImpl
         extends NotificationInterruptStateProviderImpl {
@@ -41,6 +42,7 @@ public class TestableNotificationInterruptStateProviderImpl
             AmbientDisplayConfiguration ambientDisplayConfiguration,
             NotificationFilter filter,
             StatusBarStateController statusBarStateController,
+            KeyguardStateController keyguardStateController,
             BatteryController batteryController,
             HeadsUpManager headsUpManager,
             NotificationInterruptLogger logger,
@@ -54,6 +56,7 @@ public class TestableNotificationInterruptStateProviderImpl
                 filter,
                 batteryController,
                 statusBarStateController,
+                keyguardStateController,
                 headsUpManager,
                 logger,
                 mainHandler,
