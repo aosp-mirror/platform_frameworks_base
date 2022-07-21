@@ -189,7 +189,6 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardClockPositionAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
-import com.android.systemui.statusbar.phone.LargeScreenShadeHeaderController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -1033,6 +1032,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         }
 
         mTapAgainViewController.init();
+        mLargeScreenShadeHeaderController.init();
         mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
         mNotificationPanelUnfoldAnimationController.ifPresent(controller ->
                 controller.setup(mNotificationContainerParent));
@@ -1131,7 +1131,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 SystemBarUtils.getQuickQsOffsetHeight(mView.getContext());
         int topMargin = mUseLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
                 mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_top);
-        mLargeScreenShadeHeaderController.setActive(mUseLargeScreenShadeHeader);
+        mLargeScreenShadeHeaderController.setLargeScreenActive(mUseLargeScreenShadeHeader);
         mAmbientState.setStackTopMargin(topMargin);
         mNotificationsQSContainerController.updateResources();
 
@@ -2405,7 +2405,7 @@ public final class NotificationPanelViewController extends PanelViewController {
                 : getExpandedFraction();
         mLargeScreenShadeHeaderController.setShadeExpandedFraction(shadeExpandedFraction);
         mLargeScreenShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
-        mLargeScreenShadeHeaderController.setShadeExpanded(mQsVisible);
+        mLargeScreenShadeHeaderController.setQsVisible(mQsVisible);
     }
 
     private void onStackYChanged(boolean shouldAnimate) {

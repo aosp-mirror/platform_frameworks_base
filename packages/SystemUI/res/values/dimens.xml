@@ -553,7 +553,7 @@
     <dimen name="qs_dual_tile_padding_horizontal">6dp</dimen>
     <dimen name="qs_panel_elevation">4dp</dimen>
     <dimen name="qs_panel_padding_bottom">@dimen/footer_actions_height</dimen>
-    <dimen name="qs_panel_padding_top">48dp</dimen>
+    <dimen name="qs_panel_padding_top">80dp</dimen>
 
     <dimen name="qs_data_usage_text_size">14sp</dimen>
     <dimen name="qs_data_usage_usage_text_size">36sp</dimen>
@@ -563,6 +563,8 @@
     <dimen name="qs_carrier_margin_width">4dp</dimen>
     <dimen name="qs_footer_icon_size">20dp</dimen>
     <dimen name="qs_header_row_min_height">48dp</dimen>
+
+    <dimen name="qs_header_non_clickable_element_height">24dp</dimen>
 
     <dimen name="qs_footer_padding">20dp</dimen>
     <dimen name="qs_security_footer_height">88dp</dimen>
