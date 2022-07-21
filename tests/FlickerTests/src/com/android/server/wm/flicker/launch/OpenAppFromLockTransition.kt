@@ -102,18 +102,22 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun navBarLayerPositionAtStartAndEnd() { }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun statusBarLayerPositionAtStartAndEnd() { }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun taskBarLayerIsVisibleAtStartAndEnd() { }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun taskBarWindowIsAlwaysVisible() { }
 
@@ -135,6 +139,7 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     fun statusBarLayerPositionAtEnd() = testSpec.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun statusBarLayerIsVisibleAtStartAndEnd() { }
 

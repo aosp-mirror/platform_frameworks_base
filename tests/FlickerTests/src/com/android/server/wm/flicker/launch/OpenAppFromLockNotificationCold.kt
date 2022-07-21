@@ -91,6 +91,7 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
     override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Display is off at the start")
     override fun navBarLayerPositionAtStartAndEnd() { }
 
@@ -105,6 +106,7 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
     }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Display is off at the start")
     override fun statusBarLayerPositionAtStartAndEnd() { }
 
