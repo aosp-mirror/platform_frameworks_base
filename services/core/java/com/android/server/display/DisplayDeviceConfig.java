@@ -287,7 +287,8 @@ public class DisplayDeviceConfig {
     private BrightnessThrottlingData mBrightnessThrottlingData;
     private BrightnessThrottlingData mOriginalBrightnessThrottlingData;
 
-    private DisplayDeviceConfig(Context context) {
+    @VisibleForTesting
+    DisplayDeviceConfig(Context context) {
         mContext = context;
     }
 
@@ -691,7 +692,8 @@ public class DisplayDeviceConfig {
         return config;
     }
 
-    private boolean initFromFile(File configFile) {
+    @VisibleForTesting
+    boolean initFromFile(File configFile) {
         if (!configFile.exists()) {
             // Display configuration files aren't required to exist.
             return false;
