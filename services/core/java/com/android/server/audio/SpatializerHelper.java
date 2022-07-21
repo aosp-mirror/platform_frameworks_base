@@ -175,7 +175,7 @@ public class SpatializerHelper {
         mASA = asa;
     }
 
-    synchronized void init(boolean effectExpected) {
+    synchronized void init(boolean effectExpected, @Nullable String settings) {
         loglogi("init effectExpected=" + effectExpected);
         if (!effectExpected) {
             loglogi("init(): setting state to STATE_NOT_SUPPORTED due to effect not expected");
@@ -278,6 +278,13 @@ public class SpatializerHelper {
                     mSACapableDeviceTypes.add(SPAT_MODE_FOR_DEVICE_TYPE.keyAt(i));
                 }
             }
+
+            // When initialized from AudioService, the settings string will be non-null.
+            // Saved settings need to be applied after spatialization support is initialized above.
+            if (settings != null) {
+                setSADeviceSettings(settings);
+            }
+
             // for both transaural / binaural, we are not forcing enablement as the init() method
             // could have been called another time after boot in case of audioserver restart
             addCompatibleAudioDevice(
@@ -316,7 +323,7 @@ public class SpatializerHelper {
         mState = STATE_UNINITIALIZED;
         mSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
         mActualHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
-        init(true);
+        init(true, null /* settings */);
         setSpatializerEnabledInt(featureEnabled);
     }
 
@@ -731,7 +738,7 @@ public class SpatializerHelper {
                 return;
             }
             if (mState == STATE_UNINITIALIZED) {
-                init(true);
+                init(true, null /* settings */);
             }
             setSpatializerEnabledInt(true);
         } else {
