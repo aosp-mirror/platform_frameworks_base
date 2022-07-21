@@ -33,6 +33,8 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
+import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,9 +44,11 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
@@ -62,6 +66,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
+import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent.Startable;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
@@ -71,9 +76,12 @@ import com.android.systemui.util.CarrierConfigTracker.CarrierConfigChangedListen
 import com.android.systemui.util.CarrierConfigTracker.DefaultDataSubscriptionChangedListener;
 import com.android.systemui.util.settings.SecureSettings;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -84,7 +92,7 @@ import java.util.concurrent.Executor;
 @SuppressLint("ValidFragment")
 public class CollapsedStatusBarFragment extends Fragment implements CommandQueue.Callbacks,
         StatusBarStateController.StateListener,
-        SystemStatusAnimationCallback {
+        SystemStatusAnimationCallback, Dumpable {
 
     public static final String TAG = "CollapsedStatusBarFragment";
     private static final String EXTRA_PANEL_STATE = "panel_state";
@@ -118,8 +126,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     private final SecureSettings mSecureSettings;
     private final Executor mMainExecutor;
+    private final DumpManager mDumpManager;
 
     private List<String> mBlockedIcons = new ArrayList<>();
+    private Map<Startable, Startable.State> mStartableStates = new ArrayMap<>();
 
     private final OngoingCallListener mOngoingCallListener = new OngoingCallListener() {
         @Override
@@ -171,7 +181,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             OperatorNameViewController.Factory operatorNameViewControllerFactory,
             SecureSettings secureSettings,
-            @Main Executor mainExecutor
+            @Main Executor mainExecutor,
+            DumpManager dumpManager
     ) {
         mStatusBarFragmentComponentFactory = statusBarFragmentComponentFactory;
         mOngoingCallController = ongoingCallController;
@@ -191,6 +202,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mOperatorNameViewControllerFactory = operatorNameViewControllerFactory;
         mSecureSettings = secureSettings;
         mMainExecutor = mainExecutor;
+        mDumpManager = dumpManager;
     }
 
     @Override
@@ -202,8 +214,15 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mDumpManager.registerDumpable(getClass().getSimpleName(), this);
         mStatusBarFragmentComponent = mStatusBarFragmentComponentFactory.create(this);
         mStatusBarFragmentComponent.init();
+        mStartableStates.clear();
+        for (Startable startable : mStatusBarFragmentComponent.getStartables()) {
+            mStartableStates.put(startable, Startable.State.STARTING);
+            startable.start();
+            mStartableStates.put(startable, Startable.State.STARTED);
+        }
 
         mStatusBar = (PhoneStatusBarView) view;
         View contents = mStatusBar.findViewById(R.id.status_bar_contents);
@@ -302,6 +321,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mStatusBarIconController.removeIconGroup(mDarkIconManager);
         mCarrierConfigTracker.removeCallback(mCarrierConfigCallback);
         mCarrierConfigTracker.removeDataSubscriptionChangedListener(mDefaultDataListener);
+
+        for (Startable startable : mStatusBarFragmentComponent.getStartables()) {
+            mStartableStates.put(startable, Startable.State.STOPPING);
+            startable.stop();
+            mStartableStates.put(startable, Startable.State.STOPPED);
+        }
+        mDumpManager.unregisterDumpable(getClass().getSimpleName());
     }
 
     /** Initializes views related to the notification icon area. */
@@ -621,4 +647,23 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                     updateStatusBarLocation(left, right);
                 }
             };
+
+    @Override
+    public void dump(PrintWriter printWriter, String[] args) {
+        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, /* singleIndent= */"  ");
+        StatusBarFragmentComponent component = mStatusBarFragmentComponent;
+        if (component == null) {
+            pw.println("StatusBarFragmentComponent is null");
+        } else {
+            Set<Startable> startables = component.getStartables();
+            pw.println("Startables: " + startables.size());
+            pw.increaseIndent();
+            for (Startable startable : startables) {
+                Startable.State startableState = mStartableStates.getOrDefault(startable,
+                        Startable.State.NONE);
+                pw.println(startable + ", state: " + startableState);
+            }
+            pw.decreaseIndent();
+        }
+    }
 }
