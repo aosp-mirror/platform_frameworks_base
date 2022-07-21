@@ -932,7 +932,7 @@
         <font weight="700" style="normal" fallbackFor="serif">NotoSerifLao-Bold.ttf</font>
     </family>
     <family lang="und-Laoo" variant="compact">
-        <font weight="400" style="normal">NotoSansLaoUI-Regular.ttf
+        <font weight="400" style="normal" postScriptName="NotoSansLaoUI">NotoSansLaoUI-Regular.ttf
         </font>
         <font weight="700" style="normal">NotoSansLaoUI-Bold.ttf</font>
     </family>
