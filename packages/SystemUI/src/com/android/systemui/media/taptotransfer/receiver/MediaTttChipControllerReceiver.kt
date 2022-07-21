@@ -19,7 +19,6 @@ package com.android.systemui.media.taptotransfer.receiver
 import android.annotation.SuppressLint
 import android.app.StatusBarManager
 import android.content.Context
-import android.graphics.PointF
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.MediaRoute2Info
@@ -201,10 +200,10 @@ class MediaTttChipControllerReceiver @Inject constructor(
         val height = windowBounds.height()
         val width = windowBounds.width()
 
-        rippleView.radius = height / 5f
+        val maxDiameter = height / 2.5f
+        rippleView.setMaxSize(maxDiameter, maxDiameter)
         // Center the ripple on the bottom of the screen in the middle.
-        rippleView.origin = PointF(/* x= */ width / 2f, /* y= */ height.toFloat())
-
+        rippleView.setCenter(width * 0.5f, height.toFloat())
         val color = Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColorAccent)
         val colorWithAlpha = ColorUtils.setAlphaComponent(color, 70)
         rippleView.setColor(colorWithAlpha)
