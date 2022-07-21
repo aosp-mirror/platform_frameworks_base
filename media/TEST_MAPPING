@@ -4,6 +4,9 @@
       "name": "CtsMediaBetterTogetherTestCases"
     },
     {
+      "name": "mediaroutertest"
+    },
+    {
       "name": "CtsCameraTestCases",
       "options" : [
         {
