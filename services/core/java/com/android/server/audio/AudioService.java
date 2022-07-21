@@ -9181,11 +9181,8 @@ public class AudioService extends IAudioService.Stub
                 Settings.Secure.SPATIAL_AUDIO_ENABLED, UserHandle.USER_CURRENT);
         if (settings == null) {
             Log.e(TAG, "error reading spatial audio device settings");
-        } else {
-            Log.v(TAG, "restoring spatial audio device settings: " + settings);
-            mSpatializerHelper.setSADeviceSettings(settings);
         }
-        mSpatializerHelper.init(/*effectExpected*/ mHasSpatializerEffect);
+        mSpatializerHelper.init(/*effectExpected*/ mHasSpatializerEffect, settings);
         mSpatializerHelper.setFeatureEnabled(mHasSpatializerEffect);
     }
 
@@ -10373,6 +10370,11 @@ public class AudioService extends IAudioService.Stub
 
         @Override
         public void setAccessibilityServiceUids(IntArray uids) {
+            // TODO(b/233287010): Fix voice interaction and a11y concurrency in audio policy service
+            if (isPlatformAutomotive()) {
+                return;
+            }
+
             synchronized (mAccessibilityServiceUidsLock) {
                 if (uids.size() == 0) {
                     mAccessibilityServiceUids = null;

@@ -14,96 +14,15 @@
      limitations under the License.
 -->
 <resources>
-    <!-- Car text -->
-    <style name="CarBody1">
-        <item name="textStyle">normal</item>
-        <item name="textSize">@dimen/car_body1_size</item>
-        <item name="textColor">@color/car_body1</item>
-    </style>
-
-    <style name="CarBody1.Light">
-        <item name="textColor">@color/car_body1_light</item>
-    </style>
-
-    <style name="CarBody1.Dark">
-        <item name="textColor">@color/car_body2_dark</item>
-    </style>
-
-    <style name="CarBody2">
-        <item name="textStyle">normal</item>
-        <item name="textSize">@dimen/car_body2_size</item>
-        <item name="textColor">@color/car_body2</item>
-    </style>
-
-    <style name="CarBody2.Dark">
-        <item name="textColor">@color/car_body2_dark</item>
-    </style>
-    <style name="CarBody2.Light">
-        <item name="textColor">@color/car_body2_light</item>
-    </style>
-
-    <style name="CarBody3">
-        <item name="textStyle">normal</item>
-        <item name="textSize">@dimen/car_body3_size</item>
-        <item name="textColor">@color/car_body3</item>
-    </style>
-
-    <!-- The smallest styling for body text. The color of this text changes based on the day/night
-         mode. -->
-    <style name="CarBody4">
+    <!-- The Dialog message text style-->
+    <style name="CarDialogMessageText">
         <item name="textStyle">normal</item>
         <item name="textSize">@dimen/car_body4_size</item>
         <item name="textColor">@color/car_body4</item>
     </style>
-
-    <style name="CarAction1">
-        <item name="textStyle">bold</item>
-        <item name="textSize">@dimen/car_action1_size</item>
-        <item name="textColor">@color/control_default_material</item>
-    </style>
-
-    <style name="CarAction1.Dark">
-        <item name="textColor">@color/car_highlight_dark</item>
-    </style>
-    <style name="CarAction1.Light">
-        <item name="textColor">@color/car_highlight_light</item>
-    </style>
-
-    <!-- The styling for title text. The color of this text changes based on day/night mode. -->
-    <style name="CarTitle" >
-        <item name="textStyle">bold</item>
-        <item name="textSize">@dimen/car_title2_size</item>
-        <item name="textColor">@color/car_title</item>
-    </style>
-
-    <!-- Title text that is permanently a dark color. -->
-    <style name="CarTitle.Dark" >
-        <item name="textColor">@color/car_title_dark</item>
-    </style>
-
-    <!-- Title text that is permanently a light color. -->
-    <style name="CarTitle.Light" >
-        <item name="textColor">@color/car_title_light</item>
-    </style>
-
-    <!-- Action bar -->
-    <style name="ActionBarTitle" parent="@style/Widget.DeviceDefault.TextView">
-        <item name="android:singleLine">true</item>
-        <item name="android:textAppearance">?attr/textAppearanceLarge</item>
-    </style>
-
-    <style name="ActionBarButton"
-           parent="@style/Widget.DeviceDefault.Button.Borderless.Colored">
-        <item name="android:textAppearance">@style/ActionBarButtonTextAppearance</item>
-        <!-- Button's internal horizontal padding -->
-        <item name="android:paddingStart">@*android:dimen/car_padding_3</item>
-        <item name="android:paddingEnd">@*android:dimen/car_padding_3</item>
-        <item name="android:drawablePadding">@*android:dimen/car_padding_2</item>
-        <item name="android:maxWidth">@*android:dimen/action_bar_button_max_width</item>
-    </style>
-
-    <style name="ActionBarButtonTextAppearance"
-           parent="@style/TextAppearance.DeviceDefault.Widget.Button.Borderless.Colored">
-        <item name="android:textAllCaps">false</item>
+    <!-- This style makes Dialog button text use medium font weight.  -->
+    <style name="CarDialogButtonText">
+        <item name="android:textAppearance">@style/TextAppearance.DeviceDefault.Widget.Button</item>
+        <item name="android:textColor">@color/control_default_material</item>
     </style>
 </resources>

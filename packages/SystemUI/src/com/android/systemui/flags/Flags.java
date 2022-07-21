@@ -63,6 +63,9 @@ public class Flags {
     public static final BooleanFlag REMOVE_UNRANKED_NOTIFICATIONS =
             new BooleanFlag(109, false);
 
+    public static final BooleanFlag FSI_REQUIRES_KEYGUARD =
+            new BooleanFlag(110, false, true);
+
     /***************************************/
     // 200 - keyguard/lockscreen
 
@@ -141,6 +144,9 @@ public class Flags {
 
     public static final ResourceBooleanFlag STATUS_BAR_USER_SWITCHER =
             new ResourceBooleanFlag(602, R.bool.flag_user_switcher_chip);
+
+    public static final BooleanFlag STATUS_BAR_LETTERBOX_APPEARANCE =
+            new BooleanFlag(603, false);
 
     /***************************************/
     // 700 - dialer/calls

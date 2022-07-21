@@ -306,8 +306,13 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mNotificationInterruptStateProvider =
                 new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
                         mPowerManager,
-                        mDreamManager, mAmbientDisplayConfiguration, mNotificationFilter,
-                        mStatusBarStateController, mBatteryController, mHeadsUpManager,
+                        mDreamManager,
+                        mAmbientDisplayConfiguration,
+                        mNotificationFilter,
+                        mStatusBarStateController,
+                        mKeyguardStateController,
+                        mBatteryController,
+                        mHeadsUpManager,
                         mock(NotificationInterruptLogger.class),
                         new Handler(TestableLooper.get(this).getLooper()),
                         mock(NotifPipelineFlags.class),
@@ -1036,15 +1041,28 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 AmbientDisplayConfiguration ambientDisplayConfiguration,
                 NotificationFilter filter,
                 StatusBarStateController controller,
+                KeyguardStateController keyguardStateController,
                 BatteryController batteryController,
                 HeadsUpManager headsUpManager,
                 NotificationInterruptLogger logger,
                 Handler mainHandler,
                 NotifPipelineFlags flags,
                 KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider) {
-            super(contentResolver, powerManager, dreamManager, ambientDisplayConfiguration, filter,
-                    batteryController, controller, headsUpManager, logger, mainHandler,
-                    flags, keyguardNotificationVisibilityProvider);
+            super(
+                    contentResolver,
+                    powerManager,
+                    dreamManager,
+                    ambientDisplayConfiguration,
+                    filter,
+                    batteryController,
+                    controller,
+                    keyguardStateController,
+                    headsUpManager,
+                    logger,
+                    mainHandler,
+                    flags,
+                    keyguardNotificationVisibilityProvider
+            );
             mUseHeadsUp = true;
         }
     }
