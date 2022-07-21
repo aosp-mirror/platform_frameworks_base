@@ -399,7 +399,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
                 return true;
             }
 
-            if (sbn.getNotification().fullScreenIntent != null) {
+            if (sbn.getNotification().fullScreenIntent != null
+                    && !mNotifPipelineFlags.fullScreenIntentRequiresKeyguard()) {
                 // we don't allow head-up on the lockscreen (unless there's a
                 // "showWhenLocked" activity currently showing)  if
                 // the potential HUN has a fullscreen intent
