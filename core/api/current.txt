@@ -11521,6 +11521,7 @@ package android.content.pm {
     field public static final int INSTALL_LOCATION_INTERNAL_ONLY = 1; // 0x1
     field public static final int INSTALL_LOCATION_PREFER_EXTERNAL = 2; // 0x2
     field public static final int REQUESTED_PERMISSION_GRANTED = 2; // 0x2
+    field public static final int REQUESTED_PERMISSION_IMPLICIT = 4; // 0x4
     field public static final int REQUESTED_PERMISSION_NEVER_FOR_LOCATION = 65536; // 0x10000
     field public android.content.pm.ActivityInfo[] activities;
     field public android.content.pm.ApplicationInfo applicationInfo;

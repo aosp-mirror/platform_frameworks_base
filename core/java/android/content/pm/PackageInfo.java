@@ -252,6 +252,13 @@ public class PackageInfo implements Parcelable {
     public static final int REQUESTED_PERMISSION_NEVER_FOR_LOCATION = 0x00010000;
 
     /**
+     * Flag for {@link #requestedPermissionsFlags}: the requested permission was
+     * not explicitly requested via uses-permission, but was instead implicitly
+     * requested (e.g., for version compatibility reasons).
+     */
+    public static final int REQUESTED_PERMISSION_IMPLICIT = 0x00000004;
+
+    /**
      * Array of all signatures read from the package file. This is only filled
      * in if the flag {@link PackageManager#GET_SIGNATURES} was set. A package
      * must be signed with at least one certificate which is at position zero.
