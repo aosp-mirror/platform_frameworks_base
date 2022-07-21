@@ -77,7 +77,7 @@ import java.util.Map;
  * except where indicated otherwise.
  * @hide
  */
-public abstract class BatteryStats implements Parcelable {
+public abstract class BatteryStats {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public BatteryStats() {}
@@ -3515,8 +3515,6 @@ public abstract class BatteryStats implements Parcelable {
 
 
     public abstract LongSparseArray<? extends Timer> getKernelMemoryStats();
-
-    public abstract void writeToParcelWithoutUids(Parcel out, int flags);
 
     private final static void formatTimeRaw(StringBuilder out, long seconds) {
         long days = seconds / (60 * 60 * 24);
