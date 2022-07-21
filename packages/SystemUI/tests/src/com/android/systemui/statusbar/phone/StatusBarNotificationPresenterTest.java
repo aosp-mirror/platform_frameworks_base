@@ -16,12 +16,14 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.metrics.LogMaker;
 import android.support.test.metricshelper.MetricsAsserts;
@@ -80,6 +82,8 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     private FakeMetricsLogger mMetricsLogger;
     private ShadeController mShadeController = mock(ShadeController.class);
     private CentralSurfaces mCentralSurfaces = mock(CentralSurfaces.class);
+    private KeyguardStateController mKeyguardStateController = mock(KeyguardStateController.class);
+    private NotifPipelineFlags mNotifPipelineFlags = mock(NotifPipelineFlags.class);
     private InitController mInitController = new InitController();
 
     @Before
@@ -114,7 +118,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(ScrimController.class),
                 mock(NotificationShadeWindowController.class),
                 mock(DynamicPrivacyController.class),
-                mock(KeyguardStateController.class),
+                mKeyguardStateController,
                 mock(KeyguardIndicationController.class),
                 mCentralSurfaces,
                 mock(ShadeControllerImpl.class),
@@ -130,7 +134,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mInitController,
                 mNotificationInterruptStateProvider,
                 mock(NotificationRemoteInputManager.class),
-                mock(NotifPipelineFlags.class),
+                mNotifPipelineFlags,
                 mock(NotificationRemoteInputManager.Callback.class),
                 mock(NotificationListContainer.class));
         mInitController.executePostInitTasks();
@@ -138,6 +142,19 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(NotificationInterruptSuppressor.class);
         verify(mNotificationInterruptStateProvider).addSuppressor(suppressorCaptor.capture());
         mInterruptSuppressor = suppressorCaptor.getValue();
+    }
+
+    @Test
+    public void testNoSuppressHeadsUp_default() {
+        Notification n = new Notification.Builder(getContext(), "a").build();
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .build();
+
+        assertFalse(mInterruptSuppressor.suppressAwakeHeadsUp(entry));
     }
 
     @Test
@@ -173,6 +190,63 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         assertTrue("The panel should suppress interruptions while notification shade "
                         + "disabled",
                 mInterruptSuppressor.suppressAwakeHeadsUp(entry));
+    }
+
+    @Test
+    public void testNoSuppressHeadsUp_FSI_occludedKeygaurd() {
+        when(mNotifPipelineFlags.fullScreenIntentRequiresKeyguard()).thenReturn(false);
+        Notification n = new Notification.Builder(getContext(), "a")
+                .setFullScreenIntent(mock(PendingIntent.class), true)
+                .build();
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .build();
+
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        when(mCentralSurfaces.isOccluded()).thenReturn(true);
+        assertFalse(mInterruptSuppressor.suppressAwakeHeadsUp(entry));
+    }
+
+    @Test
+    public void testSuppressHeadsUp_FSI_nonOccludedKeygaurd() {
+        when(mNotifPipelineFlags.fullScreenIntentRequiresKeyguard()).thenReturn(false);
+        Notification n = new Notification.Builder(getContext(), "a")
+                .setFullScreenIntent(mock(PendingIntent.class), true)
+                .build();
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .build();
+
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mCentralSurfaces.isOccluded()).thenReturn(false);
+        assertTrue(mInterruptSuppressor.suppressAwakeHeadsUp(entry));
+    }
+
+    @Test
+    public void testNoSuppressHeadsUp_FSI_nonOccludedKeygaurd_withNewFlag() {
+        when(mNotifPipelineFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
+        Notification n = new Notification.Builder(getContext(), "a")
+                .setFullScreenIntent(mock(PendingIntent.class), true)
+                .build();
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("a")
+                .setOpPkg("a")
+                .setTag("a")
+                .setNotification(n)
+                .build();
+
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mCentralSurfaces.isOccluded()).thenReturn(false);
+        assertFalse(mInterruptSuppressor.suppressAwakeHeadsUp(entry));
     }
 
     @Test

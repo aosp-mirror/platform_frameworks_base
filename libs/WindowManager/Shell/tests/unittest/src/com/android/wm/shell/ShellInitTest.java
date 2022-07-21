@@ -38,6 +38,8 @@ import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
+import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
@@ -54,8 +56,9 @@ import java.util.Optional;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-public class ShellInitImplTest extends ShellTestCase {
+public class ShellInitTest extends ShellTestCase {
 
+    @Mock private ShellController mShellController;
     @Mock private DisplayController mDisplayController;
     @Mock private DisplayImeController mDisplayImeController;
     @Mock private DisplayInsetsController mDisplayInsetsController;
@@ -75,12 +78,12 @@ public class ShellInitImplTest extends ShellTestCase {
     @Mock private StartingWindowController mStartingWindow;
     @Mock private ShellExecutor mMainExecutor;
 
-    private ShellInitImpl mImpl;
+    private ShellInit mImpl;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mImpl = new ShellInitImpl(mDisplayController, mDisplayImeController,
+        mImpl = new ShellInit(mShellController, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mDragAndDropController, mShellTaskOrganizer,
                 mKidsModeTaskOrganizer, mBubblesOptional, mSplitScreenOptional,
                 mPipTouchHandlerOptional, mFullscreenTaskListener, mUnfoldAnimationController,

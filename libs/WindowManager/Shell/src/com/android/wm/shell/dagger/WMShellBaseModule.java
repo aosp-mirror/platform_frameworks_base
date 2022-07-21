@@ -29,10 +29,8 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
-import com.android.wm.shell.ShellCommandHandler;
-import com.android.wm.shell.ShellCommandHandlerImpl;
-import com.android.wm.shell.ShellInit;
-import com.android.wm.shell.ShellInitImpl;
+import com.android.wm.shell.sysui.ShellCommandHandler;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.TaskViewFactoryController;
@@ -624,13 +622,9 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static ShellInit provideShellInit(ShellInitImpl impl) {
-        return impl.asShellInit();
-    }
-
-    @WMSingleton
-    @Provides
-    static ShellInitImpl provideShellInitImpl(DisplayController displayController,
+    static ShellInit provideShellInitImpl(
+            ShellController shellController,
+            DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
             DragAndDropController dragAndDropController,
@@ -648,7 +642,8 @@ public abstract class WMShellBaseModule {
             Transitions transitions,
             StartingWindowController startingWindow,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new ShellInitImpl(displayController,
+        return new ShellInit(shellController,
+                displayController,
                 displayImeController,
                 displayInsetsController,
                 dragAndDropController,
@@ -668,19 +663,10 @@ public abstract class WMShellBaseModule {
                 mainExecutor);
     }
 
-    /**
-     * Note, this is only optional because we currently pass this to the SysUI component scope and
-     * for non-primary users, we may inject a null-optional for that dependency.
-     */
     @WMSingleton
     @Provides
-    static Optional<ShellCommandHandler> provideShellCommandHandler(ShellCommandHandlerImpl impl) {
-        return Optional.of(impl.asShellCommandHandler());
-    }
-
-    @WMSingleton
-    @Provides
-    static ShellCommandHandlerImpl provideShellCommandHandlerImpl(
+    static ShellCommandHandler provideShellCommandHandlerImpl(
+            ShellController shellController,
             ShellTaskOrganizer shellTaskOrganizer,
             KidsModeTaskOrganizer kidsModeTaskOrganizer,
             Optional<SplitScreenController> splitScreenOptional,
@@ -689,9 +675,9 @@ public abstract class WMShellBaseModule {
             Optional<HideDisplayCutoutController> hideDisplayCutout,
             Optional<RecentTasksController> recentTasksOptional,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new ShellCommandHandlerImpl(shellTaskOrganizer, kidsModeTaskOrganizer,
-                splitScreenOptional, pipOptional, oneHandedOptional, hideDisplayCutout,
-                recentTasksOptional, mainExecutor);
+        return new ShellCommandHandler(shellController, shellTaskOrganizer,
+                kidsModeTaskOrganizer, splitScreenOptional, pipOptional, oneHandedOptional,
+                hideDisplayCutout, recentTasksOptional, mainExecutor);
     }
 
     @WMSingleton

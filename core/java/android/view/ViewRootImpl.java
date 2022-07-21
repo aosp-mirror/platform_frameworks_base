@@ -3759,6 +3759,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
         mFirstInputStage.onWindowFocusChanged(hasWindowFocus);
+        mOnBackInvokedDispatcher.onWindowFocusChanged(hasWindowFocus);
 
         // NOTE: there's no view visibility (appeared / disapparead) events when the windows focus
         // is lost, so we don't need to to force a flush - there might be other events such as

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell;
+package com.android.wm.shell.sysui;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
 import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
@@ -34,8 +35,8 @@ import java.util.Optional;
  *
  * Use with {@code adb shell dumpsys activity service SystemUIService WMShell ...}.
  */
-public final class ShellCommandHandlerImpl {
-    private static final String TAG = ShellCommandHandlerImpl.class.getSimpleName();
+public final class ShellCommandHandler {
+    private static final String TAG = ShellCommandHandler.class.getSimpleName();
 
     private final Optional<SplitScreenController> mSplitScreenOptional;
     private final Optional<Pip> mPipOptional;
@@ -45,9 +46,9 @@ public final class ShellCommandHandlerImpl {
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final KidsModeTaskOrganizer mKidsModeTaskOrganizer;
     private final ShellExecutor mMainExecutor;
-    private final HandlerImpl mImpl = new HandlerImpl();
 
-    public ShellCommandHandlerImpl(
+    public ShellCommandHandler(
+            ShellController shellController,
             ShellTaskOrganizer shellTaskOrganizer,
             KidsModeTaskOrganizer kidsModeTaskOrganizer,
             Optional<SplitScreenController> splitScreenOptional,
@@ -64,14 +65,12 @@ public final class ShellCommandHandlerImpl {
         mOneHandedOptional = oneHandedOptional;
         mHideDisplayCutout = hideDisplayCutout;
         mMainExecutor = mainExecutor;
-    }
-
-    public ShellCommandHandler asShellCommandHandler() {
-        return mImpl;
+        // TODO(238217847): To be removed once the command handler dependencies are inverted
+        shellController.setShellCommandHandler(this);
     }
 
     /** Dumps WM Shell internal state. */
-    private void dump(PrintWriter pw) {
+    public void dump(PrintWriter pw) {
         mShellTaskOrganizer.dump(pw, "");
         pw.println();
         pw.println();
@@ -91,7 +90,7 @@ public final class ShellCommandHandlerImpl {
 
 
     /** Returns {@code true} if command was found and executed. */
-    private boolean handleCommand(final String[] args, PrintWriter pw) {
+    public boolean handleCommand(final String[] args, PrintWriter pw) {
         if (args.length < 2) {
             // Argument at position 0 is "WMShell".
             return false;
@@ -163,29 +162,5 @@ public final class ShellCommandHandlerImpl {
         pw.println("  setSideStagePosition <SideStagePosition>");
         pw.println("    Sets the position of the side-stage.");
         return true;
-    }
-
-    private class HandlerImpl implements ShellCommandHandler {
-        @Override
-        public void dump(PrintWriter pw) {
-            try {
-                mMainExecutor.executeBlocking(() -> ShellCommandHandlerImpl.this.dump(pw));
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Failed to dump the Shell in 2s", e);
-            }
-        }
-
-        @Override
-        public boolean handleCommand(String[] args, PrintWriter pw) {
-            try {
-                boolean[] result = new boolean[1];
-                mMainExecutor.executeBlocking(() -> {
-                    result[0] = ShellCommandHandlerImpl.this.handleCommand(args, pw);
-                });
-                return result[0];
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Failed to handle Shell command in 2s", e);
-            }
-        }
     }
 }
