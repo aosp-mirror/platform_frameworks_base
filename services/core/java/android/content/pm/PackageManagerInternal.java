@@ -819,7 +819,7 @@ public abstract class PackageManagerInternal {
             @NonNull String packageName);
 
     /**
-     * Returns {@code true} if the the signing information for {@code clientUid} is sufficient
+     * Returns {@code true} if the signing information for {@code clientUid} is sufficient
      * to gain access gated by {@code capability}.  This can happen if the two UIDs have the
      * same signing information, if the signing information {@code clientUid} indicates that
      * it has the signing certificate for {@code serverUid} in its signing history (if it was
