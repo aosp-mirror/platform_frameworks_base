@@ -290,25 +290,15 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
     }
 
     /**
-     * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
-     * Not the most secure, but it is at least a second level of protection. First level is that
-     * the file is in a location only readable by the system process.
+     * Hash the given password for the password history, using the legacy algorithm.
      *
-     * @return the hash of the pattern in a byte array.
+     * @deprecated This algorithm is insecure because the password can be easily bruteforced, given
+     *             the hash and salt.  Use {@link #passwordToHistoryHash(byte[], byte[], byte[])}
+     *             instead, which incorporates an SP-derived secret into the hash.
+     *
+     * @return the legacy password hash
      */
-    public String legacyPasswordToHash(byte[] salt) {
-        return legacyPasswordToHash(mCredential, salt);
-    }
-
-    /**
-     * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
-     * Not the most secure, but it is at least a second level of protection. First level is that
-     * the file is in a location only readable by the system process.
-     *
-     * @param password the gesture pattern.
-     *
-     * @return the hash of the pattern in a byte array.
-     */
+    @Deprecated
     public static String legacyPasswordToHash(byte[] password, byte[] salt) {
         if (password == null || password.length == 0 || salt == null) {
             return null;

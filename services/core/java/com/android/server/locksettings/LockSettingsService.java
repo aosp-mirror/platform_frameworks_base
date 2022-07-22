@@ -1626,7 +1626,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
 
             onSyntheticPasswordKnown(userId, sp);
-            setLockCredentialWithSpLocked(credential, sp, userId);
+            setLockCredentialWithSpLocked(credential, sp, userId, isLockTiedToParent);
             sendCredentialsOnChangeIfRequired(credential, userId, isLockTiedToParent);
             return true;
         }
@@ -1640,15 +1640,15 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (newCredential.isPattern()) {
             setBoolean(LockPatternUtils.PATTERN_EVER_CHOSEN_KEY, true, userHandle);
         }
-        updatePasswordHistory(newCredential, userHandle);
         mContext.getSystemService(TrustManager.class).reportEnabledTrustAgentsChanged(userHandle);
     }
 
     /**
-     * Store the hash of the *current* password in the password history list, if device policy
-     * enforces password history requirement.
+     * Store the hash of the new password in the password history list, if device policy enforces
+     * a password history requirement.
      */
-    private void updatePasswordHistory(LockscreenCredential password, int userHandle) {
+    private void updatePasswordHistory(SyntheticPassword sp, LockscreenCredential password,
+            int userHandle, boolean isLockTiedToParent) {
         if (password.isNone()) {
             return;
         }
@@ -1656,8 +1656,11 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Do not keep track of historical patterns
             return;
         }
-        // Add the password to the password history. We assume all
-        // password hashes have the same length for simplicity of implementation.
+        if (isLockTiedToParent) {
+            // Do not keep track of historical auto-generated profile passwords
+            return;
+        }
+        // Add the password to the password history.
         String passwordHistory = getString(
                 LockPatternUtils.PASSWORD_HISTORY_KEY, /* defaultValue= */ null, userHandle);
         if (passwordHistory == null) {
@@ -1667,13 +1670,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (passwordHistoryLength == 0) {
             passwordHistory = "";
         } else {
-            final byte[] hashFactor = getHashFactor(password, userHandle);
+            final byte[] hashFactor = sp.derivePasswordHashFactor();
             final byte[] salt = getSalt(userHandle).getBytes();
             String hash = password.passwordToHistoryHash(salt, hashFactor);
-            if (hash == null) {
-                Slog.e(TAG, "Compute new style password hash failed, fallback to legacy style");
-                hash = password.legacyPasswordToHash(salt);
-            }
             if (TextUtils.isEmpty(passwordHistory)) {
                 passwordHistory = hash;
             } else {
@@ -2651,7 +2650,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      */
     @GuardedBy("mSpManager")
     private long setLockCredentialWithSpLocked(LockscreenCredential credential,
-            SyntheticPassword sp, int userId) {
+            SyntheticPassword sp, int userId, boolean isLockTiedToParent) {
         if (DEBUG) Slog.d(TAG, "setLockCredentialWithSpLocked: user=" + userId);
         final int savedCredentialType = getCredentialTypeInternal(userId);
         final long oldProtectorId = getCurrentLskfBasedProtectorId(userId);
@@ -2689,6 +2688,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         LockPatternUtils.invalidateCredentialTypeCache();
         synchronizeUnifiedWorkChallengeForProfiles(userId, profilePasswords);
 
+        updatePasswordHistory(sp, credential, userId, isLockTiedToParent);
         setUserPasswordMetrics(credential, userId);
         mManagedProfilePasswordCache.removePassword(userId);
         if (savedCredentialType != CREDENTIAL_TYPE_NONE) {
@@ -2934,7 +2934,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             return false;
         }
         onSyntheticPasswordKnown(userId, result.syntheticPassword);
-        setLockCredentialWithSpLocked(credential, result.syntheticPassword, userId);
+        setLockCredentialWithSpLocked(credential, result.syntheticPassword, userId,
+                /* isLockTiedToParent= */ false);
         return true;
     }
 

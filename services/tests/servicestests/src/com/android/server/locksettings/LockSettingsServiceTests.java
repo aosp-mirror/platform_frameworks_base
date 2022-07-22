@@ -33,15 +33,18 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.PropertyInvalidatedCache;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.service.gatekeeper.GateKeeperResponse;
+import android.text.TextUtils;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
 
@@ -450,6 +453,45 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
                 PRIMARY_USER_ID));
     }
 
+    @Test
+    public void testPasswordHistoryDisabledByDefault() throws Exception {
+        final int userId = PRIMARY_USER_ID;
+        checkPasswordHistoryLength(userId, 0);
+        initializeStorageWithCredential(userId, nonePassword());
+        checkPasswordHistoryLength(userId, 0);
+
+        assertTrue(mService.setLockCredential(newPassword("1234"), nonePassword(), userId));
+        checkPasswordHistoryLength(userId, 0);
+    }
+
+    @Test
+    public void testPasswordHistoryLengthHonored() throws Exception {
+        final int userId = PRIMARY_USER_ID;
+        when(mDevicePolicyManager.getPasswordHistoryLength(any(), eq(userId))).thenReturn(3);
+        checkPasswordHistoryLength(userId, 0);
+        initializeStorageWithCredential(userId, nonePassword());
+        checkPasswordHistoryLength(userId, 0);
+
+        assertTrue(mService.setLockCredential(newPassword("pass1"), nonePassword(), userId));
+        checkPasswordHistoryLength(userId, 1);
+
+        assertTrue(mService.setLockCredential(newPassword("pass2"), newPassword("pass1"), userId));
+        checkPasswordHistoryLength(userId, 2);
+
+        assertTrue(mService.setLockCredential(newPassword("pass3"), newPassword("pass2"), userId));
+        checkPasswordHistoryLength(userId, 3);
+
+        // maximum length should have been reached
+        assertTrue(mService.setLockCredential(newPassword("pass4"), newPassword("pass3"), userId));
+        checkPasswordHistoryLength(userId, 3);
+    }
+
+    private void checkPasswordHistoryLength(int userId, int expectedLen) {
+        String history = mService.getString(LockPatternUtils.PASSWORD_HISTORY_KEY, "", userId);
+        String[] hashes = TextUtils.split(history, LockPatternUtils.PASSWORD_HISTORY_DELIMITER);
+        assertEquals(expectedLen, hashes.length);
+    }
+
     private void testCreateCredential(int userId, LockscreenCredential credential)
             throws RemoteException {
         assertTrue(mService.setLockCredential(credential, nonePassword(), userId));
@@ -510,6 +552,10 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         synchronized (mService.mSpManager) {
             mService.initializeSyntheticPasswordLocked(credential, userId);
         }
-        assertNotEquals(0, mGateKeeperService.getSecureUserId(userId));
+        if (credential.isNone()) {
+            assertEquals(0, mGateKeeperService.getSecureUserId(userId));
+        } else {
+            assertNotEquals(0, mGateKeeperService.getSecureUserId(userId));
+        }
     }
 }
