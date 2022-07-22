@@ -334,7 +334,7 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setSharedUserLabel(int sharedUserLabel);
 
-    ParsingPackage setSigningDetails(SigningDetails signingDetails);
+    ParsingPackage setSigningDetails(@NonNull SigningDetails signingDetails);
 
     ParsingPackage setSplitClassLoaderName(int splitIndex, String classLoaderName);
 

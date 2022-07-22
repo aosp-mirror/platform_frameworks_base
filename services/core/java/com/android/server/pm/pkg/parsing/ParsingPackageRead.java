@@ -188,6 +188,7 @@ public interface ParsingPackageRead extends PkgWithoutStateAppInfo, PkgWithoutSt
      * The signature data of all APKs in this package, which must be exactly the same across the
      * base and splits.
      */
+    @NonNull
     SigningDetails getSigningDetails();
 
     /**
