@@ -34,6 +34,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
@@ -100,6 +101,10 @@ public final class BatteryController extends RestrictingController {
     @Override
     @GuardedBy("mLock")
     public void prepareForExecutionLocked(JobStatus jobStatus) {
+        if (!jobStatus.hasPowerConstraint()) {
+            // Ignore all jobs the controller wouldn't be tracking.
+            return;
+        }
         if (DEBUG) {
             Slog.d(TAG, "Prepping for " + jobStatus.toShortString());
         }
@@ -257,6 +262,16 @@ public final class BatteryController extends RestrictingController {
                 maybeReportNewChargingStateLocked();
             }
         }
+    }
+
+    @VisibleForTesting
+    ArraySet<JobStatus> getTrackedJobs() {
+        return mTrackedTasks;
+    }
+
+    @VisibleForTesting
+    ArraySet<JobStatus> getTopStartedJobs() {
+        return mTopStartedJobs;
     }
 
     @Override
