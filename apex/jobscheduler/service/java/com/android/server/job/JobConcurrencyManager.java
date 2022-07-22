@@ -543,6 +543,30 @@ class JobConcurrencyManager {
     }
 
     /**
+     * Return {@code true} if the specified job has been executing for longer than the minimum
+     * execution guarantee.
+     */
+    @GuardedBy("mLock")
+    boolean isJobLongRunningLocked(@NonNull JobStatus job) {
+        if (!mRunningJobs.contains(job)) {
+            return false;
+        }
+
+        for (int i = mActiveServices.size() - 1; i >= 0; --i) {
+            final JobServiceContext jsc = mActiveServices.get(i);
+            final JobStatus jobStatus = jsc.getRunningJobLocked();
+
+            if (jobStatus == job) {
+                return !jsc.isWithinExecutionGuaranteeTime();
+            }
+        }
+
+        Slog.wtf(TAG, "Couldn't find long running job on a context");
+        mRunningJobs.remove(job);
+        return false;
+    }
+
+    /**
      * Returns true if a job that is "similar" to the provided job is currently running.
      * "Similar" in this context means any job that the {@link JobStore} would consider equivalent
      * and replace one with the other.
@@ -989,6 +1013,26 @@ class JobConcurrencyManager {
         }
     }
 
+    /**
+     * Stops any jobs that have run for more than their minimum execution guarantee and are
+     * restricted by the given {@link JobRestriction}.
+     */
+    @GuardedBy("mLock")
+    void maybeStopLongRunningJobsLocked(@NonNull JobRestriction restriction) {
+        for (int i = mActiveServices.size() - 1; i >= 0; --i) {
+            final JobServiceContext jsc = mActiveServices.get(i);
+            final JobStatus jobStatus = jsc.getRunningJobLocked();
+
+            if (jobStatus != null && !jsc.isWithinExecutionGuaranteeTime()
+                    && restriction.isJobRestricted(jobStatus)) {
+                jsc.cancelExecutingJobLocked(restriction.getReason(),
+                        restriction.getInternalReason(),
+                        JobParameters.getInternalReasonCodeDescription(
+                                restriction.getInternalReason()));
+            }
+        }
+    }
+
     @GuardedBy("mLock")
     void stopNonReadyActiveJobsLocked() {
         for (int i = 0; i < mActiveServices.size(); i++) {
@@ -1348,6 +1392,12 @@ class JobConcurrencyManager {
         }
         if (mPowerManager.isDeviceIdleMode()) {
             return "deep doze";
+        }
+        final JobRestriction jobRestriction;
+        if ((jobRestriction = mService.checkIfRestricted(js)) != null) {
+            return "restriction:"
+                    + JobParameters.getInternalReasonCodeDescription(
+                            jobRestriction.getInternalReason());
         }
 
         // Update config in case memory usage has changed significantly.

@@ -1772,6 +1772,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         return mConcurrencyManager.isJobRunningLocked(job);
     }
 
+    /** @see JobConcurrencyManager#isJobLongRunningLocked(JobStatus) */
+    @GuardedBy("mLock")
+    public boolean isLongRunningLocked(JobStatus job) {
+        return mConcurrencyManager.isJobLongRunningLocked(job);
+    }
+
     private void noteJobPending(JobStatus job) {
         mJobPackageTracker.notePending(job);
     }
@@ -2046,6 +2052,17 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mChangedJobList.addAll(changedJobs);
             }
             mHandler.obtainMessage(MSG_CHECK_CHANGED_JOB_LIST).sendToTarget();
+        }
+    }
+
+    @Override
+    public void onRestrictionStateChanged(@NonNull JobRestriction restriction,
+            boolean stopLongRunningJobs) {
+        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+        if (stopLongRunningJobs) {
+            synchronized (mLock) {
+                mConcurrencyManager.maybeStopLongRunningJobsLocked(restriction);
+            }
         }
     }
 
