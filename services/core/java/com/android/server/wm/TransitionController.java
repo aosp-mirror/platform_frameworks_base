@@ -460,23 +460,26 @@ class TransitionController {
      * Collects the window containers which need to be synced with the changing display (e.g.
      * rotating) to the given transition or the current collecting transition.
      */
-    void collectForDisplayChange(@NonNull DisplayContent dc, @Nullable Transition incoming) {
+    void collectForDisplayAreaChange(@NonNull DisplayArea<?> wc, @Nullable Transition incoming) {
         if (incoming == null) incoming = mCollectingTransition;
         if (incoming == null) return;
         final Transition transition = incoming;
         // Collect all visible tasks.
-        dc.forAllLeafTasks(task -> {
+        wc.forAllLeafTasks(task -> {
             if (task.isVisible()) {
                 transition.collect(task);
             }
         }, true /* traverseTopToBottom */);
         // Collect all visible non-app windows which need to be drawn before the animation starts.
-        dc.forAllWindows(w -> {
-            if (w.mActivityRecord == null && w.isVisible() && !isCollecting(w.mToken)
-                    && dc.shouldSyncRotationChange(w)) {
-                transition.collect(w.mToken);
-            }
-        }, true /* traverseTopToBottom */);
+        final DisplayContent dc = wc.asDisplayContent();
+        if (dc != null) {
+            wc.forAllWindows(w -> {
+                if (w.mActivityRecord == null && w.isVisible() && !isCollecting(w.mToken)
+                        && dc.shouldSyncRotationChange(w)) {
+                    transition.collect(w.mToken);
+                }
+            }, true /* traverseTopToBottom */);
+        }
     }
 
     /** @see Transition#mStatusBarTransitionDelay */
