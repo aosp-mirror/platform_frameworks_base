@@ -107,6 +107,15 @@ public class FeatureFlagUtils {
      */
     public static final String SETTINGS_ENABLE_CLEAR_CALLING = "settings_enable_clear_calling";
 
+
+    /** Flag to enable / disable the Simple Cursor accessibility feature in
+     *  Settings.
+     * @hide
+     */
+    public static final String SETTINGS_ACCESSIBILITY_SIMPLE_CURSOR =
+            "settings_accessibility_simple_cursor";
+
+
     private static final Map<String, String> DEFAULT_FLAGS;
 
     static {
@@ -138,6 +147,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_AUTO_TEXT_WRAPPING, "false");
         DEFAULT_FLAGS.put(SETTINGS_GUEST_MODE_UX_CHANGES, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_CLEAR_CALLING, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ACCESSIBILITY_SIMPLE_CURSOR, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
