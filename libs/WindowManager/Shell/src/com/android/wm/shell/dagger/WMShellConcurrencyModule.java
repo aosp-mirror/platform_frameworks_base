@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Trace;
+import android.view.Choreographer;
 
 import androidx.annotation.Nullable;
 
@@ -141,6 +142,25 @@ public abstract class WMShellConcurrencyModule {
             return new HandlerExecutor(mainHandler);
         }
         return sysuiMainExecutor;
+    }
+
+    /**
+     * Provide a Shell main-thread {@link Choreographer} with the app vsync.
+     *
+     * @param executor the executor of the shell main thread
+     */
+    @WMSingleton
+    @Provides
+    @ShellMainThread
+    public static Choreographer provideShellMainChoreographer(
+            @ShellMainThread ShellExecutor executor) {
+        try {
+            final Choreographer[] choreographer = new Choreographer[1];
+            executor.executeBlocking(() -> choreographer[0] = Choreographer.getInstance());
+            return choreographer[0];
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Failed to obtain main Choreographer.", e);
+        }
     }
 
     /**

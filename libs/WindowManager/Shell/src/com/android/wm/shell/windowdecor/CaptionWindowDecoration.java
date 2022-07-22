@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
+import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.window.WindowContainerTransaction;
@@ -59,6 +60,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             RESIZE_HANDLE_IN_DIP, RESIZE_HANDLE_IN_DIP, RESIZE_HANDLE_IN_DIP, RESIZE_HANDLE_IN_DIP);
 
     private final Handler mHandler;
+    private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
 
     private View.OnClickListener mOnCaptionButtonClickListener;
@@ -77,10 +79,12 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
             Handler handler,
+            Choreographer choreographer,
             SyncTransactionQueue syncQueue) {
         super(context, displayController, taskOrganizer, taskInfo, taskSurface);
 
         mHandler = handler;
+        mChoreographer = choreographer;
         mSyncQueue = syncQueue;
     }
 
@@ -138,6 +142,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             mDragResizeListener = new DragResizeInputListener(
                     mContext,
                     mHandler,
+                    mChoreographer,
                     mDisplay.getDisplayId(),
                     mDecorationContainerSurface,
                     mDragResizeCallback);
