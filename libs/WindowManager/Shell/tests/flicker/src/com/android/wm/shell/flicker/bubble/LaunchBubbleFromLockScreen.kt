@@ -101,6 +101,12 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
     }
 
     /** {@inheritDoc} */
+    @FlakyTest
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
     @FlakyTest(bugId = 206753786)
     @Test
     override fun navBarLayerIsVisibleAtStartAndEnd() =
