@@ -60,7 +60,6 @@ import android.service.contentcapture.SnapshotData;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -88,11 +87,6 @@ final class ContentCapturePerUserService
         implements ContentCaptureServiceCallbacks {
 
     private static final String TAG = ContentCapturePerUserService.class.getSimpleName();
-
-    private static final int EVENT_LOG_CONNECT_STATE_DIED = 0;
-    static final int EVENT_LOG_CONNECT_STATE_CONNECTED = 1;
-    static final int EVENT_LOG_CONNECT_STATE_DISCONNECTED = 2;
-
 
     @GuardedBy("mLock")
     private final SparseArray<ContentCaptureServerSession> mSessions = new SparseArray<>();
@@ -196,13 +190,9 @@ final class ContentCapturePerUserService
         Slog.w(TAG, "remote service died: " + service);
         synchronized (mLock) {
             mZombie = true;
-            ComponentName serviceComponent = getServiceComponentName();
             writeServiceEvent(
                     FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_REMOTE_SERVICE_DIED,
-                    serviceComponent);
-            EventLog.writeEvent(EventLogTags.CC_CONNECT_STATE_CHANGED, mUserId,
-                    serviceComponent != null ? serviceComponent.flattenToShortString() : "",
-                    EVENT_LOG_CONNECT_STATE_DIED);
+                    getServiceComponentName());
         }
     }
 
@@ -624,16 +614,11 @@ final class ContentCapturePerUserService
                         ? "null_activities" : activities.size() + " activities") + ")"
                         + " for user " + mUserId);
             }
-            int packageCount = packages != null ? packages.size() : 0;
-            int activityCount = activities != null ? activities.size() : 0;
 
             ArraySet<String> oldList =
                     mMaster.mGlobalContentCaptureOptions.getWhitelistedPackages(mUserId);
-            EventLog.writeEvent(EventLogTags.CC_CURRENT_ALLOWLIST, mUserId, oldList.size());
 
             mMaster.mGlobalContentCaptureOptions.setWhitelist(mUserId, packages, activities);
-            EventLog.writeEvent(EventLogTags.CC_SET_ALLOWLIST, mUserId,
-                    packageCount, activityCount);
             writeSetWhitelistEvent(getServiceComponentName(), packages, activities);
 
             updateContentCaptureOptions(oldList);
@@ -714,14 +699,12 @@ final class ContentCapturePerUserService
         private void updateContentCaptureOptions(@Nullable ArraySet<String> oldList) {
             ArraySet<String> adding = mMaster.mGlobalContentCaptureOptions
                     .getWhitelistedPackages(mUserId);
-            EventLog.writeEvent(EventLogTags.CC_CURRENT_ALLOWLIST, mUserId, adding.size());
 
             if (oldList != null && adding != null) {
                 adding.removeAll(oldList);
             }
 
             int N = adding != null ? adding.size() : 0;
-            EventLog.writeEvent(EventLogTags.CC_UPDATE_OPTIONS, mUserId, N);
             for (int i = 0; i < N; i++) {
                 String packageName = adding.valueAt(i);
                 ContentCaptureOptions options = mMaster.mGlobalContentCaptureOptions
