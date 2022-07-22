@@ -166,9 +166,8 @@ public final class MediaRouter2Manager {
      */
     public void registerScanRequest() {
         if (mScanRequestCount.getAndIncrement() == 0) {
-            Client client = getOrCreateClient();
             try {
-                mMediaRouterService.startScan(client);
+                mMediaRouterService.startScan(getOrCreateClient());
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -194,9 +193,8 @@ public final class MediaRouter2Manager {
                     }
                 })
                 == 0) {
-            Client client = getOrCreateClient();
             try {
-                mMediaRouterService.stopScan(client);
+                mMediaRouterService.stopScan(getOrCreateClient());
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -425,15 +423,11 @@ public final class MediaRouter2Manager {
      */
     @NonNull
     public List<RoutingSessionInfo> getRemoteSessions() {
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                return mMediaRouterService.getRemoteSessions(client);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
+        try {
+            return mMediaRouterService.getRemoteSessions(getOrCreateClient());
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
-        return Collections.emptyList();
     }
 
     /**
@@ -516,14 +510,12 @@ public final class MediaRouter2Manager {
             return;
         }
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                int requestId = mNextRequestId.getAndIncrement();
-                mMediaRouterService.setRouteVolumeWithManager(client, requestId, route, volume);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
+        try {
+            int requestId = mNextRequestId.getAndIncrement();
+            mMediaRouterService.setRouteVolumeWithManager(
+                    getOrCreateClient(), requestId, route, volume);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -545,15 +537,12 @@ public final class MediaRouter2Manager {
             return;
         }
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                int requestId = mNextRequestId.getAndIncrement();
-                mMediaRouterService.setSessionVolumeWithManager(
-                        client, requestId, sessionInfo.getId(), volume);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
+        try {
+            int requestId = mNextRequestId.getAndIncrement();
+            mMediaRouterService.setSessionVolumeWithManager(
+                    getOrCreateClient(), requestId, sessionInfo.getId(), volume);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -810,15 +799,12 @@ public final class MediaRouter2Manager {
             return;
         }
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                int requestId = mNextRequestId.getAndIncrement();
-                mMediaRouterService.selectRouteWithManager(
-                        client, requestId, sessionInfo.getId(), route);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
+        try {
+            int requestId = mNextRequestId.getAndIncrement();
+            mMediaRouterService.selectRouteWithManager(
+                    getOrCreateClient(), requestId, sessionInfo.getId(), route);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -852,15 +838,12 @@ public final class MediaRouter2Manager {
             return;
         }
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                int requestId = mNextRequestId.getAndIncrement();
-                mMediaRouterService.deselectRouteWithManager(
-                        client, requestId, sessionInfo.getId(), route);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
+        try {
+            int requestId = mNextRequestId.getAndIncrement();
+            mMediaRouterService.deselectRouteWithManager(
+                    getOrCreateClient(), requestId, sessionInfo.getId(), route);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -877,15 +860,12 @@ public final class MediaRouter2Manager {
     public void releaseSession(@NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                int requestId = mNextRequestId.getAndIncrement();
-                mMediaRouterService.releaseSessionWithManager(
-                        client, requestId, sessionInfo.getId());
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
+        try {
+            int requestId = mNextRequestId.getAndIncrement();
+            mMediaRouterService.releaseSessionWithManager(
+                    getOrCreateClient(), requestId, sessionInfo.getId());
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -898,14 +878,11 @@ public final class MediaRouter2Manager {
             @NonNull MediaRoute2Info route) {
         int requestId = createTransferRequest(session, route);
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                mMediaRouterService.transferToRouteWithManager(
-                        client, requestId, session.getId(), route);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
+        try {
+            mMediaRouterService.transferToRouteWithManager(
+                    getOrCreateClient(), requestId, session.getId(), route);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -918,14 +895,11 @@ public final class MediaRouter2Manager {
 
         int requestId = createTransferRequest(oldSession, route);
 
-        Client client = getOrCreateClient();
-        if (client != null) {
-            try {
-                mMediaRouterService.requestCreateSessionWithManager(
-                        client, requestId, oldSession, route);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
+        try {
+            mMediaRouterService.requestCreateSessionWithManager(
+                    getOrCreateClient(), requestId, oldSession, route);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
