@@ -17,9 +17,6 @@ filegroup {
 java_library_static {
     name: "services.contentcapture",
     defaults: ["platform_service_defaults"],
-    srcs: [
-        ":services.contentcapture-sources",
-        "java/**/*.logtags",
-    ],
+    srcs: [":services.contentcapture-sources"],
     libs: ["services.core"],
 }
