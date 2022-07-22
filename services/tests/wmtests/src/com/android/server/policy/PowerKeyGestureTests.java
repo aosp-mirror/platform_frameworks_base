@@ -21,6 +21,7 @@ import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_ASSISTANT;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_GLOBAL_ACTIONS;
 
+import android.provider.Settings;
 import android.view.Display;
 
 import org.junit.Test;
@@ -79,6 +80,19 @@ public class PowerKeyGestureTests extends ShortcutKeyTestBase {
     @Test
     public void testIgnoreSinglePressWhenCombinationKeyTriggered() {
         sendKeyCombination(new int[]{KEYCODE_POWER, KEYCODE_VOLUME_UP}, 0);
+        mPhoneWindowManager.assertNoPowerSleep();
+    }
+
+    /**
+     * When a phone call is active, and INCALL_POWER_BUTTON_BEHAVIOR_HANGUP is enabled, then the
+     * power button should only stop phone call. The screen should not be turned off (power sleep
+     * should not be activated).
+     */
+    @Test
+    public void testIgnoreSinglePressWhenEndCall() {
+        mPhoneWindowManager.overrideIncallPowerBehavior(
+                Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_HANGUP);
+        sendKey(KEYCODE_POWER);
         mPhoneWindowManager.assertNoPowerSleep();
     }
 }
