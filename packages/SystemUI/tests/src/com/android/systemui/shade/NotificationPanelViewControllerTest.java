@@ -1284,6 +1284,29 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPanelClosedWhenClosingQsInSplitShade() {
+        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
+                /* expanded= */ true, /* tracking= */ false, /* dragDownPxAmount= */ 0);
+        enableSplitShade(/* enabled= */ true);
+        mNotificationPanelViewController.setExpandedFraction(1f);
+
+        assertThat(mNotificationPanelViewController.isClosing()).isFalse();
+        mNotificationPanelViewController.animateCloseQs(false);
+        assertThat(mNotificationPanelViewController.isClosing()).isTrue();
+    }
+
+    @Test
+    public void testPanelStaysOpenWhenClosingQs() {
+        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
+                /* expanded= */ true, /* tracking= */ false, /* dragDownPxAmount= */ 0);
+        mNotificationPanelViewController.setExpandedFraction(1f);
+
+        assertThat(mNotificationPanelViewController.isClosing()).isFalse();
+        mNotificationPanelViewController.animateCloseQs(false);
+        assertThat(mNotificationPanelViewController.isClosing()).isFalse();
+    }
+
+    @Test
     public void interceptTouchEvent_withinQs_shadeExpanded_startsQsTracking() {
         mNotificationPanelViewController.mQs = mQs;
         when(mQsFrame.getX()).thenReturn(0f);
