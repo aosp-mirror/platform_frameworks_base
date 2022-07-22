@@ -4596,6 +4596,7 @@ package android.app {
     method public boolean canScheduleExactAlarms();
     method public void cancel(android.app.PendingIntent);
     method public void cancel(android.app.AlarmManager.OnAlarmListener);
+    method public void cancelAll();
     method public android.app.AlarmManager.AlarmClockInfo getNextAlarmClock();
     method public void set(int, long, android.app.PendingIntent);
     method public void set(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);

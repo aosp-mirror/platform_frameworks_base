@@ -2966,6 +2966,24 @@ public class AlarmManagerService extends SystemService {
         }
 
         @Override
+        public void removeAll(String callingPackage) {
+            final int callingUid = mInjector.getCallingUid();
+            if (callingUid == Process.SYSTEM_UID) {
+                Slog.wtfStack(TAG, "Attempt to remove all alarms from the system uid package: "
+                        + callingPackage);
+                return;
+            }
+            if (callingUid != mPackageManagerInternal.getPackageUid(callingPackage, 0,
+                    UserHandle.getUserId(callingUid))) {
+                throw new SecurityException("Package " + callingPackage
+                        + " does not belong to the calling uid " + callingUid);
+            }
+            synchronized (mLock) {
+                removeLocked(callingPackage, REMOVE_REASON_ALARM_CANCELLED);
+            }
+        }
+
+        @Override
         public long getNextWakeFromIdleTime() {
             return getNextWakeFromIdleTimeImpl();
         }
@@ -4077,7 +4095,7 @@ public class AlarmManagerService extends SystemService {
     }
 
     @GuardedBy("mLock")
-    void removeLocked(final String packageName) {
+    void removeLocked(final String packageName, int reason) {
         if (packageName == null) {
             if (localLOGV) {
                 Slog.w(TAG, "requested remove() of null packageName",
@@ -4085,7 +4103,7 @@ public class AlarmManagerService extends SystemService {
             }
             return;
         }
-        removeAlarmsInternalLocked(a -> a.matches(packageName), REMOVE_REASON_UNDEFINED);
+        removeAlarmsInternalLocked(a -> a.matches(packageName), reason);
     }
 
     // Only called for ephemeral apps
@@ -5128,7 +5146,7 @@ public class AlarmManagerService extends SystemService {
                             removeLocked(uid, REMOVE_REASON_UNDEFINED);
                         } else {
                             // external-applications-unavailable case
-                            removeLocked(pkg);
+                            removeLocked(pkg, REMOVE_REASON_UNDEFINED);
                         }
                         mPriorities.remove(pkg);
                         for (int i = mBroadcastStats.size() - 1; i >= 0; i--) {

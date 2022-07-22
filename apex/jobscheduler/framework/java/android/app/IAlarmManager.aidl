@@ -37,6 +37,7 @@ interface IAlarmManager {
     boolean setTime(long millis);
     void setTimeZone(String zone);
     void remove(in PendingIntent operation, in IAlarmListener listener);
+    void removeAll(String packageName);
     long getNextWakeFromIdleTime();
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     AlarmManager.AlarmClockInfo getNextAlarmClock(int userId);
