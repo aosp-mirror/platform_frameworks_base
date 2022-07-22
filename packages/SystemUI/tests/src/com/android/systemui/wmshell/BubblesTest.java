@@ -1433,6 +1433,35 @@ public class BubblesTest extends SysuiTestCase {
         assertThat(mBubbleData.hasBubbleInStackWithKey(mBubbleEntry.getKey())).isFalse();
     }
 
+    /**
+     * Verifies that if a bubble is in the overflow and a non-interruptive notification update
+     * comes in for it with FLAG_BUBBLE that the flag is removed.
+     */
+    @Test
+    public void testNonInterruptiveUpdate_doesntOverrideOverflowFlagBubble() {
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
+        assertBubbleNotificationNotSuppressedFromShade(mBubbleEntry);
+
+        // Dismiss the bubble so it's in the overflow
+        mBubbleController.removeBubble(
+                mRow.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(mRow.getKey())).isTrue();
+        // Once it's in the overflow it's not actively a bubble (doesn't have FLAG_BUBBLE)
+        Bubble b = mBubbleData.getOverflowBubbleWithKey(mBubbleEntry.getKey());
+        assertThat(b.isBubble()).isFalse();
+
+        // Send a non-notifying update that has FLAG_BUBBLE
+        mRow.getSbn().getNotification().flags = FLAG_BUBBLE;
+        assertThat(mRow.getSbn().getNotification().isBubbleNotification()).isTrue();
+        mBubbleController.updateBubble(mBubbleEntry,
+                /* suppressFlyout= */ false, /* showInShade= */ true);
+
+        // Verify that it still doesn't have FLAG_BUBBLE because it's in the overflow.
+        b = mBubbleData.getOverflowBubbleWithKey(mBubbleEntry.getKey());
+        assertThat(b.isBubble()).isFalse();
+    }
+
     @Test
     public void testNonSystemUpdatesIgnored() {
         mEntryListener.onEntryAdded(mRow);

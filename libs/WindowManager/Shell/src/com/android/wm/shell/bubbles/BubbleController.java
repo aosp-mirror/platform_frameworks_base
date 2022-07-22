@@ -1061,6 +1061,9 @@ public class BubbleController implements ConfigurationChangeListener {
                 && mBubbleData.hasOverflowBubbleWithKey(notif.getKey())) {
             // Update the bubble but don't promote it out of overflow
             Bubble b = mBubbleData.getOverflowBubbleWithKey(notif.getKey());
+            if (notif.isBubble()) {
+                notif.setFlagBubble(false);
+            }
             b.setEntry(notif);
         } else if (mBubbleData.isSuppressedWithLocusId(notif.getLocusId())) {
             // Update the bubble but don't promote it out of overflow
@@ -1176,7 +1179,7 @@ public class BubbleController implements ConfigurationChangeListener {
                 // notification, so that the bubble will be re-created if shouldBubbleUp returns
                 // true.
                 mBubbleData.dismissBubbleWithKey(key, DISMISS_NO_BUBBLE_UP);
-            } else if (entry != null && mTmpRanking.isBubble() && !isActive) {
+            } else if (entry != null && mTmpRanking.isBubble() && !isActiveOrInOverflow) {
                 entry.setFlagBubble(true);
                 onEntryUpdated(entry, shouldBubbleUp, /* fromSystem= */ true);
             }
