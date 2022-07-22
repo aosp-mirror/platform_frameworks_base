@@ -59,13 +59,13 @@
     <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> కనెక్ట్ అయి ఉన్న ఎల్లప్పుడూ <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవండి"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB డీబగ్గింగ్‌ను అనుమతించాలా?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"ఇది కంప్యూటర్ యొక్క RSA కీ వేలిముద్ర:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
-    <string name="usb_debugging_always" msgid="4003121804294739548">"ఈ కంప్యూటర్ నుండి ఎల్లప్పుడూ అనుమతించు"</string>
+    <string name="usb_debugging_always" msgid="4003121804294739548">"ఈ కంప్యూటర్ నుండి ఎల్లప్పుడూ అనుమతించండి"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"అనుమతించండి"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB డీబగ్గింగ్‌కి అనుమతి లేదు"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"ఈ పరికరానికి ప్రస్తుతం సైన్ ఇన్ చేసిన వినియోగదారు USB డీబగ్గింగ్ ఆన్ చేయలేరు. ఈ ఫీచర్ ఉపయోగించడానికి, ప్రాథమిక వినియోగదారుకి మారాలి."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"ఈ నెట్‌వర్క్ ద్వారా వైర్‌లెస్ డీబగ్గింగ్‌ను అనుమతించాలా?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"నెట్‌వర్క్ పేరు (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi అడ్రస్ (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"ఈ నెట్‌వర్క్ నుండి ఎల్లప్పుడూ అనుమతించు"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"ఈ నెట్‌వర్క్ నుండి ఎల్లప్పుడూ అనుమతించండి"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"అనుమతించండి"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"వైర్‌లెస్ డీబగ్గింగ్‌కి అనుమతి లేదు"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"ఈ పరికరానికి ప్రస్తుతం సైన్ ఇన్ చేసిన యూజర్, వైర్‌లెస్ డీబగ్గింగ్ ఆన్ చేయలేరు. ఈ ఫీచర్ ఉపయోగించడానికి, ప్రాథమిక యూజర్ కి స్విచ్ అవ్వండి."</string>
@@ -178,7 +178,7 @@
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"చాలా ఎక్కువ తప్పు ప్రయత్నాలు చేశారు. ఈ పరికరం యొక్క డేటా తొలగించబడుతుంది."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"చాలా ఎక్కువ తప్పు ప్రయత్నాలు చేశారు. ఈ యూజర్ తొలగించబడతారు."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"చాలా ఎక్కువ తప్పు ప్రయత్నాలు చేశారు. ఈ కార్యాలయ ప్రొఫైల్ మరియు దీని డేటా తొలగించబడతాయి."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"తీసివేయి"</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"తీసివేయండి"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"వేలిముద్ర సెన్సార్‌ను తాకండి"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"వేలిముద్ర చిహ్నం"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ముఖం గుర్తించలేము. బదులుగా వేలిముద్ర ఉపయోగించండి."</string>
@@ -482,14 +482,14 @@
     <string name="user_new_user_name" msgid="2019166282704195789">"కొత్త వినియోగదారు"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"గెస్ట్‌ను తీసివేయాలా?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"తీసివేయి"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"తీసివేయండి"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"గెస్ట్‌కు తిరిగి స్వాగతం!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"మొదటి నుండి ప్రారంభించు"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"అవును, కొనసాగించు"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"అతిథి వినియోగదారు"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"యాప్‌లు, డేటా తొలగించేందుకు అతిథి వినియోగదారు తీసివేయండి"</string>
-    <string name="guest_notification_remove_action" msgid="4153019027696868099">"అతిథిని తీసివేయి"</string>
+    <string name="guest_notification_remove_action" msgid="4153019027696868099">"అతిథిని తీసివేయండి"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"వినియోగదారుని లాగ్ అవుట్ చేయండి"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"ప్రస్తుత వినియోగదారును లాగ్ అవుట్ చేయండి"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"వినియోగదారుని లాగ్ అవుట్ చేయి"</string>
@@ -502,7 +502,7 @@
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"వినియోగదారుని తీసివేయాలా?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"ఈ వినియోగదారుకు సంబంధించిన అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
-    <string name="user_remove_user_remove" msgid="8387386066949061256">"తీసివేయి"</string>
+    <string name="user_remove_user_remove" msgid="8387386066949061256">"తీసివేయండి"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"బ్యాటరీ సేవర్ ఆన్‌లో ఉంది"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"పనితీరుని మరియు నేపథ్య డేటాను తగ్గిస్తుంది"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"బ్యాటరీ సేవర్‌ను ఆఫ్ చేయండి"</string>
@@ -691,7 +691,7 @@
     <string name="tuner_persistent_warning" msgid="230466285569307806">"ఈ ప్రయోగాత్మక లక్షణాలు భవిష్యత్తు విడుదలల్లో మార్పుకు లోనవ్వచ్చు, తాత్కాలికంగా లేదా పూర్తిగా నిలిపివేయవచ్చు. జాగ్రత్తగా కొనసాగండి."</string>
     <string name="got_it" msgid="477119182261892069">"అర్థమైంది"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"అభినందనలు! సెట్టింగ్‌లకు సిస్టమ్ UI ట్యూనర్ జోడించబడింది"</string>
-    <string name="remove_from_settings" msgid="633775561782209994">"సెట్టింగ్‌ల నుండి తీసివేయి"</string>
+    <string name="remove_from_settings" msgid="633775561782209994">"సెట్టింగ్‌ల నుండి తీసివేయండి"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"సిస్టమ్ UI ట్యూనర్‌ను సెట్టింగ్‌ల నుండి తీసివేసి, దాని అన్ని లక్షణాలను ఉపయోగించడం ఆపివేయాలా?"</string>
     <string name="activity_not_found" msgid="8711661533828200293">"యాప్ మీ డివైజ్‌లో ఇన్‌స్టాల్ చేయలేదు"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"గడియారం సెకన్లు చూపు"</string>
@@ -703,7 +703,7 @@
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"మీ కీబోర్డ్‌ను మీ టాబ్లెట్‌తో కనెక్ట్ చేయడానికి, మీరు ముందుగా బ్లూటూత్ ఆన్ చేయాలి."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"ఆన్ చేయి"</string>
     <string name="show_silently" msgid="5629369640872236299">"నోటిఫికేషన్‌లను శబ్దం లేకుండా చూపు"</string>
-    <string name="block" msgid="188483833983476566">"అన్ని నోటిఫికేషన్‌లను బ్లాక్ చేయి"</string>
+    <string name="block" msgid="188483833983476566">"అన్ని నోటిఫికేషన్‌లను బ్లాక్ చేయండి"</string>
     <string name="do_not_silence" msgid="4982217934250511227">"నిశ్శబ్దం చేయవద్దు"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"నిశ్శబ్దం చేయవద్దు లేదా బ్లాక్ చేయవద్దు"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"పవర్ నోటిఫికేషన్ నియంత్రణలు"</string>
@@ -720,8 +720,8 @@
     <string name="inline_ok_button" msgid="603075490581280343">"అప్లయి చేయి"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"ఈ నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"నోటిఫికేషన్‌లను ఆపివేయి"</string>
-    <string name="inline_deliver_silently_button" msgid="2714314213321223286">"నిశ్శబ్దంగా బట్వాడా చేయండి"</string>
-    <string name="inline_block_button" msgid="479892866568378793">"బ్లాక్ చేయి"</string>
+    <string name="inline_deliver_silently_button" msgid="2714314213321223286">"నిశ్శబ్దంగా డెలివరీ చేయండి"</string>
+    <string name="inline_block_button" msgid="479892866568378793">"బ్లాక్ చేయండి"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"చూపిస్తూనే ఉండు"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"కుదించు"</string>
     <string name="inline_silent_button_silent" msgid="525243786649275816">"నిశ్శబ్దం"</string>
@@ -784,7 +784,7 @@
     <string name="notification_conversation_mute" msgid="268951550222925548">"నిశ్శబ్దం చేయబడింది"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"అలర్ట్ చేయడం"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"బబుల్‌ను చూపించు"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"బబుల్స్ తీసివేయి"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"బబుల్స్ తీసివేయండి"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"హోమ్ స్క్రీన్‌కు జోడించండి"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"నోటిఫికేషన్ నియంత్రణలు"</string>
@@ -831,7 +831,7 @@
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"నంబర్ ప్యాడ్ <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"అటాచ్‌మెంట్‌ను తీసివేయి"</string>
+    <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"అటాచ్‌మెంట్‌ను తీసివేయండి"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"సిస్టమ్"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"హోమ్"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"ఇటీవలివి"</string>
@@ -1056,7 +1056,7 @@
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"<xliff:g id="NUMBER">%d</xliff:g>వ స్థానంలో ఇష్టమైనదిగా గుర్తు పెట్టబడింది"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"ఇష్టమైనదిగా పెట్టిన గుర్తు తీసివేయబడింది"</string>
     <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"ఇష్టమైనదిగా గుర్తు పెట్టు"</string>
-    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ఇష్టమైనదిగా పెట్టిన గుర్తును తీసివేయి"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ఇష్టమైనదిగా పెట్టిన గుర్తును తీసివేయండి"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> పొజిషన్‌కు తరలించండి"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"నియంత్రణలు"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"త్వరిత సెట్టింగ్‌ల నుండి యాక్సెస్ చేయడానికి కంట్రోల్స్‌ను ఎంచుకోండి"</string>
