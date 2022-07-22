@@ -53,7 +53,16 @@ public class TimeDetectorStrategyImplTest {
 
     private static final @UserIdInt int ARBITRARY_USER_ID = 9876;
     private static final int ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS = 1234;
-    private static final Instant TIME_LOWER_BOUND = createUnixEpochTime(2009, 1, 1, 12, 0, 0);
+    private static final Instant DEFAULT_SUGGESTION_LOWER_BOUND =
+            createUnixEpochTime(2005, 1, 1, 1, 0, 0);
+    /** A value after {@link #DEFAULT_SUGGESTION_LOWER_BOUND} */
+    private static final Instant TEST_SUGGESTION_LOWER_BOUND =
+            createUnixEpochTime(2006, 1, 1, 1, 0, 0);
+    private static final Instant DEFAULT_SUGGESTION_UPPER_BOUND =
+            createUnixEpochTime(2099, 12, 1, 1, 0, 0);
+    /** A value before {@link #DEFAULT_SUGGESTION_UPPER_BOUND} */
+    private static final Instant TEST_SUGGESTION_UPPER_BOUND =
+            createUnixEpochTime(2037, 12, 1, 1, 0, 0);
 
     private static final TimestampedValue<Instant> ARBITRARY_CLOCK_INITIALIZATION_INFO =
             new TimestampedValue<>(
@@ -77,9 +86,10 @@ public class TimeDetectorStrategyImplTest {
                     .setAutoDetectionSupported(true)
                     .setSystemClockUpdateThresholdMillis(
                             ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS)
-                    .setAutoTimeLowerBound(TIME_LOWER_BOUND)
+                    .setAutoSuggestionLowerBound(DEFAULT_SUGGESTION_LOWER_BOUND)
+                    .setManualSuggestionLowerBound(DEFAULT_SUGGESTION_LOWER_BOUND)
+                    .setSuggestionUpperBound(DEFAULT_SUGGESTION_UPPER_BOUND)
                     .setOriginPriorities(ORIGIN_PRIORITIES)
-                    .setDeviceHasY2038Issue(true)
                     .setAutoDetectionEnabledSetting(false)
                     .build();
 
@@ -89,9 +99,10 @@ public class TimeDetectorStrategyImplTest {
                     .setAutoDetectionSupported(true)
                     .setSystemClockUpdateThresholdMillis(
                             ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS)
-                    .setAutoTimeLowerBound(TIME_LOWER_BOUND)
+                    .setAutoSuggestionLowerBound(DEFAULT_SUGGESTION_LOWER_BOUND)
+                    .setManualSuggestionLowerBound(DEFAULT_SUGGESTION_LOWER_BOUND)
+                    .setSuggestionUpperBound(DEFAULT_SUGGESTION_UPPER_BOUND)
                     .setOriginPriorities(ORIGIN_PRIORITIES)
-                    .setDeviceHasY2038Issue(true)
                     .setAutoDetectionEnabledSetting(true)
                     .build();
 
@@ -344,22 +355,6 @@ public class TimeDetectorStrategyImplTest {
     }
 
     @Test
-    public void telephonyTimeSuggestion_ignoredWhenReferencedTimeIsInThePast() {
-        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
-
-        int slotIndex = ARBITRARY_SLOT_INDEX;
-        Instant suggestedTime = TIME_LOWER_BOUND.minus(Duration.ofDays(1));
-
-        TelephonyTimeSuggestion timeSuggestion =
-                script.generateTelephonyTimeSuggestion(
-                        slotIndex, suggestedTime);
-
-        script.simulateTelephonyTimeSuggestion(timeSuggestion)
-                .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestTelephonySuggestion(slotIndex, null);
-    }
-
-    @Test
     public void testSuggestTelephonyTime_timeDetectionToggled() {
         final int clockIncrementMillis = 100;
         final int systemClockUpdateThresholdMillis = 2000;
@@ -453,6 +448,70 @@ public class TimeDetectorStrategyImplTest {
     }
 
     @Test
+    public void testSuggestTelephonyTime_rejectedBelowLowerBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY)
+                        .setAutoSuggestionLowerBound(TEST_SUGGESTION_LOWER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant belowLowerBound = TEST_SUGGESTION_LOWER_BOUND.minusSeconds(1);
+        TelephonyTimeSuggestion timeSuggestion =
+                script.generateTelephonyTimeSuggestion(ARBITRARY_SLOT_INDEX, belowLowerBound);
+        script.simulateTelephonyTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void testSuggestTelephonyTime_notRejectedAboveLowerBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY)
+                        .setAutoSuggestionLowerBound(TEST_SUGGESTION_LOWER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant aboveLowerBound = TEST_SUGGESTION_LOWER_BOUND.plusSeconds(1);
+        TelephonyTimeSuggestion timeSuggestion =
+                script.generateTelephonyTimeSuggestion(ARBITRARY_SLOT_INDEX, aboveLowerBound);
+        script.simulateTelephonyTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(aboveLowerBound.toEpochMilli());
+    }
+
+    @Test
+    public void testSuggestTelephonyTime_rejectedAboveUpperBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY)
+                        .setSuggestionUpperBound(TEST_SUGGESTION_UPPER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant aboveUpperBound = TEST_SUGGESTION_UPPER_BOUND.plusSeconds(1);
+        TelephonyTimeSuggestion timeSuggestion =
+                script.generateTelephonyTimeSuggestion(ARBITRARY_SLOT_INDEX, aboveUpperBound);
+        script.simulateTelephonyTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void testSuggestTelephonyTime_notRejectedBelowUpperBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY)
+                        .setSuggestionUpperBound(TEST_SUGGESTION_UPPER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant belowUpperBound = TEST_SUGGESTION_UPPER_BOUND.minusSeconds(1);
+        TelephonyTimeSuggestion timeSuggestion =
+                script.generateTelephonyTimeSuggestion(ARBITRARY_SLOT_INDEX, belowUpperBound);
+        script.simulateTelephonyTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(belowUpperBound.toEpochMilli());
+    }
+
+    @Test
     public void testSuggestManualTime_autoTimeDisabled() {
         Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED);
 
@@ -530,7 +589,7 @@ public class TimeDetectorStrategyImplTest {
     }
 
     @Test
-    public void manualTimeSuggestion_isIgnored_whenAutoTimeEnabled() {
+    public void testSuggestManualTime_isIgnored_whenAutoTimeEnabled() {
         Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
 
         ManualTimeSuggestion timeSuggestion =
@@ -543,16 +602,63 @@ public class TimeDetectorStrategyImplTest {
     }
 
     @Test
-    public void manualTimeSuggestion_ignoresTimeLowerBound() {
-        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED);
-        Instant suggestedTime = TIME_LOWER_BOUND.minus(Duration.ofDays(1));
+    public void testSuggestManualTime_rejectedAboveUpperBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
+                        .setSuggestionUpperBound(TEST_SUGGESTION_UPPER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
-        ManualTimeSuggestion timeSuggestion =
-                script.generateManualTimeSuggestion(suggestedTime);
-
+        Instant aboveUpperBound = TEST_SUGGESTION_UPPER_BOUND.plusSeconds(1);
+        ManualTimeSuggestion timeSuggestion = script.generateManualTimeSuggestion(aboveUpperBound);
         script.simulateManualTimeSuggestion(
-                ARBITRARY_USER_ID, timeSuggestion, true /* expectedResult */)
-                .verifySystemClockWasSetAndResetCallTracking(suggestedTime.toEpochMilli());
+                        ARBITRARY_USER_ID, timeSuggestion, false /* expectedResult */)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void testSuggestManualTime_notRejectedBelowUpperBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
+                        .setSuggestionUpperBound(TEST_SUGGESTION_UPPER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant belowUpperBound = TEST_SUGGESTION_UPPER_BOUND.minusSeconds(1);
+        ManualTimeSuggestion timeSuggestion = script.generateManualTimeSuggestion(belowUpperBound);
+        script.simulateManualTimeSuggestion(
+                        ARBITRARY_USER_ID, timeSuggestion, true /* expectedResult */)
+                .verifySystemClockWasSetAndResetCallTracking(belowUpperBound.toEpochMilli());
+    }
+
+    @Test
+    public void testSuggestManualTime_rejectedBelowLowerBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
+                        .setManualSuggestionLowerBound(TEST_SUGGESTION_LOWER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant belowLowerBound = TEST_SUGGESTION_LOWER_BOUND.minusSeconds(1);
+        ManualTimeSuggestion timeSuggestion = script.generateManualTimeSuggestion(belowLowerBound);
+        script.simulateManualTimeSuggestion(
+                        ARBITRARY_USER_ID, timeSuggestion, false /* expectedResult */)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void testSuggestManualTimes_notRejectedAboveLowerBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
+                        .setManualSuggestionLowerBound(TEST_SUGGESTION_LOWER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant aboveLowerBound = TEST_SUGGESTION_LOWER_BOUND.plusSeconds(1);
+        ManualTimeSuggestion timeSuggestion = script.generateManualTimeSuggestion(aboveLowerBound);
+        script.simulateManualTimeSuggestion(
+                        ARBITRARY_USER_ID, timeSuggestion, true /* expectedResult */)
+                .verifySystemClockWasSetAndResetCallTracking(aboveLowerBound.toEpochMilli());
     }
 
     @Test
@@ -591,20 +697,67 @@ public class TimeDetectorStrategyImplTest {
     }
 
     @Test
-    public void networkTimeSuggestion_ignoredWhenReferencedTimeIsInThePast() {
+    public void testSuggestNetworkTime_rejectedBelowLowerBound() {
         ConfigurationInternal configInternal =
                 new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
                         .setOriginPriorities(ORIGIN_NETWORK)
+                        .setAutoSuggestionLowerBound(TEST_SUGGESTION_LOWER_BOUND)
                         .build();
         Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
-        Instant suggestedTime = TIME_LOWER_BOUND.minus(Duration.ofDays(1));
+        Instant belowLowerBound = TEST_SUGGESTION_LOWER_BOUND.minusSeconds(1);
         NetworkTimeSuggestion timeSuggestion =
-                script.generateNetworkTimeSuggestion(suggestedTime);
-
+                script.generateNetworkTimeSuggestion(belowLowerBound);
         script.simulateNetworkTimeSuggestion(timeSuggestion)
-                .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestNetworkSuggestion(null);
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void testSuggestNetworkTime_notRejectedAboveLowerBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_NETWORK)
+                        .setAutoSuggestionLowerBound(TEST_SUGGESTION_LOWER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant aboveLowerBound = TEST_SUGGESTION_LOWER_BOUND.plusSeconds(1);
+        NetworkTimeSuggestion timeSuggestion =
+                script.generateNetworkTimeSuggestion(aboveLowerBound);
+        script.simulateNetworkTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(aboveLowerBound.toEpochMilli());
+    }
+
+    @Test
+    public void testSuggestNetworkTime_rejectedAboveUpperBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_NETWORK)
+                        .setSuggestionUpperBound(TEST_SUGGESTION_UPPER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant aboveUpperBound = TEST_SUGGESTION_UPPER_BOUND.plusSeconds(1);
+        NetworkTimeSuggestion timeSuggestion =
+                script.generateNetworkTimeSuggestion(aboveUpperBound);
+        script.simulateNetworkTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void testSuggestNetworkTime_notRejectedBelowUpperBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_NETWORK)
+                        .setSuggestionUpperBound(TEST_SUGGESTION_UPPER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant belowUpperBound = TEST_SUGGESTION_UPPER_BOUND.minusSeconds(1);
+        NetworkTimeSuggestion timeSuggestion =
+                script.generateNetworkTimeSuggestion(belowUpperBound);
+        script.simulateNetworkTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(belowUpperBound.toEpochMilli());
     }
 
     @Test
@@ -643,6 +796,70 @@ public class TimeDetectorStrategyImplTest {
     }
 
     @Test
+    public void testSuggestGnssTime_rejectedBelowLowerBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_GNSS)
+                        .setAutoSuggestionLowerBound(TEST_SUGGESTION_LOWER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant belowLowerBound = TEST_SUGGESTION_LOWER_BOUND.minusSeconds(1);
+        GnssTimeSuggestion timeSuggestion =
+                script.generateGnssTimeSuggestion(belowLowerBound);
+        script.simulateGnssTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void testSuggestGnssTime_notRejectedAboveLowerBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_GNSS)
+                        .setAutoSuggestionLowerBound(TEST_SUGGESTION_LOWER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant aboveLowerBound = TEST_SUGGESTION_LOWER_BOUND.plusSeconds(1);
+        GnssTimeSuggestion timeSuggestion =
+                script.generateGnssTimeSuggestion(aboveLowerBound);
+        script.simulateGnssTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(aboveLowerBound.toEpochMilli());
+    }
+
+    @Test
+    public void testSuggestGnssTime_rejectedAboveUpperBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_GNSS)
+                        .setSuggestionUpperBound(TEST_SUGGESTION_UPPER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant aboveUpperBound = TEST_SUGGESTION_UPPER_BOUND.plusSeconds(1);
+        GnssTimeSuggestion timeSuggestion =
+                script.generateGnssTimeSuggestion(aboveUpperBound);
+        script.simulateGnssTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void testSuggestGnssTime_notRejectedBelowUpperBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_GNSS)
+                        .setSuggestionUpperBound(TEST_SUGGESTION_UPPER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant belowUpperBound = TEST_SUGGESTION_UPPER_BOUND.minusSeconds(1);
+        GnssTimeSuggestion timeSuggestion =
+                script.generateGnssTimeSuggestion(belowUpperBound);
+        script.simulateGnssTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(belowUpperBound.toEpochMilli());
+    }
+
+    @Test
     public void testSuggestExternalTime_autoTimeEnabled() {
         ConfigurationInternal configInternal =
                 new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
@@ -678,20 +895,67 @@ public class TimeDetectorStrategyImplTest {
     }
 
     @Test
-    public void externalTimeSuggestion_ignoredWhenReferencedTimeIsInThePast() {
+    public void testSuggestExternalTime_rejectedBelowLowerBound() {
         ConfigurationInternal configInternal =
                 new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
                         .setOriginPriorities(ORIGIN_EXTERNAL)
+                        .setAutoSuggestionLowerBound(TEST_SUGGESTION_LOWER_BOUND)
                         .build();
         Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
-        Instant suggestedTime = TIME_LOWER_BOUND.minus(Duration.ofDays(1));
+        Instant belowLowerBound = TEST_SUGGESTION_LOWER_BOUND.minusSeconds(1);
         ExternalTimeSuggestion timeSuggestion =
-                script.generateExternalTimeSuggestion(suggestedTime);
-
+                script.generateExternalTimeSuggestion(belowLowerBound);
         script.simulateExternalTimeSuggestion(timeSuggestion)
-                .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestExternalSuggestion(null);
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void testSuggestExternalTime_notRejectedAboveLowerBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_EXTERNAL)
+                        .setAutoSuggestionLowerBound(TEST_SUGGESTION_LOWER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant aboveLowerBound = TEST_SUGGESTION_LOWER_BOUND.plusSeconds(1);
+        ExternalTimeSuggestion timeSuggestion =
+                script.generateExternalTimeSuggestion(aboveLowerBound);
+        script.simulateExternalTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(aboveLowerBound.toEpochMilli());
+    }
+
+    @Test
+    public void testSuggestExternalTime_rejectedAboveUpperBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_EXTERNAL)
+                        .setSuggestionUpperBound(TEST_SUGGESTION_UPPER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant aboveUpperBound = TEST_SUGGESTION_UPPER_BOUND.plusSeconds(1);
+        ExternalTimeSuggestion timeSuggestion =
+                script.generateExternalTimeSuggestion(aboveUpperBound);
+        script.simulateExternalTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void testSuggestExternalTime_notRejectedBelowUpperBound() {
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_EXTERNAL)
+                        .setSuggestionUpperBound(TEST_SUGGESTION_UPPER_BOUND)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
+
+        Instant belowUpperBound = TEST_SUGGESTION_UPPER_BOUND.minusSeconds(1);
+        ExternalTimeSuggestion timeSuggestion =
+                script.generateExternalTimeSuggestion(belowUpperBound);
+        script.simulateExternalTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(belowUpperBound.toEpochMilli());
     }
 
     @Test
@@ -1196,56 +1460,6 @@ public class TimeDetectorStrategyImplTest {
         script.simulateManualTimeSuggestion(
                 ARBITRARY_USER_ID, timeSuggestion, true /* expectedResult */)
                 .verifySystemClockWasSetAndResetCallTracking(ARBITRARY_TEST_TIME.toEpochMilli());
-    }
-
-    @Test
-    public void manualY2038SuggestionsAreRejectedOnAffectedDevices() {
-        ConfigurationInternal configInternal =
-                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
-                        .setOriginPriorities(ORIGIN_TELEPHONY)
-                        .setDeviceHasY2038Issue(true)
-                        .build();
-        Script script = new Script().simulateConfigurationInternalChange(configInternal);
-
-        Instant y2038IssueTime = Instant.ofEpochMilli((1L + Integer.MAX_VALUE) * 1000L);
-        ManualTimeSuggestion timeSuggestion = script.generateManualTimeSuggestion(y2038IssueTime);
-        script.simulateManualTimeSuggestion(
-                ARBITRARY_USER_ID, timeSuggestion, false /* expectedResult */)
-                .verifySystemClockWasNotSetAndResetCallTracking();
-    }
-
-    @Test
-    public void telephonyY2038SuggestionsAreRejectedOnAffectedDevices() {
-        ConfigurationInternal configInternal =
-                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
-                        .setOriginPriorities(ORIGIN_TELEPHONY)
-                        .setDeviceHasY2038Issue(true)
-                        .build();
-        Script script = new Script().simulateConfigurationInternalChange(configInternal);
-
-        final int slotIndex = 0;
-        Instant y2038IssueTime = Instant.ofEpochMilli((1L + Integer.MAX_VALUE) * 1000L);
-        TelephonyTimeSuggestion timeSuggestion =
-                script.generateTelephonyTimeSuggestion(slotIndex, y2038IssueTime);
-        script.simulateTelephonyTimeSuggestion(timeSuggestion)
-                .verifySystemClockWasNotSetAndResetCallTracking();
-    }
-
-    @Test
-    public void telephonyY2038SuggestionsAreNotRejectedOnUnaffectedDevices() {
-        ConfigurationInternal configInternal =
-                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
-                        .setOriginPriorities(ORIGIN_TELEPHONY)
-                        .setDeviceHasY2038Issue(false)
-                        .build();
-        Script script = new Script().simulateConfigurationInternalChange(configInternal);
-
-        final int slotIndex = 0;
-        Instant y2038IssueTime = Instant.ofEpochMilli((1L + Integer.MAX_VALUE) * 1000L);
-        TelephonyTimeSuggestion timeSuggestion =
-                script.generateTelephonyTimeSuggestion(slotIndex, y2038IssueTime);
-        script.simulateTelephonyTimeSuggestion(timeSuggestion)
-                .verifySystemClockWasSetAndResetCallTracking(y2038IssueTime.toEpochMilli());
     }
 
     /**

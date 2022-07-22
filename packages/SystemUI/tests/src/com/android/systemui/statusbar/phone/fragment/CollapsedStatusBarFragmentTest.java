@@ -41,6 +41,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogcatEchoTracker;
@@ -105,6 +106,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private NotificationPanelViewController mNotificationPanelViewController;
     @Mock
     private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
+    @Mock
+    private DumpManager mDumpManager;
 
     public CollapsedStatusBarFragmentTest() {
         super(CollapsedStatusBarFragment.class);
@@ -122,7 +125,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
@@ -132,11 +135,11 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_SYSTEM_INFO, 0, false);
 
-        assertEquals(View.INVISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
     @Test
@@ -231,7 +234,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
@@ -242,7 +245,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
@@ -346,7 +349,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                         ),
                 mOperatorNameViewControllerFactory,
                 mSecureSettings,
-                mExecutor);
+                mExecutor,
+                mDumpManager);
     }
 
     private void setUpDaggerComponent() {
@@ -379,7 +383,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         return mFragment.getView().findViewById(R.id.clock);
     }
 
-    private View getSystemIconAreaView() {
-        return mFragment.getView().findViewById(R.id.system_icon_area);
+    private View getEndSideContentView() {
+        return mFragment.getView().findViewById(R.id.status_bar_end_side_content);
     }
 }

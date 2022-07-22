@@ -106,9 +106,9 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
      */
     @Presubmit
     @Test
-    fun appLayerRotates_StartingBounds() {
+    fun fixedAppLayer_StartingBounds() {
         testSpec.assertLayersStart {
-            visibleRegion(fixedApp).coversExactly(screenBoundsStart)
+            visibleRegion(fixedApp).coversAtMost(screenBoundsStart)
         }
     }
 
@@ -117,9 +117,33 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
      */
     @Presubmit
     @Test
-    fun appLayerRotates_EndingBounds() {
+    fun fixedAppLayer_EndingBounds() {
         testSpec.assertLayersEnd {
-            visibleRegion(fixedApp).coversExactly(screenBoundsEnd)
+            visibleRegion(fixedApp).coversAtMost(screenBoundsEnd)
+        }
+    }
+
+    /**
+     * Checks that [fixedApp] plus [pipApp] layers are within [screenBoundsEnd] at the start
+     * of the transition
+     */
+    @Presubmit
+    @Test
+    fun appLayers_StartingBounds() {
+        testSpec.assertLayersStart {
+            visibleRegion(fixedApp.or(pipApp)).coversExactly(screenBoundsStart)
+        }
+    }
+
+    /**
+     * Checks that [fixedApp] plus [pipApp] layers are within [screenBoundsEnd] at the end
+     * of the transition
+     */
+    @Presubmit
+    @Test
+    fun appLayers_EndingBounds() {
+        testSpec.assertLayersEnd {
+            visibleRegion(fixedApp.or(pipApp)).coversExactly(screenBoundsEnd)
         }
     }
 

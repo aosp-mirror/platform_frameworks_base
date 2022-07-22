@@ -132,22 +132,27 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun taskBarLayerIsVisibleAtStartAndEnd() { }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun navBarLayerIsVisibleAtStartAndEnd() { }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun taskBarWindowIsAlwaysVisible() { }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun navBarWindowIsAlwaysVisible() { }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun statusBarWindowIsAlwaysVisible() { }
 

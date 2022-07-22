@@ -117,6 +117,7 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun navBarLayerPositionAtStartAndEnd() { }
 
@@ -131,6 +132,7 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
     }
 
     /** {@inheritDoc} */
+    @Test
     @Ignore("Not applicable to this CUJ. Display starts off and app is full screen at the end")
     override fun statusBarLayerPositionAtStartAndEnd() { }
 

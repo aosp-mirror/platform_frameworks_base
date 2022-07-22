@@ -30,6 +30,7 @@ import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.biometrics.AuthRippleView;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -267,7 +268,8 @@ public abstract class StatusBarViewModule {
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             OperatorNameViewController.Factory operatorNameViewControllerFactory,
             SecureSettings secureSettings,
-            @Main Executor mainExecutor
+            @Main Executor mainExecutor,
+            DumpManager dumpManager
     ) {
         return new CollapsedStatusBarFragment(statusBarFragmentComponentFactory,
                 ongoingCallController,
@@ -286,7 +288,8 @@ public abstract class StatusBarViewModule {
                 collapsedStatusBarFragmentLogger,
                 operatorNameViewControllerFactory,
                 secureSettings,
-                mainExecutor);
+                mainExecutor,
+                dumpManager);
     }
 
     /**

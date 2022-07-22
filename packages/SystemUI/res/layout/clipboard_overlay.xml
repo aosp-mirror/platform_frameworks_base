@@ -115,6 +115,7 @@
                   android:autoSizeMinTextSize="@dimen/clipboard_overlay_min_font"
                   android:autoSizeMaxTextSize="@dimen/clipboard_overlay_max_font"
                   android:textColor="?attr/overlayButtonTextColor"
+                  android:textColorLink="?attr/overlayButtonTextColor"
                   android:background="?androidprv:attr/colorAccentSecondary"
                   android:layout_width="@dimen/clipboard_preview_size"
                   android:layout_height="@dimen/clipboard_preview_size"/>

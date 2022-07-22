@@ -145,6 +145,9 @@ public class Flags {
     public static final ResourceBooleanFlag STATUS_BAR_USER_SWITCHER =
             new ResourceBooleanFlag(602, R.bool.flag_user_switcher_chip);
 
+    public static final BooleanFlag STATUS_BAR_LETTERBOX_APPEARANCE =
+            new BooleanFlag(603, false);
+
     /***************************************/
     // 700 - dialer/calls
     public static final BooleanFlag ONGOING_CALL_STATUS_BAR_CHIP =
