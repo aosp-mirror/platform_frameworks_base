@@ -1423,9 +1423,11 @@ public final class WindowInsets {
 
         static final int DISPLAY_CUTOUT = 1 << 7;
 
-        static final int LAST = 1 << 8;
-        static final int SIZE = 9;
-        static final int WINDOW_DECOR = LAST;
+        static final int WINDOW_DECOR = 1 << 8;
+
+        static final int GENERIC_OVERLAYS = 1 << 9;
+        static final int LAST = GENERIC_OVERLAYS;
+        static final int SIZE = 10;
 
         static int indexOf(@InsetsType int type) {
             switch (type) {
@@ -1447,6 +1449,8 @@ public final class WindowInsets {
                     return 7;
                 case WINDOW_DECOR:
                     return 8;
+                case GENERIC_OVERLAYS:
+                    return 9;
                 default:
                     throw new IllegalArgumentException("type needs to be >= FIRST and <= LAST,"
                             + " type=" + type);
@@ -1482,6 +1486,9 @@ public final class WindowInsets {
             if ((types & WINDOW_DECOR) != 0) {
                 result.append("windowDecor |");
             }
+            if ((types & GENERIC_OVERLAYS) != 0) {
+                result.append("genericOverlays |");
+            }
             if (result.length() > 0) {
                 result.delete(result.length() - 2, result.length());
             }
@@ -1494,7 +1501,8 @@ public final class WindowInsets {
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(flag = true, value = {STATUS_BARS, NAVIGATION_BARS, CAPTION_BAR, IME, WINDOW_DECOR,
-                SYSTEM_GESTURES, MANDATORY_SYSTEM_GESTURES, TAPPABLE_ELEMENT, DISPLAY_CUTOUT})
+                SYSTEM_GESTURES, MANDATORY_SYSTEM_GESTURES, TAPPABLE_ELEMENT, DISPLAY_CUTOUT,
+                GENERIC_OVERLAYS})
         public @interface InsetsType {
         }
 
@@ -1586,7 +1594,7 @@ public final class WindowInsets {
          *         {@link #navigationBars()}, but not {@link #ime()}.
          */
         public static @InsetsType int systemBars() {
-            return STATUS_BARS | NAVIGATION_BARS | CAPTION_BAR;
+            return STATUS_BARS | NAVIGATION_BARS | CAPTION_BAR | GENERIC_OVERLAYS;
         }
 
         /**
