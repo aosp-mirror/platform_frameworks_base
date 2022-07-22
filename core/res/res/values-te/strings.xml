@@ -69,7 +69,7 @@
     <string name="CnirMmi" msgid="885292039284503036">"కాలింగ్ నంబర్ పరిమితం చేయబడింది"</string>
     <string name="ThreeWCMmi" msgid="2436550866139999411">"మూడు మార్గాల కాలింగ్"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"అవాంఛిత అంతరాయ కాల్స్‌ల తిరస్కరణ"</string>
-    <string name="CndMmi" msgid="185136449405618437">"కాలింగ్ నంబర్ బట్వాడా"</string>
+    <string name="CndMmi" msgid="185136449405618437">"కాలింగ్ నంబర్ డెలివరీ"</string>
     <string name="DndMmi" msgid="8797375819689129800">"అంతరాయం కలిగించవద్దు"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"కాలర్ ID ఆటోమేటిక్‌లపై పరిమితి ఉంటుంది. తర్వాత కాల్: పరిమితి ఉంటుంది"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"కాలర్ ID ఆటోమేటిక్‌లపై పరిమితి ఉంటుంది. తర్వాత కాల్: పరిమితి లేదు"</string>
@@ -324,7 +324,7 @@
     <string name="permgrouplab_phone" msgid="570318944091926620">"ఫోన్"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ఫోన్ కాల్స్‌ చేయడం మరియు నిర్వహించడం"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"శరీర సెన్సార్‌లు"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"మీ అత్యంత కీలకమైన గుర్తుల గురించి సెన్సార్ డేటాని యాక్సెస్ చేస్తుంది"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"మీ అత్యంత కీలకమైన గుర్తుల గురించి సెన్సార్ డేటాను యాక్సెస్ చేస్తుంది"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"నోటిఫికేషన్‌లు"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"నోటిఫికేషన్‌లను చూపండి"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"విండో కంటెంట్‍ను తిరిగి పొందుతుంది"</string>
@@ -1076,7 +1076,7 @@
     <string name="search_hint" msgid="455364685740251925">"సెర్చ్ చేయండి..."</string>
     <string name="searchview_description_search" msgid="1045552007537359343">"సెర్చ్"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"సెర్చ్ క్వెరీ"</string>
-    <string name="searchview_description_clear" msgid="1989371719192982900">"ప్రశ్నను క్లియర్ చేయి"</string>
+    <string name="searchview_description_clear" msgid="1989371719192982900">"ప్రశ్నను క్లియర్ చేయండి"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"ప్రశ్నని సమర్పించండి"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"వాయిస్ సెర్చ్"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"తాకడం ద్వారా విశ్లేషణను ప్రారంభించాలా?"</string>
@@ -1131,11 +1131,11 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="8689459651807876423">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"అన్నింటినీ ఎంచుకోండి"</string>
-    <string name="cut" msgid="2561199725874745819">"కత్తిరించు"</string>
+    <string name="cut" msgid="2561199725874745819">"కత్తిరించండి"</string>
     <string name="copy" msgid="5472512047143665218">"కాపీ చేయండి"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"క్లిప్‌బోర్డ్‌కు కాపీ చేయడంలో విఫలమైంది"</string>
-    <string name="paste" msgid="461843306215520225">"అతికించు"</string>
-    <string name="paste_as_plain_text" msgid="7664800665823182587">"సాదా వచనం లాగా అతికించు"</string>
+    <string name="paste" msgid="461843306215520225">"పేస్ట్ చేయండి"</string>
+    <string name="paste_as_plain_text" msgid="7664800665823182587">"సాదా వచనం లాగా పేస్ట్ చేయండి"</string>
     <string name="replace" msgid="7842675434546657444">"భర్తీ చేయండి..."</string>
     <string name="delete" msgid="1514113991712129054">"తొలగించండి"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URLని కాపీ చేయి"</string>
@@ -1196,7 +1196,7 @@
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"చిత్రాన్ని క్యాప్చర్ చేయి"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"ఈ చర్యకు ఆటోమేటిక్‌గా ఉపయోగించండి."</string>
     <string name="use_a_different_app" msgid="4987790276170972776">"వేరొక యాప్‌ను ఉపయోగించండి"</string>
-    <string name="clearDefaultHintMsg" msgid="1325866337702524936">"సిస్టమ్ సెట్టింగ్‌లు &gt; యాప్‌లు &gt; డౌన్‌లోడ్ చేయబడినవిలో ఆటోమేటిక్‌ను క్లియర్ చేయి."</string>
+    <string name="clearDefaultHintMsg" msgid="1325866337702524936">"సిస్టమ్ సెట్టింగ్‌లు &gt; యాప్‌లు &gt; డౌన్‌లోడ్ చేయబడినవిలో ఆటోమేటిక్‌ను క్లియర్ చేయండి."</string>
     <string name="chooseActivity" msgid="8563390197659779956">"చర్యను ఎంచుకోండి"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"USB పరికరం కోసం యాప్‌ను ఎంచుకోండి"</string>
     <string name="noApplications" msgid="1186909265235544019">"ఈ చర్యను అమలు చేయగల యాప్‌లు ఏవీ లేవు."</string>
@@ -1326,7 +1326,7 @@
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"రద్దు చేయండి"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"నా ఎంపికను గుర్తుంచుకో"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"మీరు దీన్ని తర్వాత సెట్టింగ్‌లు &gt; అనువర్తనాలులో మార్చవచ్చు"</string>
-    <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"ఎల్లప్పుడూ అనుమతించు"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"ఎల్లప్పుడూ అనుమతించండి"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"ఎప్పటికీ అనుమతించవద్దు"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"సిమ్ కార్డు తీసివేయబడింది"</string>
     <string name="sim_removed_message" msgid="9051174064474904617">"మీరు చెల్లుబాటు అయ్యే సిమ్ కార్డు‌ను చొప్పించి పునఃప్రారంభించే వరకు మొబైల్ నెట్‌వర్క్ అందుబాటులో ఉండదు."</string>
@@ -1581,8 +1581,8 @@
     <string name="data_usage_restricted_title" msgid="126711424380051268">"నేపథ్య డేటా పరిమితం చేయబడింది"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"నియంత్రణ తీసివేయడానికి నొక్కండి."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"అధిక మొబైల్ డేటా వినియోగం"</string>
-    <string name="data_usage_rapid_body" msgid="3886676853263693432">"మీ యాప్‌లు సాధారణం కంటే ఎక్కువ డేటాని ఉపయోగించాయి"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> సాధారణం కంటే ఎక్కువ డేటాని ఉపయోగించింది"</string>
+    <string name="data_usage_rapid_body" msgid="3886676853263693432">"మీ యాప్‌లు సాధారణం కంటే ఎక్కువ డేటాను ఉపయోగించాయి"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> సాధారణం కంటే ఎక్కువ డేటాను ఉపయోగించింది"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"సెక్యూరిటీ సర్టిఫికెట్"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"ఈ సర్టిఫికెట్ చెల్లుబాటు అవుతుంది."</string>
     <string name="issued_to" msgid="5975877665505297662">"దీనికి జారీ చేయబడింది:"</string>
@@ -1670,7 +1670,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత మీ Android TV పరికరాన్ని ఈమెయిల్‌ ఖాతా ద్వారా అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని కోరడం జరుగుతుంది.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈమెయిల్‌ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"తీసివేయి"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"తీసివేయండి"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"వాల్యూమ్‌ను సిఫార్సు చేయబడిన స్థాయి కంటే ఎక్కువగా పెంచాలా?\n\nసుదీర్ఘ వ్యవధుల పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బ తినవచ్చు."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"యాక్సెస్ సామర్థ్యం షార్ట్‌కట్‌ను ఉపయోగించాలా?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"షార్ట్‌కట్ ఆన్ చేసి ఉన్నప్పుడు, రెండు వాల్యూమ్ బటన్‌లను 3 సెకన్ల పాటు నొక్కి ఉంచితే యాక్సెస్ సౌలభ్య ఫీచర్ ప్రారంభం అవుతుంది."</string>
