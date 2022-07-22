@@ -167,6 +167,7 @@ public class UserSwitcherController implements Dumpable {
     private final AtomicBoolean mGuestIsResetting;
     private final AtomicBoolean mGuestCreationScheduled;
     private FalsingManager mFalsingManager;
+    @Nullable
     private View mView;
     private String mCreateSupervisedUserPackage;
     private GlobalSettings mGlobalSettings;
@@ -572,9 +573,11 @@ public class UserSwitcherController implements Dumpable {
 
     protected void switchToUserId(int id) {
         try {
-            mInteractionJankMonitor.begin(InteractionJankMonitor.Configuration.Builder
-                    .withView(InteractionJankMonitor.CUJ_USER_SWITCH, mView)
-                    .setTimeout(MULTI_USER_JOURNEY_TIMEOUT));
+            if (mView != null) {
+                mInteractionJankMonitor.begin(InteractionJankMonitor.Configuration.Builder
+                        .withView(InteractionJankMonitor.CUJ_USER_SWITCH, mView)
+                        .setTimeout(MULTI_USER_JOURNEY_TIMEOUT));
+            }
             mLatencyTracker.onActionStart(LatencyTracker.ACTION_USER_SWITCH);
             pauseRefreshUsers();
             mActivityManager.switchUser(id);
