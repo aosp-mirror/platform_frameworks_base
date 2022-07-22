@@ -35,6 +35,10 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -381,6 +385,18 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         assertThat(wct).isNull();
     }
 
+    @Test
+    public void testisLetterboxBackgroundMultiColored() {
+        assertThat(setupLetterboxConfigurationWithBackgroundType(
+                LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING)).isTrue();
+        assertThat(setupLetterboxConfigurationWithBackgroundType(
+                LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND)).isTrue();
+        assertThat(setupLetterboxConfigurationWithBackgroundType(
+                LETTERBOX_BACKGROUND_WALLPAPER)).isTrue();
+        assertThat(setupLetterboxConfigurationWithBackgroundType(
+                LETTERBOX_BACKGROUND_SOLID_COLOR)).isFalse();
+    }
+
     private void setupActivityWithLaunchCookie(IBinder launchCookie, WindowContainerToken wct) {
         final WindowContainer.RemoteToken remoteToken = mock(WindowContainer.RemoteToken.class);
         when(remoteToken.toWindowContainerToken()).thenReturn(wct);
@@ -389,5 +405,11 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 .build();
         testActivity.mLaunchCookie = launchCookie;
         testActivity.getTask().mRemoteToken = remoteToken;
+    }
+
+    private boolean setupLetterboxConfigurationWithBackgroundType(
+            @LetterboxConfiguration.LetterboxBackgroundType int letterboxBackgroundType) {
+        mWm.mLetterboxConfiguration.setLetterboxBackgroundType(letterboxBackgroundType);
+        return mWm.isLetterboxBackgroundMultiColored();
     }
 }
