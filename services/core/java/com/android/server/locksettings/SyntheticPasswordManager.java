@@ -68,32 +68,42 @@ import java.util.Set;
 
 
 /**
- * A class that maintains the wrapping of synthetic password by user credentials or escrow tokens.
- * It's (mostly) a pure storage for synthetic passwords, providing APIs to creating and destroying
- * synthetic password blobs which are wrapped by user credentials or escrow tokens.
+ * A class that manages a user's synthetic password (SP) ({@link #SyntheticPassword}), along with a
+ * set of SP protectors that are independent ways that the SP is protected.
  *
- * Here is the assumptions it makes:
- *   Each user has one single synthetic password at any time.
- *   The SP has an associated password handle, which binds to the SID for that user. The password
- *   handle is persisted by SyntheticPasswordManager internally.
- *   If the user credential is null, it's treated as if the credential is DEFAULT_PASSWORD
+ * Invariants for SPs:
  *
- * Information persisted on disk:
- *   for each user (stored under DEFAULT_HANDLE):
- *     SP_HANDLE_NAME: GateKeeper password handle of synthetic password. Only available if user
- *                     credential exists, cleared when user clears their credential.
- *     SP_E0_NAME, SP_P1_NAME: Secret to derive synthetic password when combined with escrow
- *                     tokens. Destroyed when escrow support is turned off for the given user.
+ *  - A user's SP never changes, but SP protectors can be added and removed.  There is always a
+ *    protector that protects the SP with the user's Lock Screen Knowledge Factor (LSKF), a.k.a.
+ *    LockscreenCredential.  The LSKF may be empty (none).  There may be escrow token-based
+ *    protectors as well, only for specific use cases such as enterprise-managed users.
  *
- *     for each SP blob under the user (stored under the corresponding handle):
- *       SP_BLOB_NAME: The encrypted synthetic password. Always exists.
- *       PASSWORD_DATA_NAME: Metadata about user credential. Only exists for password based SP.
- *       SECDISCARDABLE_NAME: Part of the necessary ingredient to decrypt SP_BLOB_NAME for the
- *                            purpose of secure deletion. Exists if this is a non-weaver SP
- *                            (both password and token based), or it's a token-based SP under weaver.
- *       WEAVER_SLOT: Metadata about the weaver slot used. Only exists if this is a SP under weaver.
+ *  - While the user's LSKF is nonempty, the SP protects the user's CE (credential encrypted)
+ *    storage and auth-bound Keystore keys: the user's CE key is encrypted by an SP-derived secret,
+ *    and the user's Keystore and Gatekeeper passwords are other SP-derived secrets.  However, while
+ *    the user's LSKF is empty, these protections are cleared; this is needed to invalidate the
+ *    auth-bound keys and make UserController.unlockUser() work with an empty secret.
  *
+ * Files stored on disk for each user:
+ *   For the SP itself, stored under NULL_PROTECTOR_ID:
+ *     SP_HANDLE_NAME: GateKeeper password handle of a password derived from the SP.  Only exists
+ *                     while the LSKF is nonempty.
+ *     SP_E0_NAME, SP_P1_NAME: Information needed to create and use escrow token-based protectors.
+ *                             Deleted when escrow token support is disabled for the user.
  *
+ *     For each protector, stored under the corresponding protector ID:
+ *       SP_BLOB_NAME: The encrypted SP secret (the SP itself or the P0 value).  Always exists.
+ *       PASSWORD_DATA_NAME: Data used for LSKF verification, such as the scrypt salt and
+ *                           parameters.  Only exists for LSKF-based protectors.
+ *       PASSWORD_METRICS_NAME: Metrics about the LSKF, encrypted by a key derived from the SP.
+ *                              Only exists for LSKF-based protectors.
+ *       SECDISCARDABLE_NAME: A large number of random bytes that all need to be known in order to
+ *                            decrypt SP_BLOB_NAME.  When the protector is deleted, this file is
+ *                            overwritten and deleted as a "best-effort" attempt to support secure
+ *                            deletion when hardware support for secure deletion is unavailable.
+ *                            Doesn't exist for LSKF-based protectors that use Weaver.
+ *       WEAVER_SLOT: Contains the Weaver slot number used by this protector.  Only exists if the
+ *                    protector uses Weaver.
  */
 public class SyntheticPasswordManager {
     private static final String SP_BLOB_NAME = "spblob";
@@ -106,18 +116,24 @@ public class SyntheticPasswordManager {
     private static final String WEAVER_SLOT_NAME = "weaver";
     private static final String PASSWORD_METRICS_NAME = "metrics";
 
-    public static final long DEFAULT_HANDLE = 0L;
+    // used for files associated with the SP itself, not with a particular protector
+    public static final long NULL_PROTECTOR_ID = 0L;
+
     private static final byte[] DEFAULT_PASSWORD = "default-password".getBytes();
 
     private static final byte WEAVER_VERSION = 1;
     private static final int INVALID_WEAVER_SLOT = -1;
 
+    // Careful: the SYNTHETIC_PASSWORD_* version numbers are overloaded to identify both the version
+    // of the protector and the version of the synthetic password itself.  All a user's protectors
+    // must use a version that treats the synthetic password itself in a compatible way.
     private static final byte SYNTHETIC_PASSWORD_VERSION_V1 = 1;
     private static final byte SYNTHETIC_PASSWORD_VERSION_V2 = 2;
     private static final byte SYNTHETIC_PASSWORD_VERSION_V3 = 3;
-    private static final byte SYNTHETIC_PASSWORD_PASSWORD_BASED = 0;
-    private static final byte SYNTHETIC_PASSWORD_STRONG_TOKEN_BASED = 1;
-    private static final byte SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED = 2;
+
+    private static final byte PROTECTOR_TYPE_LSKF_BASED = 0;
+    private static final byte PROTECTOR_TYPE_STRONG_TOKEN_BASED = 1;
+    private static final byte PROTECTOR_TYPE_WEAK_TOKEN_BASED = 2;
 
     // 256-bit synthetic password
     private static final byte SYNTHETIC_PASSWORD_LENGTH = 256 / 8;
@@ -147,7 +163,7 @@ public class SyntheticPasswordManager {
 
     static class AuthenticationResult {
         // Non-null if password/token passes verification, null otherwise
-        @Nullable public AuthenticationToken authToken;
+        @Nullable public SyntheticPassword syntheticPassword;
         // OK:    password / token passes verification, user has a lockscreen
         // null:  user does not have a lockscreen (but password / token passes verification)
         // ERROR: password / token fails verification
@@ -156,39 +172,34 @@ public class SyntheticPasswordManager {
     }
 
     /**
-     * This class represents the main cryptographic secret for a given user (a.k.a synthietic
-     * password). This secret is derived from the user's lockscreen credential or password escrow
-     * token. All other cryptograhic keys related to the user, including disk encryption key,
-     * keystore encryption key, gatekeeper auth key, vendor auth secret and others are directly
-     * derived from this token.
-     * <p>
-     * The main secret associated with an authentication token is retrievable from
-     * {@link AuthenticationToken#getSyntheticPassword()} and the authentication token can be
-     * reconsturcted from the main secret later with
-     * {@link AuthenticationToken#recreateDirectly(byte[])}. The first time an authentication token
-     * is needed, it should be created with {@link AuthenticationToken#create()} so that the
-     * necessary escrow data ({@link #mEncryptedEscrowSplit0} and {@link #mEscrowSplit1}) is
-     * properly initialized. The caller can either persist the (non-secret) esscrow data if escrow
-     * is required, or discard it to cryptograhically disable escrow. To support escrow, the caller
-     * needs to securely store the secret returned from
-     * {@link AuthenticationToken#getEscrowSecret()}, and at the time of use, load the escrow data
-     * back with {@link AuthenticationToken#setEscrowData(byte[], byte[])} and then re-create the
-     * main secret from the escrow secret via
-     * {@link AuthenticationToken#recreateFromEscrow(byte[])}.
+     * A synthetic password (SP) is the main cryptographic secret for a user.  The SP is used only
+     * as input to a Key Derivation Function (KDF) to derive other keys.
+     *
+     * SPs are created by {@link SyntheticPassword#create()} as the hash of two random values P0 and
+     * P1.  E0 (P0 encrypted by an SP-derived key) and P1 can then be stored on-disk.  This approach
+     * is used instead of direct random generation of the SP so that escrow token-based protectors
+     * can protect P0 instead of the SP itself.  This makes it possible to cryptographically disable
+     * the ability to create and use such protectors by deleting (or never storing) E0 and P1.
+     *
+     * When protecting the SP directly, use {@link SyntheticPassword#getSyntheticPassword()} to get
+     * the raw SP, and later {@link SyntheticPassword#recreateDirectly(byte[])} to re-create the SP.
+     * When protecting P0, use {@link SyntheticPassword#getEscrowSecret()} to get P0, and later
+     * {@link SyntheticPassword#setEscrowData(byte[], byte[])} followed by
+     * {@link SyntheticPassword#recreateFromEscrow()} to re-create the SP.
      */
-    static class AuthenticationToken {
+    static class SyntheticPassword {
         private final byte mVersion;
         /**
          * Here is the relationship between these fields:
          * Generate two random block P0 and P1. P1 is recorded in mEscrowSplit1 but P0 is not.
          * mSyntheticPassword = hash(P0 || P1)
-         * E0 = P0 encrypted under syntheticPassword, recoreded in mEncryptedEscrowSplit0.
+         * E0 = P0 encrypted under syntheticPassword, recorded in mEncryptedEscrowSplit0.
          */
         private @NonNull byte[] mSyntheticPassword;
         private @Nullable byte[] mEncryptedEscrowSplit0;
         private @Nullable byte[] mEscrowSplit1;
 
-        AuthenticationToken(byte version) {
+        SyntheticPassword(byte version) {
             mVersion = version;
         }
 
@@ -214,7 +225,7 @@ public class SyntheticPasswordManager {
             return deriveSubkey(PERSONALIZATION_SP_GK_AUTH);
         }
 
-        public byte[] deriveDiskEncryptionKey() {
+        public byte[] deriveFileBasedEncryptionKey() {
             return deriveSubkey(PERSONALIZATION_FBE_KEY);
         }
 
@@ -232,8 +243,8 @@ public class SyntheticPasswordManager {
         }
 
         /**
-         * Assign escrow data to this auth token. This is a prerequisite to call
-         * {@link AuthenticationToken#recreateFromEscrow}.
+         * Assigns escrow data to this synthetic password. This is a prerequisite to call
+         * {@link SyntheticPassword#recreateFromEscrow}.
          */
         public void setEscrowData(@Nullable byte[] encryptedEscrowSplit0,
                 @Nullable byte[] escrowSplit1) {
@@ -242,8 +253,8 @@ public class SyntheticPasswordManager {
         }
 
         /**
-         * Re-creates authentication token from escrow secret (escrowSplit0, returned from
-         * {@link AuthenticationToken#getEscrowSecret}). Escrow data needs to be loaded
+         * Re-creates a synthetic password from the escrow secret (escrowSplit0, returned from
+         * {@link SyntheticPassword#getEscrowSecret}). Escrow data needs to be loaded
          * by {@link #setEscrowData} before calling this.
          */
         public void recreateFromEscrow(byte[] escrowSplit0) {
@@ -253,7 +264,7 @@ public class SyntheticPasswordManager {
         }
 
         /**
-         * Re-creates authentication token from synthetic password directly.
+         * Re-creates a synthetic password from its raw bytes.
          */
         public void recreateDirectly(byte[] syntheticPassword) {
             this.mSyntheticPassword = Arrays.copyOf(syntheticPassword, syntheticPassword.length);
@@ -262,8 +273,8 @@ public class SyntheticPasswordManager {
         /**
          * Generates a new random synthetic password with escrow data.
          */
-        static AuthenticationToken create() {
-            AuthenticationToken result = new AuthenticationToken(SYNTHETIC_PASSWORD_VERSION_V3);
+        static SyntheticPassword create() {
+            SyntheticPassword result = new SyntheticPassword(SYNTHETIC_PASSWORD_VERSION_V3);
             byte[] escrowSplit0 = secureRandom(SYNTHETIC_PASSWORD_LENGTH);
             byte[] escrowSplit1 = secureRandom(SYNTHETIC_PASSWORD_LENGTH);
             result.recreate(escrowSplit0, escrowSplit1);
@@ -275,7 +286,7 @@ public class SyntheticPasswordManager {
 
         /**
          * Re-creates synthetic password from both escrow splits. See javadoc for
-         * AuthenticationToken.mSyntheticPassword for details on what each block means.
+         * SyntheticPassword.mSyntheticPassword for details on what each block means.
          */
         private void recreate(byte[] escrowSplit0, byte[] escrowSplit1) {
             mSyntheticPassword = bytesToHex(SyntheticPasswordCrypto.personalizedHash(
@@ -283,8 +294,8 @@ public class SyntheticPasswordManager {
         }
 
         /**
-         * Returns the escrow secret that can be used later to reconstruct this authentication
-         * token from {@link #recreateFromEscrow(byte[])}. Only possible if escrow is not disabled
+         * Returns the escrow secret that can be used later to reconstruct this synthetic password
+         * from {@link #recreateFromEscrow(byte[])}. Only possible if escrow is not disabled
          * (encryptedEscrowSplit0 known).
          */
         public byte[] getEscrowSecret() {
@@ -296,16 +307,15 @@ public class SyntheticPasswordManager {
         }
 
         /**
-         * Returns the raw synthetic password that can be used later to reconstruct this
-         * authentication token from {@link #recreateDirectly(byte[])}
+         * Returns the raw synthetic password, for later use with {@link #recreateDirectly(byte[])}.
          */
         public byte[] getSyntheticPassword() {
             return mSyntheticPassword;
         }
 
         /**
-         * Returns the version of this AuthenticationToken for use with reconstructing
-         * this with a synthetic password version.
+         * Returns the version number of this synthetic password.  This version number determines
+         * the algorithm used to derive subkeys.
          */
         public byte getVersion() {
             return mVersion;
@@ -318,8 +328,8 @@ public class SyntheticPasswordManager {
         byte scryptLogP;
         public int credentialType;
         byte[] salt;
-        // For GateKeeper-based credential, this is the password handle returned by GK,
-        // for weaver-based credential, this is empty.
+        // If Weaver is available, then this field is empty.  Otherwise, it is the Gatekeeper
+        // password handle that resulted from enrolling the hashed LSKF.
         public byte[] passwordHandle;
 
         public static PasswordData create(int passwordType) {
@@ -377,13 +387,14 @@ public class SyntheticPasswordManager {
 
     static class SyntheticPasswordBlob {
         byte mVersion;
-        byte mType;
+        byte mProtectorType;
         byte[] mContent;
 
-        public static SyntheticPasswordBlob create(byte version, byte type, byte[] content) {
+        public static SyntheticPasswordBlob create(byte version, byte protectorType,
+                byte[] content) {
             SyntheticPasswordBlob result = new SyntheticPasswordBlob();
             result.mVersion = version;
-            result.mType = type;
+            result.mProtectorType = protectorType;
             result.mContent = content;
             return result;
         }
@@ -391,7 +402,7 @@ public class SyntheticPasswordManager {
         public static SyntheticPasswordBlob fromBytes(byte[] data) {
             SyntheticPasswordBlob result = new SyntheticPasswordBlob();
             result.mVersion = data[0];
-            result.mType = data[1];
+            result.mProtectorType = data[1];
             result.mContent = Arrays.copyOfRange(data, 2, data.length);
             return result;
         }
@@ -399,7 +410,7 @@ public class SyntheticPasswordManager {
         public byte[] toByte() {
             byte[] blob = new byte[mContent.length + 1 + 1];
             blob[0] = mVersion;
-            blob[1] = mType;
+            blob[1] = mProtectorType;
             System.arraycopy(mContent, 0, blob, 2, mContent.length);
             return blob;
         }
@@ -569,9 +580,10 @@ public class SyntheticPasswordManager {
     }
 
     public void removeUser(IGateKeeperService gatekeeper, int userId) {
-        for (long handle : mStorage.listSyntheticPasswordHandlesForUser(SP_BLOB_NAME, userId)) {
-            destroyWeaverSlot(handle, userId);
-            destroySPBlobKey(getKeyName(handle));
+        for (long protectorId : mStorage.listSyntheticPasswordProtectorsForUser(SP_BLOB_NAME,
+                    userId)) {
+            destroyWeaverSlot(protectorId, userId);
+            destroySPBlobKey(getKeyName(protectorId));
         }
         // Remove potential persistent state (in RPMB), to prevent them from accumulating and
         // causing problems.
@@ -582,8 +594,8 @@ public class SyntheticPasswordManager {
         }
     }
 
-    int getCredentialType(long handle, int userId) {
-        byte[] passwordData = loadState(PASSWORD_DATA_NAME, handle, userId);
+    int getCredentialType(long protectorId, int userId) {
+        byte[] passwordData = loadState(PASSWORD_DATA_NAME, protectorId, userId);
         if (passwordData == null) {
             Slog.w(TAG, "getCredentialType: encountered empty password data for user " + userId);
             return LockPatternUtils.CREDENTIAL_TYPE_NONE;
@@ -599,9 +611,7 @@ public class SyntheticPasswordManager {
     }
 
     /**
-     * Initializes a new Authentication token for the given user.
-     *
-     * The authentication token will bear a randomly-generated synthetic password.
+     * Creates a new synthetic password (SP) for the given user.
      *
      * Any existing SID for the user is cleared.
      *
@@ -609,22 +619,21 @@ public class SyntheticPasswordManager {
      * an escrow scheme. This information can be removed with {@link #destroyEscrowData} if
      * password escrow should be disabled completely on the given user.
      */
-    AuthenticationToken newSyntheticPassword(int userId) {
+    SyntheticPassword newSyntheticPassword(int userId) {
         clearSidForUser(userId);
-        AuthenticationToken result = AuthenticationToken.create();
+        SyntheticPassword result = SyntheticPassword.create();
         saveEscrowData(result, userId);
         return result;
     }
 
     /**
      * Enroll a new password handle and SID for the given synthetic password and persist it on disk.
-     * Used when adding password to previously-unsecured devices.
+     * Used when the LSKF is changed from empty to nonempty.
      */
-    public void newSidForUser(IGateKeeperService gatekeeper, AuthenticationToken authToken,
-            int userId) {
+    public void newSidForUser(IGateKeeperService gatekeeper, SyntheticPassword sp, int userId) {
         GateKeeperResponse response;
         try {
-            response = gatekeeper.enroll(userId, null, null, authToken.deriveGkPassword());
+            response = gatekeeper.enroll(userId, null, null, sp.deriveGkPassword());
         } catch (RemoteException e) {
             throw new IllegalStateException("Failed to create new SID for user", e);
         }
@@ -637,49 +646,48 @@ public class SyntheticPasswordManager {
 
     // Nuke the SP handle (and as a result, its SID) for the given user.
     public void clearSidForUser(int userId) {
-        destroyState(SP_HANDLE_NAME, DEFAULT_HANDLE, userId);
+        destroyState(SP_HANDLE_NAME, NULL_PROTECTOR_ID, userId);
     }
 
     public boolean hasSidForUser(int userId) {
-        return hasState(SP_HANDLE_NAME, DEFAULT_HANDLE, userId);
+        return hasState(SP_HANDLE_NAME, NULL_PROTECTOR_ID, userId);
     }
 
-    // if null, it means there is no SID associated with the user
-    // This can happen if the user is migrated to SP but currently
-    // do not have a lockscreen password.
+    // If this returns null, it means there is no SID associated with the user.  This happens if the
+    // user has an empty LSKF, but does have an SP.
     private byte[] loadSyntheticPasswordHandle(int userId) {
-        return loadState(SP_HANDLE_NAME, DEFAULT_HANDLE, userId);
+        return loadState(SP_HANDLE_NAME, NULL_PROTECTOR_ID, userId);
     }
 
     private void saveSyntheticPasswordHandle(byte[] spHandle, int userId) {
-        saveState(SP_HANDLE_NAME, spHandle, DEFAULT_HANDLE, userId);
+        saveState(SP_HANDLE_NAME, spHandle, NULL_PROTECTOR_ID, userId);
     }
 
-    private boolean loadEscrowData(AuthenticationToken authToken, int userId) {
-        byte[] e0 = loadState(SP_E0_NAME, DEFAULT_HANDLE, userId);
-        byte[] p1 = loadState(SP_P1_NAME, DEFAULT_HANDLE, userId);
-        authToken.setEscrowData(e0,  p1);
+    private boolean loadEscrowData(SyntheticPassword sp, int userId) {
+        byte[] e0 = loadState(SP_E0_NAME, NULL_PROTECTOR_ID, userId);
+        byte[] p1 = loadState(SP_P1_NAME, NULL_PROTECTOR_ID, userId);
+        sp.setEscrowData(e0,  p1);
         return e0 != null && p1 != null;
     }
 
-    private void saveEscrowData(AuthenticationToken authToken, int userId) {
-        saveState(SP_E0_NAME, authToken.mEncryptedEscrowSplit0, DEFAULT_HANDLE, userId);
-        saveState(SP_P1_NAME, authToken.mEscrowSplit1, DEFAULT_HANDLE, userId);
+    private void saveEscrowData(SyntheticPassword sp, int userId) {
+        saveState(SP_E0_NAME, sp.mEncryptedEscrowSplit0, NULL_PROTECTOR_ID, userId);
+        saveState(SP_P1_NAME, sp.mEscrowSplit1, NULL_PROTECTOR_ID, userId);
     }
 
     public boolean hasEscrowData(int userId) {
-        return hasState(SP_E0_NAME, DEFAULT_HANDLE, userId)
-                && hasState(SP_P1_NAME, DEFAULT_HANDLE, userId);
+        return hasState(SP_E0_NAME, NULL_PROTECTOR_ID, userId)
+                && hasState(SP_P1_NAME, NULL_PROTECTOR_ID, userId);
     }
 
     public void destroyEscrowData(int userId) {
-        destroyState(SP_E0_NAME, DEFAULT_HANDLE, userId);
-        destroyState(SP_P1_NAME, DEFAULT_HANDLE, userId);
+        destroyState(SP_E0_NAME, NULL_PROTECTOR_ID, userId);
+        destroyState(SP_P1_NAME, NULL_PROTECTOR_ID, userId);
     }
 
-    private int loadWeaverSlot(long handle, int userId) {
+    private int loadWeaverSlot(long protectorId, int userId) {
         final int LENGTH = Byte.BYTES + Integer.BYTES;
-        byte[] data = loadState(WEAVER_SLOT_NAME, handle, userId);
+        byte[] data = loadState(WEAVER_SLOT_NAME, protectorId, userId);
         if (data == null || data.length != LENGTH) {
             return INVALID_WEAVER_SLOT;
         }
@@ -687,22 +695,22 @@ public class SyntheticPasswordManager {
         buffer.put(data, 0, data.length);
         buffer.flip();
         if (buffer.get() != WEAVER_VERSION) {
-            Slog.e(TAG, "Invalid weaver slot version of handle " + handle);
+            Slog.e(TAG, "Invalid weaver slot version for protector " + protectorId);
             return INVALID_WEAVER_SLOT;
         }
         return buffer.getInt();
     }
 
-    private void saveWeaverSlot(int slot, long handle, int userId) {
+    private void saveWeaverSlot(int slot, long protectorId, int userId) {
         ByteBuffer buffer = ByteBuffer.allocate(Byte.BYTES + Integer.BYTES);
         buffer.put(WEAVER_VERSION);
         buffer.putInt(slot);
-        saveState(WEAVER_SLOT_NAME, buffer.array(), handle, userId);
+        saveState(WEAVER_SLOT_NAME, buffer.array(), protectorId, userId);
     }
 
-    private void destroyWeaverSlot(long handle, int userId) {
-        int slot = loadWeaverSlot(handle, userId);
-        destroyState(WEAVER_SLOT_NAME, handle, userId);
+    private void destroyWeaverSlot(long protectorId, int userId) {
+        int slot = loadWeaverSlot(protectorId, userId);
+        destroyState(WEAVER_SLOT_NAME, protectorId, userId);
         if (slot != INVALID_WEAVER_SLOT) {
             Set<Integer> usedSlots = getUsedWeaverSlots();
             if (!usedSlots.contains(slot)) {
@@ -726,12 +734,12 @@ public class SyntheticPasswordManager {
      * unintentionally.
      */
     private Set<Integer> getUsedWeaverSlots() {
-        Map<Integer, List<Long>> slotHandles = mStorage.listSyntheticPasswordHandlesForAllUsers(
-                WEAVER_SLOT_NAME);
+        Map<Integer, List<Long>> protectorIds =
+            mStorage.listSyntheticPasswordProtectorsForAllUsers(WEAVER_SLOT_NAME);
         HashSet<Integer> slots = new HashSet<>();
-        for (Map.Entry<Integer, List<Long>> entry : slotHandles.entrySet()) {
-            for (Long handle : entry.getValue()) {
-                int slot = loadWeaverSlot(handle, entry.getKey());
+        for (Map.Entry<Integer, List<Long>> entry : protectorIds.entrySet()) {
+            for (Long protectorId : entry.getValue()) {
+                int slot = loadWeaverSlot(protectorId, entry.getKey());
                 slots.add(slot);
             }
         }
@@ -750,29 +758,24 @@ public class SyntheticPasswordManager {
     }
 
     /**
-     * Create a new password based SP blob based on the supplied authentication token, such that
-     * a future successful authentication with unwrapPasswordBasedSyntheticPassword() would result
-     * in the same authentication token.
+     * Creates a protector that protects the user's SP with the given LSKF (which may be empty).
      *
-     * This method only creates SP blob wrapping around the given synthetic password and does not
-     * handle logic around SID or SP handle. The caller should separately ensure that the user's SID
-     * is consistent with the device state by calling other APIs in this class.
+     * This method only creates a new protector that isn't referenced by anything; it doesn't handle
+     * any higher-level tasks involved in changing the LSKF.
      *
-     * @see #newSidForUser
-     * @see #clearSidForUser
-     * @return a new password handle for the wrapped SP blob
-     * @throw IllegalStateException if creation fails.
+     * @return the ID of the new protector
+     * @throws IllegalStateException on failure
      */
-    public long createPasswordBasedSyntheticPassword(IGateKeeperService gatekeeper,
-            LockscreenCredential credential, AuthenticationToken authToken, int userId) {
-        long handle = generateHandle();
+    public long createLskfBasedProtector(IGateKeeperService gatekeeper,
+            LockscreenCredential credential, SyntheticPassword sp, int userId) {
+        long protectorId = generateProtectorId();
         PasswordData pwd = PasswordData.create(credential.getType());
         byte[] pwdToken = computePasswordToken(credential, pwd);
         final long sid;
-        final byte[] applicationId;
+        final byte[] protectorSecret;
 
         if (isWeaverAvailable()) {
-            // Weaver based user password
+            // Protector uses Weaver to verify the LSKF
             int weaverSlot = getNextAvailableWeaverSlot();
             Slog.i(TAG, "Weaver enroll password to slot " + weaverSlot + " for user " + userId);
             byte[] weaverSecret = weaverEnroll(weaverSlot, passwordTokenToWeaverKey(pwdToken),
@@ -781,15 +784,17 @@ public class SyntheticPasswordManager {
                 throw new IllegalStateException(
                         "Fail to enroll user password under weaver " + userId);
             }
-            saveWeaverSlot(weaverSlot, handle, userId);
+            saveWeaverSlot(weaverSlot, protectorId, userId);
             mPasswordSlotManager.markSlotInUse(weaverSlot);
             // No need to pass in quality since the credential type already encodes sufficient info
             synchronizeWeaverFrpPassword(pwd, 0, userId, weaverSlot);
 
             pwd.passwordHandle = null;
             sid = GateKeeper.INVALID_SECURE_USER_ID;
-            applicationId = transformUnderWeaverSecret(pwdToken, weaverSecret);
+            protectorSecret = transformUnderWeaverSecret(pwdToken, weaverSecret);
         } else {
+            // Protector uses Gatekeeper to verify the LSKF
+
             // In case GK enrollment leaves persistent state around (in RPMB), this will nuke them
             // to prevent them from accumulating and causing problems.
             try {
@@ -797,30 +802,30 @@ public class SyntheticPasswordManager {
             } catch (RemoteException ignore) {
                 Slog.w(TAG, "Failed to clear SID from gatekeeper");
             }
-            // GateKeeper based user password
             GateKeeperResponse response;
             try {
                 response = gatekeeper.enroll(fakeUid(userId), null, null,
                         passwordTokenToGkInput(pwdToken));
             } catch (RemoteException e) {
-                throw new IllegalStateException("Failed to enroll password for new SP blob", e);
+                throw new IllegalStateException("Failed to enroll LSKF for new SP protector for "
+                        + "user " + userId, e);
             }
             if (response.getResponseCode() != GateKeeperResponse.RESPONSE_OK) {
-                throw new IllegalStateException(
-                        "Fail to enroll user password when creating SP for user " + userId);
+                throw new IllegalStateException("Failed to enroll LSKF for new SP protector for "
+                        + "user " + userId);
             }
             pwd.passwordHandle = response.getPayload();
             sid = sidFromPasswordHandle(pwd.passwordHandle);
-            applicationId = transformUnderSecdiscardable(pwdToken,
-                    createSecdiscardable(handle, userId));
+            protectorSecret = transformUnderSecdiscardable(pwdToken,
+                    createSecdiscardable(protectorId, userId));
             // No need to pass in quality since the credential type already encodes sufficient info
             synchronizeFrpPassword(pwd, 0, userId);
         }
-        saveState(PASSWORD_DATA_NAME, pwd.toBytes(), handle, userId);
-        savePasswordMetrics(credential, authToken, handle, userId);
-        createSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_PASSWORD_BASED, authToken,
-                applicationId, sid, userId);
-        return handle;
+        saveState(PASSWORD_DATA_NAME, pwd.toBytes(), protectorId, userId);
+        savePasswordMetrics(credential, sp, protectorId, userId);
+        createSyntheticPasswordBlob(protectorId, PROTECTOR_TYPE_LSKF_BASED, sp, protectorSecret,
+                sid, userId);
+        return protectorId;
     }
 
     public VerifyCredentialResponse verifyFrpCredential(IGateKeeperService gatekeeper,
@@ -858,13 +863,14 @@ public class SyntheticPasswordManager {
     }
 
 
-    public void migrateFrpPasswordLocked(long handle, UserInfo userInfo, int requestedQuality) {
+    public void migrateFrpPasswordLocked(long protectorId, UserInfo userInfo,
+            int requestedQuality) {
         if (mStorage.getPersistentDataBlockManager() != null
                 && LockPatternUtils.userOwnsFrpCredential(mContext, userInfo)) {
-            PasswordData pwd = PasswordData.fromBytes(loadState(PASSWORD_DATA_NAME, handle,
+            PasswordData pwd = PasswordData.fromBytes(loadState(PASSWORD_DATA_NAME, protectorId,
                     userInfo.id));
             if (pwd.credentialType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
-                int weaverSlot = loadWeaverSlot(handle, userInfo.id);
+                int weaverSlot = loadWeaverSlot(protectorId, userInfo.id);
                 if (weaverSlot != INVALID_WEAVER_SLOT) {
                     synchronizeWeaverFrpPassword(pwd, requestedQuality, userInfo.id, weaverSlot);
                 } else {
@@ -905,12 +911,17 @@ public class SyntheticPasswordManager {
     private ArrayMap<Integer, ArrayMap<Long, TokenData>> tokenMap = new ArrayMap<>();
 
     /**
-     * Create a token based Synthetic password of the given type for the given user.
-     * @return the handle of the token
+     * Caches a pending escrow token in memory and pre-allocates an ID for a new SP protector.  This
+     * ID also serves as a handle for the pending token.
+     *
+     * This method doesn't persist any data, and it doesn't require access to the SP.
+     * {@link #createTokenBasedProtector} can be called later to actually create the protector.
+     *
+     * @return the token handle
      */
-    public long createTokenBasedSyntheticPassword(byte[] token, @TokenType int type, int userId,
+    public long addPendingToken(byte[] token, @TokenType int type, int userId,
             @Nullable EscrowTokenStateChangeCallback changeCallback) {
-        long handle = generateHandle();
+        long tokenHandle = generateProtectorId(); // tokenHandle is reused as protectorId later
         if (!tokenMap.containsKey(userId)) {
             tokenMap.put(userId, new ArrayMap<>());
         }
@@ -928,8 +939,8 @@ public class SyntheticPasswordManager {
         tokenData.aggregatedSecret = transformUnderSecdiscardable(token, secdiscardable);
         tokenData.mCallback = changeCallback;
 
-        tokenMap.get(userId).put(handle, tokenData);
-        return handle;
+        tokenMap.get(userId).put(tokenHandle, tokenData);
+        return tokenHandle;
     }
 
     public Set<Long> getPendingTokensForUser(int userId) {
@@ -940,23 +951,22 @@ public class SyntheticPasswordManager {
     }
 
     /** Remove the given pending token. */
-    public boolean removePendingToken(long handle, int userId) {
+    public boolean removePendingToken(long tokenHandle, int userId) {
         if (!tokenMap.containsKey(userId)) {
             return false;
         }
-        return tokenMap.get(userId).remove(handle) != null;
+        return tokenMap.get(userId).remove(tokenHandle) != null;
     }
 
-    public boolean activateTokenBasedSyntheticPassword(long handle, AuthenticationToken authToken,
-            int userId) {
+    public boolean createTokenBasedProtector(long tokenHandle, SyntheticPassword sp, int userId) {
         if (!tokenMap.containsKey(userId)) {
             return false;
         }
-        TokenData tokenData = tokenMap.get(userId).get(handle);
+        TokenData tokenData = tokenMap.get(userId).get(tokenHandle);
         if (tokenData == null) {
             return false;
         }
-        if (!loadEscrowData(authToken, userId)) {
+        if (!loadEscrowData(sp, userId)) {
             Slog.w(TAG, "User is not escrowable");
             return false;
         }
@@ -967,51 +977,52 @@ public class SyntheticPasswordManager {
                 Slog.e(TAG, "Failed to enroll weaver secret when activating token");
                 return false;
             }
-            saveWeaverSlot(slot, handle, userId);
+            saveWeaverSlot(slot, tokenHandle, userId);
             mPasswordSlotManager.markSlotInUse(slot);
         }
-        saveSecdiscardable(handle, tokenData.secdiscardableOnDisk, userId);
-        createSyntheticPasswordBlob(handle, getTokenBasedBlobType(tokenData.mType), authToken,
+        saveSecdiscardable(tokenHandle, tokenData.secdiscardableOnDisk, userId);
+        createSyntheticPasswordBlob(tokenHandle, getTokenBasedProtectorType(tokenData.mType), sp,
                 tokenData.aggregatedSecret, 0L, userId);
-        tokenMap.get(userId).remove(handle);
+        tokenMap.get(userId).remove(tokenHandle);
         if (tokenData.mCallback != null) {
-            tokenData.mCallback.onEscrowTokenActivated(handle, userId);
+            tokenData.mCallback.onEscrowTokenActivated(tokenHandle, userId);
         }
         return true;
     }
 
-    private void createSyntheticPasswordBlob(long handle, byte type, AuthenticationToken authToken,
-            byte[] applicationId, long sid, int userId) {
-        final byte[] secret;
-        if (type == SYNTHETIC_PASSWORD_STRONG_TOKEN_BASED
-                || type == SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED) {
-            secret = authToken.getEscrowSecret();
+    private void createSyntheticPasswordBlob(long protectorId, byte protectorType,
+            SyntheticPassword sp, byte[] protectorSecret, long sid, int userId) {
+        final byte[] spSecret;
+        if (protectorType == PROTECTOR_TYPE_STRONG_TOKEN_BASED
+                || protectorType == PROTECTOR_TYPE_WEAK_TOKEN_BASED) {
+            spSecret = sp.getEscrowSecret();
         } else {
-            secret = authToken.getSyntheticPassword();
+            spSecret = sp.getSyntheticPassword();
         }
-        byte[] content = createSPBlob(getKeyName(handle), secret, applicationId, sid);
+        byte[] content = createSPBlob(getKeyName(protectorId), spSecret, protectorSecret, sid);
         /*
          * We can upgrade from v1 to v2 because that's just a change in the way that
          * the SP is stored. However, we can't upgrade to v3 because that is a change
          * in the way that passwords are derived from the SP.
          */
-        byte version = authToken.mVersion == SYNTHETIC_PASSWORD_VERSION_V3
+        byte version = sp.mVersion == SYNTHETIC_PASSWORD_VERSION_V3
                 ? SYNTHETIC_PASSWORD_VERSION_V3 : SYNTHETIC_PASSWORD_VERSION_V2;
 
-        SyntheticPasswordBlob blob = SyntheticPasswordBlob.create(version, type, content);
-        saveState(SP_BLOB_NAME, blob.toByte(), handle, userId);
+        SyntheticPasswordBlob blob = SyntheticPasswordBlob.create(version, protectorType, content);
+        saveState(SP_BLOB_NAME, blob.toByte(), protectorId, userId);
     }
 
     /**
-     * Decrypt a synthetic password by supplying the user credential and corresponding password
-     * blob handle generated previously. If the decryption is successful, initiate a GateKeeper
-     * verification to referesh the SID & Auth token maintained by the system.
+     * Tries to unlock a user's LSKF-based SP protector, given its ID and the claimed LSKF (which
+     * may be empty).  On success, returns the user's synthetic password, and also does a Gatekeeper
+     * verification to refresh the SID and HardwareAuthToken maintained by the system.
      */
-    public AuthenticationResult unwrapPasswordBasedSyntheticPassword(IGateKeeperService gatekeeper,
-            long handle, @NonNull LockscreenCredential credential, int userId,
+    public AuthenticationResult unlockLskfBasedProtector(IGateKeeperService gatekeeper,
+            long protectorId, @NonNull LockscreenCredential credential, int userId,
             ICheckCredentialProgressCallback progressCallback) {
         AuthenticationResult result = new AuthenticationResult();
-        PasswordData pwd = PasswordData.fromBytes(loadState(PASSWORD_DATA_NAME, handle, userId));
+        PasswordData pwd = PasswordData.fromBytes(loadState(PASSWORD_DATA_NAME, protectorId,
+                    userId));
 
         if (!credential.checkAgainstStoredType(pwd.credentialType)) {
             Slog.e(TAG, String.format("Credential type mismatch: expected %d actual %d",
@@ -1022,13 +1033,13 @@ public class SyntheticPasswordManager {
 
         byte[] pwdToken = computePasswordToken(credential, pwd);
 
-        final byte[] applicationId;
+        final byte[] protectorSecret;
         final long sid;
-        int weaverSlot = loadWeaverSlot(handle, userId);
+        int weaverSlot = loadWeaverSlot(protectorId, userId);
         if (weaverSlot != INVALID_WEAVER_SLOT) {
-            // Weaver based user password
+            // Protector uses Weaver to verify the LSKF
             if (!isWeaverAvailable()) {
-                Slog.e(TAG, "No weaver service to unwrap password based SP");
+                Slog.e(TAG, "Protector uses Weaver, but Weaver is unavailable");
                 result.gkResponse = VerifyCredentialResponse.ERROR;
                 return result;
             }
@@ -1037,9 +1048,10 @@ public class SyntheticPasswordManager {
                 return result;
             }
             sid = GateKeeper.INVALID_SECURE_USER_ID;
-            applicationId = transformUnderWeaverSecret(pwdToken,
+            protectorSecret = transformUnderWeaverSecret(pwdToken,
                     result.gkResponse.getGatekeeperHAT());
         } else {
+            // Protector uses Gatekeeper to verify the LSKF
             byte[] gkPwdToken = passwordTokenToGkInput(pwdToken);
             GateKeeperResponse response;
             try {
@@ -1068,7 +1080,7 @@ public class SyntheticPasswordManager {
                         // Use the reenrollment opportunity to update credential type
                         // (getting rid of CREDENTIAL_TYPE_PASSWORD_OR_PIN)
                         pwd.credentialType = credential.getType();
-                        saveState(PASSWORD_DATA_NAME, pwd.toBytes(), handle, userId);
+                        saveState(PASSWORD_DATA_NAME, pwd.toBytes(), protectorId, userId);
                         synchronizeFrpPassword(pwd, 0, userId);
                     } else {
                         Slog.w(TAG, "Fail to re-enroll user password for user " + userId);
@@ -1083,8 +1095,8 @@ public class SyntheticPasswordManager {
                 return result;
             }
             sid = sidFromPasswordHandle(pwd.passwordHandle);
-            applicationId = transformUnderSecdiscardable(pwdToken,
-                    loadSecdiscardable(handle, userId));
+            protectorSecret = transformUnderSecdiscardable(pwdToken,
+                    loadSecdiscardable(protectorId, userId));
         }
         // Supplied credential passes first stage weaver/gatekeeper check so it should be correct.
         // Notify the callback so the keyguard UI can proceed immediately.
@@ -1095,80 +1107,81 @@ public class SyntheticPasswordManager {
                 Slog.w(TAG, "progressCallback throws exception", e);
             }
         }
-        result.authToken = unwrapSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_PASSWORD_BASED,
-                applicationId, sid, userId);
+        result.syntheticPassword = unwrapSyntheticPasswordBlob(protectorId,
+                PROTECTOR_TYPE_LSKF_BASED, protectorSecret, sid, userId);
 
         // Perform verifyChallenge to refresh auth tokens for GK if user password exists.
-        result.gkResponse = verifyChallenge(gatekeeper, result.authToken, 0L, userId);
+        result.gkResponse = verifyChallenge(gatekeeper, result.syntheticPassword, 0L, userId);
 
         // Upgrade case: store the metrics if the device did not have stored metrics before, should
-        // only happen once on old synthetic password blobs.
-        if (result.authToken != null && !hasPasswordMetrics(handle, userId)) {
-            savePasswordMetrics(credential, result.authToken, handle, userId);
+        // only happen once on old protectors.
+        if (result.syntheticPassword != null && !hasPasswordMetrics(protectorId, userId)) {
+            savePasswordMetrics(credential, result.syntheticPassword, protectorId, userId);
         }
         return result;
     }
 
     /**
-     * Decrypt a synthetic password by supplying an escrow token and corresponding token
-     * blob handle generated previously. If the decryption is successful, initiate a GateKeeper
-     * verification to referesh the SID & Auth token maintained by the system.
+     * Tries to unlock a token-based SP protector (weak or strong), given its ID and the claimed
+     * token.  On success, returns the user's synthetic password, and also does a Gatekeeper
+     * verification to refresh the SID and HardwareAuthToken maintained by the system.
      */
-    public @NonNull AuthenticationResult unwrapTokenBasedSyntheticPassword(
-            IGateKeeperService gatekeeper, long handle, byte[] token, int userId) {
-        SyntheticPasswordBlob blob = SyntheticPasswordBlob
-                .fromBytes(loadState(SP_BLOB_NAME, handle, userId));
-        return unwrapTokenBasedSyntheticPasswordInternal(gatekeeper, handle,
-                blob.mType, token, userId);
+    public @NonNull AuthenticationResult unlockTokenBasedProtector(
+            IGateKeeperService gatekeeper, long protectorId, byte[] token, int userId) {
+        SyntheticPasswordBlob blob = SyntheticPasswordBlob.fromBytes(loadState(SP_BLOB_NAME,
+                    protectorId, userId));
+        return unlockTokenBasedProtectorInternal(gatekeeper, protectorId, blob.mProtectorType,
+                token, userId);
     }
 
     /**
-     * Decrypt a synthetic password by supplying an strong escrow token and corresponding token
-     * blob handle generated previously. If the decryption is successful, initiate a GateKeeper
-     * verification to referesh the SID & Auth token maintained by the system.
+     * Like {@link #unlockTokenBasedProtector}, but throws an exception if the protector is not for
+     * a strong token specifically.
      */
-    public @NonNull AuthenticationResult unwrapStrongTokenBasedSyntheticPassword(
-            IGateKeeperService gatekeeper, long handle, byte[] token, int userId) {
-        return unwrapTokenBasedSyntheticPasswordInternal(gatekeeper, handle,
-                SYNTHETIC_PASSWORD_STRONG_TOKEN_BASED, token, userId);
+    public @NonNull AuthenticationResult unlockStrongTokenBasedProtector(
+            IGateKeeperService gatekeeper, long protectorId, byte[] token, int userId) {
+        return unlockTokenBasedProtectorInternal(gatekeeper, protectorId,
+                PROTECTOR_TYPE_STRONG_TOKEN_BASED, token, userId);
     }
 
     /**
-     * Decrypt a synthetic password by supplying a weak escrow token and corresponding token
-     * blob handle generated previously. If the decryption is successful, initiate a GateKeeper
-     * verification to referesh the SID & Auth token maintained by the system.
+     * Like {@link #unlockTokenBasedProtector}, but throws an exception if the protector is not for
+     * a weak token specifically.
      */
-    public @NonNull AuthenticationResult unwrapWeakTokenBasedSyntheticPassword(
-            IGateKeeperService gatekeeper, long handle, byte[] token, int userId) {
-        return unwrapTokenBasedSyntheticPasswordInternal(gatekeeper, handle,
-                SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED, token, userId);
+    public @NonNull AuthenticationResult unlockWeakTokenBasedProtector(
+            IGateKeeperService gatekeeper, long protectorId, byte[] token, int userId) {
+        return unlockTokenBasedProtectorInternal(gatekeeper, protectorId,
+                PROTECTOR_TYPE_WEAK_TOKEN_BASED, token, userId);
     }
 
-    private  @NonNull AuthenticationResult unwrapTokenBasedSyntheticPasswordInternal(
-            IGateKeeperService gatekeeper, long handle, byte type, byte[] token, int userId) {
+    private @NonNull AuthenticationResult unlockTokenBasedProtectorInternal(
+            IGateKeeperService gatekeeper, long protectorId, byte expectedProtectorType,
+            byte[] token, int userId) {
         AuthenticationResult result = new AuthenticationResult();
-        byte[] secdiscardable = loadSecdiscardable(handle, userId);
-        int slotId = loadWeaverSlot(handle, userId);
+        byte[] secdiscardable = loadSecdiscardable(protectorId, userId);
+        int slotId = loadWeaverSlot(protectorId, userId);
         if (slotId != INVALID_WEAVER_SLOT) {
             if (!isWeaverAvailable()) {
-                Slog.e(TAG, "No weaver service to unwrap token based SP");
+                Slog.e(TAG, "Protector uses Weaver, but Weaver is unavailable");
                 result.gkResponse = VerifyCredentialResponse.ERROR;
                 return result;
             }
             VerifyCredentialResponse response = weaverVerify(slotId, null);
             if (response.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK ||
                     response.getGatekeeperHAT() == null) {
-                Slog.e(TAG, "Failed to retrieve weaver secret when unwrapping token");
+                Slog.e(TAG,
+                        "Failed to retrieve Weaver secret when unlocking token-based protector");
                 result.gkResponse = VerifyCredentialResponse.ERROR;
                 return result;
             }
             secdiscardable = SyntheticPasswordCrypto.decrypt(response.getGatekeeperHAT(),
                     PERSONALIZATION_WEAVER_TOKEN, secdiscardable);
         }
-        byte[] applicationId = transformUnderSecdiscardable(token, secdiscardable);
-        result.authToken = unwrapSyntheticPasswordBlob(handle, type, applicationId, 0L, userId);
-        if (result.authToken != null) {
-            result.gkResponse = verifyChallenge(gatekeeper, result.authToken, 0L, userId);
+        byte[] protectorSecret = transformUnderSecdiscardable(token, secdiscardable);
+        result.syntheticPassword = unwrapSyntheticPasswordBlob(protectorId, expectedProtectorType,
+                protectorSecret, 0L, userId);
+        if (result.syntheticPassword != null) {
+            result.gkResponse = verifyChallenge(gatekeeper, result.syntheticPassword, 0L, userId);
             if (result.gkResponse == null) {
                 // The user currently has no password. return OK with null payload so null
                 // is propagated to unlockUser()
@@ -1180,9 +1193,9 @@ public class SyntheticPasswordManager {
         return result;
     }
 
-    private AuthenticationToken unwrapSyntheticPasswordBlob(long handle, byte type,
-            byte[] applicationId, long sid, int userId) {
-        byte[] data = loadState(SP_BLOB_NAME, handle, userId);
+    private SyntheticPassword unwrapSyntheticPasswordBlob(long protectorId,
+            byte expectedProtectorType, byte[] protectorSecret, long sid, int userId) {
+        byte[] data = loadState(SP_BLOB_NAME, protectorId, userId);
         if (data == null) {
             return null;
         }
@@ -1190,36 +1203,38 @@ public class SyntheticPasswordManager {
         if (blob.mVersion != SYNTHETIC_PASSWORD_VERSION_V3
                 && blob.mVersion != SYNTHETIC_PASSWORD_VERSION_V2
                 && blob.mVersion != SYNTHETIC_PASSWORD_VERSION_V1) {
-            throw new IllegalArgumentException("Unknown blob version");
+            throw new IllegalArgumentException("Unknown blob version: " + blob.mVersion);
         }
-        if (blob.mType != type) {
-            throw new IllegalArgumentException("Invalid blob type");
+        if (blob.mProtectorType != expectedProtectorType) {
+            throw new IllegalArgumentException("Invalid protector type: " + blob.mProtectorType);
         }
-        final byte[] secret;
+        final byte[] spSecret;
         if (blob.mVersion == SYNTHETIC_PASSWORD_VERSION_V1) {
-            secret = SyntheticPasswordCrypto.decryptBlobV1(getKeyName(handle), blob.mContent,
-                    applicationId);
+            spSecret = SyntheticPasswordCrypto.decryptBlobV1(getKeyName(protectorId), blob.mContent,
+                    protectorSecret);
         } else {
-            secret = decryptSPBlob(getKeyName(handle), blob.mContent, applicationId);
+            spSecret = decryptSPBlob(getKeyName(protectorId), blob.mContent, protectorSecret);
         }
-        if (secret == null) {
+        if (spSecret == null) {
             Slog.e(TAG, "Fail to decrypt SP for user " + userId);
             return null;
         }
-        AuthenticationToken result = new AuthenticationToken(blob.mVersion);
-        if (type == SYNTHETIC_PASSWORD_STRONG_TOKEN_BASED
-                || type == SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED) {
+        SyntheticPassword result = new SyntheticPassword(blob.mVersion);
+        if (blob.mProtectorType == PROTECTOR_TYPE_STRONG_TOKEN_BASED
+                || blob.mProtectorType == PROTECTOR_TYPE_WEAK_TOKEN_BASED) {
             if (!loadEscrowData(result, userId)) {
                 Slog.e(TAG, "User is not escrowable: " + userId);
                 return null;
             }
-            result.recreateFromEscrow(secret);
+            result.recreateFromEscrow(spSecret);
         } else {
-            result.recreateDirectly(secret);
+            result.recreateDirectly(spSecret);
         }
         if (blob.mVersion == SYNTHETIC_PASSWORD_VERSION_V1) {
-            Slog.i(TAG, "Upgrade v1 SP blob for user " + userId + ", type = " + type);
-            createSyntheticPasswordBlob(handle, type, result, applicationId, sid, userId);
+            Slog.i(TAG, "Upgrading v1 SP blob for user " + userId + ", protectorType = "
+                    + blob.mProtectorType);
+            createSyntheticPasswordBlob(protectorId, blob.mProtectorType, result, protectorSecret,
+                    sid, userId);
         }
         return result;
     }
@@ -1228,13 +1243,12 @@ public class SyntheticPasswordManager {
      * performs GK verifyChallenge and returns auth token, re-enrolling SP password handle
      * if required.
      *
-     * Normally performing verifyChallenge with an AuthenticationToken should always return
-     * RESPONSE_OK, since user authentication failures are detected earlier when trying to
-     * decrypt SP.
+     * Normally performing verifyChallenge with an SP should always return RESPONSE_OK, since user
+     * authentication failures are detected earlier when trying to decrypt the SP.
      */
     public @Nullable VerifyCredentialResponse verifyChallenge(IGateKeeperService gatekeeper,
-            @NonNull AuthenticationToken auth, long challenge, int userId) {
-        return verifyChallengeInternal(gatekeeper, auth.deriveGkPassword(), challenge, userId);
+            @NonNull SyntheticPassword sp, long challenge, int userId) {
+        return verifyChallengeInternal(gatekeeper, sp.deriveGkPassword(), challenge, userId);
     }
 
     protected @Nullable VerifyCredentialResponse verifyChallengeInternal(
@@ -1285,46 +1299,49 @@ public class SyntheticPasswordManager {
         }
     }
 
-    public boolean existsHandle(long handle, int userId) {
-        return hasState(SP_BLOB_NAME, handle, userId);
+    public boolean protectorExists(long protectorId, int userId) {
+        return hasState(SP_BLOB_NAME, protectorId, userId);
     }
 
-    /** Destroy the escrow token with the given handle for the given user. */
-    public void destroyTokenBasedSyntheticPassword(long handle, int userId) {
-        SyntheticPasswordBlob blob = SyntheticPasswordBlob.fromBytes(loadState(SP_BLOB_NAME, handle,
-                userId));
-        destroySyntheticPassword(handle, userId);
-        destroyState(SECDISCARDABLE_NAME, handle, userId);
-        if (blob.mType == SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED) {
-            notifyWeakEscrowTokenRemovedListeners(handle, userId);
+    /** Destroy a token-based SP protector. */
+    public void destroyTokenBasedProtector(long protectorId, int userId) {
+        SyntheticPasswordBlob blob = SyntheticPasswordBlob.fromBytes(loadState(SP_BLOB_NAME,
+                    protectorId, userId));
+        destroyProtectorCommon(protectorId, userId);
+        destroyState(SECDISCARDABLE_NAME, protectorId, userId);
+        if (blob.mProtectorType == PROTECTOR_TYPE_WEAK_TOKEN_BASED) {
+            notifyWeakEscrowTokenRemovedListeners(protectorId, userId);
         }
     }
 
-    /** Destroy all weak escrow tokens for the given user. */
-    public void destroyAllWeakTokenBasedSyntheticPasswords(int userId) {
-        List<Long> handles = mStorage.listSyntheticPasswordHandlesForUser(SECDISCARDABLE_NAME,
-                userId);
-        for (long handle: handles) {
+    /** Destroy all weak token-based SP protectors for the given user. */
+    public void destroyAllWeakTokenBasedProtectors(int userId) {
+        List<Long> protectorIds =
+            mStorage.listSyntheticPasswordProtectorsForUser(SECDISCARDABLE_NAME, userId);
+        for (long protectorId : protectorIds) {
             SyntheticPasswordBlob blob = SyntheticPasswordBlob.fromBytes(loadState(SP_BLOB_NAME,
-                    handle, userId));
-            if (blob.mType == SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED) {
-                destroyTokenBasedSyntheticPassword(handle, userId);
+                    protectorId, userId));
+            if (blob.mProtectorType == PROTECTOR_TYPE_WEAK_TOKEN_BASED) {
+                destroyTokenBasedProtector(protectorId, userId);
             }
         }
     }
 
-    public void destroyPasswordBasedSyntheticPassword(long handle, int userId) {
-        destroySyntheticPassword(handle, userId);
-        destroyState(SECDISCARDABLE_NAME, handle, userId);
-        destroyState(PASSWORD_DATA_NAME, handle, userId);
-        destroyState(PASSWORD_METRICS_NAME, handle, userId);
+    /**
+     * Destroy an LSKF-based SP protector.  This is used when the user's LSKF is changed.
+     */
+    public void destroyLskfBasedProtector(long protectorId, int userId) {
+        destroyProtectorCommon(protectorId, userId);
+        destroyState(SECDISCARDABLE_NAME, protectorId, userId);
+        destroyState(PASSWORD_DATA_NAME, protectorId, userId);
+        destroyState(PASSWORD_METRICS_NAME, protectorId, userId);
     }
 
-    private void destroySyntheticPassword(long handle, int userId) {
-        destroyState(SP_BLOB_NAME, handle, userId);
-        destroySPBlobKey(getKeyName(handle));
-        if (hasState(WEAVER_SLOT_NAME, handle, userId)) {
-            destroyWeaverSlot(handle, userId);
+    private void destroyProtectorCommon(long protectorId, int userId) {
+        destroyState(SP_BLOB_NAME, protectorId, userId);
+        destroySPBlobKey(getKeyName(protectorId));
+        if (hasState(WEAVER_SLOT_NAME, protectorId, userId)) {
+            destroyWeaverSlot(protectorId, userId);
         }
     }
 
@@ -1346,92 +1363,91 @@ public class SyntheticPasswordManager {
         return result;
     }
 
-    private byte[] createSecdiscardable(long handle, int userId) {
+    private byte[] createSecdiscardable(long protectorId, int userId) {
         byte[] data = secureRandom(SECDISCARDABLE_LENGTH);
-        saveSecdiscardable(handle, data, userId);
+        saveSecdiscardable(protectorId, data, userId);
         return data;
     }
 
-    private void saveSecdiscardable(long handle, byte[] secdiscardable, int userId) {
-        saveState(SECDISCARDABLE_NAME, secdiscardable, handle, userId);
+    private void saveSecdiscardable(long protectorId, byte[] secdiscardable, int userId) {
+        saveState(SECDISCARDABLE_NAME, secdiscardable, protectorId, userId);
     }
 
-    private byte[] loadSecdiscardable(long handle, int userId) {
-        return loadState(SECDISCARDABLE_NAME, handle, userId);
+    private byte[] loadSecdiscardable(long protectorId, int userId) {
+        return loadState(SECDISCARDABLE_NAME, protectorId, userId);
     }
 
-    private byte getTokenBasedBlobType(@TokenType int type) {
+    private byte getTokenBasedProtectorType(@TokenType int type) {
         switch (type) {
             case TOKEN_TYPE_WEAK:
-                return SYNTHETIC_PASSWORD_WEAK_TOKEN_BASED;
+                return PROTECTOR_TYPE_WEAK_TOKEN_BASED;
             case TOKEN_TYPE_STRONG:
             default:
-                return SYNTHETIC_PASSWORD_STRONG_TOKEN_BASED;
+                return PROTECTOR_TYPE_STRONG_TOKEN_BASED;
         }
     }
 
     /**
-     * Retrieves the saved password metrics associated with a SP handle. Only meaningful to be
-     * called on the handle of a password-based synthetic password. A valid AuthenticationToken for
-     * the target user is required in order to be able to decrypt the encrypted password metrics on
-     * disk.
+     * Retrieves a user's saved password metrics from their LSKF-based SP protector.  The
+     * SyntheticPassword itself is needed to decrypt the file containing the password metrics.
      */
-    public @Nullable PasswordMetrics getPasswordMetrics(AuthenticationToken authToken, long handle,
+    public @Nullable PasswordMetrics getPasswordMetrics(SyntheticPassword sp, long protectorId,
             int userId) {
-        final byte[] encrypted = loadState(PASSWORD_METRICS_NAME, handle, userId);
+        final byte[] encrypted = loadState(PASSWORD_METRICS_NAME, protectorId, userId);
         if (encrypted == null) return null;
-        final byte[] decrypted = SyntheticPasswordCrypto.decrypt(authToken.deriveMetricsKey(),
+        final byte[] decrypted = SyntheticPasswordCrypto.decrypt(sp.deriveMetricsKey(),
                 /* personalization= */ new byte[0], encrypted);
         if (decrypted == null) return null;
         return VersionedPasswordMetrics.deserialize(decrypted).getMetrics();
     }
 
-    private void savePasswordMetrics(LockscreenCredential credential, AuthenticationToken authToken,
-            long handle, int userId) {
-        final byte[] encrypted = SyntheticPasswordCrypto.encrypt(authToken.deriveMetricsKey(),
+    private void savePasswordMetrics(LockscreenCredential credential, SyntheticPassword sp,
+            long protectorId, int userId) {
+        final byte[] encrypted = SyntheticPasswordCrypto.encrypt(sp.deriveMetricsKey(),
                 /* personalization= */ new byte[0],
                 new VersionedPasswordMetrics(credential).serialize());
-        saveState(PASSWORD_METRICS_NAME, encrypted, handle, userId);
+        saveState(PASSWORD_METRICS_NAME, encrypted, protectorId, userId);
     }
 
-    private boolean hasPasswordMetrics(long handle, int userId) {
-        return hasState(PASSWORD_METRICS_NAME, handle, userId);
+    private boolean hasPasswordMetrics(long protectorId, int userId) {
+        return hasState(PASSWORD_METRICS_NAME, protectorId, userId);
     }
 
-    private boolean hasState(String stateName, long handle, int userId) {
-        return !ArrayUtils.isEmpty(loadState(stateName, handle, userId));
+    private boolean hasState(String stateName, long protectorId, int userId) {
+        return !ArrayUtils.isEmpty(loadState(stateName, protectorId, userId));
     }
 
-    private byte[] loadState(String stateName, long handle, int userId) {
-        return mStorage.readSyntheticPasswordState(userId, handle, stateName);
+    private byte[] loadState(String stateName, long protectorId, int userId) {
+        return mStorage.readSyntheticPasswordState(userId, protectorId, stateName);
     }
 
-    private void saveState(String stateName, byte[] data, long handle, int userId) {
-        mStorage.writeSyntheticPasswordState(userId, handle, stateName, data);
+    private void saveState(String stateName, byte[] data, long protectorId, int userId) {
+        mStorage.writeSyntheticPasswordState(userId, protectorId, stateName, data);
     }
 
-    private void destroyState(String stateName, long handle, int userId) {
-        mStorage.deleteSyntheticPasswordState(userId, handle, stateName);
+    private void destroyState(String stateName, long protectorId, int userId) {
+        mStorage.deleteSyntheticPasswordState(userId, protectorId, stateName);
     }
 
-    protected byte[] decryptSPBlob(String blobKeyName, byte[] blob, byte[] applicationId) {
-        return SyntheticPasswordCrypto.decryptBlob(blobKeyName, blob, applicationId);
+    protected byte[] decryptSPBlob(String blobKeyName, byte[] blob, byte[] protectorSecret) {
+        return SyntheticPasswordCrypto.decryptBlob(blobKeyName, blob, protectorSecret);
     }
 
-    protected byte[] createSPBlob(String blobKeyName, byte[] data, byte[] applicationId, long sid) {
-        return SyntheticPasswordCrypto.createBlob(blobKeyName, data, applicationId, sid);
+    protected byte[] createSPBlob(String blobKeyName, byte[] data, byte[] protectorSecret,
+            long sid) {
+        return SyntheticPasswordCrypto.createBlob(blobKeyName, data, protectorSecret, sid);
     }
 
     protected void destroySPBlobKey(String keyAlias) {
         SyntheticPasswordCrypto.destroyBlobKey(keyAlias);
     }
 
-    public static long generateHandle() {
+    public static long generateProtectorId() {
         SecureRandom rng = new SecureRandom();
         long result;
         do {
             result = rng.nextLong();
-        } while (result == DEFAULT_HANDLE);
+        } while (result == NULL_PROTECTOR_ID);
         return result;
     }
 
@@ -1448,8 +1464,8 @@ public class SyntheticPasswordManager {
         }
     }
 
-    private String getKeyName(long handle) {
-        return String.format("%s%x", LockPatternUtils.SYNTHETIC_PASSWORD_KEY_PREFIX, handle);
+    private String getKeyName(long protectorId) {
+        return String.format("%s%x", LockPatternUtils.SYNTHETIC_PASSWORD_KEY_PREFIX, protectorId);
     }
 
     private byte[] computePasswordToken(LockscreenCredential credential, PasswordData data) {
@@ -1506,11 +1522,11 @@ public class SyntheticPasswordManager {
      */
     public boolean migrateKeyNamespace() {
         boolean success = true;
-        final Map<Integer, List<Long>> allHandles =
-                mStorage.listSyntheticPasswordHandlesForAllUsers(SP_BLOB_NAME);
-        for (List<Long> userHandles : allHandles.values()) {
-            for (long handle : userHandles) {
-                success &= SyntheticPasswordCrypto.migrateLockSettingsKey(getKeyName(handle));
+        final Map<Integer, List<Long>> allProtectors =
+            mStorage.listSyntheticPasswordProtectorsForAllUsers(SP_BLOB_NAME);
+        for (List<Long> userProtectors : allProtectors.values()) {
+            for (long protectorId : userProtectors) {
+                success &= SyntheticPasswordCrypto.migrateLockSettingsKey(getKeyName(protectorId));
             }
         }
         return success;
@@ -1528,13 +1544,13 @@ public class SyntheticPasswordManager {
         return mListeners.unregister(listener);
     }
 
-    private void notifyWeakEscrowTokenRemovedListeners(long handle, int userId) {
+    private void notifyWeakEscrowTokenRemovedListeners(long protectorId, int userId) {
         int i = mListeners.beginBroadcast();
         try {
             while (i > 0) {
                 i--;
                 try {
-                    mListeners.getBroadcastItem(i).onWeakEscrowTokenRemoved(handle, userId);
+                    mListeners.getBroadcastItem(i).onWeakEscrowTokenRemoved(protectorId, userId);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Exception while notifying WeakEscrowTokenRemovedListener.",
                             e);

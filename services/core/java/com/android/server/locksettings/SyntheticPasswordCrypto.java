@@ -52,7 +52,7 @@ public class SyntheticPasswordCrypto {
     private static final int PROFILE_KEY_IV_SIZE = 12;
     private static final int DEFAULT_TAG_LENGTH_BITS = 128;
     private static final int AES_KEY_LENGTH = 32; // 256-bit AES key
-    private static final byte[] APPLICATION_ID_PERSONALIZATION = "application-id".getBytes();
+    private static final byte[] PROTECTOR_SECRET_PERSONALIZATION = "application-id".getBytes();
     // Time between the user credential is verified with GK and the decryption of synthetic password
     // under the auth-bound key. This should always happen one after the other, but give it 15
     // seconds just to be sure.
@@ -127,15 +127,19 @@ public class SyntheticPasswordCrypto {
         }
     }
 
-    public static byte[] decryptBlobV1(String keyAlias, byte[] blob, byte[] applicationId) {
+    /**
+     * Decrypt a legacy SP blob which did the Keystore and software encryption layers in the wrong
+     * order.
+     */
+    public static byte[] decryptBlobV1(String keyAlias, byte[] blob, byte[] protectorSecret) {
         try {
             KeyStore keyStore = getKeyStore();
-            SecretKey decryptionKey = (SecretKey) keyStore.getKey(keyAlias, null);
-            if (decryptionKey == null) {
+            SecretKey keyStoreKey = (SecretKey) keyStore.getKey(keyAlias, null);
+            if (keyStoreKey == null) {
                 throw new IllegalStateException("SP key is missing: " + keyAlias);
             }
-            byte[] intermediate = decrypt(applicationId, APPLICATION_ID_PERSONALIZATION, blob);
-            return decrypt(decryptionKey, intermediate);
+            byte[] intermediate = decrypt(protectorSecret, PROTECTOR_SECRET_PERSONALIZATION, blob);
+            return decrypt(keyStoreKey, intermediate);
         } catch (Exception e) {
             Slog.e(TAG, "Failed to decrypt V1 blob", e);
             throw new IllegalStateException("Failed to decrypt blob", e);
@@ -157,16 +161,19 @@ public class SyntheticPasswordCrypto {
         return keyStore;
     }
 
-    public static byte[] decryptBlob(String keyAlias, byte[] blob, byte[] applicationId) {
+    /**
+     * Decrypts an SP blob that was created by {@link #createBlob}.
+     */
+    public static byte[] decryptBlob(String keyAlias, byte[] blob, byte[] protectorSecret) {
         try {
             final KeyStore keyStore = getKeyStore();
 
-            SecretKey decryptionKey = (SecretKey) keyStore.getKey(keyAlias, null);
-            if (decryptionKey == null) {
+            SecretKey keyStoreKey = (SecretKey) keyStore.getKey(keyAlias, null);
+            if (keyStoreKey == null) {
                 throw new IllegalStateException("SP key is missing: " + keyAlias);
             }
-            byte[] intermediate = decrypt(decryptionKey, blob);
-            return decrypt(applicationId, APPLICATION_ID_PERSONALIZATION, intermediate);
+            byte[] intermediate = decrypt(keyStoreKey, blob);
+            return decrypt(protectorSecret, PROTECTOR_SECRET_PERSONALIZATION, intermediate);
         } catch (CertificateException | IOException | BadPaddingException
                 | IllegalBlockSizeException
                 | KeyStoreException | NoSuchPaddingException | NoSuchAlgorithmException
@@ -177,11 +184,22 @@ public class SyntheticPasswordCrypto {
         }
     }
 
-    public static byte[] createBlob(String keyAlias, byte[] data, byte[] applicationId, long sid) {
+    /**
+     * Creates a new SP blob by encrypting the given data.  Two encryption layers are applied: an
+     * inner layer using a hash of protectorSecret as the key, and an outer layer using a new
+     * Keystore key with the given alias and optionally bound to a SID.
+     *
+     * The reason we use a layer of software encryption, instead of using protectorSecret as the
+     * applicationId of the Keystore key, is to work around buggy KeyMint implementations that don't
+     * cryptographically bind the applicationId to the key.  The Keystore layer has to be the outer
+     * layer, so that LSKF verification is ratelimited by Gatekeeper when Weaver is unavailable.
+     */
+    public static byte[] createBlob(String keyAlias, byte[] data, byte[] protectorSecret,
+            long sid) {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
             keyGenerator.init(AES_KEY_LENGTH * 8, new SecureRandom());
-            SecretKey secretKey = keyGenerator.generateKey();
+            SecretKey keyStoreKey = keyGenerator.generateKey();
             final KeyStore keyStore = getKeyStore();
             KeyProtection.Builder builder = new KeyProtection.Builder(KeyProperties.PURPOSE_DECRYPT)
                     .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
@@ -194,10 +212,10 @@ public class SyntheticPasswordCrypto {
             }
 
             keyStore.setEntry(keyAlias,
-                    new KeyStore.SecretKeyEntry(secretKey),
+                    new KeyStore.SecretKeyEntry(keyStoreKey),
                     builder.build());
-            byte[] intermediate = encrypt(applicationId, APPLICATION_ID_PERSONALIZATION, data);
-            return encrypt(secretKey, intermediate);
+            byte[] intermediate = encrypt(protectorSecret, PROTECTOR_SECRET_PERSONALIZATION, data);
+            return encrypt(keyStoreKey, intermediate);
         } catch (CertificateException | IOException | BadPaddingException
                 | IllegalBlockSizeException
                 | KeyStoreException | NoSuchPaddingException | NoSuchAlgorithmException

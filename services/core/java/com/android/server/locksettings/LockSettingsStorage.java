@@ -380,29 +380,30 @@ class LockSettingsStorage {
         }
     }
 
-    public void writeSyntheticPasswordState(int userId, long handle, String name, byte[] data) {
+    public void writeSyntheticPasswordState(int userId, long protectorId, String name,
+            byte[] data) {
         ensureSyntheticPasswordDirectoryForUser(userId);
-        writeFile(getSyntheticPasswordStateFileForUser(userId, handle, name), data);
+        writeFile(getSyntheticPasswordStateFileForUser(userId, protectorId, name), data);
     }
 
-    public byte[] readSyntheticPasswordState(int userId, long handle, String name) {
-        return readFile(getSyntheticPasswordStateFileForUser(userId, handle, name));
+    public byte[] readSyntheticPasswordState(int userId, long protectorId, String name) {
+        return readFile(getSyntheticPasswordStateFileForUser(userId, protectorId, name));
     }
 
-    public void deleteSyntheticPasswordState(int userId, long handle, String name) {
-        deleteFile(getSyntheticPasswordStateFileForUser(userId, handle, name));
+    public void deleteSyntheticPasswordState(int userId, long protectorId, String name) {
+        deleteFile(getSyntheticPasswordStateFileForUser(userId, protectorId, name));
     }
 
-    public Map<Integer, List<Long>> listSyntheticPasswordHandlesForAllUsers(String stateName) {
+    public Map<Integer, List<Long>> listSyntheticPasswordProtectorsForAllUsers(String stateName) {
         Map<Integer, List<Long>> result = new ArrayMap<>();
         final UserManager um = UserManager.get(mContext);
         for (UserInfo user : um.getUsers()) {
-            result.put(user.id, listSyntheticPasswordHandlesForUser(stateName, user.id));
+            result.put(user.id, listSyntheticPasswordProtectorsForUser(stateName, user.id));
         }
         return result;
     }
 
-    public List<Long> listSyntheticPasswordHandlesForUser(String stateName, int userId) {
+    public List<Long> listSyntheticPasswordProtectorsForUser(String stateName, int userId) {
         File baseDir = getSyntheticPasswordDirectoryForUser(userId);
         List<Long> result = new ArrayList<>();
         File[] files = baseDir.listFiles();
@@ -415,7 +416,7 @@ class LockSettingsStorage {
                 try {
                     result.add(Long.parseUnsignedLong(parts[0], 16));
                 } catch (NumberFormatException e) {
-                    Slog.e(TAG, "Failed to parse handle " + parts[0]);
+                    Slog.e(TAG, "Failed to parse protector ID " + parts[0]);
                 }
             }
         }
@@ -435,8 +436,8 @@ class LockSettingsStorage {
         }
     }
 
-    private File getSyntheticPasswordStateFileForUser(int userId, long handle, String name) {
-        String fileName = formatSimple("%016x.%s", handle, name);
+    private File getSyntheticPasswordStateFileForUser(int userId, long protectorId, String name) {
+        String fileName = formatSimple("%016x.%s", protectorId, name);
         return new File(getSyntheticPasswordDirectoryForUser(userId), fileName);
     }
 
