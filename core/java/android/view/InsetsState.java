@@ -90,8 +90,10 @@ public class InsetsState implements Parcelable {
             ITYPE_IME,
             ITYPE_CLIMATE_BAR,
             ITYPE_EXTRA_NAVIGATION_BAR,
-            ITYPE_LOCAL_NAVIGATION_BAR_1,
-            ITYPE_LOCAL_NAVIGATION_BAR_2
+            ITYPE_LEFT_GENERIC_OVERLAY,
+            ITYPE_TOP_GENERIC_OVERLAY,
+            ITYPE_RIGHT_GENERIC_OVERLAY,
+            ITYPE_BOTTOM_GENERIC_OVERLAY
     })
     public @interface InternalInsetsType {}
 
@@ -135,10 +137,12 @@ public class InsetsState implements Parcelable {
     public static final int ITYPE_EXTRA_NAVIGATION_BAR = 21;
 
     /** Additional types for local insets. **/
-    public static final int ITYPE_LOCAL_NAVIGATION_BAR_1 = 22;
-    public static final int ITYPE_LOCAL_NAVIGATION_BAR_2 = 23;
+    public static final int ITYPE_LEFT_GENERIC_OVERLAY = 22;
+    public static final int ITYPE_TOP_GENERIC_OVERLAY = 23;
+    public static final int ITYPE_RIGHT_GENERIC_OVERLAY = 24;
+    public static final int ITYPE_BOTTOM_GENERIC_OVERLAY = 25;
 
-    static final int LAST_TYPE = ITYPE_LOCAL_NAVIGATION_BAR_2;
+    static final int LAST_TYPE = ITYPE_BOTTOM_GENERIC_OVERLAY;
     public static final int SIZE = LAST_TYPE + 1;
 
     // Derived types
@@ -698,8 +702,12 @@ public class InsetsState implements Parcelable {
         if ((types & Type.NAVIGATION_BARS) != 0) {
             result.add(ITYPE_NAVIGATION_BAR);
             result.add(ITYPE_EXTRA_NAVIGATION_BAR);
-            result.add(ITYPE_LOCAL_NAVIGATION_BAR_1);
-            result.add(ITYPE_LOCAL_NAVIGATION_BAR_2);
+        }
+        if ((types & Type.GENERIC_OVERLAYS) != 0) {
+            result.add(ITYPE_LEFT_GENERIC_OVERLAY);
+            result.add(ITYPE_TOP_GENERIC_OVERLAY);
+            result.add(ITYPE_RIGHT_GENERIC_OVERLAY);
+            result.add(ITYPE_BOTTOM_GENERIC_OVERLAY);
         }
         if ((types & Type.CAPTION_BAR) != 0) {
             result.add(ITYPE_CAPTION_BAR);
@@ -740,9 +748,12 @@ public class InsetsState implements Parcelable {
                 return Type.STATUS_BARS;
             case ITYPE_NAVIGATION_BAR:
             case ITYPE_EXTRA_NAVIGATION_BAR:
-            case ITYPE_LOCAL_NAVIGATION_BAR_1:
-            case ITYPE_LOCAL_NAVIGATION_BAR_2:
                 return Type.NAVIGATION_BARS;
+            case ITYPE_LEFT_GENERIC_OVERLAY:
+            case ITYPE_TOP_GENERIC_OVERLAY:
+            case ITYPE_RIGHT_GENERIC_OVERLAY:
+            case ITYPE_BOTTOM_GENERIC_OVERLAY:
+                return Type.GENERIC_OVERLAYS;
             case ITYPE_CAPTION_BAR:
                 return Type.CAPTION_BAR;
             case ITYPE_IME:
@@ -861,10 +872,14 @@ public class InsetsState implements Parcelable {
                 return "ITYPE_CLIMATE_BAR";
             case ITYPE_EXTRA_NAVIGATION_BAR:
                 return "ITYPE_EXTRA_NAVIGATION_BAR";
-            case ITYPE_LOCAL_NAVIGATION_BAR_1:
-                return "ITYPE_LOCAL_NAVIGATION_BAR_1";
-            case ITYPE_LOCAL_NAVIGATION_BAR_2:
-                return "ITYPE_LOCAL_NAVIGATION_BAR_2";
+            case ITYPE_LEFT_GENERIC_OVERLAY:
+                return "ITYPE_LEFT_GENERIC_OVERLAY";
+            case ITYPE_TOP_GENERIC_OVERLAY:
+                return "ITYPE_TOP_GENERIC_OVERLAY";
+            case ITYPE_RIGHT_GENERIC_OVERLAY:
+                return "ITYPE_RIGHT_GENERIC_OVERLAY";
+            case ITYPE_BOTTOM_GENERIC_OVERLAY:
+                return "ITYPE_BOTTOM_GENERIC_OVERLAY";
             default:
                 return "ITYPE_UNKNOWN_" + type;
         }

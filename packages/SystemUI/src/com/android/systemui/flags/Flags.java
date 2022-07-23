@@ -119,7 +119,7 @@ public class Flags {
             new BooleanFlag(500, true);
 
     public static final BooleanFlag COMBINED_QS_HEADERS =
-            new BooleanFlag(501, false);
+            new BooleanFlag(501, false, true);
 
     public static final ResourceBooleanFlag PEOPLE_TILE =
             new ResourceBooleanFlag(502, R.bool.flag_conversations);
@@ -133,7 +133,7 @@ public class Flags {
     @Deprecated
     public static final BooleanFlag NEW_FOOTER = new BooleanFlag(504, true);
 
-    public static final BooleanFlag NEW_HEADER = new BooleanFlag(505, false);
+    public static final BooleanFlag NEW_HEADER = new BooleanFlag(505, false, true);
     public static final ResourceBooleanFlag FULL_SCREEN_USER_SWITCHER =
             new ResourceBooleanFlag(506, R.bool.config_enableFullscreenUserSwitcher);
 

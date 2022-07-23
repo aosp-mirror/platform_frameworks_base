@@ -155,6 +155,7 @@ public class BrightnessMirrorController
                 .inflate(R.layout.brightness_mirror_container, mStatusBarWindow, false);
         mToggleSliderController = setMirrorLayout();
         mStatusBarWindow.addView(mBrightnessMirror, index);
+        updateResources();
 
         for (int i = 0; i < mBrightnessMirrorListeners.size(); i++) {
             mBrightnessMirrorListeners.valueAt(i).onBrightnessMirrorReinflated(mBrightnessMirror);

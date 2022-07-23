@@ -25,7 +25,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.touch.BouncerSwipeTouchHandler;
 import com.android.systemui.dreams.touch.DreamTouchHandler;
-import com.android.systemui.statusbar.phone.PanelViewController;
+import com.android.systemui.shade.PanelViewController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import javax.inject.Named;

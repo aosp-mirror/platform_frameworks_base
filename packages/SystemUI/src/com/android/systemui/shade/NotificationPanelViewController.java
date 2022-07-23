@@ -192,8 +192,6 @@ import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
-import com.android.systemui.statusbar.phone.PanelView;
-import com.android.systemui.statusbar.phone.PanelViewController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -1716,10 +1714,17 @@ public final class NotificationPanelViewController extends PanelViewController {
     /**
      * Animate QS closing by flinging it.
      * If QS is expanded, it will collapse into QQS and stop.
+     * If in split shade, it will collapse the whole shade.
      *
      * @param animateAway Do not stop when QS becomes QQS. Fling until QS isn't visible anymore.
      */
     public void animateCloseQs(boolean animateAway) {
+        if (mSplitShadeEnabled) {
+            collapsePanel(
+                    /* animate= */true, /* delayed= */false, /* speedUpFactor= */1.0f);
+            return;
+        }
+
         if (mQsExpansionAnimator != null) {
             if (!mQsAnimatorExpand) {
                 return;
@@ -3392,17 +3397,9 @@ public final class NotificationPanelViewController extends PanelViewController {
         return mQsExpanded;
     }
 
-    public boolean isQsDetailShowing() {
-        return mQs.isShowingDetail();
-    }
-
     /** Returns whether the QS customizer is currently active. */
     public boolean isQsCustomizing() {
         return mQs.isCustomizing();
-    }
-
-    public void closeQsDetail() {
-        mQs.closeDetail();
     }
 
     /** Close the QS customizer if it is open. */
@@ -3748,6 +3745,8 @@ public final class NotificationPanelViewController extends PanelViewController {
 
         final float dozeAmount = dozing ? 1 : 0;
         mStatusBarStateController.setAndInstrumentDozeAmount(mView, dozeAmount, animate);
+
+        updateKeyguardStatusViewAlignment(animate);
     }
 
     public void setPulsing(boolean pulsing) {

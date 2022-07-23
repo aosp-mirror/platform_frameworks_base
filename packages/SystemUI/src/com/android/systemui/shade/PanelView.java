@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.shade;
 
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
+
+import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
+import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 
 public abstract class PanelView extends FrameLayout {
     public static final boolean DEBUG = false;

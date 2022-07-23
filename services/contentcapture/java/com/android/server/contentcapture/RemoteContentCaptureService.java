@@ -31,7 +31,6 @@ import android.service.contentcapture.IContentCaptureService;
 import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.IDataShareCallback;
 import android.service.contentcapture.SnapshotData;
-import android.util.EventLog;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.DataRemovalRequest;
@@ -48,7 +47,6 @@ final class RemoteContentCaptureService
     private final IBinder mServerCallback;
     private final int mIdleUnbindTimeoutMs;
     private final ContentCapturePerUserService mPerUserService;
-    private final int mUserId;
 
     RemoteContentCaptureService(Context context, String serviceInterface,
             ComponentName serviceComponentName, IContentCaptureServiceCallback callback, int userId,
@@ -63,7 +61,6 @@ final class RemoteContentCaptureService
         mPerUserService = perUserService;
         mServerCallback = callback.asBinder();
         mIdleUnbindTimeoutMs = idleUnbindTimeoutMs;
-        mUserId = userId;
 
         // Bind right away, which will trigger a onConnected() on service's
         ensureBoundLocked();
@@ -91,9 +88,6 @@ final class RemoteContentCaptureService
                     writeServiceEvent(
                             FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_CONNECTED,
                             mComponentName);
-                    EventLog.writeEvent(EventLogTags.CC_CONNECT_STATE_CHANGED, mUserId,
-                            mComponentName != null ? mComponentName.flattenToShortString() : "",
-                            ContentCapturePerUserService.EVENT_LOG_CONNECT_STATE_CONNECTED);
                 } finally {
                     // Update the system-service state, in case the service reconnected after
                     // dying
@@ -104,9 +98,6 @@ final class RemoteContentCaptureService
                 writeServiceEvent(
                         FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_DISCONNECTED,
                         mComponentName);
-                EventLog.writeEvent(EventLogTags.CC_CONNECT_STATE_CHANGED, mUserId,
-                        mComponentName != null ? mComponentName.flattenToShortString() : "",
-                        ContentCapturePerUserService.EVENT_LOG_CONNECT_STATE_DISCONNECTED);
             }
         } catch (Exception e) {
             Slog.w(mTag, "Exception calling onConnectedStateChanged(" + connected + "): " + e);

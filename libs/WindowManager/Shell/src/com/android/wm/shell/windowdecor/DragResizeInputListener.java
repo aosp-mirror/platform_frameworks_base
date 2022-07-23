@@ -27,8 +27,8 @@ import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
+import android.view.Choreographer;
 import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InputEvent;
@@ -97,7 +97,7 @@ class DragResizeInputListener implements AutoCloseable {
             e.rethrowFromSystemServer();
         }
 
-        mInputEventReceiver = new TaskResizeInputEventReceiver(mInputChannel, mHandler.getLooper());
+        mInputEventReceiver = new TaskResizeInputEventReceiver(mInputChannel, mHandler);
         mCallback = callback;
     }
 
@@ -154,10 +154,6 @@ class DragResizeInputListener implements AutoCloseable {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-
-        // This marks all relevant components have handled the previous resize event and can take
-        // the next one now.
-        mInputEventReceiver.onHandledLastResizeEvent();
     }
 
     @Override
@@ -171,28 +167,42 @@ class DragResizeInputListener implements AutoCloseable {
     }
 
     private class TaskResizeInputEventReceiver extends InputEventReceiver {
-        private boolean mWaitingForLastResizeEventHandled;
+        private final Choreographer mChoreographer;
+        private final Runnable mConsumeBatchEventRunnable;
+        private boolean mConsumeBatchEventScheduled;
 
-        private TaskResizeInputEventReceiver(InputChannel inputChannel, Looper looper) {
-            super(inputChannel, looper);
-        }
+        private TaskResizeInputEventReceiver(InputChannel inputChannel, Handler handler) {
+            super(inputChannel, handler.getLooper());
 
-        private void onHandledLastResizeEvent() {
-            mWaitingForLastResizeEventHandled = false;
-            consumeBatchedInputEvents(-1);
+            final Choreographer[] choreographer = new Choreographer[1];
+            handler.runWithScissors(
+                    () -> choreographer[0] = Choreographer.getInstance(), 0);
+            mChoreographer = choreographer[0];
+
+            mConsumeBatchEventRunnable = () -> {
+                mConsumeBatchEventScheduled = false;
+                if (consumeBatchedInputEvents(mChoreographer.getFrameTimeNanos())) {
+                    // If we consumed a batch here, we want to go ahead and schedule the
+                    // consumption of batched input events on the next frame. Otherwise, we would
+                    // wait until we have more input events pending and might get starved by other
+                    // things occurring in the process.
+                    scheduleConsumeBatchEvent();
+                }
+            };
         }
 
         @Override
         public void onBatchedInputEventPending(int source) {
-            // InputEventReceiver keeps continuous move events in a batched event until explicitly
-            // consuming it or an incompatible event shows up (likely an up event in this case). We
-            // continue to keep move events in the next batched event until we receive a geometry
-            // update so that we don't put too much pressure on the framework with excessive number
-            // of input events if it can't handle them fast enough. It's more responsive to always
-            // resize the task to the latest received coordinates.
-            if (!mWaitingForLastResizeEventHandled) {
-                consumeBatchedInputEvents(-1);
+            scheduleConsumeBatchEvent();
+        }
+
+        private void scheduleConsumeBatchEvent() {
+            if (mConsumeBatchEventScheduled) {
+                return;
             }
+            mChoreographer.postCallback(
+                    Choreographer.CALLBACK_INPUT, mConsumeBatchEventRunnable, null);
+            mConsumeBatchEventScheduled = true;
         }
 
         @Override
@@ -211,14 +221,12 @@ class DragResizeInputListener implements AutoCloseable {
                     mDragPointerId = e.getPointerId(0);
                     mCallback.onDragResizeStart(
                             calculateCtrlType(e.getX(0), e.getY(0)), e.getRawX(0), e.getRawY(0));
-                    mWaitingForLastResizeEventHandled = false;
                     break;
                 }
                 case MotionEvent.ACTION_MOVE: {
                     int dragPointerIndex = e.findPointerIndex(mDragPointerId);
                     mCallback.onDragResizeMove(
                             e.getRawX(dragPointerIndex), e.getRawY(dragPointerIndex));
-                    mWaitingForLastResizeEventHandled = true;
                     break;
                 }
                 case MotionEvent.ACTION_UP:
@@ -226,7 +234,6 @@ class DragResizeInputListener implements AutoCloseable {
                     int dragPointerIndex = e.findPointerIndex(mDragPointerId);
                     mCallback.onDragResizeEnd(
                             e.getRawX(dragPointerIndex), e.getRawY(dragPointerIndex));
-                    mWaitingForLastResizeEventHandled = false;
                     mDragPointerId = -1;
                     break;
                 }

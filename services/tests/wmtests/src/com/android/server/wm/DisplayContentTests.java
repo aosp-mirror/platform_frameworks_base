@@ -47,8 +47,10 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -1390,6 +1392,28 @@ public class DisplayContentTests extends WindowTestsBase {
         requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
         win.setRequestedVisibilities(requestedVisibilities);
         win.mActivityRecord.mTargetSdk = P;
+
+        performLayout(dc);
+
+        win.setHasSurface(true);
+
+        final Region expected = Region.obtain();
+        expected.set(dc.getBounds());
+        assertEquals(expected, calculateSystemGestureExclusion(dc));
+
+        win.setHasSurface(false);
+    }
+
+    @Test
+    public void testCalculateSystemGestureExclusion_unrestricted() throws Exception {
+        mWm.mConstants.mSystemGestureExcludedByPreQStickyImmersive = true;
+
+        final DisplayContent dc = createNewDisplay();
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, dc, "win");
+        win.getAttrs().flags |= FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
+        win.getAttrs().layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        win.getAttrs().privateFlags |= PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
+        win.setSystemGestureExclusion(Collections.singletonList(dc.getBounds()));
 
         performLayout(dc);
 

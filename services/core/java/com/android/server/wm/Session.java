@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.Manifest.permission.HIDE_OVERLAY_WINDOWS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.Manifest.permission.SET_UNRESTRICTED_GESTURE_EXCLUSION;
 import static android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY;
@@ -109,6 +110,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     final boolean mCanCreateSystemApplicationOverlay;
     final boolean mCanHideNonSystemOverlayWindows;
+    final boolean mCanSetUnrestrictedGestureExclusion;
     private AlertWindowNotification mAlertWindowNotification;
     private boolean mShowingAlertWindowNotificationAllowed;
     private boolean mClientDead = false;
@@ -138,6 +140,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 START_TASKS_FROM_RECENTS) == PERMISSION_GRANTED;
         mSetsUnrestrictedKeepClearAreas =
                 service.mContext.checkCallingOrSelfPermission(SET_UNRESTRICTED_KEEP_CLEAR_AREAS)
+                        == PERMISSION_GRANTED;
+        mCanSetUnrestrictedGestureExclusion =
+                service.mContext.checkCallingOrSelfPermission(SET_UNRESTRICTED_GESTURE_EXCLUSION)
                         == PERMISSION_GRANTED;
         mShowingAlertWindowNotificationAllowed = mService.mShowAlertWindowNotifications;
         mDragDropController = mService.mDragDropController;

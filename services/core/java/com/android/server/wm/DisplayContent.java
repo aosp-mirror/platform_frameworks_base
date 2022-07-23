@@ -67,6 +67,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -5574,11 +5575,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private static boolean needsGestureExclusionRestrictions(WindowState win,
             boolean ignoreRequest) {
         final int type = win.mAttrs.type;
+        final int privateFlags = win.mAttrs.privateFlags;
         final boolean stickyHideNav =
                 !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR)
                         && win.mAttrs.insetsFlags.behavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
         return (!stickyHideNav || ignoreRequest) && type != TYPE_INPUT_METHOD
-                && type != TYPE_NOTIFICATION_SHADE && win.getActivityType() != ACTIVITY_TYPE_HOME;
+                && type != TYPE_NOTIFICATION_SHADE && win.getActivityType() != ACTIVITY_TYPE_HOME
+                && (privateFlags & PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION) == 0;
     }
 
     /**
