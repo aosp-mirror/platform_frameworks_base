@@ -117,8 +117,10 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ఫైల్ బదిలీ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ఇన్‌పుట్ పరికరం"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ఇంటర్నెట్ యాక్సెస్"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"కాంటాక్ట్ షేరింగ్"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"కాంటాక్ట్ షేరింగ్ కోసం ఉపయోగించండి"</string>
+    <!-- no translation found for bluetooth_profile_pbap (4262303387989406171) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_pbap_summary (6466456791354759132) -->
+    <skip />
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ఇంటర్నెట్ కనెక్షన్ షేరింగ్"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"టెక్స్ట్ మెసేజ్‌లు"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM యాక్సెస్"</string>
@@ -270,7 +272,7 @@
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"బ్లూటూత్ HCI రహస్య లాగ్‌ను ఎనేబుల్ చేయి"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"బ్లూటూత్‌ ప్యాకెట్‌లను క్యాప్చర్ చేయి. (ఈ సెట్టింగ్‌ని మార్చిన తర్వాత బ్లూటూత్‌ని టోగుల్ చేయండి)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM అన్‌లాకింగ్"</string>
-    <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"బూట్‌లోడర్ అన్‌లాక్ కావడానికి అనుమతించు"</string>
+    <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"బూట్‌లోడర్ అన్‌లాక్ కావడానికి అనుమతించండి"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM అన్‌లాకింగ్‌ను అనుమతించాలా?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"హెచ్చరిక: ఈ సెట్టింగ్ ఆన్ చేయబడినప్పుడు పరికరం రక్షణ లక్షణాలు ఈ పరికరంలో పని చేయవు."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"డమ్మీ లొకేష‌న్‌ యాప్‌ను ఎంచుకోండి"</string>
@@ -281,7 +283,7 @@
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi విశదీకృత లాగింగ్‌ను ప్రారంభించండి"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi స్కాన్ కుదింపు"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi నిరంతరం కాని MAC ర్యాండమైజేషన్"</string>
-    <string name="mobile_data_always_on" msgid="8275958101875563572">"మొబైల్ డేటాని ఎల్లప్పుడూ యాక్టివ్‌గా ఉంచు"</string>
+    <string name="mobile_data_always_on" msgid="8275958101875563572">"మొబైల్ డేటాను ఎల్లప్పుడూ యాక్టివ్‌గా ఉంచు"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"టెథెరింగ్ హార్డ్‌వేర్ యాగ్జిలరేషన్"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"పేర్లు లేని బ్లూటూత్ పరికరాలు  చూపించు"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"సంపూర్ణ వాల్యూమ్‌‍ను డిజేబుల్ చేయి"</string>
@@ -381,7 +383,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"క్లిప్ సరిహద్దులు, అంచులు మొ. చూపు"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL లేఅవుట్ దిశను నిర్బంధం చేయండి"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"అన్ని లొకేల్‌ల కోసం RTLకి స్క్రీన్ లేఅవుట్ దిశను నిర్భందించు"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"విండో-స్థాయి బ్లర్ అనుమతించు"</string>
+    <string name="window_blurs" msgid="6831008984828425106">"విండో-స్థాయి బ్లర్ అనుమతించండి"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA అమలు తప్పనిసరి"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 యాప్‌లలో 4x MSAAను ప్రారంభించండి"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"దీర్ఘ చతురస్రం కాని క్లిప్ చర్యలను డీబగ్ చేయండి"</string>
@@ -402,7 +404,7 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"బ్యాక్‌గ్రౌండ్ యాప్‌ల కోసం యాప్ ప్రతిస్పందించడం లేదు అనే డైలాగ్‌ను చూపు"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ఛానెల్ హెచ్చరికల నోటిఫికేషన్‌‌ను చూపు"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"చెల్లుబాటు అయ్యే ఛానెల్ లేకుండా యాప్ నోటిఫికేషన్‌ను పోస్ట్ చేస్తున్నప్పుడు స్క్రీన్‌పై హెచ్చరికను చూపిస్తుంది"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"యాప్‌లను బాహ్య స్టోరేజ్‌లో తప్పనిసరిగా అనుమతించు"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"యాప్‌లను బాహ్య స్టోరేజ్‌లో తప్పనిసరిగా అనుమతించండి"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ఏ యాప్‌ను అయినా మానిఫెస్ట్ విలువలతో సంబంధం లేకుండా బాహ్య స్టోరేజ్‌లో సేవ్ చేయడానికి అనుమతిస్తుంది"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"యాక్టివిటీ విండోల సైజ్‌ మార్చ‌గ‌లిగేలా నిర్బంధించు"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"మానిఫెస్ట్ విలువలతో సంబంధం లేకుండా అన్ని యాక్టివిటీస్‌ను పలు రకాల విండోల్లో సరిపోయేటట్లు సైజ్‌ మార్చగలిగేలా చేస్తుంది."</string>

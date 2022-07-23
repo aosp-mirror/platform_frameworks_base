@@ -641,10 +641,10 @@
     <string name="face_acquired_too_dark" msgid="7919016380747701228">"Сделайте освещение ярче"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Переместите телефон дальше от лица."</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Переместите телефон ближе к лицу"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Переместите телефон выше."</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Переместите телефон ниже."</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Переместите телефон левее."</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Переместите телефон правее."</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Переместите телефон выше"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Переместите телефон ниже"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Переместите телефон левее"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Переместите телефон правее"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Смотрите прямо на устройство."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Вашего лица не видно. Держите телефон на уровне глаз"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Не перемещайте устройство. Держите его неподвижно."</string>
