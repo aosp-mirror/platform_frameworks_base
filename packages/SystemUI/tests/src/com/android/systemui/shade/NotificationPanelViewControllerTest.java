@@ -145,7 +145,6 @@ import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
-import com.android.systemui.statusbar.phone.PanelViewController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -1282,6 +1281,29 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         // switch to portrait from split shade
         enableSplitShade(/* enabled= */ false);
         assertThat(mNotificationPanelViewController.isQsExpanded()).isFalse();
+    }
+
+    @Test
+    public void testPanelClosedWhenClosingQsInSplitShade() {
+        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
+                /* expanded= */ true, /* tracking= */ false, /* dragDownPxAmount= */ 0);
+        enableSplitShade(/* enabled= */ true);
+        mNotificationPanelViewController.setExpandedFraction(1f);
+
+        assertThat(mNotificationPanelViewController.isClosing()).isFalse();
+        mNotificationPanelViewController.animateCloseQs(false);
+        assertThat(mNotificationPanelViewController.isClosing()).isTrue();
+    }
+
+    @Test
+    public void testPanelStaysOpenWhenClosingQs() {
+        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
+                /* expanded= */ true, /* tracking= */ false, /* dragDownPxAmount= */ 0);
+        mNotificationPanelViewController.setExpandedFraction(1f);
+
+        assertThat(mNotificationPanelViewController.isClosing()).isFalse();
+        mNotificationPanelViewController.animateCloseQs(false);
+        assertThat(mNotificationPanelViewController.isClosing()).isFalse();
     }
 
     @Test

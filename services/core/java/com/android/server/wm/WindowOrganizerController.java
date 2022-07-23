@@ -397,7 +397,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // Go through all tasks and collect them before the rotation
                     // TODO(shell-transitions): move collect() to onConfigurationChange once
                     //       wallpaper handling is synchronized.
-                    dc.mTransitionController.collectForDisplayChange(dc, transition);
+                    dc.mTransitionController.collectForDisplayAreaChange(dc, transition);
                     dc.sendNewConfiguration();
                     effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
@@ -421,6 +421,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     addToSyncSet(syncId, wc);
                 }
                 if (transition != null) transition.collect(wc);
+                final DisplayArea da = wc.asDisplayArea();
+                // Only check DisplayArea here as a similar thing is done for DisplayContent above.
+                if (da != null && wc.asDisplayContent() == null
+                        && entry.getValue().getWindowingMode() != da.getWindowingMode()) {
+                    // Go through all tasks and collect them before changing the windowing mode of a
+                    // display-level container.
+                    // TODO(shell-transitions): handle this more elegantly.
+                    da.mTransitionController.collectForDisplayAreaChange(da, transition);
+                }
 
                 if ((entry.getValue().getChangeMask()
                         & WindowContainerTransaction.Change.CHANGE_FORCE_NO_PIP) != 0) {

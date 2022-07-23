@@ -520,7 +520,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
     }
 
     private boolean matchesTarget(Task task) {
-        return task.mUserId == mUserId
+        return task.getNonFinishingActivityCount() > 0 && task.mUserId == mUserId
                 && task.getBaseIntent().getComponent().equals(mTargetIntent.getComponent());
     }
 }

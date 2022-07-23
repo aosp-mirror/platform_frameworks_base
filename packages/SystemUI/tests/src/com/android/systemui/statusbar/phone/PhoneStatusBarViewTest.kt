@@ -20,6 +20,7 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.shade.PanelViewController
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
