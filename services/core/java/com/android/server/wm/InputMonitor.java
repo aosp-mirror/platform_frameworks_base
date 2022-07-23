@@ -150,13 +150,13 @@ final class InputMonitor {
 
     void onDisplayRemoved() {
         mHandler.removeCallbacks(mUpdateInputWindows);
-        mHandler.post(() -> {
-            // Make sure any pending setInputWindowInfo transactions are completed. That prevents
-            // the timing of updating input info of removed display after cleanup.
-            mService.mTransactionFactory.get().syncInputWindows().apply();
-            // It calls InputDispatcher::setInputWindows directly.
-            mService.mInputManager.onDisplayRemoved(mDisplayId);
-        });
+        mService.mTransactionFactory.get()
+            // Make sure any pending setInputWindowInfo transactions are completed. That
+            // prevents the timing of updating input info of removed display after cleanup.
+            .addWindowInfosReportedListener(() ->
+                // It calls InputDispatcher::setInputWindows directly.
+                mService.mInputManager.onDisplayRemoved(mDisplayId))
+            .apply();
         mDisplayRemoved = true;
     }
 

@@ -2848,7 +2848,11 @@ public class AlarmManagerService extends SystemService {
                 } else {
                     needsPermission = false;
                     lowerQuota = allowWhileIdle;
-                    idleOptions = allowWhileIdle ? mOptsWithFgs.toBundle() : null;
+                    idleOptions = (allowWhileIdle || (alarmClock != null))
+                            // This avoids exceptions on existing alarms when the app upgrades to
+                            // target S. Note that FGS from pre-S apps isn't restricted anyway.
+                            ? mOptsWithFgs.toBundle()
+                            : null;
                     if (exact) {
                         exactAllowReason = EXACT_ALLOW_REASON_COMPAT;
                     }

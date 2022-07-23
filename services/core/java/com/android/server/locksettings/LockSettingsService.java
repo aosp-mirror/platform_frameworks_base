@@ -33,10 +33,10 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSW
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
+import static com.android.internal.widget.LockPatternUtils.CURRENT_LSKF_BASED_PROTECTOR_ID_KEY;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
 import static com.android.internal.widget.LockPatternUtils.PROFILE_KEY_NAME_DECRYPT;
 import static com.android.internal.widget.LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT;
-import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
@@ -139,7 +139,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationResult;
-import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationToken;
+import com.android.server.locksettings.SyntheticPasswordManager.SyntheticPassword;
 import com.android.server.locksettings.SyntheticPasswordManager.TokenType;
 import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
 import com.android.server.pm.UserManagerInternal;
@@ -199,8 +199,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private static final int PROFILE_KEY_IV_SIZE = 12;
     private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
-    private static final String PREV_SYNTHETIC_PASSWORD_HANDLE_KEY = "prev-sp-handle";
-    private static final String SYNTHETIC_PASSWORD_UPDATE_TIME_KEY = "sp-handle-ts";
+    private static final String PREV_LSKF_BASED_PROTECTOR_ID_KEY = "prev-sp-handle";
+    private static final String LSKF_LAST_CHANGED_TIME_KEY = "sp-handle-ts";
     private static final String USER_SERIAL_NUMBER_KEY = "serial-number";
 
     // Duration that LockSettingsService will store the gatekeeper password for. This allows
@@ -787,28 +787,28 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // credential and still needs to be passed to the HAL once that credential is
                 // removed.
                 if (mUserManager.getUserInfo(userId).isPrimary() && !isUserSecure(userId)) {
-                    tryDeriveAuthTokenForUnsecuredPrimaryUser(userId);
+                    tryDeriveVendorAuthSecretForUnsecuredPrimaryUser(userId);
                 }
             }
         });
     }
 
-    private void tryDeriveAuthTokenForUnsecuredPrimaryUser(@UserIdInt int userId) {
+    private void tryDeriveVendorAuthSecretForUnsecuredPrimaryUser(@UserIdInt int userId) {
         synchronized (mSpManager) {
-            // Make sure the user has a synthetic password to derive
+            // If there is no SP, then there is no vendor auth secret.
             if (!isSyntheticPasswordBasedCredentialLocked(userId)) {
                 return;
             }
 
-            final long handle = getSyntheticPasswordHandleLocked(userId);
+            final long protectorId = getCurrentLskfBasedProtectorId(userId);
             AuthenticationResult result =
-                    mSpManager.unwrapPasswordBasedSyntheticPassword(getGateKeeperService(),
-                            handle, LockscreenCredential.createNone(), userId, null);
-            if (result.authToken != null) {
-                Slog.i(TAG, "Retrieved auth token for user " + userId);
-                onAuthTokenKnownForUser(userId, result.authToken);
+                    mSpManager.unlockLskfBasedProtector(getGateKeeperService(), protectorId,
+                            LockscreenCredential.createNone(), userId, null);
+            if (result.syntheticPassword != null) {
+                Slog.i(TAG, "Unwrapped SP for unsecured primary user " + userId);
+                onSyntheticPasswordKnown(userId, result.syntheticPassword);
             } else {
-                Slog.e(TAG, "Auth token not available for user " + userId);
+                Slog.e(TAG, "Failed to unwrap SP for unsecured primary user " + userId);
             }
         }
     }
@@ -912,7 +912,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                                 DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userInfo.id);
 
                         mSpManager.migrateFrpPasswordLocked(
-                                getSyntheticPasswordHandleLocked(userInfo.id),
+                                getCurrentLskfBasedProtectorId(userInfo.id),
                                 userInfo,
                                 redactActualQualityToMostLenientEquivalentQuality(actualQuality));
                     }
@@ -1168,8 +1168,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         synchronized (mSpManager) {
             if (isSyntheticPasswordBasedCredentialLocked(userId)) {
-                final long handle = getSyntheticPasswordHandleLocked(userId);
-                int rawType = mSpManager.getCredentialType(handle, userId);
+                final long protectorId = getCurrentLskfBasedProtectorId(userId);
+                int rawType = mSpManager.getCredentialType(protectorId, userId);
                 if (rawType != CREDENTIAL_TYPE_PASSWORD_OR_PIN) {
                     return rawType;
                 }
@@ -1604,13 +1604,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                     Slog.e(TAG, "Failed to decrypt child profile key", e);
                 }
             }
-            final long origHandle = getSyntheticPasswordHandleLocked(userId);
-            AuthenticationResult authResult = mSpManager.unwrapPasswordBasedSyntheticPassword(
-                    getGateKeeperService(), origHandle, savedCredential, userId, null);
+            final long oldProtectorId = getCurrentLskfBasedProtectorId(userId);
+            AuthenticationResult authResult = mSpManager.unlockLskfBasedProtector(
+                    getGateKeeperService(), oldProtectorId, savedCredential, userId, null);
             VerifyCredentialResponse response = authResult.gkResponse;
-            AuthenticationToken auth = authResult.authToken;
+            SyntheticPassword sp = authResult.syntheticPassword;
 
-            if (auth == null) {
+            if (sp == null) {
                 if (response == null
                         || response.getResponseCode() == VerifyCredentialResponse.RESPONSE_ERROR) {
                     Slog.w(TAG, "Failed to enroll: incorrect credential.");
@@ -1624,9 +1624,9 @@ public class LockSettingsService extends ILockSettings.Stub {
                 throw new IllegalStateException("password change failed");
             }
 
-            onAuthTokenKnownForUser(userId, auth);
-            setLockCredentialWithAuthTokenLocked(credential, auth, userId);
-            mSpManager.destroyPasswordBasedSyntheticPassword(origHandle, userId);
+            onSyntheticPasswordKnown(userId, sp);
+            setLockCredentialWithSpLocked(credential, sp, userId);
+            mSpManager.destroyLskfBasedProtector(oldProtectorId, userId);
             sendCredentialsOnChangeIfRequired(credential, userId, isLockTiedToParent);
             return true;
         }
@@ -1832,9 +1832,9 @@ public class LockSettingsService extends ILockSettings.Stub {
                     Slog.w(TAG, "Escrow token is disabled on the current user");
                     return false;
                 }
-                AuthenticationResult authResult = mSpManager.unwrapWeakTokenBasedSyntheticPassword(
+                AuthenticationResult authResult = mSpManager.unlockWeakTokenBasedProtector(
                         getGateKeeperService(), handle, token, userId);
-                if (authResult.authToken == null) {
+                if (authResult.syntheticPassword == null) {
                     Slog.w(TAG, "Invalid escrow token supplied");
                     return false;
                 }
@@ -1929,7 +1929,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    /** Unlock disk encryption */
+    /** Unlock file-based encryption */
     private void unlockUserKey(int userId, byte[] secret) {
         final UserInfo userInfo = mUserManager.getUserInfo(userId);
         try {
@@ -2112,20 +2112,20 @@ public class LockSettingsService extends ILockSettings.Stub {
                         progressCallback);
             }
 
-            long handle = getSyntheticPasswordHandleLocked(userId);
-            authResult = mSpManager.unwrapPasswordBasedSyntheticPassword(
-                    getGateKeeperService(), handle, credential, userId, progressCallback);
+            long protectorId = getCurrentLskfBasedProtectorId(userId);
+            authResult = mSpManager.unlockLskfBasedProtector(
+                    getGateKeeperService(), protectorId, credential, userId, progressCallback);
             response = authResult.gkResponse;
 
             if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
                 // credential has matched
                 mBiometricDeferredQueue.addPendingLockoutResetForUser(userId,
-                        authResult.authToken.deriveGkPassword());
+                        authResult.syntheticPassword.deriveGkPassword());
 
                 // perform verifyChallenge with synthetic password which generates the real GK auth
                 // token and response for the current user
-                response = mSpManager.verifyChallenge(getGateKeeperService(), authResult.authToken,
-                        0L /* challenge */, userId);
+                response = mSpManager.verifyChallenge(getGateKeeperService(),
+                        authResult.syntheticPassword, 0L /* challenge */, userId);
                 if (response.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
                     // This shouldn't really happen: the unwrapping of SP succeeds, but SP doesn't
                     // match the recorded GK password handle.
@@ -2135,11 +2135,11 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-            onCredentialVerified(authResult.authToken,
+            onCredentialVerified(authResult.syntheticPassword,
                     PasswordMetrics.computeForCredential(credential), userId);
             if ((flags & VERIFY_FLAG_REQUEST_GK_PW_HANDLE) != 0) {
                 final long gkHandle = storeGatekeeperPasswordTemporarily(
-                        authResult.authToken.deriveGkPassword());
+                        authResult.syntheticPassword.deriveGkPassword());
                 response = new VerifyCredentialResponse.Builder()
                         .setGatekeeperPasswordHandle(gkHandle)
                         .build();
@@ -2213,9 +2213,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private PasswordMetrics loadPasswordMetrics(AuthenticationToken auth, int userHandle) {
+    private PasswordMetrics loadPasswordMetrics(SyntheticPassword sp, int userHandle) {
         synchronized (mSpManager) {
-            return mSpManager.getPasswordMetrics(auth, getSyntheticPasswordHandleLocked(userHandle),
+            return mSpManager.getPasswordMetrics(sp, getCurrentLskfBasedProtectorId(userHandle),
                     userHandle);
         }
     }
@@ -2489,24 +2489,23 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private void onAuthTokenKnownForUser(@UserIdInt int userId, AuthenticationToken auth) {
+    private void onSyntheticPasswordKnown(@UserIdInt int userId, SyntheticPassword sp) {
         if (mInjector.isGsiRunning()) {
             Slog.w(TAG, "Running in GSI; skipping calls to AuthSecret and RebootEscrow");
             return;
         }
 
-        mRebootEscrowManager.callToRebootEscrowIfNeeded(userId, auth.getVersion(),
-                auth.getSyntheticPassword());
+        mRebootEscrowManager.callToRebootEscrowIfNeeded(userId, sp.getVersion(),
+                sp.getSyntheticPassword());
 
-        callToAuthSecretIfNeeded(userId, auth);
+        callToAuthSecretIfNeeded(userId, sp);
     }
 
-    private void callToAuthSecretIfNeeded(@UserIdInt int userId,
-            AuthenticationToken auth) {
+    private void callToAuthSecretIfNeeded(@UserIdInt int userId, SyntheticPassword sp) {
         // Pass the primary user's auth secret to the HAL
         if (mAuthSecretService != null && mUserManager.getUserInfo(userId).isPrimary()) {
             try {
-                final byte[] rawSecret = auth.deriveVendorAuthSecret();
+                final byte[] rawSecret = sp.deriveVendorAuthSecret();
                 final ArrayList<Byte> secret = new ArrayList<>(rawSecret.length);
                 for (int i = 0; i < rawSecret.length; ++i) {
                     secret.add(rawSecret[i]);
@@ -2519,66 +2518,51 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /**
-     * Precondition: vold and keystore unlocked.
+     * Creates the synthetic password (SP) for the given user and protects it with the user's LSKF.
+     * This is called just once in the lifetime of the user: the first time a nonempty LSKF is set,
+     * or when an escrow token is activated on a device with an empty LSKF.
      *
-     * Create new synthetic password, set up synthetic password blob protected by the supplied
-     * user credential, and make the newly-created SP blob active. This is called just once in the
-     * lifetime of the user: the first time that a user credential is set (!credential.isNone()), or
-     * when an escrow token is activated on an unsecured device (credential.isNone()).
-     *
-     * The invariant under a synthetic password is:
-     * 1. If user credential exists, then both vold and keystore and protected with keys derived
-     *     from the synthetic password.
-     * 2. If user credential does not exist, vold and keystore protection are cleared. This is to
-     *     make it consistent with current behaviour. It also allows ActivityManager to call
-     *     unlockUser() with empty secret.
-     * 3. Once a user is migrated to have synthetic password, its value will never change, no matter
-     *     whether the user changes their lockscreen PIN or clear/reset it. When the user clears its
-     *     lockscreen PIN, we still maintain the existing synthetic password in a password blob
-     *     protected by a default PIN.
-     * 4. The user SID is linked with synthetic password, but its cleared/re-created when the user
-     *     clears/re-creates their lockscreen PIN.
+     * Maintains the SP invariants described in {@link SyntheticPasswordManager}.
      */
     @GuardedBy("mSpManager")
     @VisibleForTesting
-    AuthenticationToken initializeSyntheticPasswordLocked(LockscreenCredential credential,
+    SyntheticPassword initializeSyntheticPasswordLocked(LockscreenCredential credential,
             int userId) {
         Slog.i(TAG, "Initialize SyntheticPassword for user: " + userId);
-        Preconditions.checkState(
-                getSyntheticPasswordHandleLocked(userId) == SyntheticPasswordManager.DEFAULT_HANDLE,
+        Preconditions.checkState(getCurrentLskfBasedProtectorId(userId) ==
+                SyntheticPasswordManager.NULL_PROTECTOR_ID,
                 "Cannot reinitialize SP");
 
-        final AuthenticationToken auth = mSpManager.newSyntheticPassword(userId);
-        long handle = mSpManager.createPasswordBasedSyntheticPassword(getGateKeeperService(),
-                credential, auth, userId);
+        final SyntheticPassword sp = mSpManager.newSyntheticPassword(userId);
+        long protectorId = mSpManager.createLskfBasedProtector(getGateKeeperService(), credential,
+                sp, userId);
         if (!credential.isNone()) {
-            mSpManager.newSidForUser(getGateKeeperService(), auth, userId);
-            mSpManager.verifyChallenge(getGateKeeperService(), auth, 0L, userId);
-            setUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
-            setKeystorePassword(auth.deriveKeyStorePassword(), userId);
+            mSpManager.newSidForUser(getGateKeeperService(), sp, userId);
+            mSpManager.verifyChallenge(getGateKeeperService(), sp, 0L, userId);
+            setUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
+            setKeystorePassword(sp.deriveKeyStorePassword(), userId);
         } else {
             clearUserKeyProtection(userId, null);
             setKeystorePassword(null, userId);
             gateKeeperClearSecureUserId(userId);
         }
         fixateNewestUserKeyAuth(userId);
-        setSyntheticPasswordHandleLocked(handle, userId);
-        onAuthTokenKnownForUser(userId, auth);
-        return auth;
+        setCurrentLskfBasedProtectorId(protectorId, userId);
+        onSyntheticPasswordKnown(userId, sp);
+        return sp;
     }
 
     @VisibleForTesting
-    long getSyntheticPasswordHandleLocked(int userId) {
-        return getLong(SYNTHETIC_PASSWORD_HANDLE_KEY,
-                SyntheticPasswordManager.DEFAULT_HANDLE, userId);
+    long getCurrentLskfBasedProtectorId(int userId) {
+        return getLong(CURRENT_LSKF_BASED_PROTECTOR_ID_KEY,
+                SyntheticPasswordManager.NULL_PROTECTOR_ID, userId);
     }
 
-    private void setSyntheticPasswordHandleLocked(long handle, int userId) {
-        final long oldHandle = getSyntheticPasswordHandleLocked(userId);
-        setLong(SYNTHETIC_PASSWORD_HANDLE_KEY, handle, userId);
-        setLong(PREV_SYNTHETIC_PASSWORD_HANDLE_KEY, oldHandle, userId);
-        setLong(SYNTHETIC_PASSWORD_UPDATE_TIME_KEY, System.currentTimeMillis(), userId);
-
+    private void setCurrentLskfBasedProtectorId(long newProtectorId, int userId) {
+        final long oldProtectorId = getCurrentLskfBasedProtectorId(userId);
+        setLong(CURRENT_LSKF_BASED_PROTECTOR_ID_KEY, newProtectorId, userId);
+        setLong(PREV_LSKF_BASED_PROTECTOR_ID_KEY, oldProtectorId, userId);
+        setLong(LSKF_LAST_CHANGED_TIME_KEY, System.currentTimeMillis(), userId);
     }
 
     @VisibleForTesting
@@ -2593,8 +2577,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             final int type = mStorage.readPersistentDataBlock().type;
             return type == PersistentData.TYPE_SP || type == PersistentData.TYPE_SP_WEAVER;
         }
-        long handle = getSyntheticPasswordHandleLocked(userId);
-        return handle != SyntheticPasswordManager.DEFAULT_HANDLE;
+        long protectorId = getCurrentLskfBasedProtectorId(userId);
+        return protectorId != SyntheticPasswordManager.NULL_PROTECTOR_ID;
     }
 
     /**
@@ -2624,8 +2608,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         return handle;
     }
 
-    private void onCredentialVerified(AuthenticationToken authToken, PasswordMetrics metrics,
-            int userId) {
+    private void onCredentialVerified(SyntheticPassword sp, PasswordMetrics metrics, int userId) {
 
         if (metrics != null) {
             synchronized (this) {
@@ -2635,21 +2618,21 @@ public class LockSettingsService extends ILockSettings.Stub {
             Slog.wtf(TAG, "Null metrics after credential verification");
         }
 
-        unlockKeystore(authToken.deriveKeyStorePassword(), userId);
+        unlockKeystore(sp.deriveKeyStorePassword(), userId);
 
         {
-            final byte[] secret = authToken.deriveDiskEncryptionKey();
+            final byte[] secret = sp.deriveFileBasedEncryptionKey();
             unlockUser(userId, secret);
             Arrays.fill(secret, (byte) 0);
         }
-        activateEscrowTokens(authToken, userId);
+        activateEscrowTokens(sp, userId);
 
         if (isProfileWithSeparatedLock(userId)) {
             setDeviceUnlockedForUser(userId);
         }
         mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
 
-        onAuthTokenKnownForUser(userId, authToken);
+        onSyntheticPasswordKnown(userId, sp);
     }
 
     private void setDeviceUnlockedForUser(int userId) {
@@ -2658,68 +2641,58 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /**
-     * Change the user's lockscreen password by creating a new SP blob and update the handle, based
-     * on an existing authentication token. Even though a new SP blob is created, the underlying
-     * synthetic password is never changed.
+     * Changes the user's LSKF by creating an LSKF-based protector that uses the new LSKF (which may
+     * be empty) and setting the new protector as the user's current LSKF-based protector.  The old
+     * LSKF-based protector is not destroyed, and the SP itself is not changed.
      *
-     * When clearing credential, we keep the SP unchanged, but clear its password handle so its
-     * SID is gone. We also clear password from (software-based) keystore and vold, which will be
-     * added back when new password is set in future.
+     * Also maintains the invariants described in {@link SyntheticPasswordManager} by
+     * setting/clearing the protection (by the SP) on the user's file-based encryption key and
+     * auth-bound Keystore keys when the LSKF is added/removed, respectively.  If the new LSKF is
+     * nonempty, then the Gatekeeper auth token is also refreshed.
      */
     @GuardedBy("mSpManager")
-    private long setLockCredentialWithAuthTokenLocked(LockscreenCredential credential,
-            AuthenticationToken auth, int userId) {
-        if (DEBUG) Slog.d(TAG, "setLockCredentialWithAuthTokenLocked: user=" + userId);
+    private long setLockCredentialWithSpLocked(LockscreenCredential credential,
+            SyntheticPassword sp, int userId) {
+        if (DEBUG) Slog.d(TAG, "setLockCredentialWithSpLocked: user=" + userId);
         final int savedCredentialType = getCredentialTypeInternal(userId);
-        long newHandle = mSpManager.createPasswordBasedSyntheticPassword(getGateKeeperService(),
-                credential, auth, userId);
+        final long newProtectorId = mSpManager.createLskfBasedProtector(getGateKeeperService(),
+                credential, sp, userId);
         final Map<Integer, LockscreenCredential> profilePasswords;
         if (!credential.isNone()) {
             // not needed by synchronizeUnifiedWorkChallengeForProfiles()
             profilePasswords = null;
 
             if (mSpManager.hasSidForUser(userId)) {
-                // We are changing password of a secured device, nothing more needed as
-                // createPasswordBasedSyntheticPassword has already taken care of maintaining
-                // the password handle and SID unchanged.
-
-                //refresh auth token
-                mSpManager.verifyChallenge(getGateKeeperService(), auth, 0L, userId);
+                mSpManager.verifyChallenge(getGateKeeperService(), sp, 0L, userId);
             } else {
-                // A new password is set on a previously-unsecured device, we need to generate
-                // a new SID, and re-add keys to vold and keystore.
-                mSpManager.newSidForUser(getGateKeeperService(), auth, userId);
-                mSpManager.verifyChallenge(getGateKeeperService(), auth, 0L, userId);
-                setUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
+                mSpManager.newSidForUser(getGateKeeperService(), sp, userId);
+                mSpManager.verifyChallenge(getGateKeeperService(), sp, 0L, userId);
+                setUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
                 fixateNewestUserKeyAuth(userId);
-                setKeystorePassword(auth.deriveKeyStorePassword(), userId);
+                setKeystorePassword(sp.deriveKeyStorePassword(), userId);
             }
         } else {
             // Cache all profile password if they use unified work challenge. This will later be
             // used to clear the profile's password in synchronizeUnifiedWorkChallengeForProfiles()
             profilePasswords = getDecryptedPasswordsForAllTiedProfiles(userId);
 
-            // we are clearing password of a secured device, so need to nuke SID as well.
             mSpManager.clearSidForUser(userId);
             gateKeeperClearSecureUserId(userId);
-            // Clear key from vold so ActivityManager can just unlock the user with empty secret
-            // during boot. Vold storage needs to be unlocked before manipulation of the keys can
-            // succeed.
-            unlockUserKey(userId, auth.deriveDiskEncryptionKey());
-            clearUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
+            unlockUserKey(userId, sp.deriveFileBasedEncryptionKey());
+            clearUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
             fixateNewestUserKeyAuth(userId);
-            unlockKeystore(auth.deriveKeyStorePassword(), userId);
+            unlockKeystore(sp.deriveKeyStorePassword(), userId);
             setKeystorePassword(null, userId);
             removeBiometricsForUser(userId);
         }
-        setSyntheticPasswordHandleLocked(newHandle, userId);
+        setCurrentLskfBasedProtectorId(newProtectorId, userId);
         LockPatternUtils.invalidateCredentialTypeCache();
         synchronizeUnifiedWorkChallengeForProfiles(userId, profilePasswords);
 
         setUserPasswordMetrics(credential, userId);
         mManagedProfilePasswordCache.removePassword(userId);
         if (savedCredentialType != CREDENTIAL_TYPE_NONE) {
-            mSpManager.destroyAllWeakTokenBasedSyntheticPasswords(userId);
+            mSpManager.destroyAllWeakTokenBasedProtectors(userId);
         }
 
         if (profilePasswords != null) {
@@ -2728,7 +2701,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
 
-        return newHandle;
+        return newProtectorId;
     }
 
     private void removeBiometricsForUser(int userId) {
@@ -2825,14 +2798,14 @@ public class LockSettingsService extends ILockSettings.Stub {
                     Slog.w(TAG, "Synthetic password not enabled");
                     return null;
                 }
-                long handle = getSyntheticPasswordHandleLocked(userId);
-                AuthenticationResult auth = mSpManager.unwrapPasswordBasedSyntheticPassword(
-                        getGateKeeperService(), handle, currentCredential, userId, null);
-                if (auth.authToken == null) {
+                long protectorId = getCurrentLskfBasedProtectorId(userId);
+                AuthenticationResult auth = mSpManager.unlockLskfBasedProtector(
+                        getGateKeeperService(), protectorId, currentCredential, userId, null);
+                if (auth.syntheticPassword == null) {
                     Slog.w(TAG, "Current credential is incorrect");
                     return null;
                 }
-                return auth.authToken.derivePasswordHashFactor();
+                return auth.syntheticPassword.derivePasswordHashFactor();
             }
         } finally {
             scheduleGc();
@@ -2843,46 +2816,47 @@ public class LockSettingsService extends ILockSettings.Stub {
             @NonNull EscrowTokenStateChangeCallback callback) {
         if (DEBUG) Slog.d(TAG, "addEscrowToken: user=" + userId + ", type=" + type);
         synchronized (mSpManager) {
-            // Migrate to synthetic password based credentials if the user has no password,
-            // the token can then be activated immediately.
-            AuthenticationToken auth = null;
+            // If the user has no LSKF, then the token can be activated immediately, after creating
+            // the user's SP if it doesn't already exist.  Otherwise, the token can't be activated
+            // until the SP is unlocked by another protector (normally the LSKF-based one).
+            SyntheticPassword sp = null;
             if (!isUserSecure(userId)) {
-                long handle = getSyntheticPasswordHandleLocked(userId);
-                if (handle == SyntheticPasswordManager.DEFAULT_HANDLE) {
-                    auth = initializeSyntheticPasswordLocked(LockscreenCredential.createNone(),
+                long protectorId = getCurrentLskfBasedProtectorId(userId);
+                if (protectorId == SyntheticPasswordManager.NULL_PROTECTOR_ID) {
+                    sp = initializeSyntheticPasswordLocked(LockscreenCredential.createNone(),
                             userId);
                 } else {
-                    auth = mSpManager.unwrapPasswordBasedSyntheticPassword(getGateKeeperService(),
-                            handle, LockscreenCredential.createNone(), userId, null).authToken;
+                    sp = mSpManager.unlockLskfBasedProtector(getGateKeeperService(), protectorId,
+                            LockscreenCredential.createNone(), userId, null).syntheticPassword;
                 }
             }
             disableEscrowTokenOnNonManagedDevicesIfNeeded(userId);
             if (!mSpManager.hasEscrowData(userId)) {
                 throw new SecurityException("Escrow token is disabled on the current user");
             }
-            long handle = mSpManager.createTokenBasedSyntheticPassword(token, type, userId,
-                    callback);
-            if (auth != null) {
-                mSpManager.activateTokenBasedSyntheticPassword(handle, auth, userId);
+            long handle = mSpManager.addPendingToken(token, type, userId, callback);
+            if (sp != null) {
+                // Activate the token immediately
+                mSpManager.createTokenBasedProtector(handle, sp, userId);
             }
             return handle;
         }
     }
 
-    private void activateEscrowTokens(AuthenticationToken auth, int userId) {
+    private void activateEscrowTokens(SyntheticPassword sp, int userId) {
         if (DEBUG) Slog.d(TAG, "activateEscrowTokens: user=" + userId);
         synchronized (mSpManager) {
             disableEscrowTokenOnNonManagedDevicesIfNeeded(userId);
             for (long handle : mSpManager.getPendingTokensForUser(userId)) {
                 Slog.i(TAG, String.format("activateEscrowTokens: %x %d ", handle, userId));
-                mSpManager.activateTokenBasedSyntheticPassword(handle, auth, userId);
+                mSpManager.createTokenBasedProtector(handle, sp, userId);
             }
         }
     }
 
     private boolean isEscrowTokenActive(long handle, int userId) {
         synchronized (mSpManager) {
-            return mSpManager.existsHandle(handle, userId);
+            return mSpManager.protectorExists(handle, userId);
         }
     }
 
@@ -2896,15 +2870,15 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private boolean removeEscrowToken(long handle, int userId) {
         synchronized (mSpManager) {
-            if (handle == getSyntheticPasswordHandleLocked(userId)) {
-                Slog.w(TAG, "Cannot remove password handle");
+            if (handle == getCurrentLskfBasedProtectorId(userId)) {
+                Slog.w(TAG, "Escrow token handle equals LSKF-based protector ID");
                 return false;
             }
             if (mSpManager.removePendingToken(handle, userId)) {
                 return true;
             }
-            if (mSpManager.existsHandle(handle, userId)) {
-                mSpManager.destroyTokenBasedSyntheticPassword(handle, userId);
+            if (mSpManager.protectorExists(handle, userId)) {
+                mSpManager.destroyTokenBasedProtector(handle, userId);
                 return true;
             } else {
                 return false;
@@ -2946,23 +2920,23 @@ public class LockSettingsService extends ILockSettings.Stub {
     private boolean setLockCredentialWithTokenInternalLocked(LockscreenCredential credential,
             long tokenHandle, byte[] token, int userId) {
         final AuthenticationResult result;
-        result = mSpManager.unwrapTokenBasedSyntheticPassword(getGateKeeperService(), tokenHandle,
-                token, userId);
-        if (result.authToken == null) {
+        result = mSpManager.unlockTokenBasedProtector(getGateKeeperService(), tokenHandle, token,
+                    userId);
+        if (result.syntheticPassword == null) {
             Slog.w(TAG, "Invalid escrow token supplied");
             return false;
         }
         if (result.gkResponse.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
             // Most likely, an untrusted credential reset happened in the past which
             // changed the synthetic password
-            Slog.e(TAG, "Obsolete token: synthetic password derived but it fails GK "
+            Slog.e(TAG, "Obsolete token: synthetic password decrypted but it fails GK "
                     + "verification.");
             return false;
         }
-        onAuthTokenKnownForUser(userId, result.authToken);
-        long oldHandle = getSyntheticPasswordHandleLocked(userId);
-        setLockCredentialWithAuthTokenLocked(credential, result.authToken, userId);
-        mSpManager.destroyPasswordBasedSyntheticPassword(oldHandle, userId);
+        onSyntheticPasswordKnown(userId, result.syntheticPassword);
+        final long oldProtectorId = getCurrentLskfBasedProtectorId(userId);
+        setLockCredentialWithSpLocked(credential, result.syntheticPassword, userId);
+        mSpManager.destroyLskfBasedProtector(oldProtectorId, userId);
         return true;
     }
 
@@ -2973,16 +2947,16 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slog.w(TAG, "Escrow token is disabled on the current user");
                 return false;
             }
-            authResult = mSpManager.unwrapTokenBasedSyntheticPassword(getGateKeeperService(),
-                    tokenHandle, token, userId);
-            if (authResult.authToken == null) {
+            authResult = mSpManager.unlockTokenBasedProtector(getGateKeeperService(), tokenHandle,
+                    token, userId);
+            if (authResult.syntheticPassword == null) {
                 Slog.w(TAG, "Invalid escrow token supplied");
                 return false;
             }
         }
 
-        onCredentialVerified(authResult.authToken,
-                loadPasswordMetrics(authResult.authToken, userId), userId);
+        onCredentialVerified(authResult.syntheticPassword,
+                loadPasswordMetrics(authResult.syntheticPassword, userId), userId);
         return true;
     }
 
@@ -3037,11 +3011,11 @@ public class LockSettingsService extends ILockSettings.Stub {
             pw.println("User " + userId);
             pw.increaseIndent();
             synchronized (mSpManager) {
-                pw.println(String.format("SP Handle: %x",
-                        getSyntheticPasswordHandleLocked(userId)));
-                pw.println(String.format("Last changed: %s (%x)",
-                        timestampToString(getLong(SYNTHETIC_PASSWORD_UPDATE_TIME_KEY, 0, userId)),
-                        getLong(PREV_SYNTHETIC_PASSWORD_HANDLE_KEY, 0, userId)));
+                pw.println(String.format("LSKF-based SP protector ID: %x",
+                        getCurrentLskfBasedProtectorId(userId)));
+                pw.println(String.format("LSKF last changed: %s (previous protector: %x)",
+                        timestampToString(getLong(LSKF_LAST_CHANGED_TIME_KEY, 0, userId)),
+                        getLong(PREV_LSKF_BASED_PROTECTOR_ID_KEY, 0, userId)));
             }
             try {
                 pw.println(String.format("SID: %x",
@@ -3340,14 +3314,15 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         @Override
-        public void onRebootEscrowRestored(byte spVersion, byte[] syntheticPassword, int userId) {
-            SyntheticPasswordManager.AuthenticationToken
-                    authToken = new SyntheticPasswordManager.AuthenticationToken(spVersion);
-            authToken.recreateDirectly(syntheticPassword);
+        public void onRebootEscrowRestored(byte spVersion, byte[] rawSyntheticPassword,
+                int userId) {
+            SyntheticPasswordManager.SyntheticPassword
+                    sp = new SyntheticPasswordManager.SyntheticPassword(spVersion);
+            sp.recreateDirectly(rawSyntheticPassword);
             synchronized (mSpManager) {
-                mSpManager.verifyChallenge(getGateKeeperService(), authToken, 0L, userId);
+                mSpManager.verifyChallenge(getGateKeeperService(), sp, 0L, userId);
             }
-            onCredentialVerified(authToken, loadPasswordMetrics(authToken, userId), userId);
+            onCredentialVerified(sp, loadPasswordMetrics(sp, userId), userId);
         }
     }
 }

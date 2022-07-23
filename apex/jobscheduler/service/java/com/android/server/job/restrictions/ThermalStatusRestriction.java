@@ -73,9 +73,10 @@ public class ThermalStatusRestriction extends JobRestriction {
                                 // bucket (thus resulting in us beginning to enforce the tightest
                                 // restrictions).
                                 || (mThermalStatus < UPPER_THRESHOLD && status > UPPER_THRESHOLD);
+                final boolean increased = mThermalStatus < status;
                 mThermalStatus = status;
                 if (significantChange) {
-                    mService.onControllerStateChanged(null);
+                    mService.onRestrictionStateChanged(ThermalStatusRestriction.this, increased);
                 }
             }
         });
@@ -89,16 +90,19 @@ public class ThermalStatusRestriction extends JobRestriction {
         final int priority = job.getEffectivePriority();
         if (mThermalStatus >= HIGHER_PRIORITY_THRESHOLD) {
             // For moderate throttling, only let expedited jobs and high priority regular jobs that
-            // are already running run.
+            // haven't been running for long run.
             return !job.shouldTreatAsExpeditedJob()
                     && !(priority == JobInfo.PRIORITY_HIGH
-                    && mService.isCurrentlyRunningLocked(job));
+                        && mService.isCurrentlyRunningLocked(job)
+                        && !mService.isLongRunningLocked(job));
         }
         if (mThermalStatus >= LOW_PRIORITY_THRESHOLD) {
             // For light throttling, throttle all min priority jobs and all low priority jobs that
-            // aren't already running.
-            return (priority == JobInfo.PRIORITY_LOW && !mService.isCurrentlyRunningLocked(job))
-                    || priority == JobInfo.PRIORITY_MIN;
+            // aren't already running or have been running for long enough.
+            return priority == JobInfo.PRIORITY_MIN
+                    || (priority == JobInfo.PRIORITY_LOW
+                        && (!mService.isCurrentlyRunningLocked(job)
+                            || mService.isLongRunningLocked(job)));
         }
         return false;
     }

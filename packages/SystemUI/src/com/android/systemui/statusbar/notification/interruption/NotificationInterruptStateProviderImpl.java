@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +59,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
     private final List<NotificationInterruptSuppressor> mSuppressors = new ArrayList<>();
     private final StatusBarStateController mStatusBarStateController;
+    private final KeyguardStateController mKeyguardStateController;
     private final NotificationFilter mNotificationFilter;
     private final ContentResolver mContentResolver;
     private final PowerManager mPowerManager;
@@ -82,6 +84,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             NotificationFilter notificationFilter,
             BatteryController batteryController,
             StatusBarStateController statusBarStateController,
+            KeyguardStateController keyguardStateController,
             HeadsUpManager headsUpManager,
             NotificationInterruptLogger logger,
             @Main Handler mainHandler,
@@ -94,6 +97,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
         mNotificationFilter = notificationFilter;
         mStatusBarStateController = statusBarStateController;
+        mKeyguardStateController = keyguardStateController;
         mHeadsUpManager = headsUpManager;
         mLogger = logger;
         mFlags = flags;
@@ -225,6 +229,28 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         // If the notification should HUN, then we don't need FSI
         if (shouldHeadsUp(entry)) {
             mLogger.logNoFullscreen(entry, "Expected to HUN");
+            return false;
+        }
+
+        // Check whether FSI requires the keyguard to be showing.
+        if (mFlags.fullScreenIntentRequiresKeyguard()) {
+
+            // If notification won't HUN and keyguard is showing, launch the FSI.
+            if (mKeyguardStateController.isShowing()) {
+                if (mKeyguardStateController.isOccluded()) {
+                    mLogger.logFullscreen(entry, "Expected not to HUN while keyguard occluded");
+                } else {
+                    // Likely LOCKED_SHADE, but launch FSI anyway
+                    mLogger.logFullscreen(entry, "Keyguard is showing and not occluded");
+                }
+                return true;
+            }
+
+            // Detect the case determined by b/231322873 to launch FSI while device is in use,
+            // as blocked by the correct implementation, and report the event.
+            final int uid = entry.getSbn().getUid();
+            android.util.EventLog.writeEvent(0x534e4554, "231322873", uid, "no hun or keyguard");
+            mLogger.logNoFullscreenWarning(entry, "Expected not to HUN while not on keyguard");
             return false;
         }
 

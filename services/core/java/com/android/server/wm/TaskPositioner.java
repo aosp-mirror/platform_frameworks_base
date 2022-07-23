@@ -35,6 +35,8 @@ import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
+
 import android.annotation.NonNull;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -59,6 +61,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TaskResizingAlgorithm;
 import com.android.internal.policy.TaskResizingAlgorithm.CtrlType;
 import com.android.internal.protolog.common.ProtoLog;
+
+import java.util.concurrent.CompletableFuture;
 
 class TaskPositioner implements IBinder.DeathRecipient {
     private static final boolean DEBUG_ORIENTATION_VIOLATIONS = false;
@@ -195,14 +199,14 @@ class TaskPositioner implements IBinder.DeathRecipient {
      * @param displayContent The Display that the window being dragged is on.
      * @param win The window which will be dragged.
      */
-    void register(DisplayContent displayContent, @NonNull WindowState win) {
+    CompletableFuture<Void> register(DisplayContent displayContent, @NonNull WindowState win) {
         if (DEBUG_TASK_POSITIONING) {
             Slog.d(TAG, "Registering task positioner");
         }
 
         if (mClientChannel != null) {
             Slog.e(TAG, "Task positioner already registered");
-            return;
+            return completedFuture(null);
         }
 
         mDisplayContent = displayContent;
@@ -235,27 +239,33 @@ class TaskPositioner implements IBinder.DeathRecipient {
         mDisplayContent.getDisplayRotation().pause();
 
         // Notify InputMonitor to take mDragWindowHandle.
-        mService.mTaskPositioningController.showInputSurface(win.getDisplayId());
+        return mService.mTaskPositioningController.showInputSurface(win.getDisplayId())
+            .thenRun(() -> {
+                // The global lock is held by the callers of register but released before the async
+                // results are waited on. We must acquire the lock in this callback to ensure thread
+                // safety.
+                synchronized (mService.mGlobalLock) {
+                    final Rect displayBounds = mTmpRect;
+                    displayContent.getBounds(displayBounds);
+                    final DisplayMetrics displayMetrics = displayContent.getDisplayMetrics();
+                    mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics);
+                    mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, displayMetrics);
+                    mMaxVisibleSize.set(displayBounds.width(), displayBounds.height());
 
-        final Rect displayBounds = mTmpRect;
-        displayContent.getBounds(displayBounds);
-        final DisplayMetrics displayMetrics = displayContent.getDisplayMetrics();
-        mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics);
-        mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, displayMetrics);
-        mMaxVisibleSize.set(displayBounds.width(), displayBounds.height());
+                    mDragEnded = false;
 
-        mDragEnded = false;
-
-        try {
-            mClientCallback = win.mClient.asBinder();
-            mClientCallback.linkToDeath(this, 0 /* flags */);
-        } catch (RemoteException e) {
-            // The caller has died, so clean up TaskPositioningController.
-            mService.mTaskPositioningController.finishTaskPositioning();
-            return;
-        }
-        mWindow = win;
-        mTask = win.getTask();
+                    try {
+                        mClientCallback = win.mClient.asBinder();
+                        mClientCallback.linkToDeath(this, 0 /* flags */);
+                    } catch (RemoteException e) {
+                        // The caller has died, so clean up TaskPositioningController.
+                        mService.mTaskPositioningController.finishTaskPositioning();
+                        return;
+                    }
+                    mWindow = win;
+                    mTask = win.getTask();
+                }
+            });
     }
 
     void unregister() {

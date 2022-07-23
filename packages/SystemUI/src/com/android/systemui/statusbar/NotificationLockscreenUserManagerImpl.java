@@ -125,7 +125,7 @@ public class NotificationLockscreenUserManagerImpl implements
                 updateLockscreenNotificationSetting();
                 getEntryManager().updateNotifications("ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED");
                 // TODO(b/231976036): Consolidate pipeline invalidations related to this event
-                notifyNotificationStateChanged();
+                // notifyNotificationStateChanged();
             }
         }
     };
@@ -271,7 +271,7 @@ public class NotificationLockscreenUserManagerImpl implements
                     getEntryManager().updateNotifications("LOCK_SCREEN_ALLOW_REMOTE_INPUT"
                             + " or ZEN_MODE change");
                     // TODO(b/231976036): Consolidate pipeline invalidations related to this event
-                    notifyNotificationStateChanged();
+                    // notifyNotificationStateChanged();
                 }
             }
         };
@@ -660,7 +660,7 @@ public class NotificationLockscreenUserManagerImpl implements
         }
         getEntryManager().updateNotifications("NotificationLockscreenUserManager.updatePublicMode");
         // TODO(b/234738798): Migrate KeyguardNotificationVisibilityProvider to use this listener
-        notifyNotificationStateChanged();
+        // notifyNotificationStateChanged();
     }
 
     @Override

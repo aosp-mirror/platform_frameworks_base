@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell;
+#include "core_jni_helpers.h"
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+namespace android {
 
-/**
- * An entry point into the shell for initializing shell internal state.
- */
-@ExternalThread
-public interface ShellInit {
-    /**
-     * Initializes the shell state.
-     */
-    void init();
+namespace {
+
+jmethodID gGetReferent = nullptr;
+
+} // namespace
+
+jobject GetReferent(JNIEnv* env, jobject ref) {
+    if (gGetReferent == nullptr) {
+        jclass clazz = FindClassOrDie(env, "java/lang/ref/Reference");
+        gGetReferent = GetMethodIDOrDie(env, clazz, "get", "()Ljava/lang/Object;");
+    }
+    return env->CallObjectMethod(ref, gGetReferent);
 }
+
+} // namespace android

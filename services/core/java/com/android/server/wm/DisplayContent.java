@@ -67,6 +67,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -229,6 +230,7 @@ import android.window.DisplayWindowPolicyController;
 import android.window.IDisplayAreaOrganizer;
 import android.window.TransitionRequestInfo;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -268,6 +270,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     static final int FORCE_SCALING_MODE_AUTO = 0;
     /** For {@link #setForcedScalingMode} to apply flag {@link Display#FLAG_SCALING_DISABLED}. */
     static final int FORCE_SCALING_MODE_DISABLED = 1;
+
+    static final float INVALID_DPI = 0.0f;
 
     @IntDef(prefix = { "FORCE_SCALING_MODE_" }, value = {
             FORCE_SCALING_MODE_AUTO,
@@ -1075,7 +1079,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplayPolicy = new DisplayPolicy(mWmService, this);
         mDisplayRotation = new DisplayRotation(mWmService, this);
         mCloseToSquareMaxAspectRatio = mWmService.mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_closeToSquareDisplayMaxAspectRatio);
+                R.dimen.config_closeToSquareDisplayMaxAspectRatio);
         if (isDefaultDisplay) {
             // The policy may be invoked right after here, so it requires the necessary default
             // fields of this display content.
@@ -1567,7 +1571,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mAtmService.mContext.createConfigurationContext(getConfiguration());
         final float minimalSize =
                 displayConfigurationContext.getResources().getDimension(
-                                com.android.internal.R.dimen.default_minimal_size_resizable_task);
+                        R.dimen.default_minimal_size_resizable_task);
         if (Double.compare(mDisplayMetrics.density, 0.0) == 0) {
             throw new IllegalArgumentException("Display with ID=" + getDisplayId() + "has invalid "
                 + "DisplayMetrics.density= 0.0");
@@ -2935,7 +2939,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** If the given width and height equal to initial size, the setting will be cleared. */
     void setForcedSize(int width, int height) {
-        // Can't force size higher than the maximal allowed
+        setForcedSize(width, height, INVALID_DPI, INVALID_DPI);
+    }
+
+    /**
+     * If the given width and height equal to initial size, the setting will be cleared.
+     * If xPpi or yDpi is equal to {@link #INVALID_DPI}, the values are ignored.
+     */
+    void setForcedSize(int width, int height, float xDPI, float yDPI) {
+  	// Can't force size higher than the maximal allowed
         if (mMaxUiWidth > 0 && width > mMaxUiWidth) {
             final float ratio = mMaxUiWidth / (float) width;
             height = (int) (height * ratio);
@@ -2954,8 +2966,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
-        updateBaseDisplayMetrics(width, height, mBaseDisplayDensity, mBaseDisplayPhysicalXDpi,
-                mBaseDisplayPhysicalYDpi);
+        updateBaseDisplayMetrics(width, height, mBaseDisplayDensity,
+                xDPI != INVALID_DPI ? xDPI : mBaseDisplayPhysicalXDpi,
+                yDPI != INVALID_DPI ? yDPI : mBaseDisplayPhysicalYDpi);
         reconfigureDisplayLocked();
 
         if (!mIsSizeForced) {
@@ -4551,9 +4564,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // if the wallpaper service is disabled on the device, we're never going to have
         // wallpaper, don't bother waiting for it
         boolean wallpaperEnabled = mWmService.mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_enableWallpaperService)
+                R.bool.config_enableWallpaperService)
                 && mWmService.mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_checkWallpaperAtBoot);
+                R.bool.config_checkWallpaperAtBoot);
 
         final boolean haveBootMsg = drawnWindowTypes.get(TYPE_BOOT_PROGRESS);
         final boolean haveApp = drawnWindowTypes.get(TYPE_BASE_APPLICATION);
@@ -5561,11 +5574,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private static boolean needsGestureExclusionRestrictions(WindowState win,
             boolean ignoreRequest) {
         final int type = win.mAttrs.type;
+        final int privateFlags = win.mAttrs.privateFlags;
         final boolean stickyHideNav =
                 !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR)
                         && win.mAttrs.insetsFlags.behavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
         return (!stickyHideNav || ignoreRequest) && type != TYPE_INPUT_METHOD
-                && type != TYPE_NOTIFICATION_SHADE && win.getActivityType() != ACTIVITY_TYPE_HOME;
+                && type != TYPE_NOTIFICATION_SHADE && win.getActivityType() != ACTIVITY_TYPE_HOME
+                && (privateFlags & PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION) == 0;
     }
 
     /**
@@ -6506,9 +6521,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     class RemoteInsetsControlTarget implements InsetsControlTarget {
         private final IDisplayWindowInsetsController mRemoteInsetsController;
         private final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
+        private final boolean mCanShowTransient;
 
         RemoteInsetsControlTarget(IDisplayWindowInsetsController controller) {
             mRemoteInsetsController = controller;
+            mCanShowTransient = mWmService.mContext.getResources().getBoolean(
+                    R.bool.config_remoteInsetsControllerSystemBarsCanBeShownByUserAction);
         }
 
         /**
@@ -6562,6 +6580,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver showInsets", e);
             }
+        }
+
+        @Override
+        public boolean canShowTransient() {
+            return mCanShowTransient;
         }
 
         @Override

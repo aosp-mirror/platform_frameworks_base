@@ -172,11 +172,6 @@ public class BatteryStatsServTest extends TestCase {
     public void testStartLaunchedLockedWhileLaunched() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
-            public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
-            @Override
             public long getBatteryUptimeLocked(long uptimeMs) {
                 return 777777L * 1000; // microseconds
             }
@@ -206,11 +201,6 @@ public class BatteryStatsServTest extends TestCase {
     public void testStartLaunchedLockedWhileNotLaunched() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
-            public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
-            @Override
             public long getBatteryUptimeLocked(long uptimeMs) {
                 return 777777L * 1000; // microseconds
             }
@@ -237,11 +227,6 @@ public class BatteryStatsServTest extends TestCase {
     @SmallTest
     public void testStopLaunchedLockedWhileNotLaunched() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
-            @Override
-            public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
             @Override
             public long getBatteryUptimeLocked(long uptimeMs) {
                 return 777777L * 1000; // microseconds
@@ -273,11 +258,6 @@ public class BatteryStatsServTest extends TestCase {
     public void testStopLaunchedLockedWhileLaunchedNormal() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
-            public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
-            @Override
             public long getBatteryUptimeLocked(long uptimeMs) {
                 return 777777L * 1000; // microseconds
             }
@@ -305,12 +285,7 @@ public class BatteryStatsServTest extends TestCase {
      */
     @SmallTest
     public void testStopLaunchedLockedWhileLaunchedTooQuick() throws Exception  {
-        MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
-            @Override
-            public long getBatteryUptimeLocked() {
-                return 6064L;
-            }
-        };
+        MockBatteryStatsImpl bsi = new MockBatteryStatsImpl();
         TestServ serv = new TestServ(bsi);
 
         serv.populate();
@@ -334,11 +309,6 @@ public class BatteryStatsServTest extends TestCase {
     @SmallTest
     public void testStartRunningLockedWhileRunning() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
-            @Override
-            public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
             @Override
             public long getBatteryUptimeLocked(long uptimeMs) {
                 return 777777L * 1000; // microseconds
@@ -369,11 +339,6 @@ public class BatteryStatsServTest extends TestCase {
     public void testStartRunningLockedWhileNotRunning() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
-            public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
-            @Override
             public long getBatteryUptimeLocked(long uptimeMs) {
                 return 777777L * 1000; // microseconds
             }
@@ -403,11 +368,6 @@ public class BatteryStatsServTest extends TestCase {
     public void testStopRunningLockedWhileRunningNormal() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
-            public long getBatteryUptimeLocked() {
-                return 777777L * 1000; // microseconds
-            }
-
-            @Override
             public long getBatteryUptimeLocked(long uptimeMs) {
                 return 777777L * 1000; // microseconds
             }
@@ -435,12 +395,7 @@ public class BatteryStatsServTest extends TestCase {
      */
     @SmallTest
     public void testStopRunningLockedWhileRunningTooQuick() throws Exception  {
-        MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
-            @Override
-            public long getBatteryUptimeLocked() {
-                return 2021;
-            }
-        };
+        MockBatteryStatsImpl bsi = new MockBatteryStatsImpl();
         TestServ serv = new TestServ(bsi);
 
         serv.populate();

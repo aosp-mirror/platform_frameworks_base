@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.util.ArraySet;
 
 import com.android.server.job.controllers.JobStatus;
+import com.android.server.job.restrictions.JobRestriction;
 
 import java.util.List;
 
@@ -35,6 +36,16 @@ public interface StateChangedListener {
      * set of jobs. If {@code changedJobs} is null, then all registered jobs will be evaluated.
      */
     void onControllerStateChanged(@Nullable ArraySet<JobStatus> changedJobs);
+
+    /**
+     * Called by a {@link com.android.server.job.restrictions.JobRestriction} to notify the
+     * JobScheduler that it should check on the state of all jobs.
+     *
+     * @param stopLongRunningJobs Whether to stop any jobs that have run for more than their minimum
+     *                            execution guarantee and are restricted by the changed restriction
+     */
+    void onRestrictionStateChanged(@NonNull JobRestriction restriction,
+            boolean stopLongRunningJobs);
 
     /**
      * Called by the controller to notify the JobManager that regardless of the state of the task,

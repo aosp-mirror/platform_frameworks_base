@@ -233,7 +233,8 @@ public final class SurfaceControl implements Parcelable {
     private static native boolean nativeGetProtectedContentSupport();
     private static native void nativeSetMetadata(long transactionObj, long nativeObject, int key,
             Parcel data);
-    private static native void nativeSyncInputWindows(long transactionObj);
+    private static native void nativeAddWindowInfosReportedListener(long transactionObj,
+            Runnable listener);
     private static native boolean nativeGetDisplayBrightnessSupport(IBinder displayToken);
     private static native boolean nativeSetDisplayBrightness(IBinder displayToken,
             float sdrBrightness, float sdrBrightnessNits, float displayBrightness,
@@ -3061,13 +3062,14 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Waits until any changes to input windows have been sent from SurfaceFlinger to
-         * InputFlinger before returning.
+         * Adds a callback that is called after WindowInfosListeners from the systems server are
+         * complete. This is primarily used to ensure that InputDispatcher::setInputWindowsLocked
+         * has been called before running the added callback.
          *
          * @hide
          */
-        public Transaction syncInputWindows() {
-            nativeSyncInputWindows(mNativeObject);
+        public Transaction addWindowInfosReportedListener(@NonNull Runnable listener) {
+            nativeAddWindowInfosReportedListener(mNativeObject, listener);
             return this;
         }
 

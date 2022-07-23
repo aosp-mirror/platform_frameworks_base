@@ -19,7 +19,7 @@ package com.android.server.locksettings;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
-import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
+import static com.android.internal.widget.LockPatternUtils.CURRENT_LSKF_BASED_PROTECTOR_ID_KEY;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -45,8 +45,8 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationResult;
-import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationToken;
 import com.android.server.locksettings.SyntheticPasswordManager.PasswordData;
+import com.android.server.locksettings.SyntheticPasswordManager.SyntheticPassword;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -74,28 +74,28 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     }
 
     @Test
-    public void testPasswordBasedSyntheticPassword() throws RemoteException {
+    public void testLskfBasedProtector() throws RemoteException {
         final int USER_ID = 10;
         final LockscreenCredential password = newPassword("user-password");
         final LockscreenCredential badPassword = newPassword("bad-password");
         MockSyntheticPasswordManager manager = new MockSyntheticPasswordManager(mContext, mStorage,
                 mGateKeeperService, mUserManager, mPasswordSlotManager);
-        AuthenticationToken authToken = manager.newSyntheticPassword(USER_ID);
-        long handle = manager.createPasswordBasedSyntheticPassword(mGateKeeperService,
-                password, authToken, USER_ID);
+        SyntheticPassword sp = manager.newSyntheticPassword(USER_ID);
+        long protectorId = manager.createLskfBasedProtector(mGateKeeperService, password, sp,
+                USER_ID);
 
-        AuthenticationResult result = manager.unwrapPasswordBasedSyntheticPassword(
-                mGateKeeperService, handle, password, USER_ID, null);
-        assertArrayEquals(result.authToken.deriveKeyStorePassword(),
-                authToken.deriveKeyStorePassword());
+        AuthenticationResult result = manager.unlockLskfBasedProtector(mGateKeeperService,
+                protectorId, password, USER_ID, null);
+        assertArrayEquals(result.syntheticPassword.deriveKeyStorePassword(),
+                sp.deriveKeyStorePassword());
 
-        result = manager.unwrapPasswordBasedSyntheticPassword(mGateKeeperService, handle,
-                badPassword, USER_ID, null);
-        assertNull(result.authToken);
+        result = manager.unlockLskfBasedProtector(mGateKeeperService, protectorId, badPassword,
+                USER_ID, null);
+        assertNull(result.syntheticPassword);
     }
 
     private boolean hasSyntheticPassword(int userId) throws RemoteException {
-        return mService.getLong(SYNTHETIC_PASSWORD_HANDLE_KEY, 0, userId) != 0;
+        return mService.getLong(CURRENT_LSKF_BASED_PROTECTOR_ID_KEY, 0, userId) != 0;
     }
 
     private void initializeCredential(LockscreenCredential password, int userId)
@@ -544,12 +544,12 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     }
 
     private void assertNoOrphanedFilesLeft(int userId) {
-        String handleString = String.format("%016x",
-                mService.getSyntheticPasswordHandleLocked(userId));
+        String lskfProtectorPrefix = String.format("%016x",
+                mService.getCurrentLskfBasedProtectorId(userId));
         File directory = mStorage.getSyntheticPasswordDirectoryForUser(userId);
         for (File file : directory.listFiles()) {
             String[] parts = file.getName().split("\\.");
-            if (!parts[0].equals(handleString) && !parts[0].equals("0000000000000000")) {
+            if (!parts[0].equals(lskfProtectorPrefix) && !parts[0].equals("0000000000000000")) {
                 fail("Orphaned state left: " + file.getName());
             }
         }

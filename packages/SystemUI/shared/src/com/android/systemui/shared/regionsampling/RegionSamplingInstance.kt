@@ -17,6 +17,7 @@ package com.android.systemui.shared.regionsampling
 
 import android.graphics.Rect
 import android.view.View
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.plugins.RegionDarkness
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper.SamplingCallback
@@ -26,7 +27,7 @@ import java.util.concurrent.Executor
 /**
  * Class for instance of RegionSamplingHelper
  */
-class RegionSamplingInstance(
+open class RegionSamplingInstance(
         sampledView: View?,
         mainExecutor: Executor?,
         bgExecutor: Executor?,
@@ -35,7 +36,7 @@ class RegionSamplingInstance(
 ) {
     private var isDark = RegionDarkness.DEFAULT
     private var samplingBounds = Rect()
-    private var regionSampler: RegionSamplingHelper? = null
+    @VisibleForTesting var regionSampler: RegionSamplingHelper? = null
 
     /**
      * Interface for method to be passed into RegionSamplingHelper
@@ -46,6 +47,16 @@ class RegionSamplingInstance(
          * Method to update the text colors after clock darkness changed.
          */
         fun updateColors()
+    }
+
+    @VisibleForTesting
+    open fun createRegionSamplingHelper(
+            sampledView: View,
+            callback: SamplingCallback,
+            mainExecutor: Executor?,
+            bgExecutor: Executor?
+    ): RegionSamplingHelper {
+        return RegionSamplingHelper(sampledView, callback, mainExecutor, bgExecutor)
     }
 
     private fun convertToClockDarkness(isRegionDark: Boolean): RegionDarkness {
@@ -81,16 +92,9 @@ class RegionSamplingInstance(
         regionSampler?.dump(pw)
     }
 
-    /**
-     * Restart
-     */
-    fun restart(sampledView: View?) {
-        regionSampler?.onViewAttachedToWindow(sampledView)
-    }
-
     init {
         if (regionSamplingEnabled && sampledView != null) {
-            regionSampler = RegionSamplingHelper(sampledView,
+            regionSampler = createRegionSamplingHelper(sampledView,
                     object : SamplingCallback {
                         override fun onRegionDarknessChanged(isRegionDark: Boolean) {
                             isDark = convertToClockDarkness(isRegionDark)

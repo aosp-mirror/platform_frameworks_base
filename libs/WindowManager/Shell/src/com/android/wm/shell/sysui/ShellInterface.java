@@ -18,13 +18,30 @@ package com.android.wm.shell.sysui;
 
 import android.content.res.Configuration;
 
+import java.io.PrintWriter;
+
 /**
  * General interface for notifying the Shell of common SysUI events like configuration or keyguard
  * changes.
- *
- * TODO: Move ShellInit and ShellCommandHandler into this interface
  */
 public interface ShellInterface {
+
+    /**
+     * Initializes the shell state.
+     */
+    default void onInit() {}
+
+    /**
+     * Dumps the shell state.
+     */
+    default void dump(PrintWriter pw) {}
+
+    /**
+     * Handles a shell command.
+     */
+    default boolean handleCommand(final String[] args, PrintWriter pw) {
+        return false;
+    }
 
     /**
      * Notifies the Shell that the configuration has changed.

@@ -321,6 +321,7 @@ public class BubblesTest extends SysuiTestCase {
                         mock(AmbientDisplayConfiguration.class),
                         mock(NotificationFilter.class),
                         mock(StatusBarStateController.class),
+                        mock(KeyguardStateController.class),
                         mock(BatteryController.class),
                         mock(HeadsUpManager.class),
                         mock(NotificationInterruptLogger.class),

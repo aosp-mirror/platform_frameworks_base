@@ -344,6 +344,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -373,6 +375,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // Maximum number of milliseconds to wait for input devices to be enumerated before
     // proceding with safe mode detection.
     private static final int INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS = 1000;
+
+    private static final int SYNC_INPUT_TRANSACTIONS_TIMEOUT_MS = 5000;
 
     // Poll interval in milliseconds for watching boot animation finished.
     // TODO(b/159045990) Migrate to SystemService.waitForState with dedicated thread.
@@ -5780,7 +5784,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
                 if (displayContent != null) {
                     displayContent.setForcedSize(displayContent.mInitialDisplayWidth,
-                            displayContent.mInitialDisplayHeight);
+                            displayContent.mInitialDisplayHeight,
+                            displayContent.mInitialPhysicalXDpi,
+                            displayContent.mInitialPhysicalXDpi);
                 }
             }
         } finally {
@@ -8440,7 +8446,12 @@ public class WindowManagerService extends IWindowManager.Stub
                         displayContent.getInputMonitor().updateInputWindowsImmediately(t));
             }
 
-            t.syncInputWindows().apply();
+            CountDownLatch countDownLatch = new CountDownLatch(1);
+            t.addWindowInfosReportedListener(countDownLatch::countDown).apply();
+            countDownLatch.await(SYNC_INPUT_TRANSACTIONS_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException exception) {
+            Slog.e(TAG_WM, "Exception thrown while waiting for window infos to be reported",
+                    exception);
         } finally {
             Binder.restoreCallingIdentity(token);
         }

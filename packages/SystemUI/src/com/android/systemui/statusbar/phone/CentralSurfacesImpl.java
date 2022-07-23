@@ -3308,11 +3308,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             return true;
         }
         if (mNotificationPanelViewController.isQsExpanded()) {
-            if (mNotificationPanelViewController.isQsDetailShowing()) {
-                mNotificationPanelViewController.closeQsDetail();
-            } else {
                 mNotificationPanelViewController.animateCloseQs(false /* animateAway */);
-            }
             return true;
         }
         if (mNotificationPanelViewController.closeUserSwitcherIfOpen()) {
