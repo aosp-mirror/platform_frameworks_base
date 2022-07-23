@@ -643,8 +643,8 @@
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Тримайте телефон ближче до обличчя."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Тримайте телефон вище."</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"Тримайте телефон нижче."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Тримайте телефон лівіше."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Тримайте телефон правіше."</string>
+    <string name="face_acquired_too_right" msgid="2513391513020932655">"Посуньте телефон лівіше."</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"Посуньте телефон правіше."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Дивіться просто на пристрій."</string>
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Тримайте телефон просто перед обличчям."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Забагато рухів. Тримайте телефон нерухомо."</string>
