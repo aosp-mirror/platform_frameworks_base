@@ -237,6 +237,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     private final boolean mUnlockedDeviceRequired;
     private final boolean mIsStrongBoxBacked;
     private final int mMaxUsageCount;
+    private final boolean mRollbackResistant;
 
     private KeyProtection(
             Date keyValidityStart,
@@ -259,7 +260,8 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
             boolean userConfirmationRequired,
             boolean unlockedDeviceRequired,
             boolean isStrongBoxBacked,
-            int maxUsageCount) {
+            int maxUsageCount,
+            boolean rollbackResistant) {
         mKeyValidityStart = Utils.cloneIfNotNull(keyValidityStart);
         mKeyValidityForOriginationEnd = Utils.cloneIfNotNull(keyValidityForOriginationEnd);
         mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(keyValidityForConsumptionEnd);
@@ -283,6 +285,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         mUnlockedDeviceRequired = unlockedDeviceRequired;
         mIsStrongBoxBacked = isStrongBoxBacked;
         mMaxUsageCount = maxUsageCount;
+        mRollbackResistant = rollbackResistant;
     }
 
     /**
@@ -563,6 +566,17 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     }
 
     /**
+     * Returns {@code true} if the key is rollback-resistant, meaning that when deleted it is
+     * guaranteed to be permanently deleted and unusable.
+     *
+     * @see Builder#setRollbackResistant(boolean)
+     * @hide
+     */
+    public boolean isRollbackResistant() {
+        return mRollbackResistant;
+    }
+
+    /**
      * Builder of {@link KeyProtection} instances.
      */
     public final static class Builder {
@@ -591,6 +605,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         private boolean mIsStrongBoxBacked = false;
         private int mMaxUsageCount = KeyProperties.UNRESTRICTED_USAGE_COUNT;
         private String mAttestKeyAlias = null;
+        private boolean mRollbackResistant = false;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -1097,6 +1112,21 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         }
 
         /**
+         * Sets whether the key should be rollback-resistant, meaning that when deleted it is
+         * guaranteed to be permanently deleted and unusable.  Not all implementations support
+         * rollback-resistant keys.  This method is hidden because implementations only support a
+         * limited number of rollback-resistant keys; currently the available space is reserved for
+         * critical system keys.
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder setRollbackResistant(boolean rollbackResistant) {
+            mRollbackResistant = rollbackResistant;
+            return this;
+        }
+
+        /**
          * Builds an instance of {@link KeyProtection}.
          *
          * @throws IllegalArgumentException if a required field is missing
@@ -1124,7 +1154,8 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
                     mUserConfirmationRequired,
                     mUnlockedDeviceRequired,
                     mIsStrongBoxBacked,
-                    mMaxUsageCount);
+                    mMaxUsageCount,
+                    mRollbackResistant);
         }
     }
 }
