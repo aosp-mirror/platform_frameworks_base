@@ -89,7 +89,7 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
     /**
      * Checks [pipApp] layer remains visible throughout the animation
      */
-    @FlakyTest
+    @FlakyTest(bugId = 239807171)
     @Test
     open fun pipAppLayerAlwaysVisible() {
         testSpec.assertLayers {
@@ -113,7 +113,7 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
      * Checks that the pip app layer remains inside the display bounds throughout the whole
      * animation
      */
-    @Presubmit
+    @FlakyTest(bugId = 239807171)
     @Test
     open fun pipLayerRemainInsideVisibleBounds() {
         testSpec.assertLayersVisibleRegion(pipApp) {
