@@ -307,8 +307,7 @@
     <string name="tap_again" msgid="1315420114387908655">"ထပ်တို့ပါ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ဖွင့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"ဖွင့်ရန် လော့ခ်ဖွင့်သင်္ကေတကို နှိပ်ပါ"</string>
-    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
-    <skip />
+    <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"မျက်နှာဖြင့် ဖွင့်ထားသည်။ ဖွင့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ။"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"မျက်နှာပြ လော့ခ်ဖွင့်ထားသည်။ လော့ခ်ဖွင့်သင်္ကေတ နှိပ်၍ဝင်ပါ။"</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"မျက်နှာဖြင့် ဖွင့်ထားသည်။ ဖွင့်ရန် နှိပ်ပါ။"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"မျက်နှာ မှတ်မိသည်။ ဖွင့်ရန် နှိပ်ပါ။"</string>
@@ -832,7 +831,8 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"စက်ပစ္စည်း <xliff:g id="COUNT">%1$d</xliff:g> ခုကို ရွေးချယ်ထားသည်"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ချိတ်ဆက်မှု မရှိပါ)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"ပြောင်း၍ မရပါ။ ပြန်စမ်းကြည့်ရန် တို့ပါ။"</string>
-    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"စက်အသစ် တွဲချိတ်ရန်"</string>
+    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
+    <skip />
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"အက်ပ်ဖွင့်ပြီး ဤစက်ရှင်ကို ကာစ်လုပ်နိုင်သည်။"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"အမည်မသိ အက်ပ်"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ကာစ် ရပ်ရန်"</string>
@@ -944,8 +944,14 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi မရပါ"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"ဦးစားပေးမုဒ်"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"နိုးစက် သတ်မှတ်ထားသည်"</string>
+    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
+    <skip />
+    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
+    <skip />
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ကင်မရာနှင့် မိုက် ပိတ်ထားသည်"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{အကြောင်းကြားချက် # ခု}other{အကြောင်းကြားချက် # ခု}}"</string>
+    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ထုတ်လွှင့်ခြင်း"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ထုတ်လွှင့်ခြင်းကို ရပ်မလား။"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ကို ထုတ်လွှင့်သောအခါ (သို့) အထွက်ကို ပြောင်းသောအခါ သင့်လက်ရှိထုတ်လွှင့်ခြင်း ရပ်သွားမည်"</string>

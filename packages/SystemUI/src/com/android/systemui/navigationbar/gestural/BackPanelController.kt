@@ -34,7 +34,6 @@ import android.view.ViewConfiguration
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.PathInterpolator
-import android.window.BackEvent
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.internal.util.LatencyTracker
@@ -97,7 +96,6 @@ private val DECELERATE_INTERPOLATOR_SLOW = DecelerateInterpolator(0.7f)
 
 class BackPanelController private constructor(
     context: Context,
-    private var backAnimation: BackAnimation?,
     private val windowManager: WindowManager,
     private val viewConfiguration: ViewConfiguration,
     @Main private val mainHandler: Handler,
@@ -124,7 +122,6 @@ class BackPanelController private constructor(
         fun create(context: Context, backAnimation: BackAnimation?): BackPanelController {
             val backPanelController = BackPanelController(
                 context,
-                backAnimation,
                 windowManager,
                 viewConfiguration,
                 mainHandler,
@@ -266,7 +263,6 @@ class BackPanelController private constructor(
      */
     private fun updateConfiguration() {
         params.update(resources)
-        updateBackAnimationSwipeThresholds()
         mView.updateArrowPaint(params.arrowThickness)
     }
 
@@ -298,13 +294,6 @@ class BackPanelController private constructor(
     }
 
     override fun onMotionEvent(event: MotionEvent) {
-        backAnimation?.onBackMotion(
-            event.x,
-            event.y,
-            event.actionMasked,
-            if (mView.isLeftPanel) BackEvent.EDGE_LEFT else BackEvent.EDGE_RIGHT
-        )
-
         velocityTracker!!.addMovement(event)
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
@@ -483,18 +472,6 @@ class BackPanelController private constructor(
         )
     }
 
-    fun setBackAnimation(backAnimation: BackAnimation?) {
-        this.backAnimation = backAnimation
-        updateBackAnimationSwipeThresholds()
-    }
-
-    private fun updateBackAnimationSwipeThresholds() {
-        backAnimation?.setSwipeThresholds(
-            params.swipeTriggerThreshold,
-            fullyStretchedThreshold
-        )
-    }
-
     override fun onDestroy() {
         cancelFailsafe()
         windowManager.removeView(mView)
@@ -567,7 +544,6 @@ class BackPanelController private constructor(
         totalTouchDelta = 0f
         vibrationTime = 0
         cancelFailsafe()
-        backAnimation?.setTriggerBack(false)
     }
 
     private fun updateYPosition(touchY: Float) {
@@ -580,7 +556,6 @@ class BackPanelController private constructor(
     override fun setDisplaySize(displaySize: Point) {
         this.displaySize.set(displaySize.x, displaySize.y)
         fullyStretchedThreshold = min(displaySize.x.toFloat(), params.swipeProgressThreshold)
-        updateBackAnimationSwipeThresholds()
     }
 
     /**
@@ -664,7 +639,6 @@ class BackPanelController private constructor(
                 updateRestingArrowDimens(animated = true, currentState)
             }
             GestureState.ACTIVE -> {
-                backAnimation?.setTriggerBack(true)
                 updateRestingArrowDimens(animated = true, currentState)
                 // Vibrate the first time we transition to ACTIVE
                 if (!hasHapticPlayed) {
@@ -674,7 +648,6 @@ class BackPanelController private constructor(
                 }
             }
             GestureState.INACTIVE -> {
-                backAnimation?.setTriggerBack(false)
                 updateRestingArrowDimens(animated = true, currentState)
             }
             GestureState.FLUNG -> playFlingBackAnimation()

@@ -639,10 +639,10 @@
     <string name="face_acquired_too_dark" msgid="7919016380747701228">"ଉଜ୍ଜ୍ୱଳ ଲାଇଟ ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ଫୋନକୁ ଟିକେ ଦୂରକୁ ନିଅନ୍ତୁ"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ଫୋନକୁ ପାଖକୁ ଆଣନ୍ତୁ"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"ଫୋନକୁ ଉପରକୁ ନିଅନ୍ତୁ"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"ଫୋନକୁ ତଳକୁ ନିଅନ୍ତୁ"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"ଫୋନକୁ ଆପଣଙ୍କ ବାମ ପଟକୁ ନିଅନ୍ତୁ"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"ଫୋନକୁ ଆପଣଙ୍କ ଡାହାଣ ପଟକୁ ନିଅନ୍ତୁ"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ଫୋନକୁ ଉପରକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ଫୋନ୍‌କୁ ତଳକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ଫୋନକୁ ଆପଣଙ୍କ ବାମ ପଟକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ଫୋନକୁ ଆପଣଙ୍କ ଡାହାଣ ପଟକୁ ମୁଭ କରନ୍ତୁ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"ଦୟାକରି ଆପଣଙ୍କ ଡିଭାଇସ୍‌କୁ ସିଧାସଳଖ ଦେଖନ୍ତୁ।"</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"ଆପଣଙ୍କ ଫେସ ଦେଖାଯାଉନାହିଁ। ଆପଣଙ୍କ ଫୋନକୁ ଆଖି ସିଧାରେ ଧରି ରଖନ୍ତୁ।"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"ଅତ୍ୟଧିକ ଅସ୍ଥିର। ଫୋନ୍‍କୁ ସ୍ଥିର ଭାବେ ଧରନ୍ତୁ।"</string>
