@@ -204,8 +204,11 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
             final WindowToken token = mTargetWindowTokens.keyAt(i);
             for (int j = token.getChildCount() - 1; j >= 0; j--) {
-                // TODO(b/234585256): The consumer should be handleFinishDrawing().
-                token.getChildAt(j).applyWithNextDraw(t -> {});
+                // TODO(b/234585256): The consumer should be handleFinishDrawing(). And check why
+                //  the local window might easily time out.
+                final WindowState w = token.getChildAt(j);
+                if (w.isClientLocal()) continue;
+                w.applyWithNextDraw(t -> {});
             }
         }
         mIsSyncDrawRequested = true;

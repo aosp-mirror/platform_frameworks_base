@@ -1,8 +1,0 @@
-# See system/logging/logcat/event.logtags for a description of the format of this file.
-
-option java_package com.android.server.contentcapture
-
-53200 cc_connect_state_changed (User|1|5),(component|3),(type|1)
-53201 cc_set_allowlist (User|1|5),(package_count|1),(activity_count|1)
-53202 cc_current_allowlist (User|1|5),(count|1)
-53203 cc_update_options (User|1|5),(count|1)
