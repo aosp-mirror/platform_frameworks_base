@@ -652,7 +652,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Kijk goed recht naar je telefoon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Kijk goed recht naar je telefoon"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Kijk goed recht naar je telefoon"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Zorg dat je gezicht volledig zichtbaar is."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Zorg dat je gezicht volledig zichtbaar is"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Reinig de bovenkant van je scherm, inclusief de zwarte balk"</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Je gezicht moet geheel zichtbaar zijn"</string>
     <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Je gezicht moet geheel zichtbaar zijn"</string>
