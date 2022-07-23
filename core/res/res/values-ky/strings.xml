@@ -613,7 +613,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Жүзүнөн таанып ачуу"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Жүзүнөн таанып ачуу функциясында маселе келип чыкты"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Жүзүңүздүн үлгүсүн өчүрүү үчүн басып, жаңы үлгүнү кошуңуз"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Жүзүнөн таанып ачууну жөндөө"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Жүзүнөн таанып ачууну тууралоо"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Телефонуңузду карап туруп эле кулпусун ачып алыңыз"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Кулпусун ачуунун көбүрөөк жолдорун жөндөңүз"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Манжа изин кошуу үчүн басыңыз"</string>
