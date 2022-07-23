@@ -37,6 +37,7 @@ import com.android.systemui.shade.ShadeEventsModule;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
+import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStoreImpl;
@@ -51,6 +52,7 @@ import com.android.systemui.statusbar.notification.collection.inflation.OnUserIn
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationVisibilityProviderImpl;
+import com.android.systemui.statusbar.notification.collection.provider.VisibilityLocationProviderDelegator;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
@@ -150,6 +152,11 @@ public interface NotificationsModule {
     /** Provides an instance of {@link NotifGutsViewManager} */
     @Binds
     NotifGutsViewManager bindNotifGutsViewManager(NotificationGutsManager notificationGutsManager);
+
+    /** Provides an instance of {@link VisibilityLocationProvider} */
+    @Binds
+    VisibilityLocationProvider bindVisibilityLocationProvider(
+            VisibilityLocationProviderDelegator visibilityLocationProviderDelegator);
 
     /** Provides an instance of {@link NotificationLogger} */
     @SysUISingleton
