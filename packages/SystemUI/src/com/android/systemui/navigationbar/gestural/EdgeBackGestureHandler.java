@@ -53,6 +53,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
+import android.window.BackEvent;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
@@ -208,6 +209,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private float mBottomGestureHeight;
     // The slop to distinguish between horizontal and vertical motion
     private float mTouchSlop;
+    // The threshold for triggering back
+    private float mBackSwipeTriggerThreshold;
+    // The threshold for back swipe full progress.
+    private float mBackSwipeProgressThreshold;
     // Duration after which we consider the event as longpress.
     private final int mLongPressTimeout;
     private int mStartingQuickstepRotation = -1;
@@ -274,6 +279,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                             Log.d(DEBUG_MISSING_GESTURE_TAG, "Triggered back: down="
                                     + sendDown + ", up=" + sendUp);
                         }
+                    } else {
+                        mBackAnimation.setTriggerBack(true);
                     }
 
                     mOverviewProxyService.notifyBackAction(true, (int) mDownPoint.x,
@@ -285,6 +292,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
 
                 @Override
                 public void cancelBack() {
+                    if (mBackAnimation != null) {
+                        mBackAnimation.setTriggerBack(false);
+                    }
                     logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE);
                     mOverviewProxyService.notifyBackAction(false, (int) mDownPoint.x,
                             (int) mDownPoint.y, false /* isButton */, !mIsOnLeftEdge);
@@ -406,6 +416,11 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         final float backGestureSlop = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
                         SystemUiDeviceConfigFlags.BACK_GESTURE_SLOP_MULTIPLIER, 0.75f);
         mTouchSlop = mViewConfiguration.getScaledTouchSlop() * backGestureSlop;
+        mBackSwipeTriggerThreshold = res.getDimension(
+                R.dimen.navigation_edge_action_drag_threshold);
+        mBackSwipeProgressThreshold = res.getDimension(
+                R.dimen.navigation_edge_action_progress_threshold);
+        updateBackAnimationThresholds();
     }
 
     public void updateNavigationBarOverlayExcludeRegion(Rect exclude) {
@@ -748,6 +763,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         MotionEvent cancelEv = MotionEvent.obtain(ev);
         cancelEv.setAction(MotionEvent.ACTION_CANCEL);
         mEdgeBackPlugin.onMotionEvent(cancelEv);
+        dispatchToBackAnimation(cancelEv);
         cancelEv.recycle();
     }
 
@@ -794,6 +810,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             if (mAllowGesture) {
                 mEdgeBackPlugin.setIsLeftPanel(mIsOnLeftEdge);
                 mEdgeBackPlugin.onMotionEvent(ev);
+                dispatchToBackAnimation(ev);
             }
             if (mLogGesture) {
                 mDownPoint.set(ev.getX(), ev.getY());
@@ -867,10 +884,21 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             if (mAllowGesture) {
                 // forward touch
                 mEdgeBackPlugin.onMotionEvent(ev);
+                dispatchToBackAnimation(ev);
             }
         }
 
         mProtoTracer.scheduleFrameUpdate();
+    }
+
+    private void dispatchToBackAnimation(MotionEvent event) {
+        if (mBackAnimation != null) {
+            mBackAnimation.onBackMotion(
+                    event.getX(),
+                    event.getY(),
+                    event.getActionMasked(),
+                    mIsOnLeftEdge ? BackEvent.EDGE_LEFT : BackEvent.EDGE_RIGHT);
+        }
     }
 
     private void updateDisabledForQuickstep(Configuration newConfig) {
@@ -900,6 +928,16 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         if (mEdgeBackPlugin != null) {
             mEdgeBackPlugin.setDisplaySize(mDisplaySize);
         }
+        updateBackAnimationThresholds();
+    }
+
+    private void updateBackAnimationThresholds() {
+        if (mBackAnimation == null) {
+            return;
+        }
+        mBackAnimation.setSwipeThresholds(
+                mBackSwipeTriggerThreshold,
+                Math.min(mDisplaySize.x, mBackSwipeProgressThreshold));
     }
 
     private boolean sendEvent(int action, int code) {
@@ -979,13 +1017,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
 
     public void setBackAnimation(BackAnimation backAnimation) {
         mBackAnimation = backAnimation;
-        if (mEdgeBackPlugin != null) {
-            if (mEdgeBackPlugin instanceof NavigationBarEdgePanel) {
-                ((NavigationBarEdgePanel) mEdgeBackPlugin).setBackAnimation(backAnimation);
-            } else if (mEdgeBackPlugin instanceof BackPanelController) {
-                ((BackPanelController) mEdgeBackPlugin).setBackAnimation(backAnimation);
-            }
-        }
+        updateBackAnimationThresholds();
     }
 
     /**
