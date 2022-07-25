@@ -169,6 +169,7 @@ public class ClipboardOverlayController {
     private Animator mExitAnimator;
     private Animator mEnterAnimator;
     private final int mOrientation;
+    private boolean mKeyboardVisible;
 
 
     public ClipboardOverlayController(Context context,
@@ -261,8 +262,22 @@ public class ClipboardOverlayController {
         attachWindow();
         withWindowAttached(() -> {
             mWindow.setContentView(mView);
-            updateInsets(mWindowManager.getCurrentWindowMetrics().getWindowInsets());
-            mView.requestLayout();
+            WindowInsets insets = mWindowManager.getCurrentWindowMetrics().getWindowInsets();
+            mKeyboardVisible = insets.isVisible(WindowInsets.Type.ime());
+            updateInsets(insets);
+            mWindow.peekDecorView().getViewTreeObserver().addOnGlobalLayoutListener(
+                    new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            WindowInsets insets =
+                                    mWindowManager.getCurrentWindowMetrics().getWindowInsets();
+                            boolean keyboardVisible = insets.isVisible(WindowInsets.Type.ime());
+                            if (keyboardVisible != mKeyboardVisible) {
+                                mKeyboardVisible = keyboardVisible;
+                                updateInsets(insets);
+                            }
+                        }
+                    });
             mWindow.peekDecorView().getViewRootImpl().setActivityConfigCallback(
                     new ViewRootImpl.ActivityConfigCallback() {
                         @Override
@@ -384,8 +399,6 @@ public class ClipboardOverlayController {
             mRemoteCopyChip.setVisibility(View.GONE);
         }
         withWindowAttached(() -> {
-            updateInsets(
-                    mWindowManager.getCurrentWindowMetrics().getWindowInsets());
             if (mEnterAnimator == null || !mEnterAnimator.isRunning()) {
                 mView.post(this::animateIn);
             }
