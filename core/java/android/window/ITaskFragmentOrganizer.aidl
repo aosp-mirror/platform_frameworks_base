@@ -45,10 +45,11 @@ oneway interface ITaskFragmentOrganizer {
      *
      * @param errorCallbackToken    Token set through {@link
      *                              WindowContainerTransaction#setErrorCallbackToken(IBinder)}
-     * @param exceptionBundle   Bundle containing the exception. Should be created with
-     *                          {@link TaskFragmentOrganizer#putExceptionInBundle}.
+     * @param errorBundle       Bundle containing the exception, operation type and TaskFragmentInfo
+     *                          if any. Should be created with
+     *                          {@link TaskFragmentOrganizer#putErrorInfoInBundle}.
      */
-    void onTaskFragmentError(in IBinder errorCallbackToken, in Bundle exceptionBundle);
+    void onTaskFragmentError(in IBinder errorCallbackToken, in Bundle errorBundle);
 
     /**
      * Called when an Activity is reparented to the Task with organized TaskFragment. For example,
