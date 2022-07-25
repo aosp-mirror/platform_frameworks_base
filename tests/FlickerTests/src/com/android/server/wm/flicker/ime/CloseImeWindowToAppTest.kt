@@ -96,12 +96,6 @@ class CloseImeWindowToAppTest(testSpec: FlickerTestParameter) : BaseTest(testSpe
         testSpec.navBarLayerPositionAtStartAndEnd()
     }
 
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
-
     @Presubmit
     @Test
     fun imeLayerBecomesInvisible() = testSpec.imeLayerBecomesInvisible()

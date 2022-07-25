@@ -88,12 +88,6 @@ class OpenImeWindowFromFixedOrientationAppTest(
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
     @Presubmit
     @Test
     fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()

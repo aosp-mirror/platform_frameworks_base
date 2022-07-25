@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -80,12 +79,6 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     }
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
     @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
@@ -146,9 +139,9 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
         }
     }
 
-    @FlakyTest(bugId = 204570898)
+    @Presubmit
     @Test
-    fun imeAppWindowVisibility() {
+    fun imeAppWindowIsAlwaysVisibleShellTransit() {
         Assume.assumeTrue(isShellTransitionsEnabled)
         // the app starts visible in live tile, and stays visible for the duration of entering
         // and exiting overview. Since we log 1x per frame, sometimes the activity visibility
@@ -172,9 +165,9 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
         }
     }
 
-    @FlakyTest(bugId = 204570898)
+    @Presubmit
     @Test
-    fun imeLayerIsBecomesVisible() {
+    fun imeLayerBecomesVisibleShellTransit() {
         Assume.assumeTrue(isShellTransitionsEnabled)
         testSpec.assertLayers {
             this.isVisible(ComponentMatcher.IME)

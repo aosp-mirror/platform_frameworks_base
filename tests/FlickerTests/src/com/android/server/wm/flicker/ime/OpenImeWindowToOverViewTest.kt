@@ -100,22 +100,6 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
                 stateSync.withNavOrTaskBarVisible().withStatusBarVisible()
         }
     }
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     @Presubmit
     @Test
@@ -147,7 +131,7 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
      * In the legacy transitions, the nav bar is not marked as invisible.
      * In the new transitions this is fixed and the nav bar shows as invisible
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarLayerIsInvisibleInLandscapeGestural() {
         Assume.assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
@@ -213,7 +197,7 @@ class OpenImeWindowToOverViewTest(testSpec: FlickerTestParameter) : BaseTest(tes
     override fun taskBarLayerIsVisibleAtStartAndEnd() =
         super.taskBarLayerIsVisibleAtStartAndEnd()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun statusBarLayerIsVisibleInPortrait() {
         Assume.assumeFalse(testSpec.isLandscapeOrSeascapeAtStart)
