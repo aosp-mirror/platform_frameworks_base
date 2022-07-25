@@ -24,14 +24,16 @@ package {
 android_test {
     name: "RubidiumPerfTests",
     srcs: ["src/**/*.java"],
+    min_sdk_version: "33",
     static_libs: [
         "androidx.test.rules",
         "androidx.annotation_annotation",
         "apct-perftests-utils",
-        "collector-device-lib",
+        "collector-device-lib-platform",
         "compatibility-device-util-axt",
         "platform-test-annotations",
         "adservices-service-core",
+        "androidx.core_core",
     ],
     test_suites: ["device-tests"],
     data: [":perfetto_artifacts"],

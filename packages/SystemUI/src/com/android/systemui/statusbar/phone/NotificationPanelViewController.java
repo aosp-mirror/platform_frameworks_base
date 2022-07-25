@@ -1782,14 +1782,14 @@ public class NotificationPanelViewController extends PanelViewController {
         mHeadsUpTouchHelper.notifyFling(!expand);
         mKeyguardStateController.notifyPanelFlingStart(!expand /* flingingToDismiss */);
         setClosingWithAlphaFadeout(!expand && !isOnKeyguard() && getFadeoutAlpha() == 1.0f);
-        mAmbientState.setIsFlinging(true);
+        mNotificationStackScrollLayoutController.setPanelFlinging(true);
         super.flingToHeight(vel, expand, target, collapseSpeedUpFactor, expandBecauseOfFalsing);
     }
 
     @Override
     protected void onFlingEnd(boolean cancelled) {
         super.onFlingEnd(cancelled);
-        mAmbientState.setIsFlinging(false);
+        mNotificationStackScrollLayoutController.setPanelFlinging(false);
     }
 
     private boolean onQsIntercept(MotionEvent event) {
@@ -4142,6 +4142,11 @@ public class NotificationPanelViewController extends PanelViewController {
 
             @Override
             public boolean onInterceptTouchEvent(MotionEvent event) {
+                if (SPEW_LOGCAT) {
+                    Log.v(TAG,
+                            "NPVC onInterceptTouchEvent (" + event.getId() + "): (" + event.getX()
+                                    + "," + event.getY() + ")");
+                }
                 if (mBlockTouches || mQs.disallowPanelTouches()) {
                     return false;
                 }
