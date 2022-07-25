@@ -29,9 +29,13 @@ import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ContentResolver;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -415,18 +419,34 @@ public abstract class EconomicPolicy {
 
     protected long getConstantAsCake(@NonNull KeyValueListParser parser,
             @Nullable DeviceConfig.Properties properties, String key, long defaultValCake) {
+        return getConstantAsCake(parser, properties, key, defaultValCake, 0);
+    }
+
+    protected long getConstantAsCake(@NonNull KeyValueListParser parser,
+            @Nullable DeviceConfig.Properties properties, String key, long defaultValCake,
+            long minValCake) {
         // Don't cross the streams! Mixing Settings/local user config changes with DeviceConfig
         // config can cause issues since the scales may be different, so use one or the other.
         if (parser.size() > 0) {
             // User settings take precedence. Just stick with the Settings constants, even if there
             // are invalid values. It's not worth the time to evaluate all the key/value pairs to
             // make sure there are valid ones before deciding.
-            return parseCreditValue(parser.getString(key, null), defaultValCake);
+            return Math.max(minValCake,
+                parseCreditValue(parser.getString(key, null), defaultValCake));
         }
         if (properties != null) {
-            return parseCreditValue(properties.getString(key, null), defaultValCake);
+            return Math.max(minValCake,
+                parseCreditValue(properties.getString(key, null), defaultValCake));
         }
-        return defaultValCake;
+        return Math.max(minValCake, defaultValCake);
+    }
+
+    @VisibleForTesting
+    static class Injector {
+        @Nullable
+        String getSettingsGlobalString(@NonNull ContentResolver resolver, @NonNull String name) {
+            return Settings.Global.getString(resolver, name);
+        }
     }
 
     protected static void dumpActiveModifiers(IndentingPrintWriter pw) {
