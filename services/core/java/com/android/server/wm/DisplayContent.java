@@ -3233,10 +3233,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     public void setRotationAnimation(ScreenRotationAnimation screenRotationAnimation) {
-        if (mScreenRotationAnimation != null) {
-            mScreenRotationAnimation.kill();
-        }
+        final ScreenRotationAnimation prev = mScreenRotationAnimation;
         mScreenRotationAnimation = screenRotationAnimation;
+        if (prev != null) {
+            prev.kill();
+        }
 
         // Hide the windows which are not significant in rotation animation. So that the windows
         // don't need to block the unfreeze time.
