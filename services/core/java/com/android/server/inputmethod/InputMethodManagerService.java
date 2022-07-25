@@ -4167,23 +4167,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (!calledFromValidUserLocked()) {
                 return null;
             }
-            final Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
-            // TODO: Handle the case of the last IME with no subtypes
-            if (lastIme == null || TextUtils.isEmpty(lastIme.first)
-                    || TextUtils.isEmpty(lastIme.second)) return null;
-            final InputMethodInfo lastImi = mMethodMap.get(lastIme.first);
-            if (lastImi == null) return null;
-            try {
-                final int lastSubtypeHash = Integer.parseInt(lastIme.second);
-                final int lastSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(lastImi,
-                        lastSubtypeHash);
-                if (lastSubtypeId < 0 || lastSubtypeId >= lastImi.getSubtypeCount()) {
-                    return null;
-                }
-                return lastImi.getSubtypeAt(lastSubtypeId);
-            } catch (NumberFormatException e) {
-                return null;
-            }
+            return mSettings.getLastInputMethodSubtypeLocked();
         }
     }
 
