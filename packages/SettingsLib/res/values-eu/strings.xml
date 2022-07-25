@@ -117,8 +117,10 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Fitxategi-transferentzia"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Sarrerako gailua"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Interneteko konexioa"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Kontaktuak partekatzea"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Erabili kontaktuak partekatzeko"</string>
+    <!-- no translation found for bluetooth_profile_pbap (4262303387989406171) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_pbap_summary (6466456791354759132) -->
+    <skip />
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Interneteko konexioa partekatzea"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Testu-mezuak"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIMerako sarbidea"</string>
@@ -389,7 +391,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Gaitu GPUaren arazketa-geruzak"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Eman GPUaren arazketa-geruzak kargatzeko baimena arazketa-aplikazioei"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Gaitu saltzaileen erregistro xehatuak"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sartu gailuaren berariazko saltzaileen erregistro gehigarriak akatsen txostenetan; baliteke haiek informazio pribatua izatea, bateria gehiago erabiltzea edo biltegiratzeko toki gehiago hartzea."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sartu gailuaren berariazko saltzaileen erregistro gehigarriak akatsen txostenetan; baliteke haiek informazio pribatua izatea, bateria gehiago erabiltzea eta/edo biltegiratzeko toki gehiago hartzea."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Leihoen animazio-eskala"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Trantsizioen animazio-eskala"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animatzailearen iraupen-eskala"</string>

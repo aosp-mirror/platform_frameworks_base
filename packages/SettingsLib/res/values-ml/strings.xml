@@ -117,8 +117,10 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ഫയൽ കൈമാറൽ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ഇൻപുട്ട് ഉപകരണം"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ഇന്‍റർനെറ്റ് ആക്‌സസ്"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"കോൺടാക്‌റ്റ് പങ്കിടൽ"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"കോൺടാക്‌റ്റ് പങ്കിടലിനായി ഉപയോഗിക്കുക"</string>
+    <!-- no translation found for bluetooth_profile_pbap (4262303387989406171) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_pbap_summary (6466456791354759132) -->
+    <skip />
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ഇന്റർനെറ്റ് കണക്ഷൻ പങ്കിടൽ"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"അക്ഷര സന്ദേശങ്ങൾ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"സിം ആക്സസ്"</string>
