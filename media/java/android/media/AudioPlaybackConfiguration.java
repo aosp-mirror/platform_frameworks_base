@@ -243,12 +243,17 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * Flag used when playback is restricted by AppOps manager with OP_PLAY_AUDIO.
      */
     public static final int PLAYER_MUTE_PLAYBACK_RESTRICTED = (1 << 3);
+    /**
+     * @hide
+     * Flag used when muted by client volume.
+     */
+    public static final int PLAYER_MUTE_CLIENT_VOLUME = (1 << 4);
 
     /** @hide */
     @IntDef(
             flag = true,
             value = {PLAYER_MUTE_MASTER, PLAYER_MUTE_STREAM_VOLUME, PLAYER_MUTE_STREAM_MUTED,
-                    PLAYER_MUTE_PLAYBACK_RESTRICTED})
+                    PLAYER_MUTE_PLAYBACK_RESTRICTED, PLAYER_MUTE_CLIENT_VOLUME})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlayerMuteEvent {
     }
@@ -678,7 +683,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                 + " muteFromStreamVolume=" + ((mMutedState & PLAYER_MUTE_STREAM_VOLUME) != 0)
                 + " muteFromStreamMuted=" + ((mMutedState & PLAYER_MUTE_STREAM_MUTED) != 0)
                 + " muteFromPlaybackRestricted=" + ((mMutedState & PLAYER_MUTE_PLAYBACK_RESTRICTED)
-                != 0);
+                != 0)
+                + " muteFromClientVolume=" + ((mMutedState & PLAYER_MUTE_CLIENT_VOLUME) != 0);
     }
 
     //=====================================================================
