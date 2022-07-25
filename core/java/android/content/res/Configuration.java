@@ -1974,10 +1974,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             return true;
         }
         int diff = other.seq - seq;
-        if (diff > 0x10000) {
+        if (Math.abs(diff) > 0x10000000) {
             // If there has been a sufficiently large jump, assume the
             // sequence has wrapped around.
-            return false;
+            return diff < 0;
         }
         return diff > 0;
     }
