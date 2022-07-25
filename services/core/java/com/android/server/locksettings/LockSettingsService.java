@@ -234,7 +234,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     protected final UserManager mUserManager;
     private final IStorageManager mStorageManager;
     private final IActivityManager mActivityManager;
-    private final SyntheticPasswordManager mSpManager;
+    @VisibleForTesting
+    protected final SyntheticPasswordManager mSpManager;
 
     private final KeyStore mKeyStore;
     private final java.security.KeyStore mJavaKeyStore;

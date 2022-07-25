@@ -504,11 +504,12 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
                 badCredential, userId, 0 /* flags */).getResponseCode());
     }
 
-    @SuppressWarnings("GuardedBy") // for initializeSyntheticPasswordLocked
     private void initializeStorageWithCredential(int userId, LockscreenCredential credential)
             throws RemoteException {
         assertEquals(0, mGateKeeperService.getSecureUserId(userId));
-        mService.initializeSyntheticPasswordLocked(credential, userId);
+        synchronized (mService.mSpManager) {
+            mService.initializeSyntheticPasswordLocked(credential, userId);
+        }
         assertNotEquals(0, mGateKeeperService.getSecureUserId(userId));
     }
 }
