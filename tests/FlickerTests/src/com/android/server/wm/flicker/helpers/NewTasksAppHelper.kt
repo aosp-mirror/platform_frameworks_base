@@ -47,7 +47,7 @@ class NewTasksAppHelper @JvmOverloads constructor(
         }
         button.click()
         wmHelper.StateSyncBuilder()
-            .withFullScreenApp(this)
+            .withAppTransitionIdle()
             .waitForAndVerify()
     }
 }
