@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‏‏‎‎‏‎‏‏‎‏‏‏‏‏‎‏‏‎‎‏‏‏‎‏‎‎‎‎‏‏‏‎‎‎‏‏‎‎‏‏‏‎‏‎‎‎‏‎‎‎‎‏‏‏‎‎Settings‎‏‎‎‏‎"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‏‏‏‎‏‎‏‎‏‎‎‏‏‏‎‎‎‏‏‏‎‏‎‎‎‎‏‏‎‎‏‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‏‏‏‎‏‏‏‎Enter split screen‎‏‎‎‏‎"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‏‎‏‏‎‎‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‏‎‎‏‏‎‎‏‎‎‎‎‏‎‏‎‎‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎‎‎‎Menu‎‏‎‎‏‎"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‎‎‎‎‎‎‎‏‎‎‎‏‏‎‏‏‏‎‎‏‏‏‏‎‏‏‏‏‏‎‎‎‎‎‏‎‎‎‏‏‏‎‎‏‎‏‏‏‏‎‎‏‎Picture-in-Picture Menu‎‏‎‎‏‎"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‏‎‏‏‎‎‎‏‏‏‏‎‎‎‎‎‏‎‎‏‏‏‎‎‏‏‎‎‏‏‏‎‎‏‎‎‏‏‏‏‏‏‏‎‏‏‎‎‏‏‏‎‏‏‎‏‎‎‏‎‎‏‏‎<xliff:g id="NAME">%s</xliff:g>‎‏‎‎‏‏‏‎ is in picture-in-picture‎‏‎‎‏‎"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‎‏‏‎‏‏‏‏‏‏‏‏‎‏‎‎‏‎‏‎‎‏‏‎‏‏‎‎‎‏‎‏‏‏‏‎‎‎‎‏‏‏‏‎‎‏‎‏‏‎‎‎‏‏‏‎‎‎If you don\'t want ‎‏‎‎‏‏‎<xliff:g id="NAME">%s</xliff:g>‎‏‎‎‏‏‏‎ to use this feature, tap to open settings and turn it off.‎‏‎‎‏‎"</string>
     <string name="pip_play" msgid="3496151081459417097">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‏‎‎‎‎‏‎‎‏‏‎‏‎‎‏‎‏‏‏‎‎‎‏‎‏‎‎‏‏‎‏‏‎‏‏‏‏‏‎‎‏‎‎‎‎‎‎‎‎‎‎‎‏‎‎‏‎Play‎‏‎‎‏‎"</string>
@@ -36,6 +37,7 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‏‎‎‎‏‎‎‏‎‏‎‏‏‏‎‏‎‏‎‏‎‎‏‎‏‎‏‏‏‏‎‏‏‏‎‏‏‎‏‏‎‎‎‏‎‎‏‎‎‏‎‎‏‏‏‏‎App may not work on a secondary display.‎‏‎‎‏‎"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‏‎‏‎‎‏‏‏‎‏‏‏‏‏‏‎‎‎‎‎‎‏‏‏‎‏‎‎‎‏‎‎‎‏‏‎‏‎‎‎‏‎‎‎‎‏‏‏‎‏‎‏‏‎‎‏‎App does not support launch on secondary displays.‎‏‎‎‏‎"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‏‏‏‎‎‎‏‎‎‎‏‏‎‏‏‏‏‏‎‎‎‎‏‎‏‏‎‏‎‏‎‎‏‎‎‏‎‎‏‎‏‏‎‏‎‏‏‏‏‏‎‎‏‎‏‏‏‎Split-screen divider‎‏‎‎‏‎"</string>
+    <string name="divider_title" msgid="5482989479865361192">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‎‎‏‎‏‏‏‎‏‏‏‏‏‎‏‏‏‏‎‎‎‎‏‏‎‏‏‏‏‏‎‏‎‎‏‎‏‎‎‎‎‏‎‎‎‏‏‎‎‏‎‏‎‎‎‎Split-screen divider‎‏‎‎‏‎"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‏‏‎‏‏‏‏‏‏‎‎‏‎‎‏‏‏‏‎‎‎‏‏‎‎‎‏‏‏‎‏‎‎‎‏‎‏‎‎‏‎‎‏‎‎‎‎‏‏‎‎‏‏‎‎‎‎Left full screen‎‏‎‎‏‎"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‎‏‏‏‏‎‏‎‎‎‏‏‏‏‏‏‎‎‎‏‎‎‎‎‎‏‎‎‏‎‏‎‏‏‎‏‏‏‎‏‎‎‎‎‎‏‎‏‏‎‎‏‏‎‎‏‎‎Left 70%‎‏‎‎‏‎"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‎‏‏‎‏‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‏‎‏‎‎‎‎‏‏‎‎‎‏‎‏‏‎‎‏‎‏‏‎‏‏‎‏‎‏‎‎‏‏‎‎‏‎Left 50%‎‏‎‎‏‎"</string>
