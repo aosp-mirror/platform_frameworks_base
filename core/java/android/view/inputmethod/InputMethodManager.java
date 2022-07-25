@@ -3517,7 +3517,7 @@ public final class InputMethodManager {
 
     @Nullable
     public InputMethodSubtype getLastInputMethodSubtype() {
-        return mServiceInvoker.getLastInputMethodSubtype();
+        return mServiceInvoker.getLastInputMethodSubtype(UserHandle.myUserId());
     }
 
     /**

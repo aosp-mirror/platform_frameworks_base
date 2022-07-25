@@ -50,7 +50,9 @@ interface IInputMethodManager {
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in @nullable String imiId,
             boolean allowsImplicitlySelectedSubtypes, int userId);
 
-    @nullable InputMethodSubtype getLastInputMethodSubtype();
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
+    InputMethodSubtype getLastInputMethodSubtype(int userId);
 
     boolean showSoftInput(in IInputMethodClient client, @nullable IBinder windowToken, int flags,
             in @nullable ResultReceiver resultReceiver, int reason);
