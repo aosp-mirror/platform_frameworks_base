@@ -19,6 +19,7 @@ package com.android.packageinstaller;
 import static com.android.packageinstaller.PackageUtil.getMaxTargetSdkVersionForUid;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -28,12 +29,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ProviderInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.UserManager;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -47,14 +48,12 @@ public class InstallStart extends Activity {
 
     private static final String DOWNLOADS_AUTHORITY = "downloads";
     private PackageManager mPackageManager;
-    private UserManager mUserManager;
     private boolean mAbortInstall = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPackageManager = getPackageManager();
-        mUserManager = getSystemService(UserManager.class);
         Intent intent = getIntent();
         String callingPackage = getCallingPackage();
         String callingAttributionTag = null;
@@ -119,8 +118,9 @@ public class InstallStart extends Activity {
         } else {
             Uri packageUri = intent.getData();
 
-            if (packageUri != null && packageUri.getScheme().equals(
-                    ContentResolver.SCHEME_CONTENT)) {
+            if (packageUri != null
+                    && packageUri.getScheme().equals(ContentResolver.SCHEME_CONTENT)
+                    && canPackageQuery(originatingUid, packageUri)) {
                 // [IMPORTANT] This path is deprecated, but should still work. Only necessary
                 // features should be added.
 
@@ -140,7 +140,14 @@ public class InstallStart extends Activity {
         }
 
         if (nextActivity != null) {
-            startActivity(nextActivity);
+            try {
+                startActivity(nextActivity);
+            } catch (SecurityException e) {
+                Intent result = new Intent();
+                result.putExtra(Intent.EXTRA_INSTALL_RESULT,
+                        PackageManager.INSTALL_FAILED_INVALID_URI);
+                setResult(RESULT_FIRST_USER, result);
+            }
         }
         finish();
     }
@@ -228,5 +235,22 @@ public class InstallStart extends Activity {
         }
         final ApplicationInfo appInfo = downloadProviderPackage.applicationInfo;
         return (appInfo.isSystemApp() && uid == appInfo.uid);
+    }
+
+    @NonNull
+    private boolean canPackageQuery(int originatingUid, Uri packageUri) {
+        String callingPackage = mPackageManager.getPackagesForUid(originatingUid)[0];
+        ProviderInfo info = mPackageManager.resolveContentProvider(packageUri.getAuthority(),
+                PackageManager.ComponentInfoFlags.of(0));
+        if (info == null) {
+            return false;
+        }
+        String targetPackage = info.packageName;
+
+        try {
+            return mPackageManager.canPackageQuery(callingPackage, targetPackage);
+        } catch (NameNotFoundException e) {
+            return false;
+        }
     }
 }
