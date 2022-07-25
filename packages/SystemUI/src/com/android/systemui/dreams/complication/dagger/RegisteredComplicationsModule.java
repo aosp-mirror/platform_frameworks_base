@@ -27,6 +27,9 @@ import dagger.Module;
 @Module(includes = {
                 DreamClockDateComplicationModule.class,
                 DreamClockTimeComplicationModule.class,
+        },
+        subcomponents = {
+                DreamHomeControlsComplicationComponent.class,
         })
 public interface RegisteredComplicationsModule {
 }
