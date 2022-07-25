@@ -24,6 +24,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
+import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import java.lang.IllegalStateException
 import javax.inject.Inject
@@ -34,7 +35,8 @@ import javax.inject.Inject
  */
 @CentralSurfacesScope
 class StatusBarInitializer @Inject constructor(
-    private val windowController: StatusBarWindowController
+    private val windowController: StatusBarWindowController,
+    private val creationListeners: Set<@JvmSuppressWildcards OnStatusBarViewInitializedListener>,
 ) {
 
     var statusBarViewUpdatedListener: OnStatusBarViewUpdatedListener? = null
@@ -56,6 +58,9 @@ class StatusBarInitializer @Inject constructor(
                             statusBarFragmentComponent.phoneStatusBarViewController,
                             statusBarFragmentComponent.phoneStatusBarTransitions
                         )
+                        creationListeners.forEach { listener ->
+                            listener.onStatusBarViewInitialized(statusBarFragmentComponent)
+                        }
                     }
 
                     override fun onFragmentViewDestroyed(tag: String?, fragment: Fragment?) {
@@ -67,6 +72,17 @@ class StatusBarInitializer @Inject constructor(
                         centralSurfacesComponent.createCollapsedStatusBarFragment(),
                         CollapsedStatusBarFragment.TAG)
                 .commit()
+    }
+
+    interface OnStatusBarViewInitializedListener {
+
+        /**
+         * The status bar view has been initialized.
+         *
+         * @param component Dagger component that is created when the status bar view is created.
+         * Can be used to retrieve dependencies from that scope, including the status bar root view.
+         */
+        fun onStatusBarViewInitialized(component: StatusBarFragmentComponent)
     }
 
     interface OnStatusBarViewUpdatedListener {

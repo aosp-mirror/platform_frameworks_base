@@ -16,13 +16,22 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
+import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator;
+
 import java.util.Set;
 
+import dagger.Binds;
 import dagger.Module;
+import dagger.multibindings.IntoSet;
 import dagger.multibindings.Multibinds;
 
 @Module
 interface CentralSurfacesStartableModule {
     @Multibinds
     Set<CentralSurfacesComponent.Startable> multibindStartables();
+
+    @Binds
+    @IntoSet
+    CentralSurfacesComponent.Startable letterboxAppearanceCalculator(
+            LetterboxAppearanceCalculator letterboxAppearanceCalculator);
 }
