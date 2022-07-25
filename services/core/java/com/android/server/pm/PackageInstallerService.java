@@ -912,8 +912,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             if (session == null || !isCallingUidOwner(session)) {
                 throw new SecurityException("Caller has no access to session " + sessionId);
             }
-            session.params.appLabel = appLabel;
-            mInternalCallback.onSessionBadgingChanged(session);
+            if (!appLabel.equals(session.params.appLabel)) {
+                session.params.appLabel = appLabel;
+                mInternalCallback.onSessionBadgingChanged(session);
+            }
         }
     }
 
