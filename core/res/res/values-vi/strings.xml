@@ -611,6 +611,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Thiết bị này không có cảm biến vân tay."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Đã tạm thời tắt cảm biến."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Không thể dùng cảm biến vân tay. Hãy liên hệ với một nhà cung cấp dịch vụ sửa chữa"</string>
+    <!-- no translation found for fingerprint_error_power_pressed (5479524500542129414) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Ngón tay <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Dùng vân tay"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Dùng vân tay hoặc phương thức khóa màn hình"</string>
@@ -654,7 +656,7 @@
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Bạn cần cho thấy toàn bộ khuôn mặt của mình"</string>
     <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Toàn bộ khuôn mặt của bạn phải được hiển thị"</string>
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Không thể tạo mẫu khuôn mặt của bạn. Hãy thử lại."</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Đã phát hiện đeo kính đen. Toàn bộ khuôn mặt của bạn phải được hiển thị."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Đã phát hiện thấy kính râm. Toàn bộ khuôn mặt của bạn phải được trông thấy rõ ràng."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Đã phát hiện khuôn mặt bị che khuất. Toàn bộ khuôn mặt của bạn phải được hiển thị."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -2286,6 +2288,5 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Không truy cập được vào máy ảnh trên điện thoại từ <xliff:g id="DEVICE">%1$s</xliff:g> của bạn"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Không truy cập được vào máy ảnh trên máy tính bảng từ <xliff:g id="DEVICE">%1$s</xliff:g> của bạn"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Theo chế độ mặc định của hệ thống"</string>
-    <!-- no translation found for default_card_name (9198284935962911468) -->
-    <skip />
+    <string name="default_card_name" msgid="9198284935962911468">"THẺ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

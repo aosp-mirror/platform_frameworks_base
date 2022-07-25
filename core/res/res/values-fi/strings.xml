@@ -611,6 +611,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Laitteessa ei ole sormenjälkitunnistinta."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Tunnistin poistettu väliaikaisesti käytöstä."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Sormenjälkitunnistinta ei voi käyttää. Ota yhteys korjauspalveluun"</string>
+    <!-- no translation found for fingerprint_error_power_pressed (5479524500542129414) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Sormi <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Käytä sormenjälkeä"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Käytä sormenjälkeä tai näytön lukitusta"</string>
@@ -2286,6 +2288,5 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> ei pääse puhelimen kameraan"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> ei pääse tabletin kameraan"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Järjestelmän oletusarvo"</string>
-    <!-- no translation found for default_card_name (9198284935962911468) -->
-    <skip />
+    <string name="default_card_name" msgid="9198284935962911468">"Kortti: <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>
