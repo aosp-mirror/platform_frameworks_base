@@ -5927,6 +5927,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!super.prepareSync()) {
             return false;
         }
+        if (mIsWallpaper) {
+            // TODO(b/233286785): Add sync support to wallpaper.
+            return false;
+        }
         // In the WindowContainer implementation we immediately mark ready
         // since a generic WindowContainer only needs to wait for its
         // children to finish and is immediately ready from its own
