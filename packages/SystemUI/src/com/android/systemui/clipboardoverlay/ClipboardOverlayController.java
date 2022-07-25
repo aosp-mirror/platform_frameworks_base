@@ -522,7 +522,7 @@ public class ClipboardOverlayController {
     private void shareContent(ClipData clip) {
         mUiEventLogger.log(CLIPBOARD_OVERLAY_SHARE_TAPPED);
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.putExtra(Intent.EXTRA_TEXT, clip.getItemAt(0).getText());
+        shareIntent.putExtra(Intent.EXTRA_TEXT, clip.getItemAt(0).getText().toString());
         shareIntent.setDataAndType(
                 clip.getItemAt(0).getUri(), clip.getDescription().getMimeType(0));
         shareIntent.putExtra(Intent.EXTRA_STREAM, clip.getItemAt(0).getUri());
