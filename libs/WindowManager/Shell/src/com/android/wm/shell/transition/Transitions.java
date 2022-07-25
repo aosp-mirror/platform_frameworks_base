@@ -516,7 +516,8 @@ public class Transitions implements RemoteCallable<Transitions> {
             active.mMerged = true;
             active.mAborted = abort;
             if (active.mHandler != null) {
-                active.mHandler.onTransitionConsumed(active.mToken, abort);
+                active.mHandler.onTransitionConsumed(
+                        active.mToken, abort, abort ? null : active.mFinishT);
             }
             return;
         }
@@ -524,7 +525,8 @@ public class Transitions implements RemoteCallable<Transitions> {
         active.mAborted = abort;
         if (active.mAborted && active.mHandler != null) {
             // Notifies to clean-up the aborted transition.
-            active.mHandler.onTransitionConsumed(transition, true /* aborted */);
+            active.mHandler.onTransitionConsumed(
+                    transition, true /* aborted */, null /* finishTransaction */);
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "Transition animation finished (abort=%b), notifying core %s", abort, transition);
@@ -560,7 +562,8 @@ public class Transitions implements RemoteCallable<Transitions> {
             ActiveTransition aborted = mActiveTransitions.remove(activeIdx);
             // Notifies to clean-up the aborted transition.
             if (aborted.mHandler != null) {
-                aborted.mHandler.onTransitionConsumed(transition, true /* aborted */);
+                aborted.mHandler.onTransitionConsumed(
+                        transition, true /* aborted */, null /* finishTransaction */);
             }
             mOrganizer.finishTransition(aborted.mToken, null /* wct */, null /* wctCB */);
         }
@@ -746,8 +749,13 @@ public class Transitions implements RemoteCallable<Transitions> {
          * Called when a transition which was already "claimed" by this handler has been merged
          * into another animation or has been aborted. Gives this handler a chance to clean-up any
          * expectations.
+         *
+         * @param transition The transition been consumed.
+         * @param aborted Whether the transition is aborted or not.
+         * @param finishTransaction The transaction to be applied after the transition animated.
          */
-        default void onTransitionConsumed(@NonNull IBinder transition, boolean aborted) { }
+        default void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
+                @Nullable SurfaceControl.Transaction finishTransaction) { }
 
         /**
          * Sets transition animation scale settings value to handler.

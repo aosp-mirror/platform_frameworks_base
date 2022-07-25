@@ -229,6 +229,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 if (op.getType() == HIERARCHY_OP_TYPE_REORDER && op.getToTop()
                         && (mMainStage.containsContainer(container)
                         || mSideStage.containsContainer(container))) {
+                    updateSurfaceBounds(mSplitLayout, finishT, false /* applyResizingOffset */);
                     setDividerVisibility(true, finishT);
                     return;
                 }
@@ -1677,8 +1678,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     @Override
-    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted) {
-        mSplitTransitions.onTransitionConsumed(transition, aborted);
+    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
+            @Nullable SurfaceControl.Transaction finishT) {
+        mSplitTransitions.onTransitionConsumed(transition, aborted, finishT);
     }
 
     @Override
