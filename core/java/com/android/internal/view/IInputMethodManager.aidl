@@ -104,8 +104,15 @@ interface IInputMethodManager {
     boolean isImeTraceEnabled();
 
     // Starts an ime trace.
+    @EnforcePermission("CONTROL_UI_TRACING")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.CONTROL_UI_TRACING)")
     void startImeTrace();
+
     // Stops an ime trace.
+    @EnforcePermission("CONTROL_UI_TRACING")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.CONTROL_UI_TRACING)")
     void stopImeTrace();
 
     /** Start Stylus handwriting session **/

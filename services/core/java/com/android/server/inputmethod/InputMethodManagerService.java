@@ -4549,6 +4549,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
+    @EnforcePermission(Manifest.permission.CONTROL_UI_TRACING)
     @Override
     public void startImeTrace() {
         ImeTracing.getInstance().startTrace(null /* printwriter */);
@@ -4564,6 +4565,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
+    @EnforcePermission(Manifest.permission.CONTROL_UI_TRACING)
     @Override
     public void stopImeTrace() {
         ImeTracing.getInstance().stopTrace(null /* printwriter */);
