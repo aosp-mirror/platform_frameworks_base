@@ -39,6 +39,8 @@ import com.android.systemui.keyguard.KeyguardIndication;
  * A view to show hints on Keyguard ("Swipe up to unlock", "Tap again to open").
  */
 public class KeyguardIndicationTextView extends TextView {
+    public static final long Y_IN_DURATION = 600L;
+
     @StyleRes
     private static int sStyleId = R.style.TextAppearance_Keyguard_BottomArea;
     @StyleRes
@@ -259,7 +261,7 @@ public class KeyguardIndicationTextView extends TextView {
 
     private long getYInDuration() {
         if (!mAnimationsEnabled) return 0L;
-        return 600L;
+        return Y_IN_DURATION;
     }
 
     private long getFadeOutDuration() {
