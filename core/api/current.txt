@@ -11219,9 +11219,9 @@ package android.content.pm {
     field public int requiresSmallestWidthDp;
     field public String[] sharedLibraryFiles;
     field public String sourceDir;
-    field public String[] splitNames;
-    field public String[] splitPublicSourceDirs;
-    field public String[] splitSourceDirs;
+    field @Nullable public String[] splitNames;
+    field @Nullable public String[] splitPublicSourceDirs;
+    field @Nullable public String[] splitSourceDirs;
     field public java.util.UUID storageUuid;
     field public int targetSdkVersion;
     field public String taskAffinity;

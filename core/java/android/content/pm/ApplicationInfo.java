@@ -941,21 +941,27 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
 
     /**
      * The names of all installed split APKs, ordered lexicographically.
+     * May be null if no splits are installed.
      */
+    @Nullable
     public String[] splitNames;
 
     /**
-     * Full paths to zero or more split APKs, indexed by the same order as {@link #splitNames}.
+     * Full paths to split APKs, indexed by the same order as {@link #splitNames}.
+     * May be null if no splits are installed.
      */
+    @Nullable
     public String[] splitSourceDirs;
 
     /**
      * Full path to the publicly available parts of {@link #splitSourceDirs},
      * including resources and manifest. This may be different from
      * {@link #splitSourceDirs} if an application is forward locked.
+     * May be null if no splits are installed.
      *
      * @see #splitSourceDirs
      */
+    @Nullable
     public String[] splitPublicSourceDirs;
 
     /**
