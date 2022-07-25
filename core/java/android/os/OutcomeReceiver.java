@@ -31,7 +31,7 @@ public interface OutcomeReceiver<R, E extends Throwable> {
      * Called when the asynchronous operation succeeds and delivers a result value.
      * @param result The value delivered by the asynchronous operation.
      */
-    void onResult(@NonNull R result);
+    void onResult(R result);
 
     /**
      * Called when the asynchronous operation fails. The mode of failure is indicated by the
