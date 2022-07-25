@@ -62,6 +62,7 @@ public class BatteryControllerTest {
     private static final int SOURCE_USER_ID = 0;
 
     private BatteryController mBatteryController;
+    private FlexibilityController mFlexibilityController;
     private BroadcastReceiver mPowerReceiver;
     private JobSchedulerService.Constants mConstants = new JobSchedulerService.Constants();
     private int mSourceUid;
@@ -99,7 +100,8 @@ public class BatteryControllerTest {
         // Capture the listeners.
         ArgumentCaptor<BroadcastReceiver> receiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
-        mBatteryController = new BatteryController(mJobSchedulerService);
+        mFlexibilityController = new FlexibilityController(mJobSchedulerService);
+        mBatteryController = new BatteryController(mJobSchedulerService, mFlexibilityController);
 
         verify(mContext).registerReceiver(receiverCaptor.capture(),
                 ArgumentMatchers.argThat(filter ->
@@ -208,6 +210,63 @@ public class BatteryControllerTest {
 
         trackJobs(job2);
         assertTrue(job2.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+    }
+
+    @Test
+    public void testFlexibilityController_BatteryNotLow() {
+        setBatteryNotLow(false);
+        assertFalse(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        setBatteryNotLow(true);
+        assertTrue(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        setBatteryNotLow(false);
+        assertFalse(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+    }
+
+    @Test
+    public void testFlexibilityController_Charging() {
+        setDischarging();
+        assertFalse(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+        setCharging();
+        assertTrue(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+        setDischarging();
+        assertFalse(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+    }
+
+    @Test
+    public void testFlexibilityController_Charging_BatterNotLow() {
+        setDischarging();
+        setBatteryNotLow(false);
+
+        assertFalse(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        assertFalse(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+
+        setCharging();
+
+        assertFalse(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        assertTrue(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+
+        setBatteryNotLow(true);
+
+        assertTrue(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        assertTrue(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+
+        setDischarging();
+
+        assertTrue(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        assertFalse(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
+
+        setBatteryNotLow(false);
+
+        assertFalse(
+                mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW));
+        assertFalse(mFlexibilityController.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
     }
 
     @Test

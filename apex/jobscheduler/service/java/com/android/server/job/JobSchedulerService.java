@@ -102,6 +102,7 @@ import com.android.server.job.controllers.ComponentController;
 import com.android.server.job.controllers.ConnectivityController;
 import com.android.server.job.controllers.ContentObserverController;
 import com.android.server.job.controllers.DeviceIdleJobsController;
+import com.android.server.job.controllers.FlexibilityController;
 import com.android.server.job.controllers.IdleController;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.PrefetchController;
@@ -1555,12 +1556,16 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         // Create the controllers.
         mControllers = new ArrayList<StateController>();
-        final ConnectivityController connectivityController = new ConnectivityController(this);
+        final FlexibilityController flexibilityController = new FlexibilityController(this);
+        mControllers.add(flexibilityController);
+        final ConnectivityController connectivityController =
+                new ConnectivityController(this, flexibilityController);
         mControllers.add(connectivityController);
         mControllers.add(new TimeController(this));
-        final IdleController idleController = new IdleController(this);
+        final IdleController idleController = new IdleController(this, flexibilityController);
         mControllers.add(idleController);
-        final BatteryController batteryController = new BatteryController(this);
+        final BatteryController batteryController =
+                new BatteryController(this, flexibilityController);
         mControllers.add(batteryController);
         mStorageController = new StorageController(this);
         mControllers.add(mStorageController);
