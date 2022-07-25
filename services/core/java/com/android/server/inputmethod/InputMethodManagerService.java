@@ -2208,15 +2208,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             boolean allowsImplicitlySelectedSubtypes) {
         final int callingUserId = UserHandle.getCallingUserId();
         synchronized (ImfLock.class) {
-            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(callingUserId,
-                    mSettings.getCurrentUserId(), null);
-            if (resolvedUserIds.length != 1) {
-                return Collections.emptyList();
-            }
             final long ident = Binder.clearCallingIdentity();
             try {
                 return getEnabledInputMethodSubtypeListLocked(imiId,
-                        allowsImplicitlySelectedSubtypes, resolvedUserIds[0]);
+                        allowsImplicitlySelectedSubtypes, callingUserId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
