@@ -283,12 +283,6 @@ open class QuickSwitchBetweenTwoAppsForwardTest(
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
     @FlakyTest(bugId = 239148258)
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
