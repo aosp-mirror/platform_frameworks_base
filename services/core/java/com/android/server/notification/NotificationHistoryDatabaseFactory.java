@@ -35,6 +35,6 @@ public class NotificationHistoryDatabaseFactory {
         if(sTestingNotificationHistoryDb != null) {
             return sTestingNotificationHistoryDb;
         }
-        return new NotificationHistoryDatabase(context, handler, rootDir);
+        return new NotificationHistoryDatabase(handler, rootDir);
     }
 }
