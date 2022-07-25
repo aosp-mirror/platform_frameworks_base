@@ -40,9 +40,11 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.os.IBinder;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -165,18 +167,43 @@ class ScreenRotationAnimation {
         final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
 
         try {
-            SurfaceControl.LayerCaptureArgs.Builder builder =
-                    new SurfaceControl.LayerCaptureArgs.Builder(displayContent.getSurfaceControl())
-                            .setCaptureSecureLayers(true)
-                            .setAllowProtected(true)
-                            .setSourceCrop(new Rect(0, 0, width, height));
-
+            final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer;
             if (isSizeChanged) {
+                final DisplayAddress address = displayInfo.address;
+                if (!(address instanceof DisplayAddress.Physical)) {
+                    Slog.e(TAG, "Display does not have a physical address: " + displayId);
+                    return;
+                }
+                final DisplayAddress.Physical physicalAddress =
+                        (DisplayAddress.Physical) address;
+                final IBinder displayToken = SurfaceControl.getPhysicalDisplayToken(
+                        physicalAddress.getPhysicalDisplayId());
+                if (displayToken == null) {
+                    Slog.e(TAG, "Display token is null.");
+                    return;
+                }
+                // Temporarily not skip screenshot for the rounded corner overlays and screenshot
+                // the whole display to include the rounded corner overlays.
+                setSkipScreenshotForRoundedCornerOverlays(false, t);
                 mRoundedCornerOverlay = displayContent.findRoundedCornerOverlays();
+                final SurfaceControl.DisplayCaptureArgs captureArgs =
+                        new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
+                                .setSourceCrop(new Rect(0, 0, width, height))
+                                .setAllowProtected(true)
+                                .setCaptureSecureLayers(true)
+                                .build();
+                screenshotBuffer = SurfaceControl.captureDisplay(captureArgs);
+            } else {
+                SurfaceControl.LayerCaptureArgs captureArgs =
+                        new SurfaceControl.LayerCaptureArgs.Builder(
+                                displayContent.getSurfaceControl())
+                                .setCaptureSecureLayers(true)
+                                .setAllowProtected(true)
+                                .setSourceCrop(new Rect(0, 0, width, height))
+                                .build();
+                screenshotBuffer = SurfaceControl.captureLayers(captureArgs);
             }
 
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                    SurfaceControl.captureLayers(builder.build());
             if (screenshotBuffer == null) {
                 Slog.w(TAG, "Unable to take screenshot of display " + displayId);
                 return;
@@ -273,6 +300,21 @@ class ScreenRotationAnimation {
             setRotationTransform(t, mSnapshotInitialMatrix);
         }
         t.apply();
+    }
+
+    void setSkipScreenshotForRoundedCornerOverlays(
+            boolean skipScreenshot, SurfaceControl.Transaction t) {
+        mDisplayContent.forAllWindows(w -> {
+            if (!w.mToken.mRoundedCornerOverlay || !w.isVisible() || !w.mWinAnimator.hasSurface()) {
+                return;
+            }
+            t.setSkipScreenshot(w.mWinAnimator.mSurfaceController.mSurfaceControl, skipScreenshot);
+        }, false);
+        if (!skipScreenshot) {
+            // Use sync apply to apply the change immediately, so that the next
+            // SC.captureDisplay can capture the screen decor layers.
+            t.apply(true /* sync */);
+        }
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
@@ -483,10 +525,15 @@ class ScreenRotationAnimation {
                 }
                 mBackColorSurface = null;
             }
+
             if (mRoundedCornerOverlay != null) {
-                for (SurfaceControl sc : mRoundedCornerOverlay) {
-                    if (sc.isValid()) {
-                        t.show(sc);
+                if (mDisplayContent.getRotationAnimation() == null
+                        || mDisplayContent.getRotationAnimation() == this) {
+                    setSkipScreenshotForRoundedCornerOverlays(true, t);
+                    for (SurfaceControl sc : mRoundedCornerOverlay) {
+                        if (sc.isValid()) {
+                            t.show(sc);
+                        }
                     }
                 }
                 mRoundedCornerOverlay = null;
