@@ -156,10 +156,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     int FINISH_LAYOUT_REDO_ANIM = 0x0008;
     /** Layer for the screen off animation */
     int COLOR_FADE_LAYER = 0x40000001;
-    /** Layer for Input overlays for capturing inputs for gesture detection, etc. */
-    int INPUT_DISPLAY_OVERLAY_LAYER = 0x7f000000;
-    /** Layer for Screen Decoration: The top most visible layer just below input overlay layers */
-    int SCREEN_DECOR_DISPLAY_OVERLAY_LAYER = INPUT_DISPLAY_OVERLAY_LAYER - 1;
 
     /**
      * Register shortcuts for window manager to dispatch.
