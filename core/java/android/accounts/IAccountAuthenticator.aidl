@@ -28,6 +28,7 @@ oneway interface IAccountAuthenticator {
     /**
      * prompts the user for account information and adds the result to the IAccountManager
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     @UnsupportedAppUsage
     void addAccount(in IAccountAuthenticatorResponse response, String accountType,
         String authTokenType, in String[] requiredFeatures, in Bundle options);
@@ -35,6 +36,7 @@ oneway interface IAccountAuthenticator {
     /**
      * prompts the user for the credentials of the account
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     @UnsupportedAppUsage
     void confirmCredentials(in IAccountAuthenticatorResponse response, in Account account,
         in Bundle options);
@@ -42,6 +44,7 @@ oneway interface IAccountAuthenticator {
     /**
      * gets the password by either prompting the user or querying the IAccountManager
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     @UnsupportedAppUsage
     void getAuthToken(in IAccountAuthenticatorResponse response, in Account account,
         String authTokenType, in Bundle options);
@@ -49,12 +52,14 @@ oneway interface IAccountAuthenticator {
     /**
      * Gets the user-visible label of the given authtoken type.
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     @UnsupportedAppUsage
     void getAuthTokenLabel(in IAccountAuthenticatorResponse response, String authTokenType);
 
     /**
      * prompts the user for a new password and writes it to the IAccountManager
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     @UnsupportedAppUsage
     void updateCredentials(in IAccountAuthenticatorResponse response, in Account account,
         String authTokenType, in Bundle options);
@@ -101,12 +106,14 @@ oneway interface IAccountAuthenticator {
      * Starts the add account session by prompting the user for account information
      * and return a Bundle containing data to finish the session later.
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     void startAddAccountSession(in IAccountAuthenticatorResponse response, String accountType,
         String authTokenType, in String[] requiredFeatures, in Bundle options);
 
     /**
      * Prompts the user for a new password but does not write it to the IAccountManager.
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     void startUpdateCredentialsSession(in IAccountAuthenticatorResponse response, in Account account,
         String authTokenType, in Bundle options);
 
@@ -115,6 +122,7 @@ oneway interface IAccountAuthenticator {
      * startUpdateCredentialsSession(...) by adding account to or updating local credentials
      * in the IAccountManager.
      */
+    @EnforcePermission("ACCOUNT_MANAGER")
     void finishSession(in IAccountAuthenticatorResponse response, String accountType,
         in Bundle sessionBundle);
 
