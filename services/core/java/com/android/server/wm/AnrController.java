@@ -135,8 +135,10 @@ class AnrController {
      * Notify a window owned by the provided pid was unresponsive.
      */
     private void notifyWindowUnresponsive(int pid, String reason) {
-        Slog.i(TAG_WM, "ANR in input window owned by pid=" + pid + ". Reason: " + reason);
-        dumpAnrStateLocked(null /* activity */, null /* windowState */, reason);
+        synchronized (mService.mGlobalLock) {
+            Slog.i(TAG_WM, "ANR in input window owned by pid=" + pid + ". Reason: " + reason);
+            dumpAnrStateLocked(null /* activity */, null /* windowState */, reason);
+        }
 
         // We cannot determine the z-order of the window, so place the anr dialog as high
         // as possible.
