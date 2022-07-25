@@ -62,7 +62,7 @@ class AppAdapter(
             backgroundExecutor.execute {
                 val collator = Collator.getInstance(resources.configuration.locales[0])
                 val localeComparator = compareBy<ControlsServiceInfo, CharSequence>(collator) {
-                    it.loadLabel()
+                    it.loadLabel() ?: ""
                 }
                 listOfServices = serviceInfos.sortedWith(localeComparator)
                 uiExecutor.execute(::notifyDataSetChanged)
