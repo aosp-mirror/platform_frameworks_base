@@ -65,7 +65,7 @@ private fun MainContent() {
  */
 @Composable
 fun GalleryApp(
-    isDarkTheme: Boolean,
+    theme: Theme,
     onChangeTheme: () -> Unit,
 ) {
     val systemFontScale = LocalDensity.current.fontScale
@@ -100,14 +100,14 @@ fun GalleryApp(
         LocalDensity provides density,
         LocalLayoutDirection provides layoutDirection,
     ) {
-        SystemUITheme(isDarkTheme) {
+        SystemUITheme {
             Surface(
                 Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background,
             ) {
                 Column(Modifier.fillMaxSize().systemBarsPadding().padding(16.dp)) {
                     ConfigurationControls(
-                        isDarkTheme,
+                        theme,
                         fontScale,
                         layoutDirection,
                         onChangeTheme,

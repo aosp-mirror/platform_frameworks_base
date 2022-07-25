@@ -37,7 +37,7 @@ val LocalAndroidColorScheme =
  * Important: Use M3 colors from MaterialTheme.colorScheme whenever possible instead. In the future,
  * most of the colors in this class will be removed in favor of their M3 counterpart.
  */
-class AndroidColorScheme internal constructor(private val context: Context) {
+class AndroidColorScheme internal constructor(context: Context) {
     val colorPrimary = getColor(context, R.attr.colorPrimary)
     val colorPrimaryDark = getColor(context, R.attr.colorPrimaryDark)
     val colorAccent = getColor(context, R.attr.colorAccent)
