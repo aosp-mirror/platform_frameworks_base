@@ -1207,7 +1207,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         private int mImeBackDisposition = 0;
         private boolean mShowImeSwitcher = false;
         private IBinder mImeToken = null;
-        private LetterboxDetails[] mLetterboxDetails;
+        private LetterboxDetails[] mLetterboxDetails = new LetterboxDetails[0];
 
         private void setBarAttributes(@Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
