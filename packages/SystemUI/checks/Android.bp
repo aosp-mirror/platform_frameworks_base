@@ -37,6 +37,12 @@ java_library_host {
 
 java_test_host {
     name: "SystemUILintCheckerTest",
+    // TODO(b/239881504): Since this test was written, Android
+    // Lint was updated, and now includes classes that were
+    // compiled for java 15. The soong build doesn't support
+    // java 15 yet, so we can't compile against "lint". Disable
+    // the test until java 15 is supported.
+    enabled: false,
     srcs: [
         "tests/**/*.kt",
         "tests/**/*.java",
