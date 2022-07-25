@@ -35,6 +35,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
@@ -97,9 +98,10 @@ public class AppOpsUpgradeTest {
         final int defaultModeOp2 = AppOpsManager.opToDefaultMode(op2);
         for(int i = 0; i < uidStates.size(); i++) {
             final AppOpsService.UidState uidState = uidStates.valueAt(i);
-            if (uidState.opModes != null) {
-                final int uidMode1 = uidState.opModes.get(op1, defaultModeOp1);
-                final int uidMode2 = uidState.opModes.get(op2, defaultModeOp2);
+            SparseIntArray opModes = uidState.getNonDefaultUidModes();
+            if (opModes != null) {
+                final int uidMode1 = opModes.get(op1, defaultModeOp1);
+                final int uidMode2 = opModes.get(op2, defaultModeOp2);
                 assertEquals(uidMode1, uidMode2);
                 if (uidMode1 != defaultModeOp1) {
                     numberOfNonDefaultOps++;
