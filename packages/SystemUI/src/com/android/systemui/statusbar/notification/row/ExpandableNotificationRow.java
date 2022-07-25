@@ -1909,6 +1909,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * @param isEnabled whether the content views should be enabled for accessibility
      */
     private void updateContentAccessibilityImportanceForGuts(boolean isEnabled) {
+        updateAccessibilityImportance(isEnabled);
+
         if (mChildrenContainer != null) {
             updateChildAccessibilityImportance(mChildrenContainer, isEnabled);
         }
@@ -1921,6 +1923,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (isEnabled) {
             this.requestAccessibilityFocus();
         }
+    }
+
+    /**
+     * Updates whether this view is important for accessibility based on {@code isEnabled}.
+     */
+    private void updateAccessibilityImportance(boolean isEnabled) {
+        setImportantForAccessibility(isEnabled
+                ? View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                : View.IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
     /**
