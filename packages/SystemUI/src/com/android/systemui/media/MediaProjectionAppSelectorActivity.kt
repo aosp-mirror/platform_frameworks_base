@@ -22,6 +22,7 @@ import android.media.projection.MediaProjectionManager.EXTRA_MEDIA_PROJECTION
 import android.os.Binder
 import android.os.Bundle
 import android.os.IBinder
+import android.os.ResultReceiver
 import android.view.View
 import com.android.internal.app.ChooserActivity
 import com.android.internal.app.chooser.NotSelectableTargetInfo
@@ -103,17 +104,42 @@ class MediaProjectionAppSelectorActivity @Inject constructor(
     }
 
     private fun onTargetActivityLaunched(launchToken: IBinder) {
-        val mediaProjectionBinder = intent.getIBinderExtra(EXTRA_MEDIA_PROJECTION)
-        val projection = IMediaProjection.Stub.asInterface(mediaProjectionBinder)
+        if (intent.hasExtra(EXTRA_CAPTURE_REGION_RESULT_RECEIVER)) {
+            // The client requested to return the result in the result receiver instead of
+            // activity result, let's send the media projection to the result receiver
+            val resultReceiver = intent
+                .getParcelableExtra(EXTRA_CAPTURE_REGION_RESULT_RECEIVER,
+                    ResultReceiver::class.java) as ResultReceiver
+            val captureRegion = MediaProjectionCaptureTarget(launchToken)
+            val data = Bundle().apply {
+                putParcelable(KEY_CAPTURE_TARGET, captureRegion)
+            }
+            resultReceiver.send(RESULT_OK, data)
+        } else {
+            // Return the media projection instance as activity result
+            val mediaProjectionBinder = intent.getIBinderExtra(EXTRA_MEDIA_PROJECTION)
+            val projection = IMediaProjection.Stub.asInterface(mediaProjectionBinder)
 
-        projection.launchCookie = launchToken
+            projection.launchCookie = launchToken
 
-        val intent = Intent()
-        intent.putExtra(EXTRA_MEDIA_PROJECTION, projection.asBinder())
-        setResult(RESULT_OK, intent)
-        setForceSendResultForMediaProjection()
+            val intent = Intent()
+            intent.putExtra(EXTRA_MEDIA_PROJECTION, projection.asBinder())
+            setResult(RESULT_OK, intent)
+            setForceSendResultForMediaProjection()
+        }
+
         finish()
     }
 
     override fun shouldGetOnlyDefaultActivities() = false
+
+    companion object {
+        /**
+         * When EXTRA_CAPTURE_REGION_RESULT_RECEIVER is passed as intent extra
+         * the activity will send the [CaptureRegion] to the result receiver
+         * instead of returning media projection instance through activity result.
+         */
+        const val EXTRA_CAPTURE_REGION_RESULT_RECEIVER = "capture_region_result_receiver"
+        const val KEY_CAPTURE_TARGET = "capture_region"
+    }
 }
