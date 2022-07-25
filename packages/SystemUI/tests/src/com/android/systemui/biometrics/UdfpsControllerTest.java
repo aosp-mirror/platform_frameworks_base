@@ -414,37 +414,43 @@ public class UdfpsControllerTest extends SysuiTestCase {
         final UdfpsOverlayParams oldParams = new UdfpsOverlayParams(sensorBounds[0],
                 displayWidth[0], displayHeight[0], scaleFactor[0], rotation[0]);
 
-        for (int i1 = 0; i1 <= 1; ++i1)
-        for (int i2 = 0; i2 <= 1; ++i2)
-        for (int i3 = 0; i3 <= 1; ++i3)
-        for (int i4 = 0; i4 <= 1; ++i4)
-        for (int i5 = 0; i5 <= 1; ++i5) {
-            final UdfpsOverlayParams newParams = new UdfpsOverlayParams(sensorBounds[i1],
-                    displayWidth[i2], displayHeight[i3], scaleFactor[i4], rotation[i5]);
+        for (int i1 = 0; i1 <= 1; ++i1) {
+            for (int i2 = 0; i2 <= 1; ++i2) {
+                for (int i3 = 0; i3 <= 1; ++i3) {
+                    for (int i4 = 0; i4 <= 1; ++i4) {
+                        for (int i5 = 0; i5 <= 1; ++i5) {
+                            final UdfpsOverlayParams newParams = new UdfpsOverlayParams(
+                                    sensorBounds[i1], displayWidth[i2], displayHeight[i3],
+                                    scaleFactor[i4], rotation[i5]);
 
-            if (newParams.equals(oldParams)) {
-                continue;
+                            if (newParams.equals(oldParams)) {
+                                continue;
+                            }
+
+                            // Initialize the overlay with old parameters.
+                            mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID, oldParams);
+
+                            // Show the overlay.
+                            reset(mWindowManager);
+                            mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID,
+                                    TEST_UDFPS_SENSOR_ID,
+                                    BiometricOverlayConstants.REASON_ENROLL_ENROLLING,
+                                    mUdfpsOverlayControllerCallback);
+                            mFgExecutor.runAllReady();
+                            verify(mWindowManager).addView(any(), any());
+
+                            // Update overlay parameters.
+                            reset(mWindowManager);
+                            mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID, newParams);
+                            mFgExecutor.runAllReady();
+
+                            // Ensure the overlay was recreated.
+                            verify(mWindowManager).removeView(any());
+                            verify(mWindowManager).addView(any(), any());
+                        }
+                    }
+                }
             }
-
-            // Initialize the overlay with old parameters.
-            mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID, oldParams);
-
-            // Show the overlay.
-            reset(mWindowManager);
-            mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
-                    BiometricOverlayConstants.REASON_ENROLL_ENROLLING,
-                    mUdfpsOverlayControllerCallback);
-            mFgExecutor.runAllReady();
-            verify(mWindowManager).addView(any(), any());
-
-            // Update overlay parameters.
-            reset(mWindowManager);
-            mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID, newParams);
-            mFgExecutor.runAllReady();
-
-            // Ensure the overlay was recreated.
-            verify(mWindowManager).removeView(any());
-            verify(mWindowManager).addView(any(), any());
         }
     }
 
