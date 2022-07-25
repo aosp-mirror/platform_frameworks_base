@@ -1514,7 +1514,8 @@ public final class InputMethodManager {
             boolean allowsImplicitlySelectedSubtypes) {
         return mServiceInvoker.getEnabledInputMethodSubtypeList(
                 imi == null ? null : imi.getId(),
-                allowsImplicitlySelectedSubtypes);
+                allowsImplicitlySelectedSubtypes,
+                UserHandle.myUserId());
     }
 
     /**
@@ -3320,7 +3321,8 @@ public final class InputMethodManager {
             return false;
         }
         final List<InputMethodSubtype> enabledSubtypes =
-                mServiceInvoker.getEnabledInputMethodSubtypeList(imeId, true);
+                mServiceInvoker.getEnabledInputMethodSubtypeList(imeId, true,
+                        UserHandle.myUserId());
         final int numSubtypes = enabledSubtypes.size();
         for (int i = 0; i < numSubtypes; ++i) {
             final InputMethodSubtype enabledSubtype = enabledSubtypes.get(i);

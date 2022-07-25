@@ -2202,16 +2202,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * @param imiId if null, returns enabled subtypes for the current {@link InputMethodInfo}.
      * @param allowsImplicitlySelectedSubtypes {@code true} to return the implicitly selected
      *                                         subtypes.
+     * @param userId the user ID to be queried about.
      */
     @Override
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
-            boolean allowsImplicitlySelectedSubtypes) {
-        final int callingUserId = UserHandle.getCallingUserId();
+            boolean allowsImplicitlySelectedSubtypes, @UserIdInt int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
+
         synchronized (ImfLock.class) {
             final long ident = Binder.clearCallingIdentity();
             try {
                 return getEnabledInputMethodSubtypeListLocked(imiId,
-                        allowsImplicitlySelectedSubtypes, callingUserId);
+                        allowsImplicitlySelectedSubtypes, userId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
