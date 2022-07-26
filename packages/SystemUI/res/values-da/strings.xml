@@ -840,7 +840,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Der er valgt <xliff:g id="COUNT">%1$d</xliff:g> enhed"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(afbrudt)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Det var ikke muligt at skifte. Tryk for at prøve igen."</string>
-    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Par ny enhed"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Par en ny enhed"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Åbn appen for at caste denne session."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Ukendt app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stop med at caste"</string>
