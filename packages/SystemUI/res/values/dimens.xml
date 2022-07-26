@@ -857,7 +857,7 @@
     <!-- The maximum offset for the under-display fingerprint sensor (UDFPS) icon in either
          direction that elements are moved to prevent burn-in on AOD-->
     <dimen name="udfps_burn_in_offset_x">7px</dimen>
-    <dimen name="udfps_burn_in_offset_y">28px</dimen>
+    <dimen name="udfps_burn_in_offset_y">20px</dimen>
 
     <!-- The absolute side margins of quick settings -->
     <dimen name="quick_settings_bottom_margin_media">8dp</dimen>
