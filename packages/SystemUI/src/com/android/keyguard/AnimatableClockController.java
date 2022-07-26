@@ -32,6 +32,7 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.clocks.AnimatableClockView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 
@@ -134,6 +135,21 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
                 reset();
             }
         }
+
+        @Override
+        public void onTimeFormatChanged(String timeFormat) {
+            mView.refreshFormat();
+        }
+
+        @Override
+        public void onTimeZoneChanged(TimeZone timeZone) {
+            mView.onTimeZoneChanged(timeZone);
+        }
+
+        @Override
+        public void onUserSwitchComplete(int userId) {
+            mView.refreshFormat();
+        }
     };
 
     @Override
@@ -186,7 +202,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     /** Animate the clock appearance when a foldable device goes from fully-open/half-open state to
      * fully folded state and it goes to sleep (always on display screen) */
     public void animateFoldAppear() {
-        mView.animateFoldAppear();
+        mView.animateFoldAppear(true);
     }
 
     /**
@@ -194,20 +210,6 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
      */
     public void refreshTime() {
         mView.refreshTime();
-    }
-
-    /**
-     * Updates the timezone for the view.
-     */
-    public void onTimeZoneChanged(TimeZone timeZone) {
-        mView.onTimeZoneChanged(timeZone);
-    }
-
-    /**
-     * Trigger a time format update
-     */
-    public void refreshFormat() {
-        mView.refreshFormat();
     }
 
     /**

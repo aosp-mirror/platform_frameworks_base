@@ -843,14 +843,20 @@ public class ScreenshotController {
         // The media player creation is slow and needs on the background thread.
         return CallbackToFutureAdapter.getFuture((completer) -> {
             mBgExecutor.execute(() -> {
-                MediaPlayer player = MediaPlayer.create(mContext,
-                        Uri.fromFile(new File(mContext.getResources().getString(
-                                com.android.internal.R.string.config_cameraShutterSound))), null,
-                        new AudioAttributes.Builder()
-                                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                                .build(), AudioSystem.newAudioSessionId());
-                completer.set(player);
+                try {
+                    MediaPlayer player = MediaPlayer.create(mContext,
+                            Uri.fromFile(new File(mContext.getResources().getString(
+                                    com.android.internal.R.string.config_cameraShutterSound))),
+                            null,
+                            new AudioAttributes.Builder()
+                                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                    .build(), AudioSystem.newAudioSessionId());
+                    completer.set(player);
+                } catch (IllegalStateException e) {
+                    Log.w(TAG, "Screenshot sound initialization failed", e);
+                    completer.set(null);
+                }
             });
             return "ScreenshotController#loadCameraSound";
         });

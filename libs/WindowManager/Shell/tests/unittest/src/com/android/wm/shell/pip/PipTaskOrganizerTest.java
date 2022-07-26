@@ -42,6 +42,7 @@ import android.testing.TestableLooper;
 import android.util.Rational;
 import android.util.Size;
 import android.view.DisplayInfo;
+import android.view.SurfaceControl;
 import android.window.WindowContainerToken;
 
 import com.android.wm.shell.MockSurfaceControlHelper;
@@ -150,7 +151,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         final Rational aspectRatio = new Rational(2, 1);
 
         mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
-                createPipParams(aspectRatio)), null /* leash */);
+                createPipParams(aspectRatio)), mock(SurfaceControl.class));
 
         assertEquals(aspectRatio.floatValue(), mPipBoundsState.getAspectRatio(), 0.01f);
     }
@@ -158,7 +159,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     @Test
     public void onTaskAppeared_updatesLastPipComponentName() {
         mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1, createPipParams(null)),
-                null /* leash */);
+                mock(SurfaceControl.class));
 
         assertEquals(mComponent1, mPipBoundsState.getLastPipComponentName());
     }
@@ -169,7 +170,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
 
         mSpiedPipTaskOrganizer.onTaskAppeared(
                 createTaskInfo(mComponent1, createPipParams(null), minSize),
-                null /* leash */);
+                mock(SurfaceControl.class));
 
         assertEquals(minSize, mPipBoundsState.getOverrideMinSize());
     }
@@ -179,7 +180,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         final Rational startAspectRatio = new Rational(2, 1);
         final Rational newAspectRatio = new Rational(1, 2);
         mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
-                createPipParams(startAspectRatio)), null /* leash */);
+                createPipParams(startAspectRatio)), mock(SurfaceControl.class));
 
         // It is in entering transition, should defer onTaskInfoChanged callback in this case.
         mSpiedPipTaskOrganizer.onTaskInfoChanged(createTaskInfo(mComponent1,
@@ -197,7 +198,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         final Rational startAspectRatio = new Rational(2, 1);
         final Rational newAspectRatio = new Rational(1, 2);
         mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
-                createPipParams(startAspectRatio)), null /* leash */);
+                createPipParams(startAspectRatio)), mock(SurfaceControl.class));
         mSpiedPipTaskOrganizer.sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
 
         mSpiedPipTaskOrganizer.onTaskInfoChanged(createTaskInfo(mComponent1,
@@ -210,7 +211,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     @Test
     public void onTaskInfoChanged_inPip_updatesLastPipComponentName() {
         mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
-                createPipParams(null)), null /* leash */);
+                createPipParams(null)), mock(SurfaceControl.class));
         mSpiedPipTaskOrganizer.sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
 
         mSpiedPipTaskOrganizer.onTaskInfoChanged(createTaskInfo(mComponent2,
@@ -222,7 +223,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     @Test
     public void onTaskInfoChanged_inPip_updatesOverrideMinSize() {
         mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
-                createPipParams(null)), null /* leash */);
+                createPipParams(null)), mock(SurfaceControl.class));
         mSpiedPipTaskOrganizer.sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
 
         final Size minSize = new Size(400, 320);
@@ -235,7 +236,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     @Test
     public void onTaskVanished_clearsPipBounds() {
         mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
-                createPipParams(null)), null /* leash */);
+                createPipParams(null)), mock(SurfaceControl.class));
         mPipBoundsState.setBounds(new Rect(100, 100, 200, 150));
 
         mSpiedPipTaskOrganizer.onTaskVanished(createTaskInfo(mComponent1, createPipParams(null)));

@@ -53,10 +53,12 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
+import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
+import com.android.systemui.statusbar.phone.SystemBarAttributesListener;
 import com.android.systemui.statusbar.phone.TapAgainView;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
@@ -257,6 +259,11 @@ public abstract class StatusBarViewModule {
     abstract OnStatusBarViewInitializedListener statusBarInitializedListener(
             LetterboxAppearanceCalculator letterboxAppearanceCalculator
     );
+
+    @Binds
+    @IntoSet
+    abstract StatusBarBoundsProvider.BoundsChangeListener sysBarAttrsListenerAsBoundsListener(
+            SystemBarAttributesListener systemBarAttributesListener);
 
     /**
      * Creates a new {@link CollapsedStatusBarFragment}.

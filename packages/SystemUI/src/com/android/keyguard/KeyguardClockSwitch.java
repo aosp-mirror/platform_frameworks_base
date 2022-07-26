@@ -22,6 +22,7 @@ import com.android.keyguard.dagger.KeyguardStatusViewScope;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.ClockPlugin;
+import com.android.systemui.shared.clocks.AnimatableClockView;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
