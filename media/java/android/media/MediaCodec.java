@@ -2282,6 +2282,10 @@ final public class MediaCodec {
      */
     public final void start() {
         native_start();
+        synchronized(mBufferLock) {
+            cacheBuffers(true /* input */);
+            cacheBuffers(false /* input */);
+        }
     }
     private native final void native_start();
 
@@ -3913,9 +3917,6 @@ final public class MediaCodec {
                         + "objects and attach to QueueRequest objects.");
             }
             if (mCachedInputBuffers == null) {
-                cacheBuffers(true /* input */);
-            }
-            if (mCachedInputBuffers == null) {
                 throw new IllegalStateException();
             }
             // FIXME: check codec status
@@ -3952,9 +3953,6 @@ final public class MediaCodec {
                 throw new IncompatibleWithBlockModelException("getOutputBuffers() "
                         + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
                         + "Please use getOutputFrame to get output frames.");
-            }
-            if (mCachedOutputBuffers == null) {
-                cacheBuffers(false /* input */);
             }
             if (mCachedOutputBuffers == null) {
                 throw new IllegalStateException();
