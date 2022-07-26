@@ -71,6 +71,8 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogLevel;
 import com.android.systemui.log.dagger.StatusBarNetworkControllerLog;
@@ -132,8 +134,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final DemoModeController mDemoModeController;
     private final Object mLock = new Object();
+    private final boolean mProviderModelBehavior;
     private Config mConfig;
     private final CarrierConfigTracker mCarrierConfigTracker;
+    private final FeatureFlags mFeatureFlags;
     private final DumpManager mDumpManager;
     private final LogBuffer mLogBuffer;
     private final MobileSignalControllerFactory mMobileFactory;
@@ -235,6 +239,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             MobileSignalControllerFactory mobileFactory,
             @Main Handler handler,
             InternetDialogFactory internetDialogFactory,
+            FeatureFlags featureFlags,
             DumpManager dumpManager,
             @StatusBarNetworkControllerLog LogBuffer logBuffer) {
         this(context, connectivityManager,
@@ -256,6 +261,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 trackerFactory,
                 mobileFactory,
                 handler,
+                featureFlags,
                 dumpManager,
                 logBuffer);
         mReceiverHandler.post(mRegisterListeners);
@@ -282,6 +288,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             WifiStatusTrackerFactory trackerFactory,
             MobileSignalControllerFactory mobileFactory,
             @Main Handler handler,
+            FeatureFlags featureFlags,
             DumpManager dumpManager,
             LogBuffer logBuffer
     ) {
@@ -303,6 +310,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mHasMobileDataFeature = telephonyManager.isDataCapable();
         mDemoModeController = demoModeController;
         mCarrierConfigTracker = carrierConfigTracker;
+        mFeatureFlags = featureFlags;
         mDumpManager = dumpManager;
         mLogBuffer = logBuffer;
 
@@ -454,6 +462,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         };
 
         mDemoModeController.addCallback(this);
+        mProviderModelBehavior = mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS);
 
         mDumpManager.registerDumpable(TAG, this);
     }
@@ -656,6 +665,20 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return controller != null ? controller.getNetworkNameForCarrierWiFi() : "";
     }
 
+    void notifyWifiLevelChange(int level) {
+        for (int i = 0; i < mMobileSignalControllers.size(); i++) {
+            MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
+            mobileSignalController.notifyWifiLevelChange(level);
+        }
+    }
+
+    void notifyDefaultMobileLevelChange(int level) {
+        for (int i = 0; i < mMobileSignalControllers.size(); i++) {
+            MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
+            mobileSignalController.notifyDefaultMobileLevelChange(level);
+        }
+    }
+
     private void notifyControllersMobileDataChanged() {
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
             MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
@@ -728,6 +751,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
             MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
             mobileSignalController.notifyListeners(cb);
+            if (mProviderModelBehavior) {
+                mobileSignalController.refreshCallIndicator(cb);
+            }
         }
         mCallbackHandler.setListening(cb, true);
     }
@@ -842,6 +868,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
             MobileSignalController controller = mMobileSignalControllers.valueAt(i);
             controller.setConfiguration(mConfig);
+            if (mProviderModelBehavior) {
+                controller.refreshCallIndicator(mCallbackHandler);
+            }
         }
         refreshLocale();
     }
@@ -1120,11 +1149,24 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 || mValidatedTransports.get(NetworkCapabilities.TRANSPORT_ETHERNET);
 
         pushConnectivityToSignals();
-        mNoDefaultNetwork = !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_CELLULAR)
-                && !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_WIFI)
-                && !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_ETHERNET);
-        mCallbackHandler.setConnectivityStatus(mNoDefaultNetwork, !mInetCondition,
-                mNoNetworksAvailable);
+        if (mProviderModelBehavior) {
+            mNoDefaultNetwork = !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    && !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_WIFI)
+                    && !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_ETHERNET);
+            mCallbackHandler.setConnectivityStatus(mNoDefaultNetwork, !mInetCondition,
+                    mNoNetworksAvailable);
+            for (int i = 0; i < mMobileSignalControllers.size(); i++) {
+                MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
+                mobileSignalController.updateNoCallingState();
+            }
+            notifyAllListeners();
+        } else {
+            mNoDefaultNetwork = !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    && !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_WIFI)
+                    && !mConnectedTransports.get(NetworkCapabilities.TRANSPORT_ETHERNET);
+            mCallbackHandler.setConnectivityStatus(mNoDefaultNetwork, !mInetCondition,
+                    mNoNetworksAvailable);
+        }
     }
 
     /**
