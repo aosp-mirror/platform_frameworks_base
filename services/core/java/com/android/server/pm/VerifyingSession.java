@@ -353,28 +353,42 @@ final class VerifyingSession {
         }
         final int verifierUserId = verifierUser.getIdentifier();
 
-        String requiredVerifierPackage = mPm.mRequiredVerifierPackage;
-        boolean requiredVerifierPackageOverridden = false;
+        String[] requiredVerifierPackages = mPm.mRequiredVerifierPackages;
+        boolean requiredVerifierPackagesOverridden = false;
 
         // Allow verifier override for ADB installations which could already be unverified using
         // PackageManager.INSTALL_DISABLE_VERIFICATION flag.
         if ((mInstallFlags & PackageManager.INSTALL_FROM_ADB) != 0
                 && (mInstallFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) == 0) {
-            final String adbVerifierOverridePackage = SystemProperties.get(
-                    "debug.pm.adb_verifier_override_package", "");
-            // Check if the package installed.
-            if (!TextUtils.isEmpty(adbVerifierOverridePackage)
-                    && packageExists(adbVerifierOverridePackage)) {
-                // Pretend we requested to disable verification from command line.
-                boolean requestedDisableVerification = true;
-                // If this returns false then the caller can already skip verification, so we are
-                // not adding a new way to disable verifications.
-                if (!isAdbVerificationEnabled(pkgLite, verifierUserId,
-                        requestedDisableVerification)) {
-                    requiredVerifierPackage = adbVerifierOverridePackage;
-                    requiredVerifierPackageOverridden = true;
+            String property = SystemProperties.get("debug.pm.adb_verifier_override_packages", "");
+            if (!TextUtils.isEmpty(property)) {
+                String[] verifierPackages = property.split(";");
+                List<String> adbVerifierOverridePackages = new ArrayList<>();
+                for (String verifierPackage : verifierPackages) {
+                    if (!TextUtils.isEmpty(verifierPackage) && packageExists(verifierPackage)) {
+                        adbVerifierOverridePackages.add(verifierPackage);
+                    }
+                }
+                // Check if the package installed.
+                if (adbVerifierOverridePackages.size() > 0) {
+                    // Pretend we requested to disable verification from command line.
+                    boolean requestedDisableVerification = true;
+                    // If this returns false then the caller can already skip verification, so we
+                    // are not adding a new way to disable verifications.
+                    if (!isAdbVerificationEnabled(pkgLite, verifierUserId,
+                            requestedDisableVerification)) {
+                        requiredVerifierPackages = adbVerifierOverridePackages.toArray(
+                                new String[adbVerifierOverridePackages.size()]);
+                        requiredVerifierPackagesOverridden = true;
+                    }
                 }
             }
+        }
+
+        if (mOriginInfo.mExisting || !isVerificationEnabled(pkgLite, verifierUserId,
+                requiredVerifierPackages)) {
+            verificationState.passRequiredVerification();
+            return;
         }
 
         /*
@@ -382,16 +396,11 @@ final class VerifyingSession {
          * do, then we'll defer to them to verify the packages.
          */
         final Computer snapshot = mPm.snapshotComputer();
-        final int requiredUid = requiredVerifierPackage == null ? -1
-                : snapshot.getPackageUid(requiredVerifierPackage,
-                        MATCH_DEBUG_TRIAGED_MISSING, verifierUserId);
-        verificationState.setRequiredVerifierUid(requiredUid);
-        final boolean isVerificationEnabled = isVerificationEnabled(pkgLite,
-                verifierUserId);
 
-        if (mOriginInfo.mExisting || !isVerificationEnabled) {
-            verificationState.setVerifierResponse(requiredUid, PackageManager.VERIFICATION_ALLOW);
-            return;
+        for (String requiredVerifierPackage : requiredVerifierPackages) {
+            final int requiredUid = snapshot.getPackageUid(requiredVerifierPackage,
+                    MATCH_DEBUG_TRIAGED_MISSING, verifierUserId);
+            verificationState.addRequiredVerifierUid(requiredUid);
         }
 
         final Intent verification = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
@@ -428,11 +437,13 @@ final class VerifyingSession {
         final String baseCodePath = mPackageLite.getBaseApkPath();
         final String[] splitCodePaths = mPackageLite.getSplitApkPaths();
 
+        final String rootHashString;
         if (IncrementalManager.isIncrementalPath(baseCodePath)) {
-            final String rootHashString =
-                    PackageManagerServiceUtils.buildVerificationRootHashString(
-                            baseCodePath, splitCodePaths);
+            rootHashString = PackageManagerServiceUtils.buildVerificationRootHashString(
+                    baseCodePath, splitCodePaths);
             verification.putExtra(PackageManager.EXTRA_VERIFICATION_ROOT_HASH, rootHashString);
+        } else {
+            rootHashString = null;
         }
 
         verification.putExtra(PackageInstaller.EXTRA_DATA_LOADER_TYPE, mDataLoaderType);
@@ -503,8 +514,8 @@ final class VerifyingSession {
             }
         }
 
-        if (requiredVerifierPackage == null) {
-            Slog.e(TAG, "Required verifier is null");
+        if (requiredVerifierPackages.length == 0) {
+            Slog.e(TAG, "No required verifiers");
             return;
         }
 
@@ -514,47 +525,75 @@ final class VerifyingSession {
         } else {
             verificationCodeAtTimeout = PackageManager.VERIFICATION_REJECT;
         }
-        final PackageVerificationResponse response = new PackageVerificationResponse(
-                verificationCodeAtTimeout, requiredUid);
 
-        /*
-         * Send the intent to the required verification agent,
-         * but only start the verification timeout after the
-         * target BroadcastReceivers have run.
-         */
-        if (!requiredVerifierPackageOverridden) {
-            final ComponentName requiredVerifierComponent = matchComponentForVerifier(
-                    requiredVerifierPackage, receivers.getList());
-            verification.setComponent(requiredVerifierComponent);
-        } else {
-            verification.setPackage(requiredVerifierPackage);
-        }
-        idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
-                requiredVerifierPackage, verificationTimeout,
-                verifierUserId, false,
-                REASON_PACKAGE_VERIFIER, "package verifier");
+        for (String requiredVerifierPackage : requiredVerifierPackages) {
+            final int requiredUid = snapshot.getPackageUid(requiredVerifierPackage,
+                    MATCH_DEBUG_TRIAGED_MISSING, verifierUserId);
 
-        if (streaming) {
-            // For streaming installations, count verification timeout from the broadcast.
-            startVerificationTimeoutCountdown(verificationId, streaming, response,
-                    verificationTimeout);
-        }
+            final Intent requiredIntent;
+            final String receiverPermission;
+            if (!requiredVerifierPackagesOverridden || requiredVerifierPackages.length == 1) {
+                // Prod code OR test code+single verifier.
+                requiredIntent = new Intent(verification);
+                if (!requiredVerifierPackagesOverridden) {
+                    ComponentName requiredVerifierComponent = matchComponentForVerifier(
+                            requiredVerifierPackage, receivers.getList());
+                    requiredIntent.setComponent(requiredVerifierComponent);
+                } else {
+                    requiredIntent.setPackage(requiredVerifierPackage);
+                }
+                receiverPermission = android.Manifest.permission.PACKAGE_VERIFICATION_AGENT;
+            } else {
+                // Test code+multiple verifiers.
+                // Recreate the intent to contain test-only information.
+                requiredIntent = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
+                requiredIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                requiredIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                requiredIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                requiredIntent.setDataAndType(Uri.fromFile(new File(mOriginInfo.mResolvedPath)),
+                        PACKAGE_MIME_TYPE);
+                requiredIntent.putExtra(PackageInstaller.EXTRA_SESSION_ID, mSessionId);
+                requiredIntent.putExtra(PackageInstaller.EXTRA_DATA_LOADER_TYPE, mDataLoaderType);
+                if (rootHashString != null) {
+                    requiredIntent.putExtra(PackageManager.EXTRA_VERIFICATION_ROOT_HASH,
+                            rootHashString);
+                }
+                requiredIntent.setPackage(requiredVerifierPackage);
+                // Negative verification id.
+                requiredIntent.putExtra(PackageManager.EXTRA_VERIFICATION_ID, -verificationId);
+                // OK not to have permission.
+                receiverPermission = null;
+            }
 
-        mPm.mContext.sendOrderedBroadcastAsUser(verification, verifierUser,
-                android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
-                /* appOp= */ AppOpsManager.OP_NONE,
-                /* options= */ options.toBundle(),
-                new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        if (!streaming) {
-                            // For NON-streaming installations, count verification timeout from
-                            // the broadcast was processed by all receivers.
-                            startVerificationTimeoutCountdown(verificationId, streaming, response,
-                                    verificationTimeout);
+            idleController.addPowerSaveTempWhitelistApp(Process.myUid(), requiredVerifierPackage,
+                    verificationTimeout, verifierUserId, false, REASON_PACKAGE_VERIFIER,
+                    "package verifier");
+
+            final PackageVerificationResponse response = new PackageVerificationResponse(
+                    verificationCodeAtTimeout, requiredUid);
+
+            if (streaming) {
+                // For streaming installations, count verification timeout from the broadcast.
+                startVerificationTimeoutCountdown(verificationId, streaming, response,
+                        verificationTimeout);
+            }
+
+            // Send the intent to the required verification agent, but only start the
+            // verification timeout after the target BroadcastReceivers have run.
+            mPm.mContext.sendOrderedBroadcastAsUser(requiredIntent, verifierUser,
+                    receiverPermission, AppOpsManager.OP_NONE, options.toBundle(),
+                    new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            if (!streaming) {
+                                // For NON-streaming installations, count verification timeout from
+                                // the broadcast was processed by all receivers.
+                                startVerificationTimeoutCountdown(verificationId, streaming,
+                                        response, verificationTimeout);
+                            }
                         }
-                    }
-                }, null, 0, null, null);
+                    }, null, 0, null, null);
+        }
 
         Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
 
@@ -617,7 +656,8 @@ final class VerifyingSession {
      *
      * @return true if verification should be performed
      */
-    private boolean isVerificationEnabled(PackageInfoLite pkgInfoLite, int userId) {
+    private boolean isVerificationEnabled(PackageInfoLite pkgInfoLite, int userId,
+            String[] requiredVerifierPackages) {
         if (!DEFAULT_VERIFY_ENABLE) {
             return false;
         }
@@ -634,18 +674,21 @@ final class VerifyingSession {
 
         // only when not installed from ADB, skip verification for instant apps when
         // the installer and verifier are the same.
-        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
-            if (mPm.mInstantAppInstallerActivity != null
-                    && mPm.mInstantAppInstallerActivity.packageName.equals(
-                    mPm.mRequiredVerifierPackage)) {
-                try {
-                    mPm.mInjector.getSystemService(AppOpsManager.class)
-                            .checkPackage(installerUid, mPm.mRequiredVerifierPackage);
-                    if (DEBUG_VERIFY) {
-                        Slog.i(TAG, "disable verification for instant app");
+        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0
+                && mPm.mInstantAppInstallerActivity != null) {
+            String installerPackage = mPm.mInstantAppInstallerActivity.packageName;
+            for (String requiredVerifierPackage : requiredVerifierPackages) {
+                if (installerPackage.equals(requiredVerifierPackage)) {
+                    try {
+                        mPm.mInjector.getSystemService(AppOpsManager.class)
+                                .checkPackage(installerUid, requiredVerifierPackage);
+                        if (DEBUG_VERIFY) {
+                            Slog.i(TAG, "disable verification for instant app");
+                        }
+                        return false;
+                    } catch (SecurityException ignore) {
                     }
-                    return false;
-                } catch (SecurityException ignore) { }
+                }
             }
         }
         return true;

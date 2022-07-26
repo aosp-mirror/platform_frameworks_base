@@ -816,9 +816,10 @@ final class DeletePackageHelper {
         }
 
         // Allow package verifier to silently uninstall.
-        if (mPm.mRequiredVerifierPackage != null && callingUid == snapshot
-                .getPackageUid(mPm.mRequiredVerifierPackage, 0, callingUserId)) {
-            return true;
+        for (String verifierPackageName : mPm.mRequiredVerifierPackages) {
+            if (callingUid == snapshot.getPackageUid(verifierPackageName, 0, callingUserId)) {
+                return true;
+            }
         }
 
         // Allow package uninstaller to silently uninstall.

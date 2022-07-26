@@ -79,7 +79,7 @@ public final class KnownPackages {
     private final String mRequiredInstallerPackage;
     private final String mRequiredUninstallerPackage;
     private final String mSetupWizardPackage;
-    private final String mRequiredVerifierPackage;
+    private final String[] mRequiredVerifierPackages;
     private final String mDefaultTextClassifierPackage;
     private final String mSystemTextClassifierPackageName;
     private final String mRequiredPermissionControllerPackage;
@@ -94,7 +94,7 @@ public final class KnownPackages {
 
     KnownPackages(DefaultAppProvider defaultAppProvider, String requiredInstallerPackage,
             String requiredUninstallerPackage, String setupWizardPackage,
-            String requiredVerifierPackage, String defaultTextClassifierPackage,
+            String[] requiredVerifierPackages, String defaultTextClassifierPackage,
             String systemTextClassifierPackageName, String requiredPermissionControllerPackage,
             String configuratorPackage, String incidentReportApproverPackage,
             String ambientContextDetectionPackage, String appPredictionServicePackage,
@@ -104,7 +104,7 @@ public final class KnownPackages {
         mRequiredInstallerPackage = requiredInstallerPackage;
         mRequiredUninstallerPackage = requiredUninstallerPackage;
         mSetupWizardPackage = setupWizardPackage;
-        mRequiredVerifierPackage = requiredVerifierPackage;
+        mRequiredVerifierPackages = requiredVerifierPackages;
         mDefaultTextClassifierPackage = defaultTextClassifierPackage;
         mSystemTextClassifierPackageName = systemTextClassifierPackageName;
         mRequiredPermissionControllerPackage = requiredPermissionControllerPackage;
@@ -182,7 +182,7 @@ public final class KnownPackages {
             case PACKAGE_SYSTEM:
                 return new String[]{"android"};
             case PACKAGE_VERIFIER:
-                return snapshot.filterOnlySystemPackages(mRequiredVerifierPackage);
+                return snapshot.filterOnlySystemPackages(mRequiredVerifierPackages);
             case PACKAGE_SYSTEM_TEXT_CLASSIFIER:
                 return snapshot.filterOnlySystemPackages(
                         mDefaultTextClassifierPackage, mSystemTextClassifierPackageName);
