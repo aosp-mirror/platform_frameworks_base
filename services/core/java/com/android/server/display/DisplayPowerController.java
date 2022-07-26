@@ -67,6 +67,8 @@ import com.android.internal.util.RingBuffer;
 import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
+import com.android.server.display.brightness.BrightnessEvent;
+import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.color.ColorDisplayService.ReduceBrightColorsListener;
 import com.android.server.display.utils.SensorUtils;
@@ -76,7 +78,6 @@ import com.android.server.display.whitebalance.DisplayWhiteBalanceSettings;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
-import java.util.Objects;
 
 /**
  * Controls the power state of the display.
@@ -1430,7 +1431,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // we broadcast this change through setting.
         final float unthrottledBrightnessState = brightnessState;
         if (mBrightnessThrottler.isThrottled()) {
-            mTempBrightnessEvent.thermalMax = mBrightnessThrottler.getBrightnessCap();
+            mTempBrightnessEvent.setThermalMax(mBrightnessThrottler.getBrightnessCap());
             brightnessState = Math.min(brightnessState, mBrightnessThrottler.getBrightnessCap());
             mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_THROTTLED);
             if (!mAppliedThrottling) {
@@ -1551,8 +1552,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // TODO(b/216365040): The decision to prevent HBM for HDR in low power mode should be
             // done in HighBrightnessModeController.
             if (mHbmController.getHighBrightnessMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR
-                    && ((mBrightnessReason.modifier & BrightnessReason.MODIFIER_DIMMED) == 0
-                    || (mBrightnessReason.modifier & BrightnessReason.MODIFIER_LOW_POWER) == 0)) {
+                    && ((mBrightnessReason.getModifier() & BrightnessReason.MODIFIER_DIMMED) == 0
+                    || (mBrightnessReason.getModifier() & BrightnessReason.MODIFIER_LOW_POWER)
+                    == 0)) {
                 // We want to scale HDR brightness level with the SDR level
                 animateValue = mHbmController.getHdrBrightnessValue();
             }
@@ -1615,7 +1617,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     + mBrightnessReasonTemp.toString(brightnessAdjustmentFlags)
                     + "', previous reason: '" + mBrightnessReason + "'.");
             mBrightnessReason.set(mBrightnessReasonTemp);
-        } else if (mBrightnessReasonTemp.reason == BrightnessReason.REASON_MANUAL
+        } else if (mBrightnessReasonTemp.getReason() == BrightnessReason.REASON_MANUAL
                 && userSetBrightnessChanged) {
             Slog.v(TAG, "Brightness [" + brightnessState + "] manual adjustment.");
         }
@@ -1624,17 +1626,19 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Log brightness events when a detail of significance has changed. Generally this is the
         // brightness itself changing, but also includes data like HBM cap, thermal throttling
         // brightness cap, RBC state, etc.
-        mTempBrightnessEvent.time = System.currentTimeMillis();
-        mTempBrightnessEvent.brightness = brightnessState;
-        mTempBrightnessEvent.reason.set(mBrightnessReason);
-        mTempBrightnessEvent.hbmMax = mHbmController.getCurrentBrightnessMax();
-        mTempBrightnessEvent.hbmMode = mHbmController.getHighBrightnessMode();
-        mTempBrightnessEvent.flags |= (mIsRbcActive ? BrightnessEvent.FLAG_RBC : 0);
+        mTempBrightnessEvent.setTime(System.currentTimeMillis());
+        mTempBrightnessEvent.setBrightness(brightnessState);
+        mTempBrightnessEvent.setReason(mBrightnessReason);
+        mTempBrightnessEvent.setHbmMax(mHbmController.getCurrentBrightnessMax());
+        mTempBrightnessEvent.setHbmMode(mHbmController.getHighBrightnessMode());
+        mTempBrightnessEvent.setFlags(mTempBrightnessEvent.getFlags()
+                | (mIsRbcActive ? BrightnessEvent.FLAG_RBC : 0));
         // Temporary is what we use during slider interactions. We avoid logging those so that
         // we don't spam logcat when the slider is being used.
         boolean tempToTempTransition =
-                mTempBrightnessEvent.reason.reason == BrightnessReason.REASON_TEMPORARY
-                && mLastBrightnessEvent.reason.reason == BrightnessReason.REASON_TEMPORARY;
+                mTempBrightnessEvent.getReason().getReason() == BrightnessReason.REASON_TEMPORARY
+                && mLastBrightnessEvent.getReason().getReason()
+                        == BrightnessReason.REASON_TEMPORARY;
         if ((!mTempBrightnessEvent.equalsMainData(mLastBrightnessEvent) && !tempToTempTransition)
                 || brightnessAdjustmentFlags != 0) {
             mLastBrightnessEvent.copyFrom(mTempBrightnessEvent);
@@ -1642,8 +1646,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
             // Adjustment flags (and user-set flag) only get added after the equality checks since
             // they are transient.
-            newEvent.adjustmentFlags = brightnessAdjustmentFlags;
-            newEvent.flags |= (userSetBrightnessChanged ? BrightnessEvent.FLAG_USER_SET : 0);
+            newEvent.setAdjustmentFlags(brightnessAdjustmentFlags);
+            newEvent.setFlags(newEvent.getFlags() | (userSetBrightnessChanged
+                    ? BrightnessEvent.FLAG_USER_SET : 0));
             Slog.i(TAG, newEvent.toString(/* includeTime= */ false));
 
             if (mBrightnessEventRingBuffer != null) {
@@ -2734,117 +2739,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    class BrightnessEvent {
-        static final int FLAG_RBC = 0x1;
-        static final int FLAG_INVALID_LUX = 0x2;
-        static final int FLAG_DOZE_SCALE = 0x3;
-        static final int FLAG_USER_SET = 0x4;
 
-        public final BrightnessReason reason = new BrightnessReason();
-
-        public int displayId;
-        public float lux;
-        public float preThresholdLux;
-        public long time;
-        public float brightness;
-        public float recommendedBrightness;
-        public float preThresholdBrightness;
-        public float hbmMax;
-        public float thermalMax;
-        public int hbmMode;
-        public int flags;
-        public int adjustmentFlags;
-
-        BrightnessEvent(BrightnessEvent that) {
-            copyFrom(that);
-        }
-
-        BrightnessEvent(int displayId) {
-            this.displayId = displayId;
-            reset();
-        }
-
-        void copyFrom(BrightnessEvent that) {
-            displayId = that.displayId;
-            time = that.time;
-            lux = that.lux;
-            preThresholdLux = that.preThresholdLux;
-            brightness = that.brightness;
-            recommendedBrightness = that.recommendedBrightness;
-            preThresholdBrightness = that.preThresholdBrightness;
-            hbmMax = that.hbmMax;
-            thermalMax = that.thermalMax;
-            flags = that.flags;
-            hbmMode = that.hbmMode;
-            reason.set(that.reason);
-            adjustmentFlags = that.adjustmentFlags;
-        }
-
-        void reset() {
-            time = SystemClock.uptimeMillis();
-            brightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-            recommendedBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-            lux = 0;
-            preThresholdLux = 0;
-            preThresholdBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-            hbmMax = PowerManager.BRIGHTNESS_MAX;
-            thermalMax = PowerManager.BRIGHTNESS_MAX;
-            flags = 0;
-            hbmMode = BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
-            reason.set(null);
-            adjustmentFlags = 0;
-        }
-
-        boolean equalsMainData(BrightnessEvent that) {
-            // This equals comparison purposefully ignores time since it is regularly changing and
-            // we don't want to log a brightness event just because the time changed.
-            return displayId == that.displayId
-                    && Float.floatToRawIntBits(brightness)
-                        == Float.floatToRawIntBits(that.brightness)
-                    && Float.floatToRawIntBits(recommendedBrightness)
-                        == Float.floatToRawIntBits(that.recommendedBrightness)
-                    && Float.floatToRawIntBits(preThresholdBrightness)
-                        == Float.floatToRawIntBits(that.preThresholdBrightness)
-                    && Float.floatToRawIntBits(lux) == Float.floatToRawIntBits(that.lux)
-                    && Float.floatToRawIntBits(preThresholdLux)
-                        == Float.floatToRawIntBits(that.preThresholdLux)
-                    && Float.floatToRawIntBits(hbmMax) == Float.floatToRawIntBits(that.hbmMax)
-                    && hbmMode == that.hbmMode
-                    && Float.floatToRawIntBits(thermalMax)
-                        == Float.floatToRawIntBits(that.thermalMax)
-                    && flags == that.flags
-                    && adjustmentFlags == that.adjustmentFlags
-                    && reason.equals(that.reason);
-        }
-
-        public String toString(boolean includeTime) {
-            return (includeTime ? TimeUtils.formatForLogging(time) + " - " : "")
-                    + "BrightnessEvent: "
-                    + "disp=" + displayId
-                    + ", brt=" + brightness + ((flags & FLAG_USER_SET) != 0 ? "(user_set)" : "")
-                    + ", rcmdBrt=" + recommendedBrightness
-                    + ", preBrt=" + preThresholdBrightness
-                    + ", lux=" + lux
-                    + ", preLux=" + preThresholdLux
-                    + ", hbmMax=" + hbmMax
-                    + ", hbmMode=" + BrightnessInfo.hbmToString(hbmMode)
-                    + ", thrmMax=" + thermalMax
-                    + ", flags=" + flagsToString()
-                    + ", reason=" + reason.toString(adjustmentFlags);
-        }
-
-        @Override
-        public String toString() {
-            return toString(/* includeTime */ true);
-        }
-
-        private String flagsToString() {
-            return ((flags & FLAG_USER_SET) != 0 ? "user_set " : "")
-                    + ((flags & FLAG_RBC) != 0 ? "rbc " : "")
-                    + ((flags & FLAG_INVALID_LUX) != 0 ? "invalid_lux " : "")
-                    + ((flags & FLAG_DOZE_SCALE) != 0 ? "doze_scale " : "");
-        }
-    }
 
     private final class DisplayControllerHandler extends Handler {
         public DisplayControllerHandler(Looper looper) {
@@ -2993,137 +2888,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // temperature changes or is updated, so it doesn't necessarily change the screen color
             // temperature immediately. So, let's make it!
             sendUpdatePowerState();
-        }
-    }
-
-    /**
-     * Stores data about why the brightness was changed.  Made up of one main
-     * {@code BrightnessReason.REASON_*} reason and various {@code BrightnessReason.MODIFIER_*}
-     * modifiers.
-     */
-    private final class BrightnessReason {
-        static final int REASON_UNKNOWN = 0;
-        static final int REASON_MANUAL = 1;
-        static final int REASON_DOZE = 2;
-        static final int REASON_DOZE_DEFAULT = 3;
-        static final int REASON_AUTOMATIC = 4;
-        static final int REASON_SCREEN_OFF = 5;
-        static final int REASON_VR = 6;
-        static final int REASON_OVERRIDE = 7;
-        static final int REASON_TEMPORARY = 8;
-        static final int REASON_BOOST = 9;
-        static final int REASON_MAX = REASON_BOOST;
-
-        static final int MODIFIER_DIMMED = 0x1;
-        static final int MODIFIER_LOW_POWER = 0x2;
-        static final int MODIFIER_HDR = 0x4;
-        static final int MODIFIER_THROTTLED = 0x8;
-        static final int MODIFIER_MASK = MODIFIER_DIMMED | MODIFIER_LOW_POWER | MODIFIER_HDR
-            | MODIFIER_THROTTLED;
-
-        // ADJUSTMENT_*
-        // These things can happen at any point, even if the main brightness reason doesn't
-        // fundamentally change, so they're not stored.
-
-        // Auto-brightness adjustment factor changed
-        static final int ADJUSTMENT_AUTO_TEMP = 0x1;
-        // Temporary adjustment to the auto-brightness adjustment factor.
-        static final int ADJUSTMENT_AUTO = 0x2;
-
-        // One of REASON_*
-        public int reason;
-        // Any number of MODIFIER_*
-        public int modifier;
-
-        public void set(BrightnessReason other) {
-            setReason(other == null ? REASON_UNKNOWN : other.reason);
-            setModifier(other == null ? 0 : other.modifier);
-        }
-
-        public void setReason(int reason) {
-            if (reason < REASON_UNKNOWN || reason > REASON_MAX) {
-                Slog.w(TAG, "brightness reason out of bounds: " + reason);
-            } else {
-                this.reason = reason;
-            }
-        }
-
-        public void setModifier(int modifier) {
-            if ((modifier & ~MODIFIER_MASK) != 0) {
-                Slog.w(TAG, "brightness modifier out of bounds: 0x"
-                        + Integer.toHexString(modifier));
-            } else {
-                this.modifier = modifier;
-            }
-        }
-
-        public void addModifier(int modifier) {
-            setModifier(modifier | this.modifier);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof BrightnessReason)) {
-                return false;
-            }
-            BrightnessReason other = (BrightnessReason) obj;
-            return other.reason == reason && other.modifier == modifier;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(reason, modifier);
-        }
-
-        @Override
-        public String toString() {
-            return toString(0);
-        }
-
-        public String toString(int adjustments) {
-            final StringBuilder sb = new StringBuilder();
-            sb.append(reasonToString(reason));
-            sb.append(" [");
-            if ((adjustments & ADJUSTMENT_AUTO_TEMP) != 0) {
-                sb.append(" temp_adj");
-            }
-            if ((adjustments & ADJUSTMENT_AUTO) != 0) {
-                sb.append(" auto_adj");
-            }
-            if ((modifier & MODIFIER_LOW_POWER) != 0) {
-                sb.append(" low_pwr");
-            }
-            if ((modifier & MODIFIER_DIMMED) != 0) {
-                sb.append(" dim");
-            }
-            if ((modifier & MODIFIER_HDR) != 0) {
-                sb.append(" hdr");
-            }
-            if ((modifier & MODIFIER_THROTTLED) != 0) {
-                sb.append(" throttled");
-            }
-            int strlen = sb.length();
-            if (sb.charAt(strlen - 1) == '[') {
-                sb.setLength(strlen - 2);
-            } else {
-                sb.append(" ]");
-            }
-            return sb.toString();
-        }
-
-        private String reasonToString(int reason) {
-            switch (reason) {
-                case REASON_MANUAL: return "manual";
-                case REASON_DOZE: return "doze";
-                case REASON_DOZE_DEFAULT: return "doze_default";
-                case REASON_AUTOMATIC: return "automatic";
-                case REASON_SCREEN_OFF: return "screen_off";
-                case REASON_VR: return "vr";
-                case REASON_OVERRIDE: return "override";
-                case REASON_TEMPORARY: return "temporary";
-                case REASON_BOOST: return "boost";
-                default: return Integer.toString(reason);
-            }
         }
     }
 
