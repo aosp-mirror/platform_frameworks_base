@@ -1826,9 +1826,9 @@
     <!-- Message shown during acquisition when the sensor is dirty [CHAR LIMIT=100] -->
     <string name="face_acquired_sensor_dirty">Clean the top of your screen, including the black bar</string>
     <!-- Message shown during acquisition when dark glasses were detected [CHAR LIMIT=75] -->
-    <string name="face_acquired_dark_glasses_detected">Your face must be fully visible</string>
+    <string name="face_acquired_dark_glasses_detected">@string/face_acquired_dark_glasses_detected_alt</string>
     <!-- Message shown during acquisition when a mouth covering was detected [CHAR LIMIT=75] -->
-    <string name="face_acquired_mouth_covering_detected">Your face must be fully visible</string>
+    <string name="face_acquired_mouth_covering_detected">@string/face_acquired_mouth_covering_detected_alt</string>
 
     <!-- Message shown during face acquisition when the sensor needs to be recalibrated [CHAR LIMIT=75] -->
     <string name="face_acquired_recalibrate_alt">Can\u2019t create your face model. Try again.</string>
