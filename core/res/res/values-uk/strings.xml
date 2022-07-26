@@ -613,6 +613,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"На цьому пристрої немає сканера відбитків пальців."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Датчик тимчасово вимкнено."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Не вдається скористатися сканером відбитків пальців. Зверніться до постачальника послуг із ремонту."</string>
+    <!-- no translation found for fingerprint_error_power_pressed (5479524500542129414) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Відбиток пальця <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Доступ за відбитком пальця"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Використовувати відбиток пальця або дані для розблокування екрана"</string>
@@ -640,8 +642,8 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Тримайте телефон ближче до обличчя"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Підніміть телефон вище"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Опустіть телефон нижче"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Тримайте телефон лівіше"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Тримайте телефон правіше"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Посуньте телефон лівіше"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Посуньте телефон правіше"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Дивіться просто на пристрій."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Обличчя не видно. Утримуйте телефон на рівні очей."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Забагато рухів. Тримайте телефон нерухомо."</string>
@@ -2288,6 +2290,5 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Не вдається отримати доступ до камери телефона з пристрою <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не вдається отримати доступ до камери планшета з пристрою <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Налаштування системи за умовчанням"</string>
-    <!-- no translation found for default_card_name (9198284935962911468) -->
-    <skip />
+    <string name="default_card_name" msgid="9198284935962911468">"КАРТКА <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

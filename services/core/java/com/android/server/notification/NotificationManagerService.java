@@ -2724,6 +2724,7 @@ public class NotificationManagerService extends SystemService {
             mListeners.onBootPhaseAppsCanStart();
             mAssistants.onBootPhaseAppsCanStart();
             mConditionProviders.onBootPhaseAppsCanStart();
+            Slog.d("julia", "boot phase");
             mHistoryManager.onBootPhaseAppsCanStart();
             registerDeviceConfigChange();
             migrateDefaultNAS();
@@ -2734,7 +2735,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @Override
-    public void onUserUnlocking(@NonNull TargetUser user) {
+    public void onUserUnlocked(@NonNull TargetUser user) {
         mHandler.post(() -> {
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "notifHistoryUnlockUser");
             try {
@@ -6343,6 +6344,12 @@ public class NotificationManagerService extends SystemService {
             Settings.Global.putInt(getContext().getContentResolver(),
                     Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
                     NotificationManagerService.REVIEW_NOTIF_STATE_RESHOWN);
+        }
+
+        @Override
+        public void cleanupHistoryFiles() {
+            checkCallerIsSystem();
+            mHistoryManager.cleanupHistoryFiles();
         }
     };
 

@@ -611,6 +611,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"इस डिवाइस में फ़िंगरप्रिंट सेंसर नहीं है."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"सेंसर कुछ समय के लिए बंद कर दिया गया है."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"फ़िंगरप्रिंट सेंसर इस्तेमाल नहीं किया जा सकता. रिपेयर की सेवा देने वाली कंपनी से संपर्क करें"</string>
+    <!-- no translation found for fingerprint_error_power_pressed (5479524500542129414) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"फ़िंगरप्रिंट <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"फ़िंगरप्रिंट इस्तेमाल करें"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"फ़िंगरप्रिंट या स्क्रीन लॉक का क्रेडेंशियल इस्तेमाल करें"</string>
@@ -638,8 +640,8 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"फ़ोन को नज़दीक लाएं"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"फ़ोन को थोड़ा और ऊपर ले जाएं"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"फ़ोन को थोड़ा नीचे ले जाएं"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"फ़ोन को अपनी बाईं ओर ले जाएं"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"फ़ोन को अपनी दाईं ओर ले जाएं"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"फ़ोन को अपने बाईं ओर ले जाएं"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"फ़ोन को अपने दाईं ओर ले जाएं"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"कृपया अपने डिवाइस की तरफ़ सीधे देखें."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"आपका चेहरा नहीं दिख रहा है. फ़ोन को अपनी आंखों की सीध में पकड़कर रखें."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"डिवाइस बहुत ज़्यादा हिल रहा है. फ़ोन को बिना हिलाएं पकड़ें."</string>
@@ -2286,6 +2288,5 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> से फ़ोन के कैमरे को ऐक्सेस नहीं किया जा सकता"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> से टैबलेट के कैमरे को ऐक्सेस नहीं किया जा सकता"</string>
     <string name="system_locale_title" msgid="711882686834677268">"सिस्टम डिफ़ॉल्ट"</string>
-    <!-- no translation found for default_card_name (9198284935962911468) -->
-    <skip />
+    <string name="default_card_name" msgid="9198284935962911468">"कार्ड <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

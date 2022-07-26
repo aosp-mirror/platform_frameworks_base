@@ -611,6 +611,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ଏହି ଡିଭାଇସ୍‌ରେ ଟିପଚିହ୍ନ ସେନ୍‍ସର୍ ନାହିଁ।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ସେନ୍ସରକୁ ଅସ୍ଥାୟୀ ଭାବେ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ଟିପଚିହ୍ନ ସେନ୍ସରକୁ ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ। ଏକ ମରାମତି କେନ୍ଦ୍ରକୁ ଭିଜିଟ୍ କରନ୍ତୁ"</string>
+    <!-- no translation found for fingerprint_error_power_pressed (5479524500542129414) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ଆଙ୍ଗୁଠି <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ଟିପଚିହ୍ନ ବା ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
@@ -636,10 +638,10 @@
     <string name="face_acquired_too_dark" msgid="7919016380747701228">"ଉଜ୍ଜ୍ୱଳ ଲାଇଟ ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ଫୋନକୁ ଟିକେ ଦୂରକୁ ନିଅନ୍ତୁ"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ଫୋନକୁ ପାଖକୁ ଆଣନ୍ତୁ"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"ଫୋନକୁ ଉପରକୁ ନିଅନ୍ତୁ"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"ଫୋନକୁ ତଳକୁ ନିଅନ୍ତୁ"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"ଫୋନକୁ ଆପଣଙ୍କ ବାମ ପଟକୁ ନିଅନ୍ତୁ"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"ଫୋନକୁ ଆପଣଙ୍କ ଡାହାଣ ପଟକୁ ନିଅନ୍ତୁ"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ଫୋନକୁ ଉପରକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ଫୋନ୍‌କୁ ତଳକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ଫୋନକୁ ଆପଣଙ୍କ ବାମ ପଟକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ଫୋନକୁ ଆପଣଙ୍କ ଡାହାଣ ପଟକୁ ମୁଭ କରନ୍ତୁ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"ଦୟାକରି ଆପଣଙ୍କ ଡିଭାଇସ୍‌କୁ ସିଧାସଳଖ ଦେଖନ୍ତୁ।"</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"ଆପଣଙ୍କ ଫେସ ଦେଖାଯାଉନାହିଁ। ଆପଣଙ୍କ ଫୋନକୁ ଆଖି ସିଧାରେ ଧରି ରଖନ୍ତୁ।"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"ଅତ୍ୟଧିକ ଅସ୍ଥିର। ଫୋନ୍‍କୁ ସ୍ଥିର ଭାବେ ଧରନ୍ତୁ।"</string>
@@ -2286,6 +2288,5 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରୁ ଫୋନର କ୍ୟାମେରାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରୁ ଟାବଲେଟର କ୍ୟାମେରାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ସିଷ୍ଟମ ଡିଫଲ୍ଟ"</string>
-    <!-- no translation found for default_card_name (9198284935962911468) -->
-    <skip />
+    <string name="default_card_name" msgid="9198284935962911468">"କାର୍ଡ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

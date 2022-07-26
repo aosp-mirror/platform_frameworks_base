@@ -22,6 +22,8 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"การตั้งค่า"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"เข้าสู่โหมดแบ่งหน้าจอ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"เมนู"</string>
+    <!-- no translation found for pip_menu_accessibility_title (8129016817688656249) -->
+    <skip />
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ใช้การแสดงภาพซ้อนภาพ"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"หากคุณไม่ต้องการให้ <xliff:g id="NAME">%s</xliff:g> ใช้ฟีเจอร์นี้ ให้แตะเพื่อเปิดการตั้งค่าแล้วปิดฟีเจอร์"</string>
     <string name="pip_play" msgid="3496151081459417097">"เล่น"</string>
@@ -36,6 +38,8 @@
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"แอปอาจไม่ทำงานในจอแสดงผลรอง"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"แอปไม่รองรับการเรียกใช้ในจอแสดงผลรอง"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"เส้นแบ่งหน้าจอ"</string>
+    <!-- no translation found for divider_title (5482989479865361192) -->
+    <skip />
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"เต็มหน้าจอทางซ้าย"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"ซ้าย 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"ซ้าย 50%"</string>

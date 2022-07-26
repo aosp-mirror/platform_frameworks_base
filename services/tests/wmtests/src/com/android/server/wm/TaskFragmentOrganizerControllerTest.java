@@ -18,6 +18,12 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_CHILDREN;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -237,10 +243,10 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         mController.registerOrganizer(mIOrganizer);
         mController.onTaskFragmentError(mTaskFragment.getTaskFragmentOrganizer(),
-                mErrorToken, exception);
+                mErrorToken, null /* taskFragment */, -1 /* opType */, exception);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentError(eq(mErrorToken), eq(exception));
+        verify(mOrganizer).onTaskFragmentError(eq(mErrorToken), eq(null), eq(-1), eq(exception));
     }
 
     @Test
@@ -604,7 +610,9 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         verify(mAtm.getActivityStartController(), never()).startActivityInTaskFragment(any(), any(),
                 any(), any(), anyInt(), anyInt(), any());
         verify(mAtm.mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
-                eq(mErrorToken), any(IllegalArgumentException.class));
+                eq(mErrorToken), eq(mTaskFragment),
+                eq(HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT),
+                any(IllegalArgumentException.class));
     }
 
     @Test
@@ -619,7 +627,9 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mWindowOrganizerController.applyTransaction(mTransaction);
 
         verify(mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
-                eq(mErrorToken), any(IllegalArgumentException.class));
+                eq(mErrorToken), eq(mTaskFragment),
+                eq(HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT),
+                any(IllegalArgumentException.class));
         assertNull(activity.getOrganizedTaskFragment());
     }
 
@@ -635,7 +645,9 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mWindowOrganizerController.applyTransaction(mTransaction);
 
         verify(mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
-                eq(mErrorToken), any(IllegalArgumentException.class));
+                eq(mErrorToken), eq(mTaskFragment),
+                eq(HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS),
+                any(IllegalArgumentException.class));
         verify(mTaskFragment, never()).setAdjacentTaskFragment(any());
     }
 
@@ -654,7 +666,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mWindowOrganizerController.applyTransaction(mTransaction);
 
         verify(mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
-                eq(mErrorToken), any(IllegalArgumentException.class));
+                eq(mErrorToken), eq(null), eq(HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT),
+                any(IllegalArgumentException.class));
         assertNull(mWindowOrganizerController.getTaskFragment(fragmentToken));
     }
 
@@ -669,7 +682,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mWindowOrganizerController.applyTransaction(mTransaction);
 
         verify(mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
-                eq(mErrorToken), any(IllegalArgumentException.class));
+                eq(mErrorToken), eq(mTaskFragment), eq(HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT),
+                any(IllegalArgumentException.class));
         assertNotNull(mWindowOrganizerController.getTaskFragment(mFragmentToken));
 
         // Allow organizer to delete empty TaskFragment for cleanup.
@@ -931,7 +945,9 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // The pending event will be dispatched on the handler (from requestTraversal).
         waitHandlerIdle(mWm.mAnimationHandler);
 
-        verify(mOrganizer).onTaskFragmentError(eq(mErrorToken), any(SecurityException.class));
+        verify(mOrganizer).onTaskFragmentError(eq(mErrorToken), any(),
+                eq(HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT),
+                any(SecurityException.class));
     }
 
     @Test
@@ -968,7 +984,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // The pending event will be dispatched on the handler (from requestTraversal).
         waitHandlerIdle(mWm.mAnimationHandler);
 
-        verify(mOrganizer).onTaskFragmentError(eq(mErrorToken), any(SecurityException.class));
+        verify(mOrganizer).onTaskFragmentError(eq(mErrorToken), any(),
+                eq(HIERARCHY_OP_TYPE_REPARENT_CHILDREN), any(SecurityException.class));
     }
 
     @Test

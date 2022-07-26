@@ -611,6 +611,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"මෙම උපාංගයේ ඇඟිලි සලකුණු සංවේදකයක් නොමැත."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"සංවේදකය තාවකාලිකව අබල කර ඇත."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ඇඟිලි සලකුණු සංවේදකය භාවිත කළ නොහැකිය. අළුත්වැඩියා සැපයුම්කරුවෙකු බලන්න"</string>
+    <!-- no translation found for fingerprint_error_power_pressed (5479524500542129414) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ඇඟිලි සලකුණ භාවිත කරන්න"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"ඇඟිලි සලකුණ හෝ තිර අගුල භාවිත කරන්න"</string>
@@ -2286,6 +2288,5 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> වෙතින් දුරකථනයේ කැමරාවට ප්‍රවේශ විය නොහැකිය"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> වෙතින් ටැබ්ලටයේ කැමරාවට ප්‍රවේශ විය නොහැකිය"</string>
     <string name="system_locale_title" msgid="711882686834677268">"පද්ධති පෙරනිමිය"</string>
-    <!-- no translation found for default_card_name (9198284935962911468) -->
-    <skip />
+    <string name="default_card_name" msgid="9198284935962911468">"කාඩ්පත <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

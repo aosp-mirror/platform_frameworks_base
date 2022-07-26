@@ -49,6 +49,7 @@ class DragResizeInputListener implements AutoCloseable {
 
     private final IWindowSession mWindowSession = WindowManagerGlobal.getWindowSession();
     private final Handler mHandler;
+    private final Choreographer mChoreographer;
     private final InputManager mInputManager;
 
     private final int mDisplayId;
@@ -68,11 +69,13 @@ class DragResizeInputListener implements AutoCloseable {
     DragResizeInputListener(
             Context context,
             Handler handler,
+            Choreographer choreographer,
             int displayId,
             SurfaceControl decorationSurface,
             DragResizeCallback callback) {
         mInputManager = context.getSystemService(InputManager.class);
         mHandler = handler;
+        mChoreographer = choreographer;
         mDisplayId = displayId;
         mDecorationSurface = decorationSurface;
         // Use a fake window as the backing surface is a container layer and we don't want to create
@@ -97,7 +100,8 @@ class DragResizeInputListener implements AutoCloseable {
             e.rethrowFromSystemServer();
         }
 
-        mInputEventReceiver = new TaskResizeInputEventReceiver(mInputChannel, mHandler);
+        mInputEventReceiver = new TaskResizeInputEventReceiver(
+                mInputChannel, mHandler, mChoreographer);
         mCallback = callback;
     }
 
@@ -171,13 +175,10 @@ class DragResizeInputListener implements AutoCloseable {
         private final Runnable mConsumeBatchEventRunnable;
         private boolean mConsumeBatchEventScheduled;
 
-        private TaskResizeInputEventReceiver(InputChannel inputChannel, Handler handler) {
+        private TaskResizeInputEventReceiver(
+                InputChannel inputChannel, Handler handler, Choreographer choreographer) {
             super(inputChannel, handler.getLooper());
-
-            final Choreographer[] choreographer = new Choreographer[1];
-            handler.runWithScissors(
-                    () -> choreographer[0] = Choreographer.getInstance(), 0);
-            mChoreographer = choreographer[0];
+            mChoreographer = choreographer;
 
             mConsumeBatchEventRunnable = () -> {
                 mConsumeBatchEventScheduled = false;

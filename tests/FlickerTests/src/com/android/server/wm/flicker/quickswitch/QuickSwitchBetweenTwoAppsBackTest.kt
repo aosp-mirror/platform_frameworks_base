@@ -269,12 +269,6 @@ open class QuickSwitchBetweenTwoAppsBackTest(
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun statusBarLayerIsVisibleAtStartAndEnd() =
-        super.statusBarLayerIsVisibleAtStartAndEnd()
-
     companion object {
         private var startDisplayBounds = Rect.EMPTY
 

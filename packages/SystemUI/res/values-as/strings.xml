@@ -307,8 +307,7 @@
     <string name="tap_again" msgid="1315420114387908655">"পুনৰ টিপক"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"খুলিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"খুলিবলৈ আনলক কৰক চিহ্নটোত টিপক"</string>
-    <!-- no translation found for keyguard_face_successful_unlock_swipe (6180997591385846073) -->
-    <skip />
+    <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"মুখাৱয়বৰ জৰিয়তে আনলক কৰা। খুলিবলৈ ওপৰলৈ ছোৱাইপ কৰক।"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"মুখাৱয়বৰ জৰিয়তে আনলক কৰা হৈছে। খুলিবলৈ আনলক কৰক চিহ্নটোত টিপক।"</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"মুখাৱয়বৰ জৰিয়তে আনলক কৰা হৈছে। খুলিবলৈ টিপক।"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"মুখাৱয়ব চিনাক্ত কৰা হৈছে। খুলিবলৈ টিপক।"</string>
@@ -832,7 +831,8 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> টা ডিভাইচ বাছনি কৰা হৈছে"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(সংযোগ বিচ্ছিন্ন কৰা হৈছে)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"সলনি কৰিব নোৱাৰি। আকৌ চেষ্টা কৰিবলৈ টিপক।"</string>
-    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"নতুন ডিভাইচ পেয়াৰ কৰক"</string>
+    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
+    <skip />
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"এই ছেশ্বনটো কাষ্ট কৰিবলৈ, অনুগ্ৰহ কৰি এপ্‌টো খোলক"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"অজ্ঞাত এপ্"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"কাষ্ট বন্ধ কৰক"</string>
@@ -944,8 +944,14 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"ৱাই-ফাই উপলব্ধ নহয়"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"অগ্ৰাধিকাৰ ম’ড"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"এলাৰ্ম ছেট কৰা হ’ল"</string>
+    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
+    <skip />
+    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
+    <skip />
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"কেমেৰা আৰু মাইক অফ হৈ আছে"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# টা জাননী}one{# টা জাননী}other{# টা জাননী}}"</string>
+    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
+    <skip />
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"সম্প্ৰচাৰণ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ সম্প্ৰচাৰ কৰা বন্ধ কৰিবনে?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"যদি আপুনি <xliff:g id="SWITCHAPP">%1$s</xliff:g>ৰ সম্প্ৰচাৰ কৰে অথবা আউটপুট সলনি কৰে, তেন্তে, আপোনাৰ বৰ্তমানৰ সম্প্ৰচাৰ বন্ধ হৈ যাব"</string>

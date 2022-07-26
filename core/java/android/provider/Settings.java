@@ -10987,6 +10987,14 @@ public final class Settings {
         public static final String ADAPTIVE_CHARGING_ENABLED = "adaptive_charging_enabled";
 
         /**
+         * Whether battery saver is currently set to different schedule mode.
+         *
+         * @hide
+         */
+        public static final String EXTRA_AUTOMATIC_POWER_SAVE_MODE =
+                "extra_automatic_power_save_mode";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */

@@ -198,13 +198,70 @@ public class NtpTrustedTimeTest {
     }
 
     @Test
-    public void testForceRefresh_nullConfig() {
+    public void testForceRefreshDefaultNetwork_noConnectivity() {
         NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+
+        Network network = mock(Network.class);
+        when(ntpTrustedTime.getDefaultNetwork()).thenReturn(network);
+        when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(false);
+
+        assertFalse(ntpTrustedTime.forceRefresh());
+
+        InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+        inOrder.verify(ntpTrustedTime, times(1)).getDefaultNetwork();
+        inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
+        inOrder.verifyNoMoreInteractions();
+
+        assertNoCachedTimeValueResult(ntpTrustedTime);
+    }
+
+    @Test
+    public void testForceRefreshDefaultNetwork_noActiveNetwork() {
+        NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+
+        when(ntpTrustedTime.getDefaultNetwork()).thenReturn(null);
+
+        assertFalse(ntpTrustedTime.forceRefresh());
+
+        InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+        inOrder.verify(ntpTrustedTime, times(1)).getDefaultNetwork();
+        inOrder.verifyNoMoreInteractions();
+
+        assertNoCachedTimeValueResult(ntpTrustedTime);
+    }
+
+    @Test
+    public void testForceRefreshDefaultNetwork_nullConfig() {
+        NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+
+        Network network = mock(Network.class);
+        when(ntpTrustedTime.getDefaultNetwork()).thenReturn(network);
+        when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(true);
         when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(null);
 
         assertFalse(ntpTrustedTime.forceRefresh());
 
         InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+        inOrder.verify(ntpTrustedTime, times(1)).getDefaultNetwork();
+        inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
+        inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
+        inOrder.verifyNoMoreInteractions();
+
+        assertNoCachedTimeValueResult(ntpTrustedTime);
+    }
+
+    @Test
+    public void testForceRefresh_nullConfig() {
+        NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+
+        Network network = mock(Network.class);
+        when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(true);
+        when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(null);
+
+        assertFalse(ntpTrustedTime.forceRefresh(network));
+
+        InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+        inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
         inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
         inOrder.verifyNoMoreInteractions();
 
@@ -214,17 +271,14 @@ public class NtpTrustedTimeTest {
     @Test
     public void testForceRefresh_noConnectivity() {
         NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
-        List<URI> serverUris = createUris("ntp://ntpserver.name");
-        when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
-                new NtpTrustedTime.NtpConfig(serverUris, VALID_TIMEOUT));
 
-        when(ntpTrustedTime.getNetwork()).thenReturn(null);
+        Network network = mock(Network.class);
+        when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(false);
 
-        assertFalse(ntpTrustedTime.forceRefresh());
+        assertFalse(ntpTrustedTime.forceRefresh(network));
 
         InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
-        inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
-        inOrder.verify(ntpTrustedTime, times(1)).getNetwork();
+        inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
         inOrder.verifyNoMoreInteractions();
 
         assertNoCachedTimeValueResult(ntpTrustedTime);
@@ -233,21 +287,20 @@ public class NtpTrustedTimeTest {
     @Test
     public void testForceRefresh_singleServer_queryFailed() {
         NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+
+        Network network = mock(Network.class);
+        when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(true);
         List<URI> serverUris = createUris("ntp://ntpserver.name");
         when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
                 new NtpTrustedTime.NtpConfig(serverUris, VALID_TIMEOUT));
-
-        Network network = mock(Network.class);
-        when(ntpTrustedTime.getNetwork()).thenReturn(network);
-
         when(ntpTrustedTime.queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT))
                 .thenReturn(null);
 
-        assertFalse(ntpTrustedTime.forceRefresh());
+        assertFalse(ntpTrustedTime.forceRefresh(network));
 
         InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+        inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
         inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
-        inOrder.verify(ntpTrustedTime, times(1)).getNetwork();
         inOrder.verify(ntpTrustedTime, times(1))
                 .queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT);
         inOrder.verifyNoMoreInteractions();
@@ -258,23 +311,22 @@ public class NtpTrustedTimeTest {
     @Test
     public void testForceRefresh_singleServer_querySucceeded() {
         NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+
+        Network network = mock(Network.class);
+        when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(true);
         List<URI> serverUris = createUris("ntp://ntpserver.name");
         when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
                 new NtpTrustedTime.NtpConfig(serverUris, VALID_TIMEOUT));
-
-        Network network = mock(Network.class);
-        when(ntpTrustedTime.getNetwork()).thenReturn(network);
-
         NtpTrustedTime.TimeResult successResult = new NtpTrustedTime.TimeResult(123L, 456L, 789,
                 InetSocketAddress.createUnresolved("placeholder", 123));
         when(ntpTrustedTime.queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT))
                 .thenReturn(successResult);
 
-        assertTrue(ntpTrustedTime.forceRefresh());
+        assertTrue(ntpTrustedTime.forceRefresh(network));
 
         InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+        inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
         inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
-        inOrder.verify(ntpTrustedTime, times(1)).getNetwork();
         inOrder.verify(ntpTrustedTime, times(1))
                 .queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT);
         inOrder.verifyNoMoreInteractions();
@@ -285,13 +337,12 @@ public class NtpTrustedTimeTest {
     @Test
     public void testForceRefresh_multiServer_firstQueryFailed() {
         NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+
+        Network network = mock(Network.class);
+        when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(true);
         List<URI> serverUris = createUris("ntp://ntpserver1.name", "ntp://ntpserver2.name");
         when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
                 new NtpTrustedTime.NtpConfig(serverUris, VALID_TIMEOUT));
-
-        Network network = mock(Network.class);
-        when(ntpTrustedTime.getNetwork()).thenReturn(network);
-
         when(ntpTrustedTime.queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT))
                 .thenReturn(null);
         NtpTrustedTime.TimeResult successResult = new NtpTrustedTime.TimeResult(123L, 456L, 789,
@@ -299,11 +350,11 @@ public class NtpTrustedTimeTest {
         when(ntpTrustedTime.queryNtpServer(network, serverUris.get(1), VALID_TIMEOUT))
                 .thenReturn(successResult);
 
-        assertTrue(ntpTrustedTime.forceRefresh());
+        assertTrue(ntpTrustedTime.forceRefresh(network));
 
         InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+        inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
         inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
-        inOrder.verify(ntpTrustedTime, times(1)).getNetwork();
         inOrder.verify(ntpTrustedTime, times(1))
                 .queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT);
         inOrder.verify(ntpTrustedTime, times(1))
@@ -316,23 +367,22 @@ public class NtpTrustedTimeTest {
     @Test
     public void testForceRefresh_multiServer_firstQuerySucceeded() {
         NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+
+        Network network = mock(Network.class);
+        when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(true);
         List<URI> serverUris = createUris("ntp://ntpserver1.name", "ntp://ntpserver2.name");
         when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
                 new NtpTrustedTime.NtpConfig(serverUris, VALID_TIMEOUT));
-
-        Network network = mock(Network.class);
-        when(ntpTrustedTime.getNetwork()).thenReturn(network);
-
         NtpTrustedTime.TimeResult successResult = new NtpTrustedTime.TimeResult(123L, 456L, 789,
                 InetSocketAddress.createUnresolved("placeholder", 123));
         when(ntpTrustedTime.queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT))
                 .thenReturn(successResult);
 
-        assertTrue(ntpTrustedTime.forceRefresh());
+        assertTrue(ntpTrustedTime.forceRefresh(network));
 
         InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+        inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
         inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
-        inOrder.verify(ntpTrustedTime, times(1)).getNetwork();
         inOrder.verify(ntpTrustedTime, times(1))
                 .queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT);
         inOrder.verifyNoMoreInteractions();
@@ -343,25 +393,25 @@ public class NtpTrustedTimeTest {
     @Test
     public void testForceRefresh_multiServer_keepsOldValueOnFailure() {
         NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
-        List<URI> serverUris = createUris("ntp://ntpserver1.name", "ntp://ntpserver2.name");
-        Network network = mock(Network.class);
 
+        Network network = mock(Network.class);
+        List<URI> serverUris = createUris("ntp://ntpserver1.name", "ntp://ntpserver2.name");
         NtpTrustedTime.TimeResult successResult = new NtpTrustedTime.TimeResult(123L, 456L, 789,
                 InetSocketAddress.createUnresolved("placeholder", 123));
 
         // First forceRefresh() succeeds.
         {
+            when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(true);
             when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
                     new NtpTrustedTime.NtpConfig(serverUris, VALID_TIMEOUT));
-            when(ntpTrustedTime.getNetwork()).thenReturn(network);
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT))
                     .thenReturn(successResult);
 
-            assertTrue(ntpTrustedTime.forceRefresh());
+            assertTrue(ntpTrustedTime.forceRefresh(network));
 
             InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+            inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
             inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
-            inOrder.verify(ntpTrustedTime, times(1)).getNetwork();
             inOrder.verify(ntpTrustedTime, times(1))
                     .queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT);
             inOrder.verifyNoMoreInteractions();
@@ -373,19 +423,19 @@ public class NtpTrustedTimeTest {
 
         // Next forceRefresh() fails, keeping the result of the first forceRefresh().
         {
+            when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(true);
             when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
                     new NtpTrustedTime.NtpConfig(serverUris, VALID_TIMEOUT));
-            when(ntpTrustedTime.getNetwork()).thenReturn(network);
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(0),
                     VALID_TIMEOUT)).thenReturn(null);
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(1),
                     VALID_TIMEOUT)).thenReturn(null);
 
-            assertFalse(ntpTrustedTime.forceRefresh());
+            assertFalse(ntpTrustedTime.forceRefresh(network));
 
             InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+            inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
             inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
-            inOrder.verify(ntpTrustedTime, times(1)).getNetwork();
             inOrder.verify(ntpTrustedTime, times(1))
                     .queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT);
             inOrder.verify(ntpTrustedTime, times(1))
@@ -405,10 +455,10 @@ public class NtpTrustedTimeTest {
     @Test
     public void testForceRefresh_multiServer_complex() {
         NtpTrustedTime ntpTrustedTime = spy(NtpTrustedTime.class);
+
+        Network network = mock(Network.class);
         List<URI> serverUris = createUris(
                 "ntp://ntpserver1.name", "ntp://ntpserver2.name", "ntp://ntpserver3.name");
-        Network network = mock(Network.class);
-
         NtpTrustedTime.TimeResult successResult1 = new NtpTrustedTime.TimeResult(111L, 111L, 111,
                 InetSocketAddress.createUnresolved("placeholder", 111));
         NtpTrustedTime.TimeResult successResult2 = new NtpTrustedTime.TimeResult(222L, 222L, 222,
@@ -419,19 +469,19 @@ public class NtpTrustedTimeTest {
         // The first forceRefresh() should the URIs in the original order. Here, we fail the first
         // and succeed with the second.
         {
+            when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(true);
             when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
                     new NtpTrustedTime.NtpConfig(serverUris, VALID_TIMEOUT));
-            when(ntpTrustedTime.getNetwork()).thenReturn(network);
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT))
                     .thenReturn(null);
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(1), VALID_TIMEOUT))
                     .thenReturn(successResult1);
 
-            assertTrue(ntpTrustedTime.forceRefresh());
+            assertTrue(ntpTrustedTime.forceRefresh(network));
 
             InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+            inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
             inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
-            inOrder.verify(ntpTrustedTime, times(1)).getNetwork();
             inOrder.verify(ntpTrustedTime, times(1))
                     .queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT);
             inOrder.verify(ntpTrustedTime, times(1))
@@ -445,17 +495,17 @@ public class NtpTrustedTimeTest {
 
         // forceRefresh() should try starting with the last successful server, which will succeed.
         {
+            when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(true);
             when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
                     new NtpTrustedTime.NtpConfig(serverUris, VALID_TIMEOUT));
-            when(ntpTrustedTime.getNetwork()).thenReturn(network);
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(1), VALID_TIMEOUT))
                     .thenReturn(successResult2);
 
-            assertTrue(ntpTrustedTime.forceRefresh());
+            assertTrue(ntpTrustedTime.forceRefresh(network));
 
             InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+            inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
             inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
-            inOrder.verify(ntpTrustedTime, times(1)).getNetwork();
             inOrder.verify(ntpTrustedTime, times(1))
                     .queryNtpServer(network, serverUris.get(1), VALID_TIMEOUT);
             inOrder.verifyNoMoreInteractions();
@@ -468,9 +518,9 @@ public class NtpTrustedTimeTest {
         // forceRefresh() should try starting with the last successful server, but try the others in
         // order. It will succeed with the final server.
         {
+            when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(true);
             when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
                     new NtpTrustedTime.NtpConfig(serverUris, VALID_TIMEOUT));
-            when(ntpTrustedTime.getNetwork()).thenReturn(network);
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(1), VALID_TIMEOUT))
                     .thenReturn(null);
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT))
@@ -478,11 +528,11 @@ public class NtpTrustedTimeTest {
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(2), VALID_TIMEOUT))
                     .thenReturn(successResult3);
 
-            assertTrue(ntpTrustedTime.forceRefresh());
+            assertTrue(ntpTrustedTime.forceRefresh(network));
 
             InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+            inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
             inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
-            inOrder.verify(ntpTrustedTime, times(1)).getNetwork();
             inOrder.verify(ntpTrustedTime, times(1))
                     .queryNtpServer(network, serverUris.get(1), VALID_TIMEOUT);
             inOrder.verify(ntpTrustedTime, times(1))
@@ -499,9 +549,9 @@ public class NtpTrustedTimeTest {
         // forceRefresh() should try starting with the last successful server, but try the others in
         // order. It will fail with all.
         {
+            when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(true);
             when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
                     new NtpTrustedTime.NtpConfig(serverUris, VALID_TIMEOUT));
-            when(ntpTrustedTime.getNetwork()).thenReturn(network);
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(2), VALID_TIMEOUT))
                     .thenReturn(null);
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT))
@@ -509,11 +559,11 @@ public class NtpTrustedTimeTest {
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(1), VALID_TIMEOUT))
                     .thenReturn(null);
 
-            assertFalse(ntpTrustedTime.forceRefresh());
+            assertFalse(ntpTrustedTime.forceRefresh(network));
 
             InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+            inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
             inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
-            inOrder.verify(ntpTrustedTime, times(1)).getNetwork();
             inOrder.verify(ntpTrustedTime, times(1))
                     .queryNtpServer(network, serverUris.get(2), VALID_TIMEOUT);
             inOrder.verify(ntpTrustedTime, times(1))
@@ -530,9 +580,9 @@ public class NtpTrustedTimeTest {
         // forceRefresh() should try starting with the last successful server, but try the others in
         // order. It will succeed on the last.
         {
+            when(ntpTrustedTime.isNetworkConnected(network)).thenReturn(true);
             when(ntpTrustedTime.getNtpConfigInternal()).thenReturn(
                     new NtpTrustedTime.NtpConfig(serverUris, VALID_TIMEOUT));
-            when(ntpTrustedTime.getNetwork()).thenReturn(network);
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(2), VALID_TIMEOUT))
                     .thenReturn(null);
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(0), VALID_TIMEOUT))
@@ -540,11 +590,11 @@ public class NtpTrustedTimeTest {
             when(ntpTrustedTime.queryNtpServer(network, serverUris.get(1), VALID_TIMEOUT))
                     .thenReturn(successResult1);
 
-            assertTrue(ntpTrustedTime.forceRefresh());
+            assertTrue(ntpTrustedTime.forceRefresh(network));
 
             InOrder inOrder = Mockito.inOrder(ntpTrustedTime);
+            inOrder.verify(ntpTrustedTime, times(1)).isNetworkConnected(network);
             inOrder.verify(ntpTrustedTime, times(1)).getNtpConfigInternal();
-            inOrder.verify(ntpTrustedTime, times(1)).getNetwork();
             inOrder.verify(ntpTrustedTime, times(1))
                     .queryNtpServer(network, serverUris.get(2), VALID_TIMEOUT);
             inOrder.verify(ntpTrustedTime, times(1))

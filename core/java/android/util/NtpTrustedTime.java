@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 /**
  * A singleton that connects with a remote NTP server as its trusted time source. This class
@@ -251,80 +250,102 @@ public abstract class NtpTrustedTime implements TrustedTime {
         }
     }
 
+    /** Forces a refresh using the default network. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean forceRefresh() {
         synchronized (this) {
-            NtpConfig ntpConfig = getNtpConfig();
-            if (ntpConfig == null) {
-                // missing server config, so no NTP time available
-                if (LOGD) Log.d(TAG, "forceRefresh: invalid server config");
-                return false;
-            }
-
-            Network network = getNetwork();
+            Network network = getDefaultNetwork();
             if (network == null) {
                 if (LOGD) Log.d(TAG, "forceRefresh: no network available");
                 return false;
             }
 
-            if (LOGD) {
-                Log.d(TAG, "forceRefresh: NTP request network=" + network
-                        + " ntpConfig=" + ntpConfig);
-            }
+            return forceRefreshLocked(network);
+        }
+    }
 
-            List<URI> unorderedServerUris = ntpConfig.getServerUris();
+    /** Forces a refresh using the specified network. */
+    public boolean forceRefresh(@NonNull Network network) {
+        Objects.requireNonNull(network);
 
-            // Android supports multiple NTP server URIs for situations where servers might be
-            // unreachable for some devices due to network topology, e.g. we understand that devices
-            // travelling to China often have difficulty accessing "time.android.com". Android
-            // partners may want to configure alternative URIs for devices sold globally, or those
-            // that are likely to travel to part of the world without access to the full internet.
-            //
-            // The server URI list is expected to contain one element in the general case, with two
-            // or three as the anticipated maximum. The list is never empty. Server URIs are
-            // considered to be in a rough priority order of servers to try initially (no
-            // randomization), but besides that there is assumed to be no preference.
-            //
-            // The server selection algorithm below tries to stick with a successfully accessed NTP
-            // server's URI where possible:
-            //
-            // The algorithm based on the assumption that a cluster of NTP servers sharing the same
-            // host name, particularly commercially run ones, are likely to agree more closely on
-            // the time than servers from different URIs, so it's best to be sticky. Switching
-            // between URIs could result in flip-flopping between reference clocks or involve
-            // talking to server clusters with different approaches to leap second handling.
-            //
-            // Stickiness may also be useful if some server URIs early in the list are permanently
-            // black-holing requests, or if the responses are not routed back. In those cases it's
-            // best not to try those URIs more than we have to, as might happen if the algorithm
-            // always started at the beginning of the list.
-            //
-            // Generally, we have to assume that any of the configured servers are going to be "good
-            // enough" as an external reference clock when reachable, so the stickiness is a very
-            // lightly applied bias. There's no tracking of failure rates or back-off on a per-URI
-            // basis; higher level code is expected to handle rate limiting of NTP requests in the
-            // event of failure to contact any server.
+        synchronized (this) {
+            return forceRefreshLocked(network);
+        }
+    }
 
-            List<URI> orderedServerUris = new ArrayList<>();
-            for (URI serverUri : unorderedServerUris) {
-                if (serverUri.equals(mLastSuccessfulNtpServerUri)) {
-                    orderedServerUris.add(0, serverUri);
-                } else {
-                    orderedServerUris.add(serverUri);
-                }
-            }
+    @GuardedBy("this")
+    private boolean forceRefreshLocked(@NonNull Network network) {
+        Objects.requireNonNull(network);
 
-            for (URI serverUri : orderedServerUris) {
-                TimeResult timeResult = queryNtpServer(network, serverUri, ntpConfig.getTimeout());
-                // Only overwrite previous state if the request was successful.
-                if (timeResult != null) {
-                    mLastSuccessfulNtpServerUri = serverUri;
-                    mTimeResult = timeResult;
-                    return true;
-                }
-            }
+        if (!isNetworkConnected(network)) {
+            if (LOGD) Log.d(TAG, "forceRefreshLocked: network=" + network + " is not connected");
             return false;
         }
+
+        NtpConfig ntpConfig = getNtpConfig();
+        if (ntpConfig == null) {
+            // missing server config, so no NTP time available
+            if (LOGD) Log.d(TAG, "forceRefreshLocked: invalid server config");
+            return false;
+        }
+
+        if (LOGD) {
+            Log.d(TAG, "forceRefreshLocked: NTP request network=" + network
+                    + " ntpConfig=" + ntpConfig);
+        }
+
+        List<URI> unorderedServerUris = ntpConfig.getServerUris();
+
+        // Android supports multiple NTP server URIs for situations where servers might be
+        // unreachable for some devices due to network topology, e.g. we understand that devices
+        // travelling to China often have difficulty accessing "time.android.com". Android
+        // partners may want to configure alternative URIs for devices sold globally, or those
+        // that are likely to travel to part of the world without access to the full internet.
+        //
+        // The server URI list is expected to contain one element in the general case, with two
+        // or three as the anticipated maximum. The list is never empty. Server URIs are
+        // considered to be in a rough priority order of servers to try initially (no
+        // randomization), but besides that there is assumed to be no preference.
+        //
+        // The server selection algorithm below tries to stick with a successfully accessed NTP
+        // server's URI where possible:
+        //
+        // The algorithm based on the assumption that a cluster of NTP servers sharing the same
+        // host name, particularly commercially run ones, are likely to agree more closely on
+        // the time than servers from different URIs, so it's best to be sticky. Switching
+        // between URIs could result in flip-flopping between reference clocks or involve
+        // talking to server clusters with different approaches to leap second handling.
+        //
+        // Stickiness may also be useful if some server URIs early in the list are permanently
+        // black-holing requests, or if the responses are not routed back. In those cases it's
+        // best not to try those URIs more than we have to, as might happen if the algorithm
+        // always started at the beginning of the list.
+        //
+        // Generally, we have to assume that any of the configured servers are going to be "good
+        // enough" as an external reference clock when reachable, so the stickiness is a very
+        // lightly applied bias. There's no tracking of failure rates or back-off on a per-URI
+        // basis; higher level code is expected to handle rate limiting of NTP requests in the
+        // event of failure to contact any server.
+
+        List<URI> orderedServerUris = new ArrayList<>();
+        for (URI serverUri : unorderedServerUris) {
+            if (serverUri.equals(mLastSuccessfulNtpServerUri)) {
+                orderedServerUris.add(0, serverUri);
+            } else {
+                orderedServerUris.add(serverUri);
+            }
+        }
+
+        for (URI serverUri : orderedServerUris) {
+            TimeResult timeResult = queryNtpServer(network, serverUri, ntpConfig.getTimeout());
+            // Only overwrite previous state if the request was successful.
+            if (timeResult != null) {
+                mLastSuccessfulNtpServerUri = serverUri;
+                mTimeResult = timeResult;
+                return true;
+            }
+        }
+        return false;
     }
 
     @GuardedBy("this")
@@ -346,14 +367,23 @@ public abstract class NtpTrustedTime implements TrustedTime {
     public abstract NtpConfig getNtpConfigInternal();
 
     /**
-     * Returns the {@link Network} to use during an NTP query. This method can return {@code null}
-     * if there is no connectivity
+     * Returns the default {@link Network} to use during an NTP query when no network is specified.
+     * This method can return {@code null} if the device hasn't fully initialized or there is no
+     * active network.
      *
      * <p>This method has been made public for easy replacement during tests.
      */
     @VisibleForTesting
     @Nullable
-    public abstract Network getNetwork();
+    public abstract Network getDefaultNetwork();
+
+    /**
+     * Returns {@code true} if there is likely to be connectivity on the supplied network.
+     *
+     * <p>This method has been made public for easy replacement during tests.
+     */
+    @VisibleForTesting
+    public abstract boolean isNetworkConnected(@NonNull Network network);
 
     /**
      * Queries the specified NTP server. This is a blocking call. Returns {@code null} if the query
@@ -565,25 +595,8 @@ public abstract class NtpTrustedTime implements TrustedTime {
      */
     private static final class NtpTrustedTimeImpl extends NtpTrustedTime {
 
-        /**
-         * A supplier that returns the ConnectivityManager. The Supplier can return null if
-         * ConnectivityService isn't running yet.
-         */
-        private final Supplier<ConnectivityManager> mConnectivityManagerSupplier =
-                new Supplier<>() {
-            private ConnectivityManager mConnectivityManager;
-
-            @Nullable
-            @Override
-            public synchronized ConnectivityManager get() {
-                // We can't do this at initialization time: ConnectivityService might not be running
-                // yet.
-                if (mConnectivityManager == null) {
-                    mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
-                }
-                return mConnectivityManager;
-            }
-        };
+        @GuardedBy("this")
+        private ConnectivityManager mConnectivityManager;
 
         @NonNull
         private final Context mContext;
@@ -629,13 +642,20 @@ public abstract class NtpTrustedTime implements TrustedTime {
         }
 
         @Override
-        public Network getNetwork() {
-            ConnectivityManager connectivityManager = mConnectivityManagerSupplier.get();
+        public Network getDefaultNetwork() {
+            ConnectivityManager connectivityManager = getConnectivityManager();
             if (connectivityManager == null) {
-                if (LOGD) Log.d(TAG, "getNetwork: no ConnectivityManager");
                 return null;
             }
-            final Network network = connectivityManager.getActiveNetwork();
+            return connectivityManager.getActiveNetwork();
+        }
+
+        @Override
+        public boolean isNetworkConnected(@NonNull Network network) {
+            ConnectivityManager connectivityManager = getConnectivityManager();
+            if (connectivityManager == null) {
+                return false;
+            }
             final NetworkInfo ni = connectivityManager.getNetworkInfo(network);
 
             // This connectivity check is to avoid performing a DNS lookup for the time server on a
@@ -649,9 +669,19 @@ public abstract class NtpTrustedTime implements TrustedTime {
             // addresses are actually reachable.
             if (ni == null || !ni.isConnected()) {
                 if (LOGD) Log.d(TAG, "getNetwork: no connectivity");
-                return null;
+                return false;
             }
-            return network;
+            return true;
+        }
+
+        private synchronized ConnectivityManager getConnectivityManager() {
+            if (mConnectivityManager == null) {
+                mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
+            }
+            if (mConnectivityManager == null) {
+                if (LOGD) Log.d(TAG, "getConnectivityManager: no ConnectivityManager");
+            }
+            return mConnectivityManager;
         }
 
         @Override

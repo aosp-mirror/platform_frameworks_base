@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.os.Handler;
 import android.os.UserManager;
+import android.view.Choreographer;
 import android.view.WindowManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -173,12 +174,14 @@ public abstract class WMShellModule {
     static WindowDecorViewModel<?> provideWindowDecorViewModel(
             Context context,
             @ShellMainThread Handler mainHandler,
+            @ShellMainThread Choreographer mainChoreographer,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue) {
         return new CaptionWindowDecorViewModel(
                         context,
                         mainHandler,
+                        mainChoreographer,
                         taskOrganizer,
                         displayController,
                         syncQueue);

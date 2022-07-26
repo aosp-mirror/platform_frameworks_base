@@ -64,7 +64,6 @@ import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -4167,23 +4166,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (!calledFromValidUserLocked()) {
                 return null;
             }
-            final Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
-            // TODO: Handle the case of the last IME with no subtypes
-            if (lastIme == null || TextUtils.isEmpty(lastIme.first)
-                    || TextUtils.isEmpty(lastIme.second)) return null;
-            final InputMethodInfo lastImi = mMethodMap.get(lastIme.first);
-            if (lastImi == null) return null;
-            try {
-                final int lastSubtypeHash = Integer.parseInt(lastIme.second);
-                final int lastSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(lastImi,
-                        lastSubtypeHash);
-                if (lastSubtypeId < 0 || lastSubtypeId >= lastImi.getSubtypeCount()) {
-                    return null;
-                }
-                return lastImi.getSubtypeAt(lastSubtypeId);
-            } catch (NumberFormatException e) {
-                return null;
-            }
+            return mSettings.getLastInputMethodSubtypeLocked();
         }
     }
 
@@ -5879,22 +5862,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mService = service;
         }
 
-        @RequiresPermission(allOf = {
-                Manifest.permission.DUMP,
-                Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                Manifest.permission.WRITE_SECURE_SETTINGS,
-        })
         @BinderThread
         @ShellCommandResult
         @Override
         public int onCommand(@Nullable String cmd) {
-            // For shell command, require all the permissions here in favor of code simplicity.
-            Arrays.asList(
-                    Manifest.permission.DUMP,
-                    Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    Manifest.permission.WRITE_SECURE_SETTINGS
-            ).forEach(permission -> mService.mContext.enforceCallingPermission(permission, null));
-
             final long identity = Binder.clearCallingIdentity();
             try {
                 return onCommandWithSystemIdentity(cmd);

@@ -611,6 +611,8 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"기기에 지문 센서가 없습니다."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"센서가 일시적으로 사용 중지되었습니다."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"지문 센서를 사용할 수 없습니다. 수리업체에 방문하세요."</string>
+    <!-- no translation found for fingerprint_error_power_pressed (5479524500542129414) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"손가락 <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"지문 사용"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"지문 또는 화면 잠금 사용"</string>
@@ -2286,6 +2288,5 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 휴대전화 카메라에 액세스할 수 없습니다."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 태블릿 카메라에 액세스할 수 없습니다."</string>
     <string name="system_locale_title" msgid="711882686834677268">"시스템 기본값"</string>
-    <!-- no translation found for default_card_name (9198284935962911468) -->
-    <skip />
+    <string name="default_card_name" msgid="9198284935962911468">"<xliff:g id="CARDNUMBER">%d</xliff:g> 카드"</string>
 </resources>

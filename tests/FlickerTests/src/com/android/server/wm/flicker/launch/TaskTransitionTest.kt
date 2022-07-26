@@ -78,7 +78,7 @@ class TaskTransitionTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
             testApp.openNewTask(device, wmHelper)
             tapl.pressBack()
             wmHelper.StateSyncBuilder()
-                .withFullScreenApp(testApp)
+                .withAppTransitionIdle()
                 .waitForAndVerify()
         }
     }

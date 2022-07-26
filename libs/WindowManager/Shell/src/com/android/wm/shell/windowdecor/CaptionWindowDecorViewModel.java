@@ -25,6 +25,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.os.Handler;
+import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -45,17 +46,20 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
     private final ShellTaskOrganizer mTaskOrganizer;
     private final Context mContext;
     private final Handler mMainHandler;
+    private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
     private final SyncTransactionQueue mSyncQueue;
 
     public CaptionWindowDecorViewModel(
             Context context,
             Handler mainHandler,
+            Choreographer mainChoreographer,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue) {
         mContext = context;
         mMainHandler = mainHandler;
+        mMainChoreographer = mainChoreographer;
         mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mTaskOrganizer = taskOrganizer;
         mDisplayController = displayController;
@@ -72,6 +76,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
                 taskInfo,
                 taskSurface,
                 mMainHandler,
+                mMainChoreographer,
                 mSyncQueue);
         TaskPositioner taskPositioner = new TaskPositioner(mTaskOrganizer, windowDecoration);
         CaptionTouchEventListener touchEventListener =
