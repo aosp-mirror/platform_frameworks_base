@@ -19629,8 +19629,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return superImpl.apply(code, new AttributionSource(shellUid,
-                            "com.android.shell", attributionSource.getAttributionTag(),
-                            attributionSource.getToken(), attributionSource.getNext()),
+                            Process.INVALID_PID, "com.android.shell",
+                            attributionSource.getAttributionTag(), attributionSource.getToken(),
+                            /*renouncedPermissions*/ null, attributionSource.getNext()),
                             shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                             skiProxyOperation);
                 } finally {
@@ -19681,8 +19682,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return superImpl.apply(clientId, code, new AttributionSource(shellUid,
-                            "com.android.shell", attributionSource.getAttributionTag(),
-                            attributionSource.getToken(), attributionSource.getNext()),
+                            Process.INVALID_PID, "com.android.shell",
+                            attributionSource.getAttributionTag(), attributionSource.getToken(),
+                            /*renouncedPermissions*/ null, attributionSource.getNext()),
                             startIfModeDefault, shouldCollectAsyncNotedOp, message,
                             shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
                             proxiedAttributionFlags, attributionChainId);
@@ -19706,8 +19708,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     superImpl.apply(clientId, code, new AttributionSource(shellUid,
-                            "com.android.shell", attributionSource.getAttributionTag(),
-                            attributionSource.getToken(), attributionSource.getNext()),
+                            Process.INVALID_PID, "com.android.shell",
+                            attributionSource.getAttributionTag(), attributionSource.getToken(),
+                            /*renouncedPermissions*/ null, attributionSource.getNext()),
                             skipProxyOperation);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
