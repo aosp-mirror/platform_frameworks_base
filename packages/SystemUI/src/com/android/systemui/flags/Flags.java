@@ -151,6 +151,8 @@ public class Flags {
     public static final BooleanFlag STATUS_BAR_LETTERBOX_APPEARANCE =
             new BooleanFlag(603, false);
 
+    public static final BooleanFlag NEW_STATUS_BAR_PIPELINE = new BooleanFlag(604, false);
+
     /***************************************/
     // 700 - dialer/calls
     public static final BooleanFlag ONGOING_CALL_STATUS_BAR_CHIP =
