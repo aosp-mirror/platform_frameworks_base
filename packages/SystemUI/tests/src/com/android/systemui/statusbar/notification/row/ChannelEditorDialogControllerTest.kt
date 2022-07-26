@@ -98,7 +98,7 @@ class ChannelEditorDialogControllerTest : SysuiTestCase() {
 
     @Test
     fun testPrepareDialogForApp_onlyDefaultChannel() {
-        group.channels = listOf(channelDefault)
+        group.addChannel(channelDefault)
 
         controller.prepareDialogForApp(TEST_APP_NAME, TEST_PACKAGE_NAME, TEST_UID,
                 setOf(channelDefault), appIcon, clickListener)
