@@ -17,6 +17,7 @@
 package com.android.internal.inputmethod;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.os.RemoteException;
@@ -93,6 +94,7 @@ public abstract class ImeTracing {
     /**
      * Calling {@link IInputMethodManager#startImeTrace()}} to capture IME trace.
      */
+    @RequiresPermission(android.Manifest.permission.CONTROL_UI_TRACING)
     public final void startImeTrace() {
         try {
             mService.startImeTrace();
@@ -104,6 +106,7 @@ public abstract class ImeTracing {
     /**
      * Calling {@link IInputMethodManager#stopImeTrace()} to stop IME trace.
      */
+    @RequiresPermission(android.Manifest.permission.CONTROL_UI_TRACING)
     public final void stopImeTrace() {
         try {
             mService.stopImeTrace();
