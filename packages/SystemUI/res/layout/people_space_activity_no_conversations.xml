@@ -54,7 +54,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@drawable/rounded_bg_full_large_radius"
-        android:onClick="dismissActivity"
         android:text="@string/got_it"
         android:textColor="?androidprv:attr/textColorOnAccent"
         android:layout_marginBottom="60dp"
