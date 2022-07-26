@@ -66,6 +66,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     private static final long INVALID_ID = -1;
     public static final int NANOS_IN_MILLISECOND = 1_000_000;
 
+    private static final int MAX_LENGTH_EVENT_DESC = 20;
+
     static final int REASON_END_UNKNOWN = -1;
     static final int REASON_END_NORMAL = 0;
     static final int REASON_END_SURFACE_DESTROYED = 1;
@@ -394,7 +396,18 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         return true;
     }
 
-    private void markEvent(String desc) {
+    /**
+     * Mark the FrameTracker events in the trace.
+     *
+     * @param desc The description of the trace event,
+     *            shouldn't exceed {@link #MAX_LENGTH_EVENT_DESC}.
+     */
+    private void markEvent(@NonNull String desc) {
+        if (desc.length() > MAX_LENGTH_EVENT_DESC) {
+            throw new IllegalArgumentException(TextUtils.formatSimple(
+                    "The length of the trace event description <%s> exceeds %d",
+                    desc, MAX_LENGTH_EVENT_DESC));
+        }
         Trace.beginSection(TextUtils.formatSimple("%s#%s", mSession.getName(), desc));
         Trace.endSection();
     }
