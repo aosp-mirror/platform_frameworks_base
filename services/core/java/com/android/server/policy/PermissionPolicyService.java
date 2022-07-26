@@ -354,7 +354,7 @@ public final class PermissionPolicyService extends SystemService {
      * Get op that controls the access related to the permission.
      *
      * <p>Usually the permission-op relationship is 1:1 but some permissions (e.g. fine location)
-     * {@link AppOpsManager#sOpToSwitch share an op} to control the access.
+     * {@link AppOpsManager#opToSwitch(int)}  share an op} to control the access.
      *
      * @param permission The permission
      * @return The op that controls the access of the permission

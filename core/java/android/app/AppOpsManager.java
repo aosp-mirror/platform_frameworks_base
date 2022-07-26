@@ -867,8 +867,7 @@ public class AppOpsManager {
     // when adding one of these:
     //  - increment _NUM_OP
     //  - define an OPSTR_* constant (marked as @SystemApi)
-    //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpPerms, sOpDefaultMode, sOpDisableReset,
-    //      sOpRestrictions, sOpAllowSystemRestrictionBypass
+    //  - add row to sAppOpInfos
     //  - add descriptive strings to Settings/res/values/arrays.xml
     //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)
 
@@ -1909,1163 +1908,379 @@ public class AppOpsManager {
             OP_TURN_SCREEN_ON,
     };
 
-    /**
-     * This maps each operation to the operation that serves as the
-     * switch to determine whether it is allowed.  Generally this is
-     * a 1:1 mapping, but for some things (like location) that have
-     * multiple low-level operations being tracked that should be
-     * presented to the user as one switch then this can be used to
-     * make them all controlled by the same single operation.
-     */
-    private static int[] sOpToSwitch = new int[] {
-            OP_COARSE_LOCATION,                 // COARSE_LOCATION
-            OP_FINE_LOCATION,                   // FINE_LOCATION
-            OP_COARSE_LOCATION,                 // GPS
-            OP_VIBRATE,                         // VIBRATE
-            OP_READ_CONTACTS,                   // READ_CONTACTS
-            OP_WRITE_CONTACTS,                  // WRITE_CONTACTS
-            OP_READ_CALL_LOG,                   // READ_CALL_LOG
-            OP_WRITE_CALL_LOG,                  // WRITE_CALL_LOG
-            OP_READ_CALENDAR,                   // READ_CALENDAR
-            OP_WRITE_CALENDAR,                  // WRITE_CALENDAR
-            OP_COARSE_LOCATION,                 // WIFI_SCAN
-            OP_POST_NOTIFICATION,               // POST_NOTIFICATION
-            OP_COARSE_LOCATION,                 // NEIGHBORING_CELLS
-            OP_CALL_PHONE,                      // CALL_PHONE
-            OP_READ_SMS,                        // READ_SMS
-            OP_WRITE_SMS,                       // WRITE_SMS
-            OP_RECEIVE_SMS,                     // RECEIVE_SMS
-            OP_RECEIVE_SMS,                     // RECEIVE_EMERGECY_SMS
-            OP_RECEIVE_MMS,                     // RECEIVE_MMS
-            OP_RECEIVE_WAP_PUSH,                // RECEIVE_WAP_PUSH
-            OP_SEND_SMS,                        // SEND_SMS
-            OP_READ_SMS,                        // READ_ICC_SMS
-            OP_WRITE_SMS,                       // WRITE_ICC_SMS
-            OP_WRITE_SETTINGS,                  // WRITE_SETTINGS
-            OP_SYSTEM_ALERT_WINDOW,             // SYSTEM_ALERT_WINDOW
-            OP_ACCESS_NOTIFICATIONS,            // ACCESS_NOTIFICATIONS
-            OP_CAMERA,                          // CAMERA
-            OP_RECORD_AUDIO,                    // RECORD_AUDIO
-            OP_PLAY_AUDIO,                      // PLAY_AUDIO
-            OP_READ_CLIPBOARD,                  // READ_CLIPBOARD
-            OP_WRITE_CLIPBOARD,                 // WRITE_CLIPBOARD
-            OP_TAKE_MEDIA_BUTTONS,              // TAKE_MEDIA_BUTTONS
-            OP_TAKE_AUDIO_FOCUS,                // TAKE_AUDIO_FOCUS
-            OP_AUDIO_MASTER_VOLUME,             // AUDIO_MASTER_VOLUME
-            OP_AUDIO_VOICE_VOLUME,              // AUDIO_VOICE_VOLUME
-            OP_AUDIO_RING_VOLUME,               // AUDIO_RING_VOLUME
-            OP_AUDIO_MEDIA_VOLUME,              // AUDIO_MEDIA_VOLUME
-            OP_AUDIO_ALARM_VOLUME,              // AUDIO_ALARM_VOLUME
-            OP_AUDIO_NOTIFICATION_VOLUME,       // AUDIO_NOTIFICATION_VOLUME
-            OP_AUDIO_BLUETOOTH_VOLUME,          // AUDIO_BLUETOOTH_VOLUME
-            OP_WAKE_LOCK,                       // WAKE_LOCK
-            OP_COARSE_LOCATION,                 // MONITOR_LOCATION
-            OP_COARSE_LOCATION,                 // MONITOR_HIGH_POWER_LOCATION
-            OP_GET_USAGE_STATS,                 // GET_USAGE_STATS
-            OP_MUTE_MICROPHONE,                 // MUTE_MICROPHONE
-            OP_TOAST_WINDOW,                    // TOAST_WINDOW
-            OP_PROJECT_MEDIA,                   // PROJECT_MEDIA
-            OP_ACTIVATE_VPN,                    // ACTIVATE_VPN
-            OP_WRITE_WALLPAPER,                 // WRITE_WALLPAPER
-            OP_ASSIST_STRUCTURE,                // ASSIST_STRUCTURE
-            OP_ASSIST_SCREENSHOT,               // ASSIST_SCREENSHOT
-            OP_READ_PHONE_STATE,                // READ_PHONE_STATE
-            OP_ADD_VOICEMAIL,                   // ADD_VOICEMAIL
-            OP_USE_SIP,                         // USE_SIP
-            OP_PROCESS_OUTGOING_CALLS,          // PROCESS_OUTGOING_CALLS
-            OP_USE_FINGERPRINT,                 // USE_FINGERPRINT
-            OP_BODY_SENSORS,                    // BODY_SENSORS
-            OP_READ_CELL_BROADCASTS,            // READ_CELL_BROADCASTS
-            OP_MOCK_LOCATION,                   // MOCK_LOCATION
-            OP_READ_EXTERNAL_STORAGE,           // READ_EXTERNAL_STORAGE
-            OP_WRITE_EXTERNAL_STORAGE,          // WRITE_EXTERNAL_STORAGE
-            OP_TURN_SCREEN_ON,                  // TURN_SCREEN_ON
-            OP_GET_ACCOUNTS,                    // GET_ACCOUNTS
-            OP_RUN_IN_BACKGROUND,               // RUN_IN_BACKGROUND
-            OP_AUDIO_ACCESSIBILITY_VOLUME,      // AUDIO_ACCESSIBILITY_VOLUME
-            OP_READ_PHONE_NUMBERS,              // READ_PHONE_NUMBERS
-            OP_REQUEST_INSTALL_PACKAGES,        // REQUEST_INSTALL_PACKAGES
-            OP_PICTURE_IN_PICTURE,              // ENTER_PICTURE_IN_PICTURE_ON_HIDE
-            OP_INSTANT_APP_START_FOREGROUND,    // INSTANT_APP_START_FOREGROUND
-            OP_ANSWER_PHONE_CALLS,              // ANSWER_PHONE_CALLS
-            OP_RUN_ANY_IN_BACKGROUND,           // OP_RUN_ANY_IN_BACKGROUND
-            OP_CHANGE_WIFI_STATE,               // OP_CHANGE_WIFI_STATE
-            OP_REQUEST_DELETE_PACKAGES,         // OP_REQUEST_DELETE_PACKAGES
-            OP_BIND_ACCESSIBILITY_SERVICE,      // OP_BIND_ACCESSIBILITY_SERVICE
-            OP_ACCEPT_HANDOVER,                 // ACCEPT_HANDOVER
-            OP_MANAGE_IPSEC_TUNNELS,            // MANAGE_IPSEC_HANDOVERS
-            OP_START_FOREGROUND,                // START_FOREGROUND
-            OP_BLUETOOTH_SCAN,                  // BLUETOOTH_SCAN
-            OP_USE_BIOMETRIC,                   // BIOMETRIC
-            OP_ACTIVITY_RECOGNITION,            // ACTIVITY_RECOGNITION
-            OP_SMS_FINANCIAL_TRANSACTIONS,      // SMS_FINANCIAL_TRANSACTIONS
-            OP_READ_MEDIA_AUDIO,                // READ_MEDIA_AUDIO
-            OP_WRITE_MEDIA_AUDIO,               // WRITE_MEDIA_AUDIO
-            OP_READ_MEDIA_VIDEO,                // READ_MEDIA_VIDEO
-            OP_WRITE_MEDIA_VIDEO,               // WRITE_MEDIA_VIDEO
-            OP_READ_MEDIA_IMAGES,               // READ_MEDIA_IMAGES
-            OP_WRITE_MEDIA_IMAGES,              // WRITE_MEDIA_IMAGES
-            OP_LEGACY_STORAGE,                  // LEGACY_STORAGE
-            OP_ACCESS_ACCESSIBILITY,            // ACCESS_ACCESSIBILITY
-            OP_READ_DEVICE_IDENTIFIERS,         // READ_DEVICE_IDENTIFIERS
-            OP_ACCESS_MEDIA_LOCATION,           // ACCESS_MEDIA_LOCATION
-            OP_QUERY_ALL_PACKAGES,              // QUERY_ALL_PACKAGES
-            OP_MANAGE_EXTERNAL_STORAGE,         // MANAGE_EXTERNAL_STORAGE
-            OP_INTERACT_ACROSS_PROFILES,        //INTERACT_ACROSS_PROFILES
-            OP_ACTIVATE_PLATFORM_VPN,           // ACTIVATE_PLATFORM_VPN
-            OP_LOADER_USAGE_STATS,              // LOADER_USAGE_STATS
-            OP_DEPRECATED_1,                    // deprecated
-            OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, //AUTO_REVOKE_PERMISSIONS_IF_UNUSED
-            OP_AUTO_REVOKE_MANAGED_BY_INSTALLER, //OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
-            OP_NO_ISOLATED_STORAGE,             // NO_ISOLATED_STORAGE
-            OP_PHONE_CALL_MICROPHONE,           // OP_PHONE_CALL_MICROPHONE
-            OP_PHONE_CALL_CAMERA,               // OP_PHONE_CALL_CAMERA
-            OP_RECORD_AUDIO_HOTWORD,            // RECORD_AUDIO_HOTWORD
-            OP_MANAGE_ONGOING_CALLS,            // MANAGE_ONGOING_CALLS
-            OP_MANAGE_CREDENTIALS,              // MANAGE_CREDENTIALS
-            OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
-            OP_RECORD_AUDIO_OUTPUT,             // RECORD_AUDIO_OUTPUT
-            OP_SCHEDULE_EXACT_ALARM,            // SCHEDULE_EXACT_ALARM
-            OP_FINE_LOCATION,                   // OP_FINE_LOCATION_SOURCE
-            OP_COARSE_LOCATION,                 // OP_COARSE_LOCATION_SOURCE
-            OP_MANAGE_MEDIA,                    // MANAGE_MEDIA
-            OP_BLUETOOTH_CONNECT,               // OP_BLUETOOTH_CONNECT
-            OP_UWB_RANGING,                     // OP_UWB_RANGING
-            OP_ACTIVITY_RECOGNITION,            // OP_ACTIVITY_RECOGNITION_SOURCE
-            OP_BLUETOOTH_ADVERTISE,             // OP_BLUETOOTH_ADVERTISE
-            OP_RECORD_INCOMING_PHONE_AUDIO,     // OP_RECORD_INCOMING_PHONE_AUDIO
-            OP_NEARBY_WIFI_DEVICES,             // OP_NEARBY_WIFI_DEVICES
-            OP_ESTABLISH_VPN_SERVICE,           // OP_ESTABLISH_VPN_SERVICE
-            OP_ESTABLISH_VPN_MANAGER,           // OP_ESTABLISH_VPN_MANAGER
-            OP_ACCESS_RESTRICTED_SETTINGS,      // OP_ACCESS_RESTRICTED_SETTINGS
-            OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,      // RECEIVE_SOUNDTRIGGER_AUDIO
-    };
-
-    /**
-     * This maps each operation to the public string constant for it.
-     */
-    private static String[] sOpToString = new String[]{
-            OPSTR_COARSE_LOCATION,
-            OPSTR_FINE_LOCATION,
-            OPSTR_GPS,
-            OPSTR_VIBRATE,
-            OPSTR_READ_CONTACTS,
-            OPSTR_WRITE_CONTACTS,
-            OPSTR_READ_CALL_LOG,
-            OPSTR_WRITE_CALL_LOG,
-            OPSTR_READ_CALENDAR,
-            OPSTR_WRITE_CALENDAR,
-            OPSTR_WIFI_SCAN,
-            OPSTR_POST_NOTIFICATION,
-            OPSTR_NEIGHBORING_CELLS,
-            OPSTR_CALL_PHONE,
-            OPSTR_READ_SMS,
-            OPSTR_WRITE_SMS,
-            OPSTR_RECEIVE_SMS,
-            OPSTR_RECEIVE_EMERGENCY_BROADCAST,
-            OPSTR_RECEIVE_MMS,
-            OPSTR_RECEIVE_WAP_PUSH,
-            OPSTR_SEND_SMS,
-            OPSTR_READ_ICC_SMS,
-            OPSTR_WRITE_ICC_SMS,
-            OPSTR_WRITE_SETTINGS,
-            OPSTR_SYSTEM_ALERT_WINDOW,
-            OPSTR_ACCESS_NOTIFICATIONS,
-            OPSTR_CAMERA,
-            OPSTR_RECORD_AUDIO,
-            OPSTR_PLAY_AUDIO,
-            OPSTR_READ_CLIPBOARD,
-            OPSTR_WRITE_CLIPBOARD,
-            OPSTR_TAKE_MEDIA_BUTTONS,
-            OPSTR_TAKE_AUDIO_FOCUS,
-            OPSTR_AUDIO_MASTER_VOLUME,
-            OPSTR_AUDIO_VOICE_VOLUME,
-            OPSTR_AUDIO_RING_VOLUME,
-            OPSTR_AUDIO_MEDIA_VOLUME,
-            OPSTR_AUDIO_ALARM_VOLUME,
-            OPSTR_AUDIO_NOTIFICATION_VOLUME,
-            OPSTR_AUDIO_BLUETOOTH_VOLUME,
-            OPSTR_WAKE_LOCK,
-            OPSTR_MONITOR_LOCATION,
-            OPSTR_MONITOR_HIGH_POWER_LOCATION,
-            OPSTR_GET_USAGE_STATS,
-            OPSTR_MUTE_MICROPHONE,
-            OPSTR_TOAST_WINDOW,
-            OPSTR_PROJECT_MEDIA,
-            OPSTR_ACTIVATE_VPN,
-            OPSTR_WRITE_WALLPAPER,
-            OPSTR_ASSIST_STRUCTURE,
-            OPSTR_ASSIST_SCREENSHOT,
-            OPSTR_READ_PHONE_STATE,
-            OPSTR_ADD_VOICEMAIL,
-            OPSTR_USE_SIP,
-            OPSTR_PROCESS_OUTGOING_CALLS,
-            OPSTR_USE_FINGERPRINT,
-            OPSTR_BODY_SENSORS,
-            OPSTR_READ_CELL_BROADCASTS,
-            OPSTR_MOCK_LOCATION,
-            OPSTR_READ_EXTERNAL_STORAGE,
-            OPSTR_WRITE_EXTERNAL_STORAGE,
-            OPSTR_TURN_SCREEN_ON,
-            OPSTR_GET_ACCOUNTS,
-            OPSTR_RUN_IN_BACKGROUND,
-            OPSTR_AUDIO_ACCESSIBILITY_VOLUME,
-            OPSTR_READ_PHONE_NUMBERS,
-            OPSTR_REQUEST_INSTALL_PACKAGES,
-            OPSTR_PICTURE_IN_PICTURE,
-            OPSTR_INSTANT_APP_START_FOREGROUND,
-            OPSTR_ANSWER_PHONE_CALLS,
-            OPSTR_RUN_ANY_IN_BACKGROUND,
-            OPSTR_CHANGE_WIFI_STATE,
-            OPSTR_REQUEST_DELETE_PACKAGES,
-            OPSTR_BIND_ACCESSIBILITY_SERVICE,
-            OPSTR_ACCEPT_HANDOVER,
-            OPSTR_MANAGE_IPSEC_TUNNELS,
-            OPSTR_START_FOREGROUND,
-            OPSTR_BLUETOOTH_SCAN,
-            OPSTR_USE_BIOMETRIC,
-            OPSTR_ACTIVITY_RECOGNITION,
-            OPSTR_SMS_FINANCIAL_TRANSACTIONS,
-            OPSTR_READ_MEDIA_AUDIO,
-            OPSTR_WRITE_MEDIA_AUDIO,
-            OPSTR_READ_MEDIA_VIDEO,
-            OPSTR_WRITE_MEDIA_VIDEO,
-            OPSTR_READ_MEDIA_IMAGES,
-            OPSTR_WRITE_MEDIA_IMAGES,
-            OPSTR_LEGACY_STORAGE,
-            OPSTR_ACCESS_ACCESSIBILITY,
-            OPSTR_READ_DEVICE_IDENTIFIERS,
-            OPSTR_ACCESS_MEDIA_LOCATION,
-            OPSTR_QUERY_ALL_PACKAGES,
-            OPSTR_MANAGE_EXTERNAL_STORAGE,
-            OPSTR_INTERACT_ACROSS_PROFILES,
-            OPSTR_ACTIVATE_PLATFORM_VPN,
-            OPSTR_LOADER_USAGE_STATS,
-            "", // deprecated
-            OPSTR_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
-            OPSTR_AUTO_REVOKE_MANAGED_BY_INSTALLER,
-            OPSTR_NO_ISOLATED_STORAGE,
-            OPSTR_PHONE_CALL_MICROPHONE,
-            OPSTR_PHONE_CALL_CAMERA,
-            OPSTR_RECORD_AUDIO_HOTWORD,
-            OPSTR_MANAGE_ONGOING_CALLS,
-            OPSTR_MANAGE_CREDENTIALS,
-            OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
-            OPSTR_RECORD_AUDIO_OUTPUT,
-            OPSTR_SCHEDULE_EXACT_ALARM,
-            OPSTR_FINE_LOCATION_SOURCE,
-            OPSTR_COARSE_LOCATION_SOURCE,
-            OPSTR_MANAGE_MEDIA,
-            OPSTR_BLUETOOTH_CONNECT,
-            OPSTR_UWB_RANGING,
-            OPSTR_ACTIVITY_RECOGNITION_SOURCE,
-            OPSTR_BLUETOOTH_ADVERTISE,
-            OPSTR_RECORD_INCOMING_PHONE_AUDIO,
-            OPSTR_NEARBY_WIFI_DEVICES,
-            OPSTR_ESTABLISH_VPN_SERVICE,
-            OPSTR_ESTABLISH_VPN_MANAGER,
-            OPSTR_ACCESS_RESTRICTED_SETTINGS,
-            OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO,
-    };
-
-    /**
-     * This provides a simple name for each operation to be used
-     * in debug output.
-     */
-    private static String[] sOpNames = new String[] {
-            "COARSE_LOCATION",
-            "FINE_LOCATION",
-            "GPS",
-            "VIBRATE",
-            "READ_CONTACTS",
-            "WRITE_CONTACTS",
-            "READ_CALL_LOG",
-            "WRITE_CALL_LOG",
-            "READ_CALENDAR",
-            "WRITE_CALENDAR",
-            "WIFI_SCAN",
-            "POST_NOTIFICATION",
-            "NEIGHBORING_CELLS",
-            "CALL_PHONE",
-            "READ_SMS",
-            "WRITE_SMS",
-            "RECEIVE_SMS",
-            "RECEIVE_EMERGECY_SMS",
-            "RECEIVE_MMS",
-            "RECEIVE_WAP_PUSH",
-            "SEND_SMS",
-            "READ_ICC_SMS",
-            "WRITE_ICC_SMS",
-            "WRITE_SETTINGS",
-            "SYSTEM_ALERT_WINDOW",
-            "ACCESS_NOTIFICATIONS",
-            "CAMERA",
-            "RECORD_AUDIO",
-            "PLAY_AUDIO",
-            "READ_CLIPBOARD",
-            "WRITE_CLIPBOARD",
-            "TAKE_MEDIA_BUTTONS",
-            "TAKE_AUDIO_FOCUS",
-            "AUDIO_MASTER_VOLUME",
-            "AUDIO_VOICE_VOLUME",
-            "AUDIO_RING_VOLUME",
-            "AUDIO_MEDIA_VOLUME",
-            "AUDIO_ALARM_VOLUME",
-            "AUDIO_NOTIFICATION_VOLUME",
-            "AUDIO_BLUETOOTH_VOLUME",
-            "WAKE_LOCK",
-            "MONITOR_LOCATION",
-            "MONITOR_HIGH_POWER_LOCATION",
-            "GET_USAGE_STATS",
-            "MUTE_MICROPHONE",
-            "TOAST_WINDOW",
-            "PROJECT_MEDIA",
-            "ACTIVATE_VPN",
-            "WRITE_WALLPAPER",
-            "ASSIST_STRUCTURE",
-            "ASSIST_SCREENSHOT",
-            "READ_PHONE_STATE",
-            "ADD_VOICEMAIL",
-            "USE_SIP",
-            "PROCESS_OUTGOING_CALLS",
-            "USE_FINGERPRINT",
-            "BODY_SENSORS",
-            "READ_CELL_BROADCASTS",
-            "MOCK_LOCATION",
-            "READ_EXTERNAL_STORAGE",
-            "WRITE_EXTERNAL_STORAGE",
-            "TURN_ON_SCREEN",
-            "GET_ACCOUNTS",
-            "RUN_IN_BACKGROUND",
-            "AUDIO_ACCESSIBILITY_VOLUME",
-            "READ_PHONE_NUMBERS",
-            "REQUEST_INSTALL_PACKAGES",
-            "PICTURE_IN_PICTURE",
-            "INSTANT_APP_START_FOREGROUND",
-            "ANSWER_PHONE_CALLS",
-            "RUN_ANY_IN_BACKGROUND",
-            "CHANGE_WIFI_STATE",
-            "REQUEST_DELETE_PACKAGES",
-            "BIND_ACCESSIBILITY_SERVICE",
-            "ACCEPT_HANDOVER",
-            "MANAGE_IPSEC_TUNNELS",
-            "START_FOREGROUND",
-            "BLUETOOTH_SCAN",
-            "USE_BIOMETRIC",
-            "ACTIVITY_RECOGNITION",
-            "SMS_FINANCIAL_TRANSACTIONS",
-            "READ_MEDIA_AUDIO",
-            "WRITE_MEDIA_AUDIO",
-            "READ_MEDIA_VIDEO",
-            "WRITE_MEDIA_VIDEO",
-            "READ_MEDIA_IMAGES",
-            "WRITE_MEDIA_IMAGES",
-            "LEGACY_STORAGE",
-            "ACCESS_ACCESSIBILITY",
-            "READ_DEVICE_IDENTIFIERS",
-            "ACCESS_MEDIA_LOCATION",
-            "QUERY_ALL_PACKAGES",
-            "MANAGE_EXTERNAL_STORAGE",
-            "INTERACT_ACROSS_PROFILES",
-            "ACTIVATE_PLATFORM_VPN",
-            "LOADER_USAGE_STATS",
-            "deprecated",
-            "AUTO_REVOKE_PERMISSIONS_IF_UNUSED",
-            "AUTO_REVOKE_MANAGED_BY_INSTALLER",
-            "NO_ISOLATED_STORAGE",
-            "PHONE_CALL_MICROPHONE",
-            "PHONE_CALL_CAMERA",
-            "RECORD_AUDIO_HOTWORD",
-            "MANAGE_ONGOING_CALLS",
-            "MANAGE_CREDENTIALS",
-            "USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER",
-            "RECORD_AUDIO_OUTPUT",
-            "SCHEDULE_EXACT_ALARM",
-            "FINE_LOCATION_SOURCE",
-            "COARSE_LOCATION_SOURCE",
-            "MANAGE_MEDIA",
-            "BLUETOOTH_CONNECT",
-            "UWB_RANGING",
-            "ACTIVITY_RECOGNITION_SOURCE",
-            "BLUETOOTH_ADVERTISE",
-            "RECORD_INCOMING_PHONE_AUDIO",
-            "NEARBY_WIFI_DEVICES",
-            "ESTABLISH_VPN_SERVICE",
-            "ESTABLISH_VPN_MANAGER",
-            "ACCESS_RESTRICTED_SETTINGS",
-            "RECEIVE_SOUNDTRIGGER_AUDIO",
-    };
-
-    /**
-     * This optionally maps a permission to an operation.  If there
-     * is no permission associated with an operation, it is null.
-     */
-    @UnsupportedAppUsage
-    private static String[] sOpPerms = new String[] {
-            android.Manifest.permission.ACCESS_COARSE_LOCATION,
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-            null,
-            android.Manifest.permission.VIBRATE,
-            android.Manifest.permission.READ_CONTACTS,
-            android.Manifest.permission.WRITE_CONTACTS,
-            android.Manifest.permission.READ_CALL_LOG,
-            android.Manifest.permission.WRITE_CALL_LOG,
-            android.Manifest.permission.READ_CALENDAR,
-            android.Manifest.permission.WRITE_CALENDAR,
-            android.Manifest.permission.ACCESS_WIFI_STATE,
-            android.Manifest.permission.POST_NOTIFICATIONS,
-            null, // neighboring cells shares the coarse location perm
-            android.Manifest.permission.CALL_PHONE,
-            android.Manifest.permission.READ_SMS,
-            null, // no permission required for writing sms
-            android.Manifest.permission.RECEIVE_SMS,
-            android.Manifest.permission.RECEIVE_EMERGENCY_BROADCAST,
-            android.Manifest.permission.RECEIVE_MMS,
-            android.Manifest.permission.RECEIVE_WAP_PUSH,
-            android.Manifest.permission.SEND_SMS,
-            android.Manifest.permission.READ_SMS,
-            null, // no permission required for writing icc sms
-            android.Manifest.permission.WRITE_SETTINGS,
-            android.Manifest.permission.SYSTEM_ALERT_WINDOW,
-            android.Manifest.permission.ACCESS_NOTIFICATIONS,
-            android.Manifest.permission.CAMERA,
-            android.Manifest.permission.RECORD_AUDIO,
-            null, // no permission for playing audio
-            null, // no permission for reading clipboard
-            null, // no permission for writing clipboard
-            null, // no permission for taking media buttons
-            null, // no permission for taking audio focus
-            null, // no permission for changing global volume
-            null, // no permission for changing voice volume
-            null, // no permission for changing ring volume
-            null, // no permission for changing media volume
-            null, // no permission for changing alarm volume
-            null, // no permission for changing notification volume
-            null, // no permission for changing bluetooth volume
-            android.Manifest.permission.WAKE_LOCK,
-            null, // no permission for generic location monitoring
-            null, // no permission for high power location monitoring
-            android.Manifest.permission.PACKAGE_USAGE_STATS,
-            null, // no permission for muting/unmuting microphone
-            null, // no permission for displaying toasts
-            null, // no permission for projecting media
-            null, // no permission for activating vpn
-            null, // no permission for supporting wallpaper
-            null, // no permission for receiving assist structure
-            null, // no permission for receiving assist screenshot
-            Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.ADD_VOICEMAIL,
-            Manifest.permission.USE_SIP,
-            Manifest.permission.PROCESS_OUTGOING_CALLS,
-            Manifest.permission.USE_FINGERPRINT,
-            Manifest.permission.BODY_SENSORS,
-            Manifest.permission.READ_CELL_BROADCASTS,
-            null,
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.TURN_SCREEN_ON,
-            Manifest.permission.GET_ACCOUNTS,
-            null, // no permission for running in background
-            null, // no permission for changing accessibility volume
-            Manifest.permission.READ_PHONE_NUMBERS,
-            Manifest.permission.REQUEST_INSTALL_PACKAGES,
-            null, // no permission for entering picture-in-picture on hide
-            Manifest.permission.INSTANT_APP_FOREGROUND_SERVICE,
-            Manifest.permission.ANSWER_PHONE_CALLS,
-            null, // no permission for OP_RUN_ANY_IN_BACKGROUND
-            Manifest.permission.CHANGE_WIFI_STATE,
-            Manifest.permission.REQUEST_DELETE_PACKAGES,
-            Manifest.permission.BIND_ACCESSIBILITY_SERVICE,
-            Manifest.permission.ACCEPT_HANDOVER,
-            Manifest.permission.MANAGE_IPSEC_TUNNELS,
-            Manifest.permission.FOREGROUND_SERVICE,
-            Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.USE_BIOMETRIC,
-            Manifest.permission.ACTIVITY_RECOGNITION,
-            Manifest.permission.SMS_FINANCIAL_TRANSACTIONS,
-            Manifest.permission.READ_MEDIA_AUDIO,
-            null, // no permission for OP_WRITE_MEDIA_AUDIO
-            Manifest.permission.READ_MEDIA_VIDEO,
-            null, // no permission for OP_WRITE_MEDIA_VIDEO
-            Manifest.permission.READ_MEDIA_IMAGES,
-            null, // no permission for OP_WRITE_MEDIA_IMAGES
-            null, // no permission for OP_LEGACY_STORAGE
-            null, // no permission for OP_ACCESS_ACCESSIBILITY
-            null, // no direct permission for OP_READ_DEVICE_IDENTIFIERS
-            Manifest.permission.ACCESS_MEDIA_LOCATION,
-            null, // no permission for OP_QUERY_ALL_PACKAGES
-            Manifest.permission.MANAGE_EXTERNAL_STORAGE,
-            android.Manifest.permission.INTERACT_ACROSS_PROFILES,
-            null, // no permission for OP_ACTIVATE_PLATFORM_VPN
-            android.Manifest.permission.LOADER_USAGE_STATS,
-            null, // deprecated operation
-            null, // no permission for OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED
-            null, // no permission for OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
-            null, // no permission for OP_NO_ISOLATED_STORAGE
-            null, // no permission for OP_PHONE_CALL_MICROPHONE
-            null, // no permission for OP_PHONE_CALL_CAMERA
-            null, // no permission for OP_RECORD_AUDIO_HOTWORD
-            Manifest.permission.MANAGE_ONGOING_CALLS,
-            null, // no permission for OP_MANAGE_CREDENTIALS
-            Manifest.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
-            null, // no permission for OP_RECORD_AUDIO_OUTPUT
-            Manifest.permission.SCHEDULE_EXACT_ALARM,
-            null, // no permission for OP_ACCESS_FINE_LOCATION_SOURCE,
-            null, // no permission for OP_ACCESS_COARSE_LOCATION_SOURCE,
-            Manifest.permission.MANAGE_MEDIA,
-            Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.UWB_RANGING,
-            null, // no permission for OP_ACTIVITY_RECOGNITION_SOURCE,
-            Manifest.permission.BLUETOOTH_ADVERTISE,
-            null, // no permission for OP_RECORD_INCOMING_PHONE_AUDIO,
-            Manifest.permission.NEARBY_WIFI_DEVICES,
-            null, // no permission for OP_ESTABLISH_VPN_SERVICE
-            null, // no permission for OP_ESTABLISH_VPN_MANAGER
-            null, // no permission for OP_ACCESS_RESTRICTED_SETTINGS,
-            null, // no permission for OP_RECEIVE_SOUNDTRIGGER_AUDIO
-    };
-
-    /**
-     * Specifies whether an Op should be restricted by a user restriction.
-     * Each Op should be filled with a restriction string from UserManager or
-     * null to specify it is not affected by any user restriction.
-     */
-    private static String[] sOpRestrictions = new String[] {
-            UserManager.DISALLOW_SHARE_LOCATION, //COARSE_LOCATION
-            UserManager.DISALLOW_SHARE_LOCATION, //FINE_LOCATION
-            UserManager.DISALLOW_SHARE_LOCATION, //GPS
-            null, //VIBRATE
-            null, //READ_CONTACTS
-            null, //WRITE_CONTACTS
-            UserManager.DISALLOW_OUTGOING_CALLS, //READ_CALL_LOG
-            UserManager.DISALLOW_OUTGOING_CALLS, //WRITE_CALL_LOG
-            null, //READ_CALENDAR
-            null, //WRITE_CALENDAR
-            UserManager.DISALLOW_SHARE_LOCATION, //WIFI_SCAN
-            null, //POST_NOTIFICATION
-            null, //NEIGHBORING_CELLS
-            null, //CALL_PHONE
-            UserManager.DISALLOW_SMS, //READ_SMS
-            UserManager.DISALLOW_SMS, //WRITE_SMS
-            UserManager.DISALLOW_SMS, //RECEIVE_SMS
-            null, //RECEIVE_EMERGENCY_SMS
-            UserManager.DISALLOW_SMS, //RECEIVE_MMS
-            null, //RECEIVE_WAP_PUSH
-            UserManager.DISALLOW_SMS, //SEND_SMS
-            UserManager.DISALLOW_SMS, //READ_ICC_SMS
-            UserManager.DISALLOW_SMS, //WRITE_ICC_SMS
-            null, //WRITE_SETTINGS
-            UserManager.DISALLOW_CREATE_WINDOWS, //SYSTEM_ALERT_WINDOW
-            null, //ACCESS_NOTIFICATIONS
-            UserManager.DISALLOW_CAMERA, //CAMERA
-            UserManager.DISALLOW_RECORD_AUDIO, //RECORD_AUDIO
-            null, //PLAY_AUDIO
-            null, //READ_CLIPBOARD
-            null, //WRITE_CLIPBOARD
-            null, //TAKE_MEDIA_BUTTONS
-            null, //TAKE_AUDIO_FOCUS
-            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_MASTER_VOLUME
-            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_VOICE_VOLUME
-            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_RING_VOLUME
-            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_MEDIA_VOLUME
-            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_ALARM_VOLUME
-            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_NOTIFICATION_VOLUME
-            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_BLUETOOTH_VOLUME
-            null, //WAKE_LOCK
-            UserManager.DISALLOW_SHARE_LOCATION, //MONITOR_LOCATION
-            UserManager.DISALLOW_SHARE_LOCATION, //MONITOR_HIGH_POWER_LOCATION
-            null, //GET_USAGE_STATS
-            UserManager.DISALLOW_UNMUTE_MICROPHONE, // MUTE_MICROPHONE
-            UserManager.DISALLOW_CREATE_WINDOWS, // TOAST_WINDOW
-            null, //PROJECT_MEDIA
-            null, // ACTIVATE_VPN
-            UserManager.DISALLOW_WALLPAPER, // WRITE_WALLPAPER
-            null, // ASSIST_STRUCTURE
-            null, // ASSIST_SCREENSHOT
-            null, // READ_PHONE_STATE
-            null, // ADD_VOICEMAIL
-            null, // USE_SIP
-            null, // PROCESS_OUTGOING_CALLS
-            null, // USE_FINGERPRINT
-            null, // BODY_SENSORS
-            null, // READ_CELL_BROADCASTS
-            null, // MOCK_LOCATION
-            null, // READ_EXTERNAL_STORAGE
-            null, // WRITE_EXTERNAL_STORAGE
-            null, // TURN_SCREEN_ON
-            null, // GET_ACCOUNTS
-            null, // RUN_IN_BACKGROUND
-            UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_ACCESSIBILITY_VOLUME
-            null, // READ_PHONE_NUMBERS
-            null, // REQUEST_INSTALL_PACKAGES
-            null, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
-            null, // INSTANT_APP_START_FOREGROUND
-            null, // ANSWER_PHONE_CALLS
-            null, // OP_RUN_ANY_IN_BACKGROUND
-            null, // OP_CHANGE_WIFI_STATE
-            null, // REQUEST_DELETE_PACKAGES
-            null, // OP_BIND_ACCESSIBILITY_SERVICE
-            null, // ACCEPT_HANDOVER
-            null, // MANAGE_IPSEC_TUNNELS
-            null, // START_FOREGROUND
-            null, // maybe should be UserManager.DISALLOW_SHARE_LOCATION, //BLUETOOTH_SCAN
-            null, // USE_BIOMETRIC
-            null, // ACTIVITY_RECOGNITION
-            UserManager.DISALLOW_SMS, // SMS_FINANCIAL_TRANSACTIONS
-            null, // READ_MEDIA_AUDIO
-            null, // WRITE_MEDIA_AUDIO
-            null, // READ_MEDIA_VIDEO
-            null, // WRITE_MEDIA_VIDEO
-            null, // READ_MEDIA_IMAGES
-            null, // WRITE_MEDIA_IMAGES
-            null, // LEGACY_STORAGE
-            null, // ACCESS_ACCESSIBILITY
-            null, // READ_DEVICE_IDENTIFIERS
-            null, // ACCESS_MEDIA_LOCATION
-            null, // QUERY_ALL_PACKAGES
-            null, // MANAGE_EXTERNAL_STORAGE
-            null, // INTERACT_ACROSS_PROFILES
-            null, // ACTIVATE_PLATFORM_VPN
-            null, // LOADER_USAGE_STATS
-            null, // deprecated operation
-            null, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
-            null, // AUTO_REVOKE_MANAGED_BY_INSTALLER
-            null, // NO_ISOLATED_STORAGE
-            null, // PHONE_CALL_MICROPHONE
-            null, // PHONE_CALL_MICROPHONE
-            null, // RECORD_AUDIO_HOTWORD
-            null, // MANAGE_ONGOING_CALLS
-            null, // MANAGE_CREDENTIALS
-            null, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
-            null, // RECORD_AUDIO_OUTPUT
-            null, // SCHEDULE_EXACT_ALARM
-            null, // ACCESS_FINE_LOCATION_SOURCE
-            null, // ACCESS_COARSE_LOCATION_SOURCE
-            null, // MANAGE_MEDIA
-            null, // BLUETOOTH_CONNECT
-            null, // UWB_RANGING
-            null, // ACTIVITY_RECOGNITION_SOURCE
-            null, // BLUETOOTH_ADVERTISE
-            null, // RECORD_INCOMING_PHONE_AUDIO
-            null, // NEARBY_WIFI_DEVICES
-            null, // ESTABLISH_VPN_SERVICE
-            null, // ESTABLISH_VPN_MANAGER
-            null, // ACCESS_RESTRICTED_SETTINGS
-            null, // RECEIVE_SOUNDTRIGGER_AUDIO
-    };
-
-    /**
-     * In which cases should an app be allowed to bypass the {@link #setUserRestriction user
-     * restriction} for a certain app-op.
-     */
-    private static RestrictionBypass[] sOpAllowSystemRestrictionBypass = new RestrictionBypass[] {
-            new RestrictionBypass(true, false, false), //COARSE_LOCATION
-            new RestrictionBypass(true, false, false), //FINE_LOCATION
-            null, //GPS
-            null, //VIBRATE
-            null, //READ_CONTACTS
-            null, //WRITE_CONTACTS
-            null, //READ_CALL_LOG
-            null, //WRITE_CALL_LOG
-            null, //READ_CALENDAR
-            null, //WRITE_CALENDAR
-            new RestrictionBypass(false, true, false), //WIFI_SCAN
-            null, //POST_NOTIFICATION
-            null, //NEIGHBORING_CELLS
-            null, //CALL_PHONE
-            null, //READ_SMS
-            null, //WRITE_SMS
-            null, //RECEIVE_SMS
-            null, //RECEIVE_EMERGECY_SMS
-            null, //RECEIVE_MMS
-            null, //RECEIVE_WAP_PUSH
-            null, //SEND_SMS
-            null, //READ_ICC_SMS
-            null, //WRITE_ICC_SMS
-            null, //WRITE_SETTINGS
-            new RestrictionBypass(false, true, false), //SYSTEM_ALERT_WINDOW
-            null, //ACCESS_NOTIFICATIONS
-            null, //CAMERA
-            new RestrictionBypass(false, false, true), //RECORD_AUDIO
-            null, //PLAY_AUDIO
-            null, //READ_CLIPBOARD
-            null, //WRITE_CLIPBOARD
-            null, //TAKE_MEDIA_BUTTONS
-            null, //TAKE_AUDIO_FOCUS
-            null, //AUDIO_MASTER_VOLUME
-            null, //AUDIO_VOICE_VOLUME
-            null, //AUDIO_RING_VOLUME
-            null, //AUDIO_MEDIA_VOLUME
-            null, //AUDIO_ALARM_VOLUME
-            null, //AUDIO_NOTIFICATION_VOLUME
-            null, //AUDIO_BLUETOOTH_VOLUME
-            null, //WAKE_LOCK
-            null, //MONITOR_LOCATION
-            null, //MONITOR_HIGH_POWER_LOCATION
-            null, //GET_USAGE_STATS
-            null, //MUTE_MICROPHONE
-            new RestrictionBypass(false, true, false), //TOAST_WINDOW
-            null, //PROJECT_MEDIA
-            null, //ACTIVATE_VPN
-            null, //WALLPAPER
-            null, //ASSIST_STRUCTURE
-            null, //ASSIST_SCREENSHOT
-            null, //READ_PHONE_STATE
-            null, //ADD_VOICEMAIL
-            null, // USE_SIP
-            null, // PROCESS_OUTGOING_CALLS
-            null, // USE_FINGERPRINT
-            null, // BODY_SENSORS
-            null, // READ_CELL_BROADCASTS
-            null, // MOCK_LOCATION
-            null, // READ_EXTERNAL_STORAGE
-            null, // WRITE_EXTERNAL_STORAGE
-            null, // TURN_SCREEN_ON
-            null, // GET_ACCOUNTS
-            null, // RUN_IN_BACKGROUND
-            null, // AUDIO_ACCESSIBILITY_VOLUME
-            null, // READ_PHONE_NUMBERS
-            null, // REQUEST_INSTALL_PACKAGES
-            null, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
-            null, // INSTANT_APP_START_FOREGROUND
-            null, // ANSWER_PHONE_CALLS
-            null, // OP_RUN_ANY_IN_BACKGROUND
-            null, // OP_CHANGE_WIFI_STATE
-            null, // OP_REQUEST_DELETE_PACKAGES
-            null, // OP_BIND_ACCESSIBILITY_SERVICE
-            null, // ACCEPT_HANDOVER
-            null, // MANAGE_IPSEC_HANDOVERS
-            null, // START_FOREGROUND
-            new RestrictionBypass(false, true, false), // BLUETOOTH_SCAN
-            null, // USE_BIOMETRIC
-            null, // ACTIVITY_RECOGNITION
-            null, // SMS_FINANCIAL_TRANSACTIONS
-            null, // READ_MEDIA_AUDIO
-            null, // WRITE_MEDIA_AUDIO
-            null, // READ_MEDIA_VIDEO
-            null, // WRITE_MEDIA_VIDEO
-            null, // READ_MEDIA_IMAGES
-            null, // WRITE_MEDIA_IMAGES
-            null, // LEGACY_STORAGE
-            null, // ACCESS_ACCESSIBILITY
-            null, // READ_DEVICE_IDENTIFIERS
-            null, // ACCESS_MEDIA_LOCATION
-            null, // QUERY_ALL_PACKAGES
-            null, // MANAGE_EXTERNAL_STORAGE
-            null, // INTERACT_ACROSS_PROFILES
-            null, // ACTIVATE_PLATFORM_VPN
-            null, // LOADER_USAGE_STATS
-            null, // deprecated operation
-            null, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
-            null, // AUTO_REVOKE_MANAGED_BY_INSTALLER
-            null, // NO_ISOLATED_STORAGE
-            null, // PHONE_CALL_MICROPHONE
-            null, // PHONE_CALL_CAMERA
-            null, // RECORD_AUDIO_HOTWORD
-            null, // MANAGE_ONGOING_CALLS
-            null, // MANAGE_CREDENTIALS
-            null, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
-            null, // RECORD_AUDIO_OUTPUT
-            null, // SCHEDULE_EXACT_ALARM
-            null, // ACCESS_FINE_LOCATION_SOURCE
-            null, // ACCESS_COARSE_LOCATION_SOURCE
-            null, // MANAGE_MEDIA
-            null, // BLUETOOTH_CONNECT
-            null, // UWB_RANGING
-            null, // ACTIVITY_RECOGNITION_SOURCE
-            null, // BLUETOOTH_ADVERTISE
-            null, // RECORD_INCOMING_PHONE_AUDIO
-            null, // NEARBY_WIFI_DEVICES
-            null, // ESTABLISH_VPN_SERVICE
-            null, // ESTABLISH_VPN_MANAGER
-            null, // ACCESS_RESTRICTED_SETTINGS
-            null, // RECEIVE_SOUNDTRIGGER_AUDIO
-    };
-
-    /**
-     * This specifies the default mode for each operation.
-     */
-    private static int[] sOpDefaultMode = new int[] {
-            AppOpsManager.MODE_ALLOWED, // COARSE_LOCATION
-            AppOpsManager.MODE_ALLOWED, // FINE_LOCATION
-            AppOpsManager.MODE_ALLOWED, // GPS
-            AppOpsManager.MODE_ALLOWED, // VIBRATE
-            AppOpsManager.MODE_ALLOWED, // READ_CONTACTS
-            AppOpsManager.MODE_ALLOWED, // WRITE_CONTACTS
-            AppOpsManager.MODE_ALLOWED, // READ_CALL_LOG
-            AppOpsManager.MODE_ALLOWED, // WRITE_CALL_LOG
-            AppOpsManager.MODE_ALLOWED, // READ_CALENDAR
-            AppOpsManager.MODE_ALLOWED, // WRITE_CALENDAR
-            AppOpsManager.MODE_ALLOWED, // WIFI_SCAN
-            AppOpsManager.MODE_ALLOWED, // POST_NOTIFICATION
-            AppOpsManager.MODE_ALLOWED, // NEIGHBORING_CELLS
-            AppOpsManager.MODE_ALLOWED, // CALL_PHONE
-            AppOpsManager.MODE_ALLOWED, // READ_SMS
-            AppOpsManager.MODE_IGNORED, // WRITE_SMS
-            AppOpsManager.MODE_ALLOWED, // RECEIVE_SMS
-            AppOpsManager.MODE_ALLOWED, // RECEIVE_EMERGENCY_BROADCAST
-            AppOpsManager.MODE_ALLOWED, // RECEIVE_MMS
-            AppOpsManager.MODE_ALLOWED, // RECEIVE_WAP_PUSH
-            AppOpsManager.MODE_ALLOWED, // SEND_SMS
-            AppOpsManager.MODE_ALLOWED, // READ_ICC_SMS
-            AppOpsManager.MODE_ALLOWED, // WRITE_ICC_SMS
-            AppOpsManager.MODE_DEFAULT, // WRITE_SETTINGS
-            getSystemAlertWindowDefault(), // SYSTEM_ALERT_WINDOW
-            AppOpsManager.MODE_ALLOWED, // ACCESS_NOTIFICATIONS
-            AppOpsManager.MODE_ALLOWED, // CAMERA
-            AppOpsManager.MODE_ALLOWED, // RECORD_AUDIO
-            AppOpsManager.MODE_ALLOWED, // PLAY_AUDIO
-            AppOpsManager.MODE_ALLOWED, // READ_CLIPBOARD
-            AppOpsManager.MODE_ALLOWED, // WRITE_CLIPBOARD
-            AppOpsManager.MODE_ALLOWED, // TAKE_MEDIA_BUTTONS
-            AppOpsManager.MODE_ALLOWED, // TAKE_AUDIO_FOCUS
-            AppOpsManager.MODE_ALLOWED, // AUDIO_MASTER_VOLUME
-            AppOpsManager.MODE_ALLOWED, // AUDIO_VOICE_VOLUME
-            AppOpsManager.MODE_ALLOWED, // AUDIO_RING_VOLUME
-            AppOpsManager.MODE_ALLOWED, // AUDIO_MEDIA_VOLUME
-            AppOpsManager.MODE_ALLOWED, // AUDIO_ALARM_VOLUME
-            AppOpsManager.MODE_ALLOWED, // AUDIO_NOTIFICATION_VOLUME
-            AppOpsManager.MODE_ALLOWED, // AUDIO_BLUETOOTH_VOLUME
-            AppOpsManager.MODE_ALLOWED, // WAKE_LOCK
-            AppOpsManager.MODE_ALLOWED, // MONITOR_LOCATION
-            AppOpsManager.MODE_ALLOWED, // MONITOR_HIGH_POWER_LOCATION
-            AppOpsManager.MODE_DEFAULT, // GET_USAGE_STATS
-            AppOpsManager.MODE_ALLOWED, // MUTE_MICROPHONE
-            AppOpsManager.MODE_ALLOWED, // TOAST_WINDOW
-            AppOpsManager.MODE_IGNORED, // PROJECT_MEDIA
-            AppOpsManager.MODE_IGNORED, // ACTIVATE_VPN
-            AppOpsManager.MODE_ALLOWED, // WRITE_WALLPAPER
-            AppOpsManager.MODE_ALLOWED, // ASSIST_STRUCTURE
-            AppOpsManager.MODE_ALLOWED, // ASSIST_SCREENSHOT
-            AppOpsManager.MODE_ALLOWED, // READ_PHONE_STATE
-            AppOpsManager.MODE_ALLOWED, // ADD_VOICEMAIL
-            AppOpsManager.MODE_ALLOWED, // USE_SIP
-            AppOpsManager.MODE_ALLOWED, // PROCESS_OUTGOING_CALLS
-            AppOpsManager.MODE_ALLOWED, // USE_FINGERPRINT
-            AppOpsManager.MODE_ALLOWED, // BODY_SENSORS
-            AppOpsManager.MODE_ALLOWED, // READ_CELL_BROADCASTS
-            AppOpsManager.MODE_ERRORED, // MOCK_LOCATION
-            AppOpsManager.MODE_ALLOWED, // READ_EXTERNAL_STORAGE
-            AppOpsManager.MODE_ALLOWED, // WRITE_EXTERNAL_STORAGE
-            AppOpsManager.MODE_ERRORED, // TURN_SCREEN_ON
-            AppOpsManager.MODE_ALLOWED, // GET_ACCOUNTS
-            AppOpsManager.MODE_ALLOWED, // RUN_IN_BACKGROUND
-            AppOpsManager.MODE_ALLOWED, // AUDIO_ACCESSIBILITY_VOLUME
-            AppOpsManager.MODE_ALLOWED, // READ_PHONE_NUMBERS
-            AppOpsManager.MODE_DEFAULT, // REQUEST_INSTALL_PACKAGES
-            AppOpsManager.MODE_ALLOWED, // PICTURE_IN_PICTURE
-            AppOpsManager.MODE_DEFAULT, // INSTANT_APP_START_FOREGROUND
-            AppOpsManager.MODE_ALLOWED, // ANSWER_PHONE_CALLS
-            AppOpsManager.MODE_ALLOWED, // RUN_ANY_IN_BACKGROUND
-            AppOpsManager.MODE_ALLOWED, // CHANGE_WIFI_STATE
-            AppOpsManager.MODE_ALLOWED, // REQUEST_DELETE_PACKAGES
-            AppOpsManager.MODE_ALLOWED, // BIND_ACCESSIBILITY_SERVICE
-            AppOpsManager.MODE_ALLOWED, // ACCEPT_HANDOVER
-            AppOpsManager.MODE_ERRORED, // MANAGE_IPSEC_TUNNELS
-            AppOpsManager.MODE_ALLOWED, // START_FOREGROUND
-            AppOpsManager.MODE_ALLOWED, // BLUETOOTH_SCAN
-            AppOpsManager.MODE_ALLOWED, // USE_BIOMETRIC
-            AppOpsManager.MODE_ALLOWED, // ACTIVITY_RECOGNITION
-            AppOpsManager.MODE_DEFAULT, // SMS_FINANCIAL_TRANSACTIONS
-            AppOpsManager.MODE_ALLOWED, // READ_MEDIA_AUDIO
-            AppOpsManager.MODE_ERRORED, // WRITE_MEDIA_AUDIO
-            AppOpsManager.MODE_ALLOWED, // READ_MEDIA_VIDEO
-            AppOpsManager.MODE_ERRORED, // WRITE_MEDIA_VIDEO
-            AppOpsManager.MODE_ALLOWED, // READ_MEDIA_IMAGES
-            AppOpsManager.MODE_ERRORED, // WRITE_MEDIA_IMAGES
-            AppOpsManager.MODE_DEFAULT, // LEGACY_STORAGE
-            AppOpsManager.MODE_ALLOWED, // ACCESS_ACCESSIBILITY
-            AppOpsManager.MODE_ERRORED, // READ_DEVICE_IDENTIFIERS
-            AppOpsManager.MODE_ALLOWED, // ALLOW_MEDIA_LOCATION
-            AppOpsManager.MODE_DEFAULT, // QUERY_ALL_PACKAGES
-            AppOpsManager.MODE_DEFAULT, // MANAGE_EXTERNAL_STORAGE
-            AppOpsManager.MODE_DEFAULT, // INTERACT_ACROSS_PROFILES
-            AppOpsManager.MODE_IGNORED, // ACTIVATE_PLATFORM_VPN
-            AppOpsManager.MODE_DEFAULT, // LOADER_USAGE_STATS
-            AppOpsManager.MODE_IGNORED, // deprecated operation
-            AppOpsManager.MODE_DEFAULT, // OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED
-            AppOpsManager.MODE_ALLOWED, // OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
-            AppOpsManager.MODE_ERRORED, // OP_NO_ISOLATED_STORAGE
-            AppOpsManager.MODE_ALLOWED, // PHONE_CALL_MICROPHONE
-            AppOpsManager.MODE_ALLOWED, // PHONE_CALL_CAMERA
-            AppOpsManager.MODE_ALLOWED, // RECORD_AUDIO_HOTWORD
-            AppOpsManager.MODE_DEFAULT, // MANAGE_ONGOING_CALLS
-            AppOpsManager.MODE_DEFAULT, // MANAGE_CREDENTIALS
-            AppOpsManager.MODE_DEFAULT, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
-            AppOpsManager.MODE_ALLOWED, // RECORD_AUDIO_OUTPUT
-            AppOpsManager.MODE_DEFAULT, // SCHEDULE_EXACT_ALARM
-            AppOpsManager.MODE_ALLOWED, // ACCESS_FINE_LOCATION_SOURCE
-            AppOpsManager.MODE_ALLOWED, // ACCESS_COARSE_LOCATION_SOURCE
-            AppOpsManager.MODE_DEFAULT, // MANAGE_MEDIA
-            AppOpsManager.MODE_ALLOWED, // BLUETOOTH_CONNECT
-            AppOpsManager.MODE_ALLOWED, // UWB_RANGING
-            AppOpsManager.MODE_ALLOWED, // ACTIVITY_RECOGNITION_SOURCE
-            AppOpsManager.MODE_ALLOWED, // BLUETOOTH_ADVERTISE
-            AppOpsManager.MODE_ALLOWED, // RECORD_INCOMING_PHONE_AUDIO
-            AppOpsManager.MODE_ALLOWED, // NEARBY_WIFI_DEVICES
-            AppOpsManager.MODE_ALLOWED, // ESTABLISH_VPN_SERVICE
-            AppOpsManager.MODE_ALLOWED, // ESTABLISH_VPN_MANAGER
-            AppOpsManager.MODE_ALLOWED, // ACCESS_RESTRICTED_SETTINGS,
-            AppOpsManager.MODE_ALLOWED, // RECEIVE_SOUNDTRIGGER_AUDIO
-    };
-
-    /**
-     * This specifies whether each option is allowed to be reset
-     * when resetting all app preferences.  Disable reset for
-     * app ops that are under strong control of some part of the
-     * system (such as OP_WRITE_SMS, which should be allowed only
-     * for whichever app is selected as the current SMS app).
-     */
-    private static boolean[] sOpDisableReset = new boolean[] {
-            false, // COARSE_LOCATION
-            false, // FINE_LOCATION
-            false, // GPS
-            false, // VIBRATE
-            false, // READ_CONTACTS
-            false, // WRITE_CONTACTS
-            false, // READ_CALL_LOG
-            false, // WRITE_CALL_LOG
-            false, // READ_CALENDAR
-            false, // WRITE_CALENDAR
-            false, // WIFI_SCAN
-            false, // POST_NOTIFICATION
-            false, // NEIGHBORING_CELLS
-            false, // CALL_PHONE
-            true, // READ_SMS
-            true, // WRITE_SMS
-            true, // RECEIVE_SMS
-            false, // RECEIVE_EMERGENCY_BROADCAST
-            false, // RECEIVE_MMS
-            true, // RECEIVE_WAP_PUSH
-            true, // SEND_SMS
-            false, // READ_ICC_SMS
-            false, // WRITE_ICC_SMS
-            false, // WRITE_SETTINGS
-            false, // SYSTEM_ALERT_WINDOW
-            false, // ACCESS_NOTIFICATIONS
-            false, // CAMERA
-            false, // RECORD_AUDIO
-            false, // PLAY_AUDIO
-            false, // READ_CLIPBOARD
-            false, // WRITE_CLIPBOARD
-            false, // TAKE_MEDIA_BUTTONS
-            false, // TAKE_AUDIO_FOCUS
-            false, // AUDIO_MASTER_VOLUME
-            false, // AUDIO_VOICE_VOLUME
-            false, // AUDIO_RING_VOLUME
-            false, // AUDIO_MEDIA_VOLUME
-            false, // AUDIO_ALARM_VOLUME
-            false, // AUDIO_NOTIFICATION_VOLUME
-            false, // AUDIO_BLUETOOTH_VOLUME
-            false, // WAKE_LOCK
-            false, // MONITOR_LOCATION
-            false, // MONITOR_HIGH_POWER_LOCATION
-            false, // GET_USAGE_STATS
-            false, // MUTE_MICROPHONE
-            false, // TOAST_WINDOW
-            false, // PROJECT_MEDIA
-            false, // ACTIVATE_VPN
-            false, // WRITE_WALLPAPER
-            false, // ASSIST_STRUCTURE
-            false, // ASSIST_SCREENSHOT
-            false, // READ_PHONE_STATE
-            false, // ADD_VOICEMAIL
-            false, // USE_SIP
-            false, // PROCESS_OUTGOING_CALLS
-            false, // USE_FINGERPRINT
-            false, // BODY_SENSORS
-            true, // READ_CELL_BROADCASTS
-            false, // MOCK_LOCATION
-            false, // READ_EXTERNAL_STORAGE
-            false, // WRITE_EXTERNAL_STORAGE
-            false, // TURN_SCREEN_ON
-            false, // GET_ACCOUNTS
-            false, // RUN_IN_BACKGROUND
-            false, // AUDIO_ACCESSIBILITY_VOLUME
-            false, // READ_PHONE_NUMBERS
-            false, // REQUEST_INSTALL_PACKAGES
-            false, // PICTURE_IN_PICTURE
-            false, // INSTANT_APP_START_FOREGROUND
-            false, // ANSWER_PHONE_CALLS
-            false, // RUN_ANY_IN_BACKGROUND
-            false, // CHANGE_WIFI_STATE
-            false, // REQUEST_DELETE_PACKAGES
-            false, // BIND_ACCESSIBILITY_SERVICE
-            false, // ACCEPT_HANDOVER
-            false, // MANAGE_IPSEC_TUNNELS
-            false, // START_FOREGROUND
-            false, // BLUETOOTH_SCAN
-            false, // USE_BIOMETRIC
-            false, // ACTIVITY_RECOGNITION
-            false, // SMS_FINANCIAL_TRANSACTIONS
-            false, // READ_MEDIA_AUDIO
-            false, // WRITE_MEDIA_AUDIO
-            false, // READ_MEDIA_VIDEO
-            true,  // WRITE_MEDIA_VIDEO
-            false, // READ_MEDIA_IMAGES
-            true,  // WRITE_MEDIA_IMAGES
-            true,  // LEGACY_STORAGE
-            false, // ACCESS_ACCESSIBILITY
-            false, // READ_DEVICE_IDENTIFIERS
-            false, // ACCESS_MEDIA_LOCATION
-            false, // QUERY_ALL_PACKAGES
-            false, // MANAGE_EXTERNAL_STORAGE
-            false, // INTERACT_ACROSS_PROFILES
-            false, // ACTIVATE_PLATFORM_VPN
-            false, // LOADER_USAGE_STATS
-            false, // deprecated operation
-            false, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
-            false, // AUTO_REVOKE_MANAGED_BY_INSTALLER
-            true, // NO_ISOLATED_STORAGE
-            false, // PHONE_CALL_MICROPHONE
-            false, // PHONE_CALL_CAMERA
-            false, // RECORD_AUDIO_HOTWORD
-            true, // MANAGE_ONGOING_CALLS
-            false, // MANAGE_CREDENTIALS
-            true, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
-            false, // RECORD_AUDIO_OUTPUT
-            false, // SCHEDULE_EXACT_ALARM
-            false, // ACCESS_FINE_LOCATION_SOURCE
-            false, // ACCESS_COARSE_LOCATION_SOURCE
-            false, // MANAGE_MEDIA
-            false, // BLUETOOTH_CONNECT
-            false, // UWB_RANGING
-            false, // ACTIVITY_RECOGNITION_SOURCE
-            false, // BLUETOOTH_ADVERTISE
-            false, // RECORD_INCOMING_PHONE_AUDIO
-            false, // NEARBY_WIFI_DEVICES
-            false, // OP_ESTABLISH_VPN_SERVICE
-            false, // OP_ESTABLISH_VPN_MANAGER
-            true, // ACCESS_RESTRICTED_SETTINGS
-            false, // RECEIVE_SOUNDTRIGGER_AUDIO
-    };
-
-    /**
-     * This specifies whether each option is only allowed to be read
-     * by apps with manage appops permission.
-     */
-    private static boolean[] sOpRestrictRead = new boolean[] {
-            false, // COARSE_LOCATION
-            false, // FINE_LOCATION
-            false, // GPS
-            false, // VIBRATE
-            false, // READ_CONTACTS
-            false, // WRITE_CONTACTS
-            false, // READ_CALL_LOG
-            false, // WRITE_CALL_LOG
-            false, // READ_CALENDAR
-            false, // WRITE_CALENDAR
-            false, // WIFI_SCAN
-            false, // POST_NOTIFICATION
-            false, // NEIGHBORING_CELLS
-            false, // CALL_PHONE
-            false, // READ_SMS
-            false, // WRITE_SMS
-            false, // RECEIVE_SMS
-            false, // RECEIVE_EMERGENCY_BROADCAST
-            false, // RECEIVE_MMS
-            false, // RECEIVE_WAP_PUSH
-            false, // SEND_SMS
-            false, // READ_ICC_SMS
-            false, // WRITE_ICC_SMS
-            false, // WRITE_SETTINGS
-            false, // SYSTEM_ALERT_WINDOW
-            false, // ACCESS_NOTIFICATIONS
-            false, // CAMERA
-            false, // RECORD_AUDIO
-            false, // PLAY_AUDIO
-            false, // READ_CLIPBOARD
-            false, // WRITE_CLIPBOARD
-            false, // TAKE_MEDIA_BUTTONS
-            false, // TAKE_AUDIO_FOCUS
-            false, // AUDIO_MASTER_VOLUME
-            false, // AUDIO_VOICE_VOLUME
-            false, // AUDIO_RING_VOLUME
-            false, // AUDIO_MEDIA_VOLUME
-            false, // AUDIO_ALARM_VOLUME
-            false, // AUDIO_NOTIFICATION_VOLUME
-            false, // AUDIO_BLUETOOTH_VOLUME
-            false, // WAKE_LOCK
-            false, // MONITOR_LOCATION
-            false, // MONITOR_HIGH_POWER_LOCATION
-            false, // GET_USAGE_STATS
-            false, // MUTE_MICROPHONE
-            false, // TOAST_WINDOW
-            false, // PROJECT_MEDIA
-            false, // ACTIVATE_VPN
-            false, // WRITE_WALLPAPER
-            false, // ASSIST_STRUCTURE
-            false, // ASSIST_SCREENSHOT
-            false, // READ_PHONE_STATE
-            false, // ADD_VOICEMAIL
-            false, // USE_SIP
-            false, // PROCESS_OUTGOING_CALLS
-            false, // USE_FINGERPRINT
-            false, // BODY_SENSORS
-            false, // READ_CELL_BROADCASTS
-            false, // MOCK_LOCATION
-            false, // READ_EXTERNAL_STORAGE
-            false, // WRITE_EXTERNAL_STORAGE
-            false, // TURN_SCREEN_ON
-            false, // GET_ACCOUNTS
-            false, // RUN_IN_BACKGROUND
-            false, // AUDIO_ACCESSIBILITY_VOLUME
-            false, // READ_PHONE_NUMBERS
-            false, // REQUEST_INSTALL_PACKAGES
-            false, // PICTURE_IN_PICTURE
-            false, // INSTANT_APP_START_FOREGROUND
-            false, // ANSWER_PHONE_CALLS
-            false, // RUN_ANY_IN_BACKGROUND
-            false, // CHANGE_WIFI_STATE
-            false, // REQUEST_DELETE_PACKAGES
-            false, // BIND_ACCESSIBILITY_SERVICE
-            false, // ACCEPT_HANDOVER
-            false, // MANAGE_IPSEC_TUNNELS
-            false, // START_FOREGROUND
-            false, // BLUETOOTH_SCAN
-            false, // USE_BIOMETRIC
-            false, // ACTIVITY_RECOGNITION
-            false, // SMS_FINANCIAL_TRANSACTIONS
-            false, // READ_MEDIA_AUDIO
-            false, // WRITE_MEDIA_AUDIO
-            false, // READ_MEDIA_VIDEO
-            false,  // WRITE_MEDIA_VIDEO
-            false, // READ_MEDIA_IMAGES
-            false,  // WRITE_MEDIA_IMAGES
-            false,  // LEGACY_STORAGE
-            false, // ACCESS_ACCESSIBILITY
-            false, // READ_DEVICE_IDENTIFIERS
-            false, // ACCESS_MEDIA_LOCATION
-            false, // QUERY_ALL_PACKAGES
-            false, // MANAGE_EXTERNAL_STORAGE
-            false, // INTERACT_ACROSS_PROFILES
-            false, // ACTIVATE_PLATFORM_VPN
-            false, // LOADER_USAGE_STATS
-            false, // deprecated operation
-            false, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
-            false, // AUTO_REVOKE_MANAGED_BY_INSTALLER
-            false, // NO_ISOLATED_STORAGE
-            false, // PHONE_CALL_MICROPHONE
-            false, // PHONE_CALL_CAMERA
-            false, // RECORD_AUDIO_HOTWORD
-            false, // MANAGE_ONGOING_CALLS
-            false, // MANAGE_CREDENTIALS
-            false, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
-            false, // RECORD_AUDIO_OUTPUT
-            false, // SCHEDULE_EXACT_ALARM
-            false, // ACCESS_FINE_LOCATION_SOURCE
-            false, // ACCESS_COARSE_LOCATION_SOURCE
-            false, // MANAGE_MEDIA
-            false, // BLUETOOTH_CONNECT
-            false, // UWB_RANGING
-            false, // ACTIVITY_RECOGNITION_SOURCE
-            false, // BLUETOOTH_ADVERTISE
-            false, // RECORD_INCOMING_PHONE_AUDIO
-            false, // NEARBY_WIFI_DEVICES
-            false, // OP_ESTABLISH_VPN_SERVICE
-            false, // OP_ESTABLISH_VPN_MANAGER
-            true, // ACCESS_RESTRICTED_SETTINGS
-            false, // RECEIVE_SOUNDTRIGGER_AUDIO
+    static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
+        new AppOpInfo.Builder(OP_COARSE_LOCATION, OPSTR_COARSE_LOCATION, "COARSE_LOCATION")
+            .setPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+            .setRestriction(UserManager.DISALLOW_SHARE_LOCATION)
+            .setAllowSystemRestrictionBypass(new RestrictionBypass(true, false, false))
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_FINE_LOCATION, OPSTR_FINE_LOCATION, "FINE_LOCATION")
+            .setPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            .setRestriction(UserManager.DISALLOW_SHARE_LOCATION)
+            .setAllowSystemRestrictionBypass(new RestrictionBypass(true, false, false))
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_GPS, OPSTR_GPS, "GPS")
+            .setSwitchCode(OP_COARSE_LOCATION)
+            .setRestriction(UserManager.DISALLOW_SHARE_LOCATION)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_VIBRATE, OPSTR_VIBRATE, "VIBRATE")
+            .setSwitchCode(OP_VIBRATE).setPermission(android.Manifest.permission.VIBRATE)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_CONTACTS, OPSTR_READ_CONTACTS, "READ_CONTACTS")
+            .setPermission(android.Manifest.permission.READ_CONTACTS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_WRITE_CONTACTS, OPSTR_WRITE_CONTACTS, "WRITE_CONTACTS")
+            .setPermission(android.Manifest.permission.WRITE_CONTACTS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_CALL_LOG, OPSTR_READ_CALL_LOG, "READ_CALL_LOG")
+            .setPermission(android.Manifest.permission.READ_CALL_LOG)
+            .setRestriction(UserManager.DISALLOW_OUTGOING_CALLS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_WRITE_CALL_LOG, OPSTR_WRITE_CALL_LOG, "WRITE_CALL_LOG")
+            .setPermission(android.Manifest.permission.WRITE_CALL_LOG)
+            .setRestriction(UserManager.DISALLOW_OUTGOING_CALLS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_CALENDAR, OPSTR_READ_CALENDAR, "READ_CALENDAR")
+            .setPermission(android.Manifest.permission.READ_CALENDAR)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_WRITE_CALENDAR, OPSTR_WRITE_CALENDAR, "WRITE_CALENDAR")
+            .setPermission(android.Manifest.permission.WRITE_CALENDAR)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_WIFI_SCAN, OPSTR_WIFI_SCAN, "WIFI_SCAN")
+            .setSwitchCode(OP_COARSE_LOCATION)
+            .setPermission(android.Manifest.permission.ACCESS_WIFI_STATE)
+            .setRestriction(UserManager.DISALLOW_SHARE_LOCATION)
+            .setAllowSystemRestrictionBypass(new RestrictionBypass(false, true, false))
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_POST_NOTIFICATION, OPSTR_POST_NOTIFICATION, "POST_NOTIFICATION")
+            .setPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_NEIGHBORING_CELLS, OPSTR_NEIGHBORING_CELLS, "NEIGHBORING_CELLS")
+            .setSwitchCode(OP_COARSE_LOCATION).setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_CALL_PHONE, OPSTR_CALL_PHONE, "CALL_PHONE")
+            .setSwitchCode(OP_CALL_PHONE).setPermission(android.Manifest.permission.CALL_PHONE)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_SMS, OPSTR_READ_SMS, "READ_SMS")
+            .setPermission(android.Manifest.permission.READ_SMS)
+            .setRestriction(UserManager.DISALLOW_SMS).setDefaultMode(AppOpsManager.MODE_ALLOWED)
+            .setDisableReset(true).build(),
+        new AppOpInfo.Builder(OP_WRITE_SMS, OPSTR_WRITE_SMS, "WRITE_SMS")
+            .setRestriction(UserManager.DISALLOW_SMS)
+            .setDefaultMode(AppOpsManager.MODE_IGNORED).setDisableReset(true).build(),
+        new AppOpInfo.Builder(OP_RECEIVE_SMS, OPSTR_RECEIVE_SMS, "RECEIVE_SMS")
+            .setPermission(android.Manifest.permission.RECEIVE_SMS)
+            .setRestriction(UserManager.DISALLOW_SMS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).setDisableReset(true).build(),
+        new AppOpInfo.Builder(OP_RECEIVE_EMERGECY_SMS, OPSTR_RECEIVE_EMERGENCY_BROADCAST,
+                "RECEIVE_EMERGENCY_BROADCAST").setSwitchCode(OP_RECEIVE_SMS)
+            .setPermission(android.Manifest.permission.RECEIVE_EMERGENCY_BROADCAST)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RECEIVE_MMS, OPSTR_RECEIVE_MMS, "RECEIVE_MMS")
+            .setPermission(android.Manifest.permission.RECEIVE_MMS)
+            .setRestriction(UserManager.DISALLOW_SMS).setDefaultMode(AppOpsManager.MODE_ALLOWED)
+            .build(),
+        new AppOpInfo.Builder(OP_RECEIVE_WAP_PUSH, OPSTR_RECEIVE_WAP_PUSH, "RECEIVE_WAP_PUSH")
+            .setPermission(android.Manifest.permission.RECEIVE_WAP_PUSH)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).setDisableReset(true).build(),
+        new AppOpInfo.Builder(OP_SEND_SMS, OPSTR_SEND_SMS, "SEND_SMS")
+            .setPermission(android.Manifest.permission.SEND_SMS)
+            .setRestriction(UserManager.DISALLOW_SMS).setDefaultMode(AppOpsManager.MODE_ALLOWED)
+            .setDisableReset(true).build(),
+        new AppOpInfo.Builder(OP_READ_ICC_SMS, OPSTR_READ_ICC_SMS, "READ_ICC_SMS")
+            .setSwitchCode(OP_READ_SMS).setPermission(android.Manifest.permission.READ_SMS)
+            .setRestriction(UserManager.DISALLOW_SMS).setDefaultMode(AppOpsManager.MODE_ALLOWED)
+            .build(),
+        new AppOpInfo.Builder(OP_WRITE_ICC_SMS, OPSTR_WRITE_ICC_SMS, "WRITE_ICC_SMS")
+            .setSwitchCode(OP_WRITE_SMS).setRestriction(UserManager.DISALLOW_SMS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_WRITE_SETTINGS, OPSTR_WRITE_SETTINGS, "WRITE_SETTINGS")
+            .setPermission(android.Manifest.permission.WRITE_SETTINGS).build(),
+        new AppOpInfo.Builder(OP_SYSTEM_ALERT_WINDOW, OPSTR_SYSTEM_ALERT_WINDOW,
+                "SYSTEM_ALERT_WINDOW")
+            .setPermission(android.Manifest.permission.SYSTEM_ALERT_WINDOW)
+            .setRestriction(UserManager.DISALLOW_CREATE_WINDOWS)
+            .setAllowSystemRestrictionBypass(new RestrictionBypass(false, true, false))
+            .setDefaultMode(getSystemAlertWindowDefault()).build(),
+        new AppOpInfo.Builder(OP_ACCESS_NOTIFICATIONS, OPSTR_ACCESS_NOTIFICATIONS,
+                "ACCESS_NOTIFICATIONS")
+            .setPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_CAMERA, OPSTR_CAMERA, "CAMERA")
+            .setPermission(android.Manifest.permission.CAMERA)
+            .setRestriction(UserManager.DISALLOW_CAMERA)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RECORD_AUDIO, OPSTR_RECORD_AUDIO, "RECORD_AUDIO")
+            .setPermission(android.Manifest.permission.RECORD_AUDIO)
+            .setRestriction(UserManager.DISALLOW_RECORD_AUDIO)
+            .setAllowSystemRestrictionBypass(new RestrictionBypass(false, false, true))
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_PLAY_AUDIO, OPSTR_PLAY_AUDIO, "PLAY_AUDIO")
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_CLIPBOARD, OPSTR_READ_CLIPBOARD, "READ_CLIPBOARD")
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_WRITE_CLIPBOARD, OPSTR_WRITE_CLIPBOARD, "WRITE_CLIPBOARD")
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_TAKE_MEDIA_BUTTONS, OPSTR_TAKE_MEDIA_BUTTONS, "TAKE_MEDIA_BUTTONS")
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED)
+            .build(),
+        new AppOpInfo.Builder(OP_TAKE_AUDIO_FOCUS, OPSTR_TAKE_AUDIO_FOCUS, "TAKE_AUDIO_FOCUS")
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_AUDIO_MASTER_VOLUME, OPSTR_AUDIO_MASTER_VOLUME,
+                "AUDIO_MASTER_VOLUME").setSwitchCode(OP_AUDIO_MASTER_VOLUME)
+            .setRestriction(UserManager.DISALLOW_ADJUST_VOLUME)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_AUDIO_VOICE_VOLUME, OPSTR_AUDIO_VOICE_VOLUME, "AUDIO_VOICE_VOLUME")
+            .setRestriction(UserManager.DISALLOW_ADJUST_VOLUME)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_AUDIO_RING_VOLUME, OPSTR_AUDIO_RING_VOLUME, "AUDIO_RING_VOLUME")
+            .setRestriction(UserManager.DISALLOW_ADJUST_VOLUME)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_AUDIO_MEDIA_VOLUME, OPSTR_AUDIO_MEDIA_VOLUME, "AUDIO_MEDIA_VOLUME")
+            .setRestriction(UserManager.DISALLOW_ADJUST_VOLUME)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_AUDIO_ALARM_VOLUME, OPSTR_AUDIO_ALARM_VOLUME, "AUDIO_ALARM_VOLUME")
+            .setRestriction(UserManager.DISALLOW_ADJUST_VOLUME)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_AUDIO_NOTIFICATION_VOLUME, OPSTR_AUDIO_NOTIFICATION_VOLUME,
+                "AUDIO_NOTIFICATION_VOLUME").setSwitchCode(OP_AUDIO_NOTIFICATION_VOLUME)
+            .setRestriction(UserManager.DISALLOW_ADJUST_VOLUME)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_AUDIO_BLUETOOTH_VOLUME, OPSTR_AUDIO_BLUETOOTH_VOLUME,
+                "AUDIO_BLUETOOTH_VOLUME").setRestriction(UserManager.DISALLOW_ADJUST_VOLUME)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_WAKE_LOCK, OPSTR_WAKE_LOCK, "WAKE_LOCK")
+            .setPermission(android.Manifest.permission.WAKE_LOCK)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_MONITOR_LOCATION, OPSTR_MONITOR_LOCATION, "MONITOR_LOCATION")
+            .setSwitchCode(OP_COARSE_LOCATION)
+            .setRestriction(UserManager.DISALLOW_SHARE_LOCATION)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_MONITOR_HIGH_POWER_LOCATION, OPSTR_MONITOR_HIGH_POWER_LOCATION,
+                "MONITOR_HIGH_POWER_LOCATION").setSwitchCode(OP_COARSE_LOCATION)
+            .setRestriction(UserManager.DISALLOW_SHARE_LOCATION)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_GET_USAGE_STATS, OPSTR_GET_USAGE_STATS, "GET_USAGE_STATS")
+            .setPermission(android.Manifest.permission.PACKAGE_USAGE_STATS).build(),
+        new AppOpInfo.Builder(OP_MUTE_MICROPHONE, OPSTR_MUTE_MICROPHONE, "MUTE_MICROPHONE")
+            .setRestriction(UserManager.DISALLOW_UNMUTE_MICROPHONE)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_TOAST_WINDOW, OPSTR_TOAST_WINDOW, "TOAST_WINDOW")
+            .setRestriction(UserManager.DISALLOW_CREATE_WINDOWS)
+            .setAllowSystemRestrictionBypass(new RestrictionBypass(false, true, false))
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_PROJECT_MEDIA, OPSTR_PROJECT_MEDIA, "PROJECT_MEDIA")
+            .setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
+        new AppOpInfo.Builder(OP_ACTIVATE_VPN, OPSTR_ACTIVATE_VPN, "ACTIVATE_VPN")
+            .setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
+        new AppOpInfo.Builder(OP_WRITE_WALLPAPER, OPSTR_WRITE_WALLPAPER, "WRITE_WALLPAPER")
+            .setRestriction(UserManager.DISALLOW_WALLPAPER)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_ASSIST_STRUCTURE, OPSTR_ASSIST_STRUCTURE, "ASSIST_STRUCTURE")
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_ASSIST_SCREENSHOT, OPSTR_ASSIST_SCREENSHOT, "ASSIST_SCREENSHOT")
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED)
+            .build(),
+        new AppOpInfo.Builder(OP_READ_PHONE_STATE, OPSTR_READ_PHONE_STATE, "READ_PHONE_STATE")
+            .setPermission(Manifest.permission.READ_PHONE_STATE)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_ADD_VOICEMAIL, OPSTR_ADD_VOICEMAIL, "ADD_VOICEMAIL")
+            .setPermission(Manifest.permission.ADD_VOICEMAIL)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_USE_SIP, OPSTR_USE_SIP, "USE_SIP")
+            .setPermission(Manifest.permission.USE_SIP)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_PROCESS_OUTGOING_CALLS, OPSTR_PROCESS_OUTGOING_CALLS,
+                "PROCESS_OUTGOING_CALLS").setSwitchCode(OP_PROCESS_OUTGOING_CALLS)
+            .setPermission(Manifest.permission.PROCESS_OUTGOING_CALLS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_USE_FINGERPRINT, OPSTR_USE_FINGERPRINT, "USE_FINGERPRINT")
+            .setPermission(Manifest.permission.USE_FINGERPRINT)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_BODY_SENSORS, OPSTR_BODY_SENSORS, "BODY_SENSORS")
+            .setPermission(Manifest.permission.BODY_SENSORS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_CELL_BROADCASTS, OPSTR_READ_CELL_BROADCASTS,
+                "READ_CELL_BROADCASTS").setPermission(Manifest.permission.READ_CELL_BROADCASTS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).setDisableReset(true).build(),
+        new AppOpInfo.Builder(OP_MOCK_LOCATION, OPSTR_MOCK_LOCATION, "MOCK_LOCATION")
+            .setDefaultMode(AppOpsManager.MODE_ERRORED).build(),
+        new AppOpInfo.Builder(OP_READ_EXTERNAL_STORAGE, OPSTR_READ_EXTERNAL_STORAGE,
+                "READ_EXTERNAL_STORAGE").setPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_WRITE_EXTERNAL_STORAGE, OPSTR_WRITE_EXTERNAL_STORAGE,
+                "WRITE_EXTERNAL_STORAGE").setPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_TURN_SCREEN_ON, OPSTR_TURN_SCREEN_ON, "TURN_SCREEN_ON")
+            .setPermission(Manifest.permission.TURN_SCREEN_ON)
+            .setDefaultMode(AppOpsManager.MODE_ERRORED).build(),
+        new AppOpInfo.Builder(OP_GET_ACCOUNTS, OPSTR_GET_ACCOUNTS, "GET_ACCOUNTS")
+            .setPermission(Manifest.permission.GET_ACCOUNTS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RUN_IN_BACKGROUND, OPSTR_RUN_IN_BACKGROUND, "RUN_IN_BACKGROUND")
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED)
+            .build(),
+        new AppOpInfo.Builder(OP_AUDIO_ACCESSIBILITY_VOLUME, OPSTR_AUDIO_ACCESSIBILITY_VOLUME,
+                "AUDIO_ACCESSIBILITY_VOLUME")
+            .setRestriction(UserManager.DISALLOW_ADJUST_VOLUME)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_PHONE_NUMBERS, OPSTR_READ_PHONE_NUMBERS, "READ_PHONE_NUMBERS")
+            .setPermission(Manifest.permission.READ_PHONE_NUMBERS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_REQUEST_INSTALL_PACKAGES, OPSTR_REQUEST_INSTALL_PACKAGES,
+                "REQUEST_INSTALL_PACKAGES").setSwitchCode(OP_REQUEST_INSTALL_PACKAGES)
+            .setPermission(Manifest.permission.REQUEST_INSTALL_PACKAGES).build(),
+        new AppOpInfo.Builder(OP_PICTURE_IN_PICTURE, OPSTR_PICTURE_IN_PICTURE, "PICTURE_IN_PICTURE")
+            .setSwitchCode(OP_PICTURE_IN_PICTURE).setDefaultMode(AppOpsManager.MODE_ALLOWED)
+            .build(),
+        new AppOpInfo.Builder(OP_INSTANT_APP_START_FOREGROUND, OPSTR_INSTANT_APP_START_FOREGROUND,
+                "INSTANT_APP_START_FOREGROUND")
+            .setPermission(Manifest.permission.INSTANT_APP_FOREGROUND_SERVICE).build(),
+        new AppOpInfo.Builder(OP_ANSWER_PHONE_CALLS, OPSTR_ANSWER_PHONE_CALLS, "ANSWER_PHONE_CALLS")
+            .setSwitchCode(OP_ANSWER_PHONE_CALLS)
+            .setPermission(Manifest.permission.ANSWER_PHONE_CALLS)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RUN_ANY_IN_BACKGROUND, OPSTR_RUN_ANY_IN_BACKGROUND,
+                "RUN_ANY_IN_BACKGROUND")
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_CHANGE_WIFI_STATE, OPSTR_CHANGE_WIFI_STATE, "CHANGE_WIFI_STATE")
+            .setSwitchCode(OP_CHANGE_WIFI_STATE)
+            .setPermission(Manifest.permission.CHANGE_WIFI_STATE)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_REQUEST_DELETE_PACKAGES, OPSTR_REQUEST_DELETE_PACKAGES,
+                "REQUEST_DELETE_PACKAGES")
+            .setPermission(Manifest.permission.REQUEST_DELETE_PACKAGES)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_BIND_ACCESSIBILITY_SERVICE, OPSTR_BIND_ACCESSIBILITY_SERVICE,
+                "BIND_ACCESSIBILITY_SERVICE")
+            .setPermission(Manifest.permission.BIND_ACCESSIBILITY_SERVICE)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_ACCEPT_HANDOVER, OPSTR_ACCEPT_HANDOVER, "ACCEPT_HANDOVER")
+            .setSwitchCode(OP_ACCEPT_HANDOVER)
+            .setPermission(Manifest.permission.ACCEPT_HANDOVER)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_MANAGE_IPSEC_TUNNELS, OPSTR_MANAGE_IPSEC_TUNNELS,
+                "MANAGE_IPSEC_TUNNELS")
+            .setPermission(Manifest.permission.MANAGE_IPSEC_TUNNELS)
+            .setDefaultMode(AppOpsManager.MODE_ERRORED).build(),
+        new AppOpInfo.Builder(OP_START_FOREGROUND, OPSTR_START_FOREGROUND, "START_FOREGROUND")
+            .setPermission(Manifest.permission.FOREGROUND_SERVICE)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_BLUETOOTH_SCAN, OPSTR_BLUETOOTH_SCAN, "BLUETOOTH_SCAN")
+            .setPermission(Manifest.permission.BLUETOOTH_SCAN)
+            .setAllowSystemRestrictionBypass(new RestrictionBypass(false, true, false))
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_USE_BIOMETRIC, OPSTR_USE_BIOMETRIC, "USE_BIOMETRIC")
+            .setPermission(Manifest.permission.USE_BIOMETRIC)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_ACTIVITY_RECOGNITION, OPSTR_ACTIVITY_RECOGNITION,
+                "ACTIVITY_RECOGNITION")
+            .setPermission(Manifest.permission.ACTIVITY_RECOGNITION)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_SMS_FINANCIAL_TRANSACTIONS, OPSTR_SMS_FINANCIAL_TRANSACTIONS,
+                "SMS_FINANCIAL_TRANSACTIONS")
+            .setPermission(Manifest.permission.SMS_FINANCIAL_TRANSACTIONS)
+            .setRestriction(UserManager.DISALLOW_SMS).build(),
+        new AppOpInfo.Builder(OP_READ_MEDIA_AUDIO, OPSTR_READ_MEDIA_AUDIO, "READ_MEDIA_AUDIO")
+            .setPermission(Manifest.permission.READ_MEDIA_AUDIO)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_WRITE_MEDIA_AUDIO, OPSTR_WRITE_MEDIA_AUDIO, "WRITE_MEDIA_AUDIO")
+            .setDefaultMode(AppOpsManager.MODE_ERRORED).build(),
+        new AppOpInfo.Builder(OP_READ_MEDIA_VIDEO, OPSTR_READ_MEDIA_VIDEO, "READ_MEDIA_VIDEO")
+            .setPermission(Manifest.permission.READ_MEDIA_VIDEO)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_WRITE_MEDIA_VIDEO, OPSTR_WRITE_MEDIA_VIDEO, "WRITE_MEDIA_VIDEO")
+            .setDefaultMode(AppOpsManager.MODE_ERRORED).setDisableReset(true).build(),
+        new AppOpInfo.Builder(OP_READ_MEDIA_IMAGES, OPSTR_READ_MEDIA_IMAGES, "READ_MEDIA_IMAGES")
+            .setPermission(Manifest.permission.READ_MEDIA_IMAGES)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_WRITE_MEDIA_IMAGES, OPSTR_WRITE_MEDIA_IMAGES, "WRITE_MEDIA_IMAGES")
+            .setDefaultMode(AppOpsManager.MODE_ERRORED).setDisableReset(true).build(),
+        new AppOpInfo.Builder(OP_LEGACY_STORAGE, OPSTR_LEGACY_STORAGE, "LEGACY_STORAGE")
+            .setDisableReset(true).build(),
+        new AppOpInfo.Builder(OP_ACCESS_ACCESSIBILITY, OPSTR_ACCESS_ACCESSIBILITY,
+                "ACCESS_ACCESSIBILITY").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_DEVICE_IDENTIFIERS, OPSTR_READ_DEVICE_IDENTIFIERS,
+                "READ_DEVICE_IDENTIFIERS").setDefaultMode(AppOpsManager.MODE_ERRORED).build(),
+        new AppOpInfo.Builder(OP_ACCESS_MEDIA_LOCATION, OPSTR_ACCESS_MEDIA_LOCATION,
+                "ACCESS_MEDIA_LOCATION").setPermission(Manifest.permission.ACCESS_MEDIA_LOCATION)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_QUERY_ALL_PACKAGES, OPSTR_QUERY_ALL_PACKAGES, "QUERY_ALL_PACKAGES")
+            .build(),
+        new AppOpInfo.Builder(OP_MANAGE_EXTERNAL_STORAGE, OPSTR_MANAGE_EXTERNAL_STORAGE,
+                "MANAGE_EXTERNAL_STORAGE")
+            .setPermission(Manifest.permission.MANAGE_EXTERNAL_STORAGE).build(),
+        new AppOpInfo.Builder(OP_INTERACT_ACROSS_PROFILES, OPSTR_INTERACT_ACROSS_PROFILES,
+                "INTERACT_ACROSS_PROFILES")
+            .setPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES).build(),
+        new AppOpInfo.Builder(OP_ACTIVATE_PLATFORM_VPN, OPSTR_ACTIVATE_PLATFORM_VPN,
+                "ACTIVATE_PLATFORM_VPN").setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
+        new AppOpInfo.Builder(OP_LOADER_USAGE_STATS, OPSTR_LOADER_USAGE_STATS, "LOADER_USAGE_STATS")
+            .setPermission(android.Manifest.permission.LOADER_USAGE_STATS).build(),
+        new AppOpInfo.Builder(OP_NONE, "", "").setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
+        new AppOpInfo.Builder(OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
+                OPSTR_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, "AUTO_REVOKE_PERMISSIONS_IF_UNUSED")
+            .build(),
+        new AppOpInfo.Builder(OP_AUTO_REVOKE_MANAGED_BY_INSTALLER,
+                OPSTR_AUTO_REVOKE_MANAGED_BY_INSTALLER, "AUTO_REVOKE_MANAGED_BY_INSTALLER")
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_NO_ISOLATED_STORAGE, OPSTR_NO_ISOLATED_STORAGE,
+                "NO_ISOLATED_STORAGE").setDefaultMode(AppOpsManager.MODE_ERRORED)
+            .setDisableReset(true).build(),
+        new AppOpInfo.Builder(OP_PHONE_CALL_MICROPHONE, OPSTR_PHONE_CALL_MICROPHONE,
+                "PHONE_CALL_MICROPHONE").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_PHONE_CALL_CAMERA, OPSTR_PHONE_CALL_CAMERA, "PHONE_CALL_CAMERA")
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RECORD_AUDIO_HOTWORD, OPSTR_RECORD_AUDIO_HOTWORD,
+                "RECORD_AUDIO_HOTWORD").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_MANAGE_ONGOING_CALLS, OPSTR_MANAGE_ONGOING_CALLS,
+                "MANAGE_ONGOING_CALLS").setPermission(Manifest.permission.MANAGE_ONGOING_CALLS)
+            .setDisableReset(true).build(),
+        new AppOpInfo.Builder(OP_MANAGE_CREDENTIALS, OPSTR_MANAGE_CREDENTIALS, "MANAGE_CREDENTIALS")
+            .build(),
+        new AppOpInfo.Builder(OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
+                OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER, "USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER")
+            .setPermission(Manifest.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER)
+            .setDisableReset(true).build(),
+        new AppOpInfo.Builder(OP_RECORD_AUDIO_OUTPUT, OPSTR_RECORD_AUDIO_OUTPUT,
+                "RECORD_AUDIO_OUTPUT").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_SCHEDULE_EXACT_ALARM, OPSTR_SCHEDULE_EXACT_ALARM,
+                "SCHEDULE_EXACT_ALARM").setPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
+            .build(),
+        new AppOpInfo.Builder(OP_FINE_LOCATION_SOURCE, OPSTR_FINE_LOCATION_SOURCE,
+                "FINE_LOCATION_SOURCE").setSwitchCode(OP_FINE_LOCATION)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_COARSE_LOCATION_SOURCE, OPSTR_COARSE_LOCATION_SOURCE,
+                "COARSE_LOCATION_SOURCE").setSwitchCode(OP_COARSE_LOCATION)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_MANAGE_MEDIA, OPSTR_MANAGE_MEDIA, "MANAGE_MEDIA")
+            .setPermission(Manifest.permission.MANAGE_MEDIA).build(),
+        new AppOpInfo.Builder(OP_BLUETOOTH_CONNECT, OPSTR_BLUETOOTH_CONNECT, "BLUETOOTH_CONNECT")
+            .setPermission(Manifest.permission.BLUETOOTH_CONNECT)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_UWB_RANGING, OPSTR_UWB_RANGING, "UWB_RANGING")
+            .setPermission(Manifest.permission.UWB_RANGING)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_ACTIVITY_RECOGNITION_SOURCE, OPSTR_ACTIVITY_RECOGNITION_SOURCE,
+                "ACTIVITY_RECOGNITION_SOURCE")
+            .setSwitchCode(OP_ACTIVITY_RECOGNITION).setDefaultMode(AppOpsManager.MODE_ALLOWED)
+            .build(),
+        new AppOpInfo.Builder(OP_BLUETOOTH_ADVERTISE, OPSTR_BLUETOOTH_ADVERTISE,
+                "BLUETOOTH_ADVERTISE").setPermission(Manifest.permission.BLUETOOTH_ADVERTISE)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RECORD_INCOMING_PHONE_AUDIO, OPSTR_RECORD_INCOMING_PHONE_AUDIO,
+                "RECORD_INCOMING_PHONE_AUDIO").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_NEARBY_WIFI_DEVICES, OPSTR_NEARBY_WIFI_DEVICES,
+                "NEARBY_WIFI_DEVICES").setPermission(Manifest.permission.NEARBY_WIFI_DEVICES)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_ESTABLISH_VPN_SERVICE, OPSTR_ESTABLISH_VPN_SERVICE,
+                "ESTABLISH_VPN_SERVICE").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_ESTABLISH_VPN_MANAGER, OPSTR_ESTABLISH_VPN_MANAGER,
+                "ESTABLISH_VPN_MANAGER").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_ACCESS_RESTRICTED_SETTINGS, OPSTR_ACCESS_RESTRICTED_SETTINGS,
+                "ACCESS_RESTRICTED_SETTINGS").setDefaultMode(AppOpsManager.MODE_ALLOWED)
+            .setDisableReset(true).setRestrictRead(true).build(),
+        new AppOpInfo.Builder(OP_RECEIVE_AMBIENT_TRIGGER_AUDIO, OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO,
+                "RECEIVE_SOUNDTRIGGER_AUDIO").setDefaultMode(AppOpsManager.MODE_ALLOWED).build()
     };
 
     /**
@@ -3101,46 +2316,18 @@ public class AppOpsManager {
     private static final @ShouldCollectNoteOp byte[] sAppOpsToNote = new byte[_NUM_OP];
 
     static {
-        if (sOpToSwitch.length != _NUM_OP) {
-            throw new IllegalStateException("sOpToSwitch length " + sOpToSwitch.length
+        if (sAppOpInfos.length != _NUM_OP) {
+            throw new IllegalStateException("mAppOpInfos length " + sAppOpInfos.length
                     + " should be " + _NUM_OP);
-        }
-        if (sOpToString.length != _NUM_OP) {
-            throw new IllegalStateException("sOpToString length " + sOpToString.length
-                    + " should be " + _NUM_OP);
-        }
-        if (sOpNames.length != _NUM_OP) {
-            throw new IllegalStateException("sOpNames length " + sOpNames.length
-                    + " should be " + _NUM_OP);
-        }
-        if (sOpPerms.length != _NUM_OP) {
-            throw new IllegalStateException("sOpPerms length " + sOpPerms.length
-                    + " should be " + _NUM_OP);
-        }
-        if (sOpDefaultMode.length != _NUM_OP) {
-            throw new IllegalStateException("sOpDefaultMode length " + sOpDefaultMode.length
-                    + " should be " + _NUM_OP);
-        }
-        if (sOpDisableReset.length != _NUM_OP) {
-            throw new IllegalStateException("sOpDisableReset length " + sOpDisableReset.length
-                    + " should be " + _NUM_OP);
-        }
-        if (sOpRestrictions.length != _NUM_OP) {
-            throw new IllegalStateException("sOpRestrictions length " + sOpRestrictions.length
-                    + " should be " + _NUM_OP);
-        }
-        if (sOpAllowSystemRestrictionBypass.length != _NUM_OP) {
-            throw new IllegalStateException("sOpAllowSYstemRestrictionsBypass length "
-                    + sOpRestrictions.length + " should be " + _NUM_OP);
         }
         for (int i=0; i<_NUM_OP; i++) {
-            if (sOpToString[i] != null) {
-                sOpStrToOp.put(sOpToString[i], i);
+            if (sAppOpInfos[i].name != null) {
+                sOpStrToOp.put(sAppOpInfos[i].name, i);
             }
         }
         for (int op : RUNTIME_AND_APPOP_PERMISSIONS_OPS) {
-            if (sOpPerms[op] != null) {
-                sPermToOp.put(sOpPerms[op], op);
+            if (sAppOpInfos[op].permission != null) {
+                sPermToOp.put(sAppOpInfos[op].permission, op);
             }
         }
 
@@ -3170,7 +2357,7 @@ public class AppOpsManager {
      */
     @UnsupportedAppUsage
     public static int opToSwitch(int op) {
-        return sOpToSwitch[op];
+        return sAppOpInfos[op].switchCode;
     }
 
     /**
@@ -3180,7 +2367,7 @@ public class AppOpsManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static String opToName(int op) {
         if (op == OP_NONE) return "NONE";
-        return op < sOpNames.length ? sOpNames[op] : ("Unknown(" + op + ")");
+        return op < sAppOpInfos.length ? sAppOpInfos[op].simpleName : ("Unknown(" + op + ")");
     }
 
     /**
@@ -3189,15 +2376,15 @@ public class AppOpsManager {
      * @hide
      */
     public static @NonNull String opToPublicName(int op) {
-        return sOpToString[op];
+        return sAppOpInfos[op].name;
     }
 
     /**
      * @hide
      */
     public static int strDebugOpToOp(String op) {
-        for (int i=0; i<sOpNames.length; i++) {
-            if (sOpNames[i].equals(op)) {
+        for (int i = 0; i < sAppOpInfos.length; i++) {
+            if (sAppOpInfos[i].simpleName.equals(op)) {
                 return i;
             }
         }
@@ -3211,7 +2398,7 @@ public class AppOpsManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static String opToPermission(int op) {
-        return sOpPerms[op];
+        return sAppOpInfos[op].permission;
     }
 
     /**
@@ -3232,7 +2419,7 @@ public class AppOpsManager {
      * @hide
      */
     public static String opToRestriction(int op) {
-        return sOpRestrictions[op];
+        return sAppOpInfos[op].restriction;
     }
 
     /**
@@ -3254,7 +2441,7 @@ public class AppOpsManager {
      * @hide
      */
     public static RestrictionBypass opAllowSystemBypassRestriction(int op) {
-        return sOpAllowSystemRestrictionBypass[op];
+        return sAppOpInfos[op].allowSystemRestrictionBypass;
     }
 
     /**
@@ -3262,7 +2449,7 @@ public class AppOpsManager {
      * @hide
      */
     public static @Mode int opToDefaultMode(int op) {
-        return sOpDefaultMode[op];
+        return sAppOpInfos[op].defaultMode;
     }
 
     /**
@@ -3295,7 +2482,7 @@ public class AppOpsManager {
      * @hide
      */
     public static boolean opRestrictsRead(int op) {
-        return sOpRestrictRead[op];
+        return sAppOpInfos[op].restrictRead;
     }
 
     /**
@@ -3303,7 +2490,7 @@ public class AppOpsManager {
      * @hide
      */
     public static boolean opAllowsReset(int op) {
-        return !sOpDisableReset[op];
+        return !sAppOpInfos[op].disableReset;
     }
 
     /**
@@ -4436,7 +3623,7 @@ public class AppOpsManager {
          * @return This entry's op string name, such as {@link #OPSTR_COARSE_LOCATION}.
          */
         public @NonNull String getOpStr() {
-            return sOpToString[mOp];
+            return sAppOpInfos[mOp].name;
         }
 
         /**
@@ -6553,7 +5740,7 @@ public class AppOpsManager {
             if (mHistoricalOps == null) {
                 mHistoricalOps = new ArrayMap<>();
             }
-            final String opStr = sOpToString[opCode];
+            final String opStr = sAppOpInfos[opCode].name;
             HistoricalOp op = mHistoricalOps.get(opStr);
             if (op == null) {
                 op = new HistoricalOp(opCode);
@@ -6898,7 +6085,7 @@ public class AppOpsManager {
          * @return The op name.
          */
         public @NonNull String getOpName() {
-            return sOpToString[mOp];
+            return sAppOpInfos[mOp].name;
         }
 
         /** @hide */
@@ -7912,7 +7099,7 @@ public class AppOpsManager {
         if (opCode == null) {
             return null;
         }
-        return sOpToString[opCode];
+        return sAppOpInfos[opCode].name;
     }
 
     /**
@@ -8007,8 +7194,8 @@ public class AppOpsManager {
                         if (callback instanceof OnOpChangedInternalListener) {
                             ((OnOpChangedInternalListener)callback).onOpChanged(op, packageName);
                         }
-                        if (sOpToString[op] != null) {
-                            callback.onOpChanged(sOpToString[op], packageName);
+                        if (sAppOpInfos[op].name != null) {
+                            callback.onOpChanged(sAppOpInfos[op].name, packageName);
                         }
                     }
                 };
@@ -8096,8 +7283,8 @@ public class AppOpsManager {
                             ((OnOpActiveChangedInternalListener) callback).onOpActiveChanged(op,
                                     uid, packageName, active);
                         }
-                        if (sOpToString[op] != null) {
-                            callback.onOpActiveChanged(sOpToString[op], uid, packageName,
+                        if (sAppOpInfos[op].name != null) {
+                            callback.onOpActiveChanged(sAppOpInfos[op].name, uid, packageName,
                                     attributionTag, active, attributionFlags, attributionChainId);
                         }
                     });
@@ -8273,7 +7460,8 @@ public class AppOpsManager {
     }
 
     private String buildSecurityExceptionMsg(int op, int uid, String packageName) {
-        return packageName + " from uid " + uid + " not allowed to perform " + sOpNames[op];
+        return packageName + " from uid " + uid + " not allowed to perform " +
+            sAppOpInfos[op].simpleName;
     }
 
     /**
@@ -8633,7 +7821,7 @@ public class AppOpsManager {
                     + attributionSource.getUid() + " or calling package "
                     + attributionSource.getNextPackageName() + " from uid "
                     + attributionSource.getNextUid() + " not allowed to perform "
-                    + sOpNames[op]);
+                    + sAppOpInfos[op].simpleName);
         }
         return mode;
     }
@@ -10084,9 +9272,12 @@ public class AppOpsManager {
      */
     @SystemApi
     public static String[] getOpStrs() {
-        return Arrays.copyOf(sOpToString, sOpToString.length);
+        String[] opStrs = new String[sAppOpInfos.length];
+        for(int i = 0; i < sAppOpInfos.length; i++) {
+            opStrs[i] = sAppOpInfos[i].name;
+        }
+        return opStrs;
     }
-
 
     /**
      * @return number of App ops
