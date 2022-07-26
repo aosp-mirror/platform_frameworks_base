@@ -9298,4 +9298,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         "Unexpected letterbox background type: " + letterboxBackgroundType);
         }
     }
+
+    BackNaviAnimationController getBackNaviAnimationController() {
+        return mAtmService.mBackNavigationController != null
+                ? mAtmService.mBackNavigationController.mBackNaviAnimationController : null;
+    }
 }
