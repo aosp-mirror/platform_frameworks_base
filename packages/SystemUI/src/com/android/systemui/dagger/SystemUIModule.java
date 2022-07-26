@@ -41,6 +41,7 @@ import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.keyguard.data.BouncerViewModule;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.media.dagger.MediaProjectionModule;
 import com.android.systemui.model.SysUiState;
@@ -116,6 +117,7 @@ import dagger.Provides;
             AppOpsModule.class,
             AssistModule.class,
             BiometricsModule.class,
+            BouncerViewModule.class,
             ClockModule.class,
             CoroutinesModule.class,
             DreamModule.class,

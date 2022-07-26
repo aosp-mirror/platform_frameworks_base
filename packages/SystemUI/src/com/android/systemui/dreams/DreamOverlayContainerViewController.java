@@ -35,6 +35,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
+import com.android.systemui.keyguard.domain.interactor.BouncerCallbackInteractor;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -73,6 +74,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     // Main thread handler used to schedule periodic tasks (e.g. burn-in protection updates).
     private final Handler mHandler;
     private final int mDreamOverlayMaxTranslationY;
+    private final BouncerCallbackInteractor mBouncerCallbackInteractor;
 
     private long mJitterStartTimeMillis;
 
@@ -131,7 +133,8 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
             @Named(DreamOverlayModule.MAX_BURN_IN_OFFSET) int maxBurnInOffset,
             @Named(DreamOverlayModule.BURN_IN_PROTECTION_UPDATE_INTERVAL) long
                     burnInProtectionUpdateInterval,
-            @Named(DreamOverlayModule.MILLIS_UNTIL_FULL_JITTER) long millisUntilFullJitter) {
+            @Named(DreamOverlayModule.MILLIS_UNTIL_FULL_JITTER) long millisUntilFullJitter,
+            BouncerCallbackInteractor bouncerCallbackInteractor) {
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
@@ -151,6 +154,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         mMaxBurnInOffset = maxBurnInOffset;
         mBurnInProtectionUpdateInterval = burnInProtectionUpdateInterval;
         mMillisUntilFullJitter = millisUntilFullJitter;
+        mBouncerCallbackInteractor = bouncerCallbackInteractor;
     }
 
     @Override
@@ -167,6 +171,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         if (bouncer != null) {
             bouncer.addBouncerExpansionCallback(mBouncerExpansionCallback);
         }
+        mBouncerCallbackInteractor.addBouncerExpansionCallback(mBouncerExpansionCallback);
     }
 
     @Override
@@ -176,6 +181,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         if (bouncer != null) {
             bouncer.removeBouncerExpansionCallback(mBouncerExpansionCallback);
         }
+        mBouncerCallbackInteractor.removeBouncerExpansionCallback(mBouncerExpansionCallback);
     }
 
     View getContainerView() {
