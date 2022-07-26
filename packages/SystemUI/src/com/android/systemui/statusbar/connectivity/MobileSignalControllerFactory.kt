@@ -43,12 +43,6 @@ internal class MobileSignalControllerFactory @Inject constructor(
         subscriptionDefaults: MobileStatusTracker.SubscriptionDefaults,
         receiverLooper: Looper // TODO: no!
     ): MobileSignalController {
-        val mobileTrackerFactory = MobileStatusTrackerFactory(
-            phone,
-            receiverLooper,
-            subscriptionInfo,
-            subscriptionDefaults)
-
         return MobileSignalController(
             context,
             config,
@@ -60,7 +54,6 @@ internal class MobileSignalControllerFactory @Inject constructor(
             subscriptionDefaults,
             receiverLooper,
             carrierConfigTracker,
-            mobileTrackerFactory,
             featureFlags,
         )
     }
