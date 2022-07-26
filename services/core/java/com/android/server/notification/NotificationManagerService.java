@@ -2724,7 +2724,6 @@ public class NotificationManagerService extends SystemService {
             mListeners.onBootPhaseAppsCanStart();
             mAssistants.onBootPhaseAppsCanStart();
             mConditionProviders.onBootPhaseAppsCanStart();
-            Slog.d("julia", "boot phase");
             mHistoryManager.onBootPhaseAppsCanStart();
             registerDeviceConfigChange();
             migrateDefaultNAS();
