@@ -26,6 +26,7 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.colorextraction.SysuiColorExtractor
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
@@ -45,10 +46,10 @@ import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -161,6 +162,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun testRSSISlot_notCombined() {
+        `when`(featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)).thenReturn(false)
         controller.init()
 
         val captor = argumentCaptor<List<String>>()
@@ -168,6 +170,20 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
         assertThat(captor.value).containsExactly(
             mContext.getString(com.android.internal.R.string.status_bar_mobile)
+        )
+    }
+
+    @Test
+    fun testRSSISlot_combined() {
+        `when`(featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)).thenReturn(true)
+        controller.init()
+
+        val captor = argumentCaptor<List<String>>()
+        verify(view).onAttach(any(), any(), capture(captor), any(), anyBoolean())
+
+        assertThat(captor.value).containsExactly(
+            mContext.getString(com.android.internal.R.string.status_bar_no_calling),
+            mContext.getString(com.android.internal.R.string.status_bar_call_strength)
         )
     }
 
