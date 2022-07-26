@@ -4265,6 +4265,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         void detach(Transaction t) {
             removeImeSurface(t);
         }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(64);
+            sb.append("ImeScreenshot{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(" imeTarget=" + mImeTarget);
+            sb.append(" surface=" + mImeSurface);
+            sb.append('}');
+            return sb.toString();
+        }
     }
 
     private void attachAndShowImeScreenshotOnTarget() {
@@ -4297,15 +4308,23 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * Removes the IME screenshot when necessary.
-     *
-     * Used when app transition animation finished or obsoleted screenshot surface like size
-     * changed by rotation.
+     * Removes the IME screenshot when the caller is a part of the attached target window.
      */
-    void removeImeScreenshotIfPossible() {
-        if (mImeLayeringTarget == null
-                || mImeLayeringTarget.mAttrs.type != TYPE_APPLICATION_STARTING
-                && !mImeLayeringTarget.inTransitionSelfOrParent()) {
+    void removeImeSurfaceByTarget(WindowContainer win) {
+        if (mImeScreenshot == null || win == null) {
+            return;
+        }
+        // The starting window shouldn't be the input target to attach the IME screenshot during
+        // transitioning.
+        if (win.asWindowState() != null
+                && win.asWindowState().mAttrs.type == TYPE_APPLICATION_STARTING) {
+            return;
+        }
+
+        final WindowState screenshotTarget = mImeScreenshot.getImeTarget();
+        final boolean winIsOrContainsScreenshotTarget = (win == screenshotTarget
+                || win.getWindow(w -> w == screenshotTarget) != null);
+        if (winIsOrContainsScreenshotTarget) {
             removeImeSurfaceImmediately();
         }
     }
@@ -4652,10 +4671,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     wc, SurfaceAnimator.animationTypeToString(type), mImeScreenshot,
                     mImeScreenshot.getImeTarget());
         }
-        if (mImeScreenshot != null && (wc == mImeScreenshot.getImeTarget()
-                || wc.getWindow(w -> w == mImeScreenshot.getImeTarget()) != null)
-                && (type & WindowState.EXIT_ANIMATING_TYPES) != 0) {
-            removeImeSurfaceImmediately();
+        if ((type & WindowState.EXIT_ANIMATING_TYPES) != 0) {
+            removeImeSurfaceByTarget(wc);
         }
     }
 
