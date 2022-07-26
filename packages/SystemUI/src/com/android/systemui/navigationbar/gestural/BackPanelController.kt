@@ -601,7 +601,7 @@ class BackPanelController private constructor(
                             if (currentState == GestureState.INACTIVE ||
                                 currentState == GestureState.CANCELLED
                             )
-                                params.entryIndicator.backgroundDimens.edgeCornerRadius
+                                params.cancelledEdgeCornerRadius
                             else
                                 params.activeIndicator.backgroundDimens.edgeCornerRadius
                         )

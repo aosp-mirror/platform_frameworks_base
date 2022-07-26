@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.keyguard
+package com.android.systemui.animation
 
 import android.graphics.fonts.Font
 import android.graphics.fonts.FontVariationAxis
@@ -61,7 +61,7 @@ class FontInterpolator {
         var index: Int,
         val sortedAxes: MutableList<FontVariationAxis>
     ) {
-        constructor(font: Font, axes: List<FontVariationAxis>):
+        constructor(font: Font, axes: List<FontVariationAxis>) :
                 this(font.sourceIdentifier,
                         font.ttcIndex,
                         axes.toMutableList().apply { sortBy { it.tag } }

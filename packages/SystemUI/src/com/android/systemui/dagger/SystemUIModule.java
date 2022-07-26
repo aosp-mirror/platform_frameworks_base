@@ -70,7 +70,7 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfC
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
-import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -91,7 +91,6 @@ import com.android.systemui.wallet.dagger.WalletModule;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.dagger.DynamicOverride;
-import com.android.wm.shell.sysui.ShellController;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -135,6 +134,7 @@ import dagger.Provides;
             SettingsUtilModule.class,
             SmartRepliesInflationModule.class,
             SmartspaceModule.class,
+            StatusBarPipelineModule.class,
             StatusBarPolicyModule.class,
             StatusBarWindowModule.class,
             SysUIConcurrencyModule.class,

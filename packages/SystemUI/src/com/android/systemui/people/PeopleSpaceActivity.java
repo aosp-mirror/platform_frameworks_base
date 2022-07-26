@@ -22,7 +22,6 @@ import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.activity.ComponentActivity;
@@ -40,7 +39,6 @@ public class PeopleSpaceActivity extends ComponentActivity {
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
 
     private final PeopleViewModel.Factory mViewModelFactory;
-    private PeopleViewModel mViewModel;
 
     @Inject
     public PeopleSpaceActivity(PeopleViewModel.Factory viewModelFactory) {
@@ -52,38 +50,32 @@ public class PeopleSpaceActivity extends ComponentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setResult(RESULT_CANCELED);
-        mViewModel = new ViewModelProvider(this, mViewModelFactory).get(PeopleViewModel.class);
+
+        PeopleViewModel viewModel = new ViewModelProvider(this, mViewModelFactory).get(
+                PeopleViewModel.class);
 
         // Update the widget ID coming from the intent.
         int widgetId = getIntent().getIntExtra(EXTRA_APPWIDGET_ID, INVALID_APPWIDGET_ID);
-        mViewModel.onWidgetIdChanged(widgetId);
+        viewModel.onWidgetIdChanged(widgetId);
 
         ViewGroup view = PeopleViewBinder.create(this);
-        PeopleViewBinder.bind(view, mViewModel, /* lifecycleOwner= */ this,
-                () -> {
-                    finishActivity();
+        PeopleViewBinder.bind(view, viewModel, /* lifecycleOwner= */ this,
+                (result) -> {
+                    finishActivity(result);
                     return null;
                 });
         setContentView(view);
     }
 
-    /** Finish activity with a successful widget configuration result. */
-    private void finishActivity() {
-        if (DEBUG) Log.d(TAG, "Widget added!");
-        setActivityResult(RESULT_OK);
+    private void finishActivity(PeopleViewModel.Result result) {
+        if (result instanceof PeopleViewModel.Result.Success) {
+            if (DEBUG) Log.d(TAG, "Widget added!");
+            Intent data = ((PeopleViewModel.Result.Success) result).getData();
+            setResult(RESULT_OK, data);
+        } else {
+            if (DEBUG) Log.d(TAG, "Activity dismissed with no widgets added!");
+            setResult(RESULT_CANCELED);
+        }
         finish();
-    }
-
-    /** Finish activity without choosing a widget. */
-    public void dismissActivity(View v) {
-        if (DEBUG) Log.d(TAG, "Activity dismissed with no widgets added!");
-        setResult(RESULT_CANCELED);
-        finish();
-    }
-
-    private void setActivityResult(int result) {
-        Intent resultValue = new Intent();
-        resultValue.putExtra(EXTRA_APPWIDGET_ID, mViewModel.getAppWidgetId().getValue());
-        setResult(result, resultValue);
     }
 }

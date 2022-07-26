@@ -34,12 +34,12 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.AnimatableClockController;
-import com.android.keyguard.AnimatableClockView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.clocks.AnimatableClockView;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import org.junit.After;
