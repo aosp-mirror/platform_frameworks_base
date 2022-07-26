@@ -70,6 +70,7 @@ import android.os.Process;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -398,6 +399,18 @@ public final class InputMethodManager {
     public static final long CLEAR_SHOW_FORCED_FLAG_WHEN_LEAVING = 214016041L; // This is a bug id.
 
     /**
+     * If {@code true}, avoid calling the
+     * {@link com.android.server.inputmethod.InputMethodManagerService InputMethodManagerService}
+     * by skipping the call to {@link IInputMethodManager#startInputOrWindowGainedFocus}
+     * when we are switching focus between two non-editable views. This saves the cost of a binder
+     * call into the system server.
+     * <p><b>Note:</b>
+     * The default value is {@code true}.
+     */
+    private static final boolean OPTIMIZE_NONEDITABLE_VIEWS =
+            SystemProperties.getBoolean("debug.imm.optimize_noneditable_views", true);
+
+    /**
      * @deprecated Use {@link #mServiceInvoker} instead.
      */
     @Deprecated
@@ -646,6 +659,26 @@ public final class InputMethodManager {
 
     private final class DelegateImpl implements
             ImeFocusController.InputMethodManagerDelegate {
+        @GuardedBy("mH")
+        @Nullable
+        private ViewFocusParameterInfo mPreviousViewFocusParameters;
+
+        @GuardedBy("mH")
+        private void updatePreviousViewFocusParametersLocked(
+                @Nullable EditorInfo currentEditorInfo,
+                @StartInputFlags int startInputFlags,
+                @StartInputReason int startInputReason,
+                @SoftInputModeFlags int softInputMode,
+                int windowFlags) {
+            mPreviousViewFocusParameters = new ViewFocusParameterInfo(currentEditorInfo,
+                    startInputFlags, startInputReason, softInputMode, windowFlags);
+        }
+
+        @GuardedBy("mH")
+        private void clearStateLocked() {
+            mPreviousViewFocusParameters = null;
+        }
+
         /**
          * Used by {@link ImeFocusController} to start input connection.
          */
@@ -1692,8 +1725,10 @@ public final class InputMethodManager {
      * Reset all of the state associated with a served view being connected
      * to an input method
      */
+    @GuardedBy("mH")
     private void clearConnectionLocked() {
         mCurrentEditorInfo = null;
+        mDelegate.clearStateLocked();
         if (mServedInputConnection != null) {
             mServedInputConnection.deactivate();
             mServedInputConnection = null;
@@ -2344,6 +2379,9 @@ public final class InputMethodManager {
 
             // Hook 'em up and let 'er rip.
             mCurrentEditorInfo = tba.createCopyInternal();
+            // Store the previously served connection so that we can determine whether it is safe
+            // to skip the call to startInputOrWindowGainedFocus in the IMMS
+            final RemoteInputConnectionImpl previouslyServedConnection = mServedInputConnection;
 
             mServedConnecting = false;
             if (mServedInputConnection != null) {
@@ -2382,6 +2420,22 @@ public final class InputMethodManager {
                 Log.v(TAG, "START INPUT: view=" + dumpViewInfo(view) + " ic="
                         + ic + " tba=" + tba + " startInputFlags="
                         + InputMethodDebug.startInputFlagsToString(startInputFlags));
+            }
+
+            // When we switch between non-editable views, do not call into the IMMS.
+            final boolean canSkip = OPTIMIZE_NONEDITABLE_VIEWS
+                    && previouslyServedConnection == null
+                    && ic == null
+                    && isSwitchingBetweenEquivalentNonEditableViews(
+                            mDelegate.mPreviousViewFocusParameters, startInputFlags,
+                            startInputReason, softInputMode, windowFlags);
+            updatePreviousViewFocusParametersLocked(mCurrentEditorInfo, startInputFlags,
+                    startInputReason, softInputMode, windowFlags);
+            if (canSkip) {
+                if (DEBUG) {
+                    Log.d(TAG, "Not calling IMMS due to switching between non-editable views.");
+                }
+                return false;
             }
             res = mServiceInvoker.startInputOrWindowGainedFocus(
                     startInputReason, mClient, windowGainingFocus, startInputFlags,
@@ -2443,6 +2497,47 @@ public final class InputMethodManager {
         }
 
         return true;
+    }
+
+    /**
+     * This method exists only so that the
+     * <a href="https://errorprone.info/bugpattern/GuardedBy">errorprone</a> false positive warning
+     * can be suppressed without granting a blanket exception to the {@link #startInputInner}
+     * method.
+     * <p>
+     * The warning in question implies that the access to the
+     * {@link DelegateImpl#updatePreviousViewFocusParametersLocked} method should be guarded by
+     * {@code InputMethodManager.this.mH}, but instead {@code mDelegate.mH} is held in the caller.
+     * In this case errorprone fails to realize that it is the same object.
+     */
+    @GuardedBy("mH")
+    @SuppressWarnings("GuardedBy")
+    private void updatePreviousViewFocusParametersLocked(
+            @Nullable EditorInfo currentEditorInfo,
+            @StartInputFlags int startInputFlags,
+            @StartInputReason int startInputReason,
+            @SoftInputModeFlags int softInputMode,
+            int windowFlags) {
+        mDelegate.updatePreviousViewFocusParametersLocked(currentEditorInfo, startInputFlags,
+                startInputReason, softInputMode, windowFlags);
+    }
+
+    /**
+     * @return {@code true} when we are switching focus between two non-editable views
+     * so that we can avoid calling {@link IInputMethodManager#startInputOrWindowGainedFocus}.
+     */
+    @GuardedBy("mH")
+    private boolean isSwitchingBetweenEquivalentNonEditableViews(
+            @Nullable ViewFocusParameterInfo previousViewFocusParameters,
+            @StartInputFlags int startInputFlags,
+            @StartInputReason int startInputReason,
+            @SoftInputModeFlags int softInputMode,
+            int windowFlags) {
+        return (startInputFlags & StartInputFlags.WINDOW_GAINED_FOCUS) == 0
+                && (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) == 0
+                && previousViewFocusParameters != null
+                && previousViewFocusParameters.sameAs(mCurrentEditorInfo,
+                    startInputFlags, startInputReason, softInputMode, windowFlags);
     }
 
     private void reportInputConnectionOpened(

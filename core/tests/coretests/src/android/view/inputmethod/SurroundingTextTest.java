@@ -17,7 +17,8 @@
 package android.view.inputmethod;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
 
 import android.os.Parcel;
 
@@ -69,5 +70,12 @@ public class SurroundingTextTest {
         assertThat(surroundingTextFromParcel.getSelectionStart(), is(0));
         assertThat(surroundingTextFromParcel.getSelectionEnd(), is(1));
         assertThat(surroundingTextFromParcel.getOffset(), is(2));
+    }
+
+    @Test
+    public void testIsEqualComparesText() {
+        final SurroundingText text1 = new SurroundingText("hello", 0, 1, 0);
+        final SurroundingText text2 = new SurroundingText("there", 0, 1, 0);
+        assertFalse(text1.isEqualTo(text2));
     }
 }
