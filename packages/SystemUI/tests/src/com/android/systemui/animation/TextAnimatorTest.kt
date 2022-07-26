@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.keyguard
+package com.android.systemui.animation
 
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
@@ -26,18 +26,17 @@ import android.text.TextPaint
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
+import kotlin.math.ceil
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-
-import kotlin.math.ceil
+import org.mockito.Mockito.`when`
 
 private val PAINT = TextPaint().apply {
     textSize = 32f

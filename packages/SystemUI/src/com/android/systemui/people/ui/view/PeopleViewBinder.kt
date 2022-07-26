@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 
 /** A ViewBinder for [PeopleViewModel]. */
 object PeopleViewBinder {
-    private const val TAG = "PeopleSpaceViewBinder"
+    private const val TAG = "PeopleViewBinder"
 
     /**
      * The [ViewOutlineProvider] used to clip the corner radius of the recent and priority lists.
@@ -72,15 +72,15 @@ object PeopleViewBinder {
         view: ViewGroup,
         viewModel: PeopleViewModel,
         lifecycleOwner: LifecycleOwner,
-        onFinish: () -> Unit,
+        onResult: (PeopleViewModel.Result) -> Unit,
     ) {
-        // Call [onFinish] this activity when the ViewModel tells us so.
+        // Call [onResult] as soon as a result is available.
         lifecycleOwner.lifecycleScope.launch {
             lifecycleOwner.repeatOnLifecycle(CREATED) {
-                viewModel.isFinished.collect { isFinished ->
-                    if (isFinished) {
-                        viewModel.clearIsFinished()
-                        onFinish()
+                viewModel.result.collect { result ->
+                    if (result != null) {
+                        viewModel.clearResult()
+                        onResult(result)
                     }
                 }
             }
@@ -104,7 +104,7 @@ object PeopleViewBinder {
                                 viewModel::onTileClicked,
                             )
                         } else {
-                            setNoConversationsContent(view)
+                            setNoConversationsContent(view, viewModel::onUserJourneyCancelled)
                         }
                     }
             }
@@ -119,7 +119,7 @@ object PeopleViewBinder {
         }
     }
 
-    private fun setNoConversationsContent(view: ViewGroup) {
+    private fun setNoConversationsContent(view: ViewGroup, onGotItClicked: () -> Unit) {
         // This should never happen.
         if (view.childCount > 1) {
             error("view has ${view.childCount} children, it should have maximum 1")
@@ -139,6 +139,10 @@ object PeopleViewBinder {
         val noConversationsView =
             LayoutInflater.from(context)
                 .inflate(R.layout.people_space_activity_no_conversations, /* root= */ view)
+
+        noConversationsView.findViewById<View>(R.id.got_it_button).setOnClickListener {
+            onGotItClicked()
+        }
 
         // The Tile preview has colorBackground as its background. Change it so it's different than
         // the activity's background.
