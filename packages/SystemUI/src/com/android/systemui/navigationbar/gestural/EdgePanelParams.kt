@@ -33,6 +33,8 @@ data class EdgePanelParams(private var resources: Resources) {
         private set
     var fullyStretchedIndicator = BackIndicatorDimens()
         private set
+    var cancelledEdgeCornerRadius: Float = 0f
+        private set
     var cancelledArrowDimens = ArrowDimens()
 
     // navigation bar edge constants
@@ -131,6 +133,8 @@ data class EdgePanelParams(private var resources: Resources) {
                 farCornerRadius = getDimen(R.dimen.navigation_edge_stretch_far_corners)
             )
         )
+
+        cancelledEdgeCornerRadius = getDimen(R.dimen.navigation_edge_cancelled_edge_corners)
 
         cancelledArrowDimens = ArrowDimens(
             length = getDimen(R.dimen.navigation_edge_cancelled_arrow_length),
