@@ -491,10 +491,10 @@ static void com_android_server_am_CachedAppOptimizer_compactProcess(JNIEnv*, job
     compactProcessOrFallback(pid, compactionFlags);
 }
 
-static jint com_android_server_am_CachedAppOptimizer_freezeBinder(
-        JNIEnv *env, jobject clazz, jint pid, jboolean freeze) {
-
-    jint retVal = IPCThreadState::freeze(pid, freeze, 100 /* timeout [ms] */);
+static jint com_android_server_am_CachedAppOptimizer_freezeBinder(JNIEnv* env, jobject clazz,
+                                                                  jint pid, jboolean freeze,
+                                                                  jint timeout_ms) {
+    jint retVal = IPCThreadState::freeze(pid, freeze, timeout_ms);
     if (retVal != 0 && retVal != -EAGAIN) {
         jniThrowException(env, "java/lang/RuntimeException", "Unable to freeze/unfreeze binder");
     }
@@ -548,7 +548,7 @@ static const JNINativeMethod sMethods[] = {
          (void*)com_android_server_am_CachedAppOptimizer_getMemoryFreedCompaction},
         {"compactSystem", "()V", (void*)com_android_server_am_CachedAppOptimizer_compactSystem},
         {"compactProcess", "(II)V", (void*)com_android_server_am_CachedAppOptimizer_compactProcess},
-        {"freezeBinder", "(IZ)I", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
+        {"freezeBinder", "(IZI)I", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
         {"getBinderFreezeInfo", "(I)I",
          (void*)com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo},
         {"getFreezerCheckPath", "()Ljava/lang/String;",
