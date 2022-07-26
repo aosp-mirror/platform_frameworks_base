@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
-import android.window.SurfaceSyncer;
+import android.window.SurfaceSyncGroup;
 
 import androidx.test.filters.SmallTest;
 
@@ -35,22 +35,20 @@ import java.util.concurrent.TimeUnit;
 
 @SmallTest
 @Presubmit
-public class SurfaceSyncerTest {
-    private SurfaceSyncer mSurfaceSyncer;
+public class SurfaceSyncGroupTest {
 
     @Before
     public void setup() {
-        mSurfaceSyncer = new SurfaceSyncer();
-        SurfaceSyncer.setTransactionFactory(StubTransaction::new);
+        SurfaceSyncGroup.setTransactionFactory(StubTransaction::new);
     }
 
     @Test
     public void testSyncOne() throws InterruptedException {
         final CountDownLatch finishedLatch = new CountDownLatch(1);
-        int startSyncId = mSurfaceSyncer.setupSync(transaction -> finishedLatch.countDown());
+        SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(transaction -> finishedLatch.countDown());
         SyncTarget syncTarget = new SyncTarget();
-        mSurfaceSyncer.addToSync(startSyncId, syncTarget);
-        mSurfaceSyncer.markSyncReady(startSyncId);
+        syncGroup.addToSync(syncTarget);
+        syncGroup.markSyncReady();
 
         syncTarget.onBufferReady();
 
@@ -61,15 +59,15 @@ public class SurfaceSyncerTest {
     @Test
     public void testSyncMultiple() throws InterruptedException {
         final CountDownLatch finishedLatch = new CountDownLatch(1);
-        int startSyncId = mSurfaceSyncer.setupSync(transaction -> finishedLatch.countDown());
+        SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(transaction -> finishedLatch.countDown());
         SyncTarget syncTarget1 = new SyncTarget();
         SyncTarget syncTarget2 = new SyncTarget();
         SyncTarget syncTarget3 = new SyncTarget();
 
-        mSurfaceSyncer.addToSync(startSyncId, syncTarget1);
-        mSurfaceSyncer.addToSync(startSyncId, syncTarget2);
-        mSurfaceSyncer.addToSync(startSyncId, syncTarget3);
-        mSurfaceSyncer.markSyncReady(startSyncId);
+        syncGroup.addToSync(syncTarget1);
+        syncGroup.addToSync(syncTarget2);
+        syncGroup.addToSync(syncTarget3);
+        syncGroup.markSyncReady();
 
         syncTarget1.onBufferReady();
         assertNotEquals(0, finishedLatch.getCount());
@@ -84,39 +82,36 @@ public class SurfaceSyncerTest {
     }
 
     @Test
-    public void testInvalidSyncId() {
-        assertFalse(mSurfaceSyncer.addToSync(0, new SyncTarget()));
-    }
-
-    @Test
-    public void testAddSyncWhenSyncComplete() throws InterruptedException {
+    public void testAddSyncWhenSyncComplete() {
         final CountDownLatch finishedLatch = new CountDownLatch(1);
-        int startSyncId = mSurfaceSyncer.setupSync(transaction -> finishedLatch.countDown());
+        SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(transaction -> finishedLatch.countDown());
 
         SyncTarget syncTarget1 = new SyncTarget();
         SyncTarget syncTarget2 = new SyncTarget();
 
-        assertTrue(mSurfaceSyncer.addToSync(startSyncId, syncTarget1));
-        mSurfaceSyncer.markSyncReady(startSyncId);
+        assertTrue(syncGroup.addToSync(syncTarget1));
+        syncGroup.markSyncReady();
         // Adding to a sync that has been completed is also invalid since the sync id has been
         // cleared.
-        assertFalse(mSurfaceSyncer.addToSync(startSyncId, syncTarget2));
+        assertFalse(syncGroup.addToSync(syncTarget2));
     }
 
     @Test
-    public void testMultipleSyncSets() throws InterruptedException {
+    public void testMultiplesyncGroups() throws InterruptedException {
         final CountDownLatch finishedLatch1 = new CountDownLatch(1);
         final CountDownLatch finishedLatch2 = new CountDownLatch(1);
-        int startSyncId1 = mSurfaceSyncer.setupSync(transaction -> finishedLatch1.countDown());
-        int startSyncId2 = mSurfaceSyncer.setupSync(transaction -> finishedLatch2.countDown());
+        SurfaceSyncGroup syncGroup1 = new SurfaceSyncGroup(
+                transaction -> finishedLatch1.countDown());
+        SurfaceSyncGroup syncGroup2 = new SurfaceSyncGroup(
+                transaction -> finishedLatch2.countDown());
 
         SyncTarget syncTarget1 = new SyncTarget();
         SyncTarget syncTarget2 = new SyncTarget();
 
-        assertTrue(mSurfaceSyncer.addToSync(startSyncId1, syncTarget1));
-        assertTrue(mSurfaceSyncer.addToSync(startSyncId2, syncTarget2));
-        mSurfaceSyncer.markSyncReady(startSyncId1);
-        mSurfaceSyncer.markSyncReady(startSyncId2);
+        assertTrue(syncGroup1.addToSync(syncTarget1));
+        assertTrue(syncGroup2.addToSync(syncTarget2));
+        syncGroup1.markSyncReady();
+        syncGroup2.markSyncReady();
 
         syncTarget1.onBufferReady();
 
@@ -134,19 +129,21 @@ public class SurfaceSyncerTest {
     public void testMergeSync() throws InterruptedException {
         final CountDownLatch finishedLatch1 = new CountDownLatch(1);
         final CountDownLatch finishedLatch2 = new CountDownLatch(1);
-        int startSyncId1 = mSurfaceSyncer.setupSync(transaction -> finishedLatch1.countDown());
-        int startSyncId2 = mSurfaceSyncer.setupSync(transaction -> finishedLatch2.countDown());
+        SurfaceSyncGroup syncGroup1 = new SurfaceSyncGroup(
+                transaction -> finishedLatch1.countDown());
+        SurfaceSyncGroup syncGroup2 = new SurfaceSyncGroup(
+                transaction -> finishedLatch2.countDown());
 
         SyncTarget syncTarget1 = new SyncTarget();
         SyncTarget syncTarget2 = new SyncTarget();
 
-        assertTrue(mSurfaceSyncer.addToSync(startSyncId1, syncTarget1));
-        assertTrue(mSurfaceSyncer.addToSync(startSyncId2, syncTarget2));
-        mSurfaceSyncer.markSyncReady(startSyncId1);
-        mSurfaceSyncer.merge(startSyncId2, startSyncId1, mSurfaceSyncer);
-        mSurfaceSyncer.markSyncReady(startSyncId2);
+        assertTrue(syncGroup1.addToSync(syncTarget1));
+        assertTrue(syncGroup2.addToSync(syncTarget2));
+        syncGroup1.markSyncReady();
+        syncGroup2.merge(syncGroup1);
+        syncGroup2.markSyncReady();
 
-        // Finish syncTarget2 first to test that the syncSet is not complete until the merged sync
+        // Finish syncTarget2 first to test that the syncGroup is not complete until the merged sync
         // is also done.
         syncTarget2.onBufferReady();
         finishedLatch2.await(1, TimeUnit.SECONDS);
@@ -167,23 +164,25 @@ public class SurfaceSyncerTest {
     public void testMergeSyncAlreadyComplete() throws InterruptedException {
         final CountDownLatch finishedLatch1 = new CountDownLatch(1);
         final CountDownLatch finishedLatch2 = new CountDownLatch(1);
-        int startSyncId1 = mSurfaceSyncer.setupSync(transaction -> finishedLatch1.countDown());
-        int startSyncId2 = mSurfaceSyncer.setupSync(transaction -> finishedLatch2.countDown());
+        SurfaceSyncGroup syncGroup1 = new SurfaceSyncGroup(
+                transaction -> finishedLatch1.countDown());
+        SurfaceSyncGroup syncGroup2 = new SurfaceSyncGroup(
+                transaction -> finishedLatch2.countDown());
 
         SyncTarget syncTarget1 = new SyncTarget();
         SyncTarget syncTarget2 = new SyncTarget();
 
-        assertTrue(mSurfaceSyncer.addToSync(startSyncId1, syncTarget1));
-        assertTrue(mSurfaceSyncer.addToSync(startSyncId2, syncTarget2));
-        mSurfaceSyncer.markSyncReady(startSyncId1);
+        assertTrue(syncGroup1.addToSync(syncTarget1));
+        assertTrue(syncGroup2.addToSync(syncTarget2));
+        syncGroup1.markSyncReady();
         syncTarget1.onBufferReady();
 
         // The first sync will still get a callback when it's sync requirements are done.
         finishedLatch1.await(5, TimeUnit.SECONDS);
         assertEquals(0, finishedLatch1.getCount());
 
-        mSurfaceSyncer.merge(startSyncId2, startSyncId1, mSurfaceSyncer);
-        mSurfaceSyncer.markSyncReady(startSyncId2);
+        syncGroup2.merge(syncGroup1);
+        syncGroup2.markSyncReady();
         syncTarget2.onBufferReady();
 
         // Verify that the second sync will receive complete since the merged sync was already
@@ -192,11 +191,11 @@ public class SurfaceSyncerTest {
         assertEquals(0, finishedLatch2.getCount());
     }
 
-    private static class SyncTarget implements SurfaceSyncer.SyncTarget {
-        private SurfaceSyncer.SyncBufferCallback mSyncBufferCallback;
+    private static class SyncTarget implements SurfaceSyncGroup.SyncTarget {
+        private SurfaceSyncGroup.SyncBufferCallback mSyncBufferCallback;
 
         @Override
-        public void onReadyToSync(SurfaceSyncer.SyncBufferCallback syncBufferCallback) {
+        public void onReadyToSync(SurfaceSyncGroup.SyncBufferCallback syncBufferCallback) {
             mSyncBufferCallback = syncBufferCallback;
         }
 

@@ -17,10 +17,10 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.annotation.UiThread;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
+import android.window.SurfaceSyncGroup;
 
 /**
  * Provides an interface to the root-Surface of a View Hierarchy or Window. This
@@ -138,4 +138,12 @@ public interface AttachedSurfaceControl {
      */
     default void setTouchableRegion(@Nullable Region r) {
     }
+
+    /**
+     * Returns a SyncTarget that can be used to sync {@link AttachedSurfaceControl} in a
+     * {@link SurfaceSyncGroup}
+     *
+     * @hide
+     */
+    SurfaceSyncGroup.SyncTarget getSyncTarget();
 }
