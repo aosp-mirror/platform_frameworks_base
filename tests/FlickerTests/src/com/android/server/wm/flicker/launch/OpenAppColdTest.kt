@@ -88,6 +88,12 @@ open class OpenAppColdTest(
     @Test
     override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
 
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 240238245)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
     companion object {
         /**
          * Creates the test configurations.
