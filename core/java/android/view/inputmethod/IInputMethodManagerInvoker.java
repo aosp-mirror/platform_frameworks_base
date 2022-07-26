@@ -90,10 +90,10 @@ final class IInputMethodManagerInvoker {
     @AnyThread
     @NonNull
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(@Nullable String imiId,
-            boolean allowsImplicitlySelectedSubtypes) {
+            boolean allowsImplicitlySelectedSubtypes, @UserIdInt int userId) {
         try {
             return mTarget.getEnabledInputMethodSubtypeList(imiId,
-                    allowsImplicitlySelectedSubtypes);
+                    allowsImplicitlySelectedSubtypes, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
