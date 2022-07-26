@@ -2207,6 +2207,52 @@ public class DisplayContentTests extends WindowTestsBase {
         assertNotEquals(curSnapshot, mDisplayContent.mImeScreenshot);
     }
 
+    @UseTestDisplay(addWindows = {W_INPUT_METHOD})
+    @Test
+    public void testRemoveImeScreenshot_whenTargetSurfaceWasInvisible() {
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
+        win.onSurfaceShownChanged(true);
+        makeWindowVisible(win, mDisplayContent.mInputMethodWindow);
+        task.getDisplayContent().prepareAppTransition(TRANSIT_CLOSE);
+        doReturn(true).when(task).okToAnimate();
+        ArrayList<WindowContainer> sources = new ArrayList<>();
+        sources.add(activity);
+
+        mDisplayContent.setImeLayeringTarget(win);
+        mDisplayContent.setImeInputTarget(win);
+        mDisplayContent.getInsetsStateController().getImeSourceProvider().setImeShowing(true);
+        task.applyAnimation(null, TRANSIT_OLD_TASK_CLOSE, false /* enter */,
+                false /* isVoiceInteraction */, sources);
+        assertNotNull(mDisplayContent.mImeScreenshot);
+
+        win.onSurfaceShownChanged(false);
+        assertNull(mDisplayContent.mImeScreenshot);
+    }
+
+    @UseTestDisplay(addWindows = {W_INPUT_METHOD})
+    @Test
+    public void testRemoveImeScreenshot_whenWindowRemoveImmediately() {
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
+        makeWindowVisible(mDisplayContent.mInputMethodWindow);
+
+        mDisplayContent.setImeLayeringTarget(win);
+        mDisplayContent.setImeInputTarget(win);
+        mDisplayContent.getInsetsStateController().getImeSourceProvider().setImeShowing(true);
+        mDisplayContent.showImeScreenshot();
+        assertNotNull(mDisplayContent.mImeScreenshot);
+
+        // Expect IME snapshot will be removed when the win is IME layering target and invoked
+        // removeImeSurfaceByTarget.
+        win.removeImmediately();
+        assertNull(mDisplayContent.mImeScreenshot);
+    }
+
     @Test
     public void testRotateBounds_keepSamePhysicalPosition() {
         final DisplayContent dc =
