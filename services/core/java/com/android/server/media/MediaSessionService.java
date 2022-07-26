@@ -40,6 +40,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioSystem;
@@ -85,6 +86,7 @@ import android.view.ViewConfiguration;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalManagerRegistry;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.Watchdog.Monitor;
@@ -538,14 +540,19 @@ public class MediaSessionService extends SystemService implements Monitor {
         if (TextUtils.isEmpty(packageName)) {
             throw new IllegalArgumentException("packageName may not be empty");
         }
-        String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
-        final int packageCount = packages.length;
-        for (int i = 0; i < packageCount; i++) {
-            if (packageName.equals(packages[i])) {
-                return;
-            }
+        if (uid == Process.ROOT_UID || uid == Process.SHELL_UID) {
+            // If the caller is shell, then trust the packageName given and allow it
+            // to proceed.
+            return;
         }
-        throw new IllegalArgumentException("packageName is not owned by the calling process");
+        final PackageManagerInternal packageManagerInternal =
+                LocalServices.getService(PackageManagerInternal.class);
+        final int actualUid = packageManagerInternal.getPackageUid(
+                packageName, 0 /* flags */, UserHandle.getUserId(uid));
+        if (!UserHandle.isSameApp(uid, actualUid)) {
+            throw new IllegalArgumentException("packageName does not belong to the calling uid; "
+                    + "pkg=" + packageName + ", uid=" + uid);
+        }
     }
 
     void tempAllowlistTargetPkgIfPossible(int targetUid, String targetPackage,
