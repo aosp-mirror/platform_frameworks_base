@@ -9925,8 +9925,14 @@ public class NotificationManagerService extends SystemService {
      * given NAS is bound in.
      */
     private boolean isInteractionVisibleToListener(ManagedServiceInfo info, int userId) {
-        boolean isAssistantService = mAssistants.isServiceTokenValidLocked(info.service);
+        boolean isAssistantService = isServiceTokenValid(info.service);
         return !isAssistantService || info.isSameUser(userId);
+    }
+
+    private boolean isServiceTokenValid(IInterface service) {
+        synchronized (mNotificationLock) {
+            return mAssistants.isServiceTokenValidLocked(service);
+        }
     }
 
     private boolean isPackageSuspendedForUser(String pkg, int uid) {
@@ -11190,7 +11196,7 @@ public class NotificationManagerService extends SystemService {
                 BackgroundThread.getHandler().post(() -> {
                     if (info.isSystem
                             || hasCompanionDevice(info)
-                            || mAssistants.isServiceTokenValidLocked(info.service)) {
+                            || isServiceTokenValid(info.service)) {
                         notifyNotificationChannelChanged(
                                 info, pkg, user, channel, modificationType);
                     }
