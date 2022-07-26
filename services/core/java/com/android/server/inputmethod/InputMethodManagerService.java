@@ -4160,12 +4160,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public InputMethodSubtype getLastInputMethodSubtype() {
+    public InputMethodSubtype getLastInputMethodSubtype(@UserIdInt int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
         synchronized (ImfLock.class) {
-            if (!calledFromValidUserLocked()) {
-                return null;
+            if (mSettings.getCurrentUserId() == userId) {
+                return mSettings.getLastInputMethodSubtypeLocked();
             }
-            return mSettings.getLastInputMethodSubtypeLocked();
+
+            final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
+            final InputMethodSettings settings = new InputMethodSettings(
+                    mContext.getResources(), mContext.getContentResolver(), methodMap,
+                    userId, false);
+            return settings.getLastInputMethodSubtypeLocked();
         }
     }
 
