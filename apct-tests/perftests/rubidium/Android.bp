@@ -33,6 +33,7 @@ android_test {
         "compatibility-device-util-axt",
         "platform-test-annotations",
         "adservices-service-core",
+        "androidx.core_core",
     ],
     test_suites: ["device-tests"],
     data: [":perfetto_artifacts"],
