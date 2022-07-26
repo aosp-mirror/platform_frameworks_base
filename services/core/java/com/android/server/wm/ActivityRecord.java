@@ -272,7 +272,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConstrainDisplayApisConfig;
 import android.content.pm.PackageManager;
-import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -478,7 +477,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private int mLastReportedDisplayId;
     boolean mLastReportedMultiWindowMode;
     boolean mLastReportedPictureInPictureMode;
-    CompatibilityInfo compat;// last used compatibility mode
     ActivityRecord resultTo; // who started this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
     final int requestCode;  // code given by requester (resultTo)
@@ -1022,7 +1020,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (rootVoiceInteraction) {
             pw.print(prefix); pw.print("rootVoiceInteraction="); pw.println(rootVoiceInteraction);
         }
-        pw.print(prefix); pw.print("compat="); pw.print(compat);
+        pw.print(prefix); pw.print("compat=");
+        pw.print(mAtmService.compatibilityInfoForPackageLocked(info.applicationInfo));
                 pw.print(" labelRes=0x"); pw.print(Integer.toHexString(labelRes));
                 pw.print(" icon=0x"); pw.print(Integer.toHexString(icon));
                 pw.print(" theme=0x"); pw.println(Integer.toHexString(theme));

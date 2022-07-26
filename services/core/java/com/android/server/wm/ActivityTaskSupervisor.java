@@ -875,7 +875,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         r.intent.getComponent().getPackageName(), NOTIFY_PACKAGE_USE_ACTIVITY);
                 r.forceNewConfig = false;
                 mService.getAppWarningsLocked().onStartActivity(r);
-                r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
 
                 // Because we could be starting an Activity in the system process this may not go
                 // across a Binder interface which would create a new Configuration. Consequently
@@ -905,7 +904,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         // TODO: Have this take the merged configuration instead of separate global
                         // and override configs.
                         mergedConfiguration.getGlobalConfiguration(),
-                        mergedConfiguration.getOverrideConfiguration(), r.compat,
+                        mergedConfiguration.getOverrideConfiguration(),
                         r.getFilteredReferrer(r.launchedFromPackage), task.voiceInteractor,
                         proc.getReportedProcState(), r.getSavedState(), r.getPersistentSavedState(),
                         results, newIntents, r.takeOptions(), isTransitionForward,

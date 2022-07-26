@@ -374,6 +374,7 @@ public final class ActivityThread extends ClientTransactionHandler
     int mCurDefaultDisplayDpi;
     @UnsupportedAppUsage
     boolean mDensityCompatMode;
+    private CompatibilityInfo mCompatibilityInfo;
     @UnsupportedAppUsage(trackingBug = 176961850, maxTargetSdk = Build.VERSION_CODES.R,
             publicAlternatives = "Use {@code Context#getResources()#getConfiguration()} instead.")
     Configuration mConfiguration;
@@ -612,7 +613,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         public ActivityClientRecord(IBinder token, Intent intent, int ident,
-                ActivityInfo info, Configuration overrideConfig, CompatibilityInfo compatInfo,
+                ActivityInfo info, Configuration overrideConfig,
                 String referrer, IVoiceInteractor voiceInteractor, Bundle state,
                 PersistableBundle persistentState, List<ResultInfo> pendingResults,
                 List<ReferrerIntent> pendingNewIntents, ActivityOptions activityOptions,
@@ -627,7 +628,6 @@ public final class ActivityThread extends ClientTransactionHandler
             this.referrer = referrer;
             this.voiceInteractor = voiceInteractor;
             this.activityInfo = info;
-            this.compatInfo = compatInfo;
             this.state = state;
             this.persistentState = persistentState;
             this.pendingResults = pendingResults;
@@ -635,8 +635,7 @@ public final class ActivityThread extends ClientTransactionHandler
             this.isForward = isForward;
             this.profilerInfo = profilerInfo;
             this.overrideConfig = overrideConfig;
-            this.packageInfo = client.getPackageInfoNoCheck(activityInfo.applicationInfo,
-                    compatInfo);
+            this.packageInfo = client.getPackageInfoNoCheck(activityInfo.applicationInfo);
             mActivityOptions = activityOptions;
             mLaunchedFromBubble = launchedFromBubble;
             mInitialTaskFragmentToken = initialTaskFragmentToken;
@@ -804,7 +803,6 @@ public final class ActivityThread extends ClientTransactionHandler
 
     static final class CreateBackupAgentData {
         ApplicationInfo appInfo;
-        CompatibilityInfo compatInfo;
         int backupMode;
         int userId;
         int operationType;
@@ -1038,15 +1036,13 @@ public final class ActivityThread extends ClientTransactionHandler
             ReceiverData r = new ReceiverData(intent, resultCode, data, extras,
                     sync, false, mAppThread.asBinder(), sendingUser);
             r.info = info;
-            r.compatInfo = compatInfo;
             sendMessage(H.RECEIVER, r);
         }
 
         public final void scheduleCreateBackupAgent(ApplicationInfo app,
-                CompatibilityInfo compatInfo, int backupMode, int userId, int operationType) {
+                int backupMode, int userId, int operationType) {
             CreateBackupAgentData d = new CreateBackupAgentData();
             d.appInfo = app;
-            d.compatInfo = compatInfo;
             d.backupMode = backupMode;
             d.userId = userId;
             d.operationType = operationType;
@@ -1054,11 +1050,9 @@ public final class ActivityThread extends ClientTransactionHandler
             sendMessage(H.CREATE_BACKUP_AGENT, d);
         }
 
-        public final void scheduleDestroyBackupAgent(ApplicationInfo app,
-                CompatibilityInfo compatInfo, int userId) {
+        public final void scheduleDestroyBackupAgent(ApplicationInfo app, int userId) {
             CreateBackupAgentData d = new CreateBackupAgentData();
             d.appInfo = app;
-            d.compatInfo = compatInfo;
             d.userId = userId;
 
             sendMessage(H.DESTROY_BACKUP_AGENT, d);
@@ -1070,7 +1064,6 @@ public final class ActivityThread extends ClientTransactionHandler
             CreateServiceData s = new CreateServiceData();
             s.token = token;
             s.info = info;
-            s.compatInfo = compatInfo;
 
             sendMessage(H.CREATE_SERVICE, s);
         }
@@ -2577,16 +2570,16 @@ public final class ActivityThread extends ClientTransactionHandler
                 registerPackage);
     }
 
-    @Override
     @UnsupportedAppUsage
     public final LoadedApk getPackageInfoNoCheck(ApplicationInfo ai,
             CompatibilityInfo compatInfo) {
         return getPackageInfo(ai, compatInfo, null, false, true, false);
     }
 
-    private LoadedApk getPackageInfoNoCheck(ApplicationInfo ai, CompatibilityInfo compatInfo,
-            boolean isSdkSandbox) {
-        return getPackageInfo(ai, compatInfo, null, false, true, false, isSdkSandbox);
+    @Override
+    public LoadedApk getPackageInfoNoCheck(ApplicationInfo ai) {
+        return getPackageInfo(ai, mCompatibilityInfo, null /* baseLoader */,
+                false /* securityViolation */, true /* includeCode */, false /* registerPackage */);
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -3538,7 +3531,7 @@ public final class ActivityThread extends ClientTransactionHandler
     private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
         ActivityInfo aInfo = r.activityInfo;
         if (r.packageInfo == null) {
-            r.packageInfo = getPackageInfo(aInfo.applicationInfo, r.compatInfo,
+            r.packageInfo = getPackageInfo(aInfo.applicationInfo, mCompatibilityInfo,
                     Context.CONTEXT_INCLUDE_CODE);
         }
 
@@ -4279,8 +4272,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         String component = data.intent.getComponent().getClassName();
 
-        LoadedApk packageInfo = getPackageInfoNoCheck(
-                data.info.applicationInfo, data.compatInfo);
+        final LoadedApk packageInfo = getPackageInfoNoCheck(data.info.applicationInfo);
 
         IActivityManager mgr = ActivityManager.getService();
 
@@ -4366,7 +4358,7 @@ public final class ActivityThread extends ClientTransactionHandler
         unscheduleGcIdler();
 
         // instantiate the BackupAgent class named in the manifest
-        LoadedApk packageInfo = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
+        final LoadedApk packageInfo = getPackageInfoNoCheck(data.appInfo);
         String packageName = packageInfo.mPackageName;
         if (packageName == null) {
             Slog.d(TAG, "Asked to create backup agent for nonexistent package");
@@ -4439,7 +4431,7 @@ public final class ActivityThread extends ClientTransactionHandler
     private void handleDestroyBackupAgent(CreateBackupAgentData data) {
         if (DEBUG_BACKUP) Slog.v(TAG, "handleDestroyBackupAgent: " + data);
 
-        LoadedApk packageInfo = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
+        final LoadedApk packageInfo = getPackageInfoNoCheck(data.appInfo);
         String packageName = packageInfo.mPackageName;
         ArrayMap<String, BackupAgent> backupAgents = getBackupAgentsForUser(data.userId);
         BackupAgent agent = backupAgents.get(packageName);
@@ -4471,8 +4463,7 @@ public final class ActivityThread extends ClientTransactionHandler
         // we are back active so skip it.
         unscheduleGcIdler();
 
-        LoadedApk packageInfo = getPackageInfoNoCheck(
-                data.info.applicationInfo, data.compatInfo);
+        final LoadedApk packageInfo = getPackageInfoNoCheck(data.info.applicationInfo);
         Service service = null;
         try {
             if (localLOGV) Slog.v(TAG, "Creating service " + data.info.name);
@@ -5306,6 +5297,7 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void handleUpdatePackageCompatibilityInfo(UpdateCompatibilityData data) {
+        mCompatibilityInfo = data.info;
         LoadedApk apk = peekPackageInfo(data.pkg, false);
         if (apk != null) {
             apk.setCompatibilityInfo(data.info);
@@ -6486,6 +6478,7 @@ public final class ActivityThread extends ClientTransactionHandler
         mConfigurationController.setConfiguration(data.config);
         mConfigurationController.setCompatConfiguration(data.config);
         mConfiguration = mConfigurationController.getConfiguration();
+        mCompatibilityInfo = data.compatInfo;
 
         mProfiler = new Profiler();
         String agent = null;
@@ -6569,7 +6562,9 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         final boolean isSdkSandbox = data.sdkSandboxClientAppPackage != null;
-        data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo, isSdkSandbox);
+        data.info = getPackageInfo(data.appInfo, mCompatibilityInfo, null /* baseLoader */,
+                false /* securityViolation */, true /* includeCode */,
+                false /* registerPackage */, isSdkSandbox);
         if (isSdkSandbox) {
             data.info.setSdkSandboxStorage(data.sdkSandboxClientAppVolumeUuid,
                     data.sdkSandboxClientAppPackage);
@@ -6844,7 +6839,7 @@ public final class ActivityThread extends ClientTransactionHandler
     private void handleInstrumentWithoutRestart(AppBindData data) {
         try {
             data.compatInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
-            data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
+            data.info = getPackageInfoNoCheck(data.appInfo);
             mInstrumentingWithoutRestart = true;
             final InstrumentationInfo ii = prepareInstrumentation(data);
             final ContextImpl appContext =

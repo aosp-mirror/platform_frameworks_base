@@ -361,7 +361,7 @@ public final class BroadcastQueue {
             mService.notifyPackageUse(r.intent.getComponent().getPackageName(),
                                       PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER);
             thread.scheduleReceiver(new Intent(r.intent), r.curReceiver,
-                    mService.compatibilityInfoForPackage(r.curReceiver.applicationInfo),
+                    null /* compatInfo (unused but need to keep method signature) */,
                     r.resultCode, r.resultData, r.resultExtras, r.ordered, r.userId,
                     app.mState.getReportedProcState());
             if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
