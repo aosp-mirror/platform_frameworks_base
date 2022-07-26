@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.biometrics;
+
+package com.android.server.biometrics.sensors.fingerprint;
 
 /**
- * Communication channel between <Biometric>Manager and <Biometric>Service for passing the
- * listener.
- * @hide
+ * Interface for handling power presses.
  */
-oneway interface IBiometricStateListener {
-    void onStateChanged(int newState);
-    void onBiometricAction(int action);
-    void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments);
+public interface PowerPressHandler {
+    /**
+     * Indicates a power press has occurred.
+     */
+    void onPowerPressed();
 }
