@@ -140,7 +140,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final FeatureFlags mFeatureFlags;
     private final DumpManager mDumpManager;
     private final LogBuffer mLogBuffer;
-    private final MobileSignalControllerFactory mMobileFactory;
 
     private TelephonyCallback.ActiveDataSubscriptionIdListener mPhoneStateListener;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -236,7 +235,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
             DemoModeController demoModeController,
             CarrierConfigTracker carrierConfigTracker,
             WifiStatusTrackerFactory trackerFactory,
-            MobileSignalControllerFactory mobileFactory,
             @Main Handler handler,
             InternetDialogFactory internetDialogFactory,
             FeatureFlags featureFlags,
@@ -259,7 +257,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 demoModeController,
                 carrierConfigTracker,
                 trackerFactory,
-                mobileFactory,
                 handler,
                 featureFlags,
                 dumpManager,
@@ -286,7 +283,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
             DemoModeController demoModeController,
             CarrierConfigTracker carrierConfigTracker,
             WifiStatusTrackerFactory trackerFactory,
-            MobileSignalControllerFactory mobileFactory,
             @Main Handler handler,
             FeatureFlags featureFlags,
             DumpManager dumpManager,
@@ -302,7 +298,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mCallbackHandler = callbackHandler;
         mDataSaverController = new DataSaverControllerImpl(context);
         mBroadcastDispatcher = broadcastDispatcher;
-        mMobileFactory = mobileFactory;
 
         mSubscriptionManager = subManager;
         mSubDefaults = defaultsHandler;
@@ -987,15 +982,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mMobileSignalControllers.put(subId, cachedControllers.get(subId));
                 cachedControllers.remove(subId);
             } else {
-                MobileSignalController controller = mMobileFactory.createMobileSignalController(
-                        mConfig,
-                        mHasMobileDataFeature,
-                        mPhone.createForSubscriptionId(subId),
-                        this,
-                        subscriptions.get(i),
-                        mSubDefaults,
-                        mReceiverHandler.getLooper()
-                );
+                MobileSignalController controller = new MobileSignalController(mContext, mConfig,
+                        mHasMobileDataFeature, mPhone.createForSubscriptionId(subId),
+                        mCallbackHandler, this, subscriptions.get(i),
+                        mSubDefaults, mReceiverHandler.getLooper(), mCarrierConfigTracker,
+                        mFeatureFlags);
                 controller.setUserSetupComplete(mUserSetup);
                 mMobileSignalControllers.put(subId, controller);
                 if (subscriptions.get(i).getSimSlotIndex() == 0) {
@@ -1356,7 +1347,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mMobileSignalControllers.clear();
                 int start = mSubscriptionManager.getActiveSubscriptionInfoCountMax();
                 for (int i = start /* get out of normal index range */; i < start + num; i++) {
-                    subs.add(addDemoModeSignalController(i, i));
+                    subs.add(addSignalController(i, i));
                 }
                 mCallbackHandler.setSubs(subs);
                 for (int i = 0; i < mMobileSignalControllers.size(); i++) {
@@ -1382,7 +1373,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             List<SubscriptionInfo> subs = new ArrayList<>();
             while (mMobileSignalControllers.size() <= slot) {
                 int nextSlot = mMobileSignalControllers.size();
-                subs.add(addDemoModeSignalController(nextSlot, nextSlot));
+                subs.add(addSignalController(nextSlot, nextSlot));
             }
             if (!subs.isEmpty()) {
                 mCallbackHandler.setSubs(subs);
@@ -1472,20 +1463,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mHistoryIndex = (mHistoryIndex + 1) % HISTORY_SIZE;
     }
 
-    private SubscriptionInfo addDemoModeSignalController(int id, int simSlotIndex) {
+    private SubscriptionInfo addSignalController(int id, int simSlotIndex) {
         SubscriptionInfo info = new SubscriptionInfo(id, "", simSlotIndex, "", "", 0, 0, "", 0,
                 null, null, null, "", false, null, null);
-
-        MobileSignalController controller = mMobileFactory.createMobileSignalController(
-                mConfig,
-                mHasMobileDataFeature,
-                mPhone.createForSubscriptionId(info.getSubscriptionId()),
-                this,
-                info,
-                mSubDefaults,
-                mReceiverHandler.getLooper()
-        );
-
+        MobileSignalController controller = new MobileSignalController(mContext,
+                mConfig, mHasMobileDataFeature,
+                mPhone.createForSubscriptionId(info.getSubscriptionId()), mCallbackHandler, this,
+                info, mSubDefaults, mReceiverHandler.getLooper(), mCarrierConfigTracker,
+                mFeatureFlags);
         mMobileSignalControllers.put(id, controller);
         controller.getState().userSetup = true;
         return info;
