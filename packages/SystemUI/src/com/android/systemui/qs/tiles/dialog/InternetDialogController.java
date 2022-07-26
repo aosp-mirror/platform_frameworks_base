@@ -778,8 +778,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             return;
         }
 
-        mTelephonyManager.setDataEnabledForReason(
-                TelephonyManager.DATA_ENABLED_REASON_USER, enabled);
+        mTelephonyManager.setDataEnabled(enabled);
         if (disableOtherSubscriptions) {
             final List<SubscriptionInfo> subInfoList =
                     mSubscriptionManager.getActiveSubscriptionInfoList();
