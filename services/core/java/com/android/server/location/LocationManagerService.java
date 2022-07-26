@@ -16,7 +16,6 @@
 
 package com.android.server.location;
 
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.compat.CompatChanges.isChangeEnabled;
@@ -430,7 +429,9 @@ public class LocationManagerService extends ILocationManager.Stub implements
 
         // initialize gnss last because it has no awareness of boot phases and blindly assumes that
         // all other location providers are loaded at initialization
-        if (GnssNative.isSupported()) {
+        boolean hasLocationFeature = mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_LOCATION);
+        if (hasLocationFeature && GnssNative.isSupported()) {
             GnssConfiguration gnssConfiguration = new GnssConfiguration(mContext);
             GnssNative gnssNative = GnssNative.create(mInjector, gnssConfiguration);
             mGnssManagerService = new GnssManagerService(mContext, mInjector, gnssNative);
