@@ -105,7 +105,10 @@ interface IInputMethodManager {
 
     /** Remove the IME surface. Requires passing the currently focused window. */
     oneway void removeImeSurfaceFromWindowAsync(in IBinder windowToken);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresNoPermission")
     void startProtoDump(in byte[] protoDump, int source, String where);
+
     boolean isImeTraceEnabled();
 
     // Starts an ime trace.
