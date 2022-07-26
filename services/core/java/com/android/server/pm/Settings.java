@@ -4789,6 +4789,9 @@ public final class Settings implements Watchable, Snappable {
                 pw.println();
         pw.print(prefix); pw.print("  pkgFlags="); printFlags(pw, ps.getFlags(), FLAG_DUMP_SPEC);
                 pw.println();
+        pw.print(prefix); pw.print("  privatePkgFlags="); printFlags(pw, ps.getPrivateFlags(),
+                PRIVATE_FLAG_DUMP_SPEC);
+        pw.println();
 
         if (pkg != null && pkg.getOverlayTarget() != null) {
             pw.print(prefix); pw.print("  overlayTarget="); pw.println(pkg.getOverlayTarget());
