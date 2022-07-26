@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.keyguard
+package com.android.systemui.animation
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -31,10 +31,10 @@ import android.text.TextPaint
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
-import org.junit.Test
-import org.junit.runner.RunWith
 import java.io.File
 import kotlin.math.ceil
+import org.junit.Test
+import org.junit.runner.RunWith
 
 private const val TEXT = "Hello, World."
 private const val BIDI_TEXT = "abc\u05D0\u05D1\u05D2"

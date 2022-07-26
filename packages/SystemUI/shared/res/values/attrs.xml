@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2006 The Android Open Source Project
+<!-- Copyright (C) 2022 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -20,25 +20,9 @@
 -->
 
 <resources>
-    <declare-styleable name="KeyguardSecurityViewFlipper_Layout">
-        <attr name="layout_maxWidth" format="dimension"/>
-        <attr name="layout_maxHeight" format="dimension" />
+    <declare-styleable name="AnimatableClockView">
+        <attr name="dozeWeight" format="integer" />
+        <attr name="lockScreenWeight" format="integer" />
+        <attr name="chargeAnimationDelay" format="integer" />
     </declare-styleable>
-
-    <declare-styleable name="NumPadKey">
-        <attr name="digit" format="integer" />
-        <attr name="textView" format="reference" />
-    </declare-styleable>
-
-    <declare-styleable name="PasswordTextView">
-        <attr name="scaledTextSize" format="integer" />
-        <attr name="android:gravity" />
-        <attr name="dotSize" format="dimension" />
-        <attr name="charPadding" format="dimension" />
-        <attr name="android:textColor" format="color" />
-    </declare-styleable>
-
-    <attr name="passwordStyle" format="reference" />
-
-    <attr name="numPadKeyStyle" format="reference" />
 </resources>
