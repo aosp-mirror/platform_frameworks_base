@@ -871,10 +871,9 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         if (!mPendingIntentRequest.hasPendingIntent() && mRegistered) {
             mClientManager.unregisterClient(mHostEndPointId);
             mRegistered = false;
+            mAppOpsManager.stopWatchingMode(this);
+            mContextHubProxy.onHostEndpointDisconnected(mHostEndPointId);
         }
-        mAppOpsManager.stopWatchingMode(this);
-
-        mContextHubProxy.onHostEndpointDisconnected(mHostEndPointId);
     }
 
     private String authStateToString(@ContextHubManager.AuthorizationState int state) {
