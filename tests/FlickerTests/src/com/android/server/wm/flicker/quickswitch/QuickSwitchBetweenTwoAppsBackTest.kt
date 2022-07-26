@@ -83,6 +83,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(
         transitions {
             tapl.launchedAppState.quickSwitchToPreviousApp()
             wmHelper.StateSyncBuilder()
+                .withFullScreenApp(testApp1)
                 .withNavOrTaskBarVisible()
                 .withStatusBarVisible()
                 .waitForAndVerify()
