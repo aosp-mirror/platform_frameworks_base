@@ -22,9 +22,10 @@ import static com.android.server.pm.ApexManager.MATCH_FACTORY_PACKAGE;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.apex.ApexInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.ArrayMap;
-import android.util.Pair;
 import android.util.PrintWriterPrinter;
 
 import com.android.internal.annotations.GuardedBy;
@@ -32,9 +33,8 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.File;
@@ -59,7 +59,17 @@ class ApexPackageInfo {
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
-    private List<Pair<ApexInfo, AndroidPackage>> mAllPackagesCache;
+    private List<PackageInfo> mAllPackagesCache;
+
+    /**
+     * Whether an APEX package is active or not.
+     *
+     * @param packageInfo the package to check
+     * @return {@code true} if this package is active, {@code false} otherwise.
+     */
+    private static boolean isActive(PackageInfo packageInfo) {
+        return packageInfo.isActiveApex;
+    }
 
     /**
      * Called by package manager service to scan apex package files when device boots up.
@@ -95,23 +105,20 @@ class ApexPackageInfo {
      *         is not found.
      */
     @Nullable
-    Pair<ApexInfo, AndroidPackage> getPackageInfo(String packageName,
-            @ApexManager.PackageInfoFlags int flags) {
+    PackageInfo getPackageInfo(String packageName, @ApexManager.PackageInfoFlags int flags) {
         synchronized (mLock) {
             Preconditions.checkState(mAllPackagesCache != null,
                     "APEX packages have not been scanned");
             boolean matchActive = (flags & MATCH_ACTIVE_PACKAGE) != 0;
             boolean matchFactory = (flags & MATCH_FACTORY_PACKAGE) != 0;
             for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
-                final Pair<ApexInfo, AndroidPackage> pair = mAllPackagesCache.get(i);
-                var apexInfo = pair.first;
-                var pkg = pair.second;
-                if (!pkg.getPackageName().equals(packageName)) {
+                final PackageInfo packageInfo = mAllPackagesCache.get(i);
+                if (!packageInfo.packageName.equals(packageName)) {
                     continue;
                 }
-                if ((matchActive && apexInfo.isActive)
-                        || (matchFactory && apexInfo.isFactory)) {
-                    return pair;
+                if ((matchActive && isActive(packageInfo))
+                        || (matchFactory && isFactory(packageInfo))) {
+                    return packageInfo;
                 }
             }
             return null;
@@ -121,18 +128,18 @@ class ApexPackageInfo {
     /**
      * Retrieves information about all active APEX packages.
      *
-     * @return list containing information about different active packages.
+     * @return a List of PackageInfo object, each one containing information about a different
+     *         active package.
      */
-    @NonNull
-    List<Pair<ApexInfo, AndroidPackage>> getActivePackages() {
+    List<PackageInfo> getActivePackages() {
         synchronized (mLock) {
             Preconditions.checkState(mAllPackagesCache != null,
                     "APEX packages have not been scanned");
-            final List<Pair<ApexInfo, AndroidPackage>> activePackages = new ArrayList<>();
+            final List<PackageInfo> activePackages = new ArrayList<>();
             for (int i = 0; i < mAllPackagesCache.size(); i++) {
-                final var pair = mAllPackagesCache.get(i);
-                if (pair.first.isActive) {
-                    activePackages.add(pair);
+                final PackageInfo packageInfo = mAllPackagesCache.get(i);
+                if (isActive(packageInfo)) {
+                    activePackages.add(packageInfo);
                 }
             }
             return activePackages;
@@ -140,20 +147,20 @@ class ApexPackageInfo {
     }
 
     /**
-     * Retrieves information about all pre-installed APEX packages.
+     * Retrieves information about all active pre-installed APEX packages.
      *
-     * @return list containing information about different pre-installed packages.
+     * @return a List of PackageInfo object, each one containing information about a different
+     *         active pre-installed package.
      */
-    @NonNull
-    List<Pair<ApexInfo, AndroidPackage>> getFactoryPackages() {
+    List<PackageInfo> getFactoryPackages() {
         synchronized (mLock) {
             Preconditions.checkState(mAllPackagesCache != null,
                     "APEX packages have not been scanned");
-            final List<Pair<ApexInfo, AndroidPackage>> factoryPackages = new ArrayList<>();
+            final List<PackageInfo> factoryPackages = new ArrayList<>();
             for (int i = 0; i < mAllPackagesCache.size(); i++) {
-                final var pair = mAllPackagesCache.get(i);
-                if (pair.first.isFactory) {
-                    factoryPackages.add(pair);
+                final PackageInfo packageInfo = mAllPackagesCache.get(i);
+                if (isFactory(packageInfo)) {
+                    factoryPackages.add(packageInfo);
                 }
             }
             return factoryPackages;
@@ -163,18 +170,18 @@ class ApexPackageInfo {
     /**
      * Retrieves information about all inactive APEX packages.
      *
-     * @return list containing information about different inactive packages.
+     * @return a List of PackageInfo object, each one containing information about a different
+     *         inactive package.
      */
-    @NonNull
-    List<Pair<ApexInfo, AndroidPackage>> getInactivePackages() {
+    List<PackageInfo> getInactivePackages() {
         synchronized (mLock) {
             Preconditions.checkState(mAllPackagesCache != null,
                     "APEX packages have not been scanned");
-            final List<Pair<ApexInfo, AndroidPackage>> inactivePackages = new ArrayList<>();
+            final List<PackageInfo> inactivePackages = new ArrayList<>();
             for (int i = 0; i < mAllPackagesCache.size(); i++) {
-                final var pair = mAllPackagesCache.get(i);
-                if (!pair.first.isActive) {
-                    inactivePackages.add(pair);
+                final PackageInfo packageInfo = mAllPackagesCache.get(i);
+                if (!isActive(packageInfo)) {
+                    inactivePackages.add(packageInfo);
                 }
             }
             return inactivePackages;
@@ -192,8 +199,8 @@ class ApexPackageInfo {
             Preconditions.checkState(mAllPackagesCache != null,
                     "APEX packages have not been scanned");
             for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
-                final var pair = mAllPackagesCache.get(i);
-                if (pair.second.getPackageName().equals(packageName)) {
+                final PackageInfo packageInfo = mAllPackagesCache.get(i);
+                if (packageInfo.packageName.equals(packageName)) {
                     return true;
                 }
             }
@@ -215,23 +222,36 @@ class ApexPackageInfo {
     }
 
     void notifyPackageInstalled(ApexInfo apexInfo, AndroidPackage pkg) {
-        final String packageName = pkg.getPackageName();
+        final int flags = PackageManager.GET_META_DATA
+                | PackageManager.GET_SIGNING_CERTIFICATES
+                | PackageManager.GET_SIGNATURES;
+        final PackageInfo newApexPkg = PackageInfoWithoutStateUtils.generate(
+                pkg, apexInfo, flags);
+        final String packageName = newApexPkg.packageName;
         synchronized (mLock) {
             for (int i = 0, size = mAllPackagesCache.size(); i < size; i++) {
-                var pair = mAllPackagesCache.get(i);
-                var oldApexInfo = pair.first;
-                var oldApexPkg = pair.second;
-                if (oldApexInfo.isActive && oldApexPkg.getPackageName().equals(packageName)) {
-                    if (oldApexInfo.isFactory) {
-                        oldApexInfo.isActive = false;
-                        mAllPackagesCache.add(Pair.create(apexInfo, pkg));
+                PackageInfo oldApexPkg = mAllPackagesCache.get(i);
+                if (oldApexPkg.isActiveApex && oldApexPkg.packageName.equals(packageName)) {
+                    if (isFactory(oldApexPkg)) {
+                        oldApexPkg.isActiveApex = false;
+                        mAllPackagesCache.add(newApexPkg);
                     } else {
-                        mAllPackagesCache.set(i, Pair.create(apexInfo, pkg));
+                        mAllPackagesCache.set(i, newApexPkg);
                     }
                     break;
                 }
             }
         }
+    }
+
+    /**
+     * Whether the APEX package is pre-installed or not.
+     *
+     * @param packageInfo the package to check
+     * @return {@code true} if this package is pre-installed, {@code false} otherwise.
+     */
+    private static boolean isFactory(@NonNull PackageInfo packageInfo) {
+        return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0;
     }
 
     /**
@@ -268,25 +288,33 @@ class ApexPackageInfo {
         HashSet<String> factoryPackagesSet = new HashSet<>();
         for (ApexManager.ScanResult result : scanResults) {
             ApexInfo ai = result.apexInfo;
-            String packageName = result.pkg.getPackageName();
-            if (!packageName.equals(result.packageName)) {
+
+            final PackageInfo packageInfo = PackageInfoWithoutStateUtils.generate(
+                    result.pkg, ai, flags);
+            if (packageInfo == null) {
+                throw new IllegalStateException("Unable to generate package info: "
+                        + ai.modulePath);
+            }
+            if (!packageInfo.packageName.equals(result.packageName)) {
                 throw new IllegalStateException("Unmatched package name: "
-                        + result.packageName + " != " + packageName
+                        + result.packageName + " != " + packageInfo.packageName
                         + ", path=" + ai.modulePath);
             }
-            mAllPackagesCache.add(Pair.create(ai, result.pkg));
+            mAllPackagesCache.add(packageInfo);
             if (ai.isActive) {
-                if (!activePackagesSet.add(packageName)) {
+                if (!activePackagesSet.add(packageInfo.packageName)) {
                     throw new IllegalStateException(
-                            "Two active packages have the same name: " + packageName);
+                            "Two active packages have the same name: "
+                                    + packageInfo.packageName);
                 }
             }
             if (ai.isFactory) {
                 // Don't throw when the duplicating APEX is VNDK APEX
-                if (!factoryPackagesSet.add(packageName)
+                if (!factoryPackagesSet.add(packageInfo.packageName)
                         && !ai.moduleName.startsWith(VNDK_APEX_MODULE_NAME_PREFIX)) {
                     throw new IllegalStateException(
-                            "Two factory packages have the same name: " + packageName);
+                            "Two factory packages have the same name: "
+                                    + packageInfo.packageName);
                 }
             }
         }
@@ -335,65 +363,30 @@ class ApexPackageInfo {
     }
 
     /**
-     * @see #dumpPackages(List, String, IndentingPrintWriter)
-     */
-    static void dumpPackageStates(List<PackageStateInternal> packageStates, boolean isActive,
-            @Nullable String packageName, IndentingPrintWriter ipw) {
-        ipw.println();
-        ipw.increaseIndent();
-        for (int i = 0, size = packageStates.size(); i < size; i++) {
-            final var packageState = packageStates.get(i);
-            var pkg = packageState.getPkg();
-            if (packageName != null && !packageName.equals(pkg.getPackageName())) {
-                continue;
-            }
-            ipw.println(pkg.getPackageName());
-            ipw.increaseIndent();
-            ipw.println("Version: " + pkg.getLongVersionCode());
-            ipw.println("Path: " + pkg.getBaseApkPath());
-            ipw.println("IsActive: " + isActive);
-            ipw.println("IsFactory: " + !packageState.isUpdatedSystemApp());
-            ipw.println("ApplicationInfo: ");
-            ipw.increaseIndent();
-            // TODO: Dump the package manually
-            AndroidPackageUtils.generateAppInfoWithoutState(pkg)
-                    .dump(new PrintWriterPrinter(ipw), "");
-            ipw.decreaseIndent();
-            ipw.decreaseIndent();
-        }
-        ipw.decreaseIndent();
-        ipw.println();
-    }
-
-    /**
      * Dump information about the packages contained in a particular cache
      * @param packagesCache the cache to print information about.
      * @param packageName a {@link String} containing a package name, or {@code null}. If set,
      *                    only information about that specific package will be dumped.
      * @param ipw the {@link IndentingPrintWriter} object to send information to.
      */
-    static void dumpPackages(List<Pair<ApexInfo, AndroidPackage>> packagesCache,
+    static void dumpPackages(List<PackageInfo> packagesCache,
             @Nullable String packageName, IndentingPrintWriter ipw) {
         ipw.println();
         ipw.increaseIndent();
         for (int i = 0, size = packagesCache.size(); i < size; i++) {
-            final var pair = packagesCache.get(i);
-            var apexInfo = pair.first;
-            var pkg = pair.second;
-            if (packageName != null && !packageName.equals(pkg.getPackageName())) {
+            final PackageInfo pi = packagesCache.get(i);
+            if (packageName != null && !packageName.equals(pi.packageName)) {
                 continue;
             }
-            ipw.println(pkg.getPackageName());
+            ipw.println(pi.packageName);
             ipw.increaseIndent();
-            ipw.println("Version: " + pkg.getLongVersionCode());
-            ipw.println("Path: " + pkg.getBaseApkPath());
-            ipw.println("IsActive: " + apexInfo.isActive);
-            ipw.println("IsFactory: " + apexInfo.isFactory);
+            ipw.println("Version: " + pi.versionCode);
+            ipw.println("Path: " + pi.applicationInfo.sourceDir);
+            ipw.println("IsActive: " + isActive(pi));
+            ipw.println("IsFactory: " + isFactory(pi));
             ipw.println("ApplicationInfo: ");
             ipw.increaseIndent();
-            // TODO: Dump the package manually
-            AndroidPackageUtils.generateAppInfoWithoutState(pkg)
-                    .dump(new PrintWriterPrinter(ipw), "");
+            pi.applicationInfo.dump(new PrintWriterPrinter(ipw), "");
             ipw.decreaseIndent();
             ipw.decreaseIndent();
         }
