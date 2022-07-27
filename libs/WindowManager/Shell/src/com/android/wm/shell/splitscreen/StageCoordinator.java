@@ -1283,7 +1283,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void onStageHasChildrenChanged(StageListenerImpl stageListener) {
         final boolean hasChildren = stageListener.mHasChildren;
         final boolean isSideStage = stageListener == mSideStageListener;
-        if (!hasChildren && !mIsExiting) {
+        if (!hasChildren && !mIsExiting && mMainStage.isActive()) {
             if (isSideStage && mMainStageListener.mVisible) {
                 // Exit to main stage if side stage no longer has children.
                 if (ENABLE_SHELL_TRANSITIONS) {
@@ -1303,7 +1303,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             EXIT_REASON_APP_FINISHED);
                 }
             }
-        } else if (isSideStage && !mMainStage.isActive()) {
+        } else if (isSideStage && hasChildren && !mMainStage.isActive()) {
             if (mFocusingTaskInfo != null && !isValidToEnterSplitScreen(mFocusingTaskInfo)) {
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
                 mSideStage.removeAllTasks(wct, true);
