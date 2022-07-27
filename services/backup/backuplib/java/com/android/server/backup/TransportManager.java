@@ -16,7 +16,9 @@
 
 package com.android.server.backup;
 
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
 import android.annotation.Nullable;
@@ -166,9 +168,27 @@ public class TransportManager {
                     onPackageEnabled(packageName);
                     return;
                 }
+                case COMPONENT_ENABLED_STATE_DEFAULT: {
+                    // Package is set to its default enabled state (as specified in its manifest).
+                    // Unless explicitly specified in manifest, the default enabled state
+                    // is 'enabled'. Here, we assume that default state always means enabled.
+                    if (MORE_DEBUG) {
+                        Slog.d(TAG, "Package " + packageName
+                                + " was put in default enabled state.");
+                    }
+                    onPackageEnabled(packageName);
+                    return;
+                }
                 case COMPONENT_ENABLED_STATE_DISABLED: {
                     if (MORE_DEBUG) {
                         Slog.d(TAG, "Package " + packageName + " was disabled.");
+                    }
+                    onPackageDisabled(packageName);
+                    return;
+                }
+                case COMPONENT_ENABLED_STATE_DISABLED_USER: {
+                    if (MORE_DEBUG) {
+                        Slog.d(TAG, "Package " + packageName + " was disabled by user.");
                     }
                     onPackageDisabled(packageName);
                     return;
