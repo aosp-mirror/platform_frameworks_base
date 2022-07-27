@@ -233,46 +233,29 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void onStart_isBroadcasting_verifyRegisterLeBroadcastServiceCallBack() {
+    public void whenBroadcasting_verifyLeBroadcastServiceCallBackIsRegisteredAndUnregistered() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
         mIsBroadcasting = true;
 
         mMediaOutputBaseDialogImpl.onStart();
-
         verify(mLocalBluetoothLeBroadcast).registerServiceCallBack(any(), any());
-    }
-
-    @Test
-    public void onStart_notBroadcasting_noRegisterLeBroadcastServiceCallBack() {
-        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
-                mLocalBluetoothLeBroadcast);
-        mIsBroadcasting = false;
-
-        mMediaOutputBaseDialogImpl.onStart();
-
-        verify(mLocalBluetoothLeBroadcast, never()).registerServiceCallBack(any(), any());
-    }
-
-    @Test
-    public void onStart_isBroadcasting_verifyUnregisterLeBroadcastServiceCallBack() {
-        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
-                mLocalBluetoothLeBroadcast);
-        mIsBroadcasting = true;
 
         mMediaOutputBaseDialogImpl.onStop();
-
         verify(mLocalBluetoothLeBroadcast).unregisterServiceCallBack(any());
     }
 
     @Test
-    public void onStop_notBroadcasting_noUnregisterLeBroadcastServiceCallBack() {
+    public void
+            whenNotBroadcasting_verifyLeBroadcastServiceCallBackIsNotRegisteredOrUnregistered() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
         mIsBroadcasting = false;
 
+        mMediaOutputBaseDialogImpl.onStart();
         mMediaOutputBaseDialogImpl.onStop();
 
+        verify(mLocalBluetoothLeBroadcast, never()).registerServiceCallBack(any(), any());
         verify(mLocalBluetoothLeBroadcast, never()).unregisterServiceCallBack(any());
     }
 
