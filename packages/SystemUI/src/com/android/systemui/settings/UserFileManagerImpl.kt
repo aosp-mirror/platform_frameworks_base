@@ -49,8 +49,8 @@ class UserFileManagerImpl @Inject constructor(
 ) : UserFileManager, CoreStartable(context) {
     companion object {
         private const val FILES = "files"
-        private const val SHARED_PREFS = "shared_prefs"
-        internal const val ID = "UserFileManager"
+        @VisibleForTesting internal const val SHARED_PREFS = "shared_prefs"
+        @VisibleForTesting internal const val ID = "UserFileManager"
     }
 
    private val broadcastReceiver = object : BroadcastReceiver() {
@@ -85,13 +85,15 @@ class UserFileManagerImpl @Inject constructor(
                 fileName
             )
         } else {
-            Environment.buildPath(
+            val secondaryFile = Environment.buildPath(
                 context.filesDir,
                 ID,
                 userId.toString(),
                 FILES,
                 fileName
             )
+            ensureParentDirExists(secondaryFile)
+            secondaryFile
         }
     }
 
@@ -114,6 +116,7 @@ class UserFileManagerImpl @Inject constructor(
             fileName
         )
 
+        ensureParentDirExists(secondaryUserDir)
         return context.getSharedPreferences(secondaryUserDir, mode)
     }
 
@@ -138,6 +141,20 @@ class UserFileManagerImpl @Inject constructor(
                 } catch (e: Exception) {
                     Log.e(ID, "Deletion failed.", e)
                 }
+            }
+        }
+    }
+
+    /**
+     * Checks to see if parent dir of the file exists. If it does not, we create the parent dirs
+     * recursively.
+     */
+    @VisibleForTesting
+    internal fun ensureParentDirExists(file: File) {
+        val parent = file.parentFile
+        if (!parent.exists()) {
+            if (!parent.mkdirs()) {
+                Log.e(ID, "Could not create parent directory for file: ${file.absolutePath}")
             }
         }
     }
