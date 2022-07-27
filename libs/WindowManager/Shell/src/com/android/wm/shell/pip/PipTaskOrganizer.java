@@ -445,7 +445,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // When exit to fullscreen with Shell transition enabled, we update the Task windowing
             // mode directly so that it can also trigger display rotation and visibility update in
             // the same transition if there will be any.
-            wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
+            wct.setWindowingMode(mToken, getOutPipWindowingMode());
             // We can inherit the parent bounds as it is going to be fullscreen. The
             // destinationBounds calculated above will be incorrect if this is with rotation.
             wct.setBounds(mToken, null);
@@ -544,7 +544,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             wct.setBounds(mToken, null);
-            wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
+            wct.setWindowingMode(mToken, getOutPipWindowingMode());
             wct.reorder(mToken, false);
             mPipTransitionController.startExitTransition(TRANSIT_REMOVE_PIP, wct,
                     null /* destinationBounds */);
