@@ -3576,21 +3576,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
-        return startInputOrWindowGainedFocusInternal(startInputReason, client, windowToken,
-                startInputFlags, softInputMode, windowFlags, editorInfo, inputConnection,
-                remoteAccessibilityInputConnection, unverifiedTargetSdkVersion,
-                imeDispatcher);
-    }
-
-    @NonNull
-    private InputBindResult startInputOrWindowGainedFocusInternal(
-            @StartInputReason int startInputReason, IInputMethodClient client, IBinder windowToken,
-            @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
-            int windowFlags, @Nullable EditorInfo editorInfo,
-            @Nullable IRemoteInputConnection inputConnection,
-            @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
-            int unverifiedTargetSdkVersion,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         if (windowToken == null) {
             Slog.e(TAG, "windowToken cannot be null.");
             return InputBindResult.NULL;
