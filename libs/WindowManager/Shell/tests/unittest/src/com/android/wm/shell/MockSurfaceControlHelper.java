@@ -34,13 +34,12 @@ public class MockSurfaceControlHelper {
      * given {@link SurfaceControl} when calling {@link SurfaceControl.Builder#build()}.
      *
      * @param mockSurfaceControl the first {@link SurfaceControl} to return
-     * @param mockSurfaceControls following {@link SurfaceControl} to return
      * @return the mock of {@link SurfaceControl.Builder}
      */
     public static SurfaceControl.Builder createMockSurfaceControlBuilder(
-            SurfaceControl mockSurfaceControl, SurfaceControl... mockSurfaceControls) {
+            SurfaceControl mockSurfaceControl) {
         final SurfaceControl.Builder mockBuilder = mock(SurfaceControl.Builder.class, RETURNS_SELF);
-        doReturn(mockSurfaceControl, (Object[]) mockSurfaceControls)
+        doReturn(mockSurfaceControl)
                 .when(mockBuilder)
                 .build();
         return mockBuilder;
