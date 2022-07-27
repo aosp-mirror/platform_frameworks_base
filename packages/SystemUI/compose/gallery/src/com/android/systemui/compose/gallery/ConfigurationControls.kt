@@ -9,11 +9,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BrightnessHigh
-import androidx.compose.material.icons.filled.BrightnessLow
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.FormatTextdirectionLToR
 import androidx.compose.material.icons.filled.FormatTextdirectionRToL
+import androidx.compose.material.icons.filled.InvertColors
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Tablet
 import androidx.compose.material3.Button
@@ -44,12 +45,13 @@ enum class FontScale(val scale: Float) {
 /** A configuration panel that allows to toggle the theme, font scale and layout direction. */
 @Composable
 fun ConfigurationControls(
-    isDarkTheme: Boolean,
+    theme: Theme,
     fontScale: FontScale,
     layoutDirection: LayoutDirection,
     onChangeTheme: () -> Unit,
     onChangeLayoutDirection: () -> Unit,
     onChangeFontScale: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     // The display we are emulating, if any.
     var emulatedDisplayName by rememberSaveable { mutableStateOf<String?>(null) }
@@ -84,18 +86,26 @@ fun ConfigurationControls(
 
     // TODO(b/231131244): Fork FlowRow from Accompanist and use that instead to make sure that users
     // don't miss any available configuration.
-    LazyRow {
+    LazyRow(modifier) {
         // Dark/light theme.
         item {
             TextButton(onChangeTheme) {
                 val text: String
                 val icon: ImageVector
-                if (isDarkTheme) {
-                    icon = Icons.Default.BrightnessHigh
-                    text = "Dark"
-                } else {
-                    icon = Icons.Default.BrightnessLow
-                    text = "Light"
+
+                when (theme) {
+                    Theme.System -> {
+                        icon = Icons.Default.InvertColors
+                        text = "System"
+                    }
+                    Theme.Dark -> {
+                        icon = Icons.Default.DarkMode
+                        text = "Dark"
+                    }
+                    Theme.Light -> {
+                        icon = Icons.Default.LightMode
+                        text = "Light"
+                    }
                 }
 
                 Icon(icon, null)

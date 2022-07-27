@@ -23,36 +23,38 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.android.systemui.compose.theme.SystemUITheme
 
-enum class Screen {
-    Home,
-    Typography,
-    MaterialColors,
-    AndroidColors,
-    ExampleFeature,
+/** The gallery app screens. */
+object GalleryAppScreens {
+    val Typography = ChildScreen("typography") { TypographyScreen() }
+    val MaterialColors = ChildScreen("material_colors") { MaterialColorsScreen() }
+    val AndroidColors = ChildScreen("android_colors") { AndroidColorsScreen() }
+    val ExampleFeature = ChildScreen("example_feature") { ExampleFeatureScreen() }
+
+    val Home =
+        ParentScreen(
+            "home",
+            mapOf(
+                "Typography" to Typography,
+                "Material colors" to MaterialColors,
+                "Android colors" to AndroidColors,
+                "Example feature" to ExampleFeature,
+            )
+        )
 }
 
-/** The main content of the app, that shows the [HomeScreen] by default. */
+/** The main content of the app, that shows [GalleryAppScreens.Home] by default. */
 @Composable
 private fun MainContent() {
     Box(Modifier.fillMaxSize()) {
         val navController = rememberNavController()
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.name,
+            startDestination = GalleryAppScreens.Home.identifier,
         ) {
-            composable(Screen.Home.name) {
-                HomeScreen(
-                    onScreenSelected = { navController.navigate(it.name) },
-                )
-            }
-            composable(Screen.Typography.name) { TypographyScreen() }
-            composable(Screen.MaterialColors.name) { MaterialColorsScreen() }
-            composable(Screen.AndroidColors.name) { AndroidColorsScreen() }
-            composable(Screen.ExampleFeature.name) { ExampleFeatureScreen() }
+            screen(GalleryAppScreens.Home, navController)
         }
     }
 }
@@ -63,7 +65,7 @@ private fun MainContent() {
  */
 @Composable
 fun GalleryApp(
-    isDarkTheme: Boolean,
+    theme: Theme,
     onChangeTheme: () -> Unit,
 ) {
     val systemFontScale = LocalDensity.current.fontScale
@@ -98,14 +100,14 @@ fun GalleryApp(
         LocalDensity provides density,
         LocalLayoutDirection provides layoutDirection,
     ) {
-        SystemUITheme(isDarkTheme) {
+        SystemUITheme {
             Surface(
                 Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background,
             ) {
                 Column(Modifier.fillMaxSize().systemBarsPadding().padding(16.dp)) {
                     ConfigurationControls(
-                        isDarkTheme,
+                        theme,
                         fontScale,
                         layoutDirection,
                         onChangeTheme,

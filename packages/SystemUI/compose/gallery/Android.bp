@@ -34,6 +34,7 @@ android_library {
     ],
 
     static_libs: [
+        "SystemUI-core",
         "SystemUIComposeCore",
         "SystemUIComposeFeatures",
 
