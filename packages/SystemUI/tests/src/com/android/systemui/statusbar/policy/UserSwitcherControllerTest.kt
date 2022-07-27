@@ -77,6 +77,7 @@ import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
@@ -269,6 +270,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         `when`(userManager.createGuest(any())).thenReturn(guestInfo)
 
         userSwitcherController.onUserListItemClicked(emptyGuestUserRecord, null)
+        bgExecutor.runAllReady()
+        uiExecutor.runAllReady()
         testableLooper.processAllMessages()
         verify(interactionJankMonitor).begin(any())
         verify(latencyTracker).onActionStart(LatencyTracker.ACTION_USER_SWITCH)
@@ -294,6 +297,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         `when`(userManager.createGuest(any())).thenReturn(guestInfo)
 
         userSwitcherController.onUserListItemClicked(emptyGuestUserRecord, dialogShower)
+        bgExecutor.runAllReady()
+        uiExecutor.runAllReady()
         testableLooper.processAllMessages()
         verify(dialogShower).dismiss()
     }
@@ -583,5 +588,25 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         val intent = Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE, guestId)
         broadcastReceiverCaptor.value.onReceive(context, intent)
         verify(cb).onUserSwitched()
+    }
+
+    @Test
+    fun onUserItemClicked_guest_runsOnBgThread() {
+        val dialogShower = mock(UserSwitchDialogController.DialogShower::class.java)
+        val guestUserRecord = UserSwitcherController.UserRecord(
+            null,
+            picture,
+            true /* guest */,
+            false /* current */,
+            false /* isAddUser */,
+            false /* isRestricted */,
+            true /* isSwitchToEnabled */,
+            false /* isAddSupervisedUser */)
+
+        userSwitcherController.onUserListItemClicked(guestUserRecord, dialogShower)
+        assertTrue(bgExecutor.numPending() > 0)
+        verify(userManager, never()).createGuest(context)
+        bgExecutor.runAllReady()
+        verify(userManager).createGuest(context)
     }
 }

@@ -39,6 +39,10 @@ public class PipSurfaceTransactionHelper {
     private int mCornerRadius;
     private int mShadowRadius;
 
+    public PipSurfaceTransactionHelper(Context context) {
+        onDensityOrFontScaleChanged(context);
+    }
+
     /**
      * Called when display size or font size of settings changed
      *
