@@ -92,14 +92,14 @@ public class InfoMediaManager extends MediaManager {
     public void startScan() {
         mMediaDevices.clear();
         mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
-        mRouterManager.startScan();
+        mRouterManager.registerScanRequest();
         refreshDevices();
     }
 
     @Override
     public void stopScan() {
         mRouterManager.unregisterCallback(mMediaRouterCallback);
-        mRouterManager.stopScan();
+        mRouterManager.unregisterScanRequest();
     }
 
     /**
