@@ -20,11 +20,9 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 
-import android.annotation.CallSuper;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
@@ -103,7 +101,8 @@ import java.util.UUID;
  *
  * @hide
  */
-public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden, Parcelable {
+public abstract class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
+        Parcelable {
 
     private static final SparseArray<int[]> EMPTY_INT_ARRAY_SPARSE_ARRAY = new SparseArray<>();
     public static ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
@@ -568,9 +567,9 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     private Set<String> mKnownActivityEmbeddingCerts;
 
     // Derived fields
-    @NonNull
-    private UUID mStorageUuid;
     private long mLongVersionCode;
+    @NonNull
+    protected UUID mStorageUuid;
 
     private int mLocaleConfigRes;
 
@@ -663,15 +662,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         return this;
     }
 
-    @SuppressLint("MissingSuperCall")
-    @CallSuper
-    @Override
-    public Object hideAsParsed() {
-        assignDerivedFields();
-        return this;
-    }
-
-    private void assignDerivedFields() {
+    protected void assignDerivedFields() {
         mStorageUuid = StorageManager.convert(volumeUuid);
         mLongVersionCode = PackageInfo.composeLongVersionCode(versionCodeMajor, versionCode);
     }
@@ -1057,16 +1048,6 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         return "Package{"
                 + Integer.toHexString(System.identityHashCode(this))
                 + " " + packageName + "}";
-    }
-
-    @Deprecated
-    @Override
-    public ApplicationInfo toAppInfoWithoutState() {
-        ApplicationInfo appInfo = toAppInfoWithoutStateWithoutFlags();
-        appInfo.flags = PackageInfoWithoutStateUtils.appInfoFlags(this);
-        appInfo.privateFlags = PackageInfoWithoutStateUtils.appInfoPrivateFlags(this);
-        appInfo.privateFlagsExt = PackageInfoWithoutStateUtils.appInfoPrivateFlagsExt(this);
-        return appInfo;
     }
 
     public ApplicationInfo toAppInfoWithoutStateWithoutFlags() {
@@ -1490,19 +1471,6 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         this.mKnownActivityEmbeddingCerts = sForStringSet.unparcel(in);
         assignDerivedFields();
     }
-
-    public static final Parcelable.Creator<ParsingPackageImpl> CREATOR =
-            new Parcelable.Creator<ParsingPackageImpl>() {
-                @Override
-                public ParsingPackageImpl createFromParcel(Parcel source) {
-                    return new ParsingPackageImpl(source);
-                }
-
-                @Override
-                public ParsingPackageImpl[] newArray(int size) {
-                    return new ParsingPackageImpl[size];
-                }
-            };
 
     @Override
     public int getVersionCode() {

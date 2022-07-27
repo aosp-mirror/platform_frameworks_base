@@ -194,18 +194,21 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
 
     @Override
     public ParsedPackage hideAsParsed() {
-        super.hideAsParsed();
+        super.assignDerivedFields();
         return this;
     }
 
     @Override
     public AndroidPackage hideAsFinal() {
         // TODO(b/135203078): Lock as immutable
-        assignDerivedFields();
+        if (mStorageUuid == null) {
+            assignDerivedFields();
+        }
+        assignDerivedFields2();
         return this;
     }
 
-    private void assignDerivedFields() {
+    private void assignDerivedFields2() {
         mBaseAppInfoFlags = PackageInfoUtils.appInfoFlags(this, null);
         mBaseAppInfoPrivateFlags = PackageInfoUtils.appInfoPrivateFlags(this, null);
         mBaseAppInfoPrivateFlagsExt = PackageInfoUtils.appInfoPrivateFlagsExt(this, null);
@@ -545,7 +548,8 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         this.uid = in.readInt();
         this.mBooleans = in.readInt();
 
-        assignDerivedFields();
+        super.assignDerivedFields();
+        assignDerivedFields2();
     }
 
     @NonNull

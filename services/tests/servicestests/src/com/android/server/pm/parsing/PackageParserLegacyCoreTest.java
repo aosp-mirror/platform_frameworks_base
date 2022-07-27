@@ -34,6 +34,7 @@ import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 import android.util.SparseIntArray;
@@ -52,7 +53,6 @@ import com.android.server.pm.pkg.component.ParsedComponent;
 import com.android.server.pm.pkg.component.ParsedIntentInfo;
 import com.android.server.pm.pkg.component.ParsedPermission;
 import com.android.server.pm.pkg.component.ParsedPermissionUtils;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
@@ -594,7 +594,8 @@ public class PackageParserLegacyCoreTest {
             throw new IllegalStateException(ret.getErrorMessage(), ret.getException());
         }
         pkg.setSigningDetails(ret.getResult());
-        PackageInfo pi = PackageInfoWithoutStateUtils.generate(pkg, apexInfo, flags);
+        PackageInfo pi = PackageInfoUtils.generate(pkg.hideAsParsed().setApex(true), apexInfo,
+                flags, null, UserHandle.USER_SYSTEM);
 
         assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);
         assertTrue(pi.applicationInfo.enabled);

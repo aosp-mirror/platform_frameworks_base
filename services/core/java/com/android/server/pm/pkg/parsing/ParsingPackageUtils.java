@@ -91,7 +91,9 @@ import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.SharedUidMigration;
+import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.permission.CompatibilityPermissionInfo;
+import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ComponentParseUtils;
 import com.android.server.pm.pkg.component.InstallConstraintsTagParser;
@@ -301,7 +303,8 @@ public class ParsingPackageUtils {
                     @NonNull String baseApkPath,
                     @NonNull String path,
                     @NonNull TypedArray manifestArray, boolean isCoreApp) {
-                return new ParsingPackageImpl(packageName, baseApkPath, path, manifestArray);
+                return PackageImpl.forParsing(packageName, baseApkPath, path, manifestArray,
+                        isCoreApp);
             }
         });
         result = parser.parsePackage(input, file, parseFlags, /* frameworkSplits= */ null);
@@ -3312,6 +3315,15 @@ public class ParsingPackageUtils {
         return keySetMapping;
     }
 
+    public static void fillVersionCodes(@NonNull ParsingPackageRead pkg,
+            @NonNull PackageInfo info) {
+        info.versionCode = ((ParsingPackageHidden) pkg).getVersionCode();
+        info.versionCodeMajor = ((ParsingPackageHidden) pkg).getVersionCodeMajor();
+    }
+
+    public static ApplicationInfo toAppInfoWithoutState(AndroidPackageApi pkg) {
+        return ((ParsingPackageHidden) pkg).toAppInfoWithoutState();
+    }
 
     /**
      * Callback interface for retrieving information that may be needed while parsing

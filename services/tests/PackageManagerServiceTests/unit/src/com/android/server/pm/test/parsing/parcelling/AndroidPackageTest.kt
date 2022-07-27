@@ -63,6 +63,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "toAppInfoWithoutState",
         "toAppInfoWithoutStateWithoutFlags",
         "assignDerivedFields",
+        "assignDerivedFields2",
         "buildFakeForDeletion",
         "capPermissionPriorities",
         "forParsing",

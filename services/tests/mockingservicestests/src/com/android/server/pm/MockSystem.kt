@@ -83,6 +83,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.mockito.AdditionalMatchers.or
+import org.mockito.Mockito
 import org.mockito.quality.Strictness
 import java.io.File
 import java.io.IOException
@@ -139,7 +140,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                 .mockStatic(PackageManagerServiceUtils::class.java)
                 .mockStatic(Environment::class.java)
                 .mockStatic(SystemServerInitThreadPool::class.java)
-                .mockStatic(ParsingPackageUtils::class.java)
+                .mockStatic(ParsingPackageUtils::class.java, Mockito.CALLS_REAL_METHODS)
                 .mockStatic(LockGuard::class.java)
                 .mockStatic(EventLog::class.java)
                 .mockStatic(LocalServices::class.java)

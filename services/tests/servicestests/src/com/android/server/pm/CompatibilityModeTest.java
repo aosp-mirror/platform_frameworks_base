@@ -29,13 +29,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.ApplicationInfo;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 
+import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.pkg.PackageUserStateImpl;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -220,8 +220,8 @@ public class CompatibilityModeTest {
         info.targetSdkVersion = targetSdkVersion;
         info.flags |= flags;
         when(mMockAndroidPackage.toAppInfoWithoutState()).thenReturn(info);
-        return PackageInfoWithoutStateUtils.generateApplicationInfoUnchecked(mMockAndroidPackage,
-                0 /*flags*/, mMockUserState, 0 /*userId*/, false /*assignUserFields*/);
+        return PackageInfoUtils.generateApplicationInfo(mMockAndroidPackage,
+                0 /*flags*/, mMockUserState, 0 /*userId*/, null);
     }
 
     private void setGlobalCompatibilityMode(boolean enabled) {

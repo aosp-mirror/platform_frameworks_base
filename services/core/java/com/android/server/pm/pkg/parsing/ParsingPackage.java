@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedApexSystemService;
 import com.android.server.pm.pkg.component.ParsedAttribution;
@@ -391,8 +392,6 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setOnBackInvokedCallbackEnabled(boolean enableOnBackInvokedCallback);
 
-    // TODO(b/135203078): This class no longer has access to ParsedPackage, find a replacement
-    //  for moving to the next step
     @CallSuper
-    Object hideAsParsed();
+    ParsedPackage hideAsParsed();
 }
