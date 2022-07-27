@@ -17,9 +17,9 @@
 package com.android.server.tare;
 
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
+import static android.util.TimeUtils.dumpTime;
 
 import static com.android.server.tare.TareUtils.cakeToString;
-import static com.android.server.tare.TareUtils.dumpTime;
 import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
 
 import android.annotation.NonNull;
