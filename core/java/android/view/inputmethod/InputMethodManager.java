@@ -285,9 +285,10 @@ public final class InputMethodManager {
     private static final String SUBTYPE_MODE_VOICE = "voice";
 
     /**
-     * Provide this to {@link IInputMethodManager#startInputOrWindowGainedFocus(
-     * int, IInputMethodClient, IBinder, int, int, int, EditorInfo,
-     * com.android.internal.inputmethod.IRemoteInputConnection, int)} to receive
+     * Provide this to {@link IInputMethodManagerInvoker#startInputOrWindowGainedFocus(int,
+     * IInputMethodClient, IBinder, int, int, int, EditorInfo,
+     * com.android.internal.inputmethod.IRemoteInputConnection, IRemoteAccessibilityInputConnection,
+     * int, int, ImeOnBackInvokedDispatcher)} to receive
      * {@link android.window.OnBackInvokedCallback} registrations from IME.
      */
     private final ImeOnBackInvokedDispatcher mImeDispatcher =
@@ -790,7 +791,7 @@ public final class InputMethodManager {
                         null,
                         null, null,
                         mCurRootView.mContext.getApplicationInfo().targetSdkVersion,
-                        mImeDispatcher);
+                        UserHandle.myUserId(), mImeDispatcher);
             }
         }
 
@@ -2437,12 +2438,14 @@ public final class InputMethodManager {
                 }
                 return false;
             }
+            final int targetUserId = editorInfo.targetInputMethodUser != null
+                    ? editorInfo.targetInputMethodUser.getIdentifier() : UserHandle.myUserId();
             res = mServiceInvoker.startInputOrWindowGainedFocus(
                     startInputReason, mClient, windowGainingFocus, startInputFlags,
                     softInputMode, windowFlags, editorInfo, servedInputConnection,
                     servedInputConnection == null ? null
                             : servedInputConnection.asIRemoteAccessibilityInputConnection(),
-                    view.getContext().getApplicationInfo().targetSdkVersion,
+                    view.getContext().getApplicationInfo().targetSdkVersion, targetUserId,
                     mImeDispatcher);
             if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
             if (res == null) {
