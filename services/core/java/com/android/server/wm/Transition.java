@@ -1149,6 +1149,26 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return false;
     }
 
+    private static boolean isTranslucent(@NonNull WindowContainer wc) {
+        final TaskFragment taskFragment = wc.asTaskFragment();
+        if (taskFragment != null) {
+            if (taskFragment.isTranslucent(null /* starting */)) {
+                return true;
+            }
+            final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
+            if (adjacentTaskFragment != null) {
+                // Treat the TaskFragment as translucent if its adjacent TF is, otherwise everything
+                // behind two adjacent TaskFragments are occluded.
+                return adjacentTaskFragment.isTranslucent(null /* starting */);
+            }
+        }
+        // TODO(b/172695805): hierarchical check. This is non-trivial because for containers
+        //                    it is effected by child visibility but needs to work even
+        //                    before visibility is committed. This means refactoring some
+        //                    checks to use requested visibility.
+        return !wc.fillsParent();
+    }
+
     /**
      * Under some conditions (eg. all visible targets within a parent container are transitioning
      * the same way) the transition can be "promoted" to the parent container. This means an
@@ -1701,19 +1721,12 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             if (mShowWallpaper || wc.showWallpaper()) {
                 flags |= FLAG_SHOW_WALLPAPER;
             }
-            if (!wc.fillsParent()) {
-                // TODO(b/172695805): hierarchical check. This is non-trivial because for containers
-                //                    it is effected by child visibility but needs to work even
-                //                    before visibility is committed. This means refactoring some
-                //                    checks to use requested visibility.
+            if (isTranslucent(wc)) {
                 flags |= FLAG_TRANSLUCENT;
             }
             final Task task = wc.asTask();
             if (task != null && task.voiceSession != null) {
                 flags |= FLAG_IS_VOICE_INTERACTION;
-            }
-            if (task != null && task.isTranslucent(null)) {
-                flags |= FLAG_TRANSLUCENT;
             }
             final ActivityRecord record = wc.asActivityRecord();
             if (record != null) {
