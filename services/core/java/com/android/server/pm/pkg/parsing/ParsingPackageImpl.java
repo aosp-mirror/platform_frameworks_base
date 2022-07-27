@@ -317,8 +317,8 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     protected String volumeUuid;
-    @Nullable
-    private SigningDetails signingDetails;
+    @NonNull
+    private SigningDetails signingDetails = SigningDetails.UNKNOWN;
 
     @NonNull
     @DataClass.ParcelWith(ForInternedString.class)
@@ -1873,7 +1873,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         return volumeUuid;
     }
 
-    @Nullable
+    @NonNull
     @Override
     public SigningDetails getSigningDetails() {
         return signingDetails;
@@ -2474,7 +2474,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     }
 
     @Override
-    public ParsingPackageImpl setSigningDetails(@Nullable SigningDetails value) {
+    public ParsingPackageImpl setSigningDetails(@NonNull SigningDetails value) {
         signingDetails = value;
         return this;
     }

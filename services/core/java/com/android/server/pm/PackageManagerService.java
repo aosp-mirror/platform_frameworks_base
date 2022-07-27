@@ -1611,7 +1611,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mSharedLibraries = injector.getSharedLibrariesImpl();
 
         mApexManager = testParams.apexManager;
-        mApexPackageInfo = new ApexPackageInfo();
+        mApexPackageInfo = new ApexPackageInfo(this);
         mArtManagerService = testParams.artManagerService;
         mAvailableFeatures = testParams.availableFeatures;
         mBackgroundDexOptService = testParams.backgroundDexOptService;
@@ -1811,7 +1811,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mProtectedPackages = new ProtectedPackages(mContext);
 
         mApexManager = injector.getApexManager();
-        mApexPackageInfo = new ApexPackageInfo();
+        mApexPackageInfo = new ApexPackageInfo(this);
         mAppsFilter = mInjector.getAppsFilter();
 
         mInstantAppRegistry = new InstantAppRegistry(mContext, mPermissionManager,

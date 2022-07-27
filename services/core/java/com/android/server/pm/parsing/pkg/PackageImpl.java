@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import com.android.server.pm.pkg.SELinuxUtil;
 import android.content.pm.SigningDetails;
 import android.content.res.TypedArray;
 import android.os.Environment;
@@ -35,6 +34,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import com.android.server.pm.parsing.PackageInfoUtils;
+import com.android.server.pm.pkg.SELinuxUtil;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedProvider;
@@ -255,7 +255,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
     }
 
     @Override
-    public PackageImpl setSigningDetails(@Nullable SigningDetails value) {
+    public PackageImpl setSigningDetails(@NonNull SigningDetails value) {
         super.setSigningDetails(value);
         return this;
     }
