@@ -226,6 +226,8 @@ public class Editor {
     final UndoInputFilter mUndoInputFilter = new UndoInputFilter(this);
     boolean mAllowUndo = true;
 
+    private int mLastToolType = MotionEvent.TOOL_TYPE_UNKNOWN;
+
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     // Cursor Controllers.
@@ -1737,6 +1739,9 @@ public class Editor {
     @VisibleForTesting
     public void onTouchEvent(MotionEvent event) {
         final boolean filterOutEvent = shouldFilterOutTouchEvent(event);
+
+        mLastToolType = event.getToolType(event.getActionIndex());
+
         mLastButtonState = event.getButtonState();
         if (filterOutEvent) {
             if (event.getActionMasked() == MotionEvent.ACTION_UP) {
@@ -1789,7 +1794,7 @@ public class Editor {
     }
 
     private void showFloatingToolbar() {
-        if (mTextActionMode != null) {
+        if (mTextActionMode != null && showUIForFingerInput()) {
             // Delay "show" so it doesn't interfere with click confirmations
             // or double-clicks that could "dismiss" the floating toolbar.
             int delay = ViewConfiguration.getDoubleTapTimeout();
@@ -1869,7 +1874,8 @@ public class Editor {
             final CursorController cursorController = mTextView.hasSelection()
                     ? getSelectionController() : getInsertionController();
             if (cursorController != null && !cursorController.isActive()
-                    && !cursorController.isCursorBeingModified()) {
+                    && !cursorController.isCursorBeingModified()
+                    && showUIForFingerInput()) {
                 cursorController.show();
             }
         }
@@ -2520,6 +2526,10 @@ public class Editor {
             return false;
         }
 
+        if (!showUIForFingerInput()) {
+            return false;
+        }
+
         ActionMode.Callback actionModeCallback = new TextActionModeCallback(actionMode);
         mTextActionMode = mTextView.startActionMode(actionModeCallback, ActionMode.TYPE_FLOATING);
         registerOnBackInvokedCallback();
@@ -2672,7 +2682,7 @@ public class Editor {
                     mTextView.postDelayed(mShowSuggestionRunnable,
                             ViewConfiguration.getDoubleTapTimeout());
                 } else if (hasInsertionController()) {
-                    if (shouldInsertCursor) {
+                    if (shouldInsertCursor && showUIForFingerInput()) {
                         getInsertionController().show();
                     } else {
                         getInsertionController().hide();
@@ -5401,7 +5411,8 @@ public class Editor {
             final PointF showPosInView = new PointF();
             final boolean shouldShow = checkForTransforms() /*check not rotated and compute scale*/
                     && !tooLargeTextForMagnifier()
-                    && obtainMagnifierShowCoordinates(event, showPosInView);
+                    && obtainMagnifierShowCoordinates(event, showPosInView)
+                    && showUIForFingerInput();
             if (shouldShow) {
                 // Make the cursor visible and stop blinking.
                 mRenderCursorRegardlessTiming = true;
@@ -6345,6 +6356,15 @@ public class Editor {
         if (mDrawableForCursor == null) {
             mDrawableForCursor = mTextView.getTextCursorDrawable();
         }
+    }
+
+    /**
+     * Returns true when need to show UIs, e.g. floating toolbar, etc, for finger based interaction.
+     *
+     * @return true if UIs need to show for finger interaciton. false if UIs are not necessary.
+     */
+    public boolean showUIForFingerInput() {
+        return mLastToolType != MotionEvent.TOOL_TYPE_MOUSE;
     }
 
     /** Controller for the insertion cursor. */
