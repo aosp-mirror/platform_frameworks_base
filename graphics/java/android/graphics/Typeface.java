@@ -50,6 +50,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LruCache;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1393,6 +1394,41 @@ public class Typeface {
             for (String genericFamily : genericFamilies) {
                 registerGenericFamilyNative(genericFamily, systemFontMap.get(genericFamily));
             }
+        }
+    }
+
+    /**
+     * Change default typefaces for testing purpose.
+     *
+     * Note: The existing TextView or Paint instance still holds the old Typeface.
+     *
+     * @param defaults array of [default, default_bold, default_italic, default_bolditalic].
+     * @param genericFamilies array of [sans-serif, serif, monospace]
+     * @return return the old defaults and genericFamilies
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public static Pair<List<Typeface>, List<Typeface>> changeDefaultFontForTest(
+            @NonNull List<Typeface> defaults,
+            @NonNull List<Typeface> genericFamilies
+    ) {
+        synchronized (SYSTEM_FONT_MAP_LOCK) {
+            List<Typeface> oldDefaults = Arrays.asList(sDefaults);
+            sDefaults = defaults.toArray(new Typeface[4]);
+            setDefault(defaults.get(0));
+
+            ArrayList<Typeface> oldGenerics = new ArrayList<>();
+            oldGenerics.add(sSystemFontMap.get("sans-serif"));
+            sSystemFontMap.put("sans-serif", genericFamilies.get(0));
+
+            oldGenerics.add(sSystemFontMap.get("serif"));
+            sSystemFontMap.put("serif", genericFamilies.get(1));
+
+            oldGenerics.add(sSystemFontMap.get("monospace"));
+            sSystemFontMap.put("monospace", genericFamilies.get(2));
+
+            return new Pair<>(oldDefaults, oldGenerics);
         }
     }
 
