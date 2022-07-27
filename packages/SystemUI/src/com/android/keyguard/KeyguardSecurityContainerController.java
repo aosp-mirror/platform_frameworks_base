@@ -343,7 +343,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         if (!mSidefpsController.isPresent()) {
             return;
         }
-        if (mBouncerVisible && mView.isSidedSecurityMode()
+        if (mBouncerVisible
+                && getResources().getBoolean(R.bool.config_show_sidefps_hint_on_bouncer)
                 && mUpdateMonitor.isFingerprintDetectionRunning()
                 && !mUpdateMonitor.userNeedsStrongAuth()) {
             mSidefpsController.get().show();
