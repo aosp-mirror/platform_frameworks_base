@@ -36,6 +36,8 @@ import android.apex.ApexSessionInfo;
 import android.apex.ApexSessionParams;
 import android.apex.IApexService;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -91,16 +93,16 @@ public class ApexManagerTest {
         ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
         apexPackageInfo.scanApexPackages(
                 apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
-        final var activePair = apexPackageInfo.getPackageInfo(TEST_APEX_PKG,
+        final PackageInfo activePkgPi = apexPackageInfo.getPackageInfo(TEST_APEX_PKG,
                 ApexManager.MATCH_ACTIVE_PACKAGE);
 
-        assertThat(activePair).isNotNull();
-        assertThat(activePair.second.getPackageName()).contains(TEST_APEX_PKG);
+        assertThat(activePkgPi).isNotNull();
+        assertThat(activePkgPi.packageName).contains(TEST_APEX_PKG);
 
-        final var factoryPair = apexPackageInfo.getPackageInfo(TEST_APEX_PKG,
+        final PackageInfo factoryPkgPi = apexPackageInfo.getPackageInfo(TEST_APEX_PKG,
                 ApexManager.MATCH_FACTORY_PACKAGE);
 
-        assertThat(factoryPair).isNull();
+        assertThat(factoryPkgPi).isNull();
     }
 
     @Test
@@ -109,16 +111,16 @@ public class ApexManagerTest {
         ApexPackageInfo apexPackageInfo = new ApexPackageInfo();
         apexPackageInfo.scanApexPackages(
                 apexInfo, mPackageParser2, ParallelPackageParser.makeExecutorService());
-        var factoryPair = apexPackageInfo.getPackageInfo(TEST_APEX_PKG,
+        PackageInfo factoryPkgPi = apexPackageInfo.getPackageInfo(TEST_APEX_PKG,
                 ApexManager.MATCH_FACTORY_PACKAGE);
 
-        assertThat(factoryPair).isNotNull();
-        assertThat(factoryPair.second.getPackageName()).contains(TEST_APEX_PKG);
+        assertThat(factoryPkgPi).isNotNull();
+        assertThat(factoryPkgPi.packageName).contains(TEST_APEX_PKG);
 
-        final var activePair = apexPackageInfo.getPackageInfo(TEST_APEX_PKG,
+        final PackageInfo activePkgPi = apexPackageInfo.getPackageInfo(TEST_APEX_PKG,
                 ApexManager.MATCH_ACTIVE_PACKAGE);
 
-        assertThat(activePair).isNull();
+        assertThat(activePkgPi).isNull();
     }
 
     @Test
@@ -386,16 +388,23 @@ public class ApexManagerTest {
         newApexInfo = mApexManager.installPackage(installedApex);
         apexPackageInfo.notifyPackageInstalled(newApexInfo, mPackageParser2);
 
-        var newInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
+        PackageInfo newInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
                 ApexManager.MATCH_ACTIVE_PACKAGE);
-        assertThat(newInfo.second.getBaseApkPath()).isEqualTo(finalApex.getAbsolutePath());
-        assertThat(newInfo.second.getLongVersionCode()).isEqualTo(2);
+        assertThat(newInfo.applicationInfo.sourceDir).isEqualTo(finalApex.getAbsolutePath());
+        assertThat(newInfo.applicationInfo.longVersionCode).isEqualTo(2);
+        assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)
+                .isEqualTo(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
+        assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+            .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
 
-        var factoryInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
+        PackageInfo factoryInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
                 ApexManager.MATCH_FACTORY_PACKAGE);
-        assertThat(factoryInfo.second.getBaseApkPath()).isEqualTo(activeApexInfo.modulePath);
-        assertThat(factoryInfo.second.getLongVersionCode()).isEqualTo(1);
-        assertThat(factoryInfo.second.isSystem()).isTrue();
+        assertThat(factoryInfo.applicationInfo.sourceDir).isEqualTo(activeApexInfo.modulePath);
+        assertThat(factoryInfo.applicationInfo.longVersionCode).isEqualTo(1);
+        assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
+            .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
+        assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+                .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
     }
 
     @Test
@@ -420,16 +429,23 @@ public class ApexManagerTest {
         newApexInfo = mApexManager.installPackage(installedApex);
         apexPackageInfo.notifyPackageInstalled(newApexInfo, mPackageParser2);
 
-        var newInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
+        PackageInfo newInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
                 ApexManager.MATCH_ACTIVE_PACKAGE);
-        assertThat(newInfo.second.getBaseApkPath()).isEqualTo(finalApex.getAbsolutePath());
-        assertThat(newInfo.second.getLongVersionCode()).isEqualTo(2);
+        assertThat(newInfo.applicationInfo.sourceDir).isEqualTo(finalApex.getAbsolutePath());
+        assertThat(newInfo.applicationInfo.longVersionCode).isEqualTo(2);
+        assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)
+                .isEqualTo(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
+        assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+            .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
 
-        var factoryInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
+        PackageInfo factoryInfo = apexPackageInfo.getPackageInfo("test.apex.rebootless",
                 ApexManager.MATCH_FACTORY_PACKAGE);
-        assertThat(factoryInfo.second.getBaseApkPath()).isEqualTo(factoryApexInfo.modulePath);
-        assertThat(factoryInfo.second.getLongVersionCode()).isEqualTo(1);
-        assertThat(factoryInfo.second.isSystem()).isTrue();
+        assertThat(factoryInfo.applicationInfo.sourceDir).isEqualTo(factoryApexInfo.modulePath);
+        assertThat(factoryInfo.applicationInfo.longVersionCode).isEqualTo(1);
+        assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
+            .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
+        assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+                .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
     }
 
     @Test

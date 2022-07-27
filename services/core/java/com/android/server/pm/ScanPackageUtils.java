@@ -823,8 +823,8 @@ final class ScanPackageUtils {
      * ideally be static, but, it requires locks to read system state.
      */
     public static void applyPolicy(ParsedPackage parsedPackage,
-            final @PackageManagerService.ScanFlags int scanFlags,
-            @Nullable AndroidPackage platformPkg, boolean isUpdatedSystemApp) {
+            final @PackageManagerService.ScanFlags int scanFlags, AndroidPackage platformPkg,
+            boolean isUpdatedSystemApp) {
         if ((scanFlags & SCAN_AS_SYSTEM) != 0) {
             parsedPackage.setSystem(true);
             // TODO(b/135203078): Can this be done in PackageParser? Or just inferred when the flag
