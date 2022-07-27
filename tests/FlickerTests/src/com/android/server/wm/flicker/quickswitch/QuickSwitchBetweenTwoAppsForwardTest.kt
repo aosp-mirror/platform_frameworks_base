@@ -79,6 +79,7 @@ open class QuickSwitchBetweenTwoAppsForwardTest(
                 testApp2.launchViaIntent(wmHelper)
                 tapl.launchedAppState.quickSwitchToPreviousApp()
                 wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(testApp1)
                     .withNavOrTaskBarVisible()
                     .withStatusBarVisible()
                     .waitForAndVerify()
@@ -89,6 +90,7 @@ open class QuickSwitchBetweenTwoAppsForwardTest(
         transitions {
             tapl.launchedAppState.quickSwitchToPreviousAppSwipeLeft()
             wmHelper.StateSyncBuilder()
+                .withFullScreenApp(testApp2)
                 .withNavOrTaskBarVisible()
                 .withStatusBarVisible()
                 .waitForAndVerify()
