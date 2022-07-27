@@ -137,7 +137,6 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITIO
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_STARTING_REVEAL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
-import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.WINDOW;
@@ -4969,10 +4968,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean isExitAnimationRunningSelfOrParent() {
         return inTransitionSelfOrParent()
                 || isAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION);
-    }
-
-    boolean isExitAnimationRunningSelfOrChild() {
-        return isAnimating(CHILDREN, ANIMATION_TYPE_WINDOW_ANIMATION);
     }
 
     private boolean shouldFinishAnimatingExit() {
