@@ -30,7 +30,7 @@
     </target_preparer>
 
     <!-- Load additional APKs onto device -->
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
         <option name="push" value="AppEnumerationSyncProviderTestApp.apk->/data/local/tmp/appenumerationtests/AppEnumerationSyncProviderTestApp.apk" />
     </target_preparer>
 
