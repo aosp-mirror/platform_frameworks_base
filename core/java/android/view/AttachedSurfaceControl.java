@@ -145,5 +145,8 @@ public interface AttachedSurfaceControl {
      *
      * @hide
      */
-    SurfaceSyncGroup.SyncTarget getSyncTarget();
+    @Nullable
+    default SurfaceSyncGroup.SyncTarget getSyncTarget() {
+        return null;
+    }
 }
