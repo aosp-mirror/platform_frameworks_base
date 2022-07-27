@@ -5515,6 +5515,13 @@
     <bool name="config_cecQuerySadMaxDisabled_allowed">true</bool>
     <bool name="config_cecQuerySadMaxDisabled_default">false</bool>
 
+    <!-- eARC Configuration -->
+    <bool name="config_earcEnabled_userConfigurable">true</bool>
+    <bool name="config_earcFeatureEnabled_allowed">true</bool>
+    <bool name="config_earcFeatureEnabled_default">true</bool>
+    <bool name="config_earcFeatureDisabled_allowed">true</bool>
+    <bool name="config_earcFeatureDisabled_default">false</bool>
+
     <!-- Whether app hibernation deletes OAT artifact files as part of global hibernation. -->
     <bool name="config_hibernationDeletesOatArtifactsEnabled">true</bool>
 

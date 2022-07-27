@@ -4739,6 +4739,13 @@
   <java-symbol type="bool" name="config_cecQuerySadMaxDisabled_allowed" />
   <java-symbol type="bool" name="config_cecQuerySadMaxDisabled_default" />
 
+  <!-- eARC Configuration -->
+  <java-symbol type="bool" name="config_earcEnabled_userConfigurable" />
+  <java-symbol type="bool" name="config_earcFeatureEnabled_allowed" />
+  <java-symbol type="bool" name="config_earcFeatureEnabled_default" />
+  <java-symbol type="bool" name="config_earcFeatureDisabled_allowed" />
+  <java-symbol type="bool" name="config_earcFeatureDisabled_default" />
+
   <!-- Ids for RemoteViews -->
   <java-symbol type="id" name="remote_views_next_child" />
   <java-symbol type="id" name="remote_views_stable_id" />
