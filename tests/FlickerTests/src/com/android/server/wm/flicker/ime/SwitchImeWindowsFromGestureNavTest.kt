@@ -29,7 +29,6 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.ComponentMatcher
@@ -65,6 +64,9 @@ open class SwitchImeWindowsFromGestureNavTest(
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
+            test {
+                tapl.setExpectedRotationCheckEnabled(false)
+            }
             eachRun {
                 this.setRotation(testSpec.startRotation)
                 testApp.launchViaIntent(wmHelper)
@@ -82,7 +84,7 @@ open class SwitchImeWindowsFromGestureNavTest(
         }
         teardown {
             eachRun {
-                device.pressHome()
+                tapl.goHome()
                 wmHelper.StateSyncBuilder()
                     .withHomeActivityVisible()
                     .waitForAndVerify()
@@ -93,12 +95,7 @@ open class SwitchImeWindowsFromGestureNavTest(
         transitions {
             // [Step1]: Swipe right from imeTestApp to testApp task
             createTag(TAG_IME_VISIBLE)
-            val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
-            device.swipe(
-                0, displayBounds.bounds.height,
-                displayBounds.bounds.width, displayBounds.bounds.height, 50
-            )
-
+            tapl.launchedAppState.quickSwitchToPreviousApp()
             wmHelper.StateSyncBuilder()
                 .withFullScreenApp(testApp)
                 .waitForAndVerify()
@@ -106,11 +103,7 @@ open class SwitchImeWindowsFromGestureNavTest(
         }
         transitions {
             // [Step2]: Swipe left to back to imeTestApp task
-            val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
-            device.swipe(
-                displayBounds.bounds.width, displayBounds.bounds.height,
-                0, displayBounds.bounds.height, 50
-            )
+            tapl.launchedAppState.quickSwitchToPreviousAppSwipeLeft()
             wmHelper.StateSyncBuilder()
                 .withFullScreenApp(imeTestApp)
                 .waitForAndVerify()

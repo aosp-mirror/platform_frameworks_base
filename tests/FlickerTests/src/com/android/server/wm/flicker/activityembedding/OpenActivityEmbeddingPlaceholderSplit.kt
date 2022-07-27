@@ -49,6 +49,9 @@ class OpenActivityEmbeddingPlaceholderSplit(
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
+            test {
+                tapl.setExpectedRotationCheckEnabled(false)
+            }
             eachRun {
                 testApp.launchViaIntent(wmHelper)
             }
@@ -58,7 +61,7 @@ class OpenActivityEmbeddingPlaceholderSplit(
         }
         teardown {
             test {
-                device.pressHome()
+                tapl.goHome()
                 testApp.exit(wmHelper)
             }
         }

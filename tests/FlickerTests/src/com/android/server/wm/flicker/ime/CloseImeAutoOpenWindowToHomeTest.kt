@@ -57,6 +57,9 @@ class CloseImeAutoOpenWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTes
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
+            test {
+                tapl.setExpectedRotationCheckEnabled(false)
+            }
             eachRun {
                 testApp.launchViaIntent(wmHelper)
             }
@@ -67,7 +70,7 @@ class CloseImeAutoOpenWindowToHomeTest(testSpec: FlickerTestParameter) : BaseTes
             }
         }
         transitions {
-            device.pressHome()
+            tapl.goHome()
             wmHelper.StateSyncBuilder()
                 .withHomeActivityVisible()
                 .withImeGone()

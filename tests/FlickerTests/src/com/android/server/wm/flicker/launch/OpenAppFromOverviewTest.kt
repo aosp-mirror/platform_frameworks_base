@@ -68,11 +68,11 @@ open class OpenAppFromOverviewTest(
             super.transition(this)
             setup {
                 test {
+                    tapl.setExpectedRotationCheckEnabled(false)
                     testApp.launchViaIntent(wmHelper)
                 }
                 eachRun {
-                    // Can't use tapl.goHome() because of b/235841947
-                    device.pressHome()
+                    tapl.goHome()
                     wmHelper.StateSyncBuilder()
                         .withHomeActivityVisible()
                         .waitForAndVerify()
