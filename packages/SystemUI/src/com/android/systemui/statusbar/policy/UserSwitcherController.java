@@ -62,7 +62,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.LatencyTracker;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.users.UserCreatingDialog;
-import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.GuestResetOrExitSessionReceiver;
 import com.android.systemui.GuestResumeSessionReceiver;
@@ -939,15 +938,17 @@ public class UserSwitcherController implements Dumpable {
         guestCreationProgressDialog.show();
 
         // userManager.createGuest will block the thread so post is needed for the dialog to show
-        ThreadUtils.postOnMainThread(() -> {
+        mBgExecutor.execute(() -> {
             final int guestId = createGuest();
-            guestCreationProgressDialog.dismiss();
-            if (guestId == UserHandle.USER_NULL) {
-                Toast.makeText(mContext,
-                        com.android.settingslib.R.string.add_guest_failed,
-                        Toast.LENGTH_SHORT).show();
-            }
-            callback.accept(guestId);
+            mUiExecutor.execute(() -> {
+                guestCreationProgressDialog.dismiss();
+                if (guestId == UserHandle.USER_NULL) {
+                    Toast.makeText(mContext,
+                            com.android.settingslib.R.string.add_guest_failed,
+                            Toast.LENGTH_SHORT).show();
+                }
+                callback.accept(guestId);
+            });
         });
     }
 
