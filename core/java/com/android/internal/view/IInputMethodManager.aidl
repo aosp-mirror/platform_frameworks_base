@@ -45,9 +45,14 @@ interface IInputMethodManager {
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     List<InputMethodInfo> getEnabledInputMethodList(int userId);
 
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in @nullable String imiId,
-            boolean allowsImplicitlySelectedSubtypes);
-    @nullable InputMethodSubtype getLastInputMethodSubtype();
+            boolean allowsImplicitlySelectedSubtypes, int userId);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
+    InputMethodSubtype getLastInputMethodSubtype(int userId);
 
     boolean showSoftInput(in IInputMethodClient client, @nullable IBinder windowToken, int flags,
             in @nullable ResultReceiver resultReceiver, int reason);
@@ -104,8 +109,15 @@ interface IInputMethodManager {
     boolean isImeTraceEnabled();
 
     // Starts an ime trace.
+    @EnforcePermission("CONTROL_UI_TRACING")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.CONTROL_UI_TRACING)")
     void startImeTrace();
+
     // Stops an ime trace.
+    @EnforcePermission("CONTROL_UI_TRACING")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.CONTROL_UI_TRACING)")
     void stopImeTrace();
 
     /** Start Stylus handwriting session **/

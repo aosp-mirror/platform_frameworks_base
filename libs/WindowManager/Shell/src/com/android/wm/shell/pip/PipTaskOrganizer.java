@@ -62,6 +62,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -930,6 +931,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     /** Called when exiting PIP transition is finished to do the state cleanup. */
     void onExitPipFinished(TaskInfo info) {
+        if (mLeash == null) {
+            // TODO(239461594): Remove once the double call to onExitPipFinished() is fixed
+            Log.w(TAG, "Warning, onExitPipFinished() called multiple times in the same sessino");
+            return;
+        }
+
         clearWaitForFixedRotation();
         if (mSwipePipToHomeOverlay != null) {
             removeContentOverlay(mSwipePipToHomeOverlay, null /* callback */);

@@ -16,11 +16,8 @@
 
 package android.accounts;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -152,6 +149,7 @@ public abstract class AbstractAccountAuthenticator {
     }
 
     private class Transport extends IAccountAuthenticator.Stub {
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void addAccount(IAccountAuthenticatorResponse response, String accountType,
                 String authTokenType, String[] features, Bundle options)
@@ -161,7 +159,6 @@ public abstract class AbstractAccountAuthenticator {
                         + ", authTokenType " + authTokenType
                         + ", features " + (features == null ? "[]" : Arrays.toString(features)));
             }
-            checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.addAccount(
                     new AccountAuthenticatorResponse(response),
@@ -183,13 +180,13 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void confirmCredentials(IAccountAuthenticatorResponse response,
                 Account account, Bundle options) throws RemoteException {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "confirmCredentials: " + account);
             }
-            checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.confirmCredentials(
                     new AccountAuthenticatorResponse(response), account, options);
@@ -208,6 +205,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void getAuthTokenLabel(IAccountAuthenticatorResponse response,
                 String authTokenType)
@@ -215,7 +213,6 @@ public abstract class AbstractAccountAuthenticator {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "getAuthTokenLabel: authTokenType " + authTokenType);
             }
-            checkBinderPermission();
             try {
                 Bundle result = new Bundle();
                 result.putString(AccountManager.KEY_AUTH_TOKEN_LABEL,
@@ -233,6 +230,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void getAuthToken(IAccountAuthenticatorResponse response,
                 Account account, String authTokenType, Bundle loginOptions)
@@ -241,7 +239,6 @@ public abstract class AbstractAccountAuthenticator {
                 Log.v(TAG, "getAuthToken: " + account
                         + ", authTokenType " + authTokenType);
             }
-            checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.getAuthToken(
                         new AccountAuthenticatorResponse(response), account,
@@ -261,6 +258,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void updateCredentials(IAccountAuthenticatorResponse response, Account account,
                 String authTokenType, Bundle loginOptions) throws RemoteException {
@@ -268,7 +266,6 @@ public abstract class AbstractAccountAuthenticator {
                 Log.v(TAG, "updateCredentials: " + account
                         + ", authTokenType " + authTokenType);
             }
-            checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.updateCredentials(
                     new AccountAuthenticatorResponse(response), account,
@@ -369,6 +366,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void startAddAccountSession(IAccountAuthenticatorResponse response,
                 String accountType, String authTokenType, String[] features, Bundle options)
@@ -379,7 +377,6 @@ public abstract class AbstractAccountAuthenticator {
                         + ", authTokenType " + authTokenType
                         + ", features " + (features == null ? "[]" : Arrays.toString(features)));
             }
-            checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.startAddAccountSession(
                         new AccountAuthenticatorResponse(response), accountType, authTokenType,
@@ -399,6 +396,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void startUpdateCredentialsSession(
                 IAccountAuthenticatorResponse response,
@@ -411,7 +409,6 @@ public abstract class AbstractAccountAuthenticator {
                         + ", authTokenType "
                         + authTokenType);
             }
-            checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this
                         .startUpdateCredentialsSession(
@@ -438,6 +435,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCOUNT_MANAGER)
         @Override
         public void finishSession(
                 IAccountAuthenticatorResponse response,
@@ -446,7 +444,6 @@ public abstract class AbstractAccountAuthenticator {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "finishSession: accountType " + accountType);
             }
-            checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.finishSession(
                         new AccountAuthenticatorResponse(response), accountType, sessionBundle);
@@ -507,14 +504,6 @@ public abstract class AbstractAccountAuthenticator {
             Log.w(TAG, method + "(" + data + ")", e);
             response.onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
                     method + " failed");
-        }
-    }
-
-    private void checkBinderPermission() {
-        final int uid = Binder.getCallingUid();
-        final String perm = Manifest.permission.ACCOUNT_MANAGER;
-        if (mContext.checkCallingOrSelfPermission(perm) != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("caller uid " + uid + " lacks " + perm);
         }
     }
 

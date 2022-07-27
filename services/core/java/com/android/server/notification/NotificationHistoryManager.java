@@ -85,7 +85,6 @@ public class NotificationHistoryManager {
 
     void onBootPhaseAppsCanStart() {
         try {
-            Slog.d("julia", "trying to schedule job");
             NotificationHistoryJobService.scheduleJob(mContext);
         } catch (Throwable e) {
             Slog.e(TAG, "Failed to schedule cleanup job", e);

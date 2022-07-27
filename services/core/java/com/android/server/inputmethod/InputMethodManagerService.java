@@ -2202,21 +2202,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * @param imiId if null, returns enabled subtypes for the current {@link InputMethodInfo}.
      * @param allowsImplicitlySelectedSubtypes {@code true} to return the implicitly selected
      *                                         subtypes.
+     * @param userId the user ID to be queried about.
      */
     @Override
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
-            boolean allowsImplicitlySelectedSubtypes) {
-        final int callingUserId = UserHandle.getCallingUserId();
+            boolean allowsImplicitlySelectedSubtypes, @UserIdInt int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
+
         synchronized (ImfLock.class) {
-            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(callingUserId,
-                    mSettings.getCurrentUserId(), null);
-            if (resolvedUserIds.length != 1) {
-                return Collections.emptyList();
-            }
             final long ident = Binder.clearCallingIdentity();
             try {
                 return getEnabledInputMethodSubtypeListLocked(imiId,
-                        allowsImplicitlySelectedSubtypes, resolvedUserIds[0]);
+                        allowsImplicitlySelectedSubtypes, userId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -4161,12 +4160,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public InputMethodSubtype getLastInputMethodSubtype() {
+    public InputMethodSubtype getLastInputMethodSubtype(@UserIdInt int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
         synchronized (ImfLock.class) {
-            if (!calledFromValidUserLocked()) {
-                return null;
+            if (mSettings.getCurrentUserId() == userId) {
+                return mSettings.getLastInputMethodSubtypeLocked();
             }
-            return mSettings.getLastInputMethodSubtypeLocked();
+
+            final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
+            final InputMethodSettings settings = new InputMethodSettings(
+                    mContext.getResources(), mContext.getContentResolver(), methodMap,
+                    userId, false);
+            return settings.getLastInputMethodSubtypeLocked();
         }
     }
 
@@ -4549,6 +4556,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
+    @EnforcePermission(Manifest.permission.CONTROL_UI_TRACING)
     @Override
     public void startImeTrace() {
         ImeTracing.getInstance().startTrace(null /* printwriter */);
@@ -4564,6 +4572,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
+    @EnforcePermission(Manifest.permission.CONTROL_UI_TRACING)
     @Override
     public void stopImeTrace() {
         ImeTracing.getInstance().stopTrace(null /* printwriter */);

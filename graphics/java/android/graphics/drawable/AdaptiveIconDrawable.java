@@ -26,8 +26,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -39,8 +37,6 @@ import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.graphics.Shader;
-import android.graphics.Shader.TileMode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.PathParser;
@@ -106,7 +102,8 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     private static final float DEFAULT_VIEW_PORT_SCALE = 1f / (1 + 2 * EXTRA_INSET_PERCENTAGE);
 
     /**
-     * Clip path defined in R.string.config_icon_mask.
+     * Unused path.
+     * TODO: Remove once the layoutLib is updated
      */
     private static Path sMask;
 
@@ -114,9 +111,10 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      * Scaled mask based on the view bounds.
      */
     private final Path mMask;
-    private final Path mMaskScaleOnly;
+    private final Path mMaskTransformed;
     private final Matrix mMaskMatrix;
     private final Region mTransparentRegion;
+    private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     /**
      * Indices used to access {@link #mLayerState.mChildDrawable} array for foreground and
@@ -131,18 +129,9 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      */
     LayerState mLayerState;
 
-    private Shader mLayersShader;
-    private Bitmap mLayersBitmap;
-
     private final Rect mTmpOutRect = new Rect();
     private Rect mHotspotBounds;
     private boolean mMutated;
-
-    private boolean mSuspendChildInvalidation;
-    private boolean mChildRequestedInvalidation;
-    private final Canvas mCanvas;
-    private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG |
-        Paint.FILTER_BITMAP_FLAG);
 
     /**
      * Constructor used for xml inflation.
@@ -157,19 +146,16 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      */
     AdaptiveIconDrawable(@Nullable LayerState state, @Nullable Resources res) {
         mLayerState = createConstantState(state, res);
-        // config_icon_mask from context bound resource may have been chaged using
+        // config_icon_mask from context bound resource may have been changed using
         // OverlayManager. Read that one first.
         Resources r = ActivityThread.currentActivityThread() == null
                 ? Resources.getSystem()
                 : ActivityThread.currentActivityThread().getApplication().getResources();
-        // TODO: either make sMask update only when config_icon_mask changes OR
-        // get rid of it all-together in layoutlib
-        sMask = PathParser.createPathFromPathData(r.getString(R.string.config_icon_mask));
-        mMask = new Path(sMask);
-        mMaskScaleOnly = new Path(mMask);
+        mMask = PathParser.createPathFromPathData(r.getString(R.string.config_icon_mask));
+        mMaskTransformed = new Path();
         mMaskMatrix = new Matrix();
-        mCanvas = new Canvas();
         mTransparentRegion = new Region();
+        mPaint.setColor(Color.BLACK);
     }
 
     private ChildDrawable createChildDrawable(Drawable drawable) {
@@ -280,7 +266,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      * @return the mask path object used to clip the drawable
      */
     public Path getIconMask() {
-        return mMask;
+        return mMaskTransformed;
     }
 
     /**
@@ -322,92 +308,47 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         if (bounds.isEmpty()) {
             return;
         }
-        updateLayerBounds(bounds);
-    }
-
-    private void updateLayerBounds(Rect bounds) {
-        if (bounds.isEmpty()) {
-            return;
-        }
-        try {
-            suspendChildInvalidation();
-            updateLayerBoundsInternal(bounds);
-            updateMaskBoundsInternal(bounds);
-        } finally {
-            resumeChildInvalidation();
-        }
-    }
-
-    /**
-     * Set the child layer bounds bigger than the view port size by {@link #DEFAULT_VIEW_PORT_SCALE}
-     */
-    private void updateLayerBoundsInternal(Rect bounds) {
-        int cX = bounds.width() / 2;
-        int cY = bounds.height() / 2;
+        // Set the child layer bounds bigger than the view port size
+        // by {@link #DEFAULT_VIEW_PORT_SCALE}
+        float cX = bounds.exactCenterX();
+        float cY = bounds.exactCenterY();
+        float insetWidth = bounds.width() / (DEFAULT_VIEW_PORT_SCALE * 2);
+        float insetHeight = bounds.height() / (DEFAULT_VIEW_PORT_SCALE * 2);
+        final Rect outRect = mTmpOutRect;
+        outRect.set(
+                (int) (cX - insetWidth),
+                (int) (cY - insetHeight),
+                (int) (cX + insetWidth),
+                (int) (cY + insetHeight));
 
         for (int i = 0, count = mLayerState.N_CHILDREN; i < count; i++) {
             final ChildDrawable r = mLayerState.mChildren[i];
-            final Drawable d = r.mDrawable;
-            if (d == null) {
-                continue;
+            if (r.mDrawable != null) {
+                r.mDrawable.setBounds(outRect);
             }
-
-            int insetWidth = (int) (bounds.width() / (DEFAULT_VIEW_PORT_SCALE * 2));
-            int insetHeight = (int) (bounds.height() / (DEFAULT_VIEW_PORT_SCALE * 2));
-            final Rect outRect = mTmpOutRect;
-            outRect.set(cX - insetWidth, cY - insetHeight, cX + insetWidth, cY + insetHeight);
-
-            d.setBounds(outRect);
-        }
-    }
-
-    private void updateMaskBoundsInternal(Rect b) {
-        // reset everything that depends on the view bounds
-        mMaskMatrix.setScale(b.width() / MASK_SIZE, b.height() / MASK_SIZE);
-        sMask.transform(mMaskMatrix, mMaskScaleOnly);
-
-        mMaskMatrix.postTranslate(b.left, b.top);
-        sMask.transform(mMaskMatrix, mMask);
-
-        if (mLayersBitmap == null || mLayersBitmap.getWidth() != b.width()
-                || mLayersBitmap.getHeight() != b.height()) {
-            mLayersBitmap = Bitmap.createBitmap(b.width(), b.height(), Bitmap.Config.ARGB_8888);
         }
 
-        mPaint.setShader(null);
+        // Update the clipping mask
+        mMaskMatrix.setScale(bounds.width() / MASK_SIZE, bounds.height() / MASK_SIZE);
+        mMaskMatrix.postTranslate(bounds.left, bounds.top);
+        mMask.transform(mMaskMatrix, mMaskTransformed);
+
+        // Clear the transparent region, it is calculated lazily
         mTransparentRegion.setEmpty();
-        mLayersShader = null;
     }
 
     @Override
     public void draw(Canvas canvas) {
-        if (mLayersBitmap == null) {
-            return;
+        int saveCount = canvas.save();
+        canvas.clipPath(mMaskTransformed);
+        canvas.drawPaint(mPaint);
+        if (mLayerState.mChildren[BACKGROUND_ID].mDrawable != null) {
+            mLayerState.mChildren[BACKGROUND_ID].mDrawable.draw(canvas);
         }
-        if (mLayersShader == null) {
-            mCanvas.setBitmap(mLayersBitmap);
-            mCanvas.drawColor(Color.BLACK);
-            if (mLayerState.mChildren[BACKGROUND_ID].mDrawable != null) {
-                mLayerState.mChildren[BACKGROUND_ID].mDrawable.draw(mCanvas);
-            }
-            if (mLayerState.mChildren[FOREGROUND_ID].mDrawable != null) {
-                mLayerState.mChildren[FOREGROUND_ID].mDrawable.draw(mCanvas);
-            }
-            mLayersShader = new BitmapShader(mLayersBitmap, TileMode.CLAMP, TileMode.CLAMP);
-            mPaint.setShader(mLayersShader);
+        if (mLayerState.mChildren[FOREGROUND_ID].mDrawable != null) {
+            mLayerState.mChildren[FOREGROUND_ID].mDrawable.draw(canvas);
         }
-        if (mMaskScaleOnly != null) {
-            Rect bounds = getBounds();
-            canvas.translate(bounds.left, bounds.top);
-            canvas.drawPath(mMaskScaleOnly, mPaint);
-            canvas.translate(-bounds.left, -bounds.top);
-        }
-    }
-
-    @Override
-    public void invalidateSelf() {
-        mLayersShader = null;
-        super.invalidateSelf();
+        canvas.restoreToCount(saveCount);
     }
 
     @Override
@@ -600,37 +541,9 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         return false;
     }
 
-    /**
-     * Temporarily suspends child invalidation.
-     *
-     * @see #resumeChildInvalidation()
-     */
-    private void suspendChildInvalidation() {
-        mSuspendChildInvalidation = true;
-    }
-
-    /**
-     * Resumes child invalidation after suspension, immediately performing an
-     * invalidation if one was requested by a child during suspension.
-     *
-     * @see #suspendChildInvalidation()
-     */
-    private void resumeChildInvalidation() {
-        mSuspendChildInvalidation = false;
-
-        if (mChildRequestedInvalidation) {
-            mChildRequestedInvalidation = false;
-            invalidateSelf();
-        }
-    }
-
     @Override
     public void invalidateDrawable(@NonNull Drawable who) {
-        if (mSuspendChildInvalidation) {
-            mChildRequestedInvalidation = true;
-        } else {
-            invalidateSelf();
-        }
+        invalidateSelf();
     }
 
     @Override
@@ -714,6 +627,13 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     @Override
     public void setAlpha(int alpha) {
         mPaint.setAlpha(alpha);
+        final ChildDrawable[] array = mLayerState.mChildren;
+        for (int i = 0; i < mLayerState.N_CHILDREN; i++) {
+            final Drawable dr = array[i].mDrawable;
+            if (dr != null) {
+                dr.setAlpha(alpha);
+            }
+        }
     }
 
     @Override
@@ -816,10 +736,6 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
             }
         }
 
-        if (changed) {
-            updateLayerBounds(getBounds());
-        }
-
         return changed;
     }
 
@@ -833,10 +749,6 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
             if (dr != null && dr.setLevel(level)) {
                 changed = true;
             }
-        }
-
-        if (changed) {
-            updateLayerBounds(getBounds());
         }
 
         return changed;
@@ -979,6 +891,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
         int mDensity;
 
         // The density to use when inflating/looking up the children drawables. A value of 0 means
+
         // use the system's density.
         int mSrcDensityOverride = 0;
 

@@ -16,8 +16,10 @@
 
 package com.android.systemui.people.ui.viewmodel
 
+import android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID
 import android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -32,6 +34,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Models UI state for the people space, allowing the user to select which conversation should be
@@ -49,7 +52,7 @@ class PeopleViewModel(
      * reactive and you have to manually call [onTileRefreshRequested] to refresh the tiles.
      */
     private val _priorityTiles = MutableStateFlow(priorityTiles())
-    val priorityTiles: Flow<List<PeopleTileViewModel>> = _priorityTiles
+    val priorityTiles: Flow<List<PeopleTileViewModel>> = _priorityTiles.asStateFlow()
 
     /**
      * The list of the priority tiles/conversations.
@@ -58,15 +61,15 @@ class PeopleViewModel(
      * reactive and you have to manually call [onTileRefreshRequested] to refresh the tiles.
      */
     private val _recentTiles = MutableStateFlow(recentTiles())
-    val recentTiles: Flow<List<PeopleTileViewModel>> = _recentTiles
+    val recentTiles: Flow<List<PeopleTileViewModel>> = _recentTiles.asStateFlow()
 
     /** The ID of the widget currently being edited/added. */
     private val _appWidgetId = MutableStateFlow(INVALID_APPWIDGET_ID)
-    val appWidgetId: StateFlow<Int> = _appWidgetId
+    val appWidgetId: StateFlow<Int> = _appWidgetId.asStateFlow()
 
-    /** Whether the user journey is complete. */
-    private val _isFinished = MutableStateFlow(false)
-    val isFinished: StateFlow<Boolean> = _isFinished
+    /** The result of this user journey. */
+    private val _result = MutableStateFlow<Result?>(null)
+    val result: StateFlow<Result?> = _result.asStateFlow()
 
     /** Refresh the [priorityTiles] and [recentTiles]. */
     fun onTileRefreshRequested() {
@@ -79,22 +82,28 @@ class PeopleViewModel(
         _appWidgetId.value = widgetId
     }
 
-    /** Clear [isFinished], setting it to false. */
-    fun clearIsFinished() {
-        _isFinished.value = false
+    /** Clear [result], setting it to null. */
+    fun clearResult() {
+        _result.value = null
     }
 
     /** Called when a tile is clicked. */
     fun onTileClicked(tile: PeopleTileViewModel) {
+        val widgetId = _appWidgetId.value
         if (PeopleSpaceUtils.DEBUG) {
             Log.d(
                 TAG,
-                "Put ${tile.username}'s shortcut ID: ${tile.key.shortcutId} for widget ID: " +
-                    _appWidgetId.value
+                "Put ${tile.username}'s shortcut ID: ${tile.key.shortcutId} for widget ID $widgetId"
             )
         }
-        widgetRepository.setWidgetTile(_appWidgetId.value, tile.key)
-        _isFinished.value = true
+        widgetRepository.setWidgetTile(widgetId, tile.key)
+        _result.value =
+            Result.Success(Intent().apply { putExtra(EXTRA_APPWIDGET_ID, appWidgetId.value) })
+    }
+
+    /** Called when this user journey is cancelled. */
+    fun onUserJourneyCancelled() {
+        _result.value = Result.Cancelled
     }
 
     private fun priorityTiles(): List<PeopleTileViewModel> {
@@ -143,7 +152,12 @@ class PeopleViewModel(
         }
     }
 
+    sealed class Result {
+        class Success(val data: Intent) : Result()
+        object Cancelled : Result()
+    }
+
     companion object {
-        private const val TAG = "PeopleSpaceViewModel"
+        private const val TAG = "PeopleViewModel"
     }
 }

@@ -19,6 +19,7 @@ package android.view.inputmethod;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -58,6 +59,28 @@ import org.junit.runner.RunWith;
 public class EditorInfoTest {
     private static final int TEST_USER_ID = 42;
     private static final int LONG_EXP_TEXT_LENGTH = EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH * 2;
+
+    private static final EditorInfo TEST_EDITOR_INFO = new EditorInfo();
+
+    static {
+        TEST_EDITOR_INFO.inputType = InputType.TYPE_CLASS_TEXT; // 0x1
+        TEST_EDITOR_INFO.imeOptions = EditorInfo.IME_ACTION_GO; // 0x2
+        TEST_EDITOR_INFO.privateImeOptions = "testOptions";
+        TEST_EDITOR_INFO.initialSelStart = 0;
+        TEST_EDITOR_INFO.initialSelEnd = 1;
+        TEST_EDITOR_INFO.initialCapsMode = TextUtils.CAP_MODE_CHARACTERS; // 0x1000
+        TEST_EDITOR_INFO.hintText = "testHintText";
+        TEST_EDITOR_INFO.label = "testLabel";
+        TEST_EDITOR_INFO.packageName = "android.view.inputmethod";
+        TEST_EDITOR_INFO.fieldId = 0;
+        TEST_EDITOR_INFO.autofillId = AutofillId.NO_AUTOFILL_ID;
+        TEST_EDITOR_INFO.fieldName = "testField";
+        TEST_EDITOR_INFO.extras = new Bundle();
+        TEST_EDITOR_INFO.extras.putString("testKey", "testValue");
+        TEST_EDITOR_INFO.hintLocales = LocaleList.forLanguageTags("en,de,ua");
+        TEST_EDITOR_INFO.contentMimeTypes = new String[] {"image/png"};
+        TEST_EDITOR_INFO.targetInputMethodUser = UserHandle.of(TEST_USER_ID);
+    }
 
     /**
      * Makes sure that {@code null} {@link EditorInfo#targetInputMethodUser} can be copied via
@@ -525,5 +548,48 @@ public class EditorInfoTest {
                         + "prefix: packageName=null autofillId=null fieldId=0 fieldName=null\n"
                         + "prefix: hintLocales=null\n"
                         + "prefix: contentMimeTypes=null\n");
+    }
+
+    @Test
+    public void testKindofEqualsAfterCopyInternal() {
+        final EditorInfo infoCopy = TEST_EDITOR_INFO.createCopyInternal();
+        assertTrue(TEST_EDITOR_INFO.kindofEquals(infoCopy));
+    }
+
+    @Test
+    public void testKindofEqualsAfterCloneViaParcel() {
+        // This test demonstrates a false negative case when an EditorInfo is
+        // created from a Parcel and its extras are still parcelled, which in turn
+        // runs into the edge case in Bundle.kindofEquals
+        final EditorInfo infoCopy = cloneViaParcel(TEST_EDITOR_INFO);
+        assertFalse(TEST_EDITOR_INFO.kindofEquals(infoCopy));
+    }
+
+    @Test
+    public void testKindofEqualsComparesAutofillId() {
+        final EditorInfo infoCopy = TEST_EDITOR_INFO.createCopyInternal();
+        infoCopy.autofillId = new AutofillId(42);
+        assertFalse(TEST_EDITOR_INFO.kindofEquals(infoCopy));
+    }
+
+    @Test
+    public void testKindofEqualsComparesFieldId() {
+        final EditorInfo infoCopy = TEST_EDITOR_INFO.createCopyInternal();
+        infoCopy.fieldId = 42;
+        assertFalse(TEST_EDITOR_INFO.kindofEquals(infoCopy));
+    }
+
+    @Test
+    public void testKindofEqualsComparesMimeTypes() {
+        final EditorInfo infoCopy = TEST_EDITOR_INFO.createCopyInternal();
+        infoCopy.contentMimeTypes = new String[] {"image/png", "image/gif"};
+        assertFalse(TEST_EDITOR_INFO.kindofEquals(infoCopy));
+    }
+
+    @Test
+    public void testKindofEqualsComparesExtras() {
+        final EditorInfo infoCopy = TEST_EDITOR_INFO.createCopyInternal();
+        infoCopy.extras.putString("testKey2", "testValue");
+        assertFalse(TEST_EDITOR_INFO.kindofEquals(infoCopy));
     }
 }

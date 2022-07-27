@@ -47,7 +47,7 @@ import android.util.Log;
 import android.view.SurfaceControl.Transaction;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
-import android.window.SurfaceSyncer;
+import android.window.SurfaceSyncGroup;
 
 import com.android.internal.view.SurfaceCallbackHelper;
 
@@ -210,8 +210,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private int mSurfaceFlags = SurfaceControl.HIDDEN;
 
-    private final SurfaceSyncer mSurfaceSyncer = new SurfaceSyncer();
-    private final ArraySet<Integer> mSyncIds = new ArraySet<>();
+    private final ArraySet<SurfaceSyncGroup> mSyncGroups = new ArraySet<>();
 
     /**
      * Transaction that should be used from the render thread. This transaction is only thread safe
@@ -1077,20 +1076,21 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private void handleSyncNoBuffer(SurfaceHolder.Callback[] callbacks) {
-        final int syncId = mSurfaceSyncer.setupSync(this::onDrawFinished);
+        final SurfaceSyncGroup syncGroup = new SurfaceSyncGroup();
+        synchronized (mSyncGroups) {
+            mSyncGroups.add(syncGroup);
+        }
 
-        mSurfaceSyncer.addToSync(syncId, syncBufferCallback -> redrawNeededAsync(callbacks,
+        syncGroup.addToSync(syncBufferCallback -> redrawNeededAsync(callbacks,
                 () -> {
                     syncBufferCallback.onBufferReady(null);
-                    synchronized (mSyncIds) {
-                        mSyncIds.remove(syncId);
+                    onDrawFinished();
+                    synchronized (mSyncGroups) {
+                        mSyncGroups.remove(syncGroup);
                     }
                 }));
 
-        mSurfaceSyncer.markSyncReady(syncId);
-        synchronized (mSyncIds) {
-            mSyncIds.add(syncId);
-        }
+        syncGroup.markSyncReady();
     }
 
     private void redrawNeededAsync(SurfaceHolder.Callback[] callbacks,
@@ -1106,9 +1106,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     public void surfaceSyncStarted() {
         ViewRootImpl viewRoot = getViewRootImpl();
         if (viewRoot != null) {
-            synchronized (mSyncIds) {
-                for (int syncId : mSyncIds) {
-                    viewRoot.mergeSync(syncId, mSurfaceSyncer);
+            synchronized (mSyncGroups) {
+                for (SurfaceSyncGroup syncGroup : mSyncGroups) {
+                    viewRoot.mergeSync(syncGroup);
                 }
             }
         }

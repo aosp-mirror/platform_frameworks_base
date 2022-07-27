@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package android.view;
+package com.android.systemui.statusbar.pipeline
 
-import android.content.ComponentName;
-import android.inputmethodservice.InputMethodService;
+import com.android.systemui.dagger.SysUISingleton
+import javax.inject.Inject
 
-public class HandwritingImeService extends InputMethodService {
-    private static final String PACKAGE_NAME = "com.android.perftests.core";
-
-    private static ComponentName getComponentName() {
-        return new ComponentName(PACKAGE_NAME, HandwritingImeService.class.getName());
-    }
-
-    static String getImeId() {
-        return getComponentName().flattenToShortString();
-    }
-}
+/**
+ * A processor that transforms raw connectivity information that we get from callbacks and turns it
+ * into a list of displayable connectivity information.
+ *
+ * This will be used for the new status bar pipeline to calculate the list of icons that should be
+ * displayed in the RHS of the status bar.
+ */
+@SysUISingleton
+class ConnectivityInfoProcessor @Inject constructor()

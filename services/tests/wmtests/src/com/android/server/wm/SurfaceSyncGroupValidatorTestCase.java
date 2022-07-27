@@ -31,18 +31,18 @@ import android.view.ViewGroup;
 import android.view.cts.surfacevalidator.ISurfaceValidatorTestCase;
 import android.view.cts.surfacevalidator.PixelChecker;
 import android.widget.FrameLayout;
-import android.window.SurfaceSyncer;
+import android.window.SurfaceSyncGroup;
 
 import androidx.annotation.NonNull;
 
 /**
  * A validator class that will create a SurfaceView and then update its size over and over. The code
  * will request to sync the SurfaceView content with the main window and validate that there was
- * never an empty area (black color). The test uses {@link SurfaceSyncer} class to gather the
+ * never an empty area (black color). The test uses {@link SurfaceSyncGroup} class to gather the
  * content it wants to synchronize.
  */
-public class SurfaceSyncerValidatorTestCase implements ISurfaceValidatorTestCase {
-    private static final String TAG = "SurfaceSyncerValidatorTestCase";
+public class SurfaceSyncGroupValidatorTestCase implements ISurfaceValidatorTestCase {
+    private static final String TAG = "SurfaceSyncGroupValidatorTestCase";
 
     private final Runnable mRunnable = new Runnable() {
         @Override
@@ -55,12 +55,11 @@ public class SurfaceSyncerValidatorTestCase implements ISurfaceValidatorTestCase
     private Handler mHandler;
     private SurfaceView mSurfaceView;
     private boolean mLastExpanded = true;
-    private final SurfaceSyncer mSurfaceSyncer = new SurfaceSyncer();
 
     private RenderingThread mRenderingThread;
     private FrameLayout mParent;
 
-    private int mLastSyncId = -1;
+    private SurfaceSyncGroup mSyncGroup;
 
     final SurfaceHolder.Callback mCallback = new SurfaceHolder.Callback() {
         @Override
@@ -76,11 +75,11 @@ public class SurfaceSyncerValidatorTestCase implements ISurfaceValidatorTestCase
         @Override
         public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width,
                 int height) {
-            if (mLastSyncId >= 0) {
-                mSurfaceSyncer.addToSync(mLastSyncId, mSurfaceView, frameCallback ->
+            if (mSyncGroup != null) {
+                mSyncGroup.addToSync(mSurfaceView, frameCallback ->
                         mRenderingThread.setFrameCallback(frameCallback));
-                mSurfaceSyncer.markSyncReady(mLastSyncId);
-                mLastSyncId = -1;
+                mSyncGroup.markSyncReady();
+                mSyncGroup = null;
             }
         }
 
@@ -118,7 +117,7 @@ public class SurfaceSyncerValidatorTestCase implements ISurfaceValidatorTestCase
     }
 
     public void updateSurfaceViewSize() {
-        if (mRenderingThread == null || mLastSyncId >= 0 || !mRenderingThread.isReadyToSync()) {
+        if (mRenderingThread == null || mSyncGroup != null || !mRenderingThread.isReadyToSync()) {
             return;
         }
 
@@ -133,8 +132,8 @@ public class SurfaceSyncerValidatorTestCase implements ISurfaceValidatorTestCase
         mLastExpanded = !mLastExpanded;
 
         mRenderingThread.pauseRendering();
-        mLastSyncId = mSurfaceSyncer.setupSync(() -> { });
-        mSurfaceSyncer.addToSync(mLastSyncId, mParent);
+        mSyncGroup = new SurfaceSyncGroup();
+        mSyncGroup.addToSync(mParent.getRootSurfaceControl());
 
         ViewGroup.LayoutParams svParams = mSurfaceView.getLayoutParams();
         svParams.height = height;
@@ -143,7 +142,7 @@ public class SurfaceSyncerValidatorTestCase implements ISurfaceValidatorTestCase
 
     private static class RenderingThread extends HandlerThread {
         private final SurfaceHolder mSurfaceHolder;
-        private SurfaceSyncer.SurfaceViewFrameCallback mFrameCallback;
+        private SurfaceSyncGroup.SurfaceViewFrameCallback mFrameCallback;
         private boolean mPauseRendering;
         private boolean mComplete;
 
@@ -202,7 +201,7 @@ public class SurfaceSyncerValidatorTestCase implements ISurfaceValidatorTestCase
                 return mFrameCallback == null;
             }
         }
-        public void setFrameCallback(SurfaceSyncer.SurfaceViewFrameCallback frameCallback) {
+        public void setFrameCallback(SurfaceSyncGroup.SurfaceViewFrameCallback frameCallback) {
             synchronized (this) {
                 mFrameCallback = frameCallback;
                 mPauseRendering = false;
