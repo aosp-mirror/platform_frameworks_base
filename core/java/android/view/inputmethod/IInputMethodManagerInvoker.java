@@ -139,11 +139,13 @@ final class IInputMethodManagerInvoker {
             @WindowManager.LayoutParams.Flags int windowFlags, @Nullable EditorInfo editorInfo,
             @Nullable IRemoteInputConnection remoteInputConnection,
             @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
-            int unverifiedTargetSdkVersion, @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
+            int unverifiedTargetSdkVersion, @UserIdInt int userId,
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         try {
             return mTarget.startInputOrWindowGainedFocus(startInputReason, client, windowToken,
                     startInputFlags, softInputMode, windowFlags, editorInfo, remoteInputConnection,
-                    remoteAccessibilityInputConnection, unverifiedTargetSdkVersion, imeDispatcher);
+                    remoteAccessibilityInputConnection, unverifiedTargetSdkVersion, userId,
+                    imeDispatcher);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

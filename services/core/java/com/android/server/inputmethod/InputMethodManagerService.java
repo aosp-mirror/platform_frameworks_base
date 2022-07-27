@@ -3574,8 +3574,18 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             int windowFlags, @Nullable EditorInfo editorInfo,
             IRemoteInputConnection inputConnection,
             IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
-            int unverifiedTargetSdkVersion,
+            int unverifiedTargetSdkVersion, @UserIdInt int userId,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+
+            if (editorInfo == null || editorInfo.targetInputMethodUser == null
+                    || editorInfo.targetInputMethodUser.getIdentifier() != userId) {
+                throw new InvalidParameterException("EditorInfo#targetInputMethodUser must also be "
+                        + "specified for cross-user startInputOrWindowGainedFocus()");
+            }
+        }
+
         if (windowToken == null) {
             Slog.e(TAG, "windowToken cannot be null.");
             return InputBindResult.NULL;
@@ -3585,26 +3595,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     "IMMS.startInputOrWindowGainedFocus");
             ImeTracing.getInstance().triggerManagerServiceDump(
                     "InputMethodManagerService#startInputOrWindowGainedFocus");
-            final int callingUserId = UserHandle.getCallingUserId();
-            final int userId;
-            if (editorInfo != null && editorInfo.targetInputMethodUser != null
-                    && editorInfo.targetInputMethodUser.getIdentifier() != callingUserId) {
-                mContext.enforceCallingPermission(
-                        Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                        "Using EditorInfo.targetInputMethodUser requires"
-                                + " INTERACT_ACROSS_USERS_FULL.");
-                userId = editorInfo.targetInputMethodUser.getIdentifier();
-                if (!mUserManagerInternal.isUserRunning(userId)) {
-                    // There is a chance that we hit here because of race condition. Let's just
-                    // return an error code instead of crashing the caller process, which at
-                    // least has INTERACT_ACROSS_USERS_FULL permission thus is likely to be an
-                    // important process.
-                    Slog.e(TAG, "User #" + userId + " is not running.");
-                    return InputBindResult.INVALID_USER;
-                }
-            } else {
-                userId = callingUserId;
-            }
             final InputBindResult result;
             synchronized (ImfLock.class) {
                 final long ident = Binder.clearCallingIdentity();
@@ -3653,7 +3643,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + " softInputMode=" + InputMethodDebug.softInputModeToString(softInputMode)
                     + " windowFlags=#" + Integer.toHexString(windowFlags)
                     + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion
+                    + " userId=" + userId
                     + " imeDispatcher=" + imeDispatcher);
+        }
+
+        if (!mUserManagerInternal.isUserRunning(userId)) {
+            // There is a chance that we hit here because of race condition. Let's just
+            // return an error code instead of crashing the caller process, which at
+            // least has INTERACT_ACROSS_USERS_FULL permission thus is likely to be an
+            // important process.
+            Slog.w(TAG, "User #" + userId + " is not running.");
+            return InputBindResult.INVALID_USER;
         }
 
         final ClientState cs = mClients.get(client.asBinder());
