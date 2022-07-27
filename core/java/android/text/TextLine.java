@@ -553,16 +553,11 @@ public class TextLine {
     @VisibleForTesting
     public float[] measureAllOffsets(boolean[] trailing, FontMetricsInt fmi) {
         float[] measurement = new float[mLen + 1];
-
-        int[] target = new int[mLen + 1];
-        for (int offset = 0; offset < target.length; ++offset) {
-            target[offset] = trailing[offset] ? offset - 1 : offset;
-        }
-        if (target[0] < 0) {
+        if (trailing[0]) {
             measurement[0] = 0;
         }
 
-        float h = 0;
+        float horizontal = 0;
         for (int runIndex = 0; runIndex < mDirections.getRunCount(); runIndex++) {
             final int runStart = mDirections.getRunStart(runIndex);
             if (runStart > mLen) break;
@@ -572,27 +567,48 @@ public class TextLine {
             int segStart = runStart;
             for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; ++j) {
                 if (j == runLimit || charAt(j) == TAB_CHAR) {
-                    final  float oldh = h;
-                    final boolean advance = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
-                    final float w = measureRun(segStart, j, j, runIsRtl, fmi, null, 0);
-                    h += advance ? w : -w;
+                    final float oldHorizontal = horizontal;
+                    final boolean sameDirection =
+                            (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
 
-                    final float baseh = advance ? oldh : h;
-                    FontMetricsInt crtfmi = advance ? fmi : null;
-                    for (int offset = segStart; offset <= j && offset <= mLen; ++offset) {
-                        if (target[offset] >= segStart && target[offset] < j) {
-                            measurement[offset] = baseh
-                                    + measureRun(segStart, offset, j, runIsRtl, crtfmi, null, 0);
+                    // We are using measurement to receive character advance here. So that it
+                    // doesn't need to allocate a new array.
+                    // But be aware that when trailing[segStart] is true, measurement[segStart]
+                    // will be computed in the previous run. And we need to store it first in case
+                    // measureRun overwrites the result.
+                    final float previousSegEndHorizontal = measurement[segStart];
+                    final float width =
+                            measureRun(segStart, j, j, runIsRtl, fmi, measurement, segStart);
+                    horizontal += sameDirection ? width : -width;
+
+                    float currHorizontal = sameDirection ? oldHorizontal : horizontal;
+                    final int segLimit = Math.min(j, mLen);
+
+                    for (int offset = segStart; offset <= segLimit; ++offset) {
+                        float advance = 0f;
+                        // When offset == segLimit, advance is meaningless.
+                        if (offset < segLimit) {
+                            advance = runIsRtl ? -measurement[offset] : measurement[offset];
                         }
+
+                        if (offset == segStart && trailing[offset]) {
+                            // If offset == segStart and trailing[segStart] is true, restore the
+                            // value of measurement[segStart] from the previous run.
+                            measurement[offset] = previousSegEndHorizontal;
+                        } else if (offset != segLimit || trailing[offset]) {
+                            measurement[offset] = currHorizontal;
+                        }
+
+                        currHorizontal += advance;
                     }
 
                     if (j != runLimit) {  // charAt(j) == TAB_CHAR
-                        if (target[j] == j) {
-                            measurement[j] = h;
+                        if (!trailing[j]) {
+                            measurement[j] = horizontal;
                         }
-                        h = mDir * nextTab(h * mDir);
-                        if (target[j + 1] == j) {
-                            measurement[j + 1] =  h;
+                        horizontal = mDir * nextTab(horizontal * mDir);
+                        if (trailing[j + 1]) {
+                            measurement[j + 1] = horizontal;
                         }
                     }
 
@@ -600,10 +616,9 @@ public class TextLine {
                 }
             }
         }
-        if (target[mLen] == mLen) {
-            measurement[mLen] = h;
+        if (!trailing[mLen]) {
+            measurement[mLen] = horizontal;
         }
-
         return measurement;
     }
 
