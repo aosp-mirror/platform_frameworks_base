@@ -34,7 +34,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 
@@ -52,7 +51,6 @@ import org.mockito.MockitoAnnotations;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 @RunWith(AndroidJUnit4.class)
@@ -75,7 +73,6 @@ public class AvatarPhotoControllerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mMockAvatarUi.getPhotoSize()).thenReturn(PHOTO_SIZE);
-        when(mMockAvatarUi.startSystemActivityForResult(any(), anyInt())).thenReturn(true);
 
         mImagesDir = new File(
                 InstrumentationRegistry.getTargetContext().getCacheDir(), "multi_user");
@@ -113,7 +110,9 @@ public class AvatarPhotoControllerTest {
     }
 
     @Test
-    public void takePhotoIsFollowedByCrop() throws IOException {
+    public void takePhotoIsFollowedByCropWhenSupported() throws IOException {
+        when(mMockAvatarUi.canCropPhoto()).thenReturn(true);
+
         new File(mImagesDir, "file.txt").createNewFile();
 
         Intent intent = new Intent();
@@ -122,12 +121,14 @@ public class AvatarPhotoControllerTest {
         mController.onActivityResult(
                 REQUEST_CODE_TAKE_PHOTO, Activity.RESULT_OK, intent);
 
-        verifyStartSystemActivityForResult(
+        verifyStartActivityForResult(
                 "com.android.camera.action.CROP", REQUEST_CODE_CROP_PHOTO);
     }
 
     @Test
     public void takePhotoIsNotFollowedByCropWhenResultCodeNotOk() throws IOException {
+        when(mMockAvatarUi.canCropPhoto()).thenReturn(true);
+
         new File(mImagesDir, "file.txt").createNewFile();
 
         Intent intent = new Intent();
@@ -137,11 +138,12 @@ public class AvatarPhotoControllerTest {
                 REQUEST_CODE_TAKE_PHOTO, Activity.RESULT_CANCELED, intent);
 
         verify(mMockAvatarUi, never()).startActivityForResult(any(), anyInt());
-        verify(mMockAvatarUi, never()).startSystemActivityForResult(any(), anyInt());
     }
 
     @Test
     public void takePhotoIsFollowedByCropWhenTakePhotoUriReturned() throws IOException {
+        when(mMockAvatarUi.canCropPhoto()).thenReturn(true);
+
         new File(mImagesDir, "TakeEditUserPhoto.jpg").createNewFile();
 
         Intent intent = new Intent();
@@ -149,12 +151,14 @@ public class AvatarPhotoControllerTest {
         mController.onActivityResult(
                 REQUEST_CODE_TAKE_PHOTO, Activity.RESULT_OK, intent);
 
-        verifyStartSystemActivityForResult(
+        verifyStartActivityForResult(
                 "com.android.camera.action.CROP", REQUEST_CODE_CROP_PHOTO);
     }
 
     @Test
     public void choosePhotoIsFollowedByCrop() throws IOException {
+        when(mMockAvatarUi.canCropPhoto()).thenReturn(true);
+
         new File(mImagesDir, "file.txt").createNewFile();
 
         Intent intent = new Intent();
@@ -163,12 +167,14 @@ public class AvatarPhotoControllerTest {
         mController.onActivityResult(
                 REQUEST_CODE_CHOOSE_PHOTO, Activity.RESULT_OK, intent);
 
-        verifyStartSystemActivityForResult(
+        verifyStartActivityForResult(
                 "com.android.camera.action.CROP", REQUEST_CODE_CROP_PHOTO);
     }
 
     @Test
     public void choosePhotoIsNotFollowedByCropWhenResultCodeNotOk() throws IOException {
+        when(mMockAvatarUi.canCropPhoto()).thenReturn(true);
+
         new File(mImagesDir, "file.txt").createNewFile();
 
         Intent intent = new Intent();
@@ -178,11 +184,12 @@ public class AvatarPhotoControllerTest {
                 REQUEST_CODE_CHOOSE_PHOTO, Activity.RESULT_CANCELED, intent);
 
         verify(mMockAvatarUi, never()).startActivityForResult(any(), anyInt());
-        verify(mMockAvatarUi, never()).startSystemActivityForResult(any(), anyInt());
     }
 
     @Test
     public void choosePhotoIsFollowedByCropWhenTakePhotoUriReturned() throws IOException {
+        when(mMockAvatarUi.canCropPhoto()).thenReturn(true);
+
         new File(mImagesDir, "TakeEditUserPhoto.jpg").createNewFile();
 
         Intent intent = new Intent();
@@ -190,8 +197,25 @@ public class AvatarPhotoControllerTest {
         mController.onActivityResult(
                 REQUEST_CODE_CHOOSE_PHOTO, Activity.RESULT_OK, intent);
 
-        verifyStartSystemActivityForResult(
+        verifyStartActivityForResult(
                 "com.android.camera.action.CROP", REQUEST_CODE_CROP_PHOTO);
+    }
+
+    @Test
+    public void choosePhotoIsNotFollowedByCropIntentWhenCropNotSupported() throws IOException {
+        when(mMockAvatarUi.canCropPhoto()).thenReturn(false);
+
+        File file = new File(mImagesDir, "file.txt");
+        saveBitmapToFile(file);
+
+        Intent intent = new Intent();
+        intent.setData(Uri.parse(
+                "content://com.android.settingslib.test/my_cache/multi_user/file.txt"));
+        mController.onActivityResult(
+                REQUEST_CODE_CHOOSE_PHOTO, Activity.RESULT_OK, intent);
+
+        verify(mMockAvatarUi, never()).startActivityForResult(any(), anyInt());
+        verify(mMockAvatarUi, timeout(TIMEOUT_MILLIS)).returnUriResult(mCropPhotoUri);
     }
 
     @Test
@@ -218,58 +242,11 @@ public class AvatarPhotoControllerTest {
         verify(mMockAvatarUi, timeout(TIMEOUT_MILLIS).times(0)).returnUriResult(mCropPhotoUri);
     }
 
-    @Test
-    public void cropDoesNotUseTakePhotoUri() throws IOException {
-        new File(mImagesDir, "file.txt").createNewFile();
-
-        Intent intent = new Intent();
-        intent.setData(Uri.parse(
-                "content://com.android.settingslib.test/my_cache/multi_user/file.txt"));
-        mController.onActivityResult(
-                REQUEST_CODE_TAKE_PHOTO, Activity.RESULT_OK, intent);
-
-        Intent startIntent = verifyStartSystemActivityForResult(
-                "com.android.camera.action.CROP", REQUEST_CODE_CROP_PHOTO);
-        assertThat(startIntent.getData()).isNotEqualTo(mTakePhotoUri);
-    }
-
-    @Test
-    public void internalCropUsedIfNoSystemCropperFound() throws IOException {
-        when(mMockAvatarUi.startSystemActivityForResult(any(), anyInt())).thenReturn(false);
-
-        File file = new File(mImagesDir, "file.txt");
-        saveBitmapToFile(file);
-
-        Intent intent = new Intent();
-        intent.setData(Uri.parse(
-                "content://com.android.settingslib.test/my_cache/multi_user/file.txt"));
-        mController.onActivityResult(
-                REQUEST_CODE_TAKE_PHOTO, Activity.RESULT_OK, intent);
-
-        verify(mMockAvatarUi, timeout(TIMEOUT_MILLIS)).returnUriResult(mCropPhotoUri);
-
-        InputStream imageStream = mContext.getContentResolver().openInputStream(mCropPhotoUri);
-        Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
-        assertThat(bitmap.getWidth()).isEqualTo(PHOTO_SIZE);
-        assertThat(bitmap.getHeight()).isEqualTo(PHOTO_SIZE);
-    }
-
-    private Intent verifyStartActivityForResult(String action, int resultCode) {
+    private void verifyStartActivityForResult(String action, int resultCode) {
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
         verify(mMockAvatarUi, timeout(TIMEOUT_MILLIS))
                 .startActivityForResult(captor.capture(), eq(resultCode));
-        Intent intent = captor.getValue();
-        assertThat(intent.getAction()).isEqualTo(action);
-        return intent;
-    }
-
-    private Intent verifyStartSystemActivityForResult(String action, int resultCode) {
-        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
-        verify(mMockAvatarUi, timeout(TIMEOUT_MILLIS))
-                .startSystemActivityForResult(captor.capture(), eq(resultCode));
-        Intent intent = captor.getValue();
-        assertThat(intent.getAction()).isEqualTo(action);
-        return intent;
+        assertThat(captor.getValue().getAction()).isEqualTo(action);
     }
 
     private void saveBitmapToFile(File file) throws IOException {
