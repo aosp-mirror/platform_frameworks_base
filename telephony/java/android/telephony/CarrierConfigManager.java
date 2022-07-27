@@ -2103,6 +2103,16 @@ public class CarrierConfigManager {
      * is immediately closed (disabling keep-alive).
      */
     public static final String KEY_MMS_CLOSE_CONNECTION_BOOL = "mmsCloseConnection";
+    /**
+     * Waiting time in milliseconds used before releasing an MMS data call. Not tearing down an MMS
+     * data connection immediately helps to reduce the message delivering latency if messaging
+     * continues between all parties in the conversation since the same data connection can be
+     * reused for further messages.
+     *
+     * This timer will control how long the data call will be kept alive before being torn down.
+     */
+    public static final String KEY_MMS_NETWORK_RELEASE_TIMEOUT_MILLIS_INT =
+            "mms_network_release_timeout_millis_int";
 
     /**
      * The flatten {@link android.content.ComponentName componentName} of the activity that can
@@ -9069,6 +9079,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_MMS_SMS_TO_MMS_TEXT_LENGTH_THRESHOLD_INT, -1);
         sDefaults.putInt(KEY_MMS_SMS_TO_MMS_TEXT_THRESHOLD_INT, -1);
         sDefaults.putInt(KEY_MMS_SUBJECT_MAX_LENGTH_INT, 40);
+        sDefaults.putInt(KEY_MMS_NETWORK_RELEASE_TIMEOUT_MILLIS_INT, 5 * 1000);
         sDefaults.putString(KEY_MMS_EMAIL_GATEWAY_NUMBER_STRING, "");
         sDefaults.putString(KEY_MMS_HTTP_PARAMS_STRING, "");
         sDefaults.putString(KEY_MMS_NAI_SUFFIX_STRING, "");
