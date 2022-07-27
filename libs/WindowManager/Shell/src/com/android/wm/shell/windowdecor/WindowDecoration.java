@@ -222,10 +222,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         float shadowRadius = outResult.mDensity * shadowRadiusDp;
         int backgroundColorInt = mTaskInfo.taskDescription.getBackgroundColor();
-        mTmpColor[0] = Color.red(backgroundColorInt);
-        mTmpColor[1] = Color.green(backgroundColorInt);
-        mTmpColor[2] = Color.blue(backgroundColorInt);
-        t.setCrop(mTaskBackgroundSurface, taskBounds)
+        mTmpColor[0] = (float) Color.red(backgroundColorInt) / 255.f;
+        mTmpColor[1] = (float) Color.green(backgroundColorInt) / 255.f;
+        mTmpColor[2] = (float) Color.blue(backgroundColorInt) / 255.f;
+        t.setWindowCrop(mTaskBackgroundSurface, taskBounds.width(), taskBounds.height())
                 .setShadowRadius(mTaskBackgroundSurface, shadowRadius)
                 .setColor(mTaskBackgroundSurface, mTmpColor);
 

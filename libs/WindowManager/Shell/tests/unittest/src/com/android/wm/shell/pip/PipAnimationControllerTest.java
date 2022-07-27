@@ -37,6 +37,7 @@ import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.MockSurfaceControlHelper;
 import com.android.wm.shell.ShellTestCase;
@@ -62,19 +63,18 @@ public class PipAnimationControllerTest extends ShellTestCase {
 
     @Mock
     private TaskInfo mTaskInfo;
-
     @Mock
     private PipAnimationController.PipAnimationCallback mPipAnimationCallback;
 
     @Before
     public void setUp() throws Exception {
-        mPipAnimationController = new PipAnimationController(
-                new PipSurfaceTransactionHelper());
+        MockitoAnnotations.initMocks(this);
+        mPipAnimationController = new PipAnimationController(new PipSurfaceTransactionHelper(
+                InstrumentationRegistry.getInstrumentation().getTargetContext()));
         mLeash = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName("FakeLeash")
                 .build();
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test

@@ -43,8 +43,10 @@ import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
 
@@ -127,6 +129,8 @@ public class FingerprintAuthenticationClientTest {
     private ArgumentCaptor<PointerContext> mPointerContextCaptor;
     @Captor
     private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
+
+    private TestLooper mLooper = new TestLooper();
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -233,6 +237,9 @@ public class FingerprintAuthenticationClientTest {
         client.start(mCallback);
         client.onAuthenticated(new Fingerprint("name", 2 /* enrollmentId */, SENSOR_ID),
                 true /* authenticated */, new ArrayList<>());
+
+        mLooper.moveTimeForward(10);
+        mLooper.dispatchAll();
         verify(mLuxProbe).destroy();
 
         client.onAcquired(2, 0);
@@ -309,7 +316,56 @@ public class FingerprintAuthenticationClientTest {
         client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */, 2 /* deviceId */),
                 true /* authenticated */, new ArrayList<>());
 
+        mLooper.moveTimeForward(10);
+        mLooper.dispatchAll();
         verify(mCancellationSignal).cancel();
+    }
+
+    @Test
+    public void fingerprintPowerIgnoresAuthInWindow() throws Exception {
+        when(mSensorProps.isAnySidefpsType()).thenReturn(true);
+
+        final FingerprintAuthenticationClient client = createClient(1);
+        client.start(mCallback);
+        client.onPowerPressed();
+        client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */, 2 /* deviceId */),
+                true /* authenticated */, new ArrayList<>());
+        mLooper.moveTimeForward(1000);
+        mLooper.dispatchAll();
+
+        verify(mCallback).onClientFinished(any(), eq(false));
+    }
+
+    @Test
+    public void fingerprintAuthIgnoredWaitingForPower() throws Exception {
+        when(mSensorProps.isAnySidefpsType()).thenReturn(true);
+
+        final FingerprintAuthenticationClient client = createClient(1);
+        client.start(mCallback);
+        client.onAuthenticated(new Fingerprint("friendly", 3 /* fingerId */, 4 /* deviceId */),
+                true /* authenticated */, new ArrayList<>());
+        client.onPowerPressed();
+        mLooper.moveTimeForward(1000);
+        mLooper.dispatchAll();
+
+        verify(mCallback).onClientFinished(any(), eq(false));
+    }
+
+    @Test
+    public void fingerprintAuthSucceedsAfterPowerWindow() throws Exception {
+        when(mSensorProps.isAnySidefpsType()).thenReturn(true);
+
+        final FingerprintAuthenticationClient client = createClient(1);
+        client.start(mCallback);
+        client.onPowerPressed();
+        mLooper.moveTimeForward(1000);
+        mLooper.dispatchAll();
+        client.onAuthenticated(new Fingerprint("friendly", 4 /* fingerId */, 5 /* deviceId */),
+                true /* authenticated */, new ArrayList<>());
+        mLooper.moveTimeForward(1000);
+        mLooper.dispatchAll();
+
+        verify(mCallback).onClientFinished(any(), eq(true));
     }
 
     private FingerprintAuthenticationClient createClient() throws RemoteException {
@@ -336,7 +392,8 @@ public class FingerprintAuthenticationClientTest {
         9 /* sensorId */, mBiometricLogger, mBiometricContext,
         true /* isStrongBiometric */,
         null /* taskStackListener */, mLockoutCache,
-        mUdfpsOverlayController, mSideFpsController, allowBackgroundAuthentication, mSensorProps) {
+        mUdfpsOverlayController, mSideFpsController, allowBackgroundAuthentication, mSensorProps,
+                new Handler(mLooper.getLooper())) {
             @Override
             protected ActivityTaskManager getActivityTaskManager() {
                 return mActivityTaskManager;

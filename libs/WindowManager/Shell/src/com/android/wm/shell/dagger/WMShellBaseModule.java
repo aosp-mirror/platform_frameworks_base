@@ -411,8 +411,8 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static PipSurfaceTransactionHelper providePipSurfaceTransactionHelper() {
-        return new PipSurfaceTransactionHelper();
+    static PipSurfaceTransactionHelper providePipSurfaceTransactionHelper(Context context) {
+        return new PipSurfaceTransactionHelper(context);
     }
 
     @WMSingleton

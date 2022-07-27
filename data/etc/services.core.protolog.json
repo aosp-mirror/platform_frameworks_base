@@ -3139,6 +3139,12 @@
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/LockTaskController.java"
     },
+    "956467125": {
+      "message": "Reparenting Activity to embedded TaskFragment, but the Activity is not collected",
+      "level": "WARN",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
+    },
     "958338552": {
       "message": "grantEmbeddedWindowFocus win=%s dropped focus so setting focus to null since no candidate was found",
       "level": "VERBOSE",

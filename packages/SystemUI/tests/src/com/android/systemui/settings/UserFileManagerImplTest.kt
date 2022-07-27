@@ -31,6 +31,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,6 +63,14 @@ class UserFileManagerImplTest : SysuiTestCase() {
             broadcastDispatcher, backgroundExecutor)
     }
 
+    @After
+    fun end() {
+        val dir = Environment.buildPath(
+            context.filesDir,
+            UserFileManagerImpl.ID)
+        dir.deleteRecursively()
+    }
+
     @Test
     fun testGetFile() {
         assertThat(userFileManager.getFile(TEST_FILE_NAME, 0).path)
@@ -72,8 +81,19 @@ class UserFileManagerImplTest : SysuiTestCase() {
 
     @Test
     fun testGetSharedPreferences() {
+        val secondarySharedPref = userFileManager.getSharedPreferences(TEST_FILE_NAME, 0, 11)
+        val secondaryUserDir = Environment.buildPath(
+            context.filesDir,
+            UserFileManagerImpl.ID,
+            "11",
+            UserFileManagerImpl.SHARED_PREFS,
+            TEST_FILE_NAME
+        )
+
+        assertThat(secondarySharedPref).isNotNull()
+        assertThat(secondaryUserDir.exists())
         assertThat(userFileManager.getSharedPreferences(TEST_FILE_NAME, 0, 0))
-            .isNotEqualTo(userFileManager.getSharedPreferences(TEST_FILE_NAME, 0, 11))
+            .isNotEqualTo(secondarySharedPref)
     }
 
     @Test
@@ -115,6 +135,19 @@ class UserFileManagerImplTest : SysuiTestCase() {
         verify(userManager).aliveUsers
         assertThat(secondaryUserDir.exists()).isFalse()
         assertThat(file.exists()).isFalse()
-        dir.deleteRecursively()
+    }
+
+    @Test
+    fun testEnsureParentDirExists() {
+        val file = Environment.buildPath(
+            context.filesDir,
+            UserFileManagerImpl.ID,
+            "11",
+            "files",
+            TEST_FILE_NAME
+        )
+        assertThat(file.parentFile.exists()).isFalse()
+        userFileManager.ensureParentDirExists(file)
+        assertThat(file.parentFile.exists()).isTrue()
     }
 }
