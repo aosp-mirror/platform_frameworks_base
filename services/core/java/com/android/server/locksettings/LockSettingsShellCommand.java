@@ -176,12 +176,6 @@ class LockSettingsShellCommand extends ShellCommand {
             pw.println("  set-password [--old <CREDENTIAL>] [--user USER_ID] <PASSWORD>");
             pw.println("    Sets the lock screen as password, using the given PASSOWRD to unlock.");
             pw.println("");
-            pw.println("  sp [--old <CREDENTIAL>] [--user USER_ID]");
-            pw.println("    Gets whether synthetic password is enabled.");
-            pw.println("");
-            pw.println("  sp [--old <CREDENTIAL>] [--user USER_ID] <1|0>");
-            pw.println("    Enables / disables synthetic password.");
-            pw.println("");
             pw.println("  clear [--old <CREDENTIAL>] [--user USER_ID]");
             pw.println("    Clears the lock credentials.");
             pw.println("");
