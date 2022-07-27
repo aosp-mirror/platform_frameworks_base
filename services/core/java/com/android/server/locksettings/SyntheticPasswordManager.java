@@ -1308,7 +1308,6 @@ public class SyntheticPasswordManager {
         SyntheticPasswordBlob blob = SyntheticPasswordBlob.fromBytes(loadState(SP_BLOB_NAME,
                     protectorId, userId));
         destroyProtectorCommon(protectorId, userId);
-        destroyState(SECDISCARDABLE_NAME, protectorId, userId);
         if (blob.mProtectorType == PROTECTOR_TYPE_WEAK_TOKEN_BASED) {
             notifyWeakEscrowTokenRemovedListeners(protectorId, userId);
         }
@@ -1332,7 +1331,6 @@ public class SyntheticPasswordManager {
      */
     public void destroyLskfBasedProtector(long protectorId, int userId) {
         destroyProtectorCommon(protectorId, userId);
-        destroyState(SECDISCARDABLE_NAME, protectorId, userId);
         destroyState(PASSWORD_DATA_NAME, protectorId, userId);
         destroyState(PASSWORD_METRICS_NAME, protectorId, userId);
     }
@@ -1340,6 +1338,7 @@ public class SyntheticPasswordManager {
     private void destroyProtectorCommon(long protectorId, int userId) {
         destroyState(SP_BLOB_NAME, protectorId, userId);
         destroySPBlobKey(getKeyName(protectorId));
+        destroyState(SECDISCARDABLE_NAME, protectorId, userId);
         if (hasState(WEAVER_SLOT_NAME, protectorId, userId)) {
             destroyWeaverSlot(protectorId, userId);
         }
