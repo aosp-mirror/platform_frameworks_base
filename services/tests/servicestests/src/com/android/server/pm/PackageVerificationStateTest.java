@@ -109,7 +109,7 @@ public class PackageVerificationStateTest extends AndroidTestCase {
         assertTrue("Verification should be considered complete now",
                 state.isVerificationComplete());
 
-        assertFalse("Installation should be marked as allowed",
+        assertFalse("Installation should be marked as rejected",
                 state.isInstallAllowed());
     }
 
