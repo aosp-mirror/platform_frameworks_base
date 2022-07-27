@@ -2331,22 +2331,22 @@ public final class InputMethodManager {
         // Okay we are now ready to call into the served view and have it
         // do its stuff.
         // Life is good: let's hook everything up!
-        EditorInfo tba = new EditorInfo();
+        EditorInfo editorInfo = new EditorInfo();
         // Note: Use Context#getOpPackageName() rather than Context#getPackageName() so that the
         // system can verify the consistency between the uid of this process and package name passed
         // from here. See comment of Context#getOpPackageName() for details.
-        tba.packageName = view.getContext().getOpPackageName();
-        tba.autofillId = view.getAutofillId();
-        tba.fieldId = view.getId();
-        InputConnection ic = view.onCreateInputConnection(tba);
-        if (DEBUG) Log.v(TAG, "Starting input: tba=" + tba + " ic=" + ic);
+        editorInfo.packageName = view.getContext().getOpPackageName();
+        editorInfo.autofillId = view.getAutofillId();
+        editorInfo.fieldId = view.getId();
+        InputConnection ic = view.onCreateInputConnection(editorInfo);
+        if (DEBUG) Log.v(TAG, "Starting input: editorInfo=" + editorInfo + " ic=" + ic);
 
         // Clear autofill and field ids if a connection could not be established.
         // This ensures that even disconnected EditorInfos have well-defined attributes,
         // making them consistently and straightforwardly comparable.
         if (ic == null) {
-            tba.autofillId = AutofillId.NO_AUTOFILL_ID;
-            tba.fieldId = 0;
+            editorInfo.autofillId = AutofillId.NO_AUTOFILL_ID;
+            editorInfo.fieldId = 0;
         }
 
         final Handler icHandler;
@@ -2378,7 +2378,7 @@ public final class InputMethodManager {
             }
 
             // Hook 'em up and let 'er rip.
-            mCurrentEditorInfo = tba.createCopyInternal();
+            mCurrentEditorInfo = editorInfo.createCopyInternal();
             // Store the previously served connection so that we can determine whether it is safe
             // to skip the call to startInputOrWindowGainedFocus in the IMMS
             final RemoteInputConnectionImpl previouslyServedConnection = mServedInputConnection;
@@ -2391,8 +2391,8 @@ public final class InputMethodManager {
             }
             final RemoteInputConnectionImpl servedInputConnection;
             if (ic != null) {
-                mCursorSelStart = tba.initialSelStart;
-                mCursorSelEnd = tba.initialSelEnd;
+                mCursorSelStart = editorInfo.initialSelStart;
+                mCursorSelEnd = editorInfo.initialSelEnd;
                 mInitialSelStart = mCursorSelStart;
                 mInitialSelEnd = mCursorSelEnd;
                 mCursorCandStart = -1;
@@ -2418,7 +2418,7 @@ public final class InputMethodManager {
 
             if (DEBUG) {
                 Log.v(TAG, "START INPUT: view=" + dumpViewInfo(view) + " ic="
-                        + ic + " tba=" + tba + " startInputFlags="
+                        + ic + " editorInfo=" + editorInfo + " startInputFlags="
                         + InputMethodDebug.startInputFlagsToString(startInputFlags));
             }
 
@@ -2439,7 +2439,7 @@ public final class InputMethodManager {
             }
             res = mServiceInvoker.startInputOrWindowGainedFocus(
                     startInputReason, mClient, windowGainingFocus, startInputFlags,
-                    softInputMode, windowFlags, tba, servedInputConnection,
+                    softInputMode, windowFlags, editorInfo, servedInputConnection,
                     servedInputConnection == null ? null
                             : servedInputConnection.asIRemoteAccessibilityInputConnection(),
                     view.getContext().getApplicationInfo().targetSdkVersion,
@@ -2449,7 +2449,7 @@ public final class InputMethodManager {
                 Log.wtf(TAG, "startInputOrWindowGainedFocus must not return"
                         + " null. startInputReason="
                         + InputMethodDebug.startInputReasonToString(startInputReason)
-                        + " editorInfo=" + tba
+                        + " editorInfo=" + editorInfo
                         + " startInputFlags="
                         + InputMethodDebug.startInputFlagsToString(startInputFlags));
                 return false;
@@ -2491,9 +2491,9 @@ public final class InputMethodManager {
         if (ic != null && res != null && res.method != null) {
             if (DEBUG) {
                 Log.v(TAG, "Calling View.onInputConnectionOpened: view= " + view
-                        + ", ic=" + ic + ", tba=" + tba + ", handler=" + icHandler);
+                        + ", ic=" + ic + ", editorInfo=" + editorInfo + ", handler=" + icHandler);
             }
-            reportInputConnectionOpened(ic, tba, icHandler, view);
+            reportInputConnectionOpened(ic, editorInfo, icHandler, view);
         }
 
         return true;
@@ -2541,8 +2541,8 @@ public final class InputMethodManager {
     }
 
     private void reportInputConnectionOpened(
-            InputConnection ic, EditorInfo tba, Handler icHandler, View view) {
-        view.onInputConnectionOpenedInternal(ic, tba, icHandler);
+            InputConnection ic, EditorInfo editorInfo, Handler icHandler, View view) {
+        view.onInputConnectionOpenedInternal(ic, editorInfo, icHandler);
         final ViewRootImpl viewRoot = view.getViewRootImpl();
         if (viewRoot != null) {
             viewRoot.getHandwritingInitiator().onInputConnectionCreated(view);
