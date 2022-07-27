@@ -21,6 +21,7 @@
 #include <minikin/FontFamily.h>
 #include <minikin/FontFileParser.h>
 #include <minikin/LocaleList.h>
+#include <minikin/MinikinFontFactory.h>
 #include <minikin/SystemFonts.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
@@ -206,9 +207,18 @@ static sk_sp<SkData> makeSkDataCached(const std::string& path, bool hasVerity) {
     return entry;
 }
 
-static std::shared_ptr<minikin::MinikinFont> loadMinikinFontSkia(minikin::BufferReader);
+class MinikinFontSkiaFactory : minikin::MinikinFontFactory {
+private:
+    MinikinFontSkiaFactory() : MinikinFontFactory() { MinikinFontFactory::setInstance(this); }
 
-static minikin::Font::TypefaceLoader* readMinikinFontSkia(minikin::BufferReader* reader) {
+public:
+    static void init() { static MinikinFontSkiaFactory factory; }
+    void skip(minikin::BufferReader* reader) const override;
+    std::shared_ptr<minikin::MinikinFont> create(minikin::BufferReader reader) const override;
+    void write(minikin::BufferWriter* writer, const minikin::MinikinFont* typeface) const override;
+};
+
+void MinikinFontSkiaFactory::skip(minikin::BufferReader* reader) const {
     // Advance reader's position.
     reader->skipString(); // fontPath
     reader->skip<int>(); // fontIndex
@@ -218,10 +228,10 @@ static minikin::Font::TypefaceLoader* readMinikinFontSkia(minikin::BufferReader*
         reader->skip<uint32_t>(); // expectedFontRevision
         reader->skipString(); // expectedPostScriptName
     }
-    return &loadMinikinFontSkia;
 }
 
-static std::shared_ptr<minikin::MinikinFont> loadMinikinFontSkia(minikin::BufferReader reader) {
+std::shared_ptr<minikin::MinikinFont> MinikinFontSkiaFactory::create(
+        minikin::BufferReader reader) const {
     std::string_view fontPath = reader.readString();
     std::string path(fontPath.data(), fontPath.size());
     ATRACE_FORMAT("Loading font %s", path.c_str());
@@ -270,8 +280,8 @@ static std::shared_ptr<minikin::MinikinFont> loadMinikinFontSkia(minikin::Buffer
     return minikinFont;
 }
 
-static void writeMinikinFontSkia(minikin::BufferWriter* writer,
-        const minikin::MinikinFont* typeface) {
+void MinikinFontSkiaFactory::write(minikin::BufferWriter* writer,
+                                   const minikin::MinikinFont* typeface) const {
     // When you change the format of font metadata, please update code to parse
     // typefaceMetadataReader() in
     // frameworks/base/libs/hwui/jni/fonts/Font.cpp too.
@@ -296,6 +306,7 @@ static void writeMinikinFontSkia(minikin::BufferWriter* writer,
 }
 
 static jint Typeface_writeTypefaces(JNIEnv *env, jobject, jobject buffer, jlongArray faceHandles) {
+    MinikinFontSkiaFactory::init();
     ScopedLongArrayRO faces(env, faceHandles);
     std::vector<Typeface*> typefaces;
     typefaces.reserve(faces.size());
@@ -312,7 +323,7 @@ static jint Typeface_writeTypefaces(JNIEnv *env, jobject, jobject buffer, jlongA
             fontCollections.push_back(typeface->fFontCollection);
         }
     }
-    minikin::FontCollection::writeVector<writeMinikinFontSkia>(&writer, fontCollections);
+    minikin::FontCollection::writeVector(&writer, fontCollections);
     writer.write<uint32_t>(typefaces.size());
     for (Typeface* typeface : typefaces) {
       writer.write<uint32_t>(fcToIndex.find(typeface->fFontCollection)->second);
@@ -324,11 +335,12 @@ static jint Typeface_writeTypefaces(JNIEnv *env, jobject, jobject buffer, jlongA
 }
 
 static jlongArray Typeface_readTypefaces(JNIEnv *env, jobject, jobject buffer) {
+    MinikinFontSkiaFactory::init();
     void* addr = buffer == nullptr ? nullptr : env->GetDirectBufferAddress(buffer);
     if (addr == nullptr) return nullptr;
     minikin::BufferReader reader(addr);
     std::vector<std::shared_ptr<minikin::FontCollection>> fontCollections =
-            minikin::FontCollection::readVector<readMinikinFontSkia>(&reader);
+            minikin::FontCollection::readVector(&reader);
     uint32_t typefaceCount = reader.read<uint32_t>();
     std::vector<jlong> faceHandles;
     faceHandles.reserve(typefaceCount);
