@@ -19,25 +19,14 @@ package com.android.server.tare;
 import static android.app.tare.EconomyManager.CAKE_IN_ARC;
 
 import android.annotation.NonNull;
-import android.annotation.SuppressLint;
-import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.text.SimpleDateFormat;
 import java.time.Clock;
 
 class TareUtils {
-    @SuppressLint("SimpleDateFormat")
-    private static final SimpleDateFormat sDumpDateFormat =
-            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
     @VisibleForTesting
     static Clock sSystemClock = Clock.systemUTC();
-
-    static void dumpTime(IndentingPrintWriter pw, long time) {
-        pw.print(sDumpDateFormat.format(time));
-    }
 
     static long getCurrentTimeMillis() {
         return sSystemClock.millis();
