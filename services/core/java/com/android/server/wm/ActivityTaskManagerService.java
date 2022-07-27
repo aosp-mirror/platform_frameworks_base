@@ -3560,7 +3560,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // Continue the pausing process after entering pip.
                 if (r.isState(PAUSING)) {
                     r.getTask().schedulePauseActivity(r, false /* userLeaving */,
-                            false /* pauseImmediately */, "auto-pip");
+                            false /* pauseImmediately */, true /* autoEnteringPip */, "auto-pip");
                 }
             }
         };
