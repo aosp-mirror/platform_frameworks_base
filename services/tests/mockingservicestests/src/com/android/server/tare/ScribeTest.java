@@ -30,6 +30,7 @@ import android.content.pm.PackageInfo;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArrayMap;
+import android.util.SparseLongArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -174,10 +175,13 @@ public class ScribeTest {
         when(mIrs.getConsumptionLimitLocked()).thenReturn(consumptionLimit);
 
         Ledger ledger = mScribeUnderTest.getLedgerLocked(TEST_USER_ID, TEST_PACKAGE);
-        ledger.recordTransaction(new Ledger.Transaction(0, 1000L, 1, null, 2000, 0));
+        ledger.recordTransaction(
+                new Ledger.Transaction(0, 1000L, EconomicPolicy.TYPE_REWARD | 1, null, 2000, 0));
         // Negative ledger balance shouldn't affect the total circulation value.
         ledger = mScribeUnderTest.getLedgerLocked(TEST_USER_ID + 1, TEST_PACKAGE);
-        ledger.recordTransaction(new Ledger.Transaction(0, 1000L, 1, null, -5000, 3000));
+        ledger.recordTransaction(
+                new Ledger.Transaction(0, 1000L,
+                        EconomicPolicy.TYPE_ACTION | 1, null, -5000, 3000));
         mScribeUnderTest.setLastReclamationTimeLocked(lastReclamationTime);
         mScribeUnderTest.setConsumptionLimitLocked(consumptionLimit);
         mScribeUnderTest.adjustRemainingConsumableCakesLocked(
@@ -209,9 +213,13 @@ public class ScribeTest {
     @Test
     public void testWritingPopulatedLedgerToDisk() {
         final Ledger ogLedger = mScribeUnderTest.getLedgerLocked(TEST_USER_ID, TEST_PACKAGE);
-        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51, 0));
-        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52, -1));
-        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3, 12));
+        ogLedger.recordTransaction(
+                new Ledger.Transaction(0, 1000, EconomicPolicy.TYPE_REWARD | 1, null, 51, 0));
+        ogLedger.recordTransaction(
+                new Ledger.Transaction(1500, 2000,
+                        EconomicPolicy.TYPE_REWARD | 2, "green", 52, -1));
+        ogLedger.recordTransaction(
+                new Ledger.Transaction(2500, 3000, EconomicPolicy.TYPE_REWARD | 3, "blue", 3, 12));
         mScribeUnderTest.writeImmediatelyForTesting();
 
         mScribeUnderTest.loadFromDiskLocked();
@@ -230,11 +238,13 @@ public class ScribeTest {
                 addInstalledPackage(userId, pkgName);
                 final Ledger ledger = mScribeUnderTest.getLedgerLocked(userId, pkgName);
                 ledger.recordTransaction(new Ledger.Transaction(
-                        0, 1000L * u + l, 1, null, -51L * u + l, 50));
+                        0, 1000L * u + l, EconomicPolicy.TYPE_ACTION | 1, null, -51L * u + l, 50));
                 ledger.recordTransaction(new Ledger.Transaction(
-                        1500L * u + l, 2000L * u + l, 2 * u + l, "green" + u + l, 52L * u + l, 0));
+                        1500L * u + l, 2000L * u + l,
+                        EconomicPolicy.TYPE_REWARD | 2 * u + l, "green" + u + l, 52L * u + l, 0));
                 ledger.recordTransaction(new Ledger.Transaction(
-                        2500L * u + l, 3000L * u + l, 3 * u + l, "blue" + u + l, 3L * u + l, 0));
+                        2500L * u + l, 3000L * u + l,
+                        EconomicPolicy.TYPE_REWARD | 3 * u + l, "blue" + u + l, 3L * u + l, 0));
                 ledgers.add(userId, pkgName, ledger);
             }
         }
@@ -248,9 +258,12 @@ public class ScribeTest {
     @Test
     public void testDiscardLedgerFromDisk() {
         final Ledger ogLedger = mScribeUnderTest.getLedgerLocked(TEST_USER_ID, TEST_PACKAGE);
-        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51, 1));
-        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52, 0));
-        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3, 1));
+        ogLedger.recordTransaction(
+                new Ledger.Transaction(0, 1000, EconomicPolicy.TYPE_REWARD | 1, null, 51, 1));
+        ogLedger.recordTransaction(
+                new Ledger.Transaction(1500, 2000, EconomicPolicy.TYPE_REWARD | 2, "green", 52, 0));
+        ogLedger.recordTransaction(
+                new Ledger.Transaction(2500, 3000, EconomicPolicy.TYPE_REWARD | 3, "blue", 3, 1));
         mScribeUnderTest.writeImmediatelyForTesting();
 
         mScribeUnderTest.loadFromDiskLocked();
@@ -269,9 +282,12 @@ public class ScribeTest {
     public void testLoadingMissingPackageFromDisk() {
         final String pkgName = TEST_PACKAGE + ".uninstalled";
         final Ledger ogLedger = mScribeUnderTest.getLedgerLocked(TEST_USER_ID, pkgName);
-        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51, 1));
-        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52, 2));
-        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3, 3));
+        ogLedger.recordTransaction(
+                new Ledger.Transaction(0, 1000, EconomicPolicy.TYPE_REGULATION | 1, null, 51, 1));
+        ogLedger.recordTransaction(
+                new Ledger.Transaction(1500, 2000, EconomicPolicy.TYPE_REWARD | 2, "green", 52, 2));
+        ogLedger.recordTransaction(
+                new Ledger.Transaction(2500, 3000, EconomicPolicy.TYPE_ACTION | 3, "blue", -3, 3));
         mScribeUnderTest.writeImmediatelyForTesting();
 
         // Package isn't installed, so make sure it's not saved to memory after loading.
@@ -283,9 +299,13 @@ public class ScribeTest {
     public void testLoadingMissingUserFromDisk() {
         final int userId = TEST_USER_ID + 1;
         final Ledger ogLedger = mScribeUnderTest.getLedgerLocked(userId, TEST_PACKAGE);
-        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51, 0));
-        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52, 1));
-        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3, 3));
+        ogLedger.recordTransaction(
+                new Ledger.Transaction(0, 1000, EconomicPolicy.TYPE_REWARD | 1, null, 51, 0));
+        ogLedger.recordTransaction(
+                new Ledger.Transaction(1500, 2000, EconomicPolicy.TYPE_REWARD | 2, "green", 52, 1));
+        ogLedger.recordTransaction(
+                new Ledger.Transaction(2500, 3000,
+                        EconomicPolicy.TYPE_REGULATION | 3, "blue", 3, 3));
         mScribeUnderTest.writeImmediatelyForTesting();
 
         // User doesn't show up with any packages, so make sure nothing is saved after loading.
@@ -331,11 +351,33 @@ public class ScribeTest {
         }
         assertNotNull(actual);
         assertEquals(expected.getCurrentBalance(), actual.getCurrentBalance());
+
         List<Ledger.Transaction> expectedTransactions = expected.getTransactions();
         List<Ledger.Transaction> actualTransactions = actual.getTransactions();
         assertEquals(expectedTransactions.size(), actualTransactions.size());
         for (int i = 0; i < expectedTransactions.size(); ++i) {
             assertTransactionsEqual(expectedTransactions.get(i), actualTransactions.get(i));
+        }
+
+        List<Ledger.RewardBucket> expectedRewardBuckets = expected.getRewardBuckets();
+        List<Ledger.RewardBucket> actualRewardBuckets = actual.getRewardBuckets();
+        assertEquals(expectedRewardBuckets.size(), actualRewardBuckets.size());
+        for (int i = 0; i < expectedRewardBuckets.size(); ++i) {
+            assertRewardBucketsEqual(expectedRewardBuckets.get(i), actualRewardBuckets.get(i));
+        }
+    }
+
+    private void assertSparseLongArraysEqual(SparseLongArray expected, SparseLongArray actual) {
+        if (expected == null) {
+            assertNull(actual);
+            return;
+        }
+        assertNotNull(actual);
+        final int size = expected.size();
+        assertEquals(size, actual.size());
+        for (int i = 0; i < size; ++i) {
+            assertEquals(expected.keyAt(i), actual.keyAt(i));
+            assertEquals(expected.valueAt(i), actual.valueAt(i));
         }
     }
 
@@ -380,6 +422,17 @@ public class ScribeTest {
             assertEquals("Reports #" + i + " numNegativeRegulations are not equal",
                     eReport.numNegativeRegulations, aReport.numNegativeRegulations);
         }
+    }
+
+    private void assertRewardBucketsEqual(Ledger.RewardBucket expected,
+            Ledger.RewardBucket actual) {
+        if (expected == null) {
+            assertNull(actual);
+            return;
+        }
+        assertNotNull(actual);
+        assertEquals(expected.startTimeMs, actual.startTimeMs);
+        assertSparseLongArraysEqual(expected.cumulativeDelta, actual.cumulativeDelta);
     }
 
     private void assertTransactionsEqual(Ledger.Transaction expected, Ledger.Transaction actual) {
