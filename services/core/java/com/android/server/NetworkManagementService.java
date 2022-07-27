@@ -862,10 +862,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         return list;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.SHUTDOWN)
     @Override
     public void shutdown() {
         // TODO: remove from aidl if nobody calls externally
-        mContext.enforceCallingOrSelfPermission(SHUTDOWN, TAG);
 
         Slog.i(TAG, "Shutting down");
     }
@@ -1203,9 +1203,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         setUidOnMeteredNetworkList(uid, true, enable);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.NETWORK_SETTINGS)
     @Override
     public boolean setDataSaverModeEnabled(boolean enable) {
-        mContext.enforceCallingOrSelfPermission(NETWORK_SETTINGS, TAG);
 
         if (DBG) Log.d(TAG, "setDataSaverMode: " + enable);
         synchronized (mQuotaLock) {
@@ -1741,9 +1741,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         return NetdUtils.removeRoutesFromLocalNetwork(mNetdService, routes);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY)
     @Override
     public boolean isNetworkRestricted(int uid) {
-        mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
         return isNetworkRestrictedInternal(uid);
     }
 
