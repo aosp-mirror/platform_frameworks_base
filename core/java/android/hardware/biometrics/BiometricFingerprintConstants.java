@@ -61,7 +61,8 @@ public interface BiometricFingerprintConstants {
             BIOMETRIC_ERROR_RE_ENROLL,
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
             FINGERPRINT_ERROR_UNKNOWN,
-            FINGERPRINT_ERROR_BAD_CALIBRATION})
+            FINGERPRINT_ERROR_BAD_CALIBRATION,
+            BIOMETRIC_ERROR_POWER_PRESSED})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintError {}
 
@@ -186,6 +187,12 @@ public interface BiometricFingerprintConstants {
      * @hide
      */
     int FINGERPRINT_ERROR_BAD_CALIBRATION = 18;
+
+    /**
+     * A power press stopped this biometric operation.
+     * @hide
+     */
+    int BIOMETRIC_ERROR_POWER_PRESSED = 19;
 
     /**
      * @hide

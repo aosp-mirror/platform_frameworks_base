@@ -483,11 +483,11 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     postStartTransactionCallbacks.add(t ->
                             startSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
                                     mTransactionPool, mMainExecutor, mAnimExecutor,
-                                    null /* position */, cornerRadius, clipRect));
+                                    change.getEndRelOffset(), cornerRadius, clipRect));
                 } else {
                     startSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
-                            mTransactionPool, mMainExecutor, mAnimExecutor, null /* position */,
-                            cornerRadius, clipRect);
+                            mTransactionPool, mMainExecutor, mAnimExecutor,
+                            change.getEndRelOffset(), cornerRadius, clipRect);
                 }
 
                 if (info.getAnimationOptions() != null) {
@@ -934,7 +934,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         a.restrictDuration(MAX_ANIMATION_DURATION);
         a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
         startSurfaceAnimation(animations, a, wt.getSurface(), finisher, mTransactionPool,
-                mMainExecutor, mAnimExecutor, new Point(bounds.left, bounds.top),
+                mMainExecutor, mAnimExecutor, change.getEndRelOffset(),
                 cornerRadius, change.getEndAbsBounds());
     }
 
@@ -959,7 +959,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         a.restrictDuration(MAX_ANIMATION_DURATION);
         a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
         startSurfaceAnimation(animations, a, wt.getSurface(), finisher, mTransactionPool,
-                mMainExecutor, mAnimExecutor, null /* position */,
+                mMainExecutor, mAnimExecutor, change.getEndRelOffset(),
                 cornerRadius, change.getEndAbsBounds());
     }
 

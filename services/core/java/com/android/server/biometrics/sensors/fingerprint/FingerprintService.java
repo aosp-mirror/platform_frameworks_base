@@ -1020,9 +1020,18 @@ public class FingerprintService extends SystemService {
 
         @Override
         public void registerBiometricStateListener(@NonNull IBiometricStateListener listener) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
             FingerprintService.this.registerBiometricStateListener(listener);
         }
-    }
+
+        @Override
+        public void onPowerPressed() {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+            for (ServiceProvider provider : mServiceProviders) {
+                provider.onPowerPressed();
+            }
+        }
+    };
 
     public FingerprintService(Context context) {
         super(context);
