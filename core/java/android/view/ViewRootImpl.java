@@ -846,6 +846,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private int mLastTransformHint = Integer.MIN_VALUE;
 
+    private AccessibilityWindowAttributes mAccessibilityWindowAttributes;
+
     /**
      * A temporary object used so relayoutWindow can return the latest SyncSeqId
      * system. The SyncSeqId system was designed to work without synchronous relayout
@@ -1397,8 +1399,12 @@ public final class ViewRootImpl implements ViewParent,
         if (registered) {
             final AccessibilityWindowAttributes attributes = new AccessibilityWindowAttributes(
                     mWindowAttributes);
-            mAccessibilityManager.setAccessibilityWindowAttributes(getDisplayId(),
-                    mAttachInfo.mAccessibilityWindowId, attributes);
+            if (!attributes.equals(mAccessibilityWindowAttributes)) {
+                mAccessibilityWindowAttributes = attributes;
+                mAccessibilityManager.setAccessibilityWindowAttributes(getDisplayId(),
+                        mAttachInfo.mAccessibilityWindowId, attributes);
+            }
+
         }
     }
 
@@ -10345,6 +10351,7 @@ public final class ViewRootImpl implements ViewParent,
                     != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
             if (registered) {
                 mAttachInfo.mAccessibilityWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+                mAccessibilityWindowAttributes = null;
                 mAccessibilityManager.removeAccessibilityInteractionConnection(mWindow);
             }
         }
