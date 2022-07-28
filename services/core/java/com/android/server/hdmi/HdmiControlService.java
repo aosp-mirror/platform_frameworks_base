@@ -127,6 +127,8 @@ import java.util.stream.Collectors;
 /**
  * Provides a service for sending and processing HDMI control messages,
  * HDMI-CEC and MHL control command, and providing the information on both standard.
+ *
+ * Additionally takes care of establishing and managing an eARC connection.
  */
 public class HdmiControlService extends SystemService {
     private static final String TAG = "HdmiControlService";
@@ -386,7 +388,8 @@ public class HdmiControlService extends SystemService {
     @HdmiControlManager.HdmiCecControl
     private int mHdmiControlEnabled;
 
-    // Set to true while the eARC feature is supported by the hardware and the eARC HAL is present.
+    // Set to true while the eARC feature is supported by the hardware on at least one port
+    // and the eARC HAL is present.
     @GuardedBy("mLock")
     @VisibleForTesting
     protected boolean mEarcSupported;
@@ -427,6 +430,9 @@ public class HdmiControlService extends SystemService {
     private HdmiCecController mCecController;
 
     private HdmiCecPowerStatusController mPowerStatusController;
+
+    @Nullable
+    private HdmiEarcController mEarcController;
 
     @Nullable
     private HdmiEarcLocalDevice mEarcLocalDevice;
@@ -664,7 +670,6 @@ public class HdmiControlService extends SystemService {
         }
         if (mCecController == null) {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
-            return;
         }
         if (mMhlController == null) {
             mMhlController = HdmiMhlControllerStub.create(this);
@@ -672,20 +677,46 @@ public class HdmiControlService extends SystemService {
         if (!mMhlController.isReady()) {
             Slog.i(TAG, "Device does not support MHL-control.");
         }
+        if (mEarcController == null) {
+            mEarcController = HdmiEarcController.create(this);
+        }
+        if (mEarcController == null) {
+            Slog.i(TAG, "Device does not support eARC.");
+        }
+        if (mCecController == null && mEarcController == null) {
+            return;
+        }
         mHdmiCecNetwork = new HdmiCecNetwork(this, mCecController, mMhlController);
         if (isCecControlEnabled()) {
             initializeCec(INITIATED_BY_BOOT_UP);
         } else {
             mCecController.enableCec(false);
         }
+
         synchronized (mLock) {
-            if (mEarcSupported && mEarcEnabled) {
-                initializeEarc(INITIATED_BY_BOOT_UP);
-            }
+            mMhlDevices = Collections.emptyList();
         }
-        mMhlDevices = Collections.emptyList();
 
         mHdmiCecNetwork.initPortInfo();
+        List<HdmiPortInfo> ports = getPortInfo();
+        synchronized (mLock) {
+            mEarcSupported = false;
+            for (HdmiPortInfo port : ports) {
+                if (mEarcSupported && port.isEarcSupported()) {
+                    // The HDMI specification only allows 1 active eARC connection. Android does not
+                    // support devices with multiple eARC-enabled ports.
+                    Slog.e(TAG, "HDMI eARC supported on more than 1 port.");
+                    break;
+                }
+                mEarcSupported |= port.isEarcSupported();
+            }
+
+            mEarcSupported &= (mEarcController != null);
+        }
+        if (isEarcSupportedAndEnabled()) {
+            initializeEarc(INITIATED_BY_BOOT_UP);
+        }
+
         mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
                 new HdmiCecConfig.SettingChangeListener() {
                     @Override
