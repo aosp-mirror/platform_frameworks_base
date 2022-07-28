@@ -28,7 +28,7 @@ import android.content.pm.PackageInfo;
  *
  * @hide
  */
-interface ParsingPackageHidden {
+public interface ParsingPackageHidden {
 
     /**
      * @see PackageInfo#versionCode

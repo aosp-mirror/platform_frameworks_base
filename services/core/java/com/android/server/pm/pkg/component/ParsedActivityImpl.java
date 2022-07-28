@@ -22,8 +22,8 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VER
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 
-import static com.android.server.pm.pkg.parsing.ParsingPackageImpl.sForInternedString;
-import static com.android.server.pm.pkg.parsing.ParsingPackageImpl.sForStringSet;
+import static com.android.server.pm.parsing.pkg.PackageImpl.sForInternedString;
+import static com.android.server.pm.parsing.pkg.PackageImpl.sForStringSet;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
