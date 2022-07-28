@@ -51,6 +51,7 @@ import android.util.Size;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import com.android.systemui.media.MediaProjectionCaptureTarget;
 import java.io.File;
 import java.io.Closeable;
 import java.io.IOException;
@@ -85,6 +86,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
     private ScreenRecordingMuxer mMuxer;
     private ScreenInternalAudioRecorder mAudio;
     private ScreenRecordingAudioSource mAudioSource;
+    private final MediaProjectionCaptureTarget mCaptureRegion;
     private final Handler mHandler;
 
     private Context mContext;
@@ -92,10 +94,12 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
 
     public ScreenMediaRecorder(Context context, Handler handler,
             int user, ScreenRecordingAudioSource audioSource,
+            MediaProjectionCaptureTarget captureRegion,
             ScreenMediaRecorderListener listener) {
         mContext = context;
         mHandler = handler;
         mUser = user;
+        mCaptureRegion = captureRegion;
         mListener = listener;
         mAudioSource = audioSource;
     }
@@ -108,9 +112,11 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         IMediaProjection proj = null;
         proj = mediaService.createProjection(mUser, mContext.getPackageName(),
                     MediaProjectionManager.TYPE_SCREEN_CAPTURE, false);
-        IBinder projection = proj.asBinder();
-        mMediaProjection = new MediaProjection(mContext,
-                IMediaProjection.Stub.asInterface(projection));
+        IMediaProjection projection = IMediaProjection.Stub.asInterface(proj.asBinder());
+        if (mCaptureRegion != null) {
+            projection.setLaunchCookie(mCaptureRegion.getLaunchCookie());
+        }
+        mMediaProjection = new MediaProjection(mContext, projection);
         mMediaProjection.registerCallback(this, mHandler);
 
         File cacheDir = mContext.getCacheDir();

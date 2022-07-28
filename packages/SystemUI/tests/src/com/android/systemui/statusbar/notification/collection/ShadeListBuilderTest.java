@@ -33,6 +33,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -1845,6 +1846,103 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void stableOrderingDisregardedWithSectionChange() {
+        // GIVEN the first sectioner's packages can be changed from run-to-run
+        List<String> mutableSectionerPackages = new ArrayList<>();
+        mutableSectionerPackages.add(PACKAGE_1);
+        mListBuilder.setSectioners(asList(
+                new PackageSectioner(mutableSectionerPackages, null),
+                new PackageSectioner(List.of(PACKAGE_1, PACKAGE_2, PACKAGE_3), null)));
+        mStabilityManager.setAllowEntryReordering(false);
+
+        // WHEN the list is originally built with reordering disabled (and section changes allowed)
+        addNotif(0, PACKAGE_1).setRank(1);
+        addNotif(1, PACKAGE_1).setRank(5);
+        addNotif(2, PACKAGE_2).setRank(2);
+        addNotif(3, PACKAGE_2).setRank(3);
+        addNotif(4, PACKAGE_3).setRank(4);
+        dispatchBuild();
+
+        // VERIFY the order and that entry reordering has not been suppressed
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                notif(2),
+                notif(3),
+                notif(4)
+        );
+        verify(mStabilityManager, never()).onEntryReorderSuppressed();
+
+        // WHEN the first section now claims PACKAGE_3 notifications
+        mutableSectionerPackages.add(PACKAGE_3);
+        dispatchBuild();
+
+        // VERIFY the re-sectioned notification is inserted at the top of the first section, because
+        // it's effectively "new" and "new" things are inserted at the top of their section.
+        verifyBuiltList(
+                notif(4),
+                notif(0),
+                notif(1),
+                notif(2),
+                notif(3)
+        );
+        verify(mStabilityManager).onEntryReorderSuppressed();
+        clearInvocations(mStabilityManager);
+
+        // WHEN reordering is now allowed again
+        mStabilityManager.setAllowEntryReordering(true);
+        dispatchBuild();
+
+        // VERIFY that list order changes to put the re-sectioned notification in the middle where
+        // it is ranked.
+        verifyBuiltList(
+                notif(0),
+                notif(4),
+                notif(1),
+                notif(2),
+                notif(3)
+        );
+        verify(mStabilityManager, never()).onEntryReorderSuppressed();
+    }
+
+    @Test
+    public void groupRevertingToSummaryRetainsStablePosition() {
+        // GIVEN a notification group is on screen
+        mStabilityManager.setAllowEntryReordering(false);
+
+        // WHEN the list is originally built with reordering disabled (and section changes allowed)
+        addNotif(0, PACKAGE_1).setRank(2);
+        addNotif(1, PACKAGE_1).setRank(3);
+        addGroupSummary(2, PACKAGE_1, "group").setRank(4);
+        addGroupChild(3, PACKAGE_1, "group").setRank(5);
+        addGroupChild(4, PACKAGE_1, "group").setRank(6);
+        dispatchBuild();
+
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                group(
+                        summary(2),
+                        child(3),
+                        child(4)
+                )
+        );
+
+        // WHEN the notification summary rank increases and children removed
+        setNewRank(notif(2).entry, 1);
+        mEntrySet.remove(4);
+        mEntrySet.remove(3);
+        dispatchBuild();
+
+        // VERIFY the summary stays in the same location on rebuild
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                notif(2)
+        );
+    }
+
+    @Test
     public void testStableChildOrdering() {
         // WHEN the list is originally built with reordering disabled
         mStabilityManager.setAllowEntryReordering(false);
@@ -2040,6 +2138,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
     private void assertOrder(String visible, String active, String expected) {
         StringBuilder differenceSb = new StringBuilder();
+        NotifSection section = new NotifSection(mock(NotifSectioner.class), 0);
         for (char c : active.toCharArray()) {
             if (visible.indexOf(c) < 0) differenceSb.append(c);
         }
@@ -2048,6 +2147,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         for (int i = 0; i < visible.length(); i++) {
             addNotif(i, String.valueOf(visible.charAt(i)))
                     .setRank(active.indexOf(visible.charAt(i)))
+                    .setSection(section)
                     .setStableIndex(i);
 
         }
@@ -2055,6 +2155,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         for (int i = 0; i < difference.length(); i++) {
             addNotif(i + visible.length(), String.valueOf(difference.charAt(i)))
                     .setRank(active.indexOf(difference.charAt(i)))
+                    .setSection(section)
                     .setStableIndex(-1);
         }
 
