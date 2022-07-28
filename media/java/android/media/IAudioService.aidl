@@ -98,6 +98,9 @@ interface IAudioService {
     void setStreamVolumeWithAttribution(int streamType, int index, int flags,
             in String callingPackage, in String attributionTag);
 
+    void setDeviceVolume(in VolumeInfo vi, in AudioDeviceAttributes ada,
+            in String callingPackage, in String attributionTag);
+
     oneway void handleVolumeKey(in KeyEvent event, boolean isOnTv,
             String callingPackage, String caller);
 

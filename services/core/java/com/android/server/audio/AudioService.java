@@ -175,6 +175,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.audio.AudioServiceEvents.DeviceVolumeEvent;
 import com.android.server.audio.AudioServiceEvents.PhoneStateEvent;
 import com.android.server.audio.AudioServiceEvents.VolumeEvent;
 import com.android.server.pm.UserManagerInternal;
@@ -3591,7 +3592,8 @@ public class AudioService extends IAudioService.Stub
                         + "), do not change associated stream volume");
                 continue;
             }
-            setStreamVolume(groupedStream, index, flags, callingPackage, callingPackage,
+            setStreamVolume(groupedStream, index, flags, /*device*/ null,
+                    callingPackage, callingPackage,
                     attributionTag, Binder.getCallingUid(), true /*hasModifyAudioSettings*/);
         }
     }
@@ -3634,14 +3636,72 @@ public class AudioService extends IAudioService.Stub
         return AudioSystem.getMinVolumeIndexForAttributes(attr);
     }
 
+    /** @see AudioDeviceVolumeManager#setDeviceVolume(VolumeInfo, AudioDeviceAttributes)
+     * Part of service interface, check permissions and parameters here */
+    public void setDeviceVolume(@NonNull VolumeInfo vi, @NonNull AudioDeviceAttributes ada,
+            @NonNull String callingPackage, @Nullable String attributionTag) {
+        enforceModifyAudioRoutingPermission();
+        Objects.requireNonNull(vi);
+        Objects.requireNonNull(ada);
+        Objects.requireNonNull(callingPackage);
+        if (!vi.hasStreamType()) {
+            Log.e(TAG, "Unsupported non-stream type based VolumeInfo", new Exception());
+            return;
+        }
+        int index = vi.getVolumeIndex();
+        if (index == VolumeInfo.INDEX_NOT_SET) {
+            throw new IllegalArgumentException("changing device volume requires a volume index");
+        }
+
+        if (vi.getMinVolumeIndex() == VolumeInfo.INDEX_NOT_SET
+                || vi.getMaxVolumeIndex() == VolumeInfo.INDEX_NOT_SET) {
+            // assume index meant to be in stream type range, validate
+            if ((index * 10) < mStreamStates[vi.getStreamType()].getMinIndex()
+                    || (index * 10) > mStreamStates[vi.getStreamType()].getMaxIndex()) {
+                throw new IllegalArgumentException("invalid volume index " + index
+                        + " not between min/max for stream " + vi.getStreamType());
+            }
+        } else {
+            // check if index needs to be rescaled
+            final int min = (mStreamStates[vi.getStreamType()].getMinIndex() + 5) / 10;
+            final int max = (mStreamStates[vi.getStreamType()].getMaxIndex() + 5) / 10;
+            if (vi.getMinVolumeIndex() != min || vi.getMaxVolumeIndex() != max) {
+                index = rescaleIndex(index,
+                        /*srcMin*/ vi.getMinVolumeIndex(), /*srcMax*/ vi.getMaxVolumeIndex(),
+                        /*dstMin*/ min, /*dstMax*/ max);
+            }
+        }
+        setStreamVolumeWithAttributionInt(vi.getStreamType(), index, /*flags*/ 0,
+                ada, callingPackage, attributionTag);
+    }
+
     /** Retain API for unsupported app usage */
     public void setStreamVolume(int streamType, int index, int flags, String callingPackage) {
-        setStreamVolumeWithAttribution(streamType, index, flags, callingPackage, null);
+        setStreamVolumeWithAttribution(streamType, index, flags,
+                callingPackage, /*attributionTag*/ null);
     }
 
     /** @see AudioManager#setStreamVolume(int, int, int)
      * Part of service interface, check permissions here */
     public void setStreamVolumeWithAttribution(int streamType, int index, int flags,
+            String callingPackage, String attributionTag) {
+        setStreamVolumeWithAttributionInt(streamType, index, flags, /*device*/ null,
+                callingPackage, attributionTag);
+    }
+
+    /**
+     * Internal method for a stream type volume change. Can be used to change the volume on a
+     * given device only
+     * @param streamType the stream type whose volume is to be changed
+     * @param index the volume index
+     * @param flags options for volume handling
+     * @param device null when controlling volume for the current routing, otherwise the device
+     *               for which volume is being changed
+     * @param callingPackage client side-provided package name of caller, not to be trusted
+     * @param attributionTag client side-provided attribution name, not to be trusted
+     */
+    protected void setStreamVolumeWithAttributionInt(int streamType, int index, int flags,
+            @Nullable AudioDeviceAttributes device,
             String callingPackage, String attributionTag) {
         if ((streamType == AudioManager.STREAM_ACCESSIBILITY) && !canChangeAccessibilityVolume()) {
             Log.w(TAG, "Trying to call setStreamVolume() for a11y without"
@@ -3665,10 +3725,14 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        sVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_SET_STREAM_VOL, streamType,
-                index/*val1*/, flags/*val2*/, callingPackage));
-        setStreamVolume(streamType, index, flags, callingPackage, callingPackage,
-                attributionTag, Binder.getCallingUid(), callingOrSelfHasAudioSettingsPermission());
+        final AudioEventLogger.Event event = (device == null)
+                ? new VolumeEvent(VolumeEvent.VOL_SET_STREAM_VOL, streamType,
+                    index/*val1*/, flags/*val2*/, callingPackage)
+                : new DeviceVolumeEvent(streamType, index, device, callingPackage);
+        sVolumeLogger.log(event);
+        setStreamVolume(streamType, index, flags, device,
+                callingPackage, callingPackage, attributionTag,
+                Binder.getCallingUid(), callingOrSelfHasAudioSettingsPermission());
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_ULTRASOUND)
@@ -3937,11 +4001,13 @@ public class AudioService extends IAudioService.Stub
         mDeviceBroker.postSetLeAudioVolumeIndex(index, maxIndex, streamType);
     }
 
-    private void setStreamVolume(int streamType, int index, int flags, String callingPackage,
-            String caller, String attributionTag, int uid,
+    private void setStreamVolume(int streamType, int index, int flags,
+            @Nullable AudioDeviceAttributes ada,
+            String callingPackage, String caller, String attributionTag, int uid,
             boolean hasModifyAudioSettings) {
         if (DEBUG_VOL) {
             Log.d(TAG, "setStreamVolume(stream=" + streamType+", index=" + index
+                    + ", dev=" + ada
                     + ", calling=" + callingPackage + ")");
         }
         if (mUseFixedVolume) {
@@ -3952,7 +4018,9 @@ public class AudioService extends IAudioService.Stub
         int streamTypeAlias = mStreamVolumeAlias[streamType];
         VolumeStreamState streamState = mStreamStates[streamTypeAlias];
 
-        final int device = getDeviceForStream(streamType);
+        final int device = (ada == null)
+                ? getDeviceForStream(streamType)
+                : ada.getInternalType();
         int oldIndex;
 
         // skip a2dp absolute volume control request when the device
@@ -5460,7 +5528,8 @@ public class AudioService extends IAudioService.Stub
             throw new SecurityException("Should only be called from system process");
         }
 
-        setStreamVolume(streamType, index, flags, packageName, packageName, null, uid,
+        setStreamVolume(streamType, index, flags, /*device*/ null,
+                packageName, packageName, null, uid,
                 hasAudioSettingsPermission(uid, pid));
     }
 
@@ -7603,7 +7672,7 @@ public class AudioService extends IAudioService.Stub
                     && !isFullyMuted()) {
                 index = 1;
             }
-            AudioSystem.setStreamVolumeIndexAS(mStreamType, index, device);
+            mAudioSystem.setStreamVolumeIndexAS(mStreamType, index, device);
         }
 
         // must be called while synchronized VolumeStreamState.class
