@@ -473,9 +473,10 @@ class TransitionController {
         // Collect all visible non-app windows which need to be drawn before the animation starts.
         final DisplayContent dc = wc.asDisplayContent();
         if (dc != null) {
+            final boolean noAsyncRotation = dc.getAsyncRotationController() == null;
             wc.forAllWindows(w -> {
                 if (w.mActivityRecord == null && w.isVisible() && !isCollecting(w.mToken)
-                        && dc.shouldSyncRotationChange(w)) {
+                        && (noAsyncRotation || !AsyncRotationController.canBeAsync(w.mToken))) {
                     transition.collect(w.mToken);
                 }
             }, true /* traverseTopToBottom */);
