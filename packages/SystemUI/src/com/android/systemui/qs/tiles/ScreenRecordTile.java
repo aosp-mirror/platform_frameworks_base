@@ -34,6 +34,7 @@ import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
@@ -61,6 +62,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
     private final KeyguardStateController mKeyguardStateController;
     private final Callback mCallback = new Callback();
     private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final FeatureFlags mFlags;
 
     private long mMillisUntilFinished = 0;
 
@@ -71,6 +73,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             @Main Handler mainHandler,
             FalsingManager falsingManager,
             MetricsLogger metricsLogger,
+            FeatureFlags flags,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
@@ -83,6 +86,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
                 statusBarStateController, activityStarter, qsLogger);
         mController = controller;
         mController.observe(this, mCallback);
+        mFlags = flags;
         mKeyguardDismissUtil = keyguardDismissUtil;
         mKeyguardStateController = keyguardStateController;
         mDialogLaunchAnimator = dialogLaunchAnimator;
@@ -164,8 +168,8 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
             getHost().collapsePanels();
         };
-        ScreenRecordDialog dialog = mController.createScreenRecordDialog(mContext,
-                onStartRecordingClicked);
+        ScreenRecordDialog dialog = mController.createScreenRecordDialog(mContext, mFlags,
+                mDialogLaunchAnimator, mActivityStarter, onStartRecordingClicked);
 
         ActivityStarter.OnDismissAction dismissAction = () -> {
             if (shouldAnimateFromView) {
