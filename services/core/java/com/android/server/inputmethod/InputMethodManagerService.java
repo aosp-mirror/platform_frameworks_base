@@ -178,7 +178,6 @@ import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.TransferPipe;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.view.IInputMethodManager;
@@ -4182,27 +4181,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (!mSystemReady) {
                 return;
             }
-            final InputMethodInfo imi = mMethodMap.get(imiId);
-            if (imi == null) return;
-            final String[] packageInfos;
-            try {
-                packageInfos = mIPackageManager.getPackagesForUid(Binder.getCallingUid());
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to get package infos");
-                return;
-            }
-            if (ArrayUtils.find(packageInfos,
-                    packageInfo -> TextUtils.equals(packageInfo, imi.getPackageName())) == null) {
+            if (!mSettings.setAdditionalInputMethodSubtypes(imiId, toBeAdded,
+                    mAdditionalSubtypeMap, mIPackageManager)) {
                 return;
             }
 
-            if (toBeAdded.isEmpty()) {
-                mAdditionalSubtypeMap.remove(imi.getId());
-            } else {
-                mAdditionalSubtypeMap.put(imi.getId(), toBeAdded);
-            }
-            AdditionalSubtypeUtils.save(mAdditionalSubtypeMap, mMethodMap,
-                    mSettings.getCurrentUserId());
             final long ident = Binder.clearCallingIdentity();
             try {
                 buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
