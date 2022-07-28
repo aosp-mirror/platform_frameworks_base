@@ -16,6 +16,7 @@
 
 package com.android.systemui.screenrecord;
 
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -42,6 +43,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.media.MediaProjectionCaptureTarget;
 import com.android.systemui.screenrecord.ScreenMediaRecorder.ScreenMediaRecorderListener;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
@@ -67,6 +69,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     private static final String EXTRA_PATH = "extra_path";
     private static final String EXTRA_AUDIO_SOURCE = "extra_useAudio";
     private static final String EXTRA_SHOW_TAPS = "extra_showTaps";
+    private static final String EXTRA_CAPTURE_TARGET = "extra_captureTarget";
 
     private static final String ACTION_START = "com.android.systemui.screenrecord.START";
     private static final String ACTION_STOP = "com.android.systemui.screenrecord.STOP";
@@ -110,14 +113,18 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
      * @param audioSource   The ordinal value of the audio source
      *                      {@link com.android.systemui.screenrecord.ScreenRecordingAudioSource}
      * @param showTaps   True to make touches visible while recording
+     * @param captureTarget   pass this parameter to capture a specific part instead
+     *                        of the full screen
      */
     public static Intent getStartIntent(Context context, int resultCode,
-            int audioSource, boolean showTaps) {
+            int audioSource, boolean showTaps,
+            @Nullable MediaProjectionCaptureTarget captureTarget) {
         return new Intent(context, RecordingService.class)
                 .setAction(ACTION_START)
                 .putExtra(EXTRA_RESULT_CODE, resultCode)
                 .putExtra(EXTRA_AUDIO_SOURCE, audioSource)
-                .putExtra(EXTRA_SHOW_TAPS, showTaps);
+                .putExtra(EXTRA_SHOW_TAPS, showTaps)
+                .putExtra(EXTRA_CAPTURE_TARGET, captureTarget);
     }
 
     @Override
@@ -136,6 +143,9 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                         .values()[intent.getIntExtra(EXTRA_AUDIO_SOURCE, 0)];
                 Log.d(TAG, "recording with audio source" + mAudioSource);
                 mShowTaps = intent.getBooleanExtra(EXTRA_SHOW_TAPS, false);
+                MediaProjectionCaptureTarget captureTarget =
+                        intent.getParcelableExtra(EXTRA_CAPTURE_TARGET,
+                                MediaProjectionCaptureTarget.class);
 
                 mOriginalShowTaps = Settings.System.getInt(
                         getApplicationContext().getContentResolver(),
@@ -148,6 +158,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                         mMainHandler,
                         currentUserId,
                         mAudioSource,
+                        captureTarget,
                         this
                 );
 
