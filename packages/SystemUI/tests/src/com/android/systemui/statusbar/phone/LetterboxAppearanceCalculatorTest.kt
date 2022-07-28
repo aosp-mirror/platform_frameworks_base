@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.graphics.Color
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.view.WindowInsetsController
@@ -24,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.view.AppearanceRegion
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
 import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
@@ -33,7 +35,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when` as whenever
-import com.android.systemui.dump.DumpManager
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -56,6 +57,7 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
     @Mock private lateinit var statusBarBoundsProvider: StatusBarBoundsProvider
     @Mock private lateinit var statusBarFragmentComponent: StatusBarFragmentComponent
     @Mock private lateinit var dumpManager: DumpManager
+    @Mock private lateinit var letterboxBackgroundProvider: LetterboxBackgroundProvider
 
     private lateinit var calculator: LetterboxAppearanceCalculator
 
@@ -63,8 +65,12 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(statusBarFragmentComponent.boundsProvider).thenReturn(statusBarBoundsProvider)
-        calculator = LetterboxAppearanceCalculator(lightBarController, dumpManager)
+        calculator =
+            LetterboxAppearanceCalculator(
+                lightBarController, dumpManager, letterboxBackgroundProvider)
         calculator.onStatusBarViewInitialized(statusBarFragmentComponent)
+        whenever(letterboxBackgroundProvider.letterboxBackgroundColor).thenReturn(Color.BLACK)
+        whenever(letterboxBackgroundProvider.isLetterboxBackgroundMultiColored).thenReturn(false)
     }
 
     @Test
@@ -96,6 +102,23 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
         expect
             .that(letterboxAppearance.appearance)
             .isEqualTo(TEST_APPEARANCE or APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS)
+        expect.that(letterboxAppearance.appearanceRegions).isEqualTo(TEST_APPEARANCE_REGIONS)
+    }
+
+    @Test
+    fun getLetterboxAppearance_noOverlap_BackgroundMultiColor_returnsAppearanceWithScrim() {
+        whenever(letterboxBackgroundProvider.isLetterboxBackgroundMultiColored).thenReturn(true)
+        whenever(statusBarBoundsProvider.visibleStartSideBounds).thenReturn(Rect(0, 0, 100, 100))
+        whenever(statusBarBoundsProvider.visibleEndSideBounds).thenReturn(Rect(200, 0, 300, 100))
+        val letterbox = letterboxWithInnerBounds(Rect(101, 0, 199, 100))
+
+        val letterboxAppearance =
+            calculator.getLetterboxAppearance(
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+
+        expect
+                .that(letterboxAppearance.appearance)
+                .isEqualTo(TEST_APPEARANCE or APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS)
         expect.that(letterboxAppearance.appearanceRegions).isEqualTo(TEST_APPEARANCE_REGIONS)
     }
 
