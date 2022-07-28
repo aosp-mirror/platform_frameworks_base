@@ -412,7 +412,7 @@ final class InputMethodUtils {
                 enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
                         context.getResources(), imi);
             }
-            return InputMethodSubtype.sort(context, 0, imi, enabledSubtypes);
+            return InputMethodSubtype.sort(imi, enabledSubtypes);
         }
 
         List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(InputMethodInfo imi) {
