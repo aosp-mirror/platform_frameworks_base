@@ -37,12 +37,14 @@ public final class DeleteGesture extends HandwritingGesture implements Parcelabl
     private RectF mArea;
 
     private DeleteGesture(@Granularity int granularity, RectF area, String fallbackText) {
+        mType = GESTURE_TYPE_DELETE;
         mArea = area;
         mGranularity = granularity;
         mFallbackText = fallbackText;
     }
 
     private DeleteGesture(@NonNull final Parcel source) {
+        mType = GESTURE_TYPE_DELETE;
         mFallbackText = source.readString8();
         mGranularity = source.readInt();
         mArea = source.readTypedObject(RectF.CREATOR);
