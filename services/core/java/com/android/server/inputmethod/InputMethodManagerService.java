@@ -5284,18 +5284,38 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     /**
      * Gets the current subtype of this input method.
+     *
+     * @param userId User ID to be queried about.
+     * @return The current {@link InputMethodSubtype} for the specified user.
      */
+    @Nullable
     @Override
-    public InputMethodSubtype getCurrentInputMethodSubtype() {
+    public InputMethodSubtype getCurrentInputMethodSubtype(@UserIdInt int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
         synchronized (ImfLock.class) {
-            // TODO: Make this work even for non-current users?
-            if (!calledFromValidUserLocked()) {
-                return null;
+            if (mSettings.getCurrentUserId() == userId) {
+                return getCurrentInputMethodSubtypeLocked();
             }
-            return getCurrentInputMethodSubtypeLocked();
+
+            final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
+            final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap,
+                    userId, false);
+            return settings.getCurrentInputMethodSubtypeForNonCurrentUsers();
         }
     }
 
+    /**
+     * Returns the current {@link InputMethodSubtype} for the current user.
+     *
+     * <p>CAVEATS: You must also update
+     * {@link InputMethodSettings#getCurrentInputMethodSubtypeForNonCurrentUsers()}
+     * when you update the algorithm of this method.</p>
+     *
+     * <p>TODO: Address code duplication between this and
+     * {@link InputMethodSettings#getCurrentInputMethodSubtypeForNonCurrentUsers()}.</p>
+     */
     @GuardedBy("ImfLock.class")
     InputMethodSubtype getCurrentInputMethodSubtypeLocked() {
         String selectedMethodId = getSelectedMethodIdLocked();

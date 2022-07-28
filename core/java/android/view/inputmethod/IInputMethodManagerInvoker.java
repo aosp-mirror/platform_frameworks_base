@@ -182,9 +182,9 @@ final class IInputMethodManagerInvoker {
 
     @AnyThread
     @Nullable
-    InputMethodSubtype getCurrentInputMethodSubtype() {
+    InputMethodSubtype getCurrentInputMethodSubtype(@UserIdInt int userId) {
         try {
-            return mTarget.getCurrentInputMethodSubtype();
+            return mTarget.getCurrentInputMethodSubtype(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
