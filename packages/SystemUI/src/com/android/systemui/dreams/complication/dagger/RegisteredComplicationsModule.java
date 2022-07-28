@@ -44,9 +44,9 @@ public interface RegisteredComplicationsModule {
     String DREAM_SMARTSPACE_LAYOUT_PARAMS = "smartspace_layout_params";
     String DREAM_HOME_CONTROLS_CHIP_LAYOUT_PARAMS = "home_controls_chip_layout_params";
 
-    int DREAM_CLOCK_TIME_COMPLICATION_WEIGHT = 0;
+    int DREAM_CLOCK_TIME_COMPLICATION_WEIGHT = 1;
     int DREAM_SMARTSPACE_COMPLICATION_WEIGHT = 0;
-    int DREAM_HOME_CONTROLS_CHIP_COMPLICATION_WEIGHT = 0;
+    int DREAM_HOME_CONTROLS_CHIP_COMPLICATION_WEIGHT = 1;
 
     /**
      * Provides layout parameters for the clock time complication.
@@ -56,9 +56,9 @@ public interface RegisteredComplicationsModule {
     static ComplicationLayoutParams provideClockTimeLayoutParams() {
         return new ComplicationLayoutParams(0,
             ViewGroup.LayoutParams.WRAP_CONTENT,
-            ComplicationLayoutParams.POSITION_BOTTOM
+            ComplicationLayoutParams.POSITION_TOP
                     | ComplicationLayoutParams.POSITION_START,
-            ComplicationLayoutParams.DIRECTION_UP,
+            ComplicationLayoutParams.DIRECTION_DOWN,
             DREAM_CLOCK_TIME_COMPLICATION_WEIGHT);
     }
 
