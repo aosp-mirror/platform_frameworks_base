@@ -5605,7 +5605,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             mWindowsInsetsChanged = 0;
                             // We need to update resizing windows and dispatch the new insets state
                             // to them.
-                            mRoot.performSurfacePlacement();
+                            mWindowPlacerLocked.performSurfacePlacement();
                         }
                     }
                     break;
