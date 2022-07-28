@@ -148,6 +148,20 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"/>
+
+                <!-- Temporary entrypoint for the partial screensharing used for teamfooding -->
+                <!-- TODO(b/236838395) remove this and use redesigned dialog -->
+                <TextView
+                    android:id="@+id/button_app"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="8dp"
+                    android:text="App"
+                    style="@style/Widget.Dialog.Button.BorderButton" />
+
                 <TextView
                     android:id="@+id/button_start"
                     android:layout_width="wrap_content"

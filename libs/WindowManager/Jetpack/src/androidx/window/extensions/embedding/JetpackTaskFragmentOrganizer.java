@@ -72,6 +72,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
                 @NonNull Configuration parentConfig);
         void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
                 @NonNull IBinder activityToken);
+        void onTaskFragmentError(@Nullable TaskFragmentInfo taskFragmentInfo, int opType);
     }
 
     /**
@@ -321,6 +322,20 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
             @NonNull IBinder activityToken) {
         if (mCallback != null) {
             mCallback.onActivityReparentToTask(taskId, activityIntent, activityToken);
+        }
+    }
+
+    @Override
+    public void onTaskFragmentError(@NonNull IBinder errorCallbackToken,
+            @Nullable TaskFragmentInfo taskFragmentInfo,
+            int opType, @NonNull Throwable exception) {
+        if (taskFragmentInfo != null) {
+            final IBinder fragmentToken = taskFragmentInfo.getFragmentToken();
+            mFragmentInfos.put(fragmentToken, taskFragmentInfo);
+        }
+
+        if (mCallback != null) {
+            mCallback.onTaskFragmentError(taskFragmentInfo, opType);
         }
     }
 }

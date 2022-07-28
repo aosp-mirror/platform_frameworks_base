@@ -18,6 +18,7 @@ package android.window;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -39,16 +40,23 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * Key to the exception in {@link Bundle} in {@link ITaskFragmentOrganizer#onTaskFragmentError}.
      */
     private static final String KEY_ERROR_CALLBACK_EXCEPTION = "fragment_exception";
+    private static final String KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO = "task_fragment_info";
+    private static final String KEY_ERROR_CALLBACK_OP_TYPE = "operation_type";
 
     /**
-     * Creates a {@link Bundle} with an exception that can be passed to
-     * {@link ITaskFragmentOrganizer#onTaskFragmentError}.
+     * Creates a {@link Bundle} with an exception, operation type and TaskFragmentInfo (if any)
+     * that can be passed to {@link ITaskFragmentOrganizer#onTaskFragmentError}.
      * @hide
      */
-    public static Bundle putExceptionInBundle(@NonNull Throwable exception) {
-        final Bundle exceptionBundle = new Bundle();
-        exceptionBundle.putSerializable(KEY_ERROR_CALLBACK_EXCEPTION, exception);
-        return exceptionBundle;
+    public static @NonNull Bundle putErrorInfoInBundle(@NonNull Throwable exception,
+            @Nullable TaskFragmentInfo info, int opType) {
+        final Bundle errorBundle = new Bundle();
+        errorBundle.putSerializable(KEY_ERROR_CALLBACK_EXCEPTION, exception);
+        if (info != null) {
+            errorBundle.putParcelable(KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO, info);
+        }
+        errorBundle.putInt(KEY_ERROR_CALLBACK_OP_TYPE, opType);
+        return errorBundle;
     }
 
     /**
@@ -151,9 +159,32 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * @param errorCallbackToken    token set in
      *                             {@link WindowContainerTransaction#setErrorCallbackToken(IBinder)}
      * @param exception             exception from the server side.
+     *
+     * @deprecated Use {@link #onTaskFragmentError(IBinder, TaskFragmentInfo, int, Throwable)}
+     * instead.
      */
+    @Deprecated
     public void onTaskFragmentError(
             @NonNull IBinder errorCallbackToken, @NonNull Throwable exception) {}
+
+    /**
+     * Called when the {@link WindowContainerTransaction} created with
+     * {@link WindowContainerTransaction#setErrorCallbackToken(IBinder)} failed on the server side.
+     *
+     * @param errorCallbackToken    token set in
+     *                             {@link WindowContainerTransaction#setErrorCallbackToken(IBinder)}
+     * @param taskFragmentInfo  The {@link TaskFragmentInfo}. This could be {@code null} if no
+     *                          TaskFragment created.
+     * @param opType            The {@link WindowContainerTransaction.HierarchyOp} of the failed
+     *                          transaction operation.
+     * @param exception             exception from the server side.
+     */
+    public void onTaskFragmentError(
+            @NonNull IBinder errorCallbackToken, @Nullable TaskFragmentInfo taskFragmentInfo,
+            int opType, @NonNull Throwable exception) {
+        // Doing so to keep compatibility. This will be removed in the next release.
+        onTaskFragmentError(errorCallbackToken, exception);
+    }
 
     /**
      * Called when an Activity is reparented to the Task with organized TaskFragment. For example,
@@ -217,10 +248,16 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
 
         @Override
         public void onTaskFragmentError(
-                @NonNull IBinder errorCallbackToken, @NonNull Bundle exceptionBundle) {
-            mExecutor.execute(() -> TaskFragmentOrganizer.this.onTaskFragmentError(
-                    errorCallbackToken,
-                    (Throwable) exceptionBundle.getSerializable(KEY_ERROR_CALLBACK_EXCEPTION)));
+                @NonNull IBinder errorCallbackToken, @NonNull Bundle errorBundle) {
+            mExecutor.execute(() -> {
+                final TaskFragmentInfo info = errorBundle.getParcelable(
+                        KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO, TaskFragmentInfo.class);
+                TaskFragmentOrganizer.this.onTaskFragmentError(
+                        errorCallbackToken, info,
+                        errorBundle.getInt(KEY_ERROR_CALLBACK_OP_TYPE),
+                        (Throwable) errorBundle.getSerializable(KEY_ERROR_CALLBACK_EXCEPTION,
+                                java.lang.Throwable.class));
+            });
         }
 
         @Override
