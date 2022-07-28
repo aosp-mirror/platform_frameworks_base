@@ -779,6 +779,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return leakedSurface || killedApps;
     }
 
+    /**
+     * This method should only be called from {@link WindowSurfacePlacer}. Otherwise the recursion
+     * check and {@link WindowSurfacePlacer#isInLayout()} won't take effect.
+     */
     void performSurfacePlacement() {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "performSurfacePlacement");
         try {
