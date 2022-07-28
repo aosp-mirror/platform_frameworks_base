@@ -639,6 +639,11 @@ public class UsageStatsService extends SystemService implements
         mAppStandby.initializeDefaultsForSystemApps(userId);
     }
 
+    private boolean sameApp(int callingUid, @UserIdInt int userId, String packageName) {
+        return mPackageManagerInternal.getPackageUid(packageName, 0 /* flags */, userId)
+                == callingUid;
+    }
+
     private boolean isInstantApp(String packageName, int userId) {
         return mPackageManagerInternal.isPackageEphemeral(userId, packageName);
     }
@@ -2354,17 +2359,15 @@ public class UsageStatsService extends SystemService implements
             }
             final int packageUid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
             // If the calling app is asking about itself, continue, else check for permission.
-            if (packageUid != callingUid) {
-                if (!hasPermission(callingPackage)) {
-                    throw new SecurityException(
-                            "Don't have permission to query app standby bucket");
-                }
+            final boolean sameApp = packageUid == callingUid;
+            if (!sameApp && !hasPermission(callingPackage)) {
+                throw new SecurityException("Don't have permission to query app standby bucket");
             }
 
             final boolean isInstantApp = isInstantApp(packageName, userId);
             final boolean cannotAccessInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
                     userId);
-            if (packageUid < 0 || (isInstantApp && cannotAccessInstantApps)) {
+            if (packageUid < 0 || (!sameApp && isInstantApp && cannotAccessInstantApps)) {
                 throw new IllegalArgumentException(
                         "Cannot get standby bucket for non existent package (" + packageName + ")");
             }
@@ -2418,7 +2421,9 @@ public class UsageStatsService extends SystemService implements
                 }
                 final int targetUserId = userId;
                 standbyBucketList.removeIf(
-                        i -> cannotAccessInstantApps && isInstantApp(i.mPackageName, targetUserId));
+                        i -> !sameApp(callingUid, targetUserId, i.mPackageName)
+                                && isInstantApp(i.mPackageName, targetUserId)
+                                && cannotAccessInstantApps);
                 return new ParceledListSlice<>(standbyBucketList);
             } finally {
                 Binder.restoreCallingIdentity(token);
