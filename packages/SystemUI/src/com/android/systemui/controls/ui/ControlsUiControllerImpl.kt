@@ -59,7 +59,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsPopupMenu
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.phone.ShadeController
+import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
@@ -71,18 +71,18 @@ private data class ControlKey(val componentName: ComponentName, val controlId: S
 
 @SysUISingleton
 class ControlsUiControllerImpl @Inject constructor (
-    val controlsController: Lazy<ControlsController>,
-    val context: Context,
-    @Main val uiExecutor: DelayableExecutor,
-    @Background val bgExecutor: DelayableExecutor,
-    val controlsListingController: Lazy<ControlsListingController>,
-    @Main val sharedPreferences: SharedPreferences,
-    val controlActionCoordinator: ControlActionCoordinator,
-    private val activityStarter: ActivityStarter,
-    private val shadeController: ShadeController,
-    private val iconCache: CustomIconCache,
-    private val controlsMetricsLogger: ControlsMetricsLogger,
-    private val keyguardStateController: KeyguardStateController
+        val controlsController: Lazy<ControlsController>,
+        val context: Context,
+        @Main val uiExecutor: DelayableExecutor,
+        @Background val bgExecutor: DelayableExecutor,
+        val controlsListingController: Lazy<ControlsListingController>,
+        @Main val sharedPreferences: SharedPreferences,
+        val controlActionCoordinator: ControlActionCoordinator,
+        private val activityStarter: ActivityStarter,
+        private val shadeController: ShadeController,
+        private val iconCache: CustomIconCache,
+        private val controlsMetricsLogger: ControlsMetricsLogger,
+        private val keyguardStateController: KeyguardStateController
 ) : ControlsUiController {
 
     companion object {
