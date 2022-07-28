@@ -200,7 +200,7 @@ final class InputMethodSubtypeSwitchingController {
                     continue;
                 }
                 final List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList =
-                        mSettings.getEnabledInputMethodSubtypeListLocked(mContext, imi, true);
+                        mSettings.getEnabledInputMethodSubtypeListLocked(imi, true);
                 final ArraySet<String> enabledSubtypeSet = new ArraySet<>();
                 for (InputMethodSubtype subtype : explicitlyOrImplicitlyEnabledSubtypeList) {
                     enabledSubtypeSet.add(String.valueOf(subtype.hashCode()));
