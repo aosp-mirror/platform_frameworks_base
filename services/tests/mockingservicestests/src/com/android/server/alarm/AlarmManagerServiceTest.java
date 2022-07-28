@@ -254,6 +254,7 @@ public class AlarmManagerServiceTest {
     private Injector mInjector;
     private volatile long mNowElapsedTest;
     private volatile long mNowRtcTest;
+    private volatile int mTestCallingUid = TEST_CALLING_UID;
     @GuardedBy("mTestTimer")
     private TestTimer mTestTimer = new TestTimer();
 
@@ -328,7 +329,7 @@ public class AlarmManagerServiceTest {
 
         @Override
         int getCallingUid() {
-            return TEST_CALLING_UID;
+            return mTestCallingUid;
         }
 
         @Override
@@ -1395,7 +1396,7 @@ public class AlarmManagerServiceTest {
             setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 10, getNewMockPendingIntent());
         }
         assertEquals(numAlarms, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
-        mService.removeLocked(TEST_CALLING_PACKAGE);
+        mService.removeLocked(TEST_CALLING_PACKAGE, REMOVE_REASON_UNDEFINED);
         assertEquals(0, mService.mAlarmsPerUid.get(TEST_CALLING_UID, 0));
     }
 
@@ -2683,6 +2684,59 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
+    public void removeAllBinderCall() throws RemoteException {
+        for (int i = 0; i < 10; i++) {
+            setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 1, getNewMockPendingIntent());
+        }
+
+        final String otherUidPackage1 = "other.uid.package1";
+        final String otherUidPackage2 = "other.uid.package2";
+        final int otherUid = 1243;
+
+        registerAppIds(
+                new String[]{TEST_CALLING_PACKAGE, otherUidPackage1, otherUidPackage2},
+                new Integer[]{TEST_CALLING_UID, otherUid, otherUid}
+        );
+
+        for (int i = 0; i < 9; i++) {
+            setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 11, 0,
+                    getNewMockPendingIntent(otherUid, otherUidPackage1), 0, 0, otherUid,
+                    otherUidPackage1, null);
+        }
+
+        for (int i = 0; i < 8; i++) {
+            setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 20, 0,
+                    getNewMockPendingIntent(otherUid, otherUidPackage2), 0, 0, otherUid,
+                    otherUidPackage2, null);
+        }
+
+        assertEquals(27, mService.mAlarmStore.size());
+
+        try {
+            mBinder.removeAll(otherUidPackage1);
+            fail("removeAll() for wrong package did not throw SecurityException");
+        } catch (SecurityException se) {
+            // Expected
+        }
+
+        try {
+            mBinder.removeAll(otherUidPackage2);
+            fail("removeAll() for wrong package did not throw SecurityException");
+        } catch (SecurityException se) {
+            // Expected
+        }
+
+        mBinder.removeAll(TEST_CALLING_PACKAGE);
+        assertEquals(17, mService.mAlarmStore.size());
+        assertEquals(0, mService.mAlarmStore.getCount(a -> a.matches(TEST_CALLING_PACKAGE)));
+
+        mTestCallingUid = otherUid;
+        mBinder.removeAll(otherUidPackage1);
+        assertEquals(0, mService.mAlarmStore.getCount(a -> a.matches(otherUidPackage1)));
+        assertEquals(8, mService.mAlarmStore.getCount(a -> a.matches(otherUidPackage2)));
+    }
+
+    @Test
     public void minWindowChangeEnabled() {
         mockChangeEnabled(AlarmManager.ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS, true);
         final int minWindow = 73;
@@ -3577,7 +3631,7 @@ public class AlarmManagerServiceTest {
                 getNewMockPendingIntent()), standbyQuota + temporaryQuota, mAppStandbyWindow);
 
         // refresh the state.
-        mService.removeLocked(TEST_CALLING_PACKAGE);
+        mService.removeLocked(TEST_CALLING_PACKAGE, REMOVE_REASON_UNDEFINED);
         mService.mAppWakeupHistory.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
         mService.mTemporaryQuotaReserve.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
 
@@ -3586,7 +3640,7 @@ public class AlarmManagerServiceTest {
                 getNewMockPendingIntent()), standbyQuota + temporaryQuota, mAppStandbyWindow);
 
         // refresh the state.
-        mService.removeLocked(TEST_CALLING_PACKAGE);
+        mService.removeLocked(TEST_CALLING_PACKAGE, REMOVE_REASON_UNDEFINED);
         mService.mAppWakeupHistory.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
         mService.mTemporaryQuotaReserve.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
 
