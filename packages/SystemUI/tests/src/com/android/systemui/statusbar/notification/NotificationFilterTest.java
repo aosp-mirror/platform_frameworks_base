@@ -46,6 +46,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -55,7 +56,6 @@ import com.android.systemui.statusbar.notification.collection.provider.DebugMode
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import org.junit.After;

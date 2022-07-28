@@ -125,7 +125,8 @@ abstract class InsetsSourceProvider {
         mDisplayContent = displayContent;
         mStateController = stateController;
         mFakeControl = new InsetsSourceControl(
-                source.getType(), null /* leash */, new Point(), InsetsSourceControl.INVALID_HINTS);
+                source.getType(), null /* leash */, false /* initialVisible */, new Point(),
+                Insets.NONE);
         mControllable = InsetsPolicy.isInsetsTypeControllable(source.getType());
     }
 
@@ -468,7 +469,8 @@ abstract class InsetsSourceProvider {
         final SurfaceControl leash = mAdapter.mCapturedLeash;
         mControlTarget = target;
         updateVisibility();
-        mControl = new InsetsSourceControl(mSource.getType(), leash, surfacePosition, mInsetsHint);
+        mControl = new InsetsSourceControl(mSource.getType(), leash, mClientVisible,
+                surfacePosition, mInsetsHint);
 
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS,
                 "InsetsSource Control %s for target %s", mControl, mControlTarget);
@@ -553,7 +555,8 @@ abstract class InsetsSourceProvider {
                 // to the client in case that the client applies its transaction sooner than ours
                 // that we could unexpectedly overwrite the surface state.
                 return new InsetsSourceControl(mControl.getType(), null /* leash */,
-                        mControl.getSurfacePosition(), mControl.getInsetsHint());
+                        mControl.isInitiallyVisible(), mControl.getSurfacePosition(),
+                        mControl.getInsetsHint());
             }
             return mControl;
         }

@@ -3350,7 +3350,8 @@ package android.window {
     method @NonNull public java.util.concurrent.Executor getExecutor();
     method @NonNull public android.window.TaskFragmentOrganizerToken getOrganizerToken();
     method public void onTaskFragmentAppeared(@NonNull android.window.TaskFragmentInfo);
-    method public void onTaskFragmentError(@NonNull android.os.IBinder, @NonNull Throwable);
+    method @Deprecated public void onTaskFragmentError(@NonNull android.os.IBinder, @NonNull Throwable);
+    method public void onTaskFragmentError(@NonNull android.os.IBinder, @Nullable android.window.TaskFragmentInfo, int, @NonNull Throwable);
     method public void onTaskFragmentInfoChanged(@NonNull android.window.TaskFragmentInfo);
     method public void onTaskFragmentParentInfoChanged(@NonNull android.os.IBinder, @NonNull android.content.res.Configuration);
     method public void onTaskFragmentVanished(@NonNull android.window.TaskFragmentInfo);
