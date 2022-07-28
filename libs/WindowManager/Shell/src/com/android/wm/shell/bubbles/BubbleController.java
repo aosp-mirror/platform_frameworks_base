@@ -1055,21 +1055,28 @@ public class BubbleController implements ConfigurationChangeListener {
     public void updateBubble(BubbleEntry notif, boolean suppressFlyout, boolean showInShade) {
         // If this is an interruptive notif, mark that it's interrupted
         mSysuiProxy.setNotificationInterruption(notif.getKey());
-        if (!notif.getRanking().isTextChanged()
+        boolean isNonInterruptiveNotExpanding = !notif.getRanking().isTextChanged()
                 && (notif.getBubbleMetadata() != null
-                && !notif.getBubbleMetadata().getAutoExpandBubble())
+                && !notif.getBubbleMetadata().getAutoExpandBubble());
+        if (isNonInterruptiveNotExpanding
                 && mBubbleData.hasOverflowBubbleWithKey(notif.getKey())) {
             // Update the bubble but don't promote it out of overflow
             Bubble b = mBubbleData.getOverflowBubbleWithKey(notif.getKey());
             if (notif.isBubble()) {
                 notif.setFlagBubble(false);
             }
-            b.setEntry(notif);
+            updateNotNotifyingEntry(b, notif, showInShade);
+        } else if (mBubbleData.hasAnyBubbleWithKey(notif.getKey())
+                && isNonInterruptiveNotExpanding) {
+            Bubble b = mBubbleData.getAnyBubbleWithkey(notif.getKey());
+            if (b != null) {
+                updateNotNotifyingEntry(b, notif, showInShade);
+            }
         } else if (mBubbleData.isSuppressedWithLocusId(notif.getLocusId())) {
             // Update the bubble but don't promote it out of overflow
             Bubble b = mBubbleData.getSuppressedBubbleWithKey(notif.getKey());
             if (b != null) {
-                b.setEntry(notif);
+                updateNotNotifyingEntry(b, notif, showInShade);
             }
         } else {
             Bubble bubble = mBubbleData.getOrCreateBubble(notif, null /* persistedBubble */);
@@ -1079,10 +1086,21 @@ public class BubbleController implements ConfigurationChangeListener {
                 if (bubble.shouldAutoExpand()) {
                     bubble.setShouldAutoExpand(false);
                 }
+                mImpl.mCachedState.updateBubbleSuppressedState(bubble);
             } else {
                 inflateAndAdd(bubble, suppressFlyout, showInShade);
             }
         }
+    }
+
+    void updateNotNotifyingEntry(Bubble b, BubbleEntry entry, boolean showInShade) {
+        boolean isBubbleSelected = Objects.equals(b, mBubbleData.getSelectedBubble());
+        boolean isBubbleExpandedAndSelected = isStackExpanded() && isBubbleSelected;
+        b.setEntry(entry);
+        boolean suppress = isBubbleExpandedAndSelected || !showInShade || !b.showInShade();
+        b.setSuppressNotification(suppress);
+        b.setShowDot(!isBubbleExpandedAndSelected);
+        mImpl.mCachedState.updateBubbleSuppressedState(b);
     }
 
     @VisibleForTesting

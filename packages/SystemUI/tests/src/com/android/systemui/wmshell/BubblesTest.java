@@ -1435,6 +1435,57 @@ public class BubblesTest extends SysuiTestCase {
 
     /**
      * Verifies that if a bubble is in the overflow and a non-interruptive notification update
+     * comes in for it, it stays in the overflow but the entry is updated.
+     */
+    @Test
+    public void testNonInterruptiveUpdate_doesntBubbleFromOverflow() {
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
+        assertBubbleNotificationNotSuppressedFromShade(mBubbleEntry);
+
+        // Dismiss the bubble so it's in the overflow
+        mBubbleController.removeBubble(
+                mRow.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(mRow.getKey())).isTrue();
+
+        // Update the entry to not show in shade
+        setMetadataFlags(mRow,
+                Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION, /* enableFlag= */ true);
+        mBubbleController.updateBubble(mBubbleEntry,
+                /* suppressFlyout= */ false, /* showInShade= */ true);
+
+        // Check that the update was applied - shouldn't be show in shade
+        assertBubbleNotificationSuppressedFromShade(mBubbleEntry);
+        // Check that it wasn't inflated (1 because it would've been inflated via onEntryAdded)
+        verify(mBubbleController, times(1)).inflateAndAdd(
+                any(Bubble.class), anyBoolean(), anyBoolean());
+    }
+
+    /**
+     * Verifies that if a bubble is active, and a non-interruptive notification update comes in for
+     * it, it doesn't trigger a new inflate and add for that bubble.
+     */
+    @Test
+    public void testNonInterruptiveUpdate_doesntTriggerInflate() {
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
+        assertBubbleNotificationNotSuppressedFromShade(mBubbleEntry);
+
+        // Update the entry to not show in shade
+        setMetadataFlags(mRow,
+                Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION, /* enableFlag= */ true);
+        mBubbleController.updateBubble(mBubbleEntry,
+                /* suppressFlyout= */ false, /* showInShade= */ true);
+
+        // Check that the update was applied - shouldn't be show in shade
+        assertBubbleNotificationSuppressedFromShade(mBubbleEntry);
+        // Check that it wasn't inflated (1 because it would've been inflated via onEntryAdded)
+        verify(mBubbleController, times(1)).inflateAndAdd(
+                any(Bubble.class), anyBoolean(), anyBoolean());
+    }
+
+    /**
+     * Verifies that if a bubble is in the overflow and a non-interruptive notification update
      * comes in for it with FLAG_BUBBLE that the flag is removed.
      */
     @Test
