@@ -2728,8 +2728,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final StartingSurfaceController.StartingSurface surface;
-        final StartingData startingData = mStartingData;
+        final boolean animate;
         if (mStartingData != null) {
+            animate = prepareAnimation && mStartingData.needRevealAnimation()
+                    && mStartingWindow.isVisibleByPolicy();
+            ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Schedule remove starting %s startingWindow=%s"
+                            + " animate=%b Callers=%s", this, mStartingWindow, animate,
+                    Debug.getCallers(5));
             surface = mStartingSurface;
             mStartingData = null;
             mStartingSurface = null;
@@ -2747,21 +2752,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-
-        ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Schedule remove starting %s startingWindow=%s"
-                + " startingView=%s Callers=%s", this, mStartingWindow, mStartingSurface,
-                Debug.getCallers(5));
-
-        final Runnable removeSurface = () -> {
-            ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Removing startingView=%s", surface);
-            try {
-                surface.remove(prepareAnimation && startingData.needRevealAnimation());
-            } catch (Exception e) {
-                Slog.w(TAG_WM, "Exception when removing starting window", e);
-            }
-        };
-
-        removeSurface.run();
+        surface.remove(animate);
     }
 
     /**

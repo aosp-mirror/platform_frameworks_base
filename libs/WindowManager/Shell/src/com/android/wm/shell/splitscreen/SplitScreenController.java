@@ -352,41 +352,31 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public void startIntent(PendingIntent intent, @Nullable Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options) {
+        if (fillInIntent == null) {
+            fillInIntent = new Intent();
+        }
+        // Flag this as a no-user-action launch to prevent sending user leaving event to the
+        // current top activity since it's going to be put into another side of the split. This
+        // prevents the current top activity from going into pip mode due to user leaving event.
+        fillInIntent.addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
+
+        // Flag with MULTIPLE_TASK if this is launching the same activity into both sides of the
+        // split.
+        if (isLaunchingAdjacently(intent.getIntent(), position)) {
+            fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
+        }
+
         if (!ENABLE_SHELL_TRANSITIONS) {
             startIntentLegacy(intent, fillInIntent, position, options);
             return;
         }
 
-        try {
-            options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options,
-                    null /* wct */);
-
-            if (fillInIntent == null) {
-                fillInIntent = new Intent();
-            }
-            // Flag this as a no-user-action launch to prevent sending user leaving event to the
-            // current top activity since it's going to be put into another side of the split. This
-            // prevents the current top activity from going into pip mode due to user leaving event.
-            fillInIntent.addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
-
-            // Flag with MULTIPLE_TASK if this is launching the same activity into both sides of the
-            // split.
-            if (isLaunchingAdjacently(intent.getIntent(), position)) {
-                fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
-                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
-            }
-
-            intent.send(mContext, 0, fillInIntent, null /* onFinished */, null /* handler */,
-                    null /* requiredPermission */, options);
-        } catch (PendingIntent.CanceledException e) {
-            Slog.e(TAG, "Failed to launch task", e);
-        }
+        mStageCoordinator.startIntent(intent, fillInIntent, position, options);
     }
 
-    private void startIntentLegacy(PendingIntent intent, @Nullable Intent fillInIntent,
+    private void startIntentLegacy(PendingIntent intent, Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options) {
-        boolean startSameActivityAdjacently = isLaunchingAdjacently(intent.getIntent(), position);
-
         final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         mStageCoordinator.prepareEvictChildTasks(position, evictWct);
 
@@ -397,8 +387,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     IRemoteAnimationFinishedCallback finishedCallback,
                     SurfaceControl.Transaction t) {
                 if (apps == null || apps.length == 0) {
-                    if (startSameActivityAdjacently) {
-                        // Switch split position if dragging the same activity to another side.
+                    // Switch the split position if launching as MULTIPLE_TASK failed.
+                    if ((fillInIntent.getFlags() & FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
                         setSideStagePosition(SplitLayout.reversePosition(
                                 mStageCoordinator.getSideStagePosition()));
                     }
@@ -408,8 +398,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     return;
                 }
 
-                mStageCoordinator.updateSurfaceBounds(null /* layout */, t,
-                        false /* applyResizingOffset */);
                 for (int i = 0; i < apps.length; ++i) {
                     if (apps[i].mode == MODE_OPENING) {
                         t.show(apps[i].leash);
@@ -431,18 +419,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options, wct);
-
-        // Flag this as a no-user-action launch to prevent sending user leaving event to the current
-        // top activity since it's going to be put into another side of the split. This prevents the
-        // current top activity from going into pip mode due to user leaving event.
-        if (fillInIntent == null) {
-            fillInIntent = new Intent();
-        }
-        fillInIntent.addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
-        if (startSameActivityAdjacently) {
-            fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
-        }
 
         wct.sendPendingIntent(intent, fillInIntent, options);
         mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);

@@ -564,10 +564,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return res;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
     @Override
     public byte[] getCurrentStats(List<ParcelFileDescriptor> historic) {
-        mAm.mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.PACKAGE_USAGE_STATS, null);
         Parcel current = Parcel.obtain();
         synchronized (mLock) {
             long now = SystemClock.uptimeMillis();
@@ -619,11 +618,10 @@ public final class ProcessStatsService extends IProcessStats.Stub {
      * @return List of proto binary of individual commit files or one that is merged from them;
      *         the merged, final ProcessStats object.
      */
+    @android.annotation.EnforcePermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
     @Override
     public long getCommittedStatsMerged(long highWaterMarkMs, int section, boolean doAggregate,
             List<ParcelFileDescriptor> committedStats, ProcessStats mergedStats) {
-        mAm.mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.PACKAGE_USAGE_STATS, null);
 
         long newHighWaterMark = highWaterMarkMs;
         mFileLock.lock();
@@ -708,10 +706,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return fds[0];
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
     @Override
     public ParcelFileDescriptor getStatsOverTime(long minTime) {
-        mAm.mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.PACKAGE_USAGE_STATS, null);
         Parcel current = Parcel.obtain();
         long curTime;
         synchronized (mLock) {

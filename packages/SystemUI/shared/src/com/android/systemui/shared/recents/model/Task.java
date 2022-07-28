@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.recents.model;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
@@ -245,12 +246,16 @@ public class Task {
      */
     public static Task from(TaskKey taskKey, TaskInfo taskInfo, boolean isLocked) {
         ActivityManager.TaskDescription td = taskInfo.taskDescription;
+        // Also consider undefined activity type to include tasks in overview right after rebooting
+        // the device.
+        final boolean isDockable = taskInfo.supportsMultiWindow
+                && ArrayUtils.contains(CONTROLLED_WINDOWING_MODES, taskInfo.getWindowingMode())
+                && (taskInfo.getActivityType() == ACTIVITY_TYPE_UNDEFINED
+                || ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType()));
         return new Task(taskKey,
                 td != null ? td.getPrimaryColor() : 0,
-                td != null ? td.getBackgroundColor() : 0, taskInfo.supportsMultiWindow
-                && ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType())
-                && ArrayUtils.contains(CONTROLLED_WINDOWING_MODES, taskInfo.getWindowingMode()),
-                isLocked, td, taskInfo.topActivity);
+                td != null ? td.getBackgroundColor() : 0, isDockable , isLocked, td,
+                taskInfo.topActivity);
     }
 
     public Task(TaskKey key) {

@@ -897,17 +897,6 @@ public class InputManagerService extends IInputManager.Stub
                     throw new IllegalStateException("Injection should not result in TARGET_MISMATCH"
                             + " when it is not targeted into to a specific uid.");
                 }
-                // TODO(b/228161340): Remove the fallback of targeting injection into all windows
-                //  when the caller has the injection permission.
-                // Explicitly maintain the same behavior as previous versions of Android, where
-                // injection is allowed into all windows if the caller has the INJECT_EVENTS
-                // permission, even if it is targeting a certain uid.
-                if (checkCallingPermission(android.Manifest.permission.INJECT_EVENTS,
-                        "injectInputEvent-target-mismatch-fallback")) {
-                    Slog.w(TAG, "Targeted input event was not directed at a window owned by uid "
-                            + targetUid + ". Falling back to injecting into all windows.");
-                    return injectInputEventToTarget(event, mode, Process.INVALID_UID);
-                }
                 throw new IllegalArgumentException(
                     "Targeted input event injection from pid " + pid
                             + " was not directed at a window owned by uid "

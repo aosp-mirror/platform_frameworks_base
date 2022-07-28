@@ -186,7 +186,11 @@ public final class SurfaceSyncGroup {
         if (viewRoot == null) {
             return false;
         }
-        return addToSync(viewRoot.getSyncTarget());
+        SyncTarget syncTarget = viewRoot.getSyncTarget();
+        if (syncTarget == null) {
+            return false;
+        }
+        return addToSync(syncTarget);
     }
 
     /**

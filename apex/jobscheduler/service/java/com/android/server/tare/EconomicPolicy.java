@@ -306,6 +306,10 @@ public abstract class EconomicPolicy {
         return eventId & MASK_TYPE;
     }
 
+    static boolean isReward(int eventId) {
+        return getEventType(eventId) == TYPE_REWARD;
+    }
+
     @NonNull
     static String eventToString(int eventId) {
         switch (eventId & MASK_TYPE) {

@@ -48,6 +48,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -124,6 +125,7 @@ public final class MediaRouter2 {
     private final Map<String, RoutingController> mNonSystemRoutingControllers = new ArrayMap<>();
 
     private final AtomicInteger mNextRequestId = new AtomicInteger(1);
+    private final AtomicBoolean mIsScanning = new AtomicBoolean(/* initialValue= */ false);
 
     final Handler mHandler;
 
@@ -255,7 +257,9 @@ public final class MediaRouter2 {
     @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void startScan() {
         if (isSystemRouter()) {
-            sManager.startScan();
+            if (!mIsScanning.getAndSet(true)) {
+                sManager.registerScanRequest();
+            }
         }
     }
 
@@ -281,7 +285,9 @@ public final class MediaRouter2 {
     @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void stopScan() {
         if (isSystemRouter()) {
-            sManager.stopScan();
+            if (mIsScanning.getAndSet(false)) {
+                sManager.unregisterScanRequest();
+            }
         }
     }
 

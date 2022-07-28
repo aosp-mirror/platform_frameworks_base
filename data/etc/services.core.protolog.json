@@ -907,6 +907,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "-1237827119": {
+      "message": "Schedule remove starting %s startingWindow=%s animate=%b Callers=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STARTING_WINDOW",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "-1228653755": {
       "message": "Launch on display check: displayId=%d callingPid=%d callingUid=%d",
       "level": "DEBUG",
@@ -1014,12 +1020,6 @@
       "level": "INFO",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowState.java"
-    },
-    "-1128015008": {
-      "message": "Schedule remove starting %s startingWindow=%s startingView=%s Callers=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-1117599386": {
       "message": "Deferring rotation, display is not enabled.",
@@ -3139,6 +3139,12 @@
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/LockTaskController.java"
     },
+    "956467125": {
+      "message": "Reparenting Activity to embedded TaskFragment, but the Activity is not collected",
+      "level": "WARN",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
+    },
     "958338552": {
       "message": "grantEmbeddedWindowFocus win=%s dropped focus so setting focus to null since no candidate was found",
       "level": "VERBOSE",
@@ -3876,12 +3882,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "1742235936": {
-      "message": "Removing startingView=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1746778201": {
       "message": "Set freezing of %s: visible=%b freezing=%b visibleRequested=%b. %s",

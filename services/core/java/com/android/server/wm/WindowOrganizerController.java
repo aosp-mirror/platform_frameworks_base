@@ -21,6 +21,7 @@ import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
@@ -843,6 +844,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
 
+                prepareActivityEmbeddingTransitionForReparentActivityToTaskFragment(parent,
+                        activity);
                 activity.reparent(parent, POSITION_TOP);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
@@ -1067,6 +1070,41 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
         }
         return effects;
+    }
+
+    private void prepareActivityEmbeddingTransitionForReparentActivityToTaskFragment(
+            @NonNull TaskFragment taskFragment, @NonNull ActivityRecord activity) {
+        if (!taskFragment.canHaveEmbeddingActivityTransition(activity)) {
+            return;
+        }
+
+        // The reparent can happen in the following cases:
+        // 1. Reparent an existing activity to split when app launches new intent.
+        //    - This happens after app calls to start activity, but before the activity is actually
+        //      started, so we don't expect any collecting transition, but if it does, we can't
+        //      queue the WCT because the start activity won't wait.
+        // 2. Reparent an existing activity to split to launch placeholder when Task size changed.
+        //    - We expect to have a collecting transition for the Task resize, so just collect.
+        // 3. Reparent a new launching activity to an always-expand container.
+        // 4. Reparent a new launching activity to split to launch placeholder together.
+        // 5. Reparent a new launching activity to an existing split.
+        //    - The new launching activity should have start an OPEN transition, so just collect.
+        // 6. Reparent PiP activity back to the original Task.
+        //    - This should be part of the exiting PiP transition, so just collect.
+
+        if (!taskFragment.getBounds().equals(activity.getBounds()) && activity.isVisible()
+                && !mTransitionController.isCollecting()) {
+            // 1. Reparent an existing activity to split when app launches new intent.
+            mTransitionController.requestTransitionIfNeeded(TRANSIT_CHANGE, activity);
+        }
+
+        // We expect the activity to be in the transition already, so just collect the TaskFragment.
+        if (mTransitionController.isCollecting(activity)) {
+            taskFragment.collectEmbeddedTaskFragmentIfNeeded();
+        } else {
+            ProtoLog.w(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Reparenting Activity"
+                    + " to embedded TaskFragment, but the Activity is not collected");
+        }
     }
 
     /** A helper method to send minimum dimension violation error to the client. */

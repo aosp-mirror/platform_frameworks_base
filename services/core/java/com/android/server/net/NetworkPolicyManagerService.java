@@ -1367,8 +1367,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final boolean roamingChanged = updateCapabilityChange(
                         mNetworkRoaming, newRoaming, network);
 
-                if (meteredChanged || roamingChanged) {
+                final boolean shouldUpdateNetworkRules = meteredChanged || roamingChanged;
+
+                if (meteredChanged) {
                     mLogger.meterednessChanged(network.getNetId(), newMetered);
+                }
+
+                if (roamingChanged) {
+                    mLogger.roamingChanged(network.getNetId(), newRoaming);
+                }
+
+                if (shouldUpdateNetworkRules) {
                     updateNetworkRulesNL();
                 }
             }
@@ -1381,6 +1390,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final boolean ifacesChanged = updateNetworkToIfacesNL(network.getNetId(),
                         newIfaces);
                 if (ifacesChanged) {
+                    mLogger.interfacesChanged(network.getNetId(), newIfaces);
                     updateNetworkRulesNL();
                 }
             }

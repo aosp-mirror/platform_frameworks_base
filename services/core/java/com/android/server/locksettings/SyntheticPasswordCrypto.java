@@ -17,6 +17,7 @@
 package com.android.server.locksettings;
 
 import android.security.AndroidKeyStoreMaintenance;
+import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.security.keystore2.AndroidKeyStoreLoadStoreParameter;
@@ -210,10 +211,26 @@ public class SyntheticPasswordCrypto {
                         .setBoundToSpecificSecureUserId(sid)
                         .setUserAuthenticationValidityDurationSeconds(USER_AUTHENTICATION_VALIDITY);
             }
+            final KeyProtection protNonRollbackResistant = builder.build();
+            builder.setRollbackResistant(true);
+            final KeyProtection protRollbackResistant = builder.build();
+            final KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(keyStoreKey);
+            try {
+                keyStore.setEntry(keyAlias, entry, protRollbackResistant);
+                Slog.i(TAG, "Using rollback-resistant key");
+            } catch (KeyStoreException e) {
+                if (!(e.getCause() instanceof android.security.KeyStoreException)) {
+                    throw e;
+                }
+                int errorCode = ((android.security.KeyStoreException) e.getCause()).getErrorCode();
+                if (errorCode != KeymasterDefs.KM_ERROR_ROLLBACK_RESISTANCE_UNAVAILABLE) {
+                    throw e;
+                }
+                Slog.w(TAG, "Rollback-resistant keys unavailable.  Falling back to "
+                        + "non-rollback-resistant key");
+                keyStore.setEntry(keyAlias, entry, protNonRollbackResistant);
+            }
 
-            keyStore.setEntry(keyAlias,
-                    new KeyStore.SecretKeyEntry(keyStoreKey),
-                    builder.build());
             byte[] intermediate = encrypt(protectorSecret, PROTECTOR_SECRET_PERSONALIZATION, data);
             return encrypt(keyStoreKey, intermediate);
         } catch (CertificateException | IOException | BadPaddingException

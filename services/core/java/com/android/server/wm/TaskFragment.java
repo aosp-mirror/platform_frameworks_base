@@ -2316,6 +2316,26 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return !startBounds.equals(getBounds());
     }
 
+    boolean canHaveEmbeddingActivityTransition(@NonNull ActivityRecord child) {
+        if (!isOrganizedTaskFragment() || !mTransitionController.isShellTransitionsEnabled()) {
+            return false;
+        }
+        // The activity should request open transition when it is becoming visible.
+        return child.isVisibleRequested();
+    }
+
+    void collectEmbeddedTaskFragmentIfNeeded() {
+        if (!isOrganizedTaskFragment() || mTransitionController.isCollecting(this)) {
+            return;
+        }
+        if (getChildCount() == 0) {
+            // The TaskFragment is new created, and just becoming non-empty.
+            mTransitionController.collectExistenceChange(this);
+        } else {
+            mTransitionController.collect(this);
+        }
+    }
+
     @Override
     void setSurfaceControl(SurfaceControl sc) {
         super.setSurfaceControl(sc);

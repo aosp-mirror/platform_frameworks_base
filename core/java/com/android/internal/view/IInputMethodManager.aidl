@@ -72,7 +72,8 @@ interface IInputMethodManager {
             /* @android.view.WindowManager.LayoutParams.Flags */ int windowFlags,
             in @nullable EditorInfo editorInfo, in @nullable IRemoteInputConnection inputConnection,
             in @nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
-            int unverifiedTargetSdkVersion, in ImeOnBackInvokedDispatcher imeDispatcher);
+            int unverifiedTargetSdkVersion, int userId,
+            in ImeOnBackInvokedDispatcher imeDispatcher);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);
@@ -105,7 +106,10 @@ interface IInputMethodManager {
 
     /** Remove the IME surface. Requires passing the currently focused window. */
     oneway void removeImeSurfaceFromWindowAsync(in IBinder windowToken);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresNoPermission")
     void startProtoDump(in byte[] protoDump, int source, String where);
+
     boolean isImeTraceEnabled();
 
     // Starts an ime trace.

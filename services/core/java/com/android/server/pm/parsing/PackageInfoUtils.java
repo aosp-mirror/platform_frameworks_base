@@ -93,12 +93,14 @@ public class PackageInfoUtils {
 
     /**
      * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
+     * @deprecated Once ENABLE_FEATURE_SCAN_APEX is removed, this should also be removed.
      */
+    @Deprecated
     @Nullable
-    public static PackageInfo generate(AndroidPackage pkg, ApexInfo apexInfo, int flags,
-            @Nullable PackageStateInternal pkgSetting) {
+    public static PackageInfo generate(AndroidPackage pkg, ApexInfo apexInfo, long flags,
+            @Nullable PackageStateInternal pkgSetting, @UserIdInt int userId) {
         return generateWithComponents(pkg, EmptyArray.INT, flags, 0, 0, Collections.emptySet(),
-                PackageUserStateInternal.DEFAULT, UserHandle.getCallingUserId(), apexInfo, pkgSetting);
+                PackageUserStateInternal.DEFAULT, userId, apexInfo, pkgSetting);
     }
 
     /**

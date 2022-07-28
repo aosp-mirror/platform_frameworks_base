@@ -16,6 +16,8 @@
 
 package com.android.systemui.compose.gallery
 
+import android.app.UiModeManager
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,7 +25,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
@@ -33,22 +35,46 @@ class GalleryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        val uiModeManager = getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
 
         setContent {
-            val isSystemInDarkTheme = isSystemInDarkTheme()
-            var isDarkTheme by remember { mutableStateOf(isSystemInDarkTheme) }
-            val onChangeTheme = { isDarkTheme = !isDarkTheme }
+            var theme by rememberSaveable { mutableStateOf(Theme.System) }
+            val onChangeTheme = {
+                // Change to the next theme for a toggle behavior.
+                theme =
+                    when (theme) {
+                        Theme.System -> Theme.Dark
+                        Theme.Dark -> Theme.Light
+                        Theme.Light -> Theme.System
+                    }
+            }
 
+            val isSystemInDarkTheme = isSystemInDarkTheme()
+            val isDark = theme == Theme.Dark || (theme == Theme.System && isSystemInDarkTheme)
+            val useDarkIcons = !isDark
             val systemUiController = rememberSystemUiController()
-            val useDarkIcons = !isDarkTheme
             SideEffect {
                 systemUiController.setSystemBarsColor(
                     color = Color.Transparent,
                     darkIcons = useDarkIcons,
                 )
+
+                uiModeManager.setApplicationNightMode(
+                    when (theme) {
+                        Theme.System -> UiModeManager.MODE_NIGHT_AUTO
+                        Theme.Dark -> UiModeManager.MODE_NIGHT_YES
+                        Theme.Light -> UiModeManager.MODE_NIGHT_NO
+                    }
+                )
             }
 
-            GalleryApp(isDarkTheme, onChangeTheme)
+            GalleryApp(theme, onChangeTheme)
         }
     }
+}
+
+enum class Theme {
+    System,
+    Dark,
+    Light,
 }
