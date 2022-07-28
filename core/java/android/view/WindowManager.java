@@ -824,15 +824,19 @@ public interface WindowManager extends ViewManager {
      * provide consent for their app to allow OEMs to manually provide ActivityEmbedding split
      * rule configuration on behalf of the app.
      *
-     * <p>If {@code true}, the system CAN override the windowing behaviors for the app, such as
+     * <p>If {@code true}, the system can override the windowing behaviors for the app, such as
      * showing some activities side-by-side. In this case, it will report that ActivityEmbedding
      * APIs are disabled for the app to avoid conflict.
      *
-     * <p>If {@code false}, the system MUST NOT override the window behavior for the app. It should
+     * <p>If {@code false}, the system can't override the window behavior for the app. It should
      * be used if the app wants to provide their own ActivityEmbedding split rules, or if the app
      * wants to opt-out of system overrides for any other reason.
      *
      * <p>Default is {@code false}.
+     *
+     * <p>The system enforcement will be added in Android 14, but some devices may start following
+     * the requirement before that. The best practice for apps is to always explicitly set this
+     * property in AndroidManifest instead of relying on the default value.
      *
      * <p>Example usage:
      * <pre>
