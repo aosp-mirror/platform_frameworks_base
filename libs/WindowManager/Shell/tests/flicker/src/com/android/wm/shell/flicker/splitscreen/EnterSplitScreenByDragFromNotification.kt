@@ -109,12 +109,12 @@ class EnterSplitScreenByDragFromNotification(
     @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        primaryApp, splitLeftTop = false)
+        primaryApp, landscapePosLeft = false, portraitPosTop = false)
 
     @Presubmit
     @Test
     fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisible(
-        sendNotificationApp, splitLeftTop = true)
+        sendNotificationApp, landscapePosLeft = true, portraitPosTop = true)
 
     @Presubmit
     @Test

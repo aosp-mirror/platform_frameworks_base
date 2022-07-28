@@ -98,7 +98,7 @@ class DismissSplitScreenByDivider (testSpec: FlickerTestParameter) : SplitScreen
     @Presubmit
     @Test
     fun primaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
-        primaryApp, splitLeftTop = false)
+        primaryApp, landscapePosLeft = false, portraitPosTop = false)
 
     @Presubmit
     @Test

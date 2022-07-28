@@ -108,12 +108,12 @@ class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(tes
     @Presubmit
     @Test
     fun primaryAppBoundsChanges() = testSpec.splitAppLayerBoundsChanges(
-        primaryApp, splitLeftTop = false)
+        primaryApp, landscapePosLeft = false, portraitPosTop = false)
 
     @Presubmit
     @Test
     fun secondaryAppBoundsChanges() = testSpec.splitAppLayerBoundsChanges(
-        secondaryApp, splitLeftTop = true)
+        secondaryApp, landscapePosLeft = true, portraitPosTop = true)
 
     /** {@inheritDoc} */
     @Postsubmit
