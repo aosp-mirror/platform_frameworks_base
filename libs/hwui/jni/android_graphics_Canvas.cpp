@@ -407,14 +407,28 @@ static void drawVertices(JNIEnv* env, jobject, jlong canvasHandle,
         indices = (const uint16_t*)(indexA.ptr() + indexIndex);
     }
 
-    SkVertices::VertexMode mode = static_cast<SkVertices::VertexMode>(modeHandle);
+    SkVertices::VertexMode vertexMode = static_cast<SkVertices::VertexMode>(modeHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    get_canvas(canvasHandle)->drawVertices(SkVertices::MakeCopy(mode, vertexCount,
-                                           reinterpret_cast<const SkPoint*>(verts),
-                                           reinterpret_cast<const SkPoint*>(texs),
-                                           reinterpret_cast<const SkColor*>(colors),
-                                           indexCount, indices).get(),
-                                           SkBlendMode::kModulate, *paint);
+
+    // Preserve legacy Skia behavior: ignore the shader if there are no texs set.
+    Paint noShaderPaint;
+    if (jtexs == NULL) {
+        noShaderPaint = Paint(*paint);
+        noShaderPaint.setShader(nullptr);
+        paint = &noShaderPaint;
+    }
+    // Since https://skia-review.googlesource.com/c/skia/+/473676, Skia will blend paint and vertex
+    // colors when no shader is provided. This ternary uses kDst to mimic the old behavior of
+    // ignoring the paint and using the vertex colors directly when no shader is provided.
+    SkBlendMode blendMode = paint->getShader() ? SkBlendMode::kModulate : SkBlendMode::kDst;
+
+    get_canvas(canvasHandle)
+            ->drawVertices(SkVertices::MakeCopy(
+                                   vertexMode, vertexCount, reinterpret_cast<const SkPoint*>(verts),
+                                   reinterpret_cast<const SkPoint*>(texs),
+                                   reinterpret_cast<const SkColor*>(colors), indexCount, indices)
+                                   .get(),
+                           blendMode, *paint);
 }
 
 static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,
