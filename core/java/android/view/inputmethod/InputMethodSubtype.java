@@ -666,14 +666,12 @@ public final class InputMethodSubtype implements Parcelable {
 
     /**
      * Sort the list of InputMethodSubtype
-     * @param context Context will be used for getting localized strings from IME
-     * @param flags Flags for the sort order
      * @param imi InputMethodInfo of which subtypes are subject to be sorted
      * @param subtypeList List of InputMethodSubtype which will be sorted
      * @return Sorted list of subtypes
      * @hide
      */
-    public static List<InputMethodSubtype> sort(Context context, int flags, InputMethodInfo imi,
+    public static List<InputMethodSubtype> sort(InputMethodInfo imi,
             List<InputMethodSubtype> subtypeList) {
         if (imi == null) return subtypeList;
         final HashSet<InputMethodSubtype> inputSubtypesSet = new HashSet<InputMethodSubtype>(
