@@ -818,6 +818,56 @@ final class InputMethodUtils {
             }
         }
 
+        /**
+         * A variant of {@link InputMethodManagerService#getCurrentInputMethodSubtypeLocked()} for
+         * non-current users.
+         *
+         * <p>TODO: Address code duplication between this and
+         * {@link InputMethodManagerService#getCurrentInputMethodSubtypeLocked()}.</p>
+         *
+         * @return {@link InputMethodSubtype} if exists. {@code null} otherwise.
+         */
+        @Nullable
+        InputMethodSubtype getCurrentInputMethodSubtypeForNonCurrentUsers() {
+            final String selectedMethodId = getSelectedInputMethod();
+            if (selectedMethodId == null) {
+                return null;
+            }
+            final InputMethodInfo imi = mMethodMap.get(selectedMethodId);
+            if (imi == null || imi.getSubtypeCount() == 0) {
+                return null;
+            }
+
+            final int subtypeHashCode = getSelectedInputMethodSubtypeHashCode();
+            if (subtypeHashCode != InputMethodUtils.NOT_A_SUBTYPE_ID) {
+                final int subtypeIndex = SubtypeUtils.getSubtypeIdFromHashCode(imi,
+                        subtypeHashCode);
+                if (subtypeIndex >= 0) {
+                    return imi.getSubtypeAt(subtypeIndex);
+                }
+            }
+
+            // If there are no selected subtypes, the framework will try to find the most applicable
+            // subtype from explicitly or implicitly enabled subtypes.
+            final List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypes =
+                    getEnabledInputMethodSubtypeListLocked(imi, true);
+            // If there is only one explicitly or implicitly enabled subtype, just returns it.
+            if (explicitlyOrImplicitlyEnabledSubtypes.isEmpty()) {
+                return null;
+            }
+            if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
+                return explicitlyOrImplicitlyEnabledSubtypes.get(0);
+            }
+            final InputMethodSubtype subtype = SubtypeUtils.findLastResortApplicableSubtypeLocked(
+                    mRes, explicitlyOrImplicitlyEnabledSubtypes, SubtypeUtils.SUBTYPE_MODE_KEYBOARD,
+                    null, true);
+            if (subtype != null) {
+                return subtype;
+            }
+            return SubtypeUtils.findLastResortApplicableSubtypeLocked(mRes,
+                    explicitlyOrImplicitlyEnabledSubtypes, null, null, true);
+        }
+
         public void dumpLocked(final Printer pw, final String prefix) {
             pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
             pw.println(prefix + "mCurrentProfileIds=" + Arrays.toString(mCurrentProfileIds));
