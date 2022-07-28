@@ -6559,7 +6559,7 @@ public class TelephonyManager {
          * list will be provided. If an error occurs, null will be provided unless the onError
          * callback is overridden.
          *
-         * @param cellInfo a list of {@link CellInfo}, an empty list, or null.
+         * @param cellInfo a list of {@link CellInfo} or an empty list.
          *
          * {@see android.telephony.TelephonyManager#getAllCellInfo getAllCellInfo()}
          */
