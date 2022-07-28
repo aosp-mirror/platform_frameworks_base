@@ -976,6 +976,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void deviceStateChange_unfolded_shadeOpen_setsLeaveOpenOnKeyguardHide() {
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
         setFoldedStates(FOLD_STATE_FOLDED);
         setGoToSleepStates(FOLD_STATE_FOLDED);
         when(mNotificationPanelViewController.isFullyExpanded()).thenReturn(true);
@@ -984,6 +985,19 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         verify(mStatusBarStateController).setLeaveOpenOnKeyguardHide(true);
     }
+
+    @Test
+    public void deviceStateChange_unfolded_shadeOpen_onKeyguard_doesNotSetLeaveOpenOnKeyguardHide() {
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        setFoldedStates(FOLD_STATE_FOLDED);
+        setGoToSleepStates(FOLD_STATE_FOLDED);
+        when(mNotificationPanelViewController.isFullyExpanded()).thenReturn(true);
+
+        setDeviceState(FOLD_STATE_UNFOLDED);
+
+        verify(mStatusBarStateController, never()).setLeaveOpenOnKeyguardHide(true);
+    }
+
 
     @Test
     public void deviceStateChange_unfolded_shadeClose_doesNotSetLeaveOpenOnKeyguardHide() {
