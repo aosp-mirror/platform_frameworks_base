@@ -25,7 +25,10 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 
+import com.android.internal.annotations.Keep;
+
 /** The root of a partition of the logical display. */
+@Keep
 class DisplayAreaGroup extends RootDisplayArea {
 
     DisplayAreaGroup(WindowManagerService wms, String name, int featureId) {
