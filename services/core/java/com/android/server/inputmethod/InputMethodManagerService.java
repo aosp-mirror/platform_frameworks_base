@@ -1765,8 +1765,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mLastSwitchUserId = userId;
 
         // mSettings should be created before buildInputMethodListLocked
-        mSettings = new InputMethodSettings(
-                mRes, context.getContentResolver(), mMethodMap, userId, !mSystemReady);
+        mSettings = new InputMethodSettings(mContext, mMethodMap, userId, !mSystemReady);
 
         updateCurrentProfileIds();
         AdditionalSubtypeUtils.load(mAdditionalSubtypeMap, userId);
@@ -2138,8 +2137,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             //TODO(b/197848765): This can be optimized by caching multi-user methodMaps/methodList.
             //TODO(b/210039666): use cache.
             final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
-            final InputMethodSettings settings = new InputMethodSettings(mContext.getResources(),
-                    mContext.getContentResolver(), methodMap, userId, true);
+            final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap,
+                    userId, true);
             final InputMethodInfo imi = methodMap.get(settings.getSelectedInputMethod());
             return imi != null && imi.supportsStylusHandwriting();
         }
@@ -2171,8 +2170,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return mSettings.getEnabledInputMethodListLocked();
         }
         final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
-        final InputMethodSettings settings = new InputMethodSettings(mContext.getResources(),
-                mContext.getContentResolver(), methodMap, userId, true);
+        final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap, userId,
+                true);
         return settings.getEnabledInputMethodListLocked();
     }
 
@@ -2237,17 +2236,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 return Collections.emptyList();
             }
             return mSettings.getEnabledInputMethodSubtypeListLocked(
-                    mContext, imi, allowsImplicitlySelectedSubtypes);
+                    imi, allowsImplicitlySelectedSubtypes);
         }
         final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
         final InputMethodInfo imi = methodMap.get(imiId);
         if (imi == null) {
             return Collections.emptyList();
         }
-        final InputMethodSettings settings = new InputMethodSettings(mContext.getResources(),
-                mContext.getContentResolver(), methodMap, userId, true);
+        final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap, userId,
+                true);
         return settings.getEnabledInputMethodSubtypeListLocked(
-                mContext, imi, allowsImplicitlySelectedSubtypes);
+                imi, allowsImplicitlySelectedSubtypes);
     }
 
     /**
@@ -3066,7 +3065,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         for (int i = 0; i < numImes; ++i) {
             final InputMethodInfo imi = imes.get(i);
             final List<InputMethodSubtype> subtypes =
-                    mSettings.getEnabledInputMethodSubtypeListLocked(mContext, imi, true);
+                    mSettings.getEnabledInputMethodSubtypeListLocked(imi, true);
             final int subtypeCount = subtypes.size();
             if (subtypeCount == 0) {
                 ++nonAuxCount;
@@ -4155,8 +4154,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
 
             final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
-            final InputMethodSettings settings = new InputMethodSettings(
-                    mContext.getResources(), mContext.getContentResolver(), methodMap,
+            final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap,
                     userId, false);
             return settings.getLastInputMethodSubtypeLocked();
         }
@@ -5317,7 +5315,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // the most applicable subtype from explicitly or implicitly enabled
                 // subtypes.
                 List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypes =
-                        mSettings.getEnabledInputMethodSubtypeListLocked(mContext, imi, true);
+                        mSettings.getEnabledInputMethodSubtypeListLocked(imi, true);
                 // If there is only one explicitly or implicitly enabled subtype,
                 // just returns it.
                 if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
@@ -5361,9 +5359,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return true;
         }
         final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
-        final InputMethodSettings settings = new InputMethodSettings(
-                mContext.getResources(), mContext.getContentResolver(), methodMap,
-                userId, false);
+        final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap, userId,
+                false);
         if (!methodMap.containsKey(imeId)
                 || !settings.getEnabledInputMethodListLocked().contains(methodMap.get(imeId))) {
             return false; // IME is not found or not enabled.
@@ -5435,8 +5432,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     return true;
                 }
                 final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
-                final InputMethodSettings settings = new InputMethodSettings(
-                        mContext.getResources(), mContext.getContentResolver(), methodMap,
+                final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap,
                         userId, false);
                 if (!methodMap.containsKey(imeId)) {
                     return false; // IME is not found.
@@ -6138,8 +6134,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
         } else {
             final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
-            final InputMethodSettings settings = new InputMethodSettings(mContext.getResources(),
-                    mContext.getContentResolver(), methodMap, userId, false);
+            final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap,
+                    userId, false);
             if (enabled) {
                 if (!methodMap.containsKey(imeId)) {
                     failedToEnableUnknownIme = true;
@@ -6275,9 +6271,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
                         queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
                                 methodMap, methodList, DirectBootAwareness.AUTO);
-                        final InputMethodSettings settings = new InputMethodSettings(
-                                mContext.getResources(), mContext.getContentResolver(), methodMap,
-                                userId, false);
+                        final InputMethodSettings settings = new InputMethodSettings(mContext,
+                                methodMap, userId, false);
 
                         nextEnabledImes = InputMethodInfoUtils.getDefaultEnabledImes(mContext,
                                 methodList);

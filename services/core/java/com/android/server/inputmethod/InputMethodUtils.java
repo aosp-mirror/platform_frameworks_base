@@ -233,6 +233,7 @@ final class InputMethodUtils {
      * TODO: Move all putters and getters of settings to this class.
      * TODO(b/235661780): Make the setting supports multi-users.
      */
+    @UserHandleAware
     public static class InputMethodSettings {
         private final TextUtils.SimpleStringSplitter mInputMethodSplitter =
                 new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
@@ -240,6 +241,8 @@ final class InputMethodUtils {
         private final TextUtils.SimpleStringSplitter mSubtypeSplitter =
                 new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
 
+        @NonNull
+        private final Context mUserAwareContext;
         private final Resources mRes;
         private final ContentResolver mResolver;
         private final ArrayMap<String, InputMethodInfo> mMethodMap;
@@ -299,11 +302,14 @@ final class InputMethodUtils {
             return imsList;
         }
 
-        InputMethodSettings(Resources res, ContentResolver resolver,
+        InputMethodSettings(@NonNull Context context,
                 ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId,
                 boolean copyOnWrite) {
-            mRes = res;
-            mResolver = resolver;
+            mUserAwareContext = context.getUserId() == userId
+                    ? context
+                    : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
+            mRes = mUserAwareContext.getResources();
+            mResolver = mUserAwareContext.getContentResolver();
             mMethodMap = methodMap;
             switchCurrentUser(userId, copyOnWrite);
         }
@@ -405,12 +411,11 @@ final class InputMethodUtils {
         }
 
         List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
-                Context context, InputMethodInfo imi, boolean allowsImplicitlySelectedSubtypes) {
+                InputMethodInfo imi, boolean allowsImplicitlySelectedSubtypes) {
             List<InputMethodSubtype> enabledSubtypes =
                     getEnabledInputMethodSubtypeListLocked(imi);
             if (allowsImplicitlySelectedSubtypes && enabledSubtypes.isEmpty()) {
-                enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                        context.getResources(), imi);
+                enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypesLocked(mRes, imi);
             }
             return InputMethodSubtype.sort(imi, enabledSubtypes);
         }
