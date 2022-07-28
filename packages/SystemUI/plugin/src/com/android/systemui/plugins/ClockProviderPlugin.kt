@@ -11,12 +11,11 @@
  * KIND, either express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package com.android.systemui.shared.clocks
+package com.android.systemui.plugins
 
 import android.graphics.drawable.Drawable
 import android.view.View
 import com.android.internal.colorextraction.ColorExtractor
-import com.android.systemui.plugins.Plugin
 import com.android.systemui.plugins.annotations.ProvidesInterface
 import java.io.PrintWriter
 import java.util.Locale

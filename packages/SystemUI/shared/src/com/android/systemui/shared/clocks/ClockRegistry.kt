@@ -22,6 +22,11 @@ import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.Clock
+import com.android.systemui.plugins.ClockId
+import com.android.systemui.plugins.ClockMetadata
+import com.android.systemui.plugins.ClockProvider
+import com.android.systemui.plugins.ClockProviderPlugin
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.shared.plugins.PluginManager
 import com.google.gson.Gson
