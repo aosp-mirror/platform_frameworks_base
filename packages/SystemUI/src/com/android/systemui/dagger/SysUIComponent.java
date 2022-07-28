@@ -31,7 +31,6 @@ import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
 import com.android.systemui.people.PeopleProvider;
-import com.android.systemui.statusbar.pipeline.ConnectivityInfoProcessor;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.unfold.FoldStateLogger;
 import com.android.systemui.unfold.FoldStateLoggingProvider;
@@ -135,7 +134,6 @@ public interface SysUIComponent {
         getMediaTttCommandLineHelper();
         getMediaMuteAwaitConnectionCli();
         getNearbyMediaDevicesManager();
-        getConnectivityInfoProcessor();
         getUnfoldLatencyTracker().init();
         getFoldStateLoggingProvider().ifPresent(FoldStateLoggingProvider::init);
         getFoldStateLogger().ifPresent(FoldStateLogger::init);
@@ -217,9 +215,6 @@ public interface SysUIComponent {
 
     /** */
     Optional<NearbyMediaDevicesManager> getNearbyMediaDevicesManager();
-
-    /** */
-    Optional<ConnectivityInfoProcessor> getConnectivityInfoProcessor();
 
     /**
      * Returns {@link CoreStartable}s that should be started with the application.
