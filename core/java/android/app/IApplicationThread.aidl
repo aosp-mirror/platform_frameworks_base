@@ -102,10 +102,9 @@ oneway interface IApplicationThread {
     void scheduleLowMemory();
     void profilerControl(boolean start, in ProfilerInfo profilerInfo, int profileType);
     void setSchedulingGroup(int group);
-    void scheduleCreateBackupAgent(in ApplicationInfo app, in CompatibilityInfo compatInfo,
+    void scheduleCreateBackupAgent(in ApplicationInfo app,
             int backupMode, int userId, int operationType);
-    void scheduleDestroyBackupAgent(in ApplicationInfo app,
-            in CompatibilityInfo compatInfo, int userId);
+    void scheduleDestroyBackupAgent(in ApplicationInfo app, int userId);
     void scheduleOnNewActivityOptions(IBinder token, in Bundle options);
     void scheduleSuicide();
     void dispatchPackageBroadcast(int cmd, in String[] packages);

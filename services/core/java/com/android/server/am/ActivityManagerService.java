@@ -4980,7 +4980,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                              PackageManager.NOTIFY_PACKAGE_USE_BACKUP);
             try {
                 thread.scheduleCreateBackupAgent(backupTarget.appInfo,
-                        compatibilityInfoForPackage(backupTarget.appInfo),
                         backupTarget.backupMode, backupTarget.userId, backupTarget.operationType);
             } catch (Exception e) {
                 Slog.wtf(TAG, "Exception thrown creating backup agent in " + app, e);
@@ -12900,8 +12899,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (thread != null) {
                 if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "Agent proc already running: " + proc);
                 try {
-                    thread.scheduleCreateBackupAgent(app,
-                            compatibilityInfoForPackage(app), backupMode, targetUserId,
+                    thread.scheduleCreateBackupAgent(app, backupMode, targetUserId,
                             operationType);
                 } catch (RemoteException e) {
                     // Will time out on the backup manager side
@@ -13027,8 +13025,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final IApplicationThread thread = proc.getThread();
                 if (thread != null) {
                     try {
-                        thread.scheduleDestroyBackupAgent(appInfo,
-                                compatibilityInfoForPackage(appInfo), userId);
+                        thread.scheduleDestroyBackupAgent(appInfo, userId);
                     } catch (Exception e) {
                         Slog.e(TAG, "Exception when unbinding backup agent:");
                         e.printStackTrace();

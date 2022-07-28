@@ -32,7 +32,6 @@ import android.app.servertransaction.TestUtils.LaunchActivityItemBuilder;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
@@ -140,7 +139,6 @@ public class ObjectPoolTests {
         activityInfo.name = "name";
         Configuration overrideConfig = new Configuration();
         overrideConfig.assetsSeq = 5;
-        CompatibilityInfo compat = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
         String referrer = "referrer";
         int procState = 4;
         Bundle bundle = new Bundle();
@@ -152,7 +150,7 @@ public class ObjectPoolTests {
 
         Supplier<LaunchActivityItem> itemSupplier = () -> new LaunchActivityItemBuilder()
                 .setIntent(intent).setIdent(ident).setInfo(activityInfo).setCurConfig(config())
-                .setOverrideConfig(overrideConfig).setCompatInfo(compat).setReferrer(referrer)
+                .setOverrideConfig(overrideConfig).setReferrer(referrer)
                 .setProcState(procState).setState(bundle).setPersistentState(persistableBundle)
                 .setPendingResults(resultInfoList()).setPendingNewIntents(referrerIntentList())
                 .setIsForward(true).setAssistToken(assistToken)
