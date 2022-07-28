@@ -34,7 +34,6 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.ColorSpace;
-import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -85,8 +84,6 @@ class ScreenRotationAnimation {
     private final Context mContext;
     private final TransactionPool mTransactionPool;
     private final float[] mTmpFloats = new float[9];
-    // Complete transformations being applied.
-    private final Matrix mSnapshotInitialMatrix = new Matrix();
     /** The leash of display. */
     private final SurfaceControl mSurfaceControl;
     private final Rect mStartBounds = new Rect();
@@ -169,16 +166,15 @@ class ScreenRotationAnimation {
                     .setName("RotationLayer")
                     .build();
 
-            GraphicBuffer buffer = GraphicBuffer.createFromHardwareBuffer(
-                    screenshotBuffer.getHardwareBuffer());
-
             t.setLayer(mAnimLeash, SCREEN_FREEZE_LAYER_BASE);
             t.setPosition(mAnimLeash, 0, 0);
             t.setAlpha(mAnimLeash, 1);
             t.show(mAnimLeash);
 
-            t.setBuffer(mScreenshotLayer, buffer);
-            t.setColorSpace(mScreenshotLayer, screenshotBuffer.getColorSpace());
+            final ColorSpace colorSpace = screenshotBuffer.getColorSpace();
+            final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
+            t.setDataSpace(mScreenshotLayer, colorSpace.getDataSpace());
+            t.setBuffer(mScreenshotLayer, hardwareBuffer);
             t.show(mScreenshotLayer);
 
             if (!isCustomRotate()) {
@@ -189,8 +185,7 @@ class ScreenRotationAnimation {
                         .setName("BackColorSurface")
                         .build();
 
-                HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
-                mStartLuma = getMedianBorderLuma(hardwareBuffer, screenshotBuffer.getColorSpace());
+                mStartLuma = getMedianBorderLuma(hardwareBuffer, colorSpace);
 
                 t.setLayer(mBackColorSurface, -1);
                 t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
@@ -202,7 +197,7 @@ class ScreenRotationAnimation {
             Slog.w(TAG, "Unable to allocate freeze surface", e);
         }
 
-        setRotation(t);
+        setScreenshotTransform(t);
         t.apply();
     }
 
@@ -210,18 +205,35 @@ class ScreenRotationAnimation {
         return mAnimHint == ROTATION_ANIMATION_CROSSFADE || mAnimHint == ROTATION_ANIMATION_JUMPCUT;
     }
 
-    private void setRotation(SurfaceControl.Transaction t) {
-        // Compute the transformation matrix that must be applied
-        // to the snapshot to make it stay in the same original position
-        // with the current screen rotation.
-        int delta = deltaRotation(mEndRotation, mStartRotation);
-        createRotationMatrix(delta, mStartWidth, mStartHeight, mSnapshotInitialMatrix);
-        setRotationTransform(t, mSnapshotInitialMatrix);
-    }
-
-    private void setRotationTransform(SurfaceControl.Transaction t, Matrix matrix) {
+    private void setScreenshotTransform(SurfaceControl.Transaction t) {
         if (mScreenshotLayer == null) {
             return;
+        }
+        final Matrix matrix = new Matrix();
+        final int delta = deltaRotation(mEndRotation, mStartRotation);
+        if (delta != 0) {
+            // Compute the transformation matrix that must be applied to the snapshot to make it
+            // stay in the same original position with the current screen rotation.
+            switch (delta) {
+                case Surface.ROTATION_90:
+                    matrix.setRotate(90, 0, 0);
+                    matrix.postTranslate(mStartHeight, 0);
+                    break;
+                case Surface.ROTATION_180:
+                    matrix.setRotate(180, 0, 0);
+                    matrix.postTranslate(mStartWidth, mStartHeight);
+                    break;
+                case Surface.ROTATION_270:
+                    matrix.setRotate(270, 0, 0);
+                    matrix.postTranslate(0, mStartWidth);
+                    break;
+            }
+        } else if ((mEndWidth > mStartWidth) == (mEndHeight > mStartHeight)
+                && (mEndWidth != mStartWidth || mEndHeight != mStartHeight)) {
+            // Display resizes without rotation change.
+            final float scale = Math.max((float) mEndWidth / mStartHeight,
+                    (float) mEndHeight / mStartHeight);
+            matrix.setScale(scale, scale);
         }
         matrix.getValues(mTmpFloats);
         float x = mTmpFloats[Matrix.MTRANS_X];
@@ -230,9 +242,7 @@ class ScreenRotationAnimation {
         t.setMatrix(mScreenshotLayer,
                 mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
                 mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-
         t.setAlpha(mScreenshotLayer, (float) 1.0);
-        t.show(mScreenshotLayer);
     }
 
     /**
@@ -484,27 +494,6 @@ class ScreenRotationAnimation {
         }
 
         return getMedianBorderLuma(buffer.getHardwareBuffer(), buffer.getColorSpace());
-    }
-
-    private static void createRotationMatrix(int rotation, int width, int height,
-            Matrix outMatrix) {
-        switch (rotation) {
-            case Surface.ROTATION_0:
-                outMatrix.reset();
-                break;
-            case Surface.ROTATION_90:
-                outMatrix.setRotate(90, 0, 0);
-                outMatrix.postTranslate(height, 0);
-                break;
-            case Surface.ROTATION_180:
-                outMatrix.setRotate(180, 0, 0);
-                outMatrix.postTranslate(width, height);
-                break;
-            case Surface.ROTATION_270:
-                outMatrix.setRotate(270, 0, 0);
-                outMatrix.postTranslate(0, width);
-                break;
-        }
     }
 
     private static void applyColor(int startColor, int endColor, float[] rgbFloat,
