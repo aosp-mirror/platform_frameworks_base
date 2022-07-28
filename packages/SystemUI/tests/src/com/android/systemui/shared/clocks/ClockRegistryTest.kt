@@ -25,6 +25,10 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.shared.plugins.PluginManager
+import com.android.systemui.plugins.Clock
+import com.android.systemui.plugins.ClockId
+import com.android.systemui.plugins.ClockMetadata
+import com.android.systemui.plugins.ClockProviderPlugin
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import junit.framework.Assert.assertEquals
