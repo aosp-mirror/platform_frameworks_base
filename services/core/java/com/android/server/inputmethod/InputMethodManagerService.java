@@ -4161,7 +4161,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
+    public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes,
+            @UserIdInt int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
+
         // By this IPC call, only a process which shares the same uid with the IME can add
         // additional input method subtypes to the IME.
         if (TextUtils.isEmpty(imiId) || subtypes == null) return;
@@ -4175,23 +4180,32 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         synchronized (ImfLock.class) {
-            if (!calledFromValidUserLocked()) {
-                return;
-            }
             if (!mSystemReady) {
                 return;
             }
-            if (!mSettings.setAdditionalInputMethodSubtypes(imiId, toBeAdded,
-                    mAdditionalSubtypeMap, mIPackageManager)) {
+
+            if (mSettings.getCurrentUserId() == userId) {
+                if (!mSettings.setAdditionalInputMethodSubtypes(imiId, toBeAdded,
+                        mAdditionalSubtypeMap, mIPackageManager)) {
+                    return;
+                }
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
                 return;
             }
 
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+            final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
+            final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap,
+                    userId, false);
+            final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
+                    new ArrayMap<>();
+            AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+            settings.setAdditionalInputMethodSubtypes(imiId, toBeAdded, additionalSubtypeMap,
+                    mIPackageManager);
         }
     }
 
