@@ -1626,7 +1626,6 @@ public class LockSettingsService extends ILockSettings.Stub {
 
             onSyntheticPasswordKnown(userId, sp);
             setLockCredentialWithSpLocked(credential, sp, userId);
-            mSpManager.destroyLskfBasedProtector(oldProtectorId, userId);
             sendCredentialsOnChangeIfRequired(credential, userId, isLockTiedToParent);
             return true;
         }
@@ -2642,8 +2641,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     /**
      * Changes the user's LSKF by creating an LSKF-based protector that uses the new LSKF (which may
-     * be empty) and setting the new protector as the user's current LSKF-based protector.  The old
-     * LSKF-based protector is not destroyed, and the SP itself is not changed.
+     * be empty) and replacing the old LSKF-based protector with it.  The SP itself is not changed.
      *
      * Also maintains the invariants described in {@link SyntheticPasswordManager} by
      * setting/clearing the protection (by the SP) on the user's file-based encryption key and
@@ -2655,6 +2653,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             SyntheticPassword sp, int userId) {
         if (DEBUG) Slog.d(TAG, "setLockCredentialWithSpLocked: user=" + userId);
         final int savedCredentialType = getCredentialTypeInternal(userId);
+        final long oldProtectorId = getCurrentLskfBasedProtectorId(userId);
         final long newProtectorId = mSpManager.createLskfBasedProtector(getGateKeeperService(),
                 credential, sp, userId);
         final Map<Integer, LockscreenCredential> profilePasswords;
@@ -2700,7 +2699,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 entry.getValue().zeroize();
             }
         }
-
+        mSpManager.destroyLskfBasedProtector(oldProtectorId, userId);
         return newProtectorId;
     }
 
@@ -2934,9 +2933,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             return false;
         }
         onSyntheticPasswordKnown(userId, result.syntheticPassword);
-        final long oldProtectorId = getCurrentLskfBasedProtectorId(userId);
         setLockCredentialWithSpLocked(credential, result.syntheticPassword, userId);
-        mSpManager.destroyLskfBasedProtector(oldProtectorId, userId);
         return true;
     }
 
