@@ -204,11 +204,8 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
             final WindowToken token = mTargetWindowTokens.keyAt(i);
             for (int j = token.getChildCount() - 1; j >= 0; j--) {
-                // TODO(b/234585256): The consumer should be handleFinishDrawing(). And check why
-                //  the local window might easily time out.
-                final WindowState w = token.getChildAt(j);
-                if (w.isClientLocal()) continue;
-                w.applyWithNextDraw(t -> {});
+                // TODO(b/234585256): The consumer should be handleFinishDrawing().
+                token.getChildAt(j).applyWithNextDraw(t -> {});
             }
         }
         mIsSyncDrawRequested = true;
@@ -484,7 +481,16 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         if (op == null) return false;
         if (DEBUG) Slog.d(TAG, "handleFinishDrawing " + w);
         if (op.mDrawTransaction == null) {
-            op.mDrawTransaction = postDrawTransaction;
+            if (w.isClientLocal()) {
+                // Use a new transaction to merge the draw transaction of local window because the
+                // same instance will be cleared (Transaction#clear()) after reporting draw.
+                op.mDrawTransaction = mService.mTransactionFactory.get();
+                op.mDrawTransaction.merge(postDrawTransaction);
+            } else {
+                // The transaction read from parcel (the client is in a different process) is
+                // already a copy, so just reference it directly.
+                op.mDrawTransaction = postDrawTransaction;
+            }
         } else {
             op.mDrawTransaction.merge(postDrawTransaction);
         }
