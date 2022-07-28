@@ -49,7 +49,9 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
+import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
+import com.android.wm.shell.freeform.FreeformTaskTransitionHandler;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -194,10 +196,27 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     @DynamicOverride
+    static FreeformComponents provideFreeformComponents(
+            FreeformTaskListener<?> taskListener,
+            FreeformTaskTransitionHandler transitionHandler) {
+        return new FreeformComponents(taskListener, Optional.of(transitionHandler));
+    }
+
+    @WMSingleton
+    @Provides
     static FreeformTaskListener<?> provideFreeformTaskListener(
+            WindowDecorViewModel<?> windowDecorViewModel) {
+        return new FreeformTaskListener<>(windowDecorViewModel);
+    }
+
+    @WMSingleton
+    @Provides
+    static FreeformTaskTransitionHandler provideTaskTransitionHandler(
+            Transitions transitions,
             WindowDecorViewModel<?> windowDecorViewModel,
-            SyncTransactionQueue syncQueue) {
-        return new FreeformTaskListener<>(windowDecorViewModel, syncQueue);
+            FreeformTaskListener<?> freeformTaskListener) {
+        return new FreeformTaskTransitionHandler(transitions, windowDecorViewModel,
+                freeformTaskListener);
     }
 
     //
