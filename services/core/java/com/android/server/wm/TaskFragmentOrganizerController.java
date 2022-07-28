@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.window.TaskFragmentOrganizer.putExceptionInBundle;
+import static android.window.TaskFragmentOrganizer.putErrorInfoInBundle;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
@@ -214,12 +214,15 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
         }
 
-        void onTaskFragmentError(IBinder errorCallbackToken, Throwable exception) {
+        void onTaskFragmentError(IBinder errorCallbackToken, @Nullable TaskFragment taskFragment,
+                int opType, Throwable exception) {
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
                     "Sending TaskFragment error exception=%s", exception.toString());
-            final Bundle exceptionBundle = putExceptionInBundle(exception);
+            final TaskFragmentInfo info =
+                    taskFragment != null ? taskFragment.getTaskFragmentInfo() : null;
+            final Bundle errorBundle = putErrorInfoInBundle(exception, info, opType);
             try {
-                mOrganizer.onTaskFragmentError(errorCallbackToken, exceptionBundle);
+                mOrganizer.onTaskFragmentError(errorCallbackToken, errorBundle);
             } catch (RemoteException e) {
                 Slog.d(TAG, "Exception sending onTaskFragmentError callback", e);
             }
@@ -462,13 +465,15 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     void onTaskFragmentError(ITaskFragmentOrganizer organizer, IBinder errorCallbackToken,
-            Throwable exception) {
+            TaskFragment taskFragment, int opType, Throwable exception) {
         validateAndGetState(organizer);
         Slog.w(TAG, "onTaskFragmentError ", exception);
         final PendingTaskFragmentEvent pendingEvent = new PendingTaskFragmentEvent.Builder(
                 PendingTaskFragmentEvent.EVENT_ERROR, organizer)
                 .setErrorCallbackToken(errorCallbackToken)
+                .setTaskFragment(taskFragment)
                 .setException(exception)
+                .setOpType(opType)
                 .build();
         mPendingTaskFragmentEvents.add(pendingEvent);
         // Make sure the error event will be dispatched if there are no other changes.
@@ -567,19 +572,22 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         // Set when the event is deferred due to the host task is invisible. The defer time will
         // be the last active time of the host task.
         private long mDeferTime;
+        private int mOpType;
 
         private PendingTaskFragmentEvent(@EventType int eventType,
                 ITaskFragmentOrganizer taskFragmentOrg,
                 @Nullable TaskFragment taskFragment,
                 @Nullable IBinder errorCallbackToken,
                 @Nullable Throwable exception,
-                @Nullable ActivityRecord activity) {
+                @Nullable ActivityRecord activity,
+                int opType) {
             mEventType = eventType;
             mTaskFragmentOrg = taskFragmentOrg;
             mTaskFragment = taskFragment;
             mErrorCallbackToken = errorCallbackToken;
             mException = exception;
             mActivity = activity;
+            mOpType = opType;
         }
 
         /**
@@ -610,6 +618,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             private Throwable mException;
             @Nullable
             private ActivityRecord mActivity;
+            private int mOpType;
 
             Builder(@EventType int eventType, ITaskFragmentOrganizer taskFragmentOrg) {
                 mEventType = eventType;
@@ -636,9 +645,14 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 return this;
             }
 
+            Builder setOpType(int opType) {
+                mOpType = opType;
+                return this;
+            }
+
             PendingTaskFragmentEvent build() {
                 return new PendingTaskFragmentEvent(mEventType, mTaskFragmentOrg, mTaskFragment,
-                        mErrorCallbackToken, mException, mActivity);
+                        mErrorCallbackToken, mException, mActivity, mOpType);
             }
         }
     }
@@ -667,6 +681,10 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     private boolean shouldSendEventWhenTaskInvisible(@NonNull PendingTaskFragmentEvent event) {
+        if (event.mEventType == PendingTaskFragmentEvent.EVENT_ERROR) {
+            return true;
+        }
+
         final TaskFragmentOrganizerState state =
                 mTaskFragmentOrganizerState.get(event.mTaskFragmentOrg.asBinder());
         final TaskFragmentInfo lastInfo = state.mLastSentTaskFragmentInfos.get(event.mTaskFragment);
@@ -757,7 +775,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 state.onTaskFragmentParentInfoChanged(taskFragment);
                 break;
             case PendingTaskFragmentEvent.EVENT_ERROR:
-                state.onTaskFragmentError(event.mErrorCallbackToken, event.mException);
+                state.onTaskFragmentError(event.mErrorCallbackToken, taskFragment, event.mOpType,
+                        event.mException);
                 break;
             case PendingTaskFragmentEvent.EVENT_ACTIVITY_REPARENT_TO_TASK:
                 state.onActivityReparentToTask(event.mActivity);
