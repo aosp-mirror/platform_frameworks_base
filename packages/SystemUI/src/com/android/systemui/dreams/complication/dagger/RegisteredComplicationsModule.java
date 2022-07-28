@@ -25,7 +25,6 @@ import dagger.Module;
  * {@link SystemUIBinder}.
  */
 @Module(includes = {
-                DreamClockDateComplicationModule.class,
                 DreamClockTimeComplicationModule.class,
         },
         subcomponents = {
