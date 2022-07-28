@@ -4347,6 +4347,9 @@
     <!-- Name of a font family to use for medium body text. -->
     <string name="config_bodyFontFamilyMedium" translatable="false">sans-serif-medium</string>
 
+    <!-- Name of the font family to use in the default lockscreen clock -->
+    <string name="config_clockFontFamily" translatable="false">monospace</string>
+
     <!-- Size of icon shown beside a preference locked by admin -->
     <dimen name="config_restrictedIconSize">@dimen/restricted_icon_size_material</dimen>
 
