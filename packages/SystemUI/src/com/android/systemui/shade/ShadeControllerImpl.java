@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.shade;
 
 import android.util.Log;
 import android.view.ViewTreeObserver;
@@ -23,12 +23,12 @@ import android.view.WindowManager;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotificationPanelViewController;
-import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -37,7 +37,7 @@ import javax.inject.Inject;
 
 import dagger.Lazy;
 
-/** An implementation of {@link com.android.systemui.statusbar.phone.ShadeController}. */
+/** An implementation of {@link ShadeController}. */
 @SysUISingleton
 public class ShadeControllerImpl implements ShadeController {
 
@@ -157,7 +157,8 @@ public class ShadeControllerImpl implements ShadeController {
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        if (getCentralSurfaces().getNotificationShadeWindowView().isVisibleToUser()) {
+                        if (getCentralSurfaces().getNotificationShadeWindowView()
+                                .isVisibleToUser()) {
                             getNotificationPanelViewController().removeOnGlobalLayoutListener(this);
                             getNotificationPanelViewController().getView().post(executable);
                         }
