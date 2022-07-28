@@ -62,16 +62,19 @@ public final class BatteryController extends RestrictingController {
 
     private final PowerTracker mPowerTracker;
 
+    private final FlexibilityController mFlexibilityController;
     /**
      * Helper set to avoid too much GC churn from frequent calls to
      * {@link #maybeReportNewChargingStateLocked()}.
      */
     private final ArraySet<JobStatus> mChangedJobs = new ArraySet<>();
 
-    public BatteryController(JobSchedulerService service) {
+    public BatteryController(JobSchedulerService service,
+            FlexibilityController flexibilityController) {
         super(service);
         mPowerTracker = new PowerTracker();
         mPowerTracker.startTracking();
+        mFlexibilityController = flexibilityController;
     }
 
     @Override
@@ -173,6 +176,11 @@ public final class BatteryController extends RestrictingController {
             Slog.d(TAG, "maybeReportNewChargingStateLocked: "
                     + powerConnected + "/" + stablePower + "/" + batteryNotLow);
         }
+        mFlexibilityController.setConstraintSatisfied(
+                JobStatus.CONSTRAINT_CHARGING, mService.isBatteryCharging());
+        mFlexibilityController
+            .setConstraintSatisfied(JobStatus.CONSTRAINT_BATTERY_NOT_LOW, batteryNotLow);
+
         final long nowElapsed = sElapsedRealtimeClock.millis();
         for (int i = mTrackedTasks.size() - 1; i >= 0; i--) {
             final JobStatus ts = mTrackedTasks.valueAt(i);

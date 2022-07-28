@@ -25,6 +25,8 @@ import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+import static com.android.server.job.controllers.FlexibilityController.NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS;
+import static com.android.server.job.controllers.FlexibilityController.SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.app.AppGlobals;
@@ -122,12 +124,6 @@ public final class JobStatus {
                     | CONSTRAINT_IDLE;
 
     /**
-     * The set of constraints that are required to satisfy flexible constraints.
-     * Constraints explicitly requested by the job will not be added to the set.
-     */
-    private int mFlexibleConstraints;
-
-    /**
      * Keeps track of how many flexible constraints must be satisfied for the job to execute.
      */
     private int mNumRequiredFlexibleConstraints;
@@ -136,6 +132,9 @@ public final class JobStatus {
      * Number of required flexible constraints that have been dropped.
      */
     private int mNumDroppedFlexibleConstraints;
+
+    /** If the job is going to be passed an unmetered network. */
+    private boolean mHasAccessToUnmetered;
 
     /**
      * The additional set of dynamic constraints that must be met if this is an expedited job that
@@ -466,6 +465,12 @@ public final class JobStatus {
     /** The job's dynamic requirements have been satisfied. */
     private boolean mReadyDynamicSatisfied;
 
+    /**
+     * The job prefers an unmetered network if it has the connectivity constraint but is
+     * okay with any meteredness.
+     */
+    private final boolean mPreferUnmetered;
+
     /** The reason a job most recently went from ready to not ready. */
     private int mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
 
@@ -554,30 +559,23 @@ public final class JobStatus {
         }
         mHasExemptedMediaUrisOnly = exemptedMediaUrisOnly;
 
-        if (isRequestedExpeditedJob()
-                || ((latestRunTimeElapsedMillis - earliestRunTimeElapsedMillis)
-                < MIN_WINDOW_FOR_FLEXIBILITY_MS)
-                || job.isPrefetch()) {
-            mFlexibleConstraints = 0;
-        } else {
-            if ((requiredConstraints & CONSTRAINT_CHARGING) == 0) {
-                mFlexibleConstraints |= CONSTRAINT_CHARGING;
-            }
-            if ((requiredConstraints & CONSTRAINT_BATTERY_NOT_LOW) == 0) {
-                mFlexibleConstraints |= CONSTRAINT_BATTERY_NOT_LOW;
-            }
-            if ((requiredConstraints & CONSTRAINT_IDLE) == 0) {
-                mFlexibleConstraints |= CONSTRAINT_IDLE;
-            }
-            if (job.getRequiredNetwork() != null
-                    && !job.getRequiredNetwork().hasCapability(NET_CAPABILITY_NOT_METERED)) {
-                mFlexibleConstraints |= CONSTRAINT_CONNECTIVITY;
-            }
-        }
-        if (mFlexibleConstraints != 0) {
-            // TODO(b/239047584): Uncomment once Flexibility Controller is plugged in.
-            // requiredConstraints |= CONSTRAINT_FLEXIBLE;
-            mNumRequiredFlexibleConstraints = Integer.bitCount(mFlexibleConstraints);
+        mPreferUnmetered = job.getRequiredNetwork() != null
+                && !job.getRequiredNetwork().hasCapability(NET_CAPABILITY_NOT_METERED);
+
+        final boolean lacksSomeFlexibleConstraints =
+                ((~requiredConstraints) & SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS) != 0
+                        || mPreferUnmetered;
+        final boolean satisfiesMinWindowException =
+                (latestRunTimeElapsedMillis - earliestRunTimeElapsedMillis)
+                >= MIN_WINDOW_FOR_FLEXIBILITY_MS;
+
+        if (!isRequestedExpeditedJob()
+                && satisfiesMinWindowException
+                && !job.isPrefetch()
+                && lacksSomeFlexibleConstraints) {
+            mNumRequiredFlexibleConstraints =
+                    NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS + (mPreferUnmetered ? 1 : 0);
+            requiredConstraints |= CONSTRAINT_FLEXIBLE;
         }
 
         this.requiredConstraints = requiredConstraints;
@@ -1206,12 +1204,21 @@ public final class JobStatus {
         return mOriginalLatestRunTimeElapsedMillis;
     }
 
-    public int getFlexibleConstraints() {
-        return mFlexibleConstraints;
-    }
-
     public void setOriginalLatestRunTimeElapsed(long latestRunTimeElapsed) {
         mOriginalLatestRunTimeElapsedMillis = latestRunTimeElapsed;
+    }
+
+    /** Sets the jobs access to an unmetered network. */
+    void setHasAccessToUnmetered(boolean access) {
+        mHasAccessToUnmetered = access;
+    }
+
+    boolean getHasAccessToUnmetered() {
+        return mHasAccessToUnmetered;
+    }
+
+    boolean getPreferUnmetered() {
+        return mPreferUnmetered;
     }
 
     @JobParameters.StopReason
