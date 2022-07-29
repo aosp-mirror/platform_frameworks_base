@@ -141,7 +141,7 @@ public class HdmiCecLocalDeviceTest {
                 new HdmiControlService(context, Collections.emptyList(),
                         new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
-                    boolean isControlEnabled() {
+                    boolean isCecControlEnabled() {
                         return isControlEnabled;
                     }
 
