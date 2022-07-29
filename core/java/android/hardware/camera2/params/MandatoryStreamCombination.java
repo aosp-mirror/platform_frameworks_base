@@ -920,15 +920,15 @@ public final class MandatoryStreamCombination {
         // UH res YUV / RAW / JPEG + YUV preview size stream
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.FULL_RES),
-                 new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
                 "No-viewfinder Ultra high resolution YUV image capture with image analysis"),
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.FULL_RES),
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
                 "No-viewfinder Ultra high resolution RAW_SENSOR image capture with image analysis"),
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.JPEG, SizeThreshold.FULL_RES),
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
                 "No-viewfinder Ultra high resolution JPEG image capture with image analysis"),
 
         // UH res YUV / RAW / JPEG + PRIV preview + PRIV RECORD stream

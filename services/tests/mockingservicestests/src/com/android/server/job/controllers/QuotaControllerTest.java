@@ -395,6 +395,7 @@ public class QuotaControllerTest {
                 sElapsedRealtimeClock.millis(), true, false);
         js.setTareWealthConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
         js.setExpeditedJobTareApproved(sElapsedRealtimeClock.millis(), true);
+        js.setFlexibilityConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
         return js;
     }
 

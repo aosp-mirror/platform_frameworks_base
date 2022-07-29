@@ -4413,7 +4413,7 @@ public final class ActiveServices {
             mAm.notifyPackageUse(r.serviceInfo.packageName,
                                  PackageManager.NOTIFY_PACKAGE_USE_SERVICE);
             thread.scheduleCreateService(r, r.serviceInfo,
-                    mAm.compatibilityInfoForPackage(r.serviceInfo.applicationInfo),
+                    null /* compatInfo (unused but need to keep method signature) */,
                     app.mState.getReportedProcState());
             r.postNotification();
             created = true;

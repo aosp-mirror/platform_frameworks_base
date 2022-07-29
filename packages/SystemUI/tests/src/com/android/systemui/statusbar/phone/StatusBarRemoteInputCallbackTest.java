@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -56,7 +57,7 @@ import org.mockito.MockitoAnnotations;
 public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
-    @Mock private ShadeController mShadeController;
+    @Mock private com.android.systemui.shade.ShadeController mShadeController;
     @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;

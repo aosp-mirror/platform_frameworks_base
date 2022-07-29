@@ -797,6 +797,7 @@ public class JobStatusTest {
                 sElapsedRealtimeClock.millis(), isSatisfied, false);
         job.setBackgroundNotRestrictedConstraintSatisfied(
                 sElapsedRealtimeClock.millis(), isSatisfied, false);
+        job.setFlexibilityConstraintSatisfied(sElapsedRealtimeClock.millis(), isSatisfied);
     }
 
     private static JobStatus createJobStatus(long earliestRunTimeElapsedMillis,

@@ -34,7 +34,7 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.draganddrop.DragAndDropController;
-import com.android.wm.shell.freeform.FreeformTaskListener;
+import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
 import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
@@ -68,7 +68,7 @@ public class ShellInit {
     private final FullscreenTaskListener mFullscreenTaskListener;
     private final Optional<UnfoldAnimationController> mUnfoldController;
     private final Optional<UnfoldTransitionHandler> mUnfoldTransitionHandler;
-    private final Optional<FreeformTaskListener<?>> mFreeformTaskListenerOptional;
+    private final Optional<FreeformComponents> mFreeformComponentsOptional;
     private final ShellExecutor mMainExecutor;
     private final Transitions mTransitions;
     private final StartingWindowController mStartingWindow;
@@ -93,7 +93,7 @@ public class ShellInit {
             FullscreenTaskListener fullscreenTaskListener,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
-            Optional<FreeformTaskListener<?>> freeformTaskListenerOptional,
+            Optional<FreeformComponents> freeformComponentsOptional,
             Optional<RecentTasksController> recentTasks,
             Optional<ActivityEmbeddingController> activityEmbeddingOptional,
             Transitions transitions,
@@ -111,7 +111,7 @@ public class ShellInit {
         mPipTouchHandlerOptional = pipTouchHandlerOptional;
         mUnfoldController = unfoldAnimationController;
         mUnfoldTransitionHandler = unfoldTransitionHandler;
-        mFreeformTaskListenerOptional = freeformTaskListenerOptional;
+        mFreeformComponentsOptional = freeformComponentsOptional;
         mRecentTasks = recentTasks;
         mActivityEmbeddingOptional = activityEmbeddingOptional;
         mTransitions = transitions;
@@ -143,6 +143,8 @@ public class ShellInit {
             mTransitions.register(mShellTaskOrganizer);
             mActivityEmbeddingOptional.ifPresent(ActivityEmbeddingController::init);
             mUnfoldTransitionHandler.ifPresent(UnfoldTransitionHandler::init);
+            mFreeformComponentsOptional.flatMap(f -> f.mTaskTransitionHandler)
+                    .ifPresent(mTransitions::addHandler);
             if (mSplitScreenOptional.isPresent() && mPipTouchHandlerOptional.isPresent()) {
                 final DefaultMixedHandler mixedHandler = new DefaultMixedHandler(mTransitions,
                         mPipTouchHandlerOptional.get().getTransitionHandler(),
@@ -158,9 +160,9 @@ public class ShellInit {
         mPipTouchHandlerOptional.ifPresent((handler) -> handler.init());
 
         // Initialize optional freeform
-        mFreeformTaskListenerOptional.ifPresent(f ->
+        mFreeformComponentsOptional.ifPresent(f ->
                 mShellTaskOrganizer.addListenerForType(
-                        f, ShellTaskOrganizer.TASK_LISTENER_TYPE_FREEFORM));
+                        f.mTaskListener, ShellTaskOrganizer.TASK_LISTENER_TYPE_FREEFORM));
 
         mUnfoldController.ifPresent(UnfoldAnimationController::init);
         mRecentTasks.ifPresent(RecentTasksController::init);

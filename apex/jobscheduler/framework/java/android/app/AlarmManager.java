@@ -1257,6 +1257,17 @@ public class AlarmManager {
     }
 
     /**
+     * Remove all alarms previously set by the caller, if any.
+     */
+    public void cancelAll() {
+        try {
+            mService.removeAll(mContext.getOpPackageName());
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Set the system wall clock time.
      * Requires the permission android.permission.SET_TIME.
      *

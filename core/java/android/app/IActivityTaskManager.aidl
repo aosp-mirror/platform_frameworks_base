@@ -69,6 +69,7 @@ import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
 import android.view.IRecentsAnimationRunner;
 import android.view.IRemoteAnimationRunner;
+import android.view.IWindowFocusObserver;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
 import android.window.IWindowOrganizerController;
@@ -352,6 +353,8 @@ interface IActivityTaskManager {
      * Prepare the back navigation in the server. This setups the leashed for sysui to animate
      * the back gesture and returns the data needed for the animation.
      * @param requestAnimation true if the caller wishes to animate the back navigation
+     * @param focusObserver a remote callback to nofify shell when the focused window lost focus.
      */
-    android.window.BackNavigationInfo startBackNavigation(in boolean requestAnimation);
+    android.window.BackNavigationInfo startBackNavigation(in boolean requestAnimation,
+            in IWindowFocusObserver focusObserver);
 }

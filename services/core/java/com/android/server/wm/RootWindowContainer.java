@@ -210,10 +210,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     // Map from the PID to the top most app which has a focused window of the process.
     final ArrayMap<Integer, ActivityRecord> mTopFocusedAppByProcess = new ArrayMap<>();
 
-    // Only a separate transaction until we separate the apply surface changes
-    // transaction from the global transaction.
-    private final SurfaceControl.Transaction mDisplayTransaction;
-
     // The tag for the token to put root tasks on the displays to sleep.
     private static final String DISPLAY_OFF_SLEEP_TOKEN_TAG = "Display-off";
 
@@ -458,7 +454,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     RootWindowContainer(WindowManagerService service) {
         super(service);
-        mDisplayTransaction = service.mTransactionFactory.get();
         mHandler = new MyHandler(service.mH.getLooper());
         mService = service.mAtmService;
         mTaskSupervisor = mService.mTaskSupervisor;
@@ -777,6 +772,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return leakedSurface || killedApps;
     }
 
+    /**
+     * This method should only be called from {@link WindowSurfacePlacer}. Otherwise the recursion
+     * check and {@link WindowSurfacePlacer#isInLayout()} won't take effect.
+     */
     void performSurfacePlacement() {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "performSurfacePlacement");
         try {
@@ -999,19 +998,20 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mObscuringWindow = null;
 
         // TODO(multi-display): Support these features on secondary screens.
-        final DisplayContent defaultDc = mWmService.getDefaultDisplayContentLocked();
+        final DisplayContent defaultDc = mDefaultDisplay;
         final DisplayInfo defaultInfo = defaultDc.getDisplayInfo();
         final int defaultDw = defaultInfo.logicalWidth;
         final int defaultDh = defaultInfo.logicalHeight;
+        final SurfaceControl.Transaction t = defaultDc.getSyncTransaction();
         if (mWmService.mWatermark != null) {
-            mWmService.mWatermark.positionSurface(defaultDw, defaultDh, mDisplayTransaction);
+            mWmService.mWatermark.positionSurface(defaultDw, defaultDh, t);
         }
         if (mWmService.mStrictModeFlash != null) {
-            mWmService.mStrictModeFlash.positionSurface(defaultDw, defaultDh, mDisplayTransaction);
+            mWmService.mStrictModeFlash.positionSurface(defaultDw, defaultDh, t);
         }
         if (mWmService.mEmulatorDisplayOverlay != null) {
             mWmService.mEmulatorDisplayOverlay.positionSurface(defaultDw, defaultDh,
-                    mWmService.getDefaultDisplayRotation(), mDisplayTransaction);
+                    defaultDc.getRotation(), t);
         }
 
         final int count = mChildren.size();
@@ -1022,8 +1022,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         // Give the display manager a chance to adjust properties like display rotation if it needs
         // to.
-        mWmService.mDisplayManagerInternal.performTraversal(mDisplayTransaction);
-        SurfaceControl.mergeToGlobalTransaction(mDisplayTransaction);
+        mWmService.mDisplayManagerInternal.performTraversal(t);
+        if (t != defaultDc.mSyncTransaction) {
+            SurfaceControl.mergeToGlobalTransaction(t);
+        }
     }
 
     /**

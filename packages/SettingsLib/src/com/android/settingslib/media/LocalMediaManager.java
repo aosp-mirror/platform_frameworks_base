@@ -84,7 +84,8 @@ public class LocalMediaManager implements BluetoothCallback {
     private InfoMediaManager mInfoMediaManager;
     private String mPackageName;
     private MediaDevice mOnTransferBluetoothDevice;
-    private AudioManager mAudioManager;
+    @VisibleForTesting
+    AudioManager mAudioManager;
 
     @VisibleForTesting
     List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();

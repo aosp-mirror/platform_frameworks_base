@@ -56,6 +56,7 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -121,7 +122,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     @Nullable
     private final FoldAodAnimationController mFoldAodAnimationController;
     private KeyguardMessageAreaController mKeyguardMessageAreaController;
-    private final Lazy<ShadeController> mShadeController;
+    private final Lazy<com.android.systemui.shade.ShadeController> mShadeController;
 
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
         private boolean mBouncerAnimating;

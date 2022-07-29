@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,6 +39,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSTileHost;
@@ -73,6 +75,8 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     @Mock
     private QSLogger mQSLogger;
     @Mock
+    private FeatureFlags mFeatureFlags;
+    @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private DialogLaunchAnimator mDialogLaunchAnimator;
@@ -94,6 +98,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),
                 mMetricsLogger,
+                mFeatureFlags,
                 mStatusBarStateController,
                 mActivityStarter,
                 mQSLogger,
@@ -125,7 +130,8 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         ArgumentCaptor<Runnable> onStartRecordingClicked = ArgumentCaptor.forClass(Runnable.class);
-        verify(mController).createScreenRecordDialog(any(), onStartRecordingClicked.capture());
+        verify(mController).createScreenRecordDialog(any(), eq(mFeatureFlags),
+                eq(mDialogLaunchAnimator), eq(mActivityStarter), onStartRecordingClicked.capture());
 
         // When starting the recording, we collapse the shade and disable the dialog animation.
         assertNotNull(onStartRecordingClicked.getValue());

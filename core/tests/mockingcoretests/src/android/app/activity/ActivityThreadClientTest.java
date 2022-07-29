@@ -54,7 +54,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.UserHandle;
@@ -339,8 +338,7 @@ public class ActivityThreadClientTest {
             doNothing().when(packageInfo).updateApplicationInfo(any(), any());
 
             return new ActivityClientRecord(mock(IBinder.class), Intent.makeMainActivity(component),
-                    0 /* ident */, info, new Configuration(),
-                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null /* referrer */,
+                    0 /* ident */, info, new Configuration(), null /* referrer */,
                     null /* voiceInteractor */, null /* state */, null /* persistentState */,
                     null /* pendingResults */, null /* pendingNewIntents */,
                     null /* activityOptions */, true /* isForward */, null /* profilerInfo */,

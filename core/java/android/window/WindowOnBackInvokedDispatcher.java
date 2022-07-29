@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.TreeMap;
-import java.util.function.Supplier;
 
 /**
  * Provides window based implementation of {@link OnBackInvokedDispatcher}.
@@ -65,7 +64,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     private final TreeMap<Integer, ArrayList<OnBackInvokedCallback>>
             mOnBackInvokedCallbacks = new TreeMap<>();
     private final Checker mChecker;
-    private boolean mHasFocus;
 
     public WindowOnBackInvokedDispatcher(boolean applicationCallBackEnabled) {
         mChecker = new Checker(applicationCallBackEnabled);
@@ -191,24 +189,13 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                                     .ImeOnBackInvokedCallback
                                 ? ((ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
                                         callback).getIOnBackInvokedCallback()
-                                : new OnBackInvokedCallbackWrapper(callback, this::hasFocus);
+                                : new OnBackInvokedCallbackWrapper(callback);
                 callbackInfo = new OnBackInvokedCallbackInfo(iCallback, priority);
             }
             mWindowSession.setOnBackInvokedCallbackInfo(mWindow, callbackInfo);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to set OnBackInvokedCallback to WM. Error: " + e);
         }
-    }
-
-    /**
-     * Called when window focus changed.
-     */
-    public void onWindowFocusChanged(boolean hasFocus) {
-        mHasFocus = hasFocus;
-    }
-
-    private boolean hasFocus() {
-        return mHasFocus;
     }
 
     public OnBackInvokedCallback getTopCallback() {
@@ -234,11 +221,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
         private final WeakReference<OnBackInvokedCallback> mCallback;
-        private final Supplier<Boolean> mHasFocus;
-        OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback,
-                @NonNull Supplier<Boolean> hasFocus) {
+        OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback) {
             mCallback = new WeakReference<>(callback);
-            mHasFocus = hasFocus;
         }
 
         @Override
@@ -276,10 +260,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             Handler.getMain().post(() -> {
                 final OnBackInvokedCallback callback = mCallback.get();
                 if (callback == null) {
-                    return;
-                }
-                if (!mHasFocus.get()) {
-                    Log.w(TAG, "Skip back invoke due to current focus has lost.");
                     return;
                 }
                 callback.onBackInvoked();

@@ -261,6 +261,10 @@ public abstract class NotificationListenerService extends Service {
     /**
      * Notification was canceled when entering lockdown mode, which turns off
      * Smart Lock, fingerprint unlocking, and notifications on the lock screen.
+     * All the listeners shall ensure the canceled notifications are indeed removed
+     * on their end to prevent data leaking.
+     * When the user exits the lockdown mode, the removed notifications (due to lockdown)
+     * will be restored via NotificationListeners#notifyPostedLocked()
      */
     public static final int REASON_LOCKDOWN = 23;
 

@@ -106,6 +106,7 @@ public final class ConnectivityController extends RestrictingController implemen
 
     private final ConnectivityManager mConnManager;
     private final NetworkPolicyManagerInternal mNetPolicyManagerInternal;
+    private final FlexibilityController mFlexibilityController;
 
     /** List of tracked jobs keyed by source UID. */
     @GuardedBy("mLock")
@@ -231,12 +232,14 @@ public final class ConnectivityController extends RestrictingController implemen
 
     private final Handler mHandler;
 
-    public ConnectivityController(JobSchedulerService service) {
+    public ConnectivityController(JobSchedulerService service,
+            @NonNull FlexibilityController flexibilityController) {
         super(service);
         mHandler = new CcHandler(mContext.getMainLooper());
 
         mConnManager = mContext.getSystemService(ConnectivityManager.class);
         mNetPolicyManagerInternal = LocalServices.getService(NetworkPolicyManagerInternal.class);
+        mFlexibilityController = flexibilityController;
 
         // We're interested in all network changes; internally we match these
         // network changes against the active network for each UID with jobs.
@@ -1057,6 +1060,15 @@ public final class ConnectivityController extends RestrictingController implemen
         final boolean satisfied = isSatisfied(jobStatus, network, capabilities, mConstants);
 
         final boolean changed = jobStatus.setConnectivityConstraintSatisfied(nowElapsed, satisfied);
+
+        if (jobStatus.getPreferUnmetered()) {
+            jobStatus.setHasAccessToUnmetered(satisfied && capabilities != null
+                    && capabilities.hasCapability(NET_CAPABILITY_NOT_METERED));
+
+            jobStatus.setFlexibilityConstraintSatisfied(nowElapsed,
+                    mFlexibilityController.isFlexibilitySatisfiedLocked(jobStatus));
+        }
+
 
         // Pass along the evaluated network for job to use; prevents race
         // conditions as default routes change over time, and opens the door to

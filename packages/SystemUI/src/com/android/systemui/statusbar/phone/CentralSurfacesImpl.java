@@ -176,6 +176,7 @@ import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
@@ -469,7 +470,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final CentralSurfacesComponent.Factory mCentralSurfacesComponentFactory;
     private final PluginManager mPluginManager;
-    private final ShadeController mShadeController;
+    private final com.android.systemui.shade.ShadeController mShadeController;
     private final InitController mInitController;
 
     private final PluginDependencyProvider mPluginDependencyProvider;

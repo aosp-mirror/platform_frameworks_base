@@ -66,7 +66,6 @@ public class WindowOnBackInvokedDispatcherTest {
         MockitoAnnotations.initMocks(this);
         mDispatcher = new WindowOnBackInvokedDispatcher(true /* applicationCallbackEnabled */);
         mDispatcher.attachToWindow(mWindowSession, mWindow);
-        mDispatcher.onWindowFocusChanged(true);
     }
 
     private void waitForIdle() {
@@ -152,32 +151,5 @@ public class WindowOnBackInvokedDispatcherTest {
         captor.getValue().getCallback().onBackStarted();
         waitForIdle();
         verify(mCallback2).onBackStarted();
-    }
-
-    @Test
-    public void skipBackInvokeWhenNoFocus() throws RemoteException {
-        ArgumentCaptor<OnBackInvokedCallbackInfo> captor =
-                ArgumentCaptor.forClass(OnBackInvokedCallbackInfo.class);
-
-        mDispatcher.registerOnBackInvokedCallback(
-                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCallback1);
-
-        verify(mWindowSession, times(1)).setOnBackInvokedCallbackInfo(
-                Mockito.eq(mWindow),
-                captor.capture());
-
-        verify(mWindowSession).setOnBackInvokedCallbackInfo(Mockito.eq(mWindow), captor.capture());
-
-        // Should invoke back if it's still in focused.
-        captor.getValue().getCallback().onBackInvoked();
-        waitForIdle();
-        verify(mCallback1).onBackInvoked();
-
-        // In case the focus has lost during back gesture.
-        mDispatcher.onWindowFocusChanged(false);
-
-        captor.getValue().getCallback().onBackInvoked();
-        waitForIdle();
-        verifyZeroInteractions(mCallback1);
     }
 }

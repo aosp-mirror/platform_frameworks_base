@@ -30,8 +30,8 @@ import android.view.SurfaceControl;
 import java.io.PrintWriter;
 
 /**
- * Represents a physical display device such as the built-in display
- * an external monitor, or a WiFi display.
+ * Represents a display device such as the built-in display, an external monitor, a WiFi display,
+ * or a {@link android.hardware.display.VirtualDisplay}.
  * <p>
  * Display devices are guarded by the {@link DisplayManagerService.SyncRoot} lock.
  * </p>

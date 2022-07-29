@@ -24,9 +24,12 @@ import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.os.Binder;
 import android.os.Build;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -40,6 +43,7 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.view.textservice.SpellCheckerInfo;
 
 import com.android.internal.inputmethod.StartInputFlags;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.textservices.TextServicesManagerInternal;
@@ -233,6 +237,7 @@ final class InputMethodUtils {
      * TODO: Move all putters and getters of settings to this class.
      * TODO(b/235661780): Make the setting supports multi-users.
      */
+    @UserHandleAware
     public static class InputMethodSettings {
         private final TextUtils.SimpleStringSplitter mInputMethodSplitter =
                 new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
@@ -240,6 +245,8 @@ final class InputMethodUtils {
         private final TextUtils.SimpleStringSplitter mSubtypeSplitter =
                 new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
 
+        @NonNull
+        private final Context mUserAwareContext;
         private final Resources mRes;
         private final ContentResolver mResolver;
         private final ArrayMap<String, InputMethodInfo> mMethodMap;
@@ -299,11 +306,14 @@ final class InputMethodUtils {
             return imsList;
         }
 
-        InputMethodSettings(Resources res, ContentResolver resolver,
+        InputMethodSettings(@NonNull Context context,
                 ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId,
                 boolean copyOnWrite) {
-            mRes = res;
-            mResolver = resolver;
+            mUserAwareContext = context.getUserId() == userId
+                    ? context
+                    : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
+            mRes = mUserAwareContext.getResources();
+            mResolver = mUserAwareContext.getContentResolver();
             mMethodMap = methodMap;
             switchCurrentUser(userId, copyOnWrite);
         }
@@ -405,14 +415,13 @@ final class InputMethodUtils {
         }
 
         List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
-                Context context, InputMethodInfo imi, boolean allowsImplicitlySelectedSubtypes) {
+                InputMethodInfo imi, boolean allowsImplicitlySelectedSubtypes) {
             List<InputMethodSubtype> enabledSubtypes =
                     getEnabledInputMethodSubtypeListLocked(imi);
             if (allowsImplicitlySelectedSubtypes && enabledSubtypes.isEmpty()) {
-                enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                        context.getResources(), imi);
+                enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypesLocked(mRes, imi);
             }
-            return InputMethodSubtype.sort(context, 0, imi, enabledSubtypes);
+            return InputMethodSubtype.sort(imi, enabledSubtypes);
         }
 
         List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(InputMethodInfo imi) {
@@ -811,6 +820,85 @@ final class InputMethodUtils {
             if (canAddToLastInputMethod(currentSubtype)) {
                 addSubtypeToHistory(curMethodId, subtypeId);
             }
+        }
+
+        /**
+         * A variant of {@link InputMethodManagerService#getCurrentInputMethodSubtypeLocked()} for
+         * non-current users.
+         *
+         * <p>TODO: Address code duplication between this and
+         * {@link InputMethodManagerService#getCurrentInputMethodSubtypeLocked()}.</p>
+         *
+         * @return {@link InputMethodSubtype} if exists. {@code null} otherwise.
+         */
+        @Nullable
+        InputMethodSubtype getCurrentInputMethodSubtypeForNonCurrentUsers() {
+            final String selectedMethodId = getSelectedInputMethod();
+            if (selectedMethodId == null) {
+                return null;
+            }
+            final InputMethodInfo imi = mMethodMap.get(selectedMethodId);
+            if (imi == null || imi.getSubtypeCount() == 0) {
+                return null;
+            }
+
+            final int subtypeHashCode = getSelectedInputMethodSubtypeHashCode();
+            if (subtypeHashCode != InputMethodUtils.NOT_A_SUBTYPE_ID) {
+                final int subtypeIndex = SubtypeUtils.getSubtypeIdFromHashCode(imi,
+                        subtypeHashCode);
+                if (subtypeIndex >= 0) {
+                    return imi.getSubtypeAt(subtypeIndex);
+                }
+            }
+
+            // If there are no selected subtypes, the framework will try to find the most applicable
+            // subtype from explicitly or implicitly enabled subtypes.
+            final List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypes =
+                    getEnabledInputMethodSubtypeListLocked(imi, true);
+            // If there is only one explicitly or implicitly enabled subtype, just returns it.
+            if (explicitlyOrImplicitlyEnabledSubtypes.isEmpty()) {
+                return null;
+            }
+            if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
+                return explicitlyOrImplicitlyEnabledSubtypes.get(0);
+            }
+            final InputMethodSubtype subtype = SubtypeUtils.findLastResortApplicableSubtypeLocked(
+                    mRes, explicitlyOrImplicitlyEnabledSubtypes, SubtypeUtils.SUBTYPE_MODE_KEYBOARD,
+                    null, true);
+            if (subtype != null) {
+                return subtype;
+            }
+            return SubtypeUtils.findLastResortApplicableSubtypeLocked(mRes,
+                    explicitlyOrImplicitlyEnabledSubtypes, null, null, true);
+        }
+
+        boolean setAdditionalInputMethodSubtypes(@NonNull String imeId,
+                @NonNull ArrayList<InputMethodSubtype> subtypes,
+                @NonNull ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
+                @NonNull IPackageManager packageManager) {
+            final InputMethodInfo imi = mMethodMap.get(imeId);
+            if (imi == null) {
+                return false;
+            }
+            final String[] packageInfos;
+            try {
+                packageInfos = packageManager.getPackagesForUid(Binder.getCallingUid());
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to get package infos");
+                return false;
+            }
+            if (ArrayUtils.find(packageInfos,
+                    packageInfo -> TextUtils.equals(packageInfo, imi.getPackageName())) == null) {
+                return false;
+            }
+
+            if (subtypes.isEmpty()) {
+                additionalSubtypeMap.remove(imi.getId());
+            } else {
+                additionalSubtypeMap.put(imi.getId(), subtypes);
+            }
+            AdditionalSubtypeUtils.save(additionalSubtypeMap, mMethodMap, getCurrentUserId());
+            return true;
         }
 
         public void dumpLocked(final Printer pw, final String prefix) {
