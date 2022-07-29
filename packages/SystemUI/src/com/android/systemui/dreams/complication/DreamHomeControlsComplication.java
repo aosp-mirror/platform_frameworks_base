@@ -62,7 +62,7 @@ public class DreamHomeControlsComplication implements Complication {
 
     @Override
     public int getRequiredTypeAvailability() {
-        return COMPLICATION_TYPE_NONE;
+        return COMPLICATION_TYPE_HOME_CONTROLS;
     }
 
     /**
