@@ -24,9 +24,12 @@ import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.os.Binder;
 import android.os.Build;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -40,6 +43,7 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.view.textservice.SpellCheckerInfo;
 
 import com.android.internal.inputmethod.StartInputFlags;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.textservices.TextServicesManagerInternal;
@@ -866,6 +870,35 @@ final class InputMethodUtils {
             }
             return SubtypeUtils.findLastResortApplicableSubtypeLocked(mRes,
                     explicitlyOrImplicitlyEnabledSubtypes, null, null, true);
+        }
+
+        boolean setAdditionalInputMethodSubtypes(@NonNull String imeId,
+                @NonNull ArrayList<InputMethodSubtype> subtypes,
+                @NonNull ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
+                @NonNull IPackageManager packageManager) {
+            final InputMethodInfo imi = mMethodMap.get(imeId);
+            if (imi == null) {
+                return false;
+            }
+            final String[] packageInfos;
+            try {
+                packageInfos = packageManager.getPackagesForUid(Binder.getCallingUid());
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to get package infos");
+                return false;
+            }
+            if (ArrayUtils.find(packageInfos,
+                    packageInfo -> TextUtils.equals(packageInfo, imi.getPackageName())) == null) {
+                return false;
+            }
+
+            if (subtypes.isEmpty()) {
+                additionalSubtypeMap.remove(imi.getId());
+            } else {
+                additionalSubtypeMap.put(imi.getId(), subtypes);
+            }
+            AdditionalSubtypeUtils.save(additionalSubtypeMap, mMethodMap, getCurrentUserId());
+            return true;
         }
 
         public void dumpLocked(final Printer pw, final String prefix) {
