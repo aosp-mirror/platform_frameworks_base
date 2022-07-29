@@ -29,6 +29,7 @@ import android.os.Parcelable;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import libcore.util.HexEncoding;
@@ -280,7 +281,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
             sha256.update(hashFactor);
             sha256.update(passwordToHash);
             sha256.update(salt);
-            return new String(HexEncoding.encode(sha256.digest()));
+            return HexEncoding.encodeToString(sha256.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError("Missing digest algorithm: ", e);
         }
@@ -302,21 +303,12 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         }
 
         try {
-            // Previously the password was passed as a String with the following code:
-            // byte[] saltedPassword = (password + salt).getBytes();
-            // The code below creates the identical digest preimage using byte arrays:
-            byte[] saltedPassword = Arrays.copyOf(password, password.length + salt.length);
-            System.arraycopy(salt, 0, saltedPassword, password.length, salt.length);
+            byte[] saltedPassword = ArrayUtils.concat(password, salt);
             byte[] sha1 = MessageDigest.getInstance("SHA-1").digest(saltedPassword);
             byte[] md5 = MessageDigest.getInstance("MD5").digest(saltedPassword);
 
-            byte[] combined = new byte[sha1.length + md5.length];
-            System.arraycopy(sha1, 0, combined, 0, sha1.length);
-            System.arraycopy(md5, 0, combined, sha1.length, md5.length);
-
-            final char[] hexEncoded = HexEncoding.encode(combined);
             Arrays.fill(saltedPassword, (byte) 0);
-            return new String(hexEncoded);
+            return HexEncoding.encodeToString(ArrayUtils.concat(sha1, md5));
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError("Missing digest algorithm: ", e);
         }

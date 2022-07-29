@@ -27,6 +27,8 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -176,9 +178,9 @@ public class SecureBoxTest {
                 SecureBox.decrypt(
                         THM_PRIVATE_KEY,
                         /*sharedSecret=*/ null,
-                        SecureBox.concat(getBytes("V1 KF_claim"), VAULT_PARAMS, VAULT_CHALLENGE),
+                        ArrayUtils.concat(getBytes("V1 KF_claim"), VAULT_PARAMS, VAULT_CHALLENGE),
                         RECOVERY_CLAIM);
-        assertThat(claimContent).isEqualTo(SecureBox.concat(THM_KF_HASH, KEY_CLAIMANT));
+        assertThat(claimContent).isEqualTo(ArrayUtils.concat(THM_KF_HASH, KEY_CLAIMANT));
     }
 
     @Test
@@ -186,7 +188,7 @@ public class SecureBoxTest {
         SecureBox.decrypt(
                 THM_PRIVATE_KEY,
                 THM_KF_HASH,
-                SecureBox.concat(getBytes("V1 THM_encrypted_recovery_key"), VAULT_PARAMS),
+                ArrayUtils.concat(getBytes("V1 THM_encrypted_recovery_key"), VAULT_PARAMS),
                 ENCRYPTED_RECOVERY_KEY);
     }
 
