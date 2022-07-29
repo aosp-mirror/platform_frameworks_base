@@ -207,4 +207,54 @@ public class ArrayUtilsTest extends TestCase {
 
         assertArrayEquals(expectation, ArrayUtils.concat(String.class, array1, array2, array3));
     }
+
+    public void testConcat_zeroByteArrays() {
+        // empty varargs array
+        assertArrayEquals(new byte[] {}, ArrayUtils.concat());
+        // null varargs array
+        assertArrayEquals(new byte[] {}, ArrayUtils.concat((byte[][]) null));
+    }
+
+    public void testConcat_oneByteArray() {
+        assertArrayEquals(new byte[] { 1, 2 }, ArrayUtils.concat(new byte[] { 1, 2 }));
+    }
+
+    public void testConcat_oneEmptyByteArray() {
+        assertArrayEquals(new byte[] {}, ArrayUtils.concat((byte[]) null));
+        assertArrayEquals(new byte[] {}, ArrayUtils.concat(new byte[] {}));
+    }
+
+    public void testConcat_twoByteArrays() {
+        assertArrayEquals(new byte[] { 1 }, ArrayUtils.concat(new byte[] { 1 }, new byte[] {}));
+        assertArrayEquals(new byte[] { 1 }, ArrayUtils.concat(new byte[] {}, new byte[] { 1 }));
+        assertArrayEquals(new byte[] { 1, 2 },
+                ArrayUtils.concat(new byte[] { 1 }, new byte[] { 2 }));
+        assertArrayEquals(new byte[] { 1, 2, 3, 4 },
+                ArrayUtils.concat(new byte[] { 1, 2 }, new byte[] { 3, 4 }));
+    }
+
+    public void testConcat_twoEmptyByteArrays() {
+        assertArrayEquals(new byte[] {}, ArrayUtils.concat((byte[]) null, null));
+        assertArrayEquals(new byte[] {}, ArrayUtils.concat(new byte[] {}, null));
+        assertArrayEquals(new byte[] {}, ArrayUtils.concat((byte[]) null, new byte[] {}));
+        assertArrayEquals(new byte[] {}, ArrayUtils.concat(new byte[] {}, new byte[] {}));
+    }
+
+    public void testConcat_threeByteArrays() {
+        byte[] array1 = { 1, 2 };
+        byte[] array2 = { 3, 4 };
+        byte[] array3 = { 5, 6 };
+        byte[] expectation = { 1, 2, 3, 4, 5, 6 };
+
+        assertArrayEquals(expectation, ArrayUtils.concat(array1, array2, array3));
+    }
+
+    public void testConcat_threeByteArraysWithNull() {
+        byte[] array1 = { 1, 2 };
+        byte[] array2 = null;
+        byte[] array3 = { 5, 6 };
+        byte[] expectation = { 1, 2, 5, 6 };
+
+        assertArrayEquals(expectation, ArrayUtils.concat(array1, array2, array3));
+    }
 }
