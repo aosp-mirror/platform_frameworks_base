@@ -367,7 +367,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 // the animations since they won't be visible.
                 !notificationShadeWindowController.isLaunchingActivity &&
                 launcherUnlockController != null &&
-                !keyguardStateController.isDismissingFromSwipe &&
                 // Temporarily disable for foldables since foldable launcher has two first pages,
                 // which breaks the in-window animation.
                 !isFoldable(context)
@@ -472,16 +471,34 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
         // If we specifically requested that the surface behind be made visible (vs. it being made
         // visible because we're unlocking), then we're in the middle of a swipe-to-unlock touch
-        // gesture and the surface behind the keyguard should be made visible.
+        // gesture and the surface behind the keyguard should be made visible so that we can animate
+        // it in.
         if (requestedShowSurfaceBehindKeyguard) {
-            // Fade in the surface, as long as we're not now flinging. The touch gesture ending in
-            // a fling during the time it takes the keyguard exit animation to start is an edge
-            // case race condition, and we'll handle it by playing a canned animation on the
-            // now-visible surface to finish unlocking.
-            if (!keyguardStateController.isFlingingToDismissKeyguard) {
-                fadeInSurfaceBehind()
-            } else {
+
+            // If we're flinging to dismiss here, it means the touch gesture ended in a fling during
+            // the time it takes the keyguard exit animation to start. This is an edge case race
+            // condition, which we handle by just playing a canned animation on the now-visible
+            // surface behind the keyguard to finish unlocking.
+            if (keyguardStateController.isFlingingToDismissKeyguard) {
                 playCannedUnlockAnimation()
+            } else if (keyguardStateController.isDismissingFromSwipe
+                    && willUnlockWithInWindowLauncherAnimations) {
+                // If we're swiping to unlock to the Launcher, and can play in-window animations,
+                // make the launcher surface fully visible and play the in-window unlock animation
+                // on the launcher icons. System UI will remain locked, using the swipe-to-unlock
+                // translation logic on the launcher window, until the swipe gesture ends (either in
+                // a successful unlock, or an aborted unlock).
+                surfaceBehindAlpha = 1f
+                setSurfaceBehindAppearAmount(1f)
+
+                launcherUnlockController?.playUnlockAnimation(
+                        true,
+                        UNLOCK_ANIMATION_DURATION_MS + CANNED_UNLOCK_START_DELAY,
+                        0 /* startDelay */)
+            } else {
+                // Otherwise, we're swiping in an app and should just fade it in. The swipe gesture
+                // will translate it until the end of the swipe gesture.
+                fadeInSurfaceBehind()
             }
         } else {
             // The surface was made visible since we're unlocking not from a swipe (fingerprint,
@@ -700,9 +717,17 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
         // Otherwise, animate in the surface's scale/transltion.
         val surfaceHeight: Int = surfaceBehindRemoteAnimationTarget!!.screenSpaceBounds.height()
-        val scaleFactor = (SURFACE_BEHIND_START_SCALE_FACTOR +
+
+        var scaleFactor = (SURFACE_BEHIND_START_SCALE_FACTOR +
                 (1f - SURFACE_BEHIND_START_SCALE_FACTOR) *
                 MathUtils.clamp(amount, 0f, 1f))
+
+        // If we're dismissing via swipe to the Launcher, we'll play in-window scale animations, so
+        // don't also scale the window.
+        if (keyguardStateController.isDismissingFromSwipe
+                && willUnlockWithInWindowLauncherAnimations) {
+            scaleFactor = 1f
+        }
 
         // Scale up from a point at the center-bottom of the surface.
         surfaceBehindMatrix.setScale(
@@ -848,6 +873,12 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // dismiss. In this case, the smartspace swiped away with the rest of the keyguard, so don't
         // do the shared element transition.
         if (keyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture) {
+            return false
+        }
+
+        // If we're swiping to dismiss, the smartspace will be swiped off the top of the screen
+        // so we can't shared element animate it.
+        if (keyguardStateController.isDismissingFromSwipe) {
             return false
         }
 
