@@ -1443,8 +1443,18 @@ public final class PlaybackActivityMonitor
                         }
                         @PlayerMuteEvent int eventValue = extras.getInt(EXTRA_PLAYER_EVENT_MUTE);
 
-                        sEventLogger.log(new PlayerEvent(/*piid=*/msg.arg1, PLAYER_UPDATE_MUTED,
-                                eventValue));
+                        synchronized (mPlayerLock) {
+                            int piid = msg.arg1;
+
+                            sEventLogger.log(
+                                    new PlayerEvent(piid, PLAYER_UPDATE_MUTED, eventValue));
+
+                            final AudioPlaybackConfiguration apc = mPlayers.get(piid);
+                            if (apc == null || !apc.handleMutedEvent(eventValue)) {
+                                break;  // do not dispatch
+                            }
+                            dispatchPlaybackChange(/* iplayerReleased= */false);
+                        }
                         break;
                     case MSG_L_CLEAR_PORTS_FOR_PIID:
                         int piid = msg.arg1;
