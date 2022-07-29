@@ -3157,8 +3157,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // Used to load label
                 final CharSequence title = mRes.getText(
                         com.android.internal.R.string.select_input_method);
+                final int currentUserId = mSettings.getCurrentUserId();
+                final Context userAwareContext = mContext.getUserId() == currentUserId
+                        ? mContext
+                        : mContext.createContextAsUser(UserHandle.of(currentUserId), 0 /* flags */);
                 final CharSequence summary = InputMethodUtils.getImeAndSubtypeDisplayName(
-                        mContext, imi, mCurrentSubtype);
+                        userAwareContext, imi, mCurrentSubtype);
                 mImeSwitcherNotification.setContentTitle(title)
                         .setContentText(summary)
                         .setContentIntent(mImeSwitchPendingIntent);
