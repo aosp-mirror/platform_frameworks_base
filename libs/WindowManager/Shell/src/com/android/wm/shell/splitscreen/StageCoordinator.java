@@ -31,13 +31,13 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
-import static android.window.TransitionInfo.FLAG_FIRST_CUSTOM;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 
 import static com.android.wm.shell.common.split.SplitLayout.PARALLAX_ALIGN_CENTER;
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
+import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
@@ -145,9 +145,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         ShellTaskOrganizer.TaskListener, ShellTaskOrganizer.FocusListener {
 
     private static final String TAG = StageCoordinator.class.getSimpleName();
-
-    /** Flag applied to a transition change to identify it as a divider bar for animation. */
-    public static final int FLAG_IS_DIVIDER_BAR = FLAG_FIRST_CUSTOM;
 
     private final SurfaceSession mSurfaceSession = new SurfaceSession();
 
@@ -1737,7 +1734,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         boolean shouldAnimate = true;
         if (mSplitTransitions.isPendingEnter(transition)) {
-            shouldAnimate = startPendingEnterAnimation(transition, info, startTransaction);
+            shouldAnimate = startPendingEnterAnimation(
+                    transition, info, startTransaction, finishTransaction);
         } else if (mSplitTransitions.isPendingRecent(transition)) {
             shouldAnimate = startPendingRecentAnimation(transition, info, startTransaction);
         } else if (mSplitTransitions.isPendingDismiss(transition)) {
@@ -1765,7 +1763,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     private boolean startPendingEnterAnimation(@NonNull IBinder transition,
-            @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction t) {
+            @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction t,
+            @NonNull SurfaceControl.Transaction finishT) {
         // First, verify that we actually have opened apps in both splits.
         TransitionInfo.Change mainChild = null;
         TransitionInfo.Change sideChild = null;
@@ -1812,8 +1811,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     + " before startAnimation().");
         }
 
-        finishEnterSplitScreen(t);
-        addDividerBarToTransition(info, t, true /* show */);
+        finishEnterSplitScreen(finishT);
+        addDividerBarToTransition(info, finishT, true /* show */);
         return true;
     }
 
@@ -1898,7 +1897,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             return false;
         }
 
-        addDividerBarToTransition(info, t, false /* show */);
+        addDividerBarToTransition(info, finishT, false /* show */);
         return true;
     }
 
@@ -1909,23 +1908,25 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     private void addDividerBarToTransition(@NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t, boolean show) {
+            @NonNull SurfaceControl.Transaction finishT, boolean show) {
         final SurfaceControl leash = mSplitLayout.getDividerLeash();
         final TransitionInfo.Change barChange = new TransitionInfo.Change(null /* token */, leash);
-        final Rect bounds = mSplitLayout.getDividerBounds();
-        barChange.setStartAbsBounds(bounds);
-        barChange.setEndAbsBounds(bounds);
+        mSplitLayout.getRefDividerBounds(mTempRect1);
+        barChange.setStartAbsBounds(mTempRect1);
+        barChange.setEndAbsBounds(mTempRect1);
         barChange.setMode(show ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK);
         barChange.setFlags(FLAG_IS_DIVIDER_BAR);
         // Technically this should be order-0, but this is running after layer assignment
         // and it's a special case, so just add to end.
         info.addChange(barChange);
-        // Be default, make it visible. The remote animator can adjust alpha if it plans to animate.
+
         if (show) {
-            t.setAlpha(leash, 1.f);
-            t.setLayer(leash, Integer.MAX_VALUE);
-            t.setPosition(leash, bounds.left, bounds.top);
-            t.show(leash);
+            finishT.setLayer(leash, Integer.MAX_VALUE);
+            finishT.setPosition(leash, mTempRect1.left, mTempRect1.top);
+            finishT.show(leash);
+            // Ensure divider surface are re-parented back into the hierarchy at the end of the
+            // transition. See Transition#buildFinishTransaction for more detail.
+            finishT.reparent(leash, mRootTaskLeash);
         }
     }
 
