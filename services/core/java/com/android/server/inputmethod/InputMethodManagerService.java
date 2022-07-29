@@ -2016,49 +2016,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    // ---------------------------------------------------------------------------------------
-    // Check whether or not this is a valid IPC. Assumes an IPC is valid when either
-    // 1) it comes from the system process
-    // 2) the calling process' user id is identical to the current user id IMMS thinks.
-    @GuardedBy("ImfLock.class")
-    private boolean calledFromValidUserLocked() {
-        final int uid = Binder.getCallingUid();
-        final int userId = UserHandle.getUserId(uid);
-        if (DEBUG) {
-            Slog.d(TAG, "--- calledFromForegroundUserOrSystemProcess ? "
-                    + "calling uid = " + uid + " system uid = " + Process.SYSTEM_UID
-                    + " calling userId = " + userId + ", foreground user id = "
-                    + mSettings.getCurrentUserId() + ", calling pid = " + Binder.getCallingPid()
-                    + InputMethodUtils.getApiCallStack());
-        }
-        if (uid == Process.SYSTEM_UID) {
-            return true;
-        }
-        if (userId == mSettings.getCurrentUserId()) {
-            return true;
-        }
-
-        // Caveat: A process which has INTERACT_ACROSS_USERS_FULL gets results for the
-        // foreground user, not for the user of that process. Accordingly InputMethodManagerService
-        // must not manage background users' states in any functions.
-        // Note that privacy-sensitive IPCs, such as setInputMethod, are still securely guarded
-        // by a token.
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-                == PackageManager.PERMISSION_GRANTED) {
-            if (DEBUG) {
-                Slog.d(TAG, "--- Access granted because the calling process has "
-                        + "the INTERACT_ACROSS_USERS_FULL permission");
-            }
-            return true;
-        }
-        // TODO(b/34886274): The semantics of this verification is actually not well-defined.
-        Slog.w(TAG, "--- IPC called from background users. Ignore. callers="
-                + Debug.getCallers(10));
-        return false;
-    }
-
-
     /**
      * Returns true iff the caller is identified to be the current input method with the token.
      * @param token The window token given to the input method when it was started.
