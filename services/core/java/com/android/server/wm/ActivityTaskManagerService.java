@@ -222,6 +222,7 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationRunner;
+import android.view.IWindowFocusObserver;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
@@ -1027,7 +1028,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mTaskSupervisor.setWindowManager(wm);
             mRootWindowContainer.setWindowManager(wm);
             if (mBackNavigationController != null) {
-                mBackNavigationController.setTaskSnapshotController(wm.mTaskSnapshotController);
+                mBackNavigationController.setWindowManager(wm);
             }
         }
     }
@@ -1833,13 +1834,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public BackNavigationInfo startBackNavigation(boolean requestAnimation) {
+    public BackNavigationInfo startBackNavigation(boolean requestAnimation,
+            IWindowFocusObserver observer) {
         mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
                 "startBackNavigation()");
         if (mBackNavigationController == null) {
             return null;
         }
-        return mBackNavigationController.startBackNavigation(mWindowManager, requestAnimation);
+        return mBackNavigationController.startBackNavigation(requestAnimation, observer);
     }
 
     /**

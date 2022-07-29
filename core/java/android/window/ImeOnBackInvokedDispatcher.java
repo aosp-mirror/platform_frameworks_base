@@ -83,8 +83,7 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         final Bundle bundle = new Bundle();
         // Always invoke back for ime without checking the window focus.
         final IOnBackInvokedCallback iCallback =
-                new WindowOnBackInvokedDispatcher.OnBackInvokedCallbackWrapper(callback,
-                        () -> true);
+                new WindowOnBackInvokedDispatcher.OnBackInvokedCallbackWrapper(callback);
         bundle.putBinder(RESULT_KEY_CALLBACK, iCallback.asBinder());
         bundle.putInt(RESULT_KEY_PRIORITY, priority);
         bundle.putInt(RESULT_KEY_ID, callback.hashCode());
