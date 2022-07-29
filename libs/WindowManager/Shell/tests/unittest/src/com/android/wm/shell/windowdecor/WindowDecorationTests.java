@@ -98,11 +98,13 @@ public class WindowDecorationTests extends ShellTestCase {
     private WindowContainerTransaction mMockWindowContainerTransaction;
 
     private final List<SurfaceControl.Builder> mMockSurfaceControlBuilders = new ArrayList<>();
-    private SurfaceControl.Transaction mMockSurfaceControlTransaction;
+    private SurfaceControl.Transaction mMockSurfaceControlStartT;
+    private SurfaceControl.Transaction mMockSurfaceControlFinishT;
 
     @Before
     public void setUp() {
-        mMockSurfaceControlTransaction = createMockSurfaceControlTransaction();
+        mMockSurfaceControlStartT = createMockSurfaceControlTransaction();
+        mMockSurfaceControlFinishT = createMockSurfaceControlTransaction();
 
         doReturn(mMockSurfaceControlViewHost).when(mMockSurfaceControlViewHostFactory)
                 .create(any(), any(), any(), anyBoolean());
@@ -149,7 +151,7 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(mMockSurfaceControlViewHostFactory, never())
                 .create(any(), any(), any(), anyBoolean());
 
-        verify(mMockSurfaceControlTransaction).hide(taskSurface);
+        verify(mMockSurfaceControlFinishT).hide(taskSurface);
 
         assertNull(mRelayoutResult.mRootView);
     }
@@ -192,16 +194,16 @@ public class WindowDecorationTests extends ShellTestCase {
 
         verify(decorContainerSurfaceBuilder).setParent(taskSurface);
         verify(decorContainerSurfaceBuilder).setContainerLayer();
-        verify(mMockSurfaceControlTransaction).setTrustedOverlay(decorContainerSurface, true);
-        verify(mMockSurfaceControlTransaction).setPosition(decorContainerSurface, -20, -40);
-        verify(mMockSurfaceControlTransaction).setWindowCrop(decorContainerSurface, 380, 220);
+        verify(mMockSurfaceControlStartT).setTrustedOverlay(decorContainerSurface, true);
+        verify(mMockSurfaceControlStartT).setPosition(decorContainerSurface, -20, -40);
+        verify(mMockSurfaceControlStartT).setWindowCrop(decorContainerSurface, 380, 220);
 
         verify(taskBackgroundSurfaceBuilder).setParent(taskSurface);
         verify(taskBackgroundSurfaceBuilder).setEffectLayer();
-        verify(mMockSurfaceControlTransaction).setWindowCrop(taskBackgroundSurface, 300, 100);
-        verify(mMockSurfaceControlTransaction)
+        verify(mMockSurfaceControlStartT).setWindowCrop(taskBackgroundSurface, 300, 100);
+        verify(mMockSurfaceControlStartT)
                 .setColor(taskBackgroundSurface, new float[] {1.f, 1.f, 0.f});
-        verify(mMockSurfaceControlTransaction).setShadowRadius(taskBackgroundSurface, 10);
+        verify(mMockSurfaceControlStartT).setShadowRadius(taskBackgroundSurface, 10);
 
         verify(mMockSurfaceControlViewHostFactory)
                 .create(any(), eq(defaultDisplay), any(), anyBoolean());
@@ -218,11 +220,11 @@ public class WindowDecorationTests extends ShellTestCase {
                             new int[] { InsetsState.ITYPE_CAPTION_BAR });
         }
 
-        verify(mMockSurfaceControlTransaction)
+        verify(mMockSurfaceControlFinishT)
                 .setPosition(taskSurface, TASK_POSITION_IN_PARENT.x, TASK_POSITION_IN_PARENT.y);
-        verify(mMockSurfaceControlTransaction)
+        verify(mMockSurfaceControlFinishT)
                 .setCrop(taskSurface, new Rect(-20, -40, 360, 180));
-        verify(mMockSurfaceControlTransaction)
+        verify(mMockSurfaceControlStartT)
                 .show(taskSurface);
 
         assertEquals(380, mRelayoutResult.mWidth);
@@ -319,8 +321,8 @@ public class WindowDecorationTests extends ShellTestCase {
         @Override
         void relayout(ActivityManager.RunningTaskInfo taskInfo) {
             relayout(null /* taskInfo */, 0 /* layoutResId */, mMockView, CAPTION_HEIGHT_DP,
-                    mOutsetsDp, SHADOW_RADIUS_DP, mMockSurfaceControlTransaction,
-                    mMockWindowContainerTransaction, mRelayoutResult);
+                    mOutsetsDp, SHADOW_RADIUS_DP, mMockSurfaceControlStartT,
+                    mMockSurfaceControlFinishT, mMockWindowContainerTransaction, mRelayoutResult);
         }
     }
 }

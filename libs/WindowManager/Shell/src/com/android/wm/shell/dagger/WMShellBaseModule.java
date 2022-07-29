@@ -29,8 +29,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
-import com.android.wm.shell.sysui.ShellCommandHandler;
-import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.TaskViewFactoryController;
@@ -59,7 +57,7 @@ import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
-import com.android.wm.shell.freeform.FreeformTaskListener;
+import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
 import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
@@ -78,7 +76,9 @@ import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.startingsurface.StartingWindowController;
 import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
 import com.android.wm.shell.startingsurface.phone.PhoneStartingWindowTypeAlgorithm;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
@@ -339,15 +339,15 @@ public abstract class WMShellBaseModule {
     // Workaround for dynamic overriding with a default implementation, see {@link DynamicOverride}
     @BindsOptionalOf
     @DynamicOverride
-    abstract FreeformTaskListener<?> optionalFreeformTaskListener();
+    abstract FreeformComponents optionalFreeformComponents();
 
     @WMSingleton
     @Provides
-    static Optional<FreeformTaskListener<?>> provideFreeformTaskListener(
-            @DynamicOverride Optional<FreeformTaskListener<?>> freeformTaskListener,
+    static Optional<FreeformComponents> provideFreeformTaskListener(
+            @DynamicOverride Optional<FreeformComponents> freeformComponents,
             Context context) {
-        if (FreeformTaskListener.isFreeformEnabled(context)) {
-            return freeformTaskListener;
+        if (FreeformComponents.isFreeformEnabled(context)) {
+            return freeformComponents;
         }
         return Optional.empty();
     }
@@ -636,7 +636,7 @@ public abstract class WMShellBaseModule {
             FullscreenTaskListener fullscreenTaskListener,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
-            Optional<FreeformTaskListener<?>> freeformTaskListener,
+            Optional<FreeformComponents> freeformComponents,
             Optional<RecentTasksController> recentTasksOptional,
             Optional<ActivityEmbeddingController> activityEmbeddingOptional,
             Transitions transitions,
@@ -655,7 +655,7 @@ public abstract class WMShellBaseModule {
                 fullscreenTaskListener,
                 unfoldAnimationController,
                 unfoldTransitionHandler,
-                freeformTaskListener,
+                freeformComponents,
                 recentTasksOptional,
                 activityEmbeddingOptional,
                 transitions,

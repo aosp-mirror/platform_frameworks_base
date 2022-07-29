@@ -31,7 +31,7 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.draganddrop.DragAndDropController;
-import com.android.wm.shell.freeform.FreeformTaskListener;
+import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
 import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
@@ -71,7 +71,7 @@ public class ShellInitTest extends ShellTestCase {
     @Mock private FullscreenTaskListener mFullscreenTaskListener;
     @Mock private Optional<UnfoldAnimationController> mUnfoldAnimationController;
     @Mock private Optional<UnfoldTransitionHandler> mUnfoldTransitionHandler;
-    @Mock private Optional<FreeformTaskListener<?>> mFreeformTaskListenerOptional;
+    @Mock private Optional<FreeformComponents> mFreeformComponentsOptional;
     @Mock private Optional<RecentTasksController> mRecentTasks;
     @Mock private Optional<ActivityEmbeddingController> mActivityEmbeddingController;
     @Mock private Transitions mTransitions;
@@ -87,7 +87,7 @@ public class ShellInitTest extends ShellTestCase {
                 mDisplayInsetsController, mDragAndDropController, mShellTaskOrganizer,
                 mKidsModeTaskOrganizer, mBubblesOptional, mSplitScreenOptional,
                 mPipTouchHandlerOptional, mFullscreenTaskListener, mUnfoldAnimationController,
-                mUnfoldTransitionHandler, mFreeformTaskListenerOptional, mRecentTasks,
+                mUnfoldTransitionHandler, mFreeformComponentsOptional, mRecentTasks,
                 mActivityEmbeddingController, mTransitions, mStartingWindow, mMainExecutor);
     }
 
