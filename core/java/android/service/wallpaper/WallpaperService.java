@@ -1133,7 +1133,7 @@ public abstract class WallpaperService extends Service {
 
                         if (mSession.addToDisplay(mWindow, mLayout, View.VISIBLE,
                                 mDisplay.getDisplayId(), mRequestedVisibilities, inputChannel,
-                                mInsetsState, mTempControls, new Rect()) < 0) {
+                                mInsetsState, mTempControls, new Rect(), new float[1]) < 0) {
                             Log.w(TAG, "Failed to add window while updating wallpaper surface.");
                             return;
                         }

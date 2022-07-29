@@ -275,7 +275,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, DEFAULT_DISPLAY,
                 UserHandle.USER_SYSTEM, new InsetsVisibilities(), null, new InsetsState(),
-                new InsetsSourceControl[0], new Rect());
+                new InsetsSourceControl[0], new Rect(), new float[1]);
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
                 any(), anyInt(), anyInt(), any());

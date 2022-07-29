@@ -251,7 +251,7 @@ public class StartingSurfaceDrawerTests extends ShellTestCase {
                 anyInt() /* viewVisibility */, anyInt() /* displayId */,
                 any() /* requestedVisibility */, any() /* outInputChannel */,
                 any() /* outInsetsState */, any() /* outActiveControls */,
-                any() /* outAttachedFrame */);
+                any() /* outAttachedFrame */, any() /* outSizeCompatScale */);
         TaskSnapshotWindow mockSnapshotWindow = TaskSnapshotWindow.create(windowInfo,
                 mBinder,
                 snapshot, mTestExecutor, () -> {

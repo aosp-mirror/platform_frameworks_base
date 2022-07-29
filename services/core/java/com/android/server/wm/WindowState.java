@@ -471,11 +471,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     int mTouchableInsets = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 
     // Current transformation being applied.
-    float mGlobalScale=1;
-    float mInvGlobalScale=1;
+    float mGlobalScale = 1f;
+    float mInvGlobalScale = 1f;
+    float mSizeCompatScale = 1f;
     final float mOverrideScale;
-    float mHScale=1, mVScale=1;
-    float mLastHScale=1, mLastVScale=1;
+    float mHScale = 1f, mVScale = 1f;
+    float mLastHScale = 1f, mLastVScale = 1f;
 
     // An offset in pixel of the surface contents from the window position. Used for Wallpaper
     // to provide the effect of scrolling within a large surface. We just use these values as
@@ -1251,18 +1252,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void updateGlobalScale() {
         if (hasCompatScale()) {
-            if (mOverrideScale != 1f) {
-                mGlobalScale = mToken.hasSizeCompatBounds()
-                        ? mToken.getSizeCompatScale() * mOverrideScale
-                        : mOverrideScale;
-            } else {
-                mGlobalScale = mToken.getSizeCompatScale();
-            }
+            mSizeCompatScale = (mOverrideScale == 1f || mToken.hasSizeCompatBounds())
+                    ? mToken.getSizeCompatScale()
+                    : 1f;
+            mGlobalScale = mSizeCompatScale * mOverrideScale;
             mInvGlobalScale = 1f / mGlobalScale;
             return;
         }
 
-        mGlobalScale = mInvGlobalScale = 1f;
+        mGlobalScale = mInvGlobalScale = mSizeCompatScale = 1f;
+    }
+
+    float getSizeCompatScale() {
+        return mSizeCompatScale;
     }
 
     /**
@@ -1353,7 +1355,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             windowFrames.mFrame.set(clientWindowFrames.frame);
             windowFrames.mDisplayFrame.set(clientWindowFrames.displayFrame);
             windowFrames.mParentFrame.set(clientWindowFrames.parentFrame);
-            if (hasCompatScale()) {
+            if (mGlobalScale != 1f) {
                 // The frames sent from the client need to be adjusted to the real coordinate space.
                 windowFrames.mFrame.scale(mGlobalScale);
                 windowFrames.mDisplayFrame.scale(mGlobalScale);
@@ -1365,7 +1367,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             windowFrames.mFrame.set(clientWindowFrames.frame);
 
             windowFrames.mCompatFrame.set(windowFrames.mFrame);
-            if (hasCompatScale()) {
+            if (mInvGlobalScale != 1f) {
                 // Also, the scaled frame that we report to the app needs to be adjusted to be in
                 // its coordinate space.
                 windowFrames.mCompatFrame.scale(mInvGlobalScale);
@@ -1468,10 +1470,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     Rect getParentFrame() {
         return mWindowFrames.mParentFrame;
-    }
-
-    Rect getCompatFrame() {
-        return mWindowFrames.mCompatFrame;
     }
 
     WindowManager.LayoutParams getAttrs() {
@@ -1727,7 +1725,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     InsetsState getCompatInsetsState() {
         InsetsState state = getInsetsState();
-        if (hasCompatScale()) {
+        if (mInvGlobalScale != 1f) {
             state = new InsetsState(state, true);
             state.scale(mInvGlobalScale);
         }
@@ -3836,15 +3834,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             boolean relayoutVisible) {
         outFrames.frame.set(mWindowFrames.mCompatFrame);
         outFrames.displayFrame.set(mWindowFrames.mDisplayFrame);
-        if (mInvGlobalScale != 1.0f && hasCompatScale()) {
+        if (mInvGlobalScale != 1f) {
             outFrames.displayFrame.scale(mInvGlobalScale);
         }
         if (mLayoutAttached) {
             if (outFrames.attachedFrame == null) {
                 outFrames.attachedFrame = new Rect();
             }
-            outFrames.attachedFrame.set(getParentWindow().getCompatFrame());
+            outFrames.attachedFrame.set(getParentWindow().getFrame());
+            if (mInvGlobalScale != 1f) {
+                outFrames.attachedFrame.scale(mInvGlobalScale);
+            }
         }
+        outFrames.sizeCompatScale = mSizeCompatScale;
 
         // Note: in the cases where the window is tied to an activity, we should not send a
         // configuration update when the window has requested to be hidden. Doing so can lead to
@@ -4344,7 +4346,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         pw.println(prefix + "mHasSurface=" + mHasSurface
                 + " isReadyForDisplay()=" + isReadyForDisplay()
                 + " mWindowRemovalAllowed=" + mWindowRemovalAllowed);
-        if (hasCompatScale()) {
+        if (mInvGlobalScale != 1f) {
             pw.println(prefix + "mCompatFrame=" + mWindowFrames.mCompatFrame.toShortString(sTmpSB));
         }
         if (dumpAll) {
@@ -4556,7 +4558,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     float translateToWindowX(float x) {
         float winX = x - mWindowFrames.mFrame.left;
-        if (hasCompatScale()) {
+        if (mGlobalScale != 1f) {
             winX *= mGlobalScale;
         }
         return winX;
@@ -4564,7 +4566,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     float translateToWindowY(float y) {
         float winY = y - mWindowFrames.mFrame.top;
-        if (hasCompatScale()) {
+        if (mGlobalScale != 1f) {
             winY *= mGlobalScale;
         }
         return winY;
