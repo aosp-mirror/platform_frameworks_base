@@ -37,13 +37,13 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 
-import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -91,9 +91,15 @@ public class RecentsAnimationTest extends WindowTestsBase {
         TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         Task recentsStack = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_RECENTS, true /* onTop */);
+        final WindowProcessController wpc = mSystemServicesTestRule.addProcess(
+                mRecentsComponent.getPackageName(), mRecentsComponent.getPackageName(),
+                // Use real pid/uid of the test so the corresponding process can be mapped by
+                // Binder.getCallingPid/Uid.
+                android.os.Process.myPid(), android.os.Process.myUid());
         ActivityRecord recentActivity = new ActivityBuilder(mAtm)
                 .setComponent(mRecentsComponent)
                 .setTask(recentsStack)
+                .setUseProcess(wpc)
                 .build();
         ActivityRecord topActivity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         topActivity.getRootTask().moveToFront("testRecentsActivityVisiblility");
@@ -106,11 +112,14 @@ public class RecentsAnimationTest extends WindowTestsBase {
                 mRecentsComponent, true /* getRecentsAnimation */);
         // The launch-behind state should make the recents activity visible.
         assertTrue(recentActivity.mVisibleRequested);
+        assertEquals(ActivityTaskManagerService.DEMOTE_TOP_REASON_ANIMATING_RECENTS,
+                mAtm.mDemoteTopAppReasons);
 
         // Simulate the animation is cancelled without changing the stack order.
         recentsAnimation.onAnimationFinished(REORDER_KEEP_IN_PLACE, false /* sendUserLeaveHint */);
         // The non-top recents activity should be invisible by the restored launch-behind state.
         assertFalse(recentActivity.mVisibleRequested);
+        assertEquals(0, mAtm.mDemoteTopAppReasons);
     }
 
     @Test
@@ -138,11 +147,8 @@ public class RecentsAnimationTest extends WindowTestsBase {
                 anyInt() /* startFlags */, any() /* profilerInfo */);
 
         // Assume its process is alive because the caller should be the recents service.
-        WindowProcessController wpc = new WindowProcessController(mAtm, aInfo.applicationInfo,
-                aInfo.processName, aInfo.applicationInfo.uid, 0 /* userId */,
-                mock(Object.class) /* owner */, mock(WindowProcessListener.class));
-        wpc.setThread(mock(IApplicationThread.class));
-        doReturn(wpc).when(mAtm).getProcessController(eq(wpc.mName), eq(wpc.mUid));
+        mSystemServicesTestRule.addProcess(aInfo.packageName, aInfo.processName, 12345 /* pid */,
+                aInfo.applicationInfo.uid);
 
         Intent recentsIntent = new Intent().setComponent(mRecentsComponent);
         // Null animation indicates to preload.
