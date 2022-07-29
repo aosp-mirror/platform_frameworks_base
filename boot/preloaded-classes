@@ -220,7 +220,6 @@ android.app.ActivityThread$$ExternalSyntheticLambda1
 android.app.ActivityThread$$ExternalSyntheticLambda2
 android.app.ActivityThread$1$$ExternalSyntheticLambda0
 android.app.ActivityThread$1
-android.app.ActivityThread$2
 android.app.ActivityThread$3
 android.app.ActivityThread$ActivityClientRecord
 android.app.ActivityThread$AndroidOs
@@ -441,7 +440,6 @@ android.app.IBackupAgent$Stub
 android.app.IBackupAgent
 android.app.IForegroundServiceObserver$Stub
 android.app.IForegroundServiceObserver
-android.app.IGameManagerService$Stub$Proxy
 android.app.IGameManagerService$Stub
 android.app.IGameManagerService
 android.app.IInstantAppResolver$Stub$Proxy
@@ -1167,7 +1165,6 @@ android.companion.CompanionDeviceManager
 android.companion.ICompanionDeviceManager$Stub$Proxy
 android.companion.ICompanionDeviceManager$Stub
 android.companion.ICompanionDeviceManager
-android.companion.virtual.IVirtualDevice$Stub
 android.companion.virtual.IVirtualDevice
 android.companion.virtual.VirtualDeviceManager
 android.content.AbstractThreadedSyncAdapter$ISyncAdapterImpl
@@ -3690,6 +3687,7 @@ android.icu.number.NumberFormatter$DecimalSeparatorDisplay
 android.icu.number.NumberFormatter$GroupingStrategy
 android.icu.number.NumberFormatter$RoundingPriority
 android.icu.number.NumberFormatter$SignDisplay
+android.icu.number.NumberFormatter$TrailingZeroDisplay
 android.icu.number.NumberFormatter$UnitWidth
 android.icu.number.NumberFormatter
 android.icu.number.NumberFormatterImpl
@@ -12944,6 +12942,7 @@ org.ccil.cowan.tagsoup.jaxp.SAXParserImpl
 [Landroid.icu.impl.number.CompactData$CompactType;
 [Landroid.icu.impl.number.DecimalFormatProperties$ParseMode;
 [Landroid.icu.impl.number.Modifier$Signum;
+[Landroid.icu.impl.number.Modifier;
 [Landroid.icu.impl.number.Padder$PadPosition;
 [Landroid.icu.impl.number.PatternStringUtils$PatternSignType;
 [Landroid.icu.impl.units.MeasureUnitImpl$CompoundPart;
@@ -12964,6 +12963,11 @@ org.ccil.cowan.tagsoup.jaxp.SAXParserImpl
 [Landroid.icu.number.NumberSkeletonImpl$ParseState;
 [Landroid.icu.number.NumberSkeletonImpl$StemEnum;
 [Landroid.icu.text.AlphabeticIndex$Bucket$LabelType;
+[Landroid.icu.text.Bidi$IsoRun;
+[Landroid.icu.text.Bidi$Isolate;
+[Landroid.icu.text.Bidi$Opening;
+[Landroid.icu.text.Bidi$Point;
+[Landroid.icu.text.BidiRun;
 [Landroid.icu.text.BidiTransform$Mirroring;
 [Landroid.icu.text.BidiTransform$Order;
 [Landroid.icu.text.BidiTransform$ReorderingScheme;
