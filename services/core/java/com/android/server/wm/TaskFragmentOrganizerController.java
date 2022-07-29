@@ -136,6 +136,9 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         void dispose() {
             while (!mOrganizedTaskFragments.isEmpty()) {
                 final TaskFragment taskFragment = mOrganizedTaskFragments.get(0);
+                // Cleanup before remove to prevent it from sending any additional event, such as
+                // #onTaskFragmentVanished, to the removed organizer.
+                taskFragment.onTaskFragmentOrganizerRemoved();
                 taskFragment.removeImmediately();
                 mOrganizedTaskFragments.remove(taskFragment);
             }
@@ -512,10 +515,21 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         mPendingTaskFragmentEvents.add(pendingEvent);
     }
 
+    boolean isOrganizerRegistered(ITaskFragmentOrganizer organizer) {
+        return mTaskFragmentOrganizerState.containsKey(organizer.asBinder());
+    }
+
     private void removeOrganizer(ITaskFragmentOrganizer organizer) {
         final TaskFragmentOrganizerState state = validateAndGetState(organizer);
         // remove all of the children of the organized TaskFragment
         state.dispose();
+        // Remove any pending event of this organizer.
+        for (int i = mPendingTaskFragmentEvents.size() - 1; i >= 0; i--) {
+            final PendingTaskFragmentEvent event = mPendingTaskFragmentEvents.get(i);
+            if (event.mTaskFragmentOrg.asBinder().equals(organizer.asBinder())) {
+                mPendingTaskFragmentEvents.remove(i);
+            }
+        }
         mTaskFragmentOrganizerState.remove(organizer.asBinder());
     }
 
