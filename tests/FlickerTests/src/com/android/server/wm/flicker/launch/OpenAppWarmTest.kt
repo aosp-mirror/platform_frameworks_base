@@ -66,10 +66,11 @@ open class OpenAppWarmTest(testSpec: FlickerTestParameter) :
             super.transition(this)
             setup {
                 test {
+                    tapl.setExpectedRotationCheckEnabled(false)
                     testApp.launchViaIntent(wmHelper)
                 }
                 eachRun {
-                    device.pressHome()
+                    tapl.goHome()
                     wmHelper.StateSyncBuilder()
                         .withHomeActivityVisible()
                         .waitForAndVerify()
