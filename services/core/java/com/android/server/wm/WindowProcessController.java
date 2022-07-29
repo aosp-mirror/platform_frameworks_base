@@ -1126,6 +1126,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm.mH.sendMessage(m);
     }
 
+    /** Refreshes oom adjustment and process state of this process. */
+    void scheduleUpdateOomAdj() {
+        mAtm.mH.sendMessage(PooledLambda.obtainMessage(WindowProcessListener::updateProcessInfo,
+                mListener, false /* updateServiceConnectionActivities */,
+                false /* activityChange */, true /* updateOomAdj */));
+    }
+
     /** Makes the process have top state before oom-adj is computed from a posted message. */
     void addToPendingTop() {
         mAtm.mAmInternal.addPendingTopUid(mUid, mPid, mThread);

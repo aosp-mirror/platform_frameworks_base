@@ -64,8 +64,8 @@ import static android.provider.Settings.Global.HIDE_ERROR_DIALOGS;
 import static android.provider.Settings.System.FONT_SCALE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT;
 import static android.view.WindowManager.TRANSIT_WAKE;
+import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -399,6 +399,26 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     volatile WindowProcessController mPreviousProcess;
     /** The time at which the previous process was last visible. */
     private long mPreviousProcessVisibleTime;
+
+    /** It is set from keyguard-going-away to set-keyguard-shown. */
+    static final int DEMOTE_TOP_REASON_DURING_UNLOCKING = 1;
+    /** It is set if legacy recents animation is running. */
+    static final int DEMOTE_TOP_REASON_ANIMATING_RECENTS = 1 << 1;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            DEMOTE_TOP_REASON_DURING_UNLOCKING,
+            DEMOTE_TOP_REASON_ANIMATING_RECENTS,
+    })
+    @interface DemoteTopReason {}
+
+    /**
+     * If non-zero, getTopProcessState() will
+     * return {@link ActivityManager#PROCESS_STATE_IMPORTANT_FOREGROUND} to avoid top app from
+     * preempting CPU while another process is running an important animation.
+     */
+    @DemoteTopReason
+    volatile int mDemoteTopAppReasons;
 
     /** List of intents that were used to start the most recent tasks. */
     private RecentTasks mRecentTasks;
@@ -2830,12 +2850,24 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         keyguardShowing);
                 mH.sendMessage(msg);
             }
+            // Always reset the state regardless of keyguard-showing change, because that means the
+            // unlock is either completed or canceled.
+            if ((mDemoteTopAppReasons & DEMOTE_TOP_REASON_DURING_UNLOCKING) != 0) {
+                mDemoteTopAppReasons &= ~DEMOTE_TOP_REASON_DURING_UNLOCKING;
+                // The scheduling group of top process was demoted by unlocking, so recompute
+                // to restore its real top priority if possible.
+                if (mTopApp != null) {
+                    mTopApp.scheduleUpdateOomAdj();
+                }
+            }
             try {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "setLockScreenShown");
                 mRootWindowContainer.forAllDisplays(displayContent -> {
                     mKeyguardController.setKeyguardShown(displayContent.getDisplayId(),
                             keyguardShowing, aodShowing);
                 });
             } finally {
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 Binder.restoreCallingIdentity(ident);
             }
         }
@@ -2862,6 +2894,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // animation of system UI. Even if AOD is not enabled, it should be no harm.
         final WindowProcessController proc;
         synchronized (mGlobalLockWithoutBoost) {
+            mDemoteTopAppReasons &= ~DEMOTE_TOP_REASON_DURING_UNLOCKING;
             final WindowState notificationShade = mRootWindowContainer.getDefaultDisplay()
                     .getDisplayPolicy().getNotificationShade();
             proc = notificationShade != null
@@ -3399,8 +3432,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 // Keyguard asked us to clear the home task snapshot before going away, so do that.
-                if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT) != 0) {
+                if ((flags & KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT) != 0) {
                     mActivityClientController.invalidateHomeTaskSnapshot(null /* token */);
+                } else if (mKeyguardShown) {
+                    // Only set if it is not unlocking to launcher which may also animate.
+                    mDemoteTopAppReasons |= DEMOTE_TOP_REASON_DURING_UNLOCKING;
                 }
 
                 mRootWindowContainer.forAllDisplays(displayContent -> {
@@ -3968,6 +4004,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mTaskOrganizerController.dump(pw, "  ");
             mVisibleActivityProcessTracker.dump(pw, "  ");
             mActiveUids.dump(pw, "  ");
+            if (mDemoteTopAppReasons != 0) {
+                pw.println("  mDemoteTopAppReasons=" + mDemoteTopAppReasons);
+            }
         }
 
         if (!printedAnything) {
@@ -5595,12 +5634,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public int getTopProcessState() {
+            final int topState = mTopProcessState;
+            if (mDemoteTopAppReasons != 0 && topState == ActivityManager.PROCESS_STATE_TOP) {
+                // There may be a more important UI/animation than the top app.
+                return ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            }
             if (mRetainPowerModeAndTopProcessState) {
                 // There is a launching app while device may be sleeping, force the top state so
                 // the launching process can have top-app scheduling group.
                 return ActivityManager.PROCESS_STATE_TOP;
             }
-            return mTopProcessState;
+            return topState;
         }
 
         @HotPath(caller = HotPath.PROCESS_CHANGE)
