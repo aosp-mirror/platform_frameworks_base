@@ -4341,7 +4341,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         im.registerInputDeviceListener(new InputManager.InputDeviceListener() {
             @Override
             public void onInputDeviceAdded(int deviceId) {
-                if (isStylusDevice(im.getInputDevice(deviceId))) {
+                InputDevice device = im.getInputDevice(deviceId);
+                if (device != null && isStylusDevice(device)) {
                     add(deviceId);
                 }
             }
@@ -4353,7 +4354,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
             @Override
             public void onInputDeviceChanged(int deviceId) {
-                if (isStylusDevice(im.getInputDevice(deviceId))) {
+                InputDevice device = im.getInputDevice(deviceId);
+                if (device == null) {
+                    return;
+                }
+                if (isStylusDevice(device)) {
                     add(deviceId);
                 } else {
                     remove(deviceId);
@@ -4452,8 +4457,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (!im.isInputDeviceEnabled(id)) {
                 continue;
             }
-            InputDevice inputDevice = im.getInputDevice(id);
-            if (isStylusDevice(inputDevice)) {
+            InputDevice device = im.getInputDevice(id);
+            if (device != null && isStylusDevice(device)) {
                 stylusIds.add(id);
             }
         }
