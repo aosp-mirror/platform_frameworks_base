@@ -460,6 +460,15 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         setDisplayWindowingMode(WINDOWING_MODE_UNDEFINED);
     }
 
+    /** @hide */
+    public void scale(float scale) {
+        mBounds.scale(scale);
+        mMaxBounds.scale(scale);
+        if (mAppBounds != null) {
+            mAppBounds.scale(scale);
+        }
+    }
+
     /**
      * Copies the fields from delta into this Configuration object, keeping
      * track of which ones have changed. Any undefined fields in {@code delta}

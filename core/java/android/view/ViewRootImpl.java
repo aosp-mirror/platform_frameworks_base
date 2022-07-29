@@ -695,6 +695,8 @@ public final class ViewRootImpl implements ViewParent,
     boolean mPendingAlwaysConsumeSystemBars;
     private final InsetsState mTempInsets = new InsetsState();
     private final InsetsSourceControl[] mTempControls = new InsetsSourceControl[SIZE];
+    private final WindowConfiguration mTempWinConfig = new WindowConfiguration();
+    private float mInvSizeCompatScale = 1f;
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
@@ -1094,6 +1096,16 @@ public final class ViewRootImpl implements ViewParent,
         return mContext.getResources().getConfiguration();
     }
 
+    private WindowConfiguration getCompatWindowConfiguration() {
+        final WindowConfiguration winConfig = getConfiguration().windowConfiguration;
+        if (mInvSizeCompatScale == 1f) {
+            return winConfig;
+        }
+        mTempWinConfig.setTo(winConfig);
+        mTempWinConfig.scale(mInvSizeCompatScale);
+        return mTempWinConfig;
+    }
+
     /**
      * We have one child
      */
@@ -1223,10 +1235,11 @@ public final class ViewRootImpl implements ViewParent,
                     controlInsetsForCompatibility(mWindowAttributes);
 
                     Rect attachedFrame = new Rect();
+                    final float[] sizeCompatScale = { 1f };
                     res = mWindowSession.addToDisplayAsUser(mWindow, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(), userId,
                             mInsetsController.getRequestedVisibilities(), inputChannel, mTempInsets,
-                            mTempControls, attachedFrame);
+                            mTempControls, attachedFrame, sizeCompatScale);
                     if (!attachedFrame.isValid()) {
                         attachedFrame = null;
                     }
@@ -1236,6 +1249,8 @@ public final class ViewRootImpl implements ViewParent,
                         mTranslator.translateRectInScreenToAppWindow(attachedFrame);
                     }
                     mTmpFrames.attachedFrame = attachedFrame;
+                    mTmpFrames.sizeCompatScale = sizeCompatScale[0];
+                    mInvSizeCompatScale = 1f / sizeCompatScale[0];
                 } catch (RemoteException e) {
                     mAdded = false;
                     mView = null;
@@ -1258,7 +1273,7 @@ public final class ViewRootImpl implements ViewParent,
                 final InsetsState state = mInsetsController.getState();
                 final Rect displayCutoutSafe = mTempRect;
                 state.getDisplayCutoutSafe(displayCutoutSafe);
-                final WindowConfiguration winConfig = getConfiguration().windowConfiguration;
+                final WindowConfiguration winConfig = getCompatWindowConfiguration();
                 mWindowLayout.computeFrames(mWindowAttributes, state,
                         displayCutoutSafe, winConfig.getBounds(), winConfig.getWindowingMode(),
                         UNSPECIFIED_LENGTH, UNSPECIFIED_LENGTH,
@@ -1751,19 +1766,24 @@ public final class ViewRootImpl implements ViewParent,
             mTranslator.translateRectInScreenToAppWindow(displayFrame);
             mTranslator.translateRectInScreenToAppWindow(attachedFrame);
         }
+        final float sizeCompatScale = frames.sizeCompatScale;
         final boolean frameChanged = !mWinFrame.equals(frame);
         final boolean configChanged = !mLastReportedMergedConfiguration.equals(mergedConfiguration);
         final boolean attachedFrameChanged = LOCAL_LAYOUT
                 && !Objects.equals(mTmpFrames.attachedFrame, attachedFrame);
         final boolean displayChanged = mDisplay.getDisplayId() != displayId;
         final boolean resizeModeChanged = mResizeMode != resizeMode;
+        final boolean sizeCompatScaleChanged = mTmpFrames.sizeCompatScale != sizeCompatScale;
         if (msg == MSG_RESIZED && !frameChanged && !configChanged && !attachedFrameChanged
-                && !displayChanged && !resizeModeChanged && !forceNextWindowRelayout) {
+                && !displayChanged && !resizeModeChanged && !forceNextWindowRelayout
+                && !sizeCompatScaleChanged) {
             return;
         }
 
         mPendingDragResizing = resizeMode != RESIZE_MODE_INVALID;
         mResizeMode = resizeMode;
+        mTmpFrames.sizeCompatScale = sizeCompatScale;
+        mInvSizeCompatScale = 1f / sizeCompatScale;
 
         if (configChanged) {
             // If configuration changed - notify about that and, maybe, about move to display.
@@ -8064,11 +8084,12 @@ public final class ViewRootImpl implements ViewParent,
         if (maybeSyncSeqId > 0) {
             mSyncSeqId = maybeSyncSeqId;
         }
+        mInvSizeCompatScale = 1f / mTmpFrames.sizeCompatScale;
 
         final int transformHint = SurfaceControl.rotationToBufferTransform(
                 (mDisplayInstallOrientation + mDisplay.getRotation()) % 4);
 
-        final WindowConfiguration winConfig = getConfiguration().windowConfiguration;
+        final WindowConfiguration winConfig = getCompatWindowConfiguration();
         WindowLayout.computeSurfaceSize(mWindowAttributes, winConfig.getMaxBounds(), requestedWidth,
                 requestedHeight, mTmpFrames.frame, mPendingDragResizing, mSurfaceSize);
 
@@ -8171,7 +8192,7 @@ public final class ViewRootImpl implements ViewParent,
     private void setFrame(Rect frame) {
         mWinFrame.set(frame);
 
-        final WindowConfiguration winConfig = getConfiguration().windowConfiguration;
+        final WindowConfiguration winConfig = getCompatWindowConfiguration();
         mPendingBackDropFrame.set(mPendingDragResizing && !winConfig.useWindowFrameForBackdrop()
                 ? winConfig.getMaxBounds()
                 : frame);
