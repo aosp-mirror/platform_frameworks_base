@@ -20,6 +20,7 @@ import static android.window.BackNavigationInfo.KEY_TRIGGER_BACK;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,6 +40,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -121,24 +123,22 @@ public class BackAnimationControllerTest extends ShellTestCase {
             HardwareBuffer hardwareBuffer,
             int backType,
             IOnBackInvokedCallback onBackInvokedCallback) {
-        BackNavigationInfo navigationInfo = new BackNavigationInfo(
-                backType,
-                topAnimationTarget,
-                screenshotSurface,
-                hardwareBuffer,
-                new WindowConfiguration(),
-                new RemoteCallback((bundle) -> {}),
-                onBackInvokedCallback);
-        try {
-            doReturn(navigationInfo).when(mActivityTaskManager).startBackNavigation(anyBoolean());
-        } catch (RemoteException ex) {
-            ex.rethrowFromSystemServer();
-        }
+        BackNavigationInfo.Builder builder = new BackNavigationInfo.Builder()
+                .setType(backType)
+                .setDepartingAnimationTarget(topAnimationTarget)
+                .setScreenshotSurface(screenshotSurface)
+                .setScreenshotBuffer(hardwareBuffer)
+                .setTaskWindowConfiguration(new WindowConfiguration())
+                .setOnBackNavigationDone(new RemoteCallback((bundle) -> {}))
+                .setOnBackInvokedCallback(onBackInvokedCallback);
+
+        createNavigationInfo(builder);
     }
 
     private void createNavigationInfo(BackNavigationInfo.Builder builder) {
         try {
-            doReturn(builder.build()).when(mActivityTaskManager).startBackNavigation(anyBoolean());
+            doReturn(builder.build()).when(mActivityTaskManager)
+                    .startBackNavigation(anyBoolean(), any());
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
         }
@@ -295,6 +295,34 @@ public class BackAnimationControllerTest extends ShellTestCase {
         doMotionEvent(MotionEvent.ACTION_DOWN, 0);
         doMotionEvent(MotionEvent.ACTION_MOVE, 100);
         verify(mIOnBackInvokedCallback).onBackStarted();
+    }
+
+
+    @Test
+    public void cancelBackInvokeWhenLostFocus() throws RemoteException {
+        mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
+        RemoteAnimationTarget animationTarget = createAnimationTarget();
+
+        createNavigationInfo(animationTarget, null, null,
+                BackNavigationInfo.TYPE_RETURN_TO_HOME, null);
+
+        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
+        // Check that back start and progress is dispatched when first move.
+        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+        verify(mIOnBackInvokedCallback).onBackStarted();
+
+        // Check that back invocation is dispatched.
+        mController.setTriggerBack(true);   // Fake trigger back
+
+        // In case the focus has been changed.
+        IBinder token = mock(IBinder.class);
+        mController.mFocusObserver.focusLost(token);
+        mShellExecutor.flushAll();
+        verify(mIOnBackInvokedCallback).onBackCancelled();
+
+        // No more back invoke.
+        doMotionEvent(MotionEvent.ACTION_UP, 0);
+        verify(mIOnBackInvokedCallback, never()).onBackInvoked();
     }
 
     private void doMotionEvent(int actionDown, int coordinate) {
