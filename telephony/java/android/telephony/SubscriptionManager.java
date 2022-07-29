@@ -194,13 +194,24 @@ public class SubscriptionManager {
         }
 
         @Override
-        public T recompute(Void aVoid) {
+        public T recompute(Void query) {
+            // This always throws on any error.  The exceptions must be handled outside
+            // the cache.
+            try {
+                return mInterfaceMethod.applyOrThrow(TelephonyManager.getSubscriptionService());
+            } catch (Exception re) {
+                throw new RuntimeException(re);
+            }
+        }
+
+        @Override
+        public T query(Void query) {
             T result = mDefaultValue;
 
             try {
                 ISub iSub = TelephonyManager.getSubscriptionService();
                 if (iSub != null) {
-                    result = mInterfaceMethod.applyOrThrow(iSub);
+                    result = super.query(query);
                 }
             } catch (Exception ex) {
                 Rlog.w(LOG_TAG, "Failed to recompute cache key for " + mCacheKeyProperty);
@@ -229,12 +240,24 @@ public class SubscriptionManager {
 
         @Override
         public T recompute(Integer query) {
+            // This always throws on any error.  The exceptions must be handled outside
+            // the cache.
+            try {
+                return mInterfaceMethod.applyOrThrow(
+                    TelephonyManager.getSubscriptionService(), query);
+            } catch (Exception re) {
+                throw new RuntimeException(re);
+            }
+        }
+
+        @Override
+        public T query(Integer query) {
             T result = mDefaultValue;
 
             try {
                 ISub iSub = TelephonyManager.getSubscriptionService();
                 if (iSub != null) {
-                    result = mInterfaceMethod.applyOrThrow(iSub, query);
+                    result = super.query(query);
                 }
             } catch (Exception ex) {
                 Rlog.w(LOG_TAG, "Failed to recompute cache key for " + mCacheKeyProperty);
@@ -4118,4 +4141,3 @@ public class SubscriptionManager {
                         usageSetting, subscriptionId, mContext.getOpPackageName()));
     }
 }
-
