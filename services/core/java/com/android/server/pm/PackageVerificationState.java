@@ -137,15 +137,15 @@ class PackageVerificationState {
      * @return {@code true} if installation should be allowed
      */
     boolean isInstallAllowed() {
-        if (!mRequiredVerificationPassed) {
+        if (!mRequiredVerificationComplete) {
             return false;
         }
 
         if (mSufficientVerificationComplete) {
-            return mSufficientVerificationPassed;
+            return mRequiredVerificationPassed && mSufficientVerificationPassed;
         }
 
-        return true;
+        return mRequiredVerificationPassed;
     }
 
     /** Extend the timeout for this Package to be verified. */

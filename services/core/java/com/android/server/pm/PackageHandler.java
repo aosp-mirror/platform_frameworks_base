@@ -146,37 +146,9 @@ final class PackageHandler extends Handler {
                 }
 
                 final PackageVerificationResponse response = (PackageVerificationResponse) msg.obj;
+                VerificationUtils.processVerificationResponse(verificationId, state, response,
+                        "Verification timed out", mPm);
 
-                final VerifyingSession verifyingSession = state.getVerifyingSession();
-                final Uri originUri = Uri.fromFile(verifyingSession.mOriginInfo.mResolvedFile);
-
-                String errorMsg = "Verification timed out for " + originUri;
-                Slog.i(TAG, errorMsg);
-
-                final UserHandle user = verifyingSession.getUser();
-                if (response.code != PackageManager.VERIFICATION_REJECT) {
-                    Slog.i(TAG, "Continuing with installation of " + originUri);
-                    state.setVerifierResponse(response.callerUid, response.code);
-                    VerificationUtils.broadcastPackageVerified(verificationId, originUri,
-                            PackageManager.VERIFICATION_ALLOW, null,
-                            verifyingSession.mDataLoaderType, user, mPm.mContext);
-                } else {
-                    VerificationUtils.broadcastPackageVerified(verificationId, originUri,
-                            PackageManager.VERIFICATION_REJECT, null,
-                            verifyingSession.mDataLoaderType, user, mPm.mContext);
-                    verifyingSession.setReturnCode(
-                            PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE, errorMsg);
-                    state.setVerifierResponse(response.callerUid, response.code);
-                }
-
-                if (state.areAllVerificationsComplete()) {
-                    mPm.mPendingVerification.remove(verificationId);
-                }
-
-                Trace.asyncTraceEnd(
-                        TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
-
-                verifyingSession.handleVerificationFinished();
                 break;
             }
             case CHECK_PENDING_INTEGRITY_VERIFICATION: {
@@ -231,31 +203,8 @@ final class PackageHandler extends Handler {
                 }
 
                 final PackageVerificationResponse response = (PackageVerificationResponse) msg.obj;
-                state.setVerifierResponse(response.callerUid, response.code);
-
-                if (state.isVerificationComplete()) {
-                    final VerifyingSession verifyingSession = state.getVerifyingSession();
-                    final Uri originUri = Uri.fromFile(verifyingSession.mOriginInfo.mResolvedFile);
-
-                    if (state.isInstallAllowed()) {
-                        VerificationUtils.broadcastPackageVerified(verificationId, originUri,
-                                response.code, null, verifyingSession.mDataLoaderType,
-                                verifyingSession.getUser(), mPm.mContext);
-                    } else {
-                        verifyingSession.setReturnCode(
-                                PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
-                                "Install not allowed");
-                    }
-
-                    if (state.areAllVerificationsComplete()) {
-                        mPm.mPendingVerification.remove(verificationId);
-                    }
-
-                    Trace.asyncTraceEnd(
-                            TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
-
-                    verifyingSession.handleVerificationFinished();
-                }
+                VerificationUtils.processVerificationResponse(verificationId, state, response,
+                        "Install not allowed", mPm);
 
                 break;
             }
