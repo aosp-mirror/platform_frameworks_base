@@ -650,6 +650,20 @@
         -->
     </integer-array>
 
+    <!-- The device states (supplied by DeviceStateManager) that should be treated as half-folded by
+     the display fold controller. Default is empty. -->
+    <integer-array name="config_halfFoldedDeviceStates">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        -->
+    </integer-array>
+
+    <!-- Indicates whether the window manager reacts to half-fold device states by overriding
+     rotation. -->
+    <bool name="config_windowManagerHalfFoldAutoRotateOverride">false</bool>
+
     <!-- When a device enters any of these states, it should be woken up. States are defined in
          device_state_configuration.xml. -->
     <integer-array name="config_deviceStatesOnWhichToWakeUp">
