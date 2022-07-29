@@ -1556,14 +1556,22 @@ public class OomAdjuster {
 
         boolean foregroundActivities = false;
         boolean hasVisibleActivities = false;
-        if (PROCESS_STATE_CUR_TOP == PROCESS_STATE_TOP && app == topApp) {
+        if (app == topApp && (PROCESS_STATE_CUR_TOP == PROCESS_STATE_TOP
+                || PROCESS_STATE_CUR_TOP == PROCESS_STATE_IMPORTANT_FOREGROUND)) {
             // The last app on the list is the foreground app.
             adj = ProcessList.FOREGROUND_APP_ADJ;
-            schedGroup = ProcessList.SCHED_GROUP_TOP_APP;
-            state.setAdjType("top-activity");
+            if (PROCESS_STATE_CUR_TOP == PROCESS_STATE_TOP) {
+                schedGroup = ProcessList.SCHED_GROUP_TOP_APP;
+                state.setAdjType("top-activity");
+            } else {
+                // Demote the scheduling group to avoid CPU contention if there is another more
+                // important process which also uses top-app, such as if SystemUI is animating.
+                schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+                state.setAdjType("intermediate-top-activity");
+            }
             foregroundActivities = true;
             hasVisibleActivities = true;
-            procState = PROCESS_STATE_CUR_TOP;
+            procState = PROCESS_STATE_TOP;
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, "Making top: " + app);
             }
