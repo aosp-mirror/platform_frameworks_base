@@ -1448,7 +1448,8 @@ public class WindowManagerService extends IWindowManager.Stub
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
             int displayId, int requestUserId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame) {
+            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         Arrays.fill(outActiveControls, null);
         int[] appOp = new int[1];
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
@@ -1865,11 +1866,15 @@ public class WindowManagerService extends IWindowManager.Stub
             getInsetsSourceControls(win, outActiveControls);
 
             if (win.mLayoutAttached) {
-                outAttachedFrame.set(win.getParentWindow().getCompatFrame());
+                outAttachedFrame.set(win.getParentWindow().getFrame());
+                if (win.mInvGlobalScale != 1f) {
+                    outAttachedFrame.scale(win.mInvGlobalScale);
+                }
             } else {
                 // Make this invalid which indicates a null attached frame.
                 outAttachedFrame.set(0, 0, -1, -1);
             }
+            outSizeCompatScale[0] = win.getSizeCompatScale();
         }
 
         Binder.restoreCallingIdentity(origId);

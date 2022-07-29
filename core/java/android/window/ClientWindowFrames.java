@@ -49,6 +49,8 @@ public class ClientWindowFrames implements Parcelable {
 
     public boolean isParentFrameClippedByDisplayCutout;
 
+    public float sizeCompatScale = 1f;
+
     public ClientWindowFrames() {
     }
 
@@ -60,6 +62,7 @@ public class ClientWindowFrames implements Parcelable {
             attachedFrame = new Rect(other.attachedFrame);
         }
         isParentFrameClippedByDisplayCutout = other.isParentFrameClippedByDisplayCutout;
+        sizeCompatScale = other.sizeCompatScale;
     }
 
     private ClientWindowFrames(Parcel in) {
@@ -73,6 +76,7 @@ public class ClientWindowFrames implements Parcelable {
         parentFrame.readFromParcel(in);
         attachedFrame = in.readTypedObject(Rect.CREATOR);
         isParentFrameClippedByDisplayCutout = in.readBoolean();
+        sizeCompatScale = in.readFloat();
     }
 
     @Override
@@ -82,6 +86,7 @@ public class ClientWindowFrames implements Parcelable {
         parentFrame.writeToParcel(dest, flags);
         dest.writeTypedObject(attachedFrame, flags);
         dest.writeBoolean(isParentFrameClippedByDisplayCutout);
+        dest.writeFloat(sizeCompatScale);
     }
 
     @Override
@@ -91,7 +96,8 @@ public class ClientWindowFrames implements Parcelable {
                 + " display=" + displayFrame.toShortString(sb)
                 + " parentFrame=" + parentFrame.toShortString(sb)
                 + (attachedFrame != null ? " attachedFrame=" + attachedFrame.toShortString() : "")
-                + " parentClippedByDisplayCutout=" + isParentFrameClippedByDisplayCutout + "}";
+                + (isParentFrameClippedByDisplayCutout ? " parentClippedByDisplayCutout" : "")
+                + (sizeCompatScale != 1f ? " sizeCompatScale=" + sizeCompatScale : "") +  "}";
     }
 
     @Override
