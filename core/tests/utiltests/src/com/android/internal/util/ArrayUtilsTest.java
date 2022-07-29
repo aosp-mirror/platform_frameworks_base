@@ -16,8 +16,6 @@
 
 package com.android.internal.util;
 
-import static com.android.internal.util.ArrayUtils.concatElements;
-
 import static org.junit.Assert.assertArrayEquals;
 
 import junit.framework.TestCase;
@@ -156,61 +154,57 @@ public class ArrayUtilsTest extends TestCase {
                 ArrayUtils.removeLong(new long[] { 1, 2, 3, 1 }, 1));
     }
 
-    public void testConcatEmpty() throws Exception {
-        assertArrayEquals(new Long[] {},
-                concatElements(Long.class, null, null));
-        assertArrayEquals(new Long[] {},
-                concatElements(Long.class, new Long[] {}, null));
-        assertArrayEquals(new Long[] {},
-                concatElements(Long.class, null, new Long[] {}));
-        assertArrayEquals(new Long[] {},
-                concatElements(Long.class, new Long[] {}, new Long[] {}));
+    public void testConcat_zeroObjectArrays() {
+        // empty varargs array
+        assertArrayEquals(new String[] {}, ArrayUtils.concat(String.class));
+        // null varargs array
+        assertArrayEquals(new String[] {}, ArrayUtils.concat(String.class, (String[][]) null));
     }
 
-    public void testconcatElements() throws Exception {
+    public void testConcat_oneObjectArray() {
+        assertArrayEquals(new String[] { "1", "2" },
+                ArrayUtils.concat(String.class, new String[] { "1", "2" }));
+    }
+
+    public void testConcat_oneEmptyObjectArray() {
+        assertArrayEquals(new String[] {}, ArrayUtils.concat(String.class, (String[]) null));
+        assertArrayEquals(new String[] {}, ArrayUtils.concat(String.class, new String[] {}));
+    }
+
+    public void testConcat_twoObjectArrays() {
         assertArrayEquals(new Long[] { 1L },
-                concatElements(Long.class, new Long[] { 1L }, new Long[] {}));
+                ArrayUtils.concat(Long.class, new Long[] { 1L }, new Long[] {}));
         assertArrayEquals(new Long[] { 1L },
-                concatElements(Long.class, new Long[] {}, new Long[] { 1L }));
+                ArrayUtils.concat(Long.class, new Long[] {}, new Long[] { 1L }));
         assertArrayEquals(new Long[] { 1L, 2L },
-                concatElements(Long.class, new Long[] { 1L }, new Long[] { 2L }));
+                ArrayUtils.concat(Long.class, new Long[] { 1L }, new Long[] { 2L }));
         assertArrayEquals(new Long[] { 1L, 2L, 3L, 4L },
-                concatElements(Long.class, new Long[] { 1L, 2L }, new Long[] { 3L, 4L }));
+                ArrayUtils.concat(Long.class, new Long[] { 1L, 2L }, new Long[] { 3L, 4L }));
     }
 
-    public void testConcatElements_threeWay() {
+    public void testConcat_twoEmptyObjectArrays() {
+        assertArrayEquals(new Long[] {}, ArrayUtils.concat(Long.class, null, null));
+        assertArrayEquals(new Long[] {}, ArrayUtils.concat(Long.class, new Long[] {}, null));
+        assertArrayEquals(new Long[] {}, ArrayUtils.concat(Long.class, null, new Long[] {}));
+        assertArrayEquals(new Long[] {},
+                ArrayUtils.concat(Long.class, new Long[] {}, new Long[] {}));
+    }
+
+    public void testConcat_threeObjectArrays() {
         String[] array1 = { "1", "2" };
         String[] array2 = { "3", "4" };
         String[] array3 = { "5", "6" };
-        String[] expectation = {"1", "2", "3", "4", "5", "6"};
+        String[] expectation = { "1", "2", "3", "4", "5", "6" };
 
-        String[] concatResult = ArrayUtils.concatElements(String.class, array1, array2, array3);
-        assertArrayEquals(expectation, concatResult);
+        assertArrayEquals(expectation, ArrayUtils.concat(String.class, array1, array2, array3));
     }
 
-
-    public void testConcatElements_threeWayWithNull() {
+    public void testConcat_threeObjectArraysWithNull() {
         String[] array1 = { "1", "2" };
         String[] array2 = null;
         String[] array3 = { "5", "6" };
-        String[] expectation = {"1", "2", "5", "6"};
+        String[] expectation = { "1", "2", "5", "6" };
 
-        String[] concatResult = ArrayUtils.concatElements(String.class, array1, array2, array3);
-        assertArrayEquals(expectation, concatResult);
+        assertArrayEquals(expectation, ArrayUtils.concat(String.class, array1, array2, array3));
     }
-
-    public void testConcatElements_zeroElements() {
-        String[] expectation = new String[0];
-
-        String[] concatResult = ArrayUtils.concatElements(String.class);
-        assertArrayEquals(expectation, concatResult);
-    }
-
-    public void testConcatElements_oneNullElement() {
-        String[] expectation = new String[0];
-
-        String[] concatResult = ArrayUtils.concatElements(String.class, null);
-        assertArrayEquals(expectation, concatResult);
-    }
-
 }
