@@ -32,8 +32,12 @@ import com.android.server.wm.flicker.helpers.NotificationAppHelper
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.taskBarLayerIsVisibleAtEnd
+import com.android.server.wm.flicker.taskBarWindowIsVisibleAtEnd
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.Assume
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -230,6 +234,42 @@ open class OpenAppFromNotificationWarm(
         Assume.assumeTrue(isShellTransitionsEnabled)
         super.appWindowBecomesTopWindow()
     }
+
+    /**
+     * Checks that the [ComponentMatcher.TASK_BAR] window is visible at the end of the transition
+     *
+     * Note: Large screen only
+     */
+    @Postsubmit
+    @Test
+    open fun taskBarWindowIsVisibleAtEnd() {
+        Assume.assumeFalse(testSpec.isTablet)
+        testSpec.taskBarWindowIsVisibleAtEnd()
+    }
+
+    /**
+     * Checks that the [ComponentMatcher.TASK_BAR] layer is visible at the end of the transition
+     *
+     * Note: Large screen only
+     */
+    @Postsubmit
+    @Test
+    open fun taskBarLayerIsVisibleAtEnd() {
+        Assume.assumeFalse(testSpec.isTablet)
+        testSpec.taskBarLayerIsVisibleAtEnd()
+    }
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Display is locked at the start")
+    override fun taskBarWindowIsAlwaysVisible() =
+        super.taskBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Display is locked at the start")
+    override fun taskBarLayerIsVisibleAtStartAndEnd() =
+        super.taskBarLayerIsVisibleAtStartAndEnd()
 
     companion object {
         /**
