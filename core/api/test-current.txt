@@ -683,6 +683,7 @@ package android.app.usage {
 
   public final class UsageStatsManager {
     method public void forceUsageSourceSettingRead();
+    method public boolean isAppStandbyEnabled();
   }
 
 }
@@ -1834,6 +1835,7 @@ package android.os {
   }
 
   public final class PowerManager {
+    method public boolean areAutoPowerSaveModesEnabled();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public void forceLowPowerStandbyActive(boolean);
     field public static final String ACTION_ENHANCED_DISCHARGE_PREDICTION_CHANGED = "android.os.action.ENHANCED_DISCHARGE_PREDICTION_CHANGED";
     field @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public static final int SYSTEM_WAKELOCK = -2147483648; // 0x80000000

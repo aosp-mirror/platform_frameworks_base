@@ -2289,6 +2289,11 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public boolean isAppStandbyEnabled() {
+            return mAppStandby.isAppIdleEnabled();
+        }
+
+        @Override
         public boolean isAppInactive(String packageName, int userId, String callingPackage) {
             final int callingUid = Binder.getCallingUid();
             try {
