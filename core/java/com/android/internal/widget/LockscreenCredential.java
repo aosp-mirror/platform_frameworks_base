@@ -278,11 +278,8 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
             sha256.update(hashFactor);
-            byte[] saltedPassword = Arrays.copyOf(passwordToHash, passwordToHash.length
-                    + salt.length);
-            System.arraycopy(salt, 0, saltedPassword, passwordToHash.length, salt.length);
-            sha256.update(saltedPassword);
-            Arrays.fill(saltedPassword, (byte) 0);
+            sha256.update(passwordToHash);
+            sha256.update(salt);
             return new String(HexEncoding.encode(sha256.digest()));
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError("Missing digest algorithm: ", e);
