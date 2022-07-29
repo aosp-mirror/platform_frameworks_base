@@ -24,7 +24,6 @@ import android.service.dreams.IDreamManager;
 
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
@@ -40,7 +39,6 @@ public class TestableNotificationInterruptStateProviderImpl
             PowerManager powerManager,
             IDreamManager dreamManager,
             AmbientDisplayConfiguration ambientDisplayConfiguration,
-            NotificationFilter filter,
             StatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
             BatteryController batteryController,
@@ -53,7 +51,6 @@ public class TestableNotificationInterruptStateProviderImpl
                 powerManager,
                 dreamManager,
                 ambientDisplayConfiguration,
-                filter,
                 batteryController,
                 statusBarStateController,
                 keyguardStateController,

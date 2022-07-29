@@ -118,7 +118,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                         mPowerManager,
                         mDreamManager,
                         mAmbientDisplayConfiguration,
-                        mNotificationFilter,
                         mBatteryController,
                         mStatusBarStateController,
                         mKeyguardStateController,
