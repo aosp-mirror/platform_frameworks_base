@@ -209,8 +209,6 @@ class KeyguardController {
 
         if (keyguardChanged) {
             // Irrelevant to AOD.
-            dismissMultiWindowModeForTaskIfNeeded(displayId,
-                    null /* currentTaskControllsingOcclusion */);
             state.mKeyguardGoingAway = false;
             if (keyguardShowing) {
                 state.mDismissalRequested = false;
