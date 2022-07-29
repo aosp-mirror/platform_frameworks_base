@@ -128,6 +128,54 @@ class QSLogger @Inject constructor(
         })
     }
 
+    fun logOnViewAttached(orientation: Int, containerName: String) {
+        log(DEBUG, {
+            str1 = containerName
+            int1 = orientation
+        }, {
+            "onViewAttached: $str1 orientation $int1"
+        })
+    }
+
+    fun logOnViewDetached(orientation: Int, containerName: String) {
+        log(DEBUG, {
+            str1 = containerName
+            int1 = orientation
+        }, {
+            "onViewDetached: $str1 orientation $int1"
+        })
+    }
+
+    fun logOnConfigurationChanged(
+        lastOrientation: Int,
+        newOrientation: Int,
+        containerName: String
+    ) {
+        log(DEBUG, {
+            str1 = containerName
+            int1 = lastOrientation
+            int2 = newOrientation
+        }, {
+            "configuration change: $str1 orientation was $int1, now $int2"
+        })
+    }
+
+    fun logSwitchTileLayout(
+        after: Boolean,
+        before: Boolean,
+        force: Boolean,
+        containerName: String
+    ) {
+        log(DEBUG, {
+            str1 = containerName
+            bool1 = after
+            bool2 = before
+            bool3 = force
+        }, {
+            "change tile layout: $str1 horizontal=$bool1 (was $bool2), force? $bool3"
+        })
+    }
+
     private fun toStateString(state: Int): String {
         return when (state) {
             Tile.STATE_ACTIVE -> "active"

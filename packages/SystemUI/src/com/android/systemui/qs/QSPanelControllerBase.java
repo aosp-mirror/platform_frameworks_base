@@ -88,6 +88,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 public void onConfigurationChange(Configuration newConfig) {
                     mShouldUseSplitNotificationShade =
                             LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+                    mQSLogger.logOnConfigurationChanged(mLastOrientation, newConfig.orientation,
+                            mView.getDumpableTag());
                     onConfigurationChanged();
                     if (newConfig.orientation != mLastOrientation) {
                         mLastOrientation = newConfig.orientation;
@@ -164,6 +166,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mHost.addCallback(mQSHostCallback);
         setTiles();
         mLastOrientation = getResources().getConfiguration().orientation;
+        mQSLogger.logOnViewAttached(mLastOrientation, mView.getDumpableTag());
         switchTileLayout(true);
 
         mDumpManager.registerDumpable(mView.getDumpableTag(), this);
@@ -171,6 +174,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     @Override
     protected void onViewDetached() {
+        mQSLogger.logOnViewDetached(mLastOrientation, mView.getDumpableTag());
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
         mHost.removeCallback(mQSHostCallback);
 
@@ -325,6 +329,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         /* Whether or not the panel currently contains a media player. */
         boolean horizontal = shouldUseHorizontalLayout();
         if (horizontal != mUsingHorizontalLayout || force) {
+            mQSLogger.logSwitchTileLayout(horizontal, mUsingHorizontalLayout, force,
+                    mView.getDumpableTag());
             mUsingHorizontalLayout = horizontal;
             mView.setUsingHorizontalLayout(mUsingHorizontalLayout, mMediaHost.getHostView(), force);
             updateMediaDisappearParameters();
