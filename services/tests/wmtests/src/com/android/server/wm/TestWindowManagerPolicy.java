@@ -40,6 +40,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     boolean mKeyguardShowingAndNotOccluded = false;
     boolean mOkToAnimate = true;
+    boolean mIsUserSetupComplete = false;
 
     TestWindowManagerPolicy() {
     }
@@ -284,7 +285,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public boolean isUserSetupComplete() {
-        return false;
+        return mIsUserSetupComplete;
     }
 
     @Override
