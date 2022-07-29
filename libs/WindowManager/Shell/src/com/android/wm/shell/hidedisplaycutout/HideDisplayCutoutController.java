@@ -28,6 +28,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
 
@@ -49,7 +50,9 @@ public class HideDisplayCutoutController implements ConfigurationChangeListener 
      */
     @Nullable
     public static HideDisplayCutoutController create(Context context,
-            ShellController shellController, DisplayController displayController,
+            ShellInit shellInit,
+            ShellController shellController,
+            DisplayController displayController,
             ShellExecutor mainExecutor) {
         // The SystemProperty is set for devices that support this feature and is used to control
         // whether to create the HideDisplayCutout instance.
@@ -60,14 +63,20 @@ public class HideDisplayCutoutController implements ConfigurationChangeListener 
 
         HideDisplayCutoutOrganizer organizer =
                 new HideDisplayCutoutOrganizer(context, displayController, mainExecutor);
-        return new HideDisplayCutoutController(context, shellController, organizer);
+        return new HideDisplayCutoutController(context, shellInit, shellController, organizer);
     }
 
-    HideDisplayCutoutController(Context context, ShellController shellController,
+    HideDisplayCutoutController(Context context,
+            ShellInit shellInit,
+            ShellController shellController,
             HideDisplayCutoutOrganizer organizer) {
         mContext = context;
         mShellController = shellController;
         mOrganizer = organizer;
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    private void onInit() {
         updateStatus();
         mShellController.addConfigurationChangeListener(this);
     }

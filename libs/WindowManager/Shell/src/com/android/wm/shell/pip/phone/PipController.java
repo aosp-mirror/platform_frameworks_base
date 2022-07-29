@@ -90,6 +90,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
@@ -295,6 +296,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      */
     @Nullable
     public static Pip create(Context context,
+            ShellInit shellInit,
             ShellController shellController,
             DisplayController displayController,
             PipAppOpsListener pipAppOpsListener,
@@ -319,16 +321,17 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             return null;
         }
 
-        return new PipController(context, shellController, displayController, pipAppOpsListener,
-                pipBoundsAlgorithm, pipKeepClearAlgorithm, pipBoundsState, pipMotionHelper,
-                pipMediaController, phonePipMenuController, pipTaskOrganizer, pipTransitionState,
-                pipTouchHandler, pipTransitionController,
+        return new PipController(context, shellInit, shellController, displayController,
+                pipAppOpsListener, pipBoundsAlgorithm, pipKeepClearAlgorithm, pipBoundsState,
+                pipMotionHelper, pipMediaController, phonePipMenuController, pipTaskOrganizer,
+                pipTransitionState, pipTouchHandler, pipTransitionController,
                 windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
                 oneHandedController, mainExecutor)
                 .mImpl;
     }
 
     protected PipController(Context context,
+            ShellInit shellInit,
             ShellController shellController,
             DisplayController displayController,
             PipAppOpsListener pipAppOpsListener,
@@ -378,11 +381,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 .getInteger(R.integer.config_pipEnterAnimationDuration);
         mPipParamsChangedForwarder = pipParamsChangedForwarder;
 
-        //TODO: move this to ShellInit when PipController can be injected
-        mMainExecutor.execute(this::init);
+        shellInit.addInitCallback(this::onInit, this);
     }
 
-    public void init() {
+    private void onInit() {
         mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
                 INPUT_CONSUMER_PIP, mMainExecutor);
         mPipTransitionController.registerPipTransitionCallback(this);

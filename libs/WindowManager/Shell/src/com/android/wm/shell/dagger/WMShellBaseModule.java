@@ -204,11 +204,12 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static CompatUIController provideCompatUIController(Context context,
+            ShellInit shellInit,
             ShellController shellController,
             DisplayController displayController, DisplayInsetsController displayInsetsController,
             DisplayImeController imeController, SyncTransactionQueue syncQueue,
             @ShellMainThread ShellExecutor mainExecutor, Lazy<Transitions> transitionsLazy) {
-        return new CompatUIController(context, shellController, displayController,
+        return new CompatUIController(context, shellInit, shellController, displayController,
                 displayInsetsController, imeController, syncQueue, mainExecutor, transitionsLazy);
     }
 
@@ -268,12 +269,14 @@ public abstract class WMShellBaseModule {
     @Provides
     static Optional<BackAnimationController> provideBackAnimationController(
             Context context,
+            ShellInit shellInit,
             @ShellMainThread ShellExecutor shellExecutor,
             @ShellBackgroundThread Handler backgroundHandler
     ) {
         if (BackAnimationController.IS_ENABLED) {
             return Optional.of(
-                    new BackAnimationController(shellExecutor, backgroundHandler, context));
+                    new BackAnimationController(shellInit, shellExecutor, backgroundHandler,
+                            context));
         }
         return Optional.empty();
     }
@@ -384,11 +387,13 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Optional<HideDisplayCutoutController> provideHideDisplayCutoutController(Context context,
-            ShellController shellController, DisplayController displayController,
+            ShellInit shellInit,
+            ShellController shellController,
+            DisplayController displayController,
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(
-                HideDisplayCutoutController.create(context, shellController, displayController,
-                        mainExecutor));
+                HideDisplayCutoutController.create(context, shellInit, shellController,
+                        displayController, mainExecutor));
     }
 
     //

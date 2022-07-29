@@ -248,12 +248,17 @@ public abstract class WMShellModule {
     @Provides
     @DynamicOverride
     static OneHandedController provideOneHandedController(Context context,
+            ShellInit shellInit,
             ShellController shellController,
-            WindowManager windowManager, DisplayController displayController,
-            DisplayLayout displayLayout, TaskStackListenerImpl taskStackListener,
-            UiEventLogger uiEventLogger, InteractionJankMonitor jankMonitor,
-            @ShellMainThread ShellExecutor mainExecutor, @ShellMainThread Handler mainHandler) {
-        return OneHandedController.create(context, shellController, windowManager,
+            WindowManager windowManager,
+            DisplayController displayController,
+            DisplayLayout displayLayout,
+            TaskStackListenerImpl taskStackListener,
+            UiEventLogger uiEventLogger,
+            InteractionJankMonitor jankMonitor,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler) {
+        return OneHandedController.create(context, shellInit, shellController, windowManager,
                 displayController, displayLayout, taskStackListener, jankMonitor, uiEventLogger,
                 mainExecutor, mainHandler);
     }
@@ -293,7 +298,7 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static Optional<Pip> providePip(Context context,
+    static Optional<Pip> providePip(Context context, ShellInit shellInit,
             ShellController shellController, DisplayController displayController,
             PipAppOpsListener pipAppOpsListener, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipKeepClearAlgorithm pipKeepClearAlgorithm, PipBoundsState pipBoundsState,
@@ -306,12 +311,12 @@ public abstract class WMShellModule {
             PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<OneHandedController> oneHandedController,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return Optional.ofNullable(PipController.create(context, shellController, displayController,
-                pipAppOpsListener, pipBoundsAlgorithm, pipKeepClearAlgorithm, pipBoundsState,
-                pipMotionHelper,
-                pipMediaController, phonePipMenuController, pipTaskOrganizer, pipTransitionState,
-                pipTouchHandler, pipTransitionController, windowManagerShellWrapper,
-                taskStackListener, pipParamsChangedForwarder, oneHandedController, mainExecutor));
+        return Optional.ofNullable(PipController.create(context, shellInit, shellController,
+                displayController, pipAppOpsListener, pipBoundsAlgorithm, pipKeepClearAlgorithm,
+                pipBoundsState, pipMotionHelper, pipMediaController, phonePipMenuController,
+                pipTaskOrganizer, pipTransitionState, pipTouchHandler, pipTransitionController,
+                windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
+                oneHandedController, mainExecutor));
     }
 
     @WMSingleton
