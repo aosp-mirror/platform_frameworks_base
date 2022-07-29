@@ -22,7 +22,6 @@ import android.telephony.TelephonyManager
 import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.MobileStatusTracker
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.util.CarrierConfigTracker
 import javax.inject.Inject
 
@@ -34,16 +33,15 @@ internal class MobileSignalControllerFactory @Inject constructor(
     val context: Context,
     val callbackHandler: CallbackHandler,
     val carrierConfigTracker: CarrierConfigTracker,
-    val featureFlags: FeatureFlags,
 ) {
     fun createMobileSignalController(
         config: MobileMappings.Config,
         hasMobileData: Boolean,
         phone: TelephonyManager,
-        networkController: NetworkControllerImpl, // TODO: no!
+        networkController: NetworkControllerImpl,
         subscriptionInfo: SubscriptionInfo,
         subscriptionDefaults: MobileStatusTracker.SubscriptionDefaults,
-        receiverLooper: Looper // TODO: no!
+        receiverLooper: Looper,
     ): MobileSignalController {
         val mobileTrackerFactory = MobileStatusTrackerFactory(
             phone,
@@ -63,7 +61,6 @@ internal class MobileSignalControllerFactory @Inject constructor(
             receiverLooper,
             carrierConfigTracker,
             mobileTrackerFactory,
-            featureFlags,
         )
     }
 }

@@ -70,8 +70,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
@@ -127,7 +125,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected CarrierConfigTracker mCarrierConfigTracker;
     protected FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     protected Handler mMainHandler;
-    protected FeatureFlags mFeatureFlags;
     protected WifiStatusTrackerFactory mWifiStatusTrackerFactory;
     protected MobileSignalControllerFactory mMobileFactory;
 
@@ -159,9 +156,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        mFeatureFlags = mock(FeatureFlags.class);
-        when(mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)).thenReturn(false);
-
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         Settings.Global.putInt(mContext.getContentResolver(), Global.AIRPLANE_MODE_ON, 0);
         TestableResources res = mContext.getOrCreateTestableResources();
@@ -228,8 +222,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mMobileFactory = new MobileSignalControllerFactory(
                 mContext,
                 mCallbackHandler,
-                mCarrierConfigTracker,
-                mFeatureFlags
+                mCarrierConfigTracker
         );
 
         mNetworkController = new NetworkControllerImpl(mContext,
@@ -252,7 +245,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mWifiStatusTrackerFactory,
                 mMobileFactory,
                 mMainHandler,
-                mFeatureFlags,
                 mock(DumpManager.class),
                 mock(LogBuffer.class)
         );
@@ -444,10 +436,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     public void setLevel(int level) {
         when(mSignalStrength.getLevel()).thenReturn(level);
         updateSignalStrength();
-    }
-
-    public void setImsType(int imsType) {
-        mMobileSignalController.setImsType(imsType);
     }
 
     public void setIsGsm(boolean gsm) {
