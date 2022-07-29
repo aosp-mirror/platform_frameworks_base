@@ -192,9 +192,9 @@ final class IInputMethodManagerInvoker {
 
     @AnyThread
     void setAdditionalInputMethodSubtypes(@NonNull String imeId,
-            @NonNull InputMethodSubtype[] subtypes) {
+            @NonNull InputMethodSubtype[] subtypes, @UserIdInt int userId) {
         try {
-            mTarget.setAdditionalInputMethodSubtypes(imeId, subtypes);
+            mTarget.setAdditionalInputMethodSubtypes(imeId, subtypes, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
