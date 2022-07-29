@@ -634,7 +634,7 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueo dactilar"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Non se puido usar o sensor de impresión dixital"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visita un provedor de reparacións."</string>
-    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Non se pode crear o modelo facial. Téntao de novo."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Non se puido crear o modelo facial. Téntao de novo."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Hai demasiada iluminación. Proba cunha máis suave."</string>
     <string name="face_acquired_too_dark" msgid="7919016380747701228">"Proba con máis luz"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Afasta o teléfono"</string>
@@ -656,7 +656,7 @@
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpa a parte superior da pantalla, incluída a barra de cor negra"</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"A cara debe poder verse por completo"</string>
     <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"A cara debe poder verse por completo"</string>
-    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Non se pode crear o modelo facial. Téntao de novo."</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Non se puido crear o modelo facial. Téntao de novo."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Detectáronse lentes escuras. A cara debe poder verse por completo."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Detectouse unha máscara. A cara debe poder verse por completo."</string>
   <string-array name="face_acquired_vendor">
