@@ -135,6 +135,8 @@ public class SyntheticPasswordManager {
     private static final byte PROTECTOR_TYPE_STRONG_TOKEN_BASED = 1;
     private static final byte PROTECTOR_TYPE_WEAK_TOKEN_BASED = 2;
 
+    private static final String PROTECTOR_KEY_ALIAS_PREFIX = "synthetic_password_";
+
     // The security strength of the synthetic password, in bytes
     private static final int SYNTHETIC_PASSWORD_SECURITY_STRENGTH = 256 / 8;
 
@@ -583,7 +585,7 @@ public class SyntheticPasswordManager {
         for (long protectorId : mStorage.listSyntheticPasswordProtectorsForUser(SP_BLOB_NAME,
                     userId)) {
             destroyWeaverSlot(protectorId, userId);
-            destroySPBlobKey(getKeyName(protectorId));
+            destroyProtectorKey(getProtectorKeyAlias(protectorId));
         }
         // Remove potential persistent state (in RPMB), to prevent them from accumulating and
         // causing problems.
@@ -999,7 +1001,8 @@ public class SyntheticPasswordManager {
         } else {
             spSecret = sp.getSyntheticPassword();
         }
-        byte[] content = createSPBlob(getKeyName(protectorId), spSecret, protectorSecret, sid);
+        byte[] content = createSpBlob(getProtectorKeyAlias(protectorId), spSecret, protectorSecret,
+                sid);
         /*
          * We can upgrade from v1 to v2 because that's just a change in the way that
          * the SP is stored. However, we can't upgrade to v3 because that is a change
@@ -1210,10 +1213,11 @@ public class SyntheticPasswordManager {
         }
         final byte[] spSecret;
         if (blob.mVersion == SYNTHETIC_PASSWORD_VERSION_V1) {
-            spSecret = SyntheticPasswordCrypto.decryptBlobV1(getKeyName(protectorId), blob.mContent,
-                    protectorSecret);
+            spSecret = SyntheticPasswordCrypto.decryptBlobV1(getProtectorKeyAlias(protectorId),
+                    blob.mContent, protectorSecret);
         } else {
-            spSecret = decryptSPBlob(getKeyName(protectorId), blob.mContent, protectorSecret);
+            spSecret = decryptSpBlob(getProtectorKeyAlias(protectorId), blob.mContent,
+                    protectorSecret);
         }
         if (spSecret == null) {
             Slog.e(TAG, "Fail to decrypt SP for user " + userId);
@@ -1337,7 +1341,7 @@ public class SyntheticPasswordManager {
 
     private void destroyProtectorCommon(long protectorId, int userId) {
         destroyState(SP_BLOB_NAME, protectorId, userId);
-        destroySPBlobKey(getKeyName(protectorId));
+        destroyProtectorKey(getProtectorKeyAlias(protectorId));
         destroyState(SECDISCARDABLE_NAME, protectorId, userId);
         if (hasState(WEAVER_SLOT_NAME, protectorId, userId)) {
             destroyWeaverSlot(protectorId, userId);
@@ -1428,17 +1432,20 @@ public class SyntheticPasswordManager {
         mStorage.deleteSyntheticPasswordState(userId, protectorId, stateName);
     }
 
-    protected byte[] decryptSPBlob(String blobKeyName, byte[] blob, byte[] protectorSecret) {
-        return SyntheticPasswordCrypto.decryptBlob(blobKeyName, blob, protectorSecret);
+    @VisibleForTesting
+    protected byte[] decryptSpBlob(String protectorKeyAlias, byte[] blob, byte[] protectorSecret) {
+        return SyntheticPasswordCrypto.decryptBlob(protectorKeyAlias, blob, protectorSecret);
     }
 
-    protected byte[] createSPBlob(String blobKeyName, byte[] data, byte[] protectorSecret,
+    @VisibleForTesting
+    protected byte[] createSpBlob(String protectorKeyAlias, byte[] data, byte[] protectorSecret,
             long sid) {
-        return SyntheticPasswordCrypto.createBlob(blobKeyName, data, protectorSecret, sid);
+        return SyntheticPasswordCrypto.createBlob(protectorKeyAlias, data, protectorSecret, sid);
     }
 
-    protected void destroySPBlobKey(String keyAlias) {
-        SyntheticPasswordCrypto.destroyBlobKey(keyAlias);
+    @VisibleForTesting
+    protected void destroyProtectorKey(String keyAlias) {
+        SyntheticPasswordCrypto.destroyProtectorKey(keyAlias);
     }
 
     public static long generateProtectorId() {
@@ -1463,8 +1470,8 @@ public class SyntheticPasswordManager {
         }
     }
 
-    private String getKeyName(long protectorId) {
-        return String.format("%s%x", LockPatternUtils.SYNTHETIC_PASSWORD_KEY_PREFIX, protectorId);
+    private String getProtectorKeyAlias(long protectorId) {
+        return String.format("%s%x", PROTECTOR_KEY_ALIAS_PREFIX, protectorId);
     }
 
     private byte[] computePasswordToken(LockscreenCredential credential, PasswordData data) {
@@ -1517,7 +1524,7 @@ public class SyntheticPasswordManager {
     }
 
     /**
-     * Migrate all existing SP keystore keys from uid 1000 app domain to LSS selinux domain
+     * Migrates all existing SP protector keys from uid 1000 app domain to LSS selinux domain.
      */
     public boolean migrateKeyNamespace() {
         boolean success = true;
@@ -1525,7 +1532,8 @@ public class SyntheticPasswordManager {
             mStorage.listSyntheticPasswordProtectorsForAllUsers(SP_BLOB_NAME);
         for (List<Long> userProtectors : allProtectors.values()) {
             for (long protectorId : userProtectors) {
-                success &= SyntheticPasswordCrypto.migrateLockSettingsKey(getKeyName(protectorId));
+                success &= SyntheticPasswordCrypto.migrateLockSettingsKey(
+                        getProtectorKeyAlias(protectorId));
             }
         }
         return success;
