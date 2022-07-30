@@ -90,7 +90,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"O administrador bloqueou o dispositivo"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"O dispositivo bloqueouse manualmente"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Non se recoñeceu"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Desbloqueo facial: acceso á cámara en Configuración"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"O Desbloqueo facial necesita acceso á cámara"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Introduce o código PIN da SIM. Quédanche <xliff:g id="NUMBER_1">%d</xliff:g> intentos.</item>
       <item quantity="one">Introduce o código PIN da SIM. Quédache <xliff:g id="NUMBER_0">%d</xliff:g> intento antes de que teñas que contactar co operador para desbloquear o dispositivo.</item>
