@@ -118,7 +118,7 @@ public final class BackNavigationInfo implements Parcelable {
      *                                back preview.
      * @param onBackInvokedCallback   The back callback registered by the current top level window.
      */
-    public BackNavigationInfo(@BackTargetType int type,
+    private BackNavigationInfo(@BackTargetType int type,
             @Nullable RemoteAnimationTarget departingAnimationTarget,
             @Nullable SurfaceControl screenshotSurface,
             @Nullable HardwareBuffer screenshotBuffer,

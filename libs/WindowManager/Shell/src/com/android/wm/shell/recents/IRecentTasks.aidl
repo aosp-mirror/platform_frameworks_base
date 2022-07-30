@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.recents;
 
+import android.app.ActivityManager;
+
 import com.android.wm.shell.recents.IRecentTasksListener;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 
@@ -38,4 +40,9 @@ interface IRecentTasks {
      * Gets the set of recent tasks.
      */
     GroupedRecentTaskInfo[] getRecentTasks(int maxNum, int flags, int userId) = 3;
+
+    /**
+     * Gets the set of running tasks.
+     */
+    ActivityManager.RunningTaskInfo[] getRunningTasks(int maxNum) = 4;
 }

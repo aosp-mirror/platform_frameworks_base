@@ -149,7 +149,8 @@ public class WindowlessWindowManager implements IWindowSession {
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame) {
+            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         final SurfaceControl.Builder b = new SurfaceControl.Builder(mSurfaceSession)
                 .setFormat(attrs.format)
                 .setBLASTLayer()
@@ -182,6 +183,7 @@ public class WindowlessWindowManager implements IWindowSession {
             mStateForWindow.put(window.asBinder(), state);
         }
         outAttachedFrame.set(0, 0, -1, -1);
+        outSizeCompatScale[0] = 1f;
 
         final int res = WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE |
                         WindowManagerGlobal.ADD_FLAG_USE_BLAST;
@@ -197,15 +199,18 @@ public class WindowlessWindowManager implements IWindowSession {
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, int userId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame) {
+            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         return addToDisplay(window, attrs, viewVisibility, displayId, requestedVisibilities,
-                outInputChannel, outInsetsState, outActiveControls, outAttachedFrame);
+                outInputChannel, outInsetsState, outActiveControls, outAttachedFrame,
+                outSizeCompatScale);
     }
 
     @Override
     public int addToDisplayWithoutInputChannel(android.view.IWindow window,
             android.view.WindowManager.LayoutParams attrs, int viewVisibility, int layerStackId,
-            android.view.InsetsState insetsState, Rect outAttachedFrame) {
+            android.view.InsetsState insetsState, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         return 0;
     }
 
