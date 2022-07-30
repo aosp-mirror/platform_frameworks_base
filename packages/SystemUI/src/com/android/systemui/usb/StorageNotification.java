@@ -21,6 +21,7 @@ import android.app.Notification;
 import android.app.Notification.Action;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -215,9 +216,11 @@ public class StorageNotification extends CoreStartable {
 
             } else {
                 // Boo, annoy the user to reinsert the private volume
-                final CharSequence title = mContext.getString(R.string.ext_media_missing_title,
+                final CharSequence title =
+                  mContext.getString(R.string.ext_media_missing_title,
                         rec.getNickname());
-                final CharSequence text = mContext.getString(R.string.ext_media_missing_message);
+                final CharSequence text =
+                  mContext.getString(R.string.ext_media_missing_message);
 
                 Notification.Builder builder =
                         new Notification.Builder(mContext, NotificationChannels.STORAGE)
@@ -381,8 +384,8 @@ public class StorageNotification extends CoreStartable {
         if (rec.isSnoozed() && disk.isAdoptable()) {
             return null;
         }
-
-        if (disk.isAdoptable() && !rec.isInited()) {
+        if (disk.isAdoptable() && !rec.isInited() && rec.getType() != VolumeInfo.TYPE_PUBLIC
+            && rec.getType() != VolumeInfo.TYPE_PRIVATE) {
             final CharSequence title = disk.getDescription();
             final CharSequence text = mContext.getString(
                     R.string.ext_media_new_notification_message, disk.getDescription());
