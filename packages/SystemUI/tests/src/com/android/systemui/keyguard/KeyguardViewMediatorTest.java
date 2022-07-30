@@ -186,6 +186,31 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     }
 
     @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void restoreBouncerWhenSimLockedAndKeyguardIsGoingAway_initiallyNotShowing() {
+        // When showing and provisioned
+        mViewMediator.onSystemReady();
+        when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
+        mViewMediator.setShowingLocked(false);
+
+        // and a SIM becomes locked and requires a PIN
+        mViewMediator.mUpdateCallback.onSimStateChanged(
+                1 /* subId */,
+                0 /* slotId */,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+
+        // and the keyguard goes away
+        mViewMediator.setShowingLocked(false);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
+        mViewMediator.mUpdateCallback.onKeyguardVisibilityChanged(false);
+
+        TestableLooper.get(this).processAllMessages();
+
+        // then make sure it comes back
+        verify(mStatusBarKeyguardViewManager, atLeast(1)).show(null);
+    }
+
+    @Test
     public void testBouncerPrompt_deviceLockedByAdmin() {
         // GIVEN no trust agents enabled and biometrics aren't enrolled
         when(mUpdateMonitor.isTrustUsuallyManaged(anyInt())).thenReturn(false);

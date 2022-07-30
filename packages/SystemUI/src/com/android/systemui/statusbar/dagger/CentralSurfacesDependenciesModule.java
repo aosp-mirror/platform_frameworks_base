@@ -23,13 +23,11 @@ import android.service.dreams.IDreamManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -42,23 +40,16 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.RemoteInputNotificationRebuilder;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler;
-import com.android.systemui.statusbar.notification.AssistantFeedbackController;
-import com.android.systemui.statusbar.notification.DynamicChildBindController;
-import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
-import com.android.systemui.statusbar.notification.collection.legacy.LowPriorityInflationHelper;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -73,13 +64,11 @@ import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallFlags;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLogger;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
-import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -181,47 +170,6 @@ public interface CentralSurfacesDependenciesModule {
     @Binds
     NotificationRemoteInputManager.Callback provideNotificationRemoteInputManagerCallback(
             StatusBarRemoteInputCallback callbackImpl);
-
-    /** */
-    @SysUISingleton
-    @Provides
-    static NotificationViewHierarchyManager provideNotificationViewHierarchyManager(
-            Context context,
-            @Main Handler mainHandler,
-            FeatureFlags featureFlags,
-            NotificationLockscreenUserManager notificationLockscreenUserManager,
-            NotificationGroupManagerLegacy groupManager,
-            VisualStabilityManager visualStabilityManager,
-            StatusBarStateController statusBarStateController,
-            NotificationEntryManager notificationEntryManager,
-            KeyguardBypassController bypassController,
-            Optional<Bubbles> bubblesOptional,
-            DynamicPrivacyController privacyController,
-            DynamicChildBindController dynamicChildBindController,
-            LowPriorityInflationHelper lowPriorityInflationHelper,
-            AssistantFeedbackController assistantFeedbackController,
-            NotifPipelineFlags notifPipelineFlags,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardStateController keyguardStateController) {
-        return new NotificationViewHierarchyManager(
-                context,
-                mainHandler,
-                featureFlags,
-                notificationLockscreenUserManager,
-                groupManager,
-                visualStabilityManager,
-                statusBarStateController,
-                notificationEntryManager,
-                bypassController,
-                bubblesOptional,
-                privacyController,
-                dynamicChildBindController,
-                lowPriorityInflationHelper,
-                assistantFeedbackController,
-                notifPipelineFlags,
-                keyguardUpdateMonitor,
-                keyguardStateController);
-    }
 
     /**
      * Provides our instance of CommandQueue which is considered optional.

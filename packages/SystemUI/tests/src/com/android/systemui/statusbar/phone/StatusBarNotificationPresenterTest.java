@@ -43,7 +43,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -76,16 +75,17 @@ import org.mockito.ArgumentCaptor;
 @RunWithLooper()
 public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     private StatusBarNotificationPresenter mStatusBarNotificationPresenter;
-    private NotificationInterruptStateProvider mNotificationInterruptStateProvider =
+    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider =
             mock(NotificationInterruptStateProvider.class);
     private NotificationInterruptSuppressor mInterruptSuppressor;
     private CommandQueue mCommandQueue;
     private FakeMetricsLogger mMetricsLogger;
-    private ShadeController mShadeController = mock(ShadeController.class);
-    private CentralSurfaces mCentralSurfaces = mock(CentralSurfaces.class);
-    private KeyguardStateController mKeyguardStateController = mock(KeyguardStateController.class);
-    private NotifPipelineFlags mNotifPipelineFlags = mock(NotifPipelineFlags.class);
-    private InitController mInitController = new InitController();
+    private final ShadeController mShadeController = mock(ShadeController.class);
+    private final CentralSurfaces mCentralSurfaces = mock(CentralSurfaces.class);
+    private final KeyguardStateController mKeyguardStateController =
+            mock(KeyguardStateController.class);
+    private final NotifPipelineFlags mNotifPipelineFlags = mock(NotifPipelineFlags.class);
+    private final InitController mInitController = new InitController();
 
     @Before
     public void setup() {
@@ -116,13 +116,11 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(ActivityStarter.class),
                 stackScrollLayoutController,
                 mock(DozeScrimController.class),
-                mock(ScrimController.class),
                 mock(NotificationShadeWindowController.class),
                 mock(DynamicPrivacyController.class),
                 mKeyguardStateController,
                 mock(KeyguardIndicationController.class),
                 mCentralSurfaces,
-                mock(ShadeControllerImpl.class),
                 mock(LockscreenShadeTransitionController.class),
                 mCommandQueue,
                 mock(NotificationLockscreenUserManager.class),

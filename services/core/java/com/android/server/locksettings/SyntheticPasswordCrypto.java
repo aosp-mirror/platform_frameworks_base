@@ -50,9 +50,9 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class SyntheticPasswordCrypto {
     private static final String TAG = "SyntheticPasswordCrypto";
-    private static final int PROFILE_KEY_IV_SIZE = 12;
-    private static final int DEFAULT_TAG_LENGTH_BITS = 128;
-    private static final int AES_KEY_LENGTH = 32; // 256-bit AES key
+    private static final int AES_GCM_KEY_SIZE = 32; // AES-256-GCM
+    private static final int AES_GCM_IV_SIZE = 12;
+    private static final int AES_GCM_TAG_SIZE = 16;
     private static final byte[] PROTECTOR_SECRET_PERSONALIZATION = "application-id".getBytes();
     // Time between the user credential is verified with GK and the decryption of synthetic password
     // under the auth-bound key. This should always happen one after the other, but give it 15
@@ -65,11 +65,11 @@ public class SyntheticPasswordCrypto {
         if (blob == null) {
             return null;
         }
-        byte[] iv = Arrays.copyOfRange(blob, 0, PROFILE_KEY_IV_SIZE);
-        byte[] ciphertext = Arrays.copyOfRange(blob, PROFILE_KEY_IV_SIZE, blob.length);
+        byte[] iv = Arrays.copyOfRange(blob, 0, AES_GCM_IV_SIZE);
+        byte[] ciphertext = Arrays.copyOfRange(blob, AES_GCM_IV_SIZE, blob.length);
         Cipher cipher = Cipher.getInstance(KeyProperties.KEY_ALGORITHM_AES + "/"
                 + KeyProperties.BLOCK_MODE_GCM + "/" + KeyProperties.ENCRYPTION_PADDING_NONE);
-        cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(DEFAULT_TAG_LENGTH_BITS, iv));
+        cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(AES_GCM_TAG_SIZE * 8, iv));
         return cipher.doFinal(ciphertext);
     }
 
@@ -86,13 +86,13 @@ public class SyntheticPasswordCrypto {
         cipher.init(Cipher.ENCRYPT_MODE, key);
         byte[] ciphertext = cipher.doFinal(blob);
         byte[] iv = cipher.getIV();
-        if (iv.length != PROFILE_KEY_IV_SIZE) {
-            throw new IllegalArgumentException("Invalid iv length: " + iv.length);
+        if (iv.length != AES_GCM_IV_SIZE) {
+            throw new IllegalArgumentException("Invalid iv length: " + iv.length + " bytes");
         }
         final GCMParameterSpec spec = cipher.getParameters().getParameterSpec(
                 GCMParameterSpec.class);
-        if (spec.getTLen() != DEFAULT_TAG_LENGTH_BITS) {
-            throw new IllegalArgumentException("Invalid tag length: " + spec.getTLen());
+        if (spec.getTLen() != AES_GCM_TAG_SIZE * 8) {
+            throw new IllegalArgumentException("Invalid tag length: " + spec.getTLen() + " bits");
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         outputStream.write(iv);
@@ -102,7 +102,7 @@ public class SyntheticPasswordCrypto {
 
     public static byte[] encrypt(byte[] keyBytes, byte[] personalization, byte[] message) {
         byte[] keyHash = personalizedHash(personalization, keyBytes);
-        SecretKeySpec key = new SecretKeySpec(Arrays.copyOf(keyHash, AES_KEY_LENGTH),
+        SecretKeySpec key = new SecretKeySpec(Arrays.copyOf(keyHash, AES_GCM_KEY_SIZE),
                 KeyProperties.KEY_ALGORITHM_AES);
         try {
             return encrypt(key, message);
@@ -116,7 +116,7 @@ public class SyntheticPasswordCrypto {
 
     public static byte[] decrypt(byte[] keyBytes, byte[] personalization, byte[] ciphertext) {
         byte[] keyHash = personalizedHash(personalization, keyBytes);
-        SecretKeySpec key = new SecretKeySpec(Arrays.copyOf(keyHash, AES_KEY_LENGTH),
+        SecretKeySpec key = new SecretKeySpec(Arrays.copyOf(keyHash, AES_GCM_KEY_SIZE),
                 KeyProperties.KEY_ALGORITHM_AES);
         try {
             return decrypt(key, ciphertext);
@@ -199,7 +199,7 @@ public class SyntheticPasswordCrypto {
             long sid) {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
-            keyGenerator.init(AES_KEY_LENGTH * 8, new SecureRandom());
+            keyGenerator.init(AES_GCM_KEY_SIZE * 8, new SecureRandom());
             SecretKey keyStoreKey = keyGenerator.generateKey();
             final KeyStore keyStore = getKeyStore();
             KeyProtection.Builder builder = new KeyProtection.Builder(KeyProperties.PURPOSE_DECRYPT)

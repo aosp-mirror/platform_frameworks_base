@@ -29,10 +29,6 @@ class NotifPipelineFlags @Inject constructor(
     val featureFlags: FeatureFlags
 ) {
     fun checkLegacyPipelineEnabled(): Boolean {
-        if (!isNewPipelineEnabled()) {
-            return true
-        }
-
         if (Compile.IS_DEBUG) {
             Toast.makeText(context, "Old pipeline code running!", Toast.LENGTH_SHORT).show()
         }
@@ -44,11 +40,6 @@ class NotifPipelineFlags @Inject constructor(
         }
         return false
     }
-
-    fun assertLegacyPipelineEnabled(): Unit =
-        check(!isNewPipelineEnabled()) { "Old pipeline code running w/ new pipeline enabled" }
-
-    fun isNewPipelineEnabled(): Boolean = true
 
     fun isDevLoggingEnabled(): Boolean =
         featureFlags.isEnabled(Flags.NOTIFICATION_PIPELINE_DEVELOPER_LOGGING)

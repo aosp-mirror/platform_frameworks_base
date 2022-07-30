@@ -97,6 +97,10 @@ public class TypefaceSerializationPerfTest {
             buffer.position(0);
             Typeface.deserializeFontMap(buffer, out);
             elapsedTime = System.nanoTime() - startTime;
+            for (Typeface typeface : out.values()) {
+                typeface.releaseNativeObjectForTest();
+            }
+            out.clear();
         }
     }
 

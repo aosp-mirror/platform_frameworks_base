@@ -93,7 +93,6 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -319,7 +318,6 @@ public class BubblesTest extends SysuiTestCase {
                         mock(PowerManager.class),
                         mock(IDreamManager.class),
                         mock(AmbientDisplayConfiguration.class),
-                        mock(NotificationFilter.class),
                         mock(StatusBarStateController.class),
                         mock(KeyguardStateController.class),
                         mock(BatteryController.class),

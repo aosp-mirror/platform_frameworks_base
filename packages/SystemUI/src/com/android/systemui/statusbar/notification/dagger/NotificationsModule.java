@@ -127,7 +127,6 @@ public interface NotificationsModule {
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
             IStatusBarService statusBarService,
-            NotifLiveDataStoreImpl notifLiveDataStore,
             DumpManager dumpManager,
             @Background Executor bgExecutor) {
         return new NotificationEntryManager(
@@ -138,7 +137,6 @@ public interface NotificationsModule {
                 notificationRemoteInputManagerLazy,
                 leakDetector,
                 statusBarService,
-                notifLiveDataStore,
                 dumpManager,
                 bgExecutor);
     }
@@ -174,7 +172,6 @@ public interface NotificationsModule {
                 accessibilityManager,
                 highPriorityProvider,
                 notificationManager,
-                notificationEntryManager,
                 peopleSpaceWidgetManager,
                 launcherApps,
                 shortcutManager,

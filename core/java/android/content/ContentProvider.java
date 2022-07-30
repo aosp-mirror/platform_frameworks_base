@@ -19,7 +19,7 @@ package android.content;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.os.Process.myUserHandle;
-import static android.os.Trace.TRACE_TAG_DATABASE;
+import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -278,7 +278,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 // Return an empty cursor for all columns.
                 return new MatrixCursor(cursor.getColumnNames(), 0);
             }
-            traceBegin(TRACE_TAG_DATABASE, "query: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "query: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -289,7 +289,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -298,13 +298,13 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             // getCallingPackage() isn't available in getType(), as the javadoc states.
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            traceBegin(TRACE_TAG_DATABASE, "getType: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "getType: ", uri.getAuthority());
             try {
                 return mInterface.getType(uri);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             } finally {
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -336,7 +336,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     setCallingAttributionSource(original);
                 }
             }
-            traceBegin(TRACE_TAG_DATABASE, "insert: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "insert: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -345,7 +345,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -358,7 +358,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     != PermissionChecker.PERMISSION_GRANTED) {
                 return 0;
             }
-            traceBegin(TRACE_TAG_DATABASE, "bulkInsert: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "bulkInsert: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -367,7 +367,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -404,7 +404,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     }
                 }
             }
-            traceBegin(TRACE_TAG_DATABASE, "applyBatch: ", authority);
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "applyBatch: ", authority);
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -423,7 +423,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -436,7 +436,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     != PermissionChecker.PERMISSION_GRANTED) {
                 return 0;
             }
-            traceBegin(TRACE_TAG_DATABASE, "delete: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "delete: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -445,7 +445,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -458,7 +458,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     != PermissionChecker.PERMISSION_GRANTED) {
                 return 0;
             }
-            traceBegin(TRACE_TAG_DATABASE, "update: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "update: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -467,7 +467,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -478,7 +478,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(attributionSource, uri, mode);
-            traceBegin(TRACE_TAG_DATABASE, "openFile: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "openFile: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -488,7 +488,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -499,7 +499,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(attributionSource, uri, mode);
-            traceBegin(TRACE_TAG_DATABASE, "openAssetFile: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "openAssetFile: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -509,7 +509,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -518,7 +518,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 String method, @Nullable String arg, @Nullable Bundle extras) {
             validateIncomingAuthority(authority);
             Bundle.setDefusable(extras, true);
-            traceBegin(TRACE_TAG_DATABASE, "call: ", authority);
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "call: ", authority);
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -527,7 +527,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -536,13 +536,13 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             // getCallingPackage() isn't available in getType(), as the javadoc states.
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            traceBegin(TRACE_TAG_DATABASE, "getStreamTypes: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "getStreamTypes: ", uri.getAuthority());
             try {
                 return mInterface.getStreamTypes(uri, mimeTypeFilter);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             } finally {
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -554,7 +554,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(attributionSource, uri, "r");
-            traceBegin(TRACE_TAG_DATABASE, "openTypedAssetFile: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "openTypedAssetFile: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -564,7 +564,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -582,7 +582,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     != PermissionChecker.PERMISSION_GRANTED) {
                 return null;
             }
-            traceBegin(TRACE_TAG_DATABASE, "canonicalize: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "canonicalize: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -591,7 +591,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -618,7 +618,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     != PermissionChecker.PERMISSION_GRANTED) {
                 return null;
             }
-            traceBegin(TRACE_TAG_DATABASE, "uncanonicalize: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "uncanonicalize: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -627,7 +627,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -654,7 +654,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     != PermissionChecker.PERMISSION_GRANTED) {
                 return false;
             }
-            traceBegin(TRACE_TAG_DATABASE, "refresh: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "refresh: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -662,7 +662,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                         CancellationSignal.fromTransport(cancellationSignal));
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
@@ -671,7 +671,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 int uid, int modeFlags) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            traceBegin(TRACE_TAG_DATABASE, "checkUriPermission: ", uri.getAuthority());
+            traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "checkUriPermission: ", uri.getAuthority());
             final AttributionSource original = setCallingAttributionSource(
                     attributionSource);
             try {
@@ -680,7 +680,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingAttributionSource(original);
-                Trace.traceEnd(TRACE_TAG_DATABASE);
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
 
