@@ -1165,7 +1165,6 @@ android.companion.CompanionDeviceManager
 android.companion.ICompanionDeviceManager$Stub$Proxy
 android.companion.ICompanionDeviceManager$Stub
 android.companion.ICompanionDeviceManager
-android.companion.virtual.IVirtualDevice$Stub
 android.companion.virtual.IVirtualDevice
 android.companion.virtual.VirtualDeviceManager
 android.compat.Compatibility$1
@@ -3692,6 +3691,7 @@ android.icu.number.NumberFormatter$DecimalSeparatorDisplay
 android.icu.number.NumberFormatter$GroupingStrategy
 android.icu.number.NumberFormatter$RoundingPriority
 android.icu.number.NumberFormatter$SignDisplay
+android.icu.number.NumberFormatter$TrailingZeroDisplay
 android.icu.number.NumberFormatter$UnitWidth
 android.icu.number.NumberFormatter
 android.icu.number.NumberFormatterImpl
@@ -9161,6 +9161,7 @@ android.widget.inline.InlinePresentationSpec$Builder
 android.widget.inline.InlinePresentationSpec
 android.window.ClientWindowFrames$1
 android.window.ClientWindowFrames
+android.window.ConfigurationHelper
 android.window.DisplayAreaAppearedInfo$1
 android.window.DisplayAreaAppearedInfo
 android.window.DisplayAreaOrganizer$1
@@ -9190,6 +9191,7 @@ android.window.IWindowContainerTransactionCallback
 android.window.IWindowOrganizerController$Stub$Proxy
 android.window.IWindowOrganizerController$Stub
 android.window.IWindowOrganizerController
+android.window.OnBackInvokedDispatcher
 android.window.SizeConfigurationBuckets$1
 android.window.SizeConfigurationBuckets
 android.window.SplashScreen$SplashScreenManagerGlobal$1
@@ -14588,7 +14590,6 @@ java.util.concurrent.SynchronousQueue$TransferStack
 java.util.concurrent.SynchronousQueue$Transferer
 java.util.concurrent.SynchronousQueue
 java.util.concurrent.ThreadFactory
-java.util.concurrent.ThreadLocalRandom
 java.util.concurrent.ThreadPoolExecutor$AbortPolicy
 java.util.concurrent.ThreadPoolExecutor$DiscardPolicy
 java.util.concurrent.ThreadPoolExecutor$Worker
@@ -15810,6 +15811,7 @@ sun.util.logging.PlatformLogger
 [Landroid.icu.impl.number.CompactData$CompactType;
 [Landroid.icu.impl.number.DecimalFormatProperties$ParseMode;
 [Landroid.icu.impl.number.Modifier$Signum;
+[Landroid.icu.impl.number.Modifier;
 [Landroid.icu.impl.number.Padder$PadPosition;
 [Landroid.icu.impl.number.PatternStringUtils$PatternSignType;
 [Landroid.icu.impl.units.MeasureUnitImpl$CompoundPart;
@@ -15830,6 +15832,11 @@ sun.util.logging.PlatformLogger
 [Landroid.icu.number.NumberSkeletonImpl$ParseState;
 [Landroid.icu.number.NumberSkeletonImpl$StemEnum;
 [Landroid.icu.text.AlphabeticIndex$Bucket$LabelType;
+[Landroid.icu.text.Bidi$IsoRun;
+[Landroid.icu.text.Bidi$Isolate;
+[Landroid.icu.text.Bidi$Opening;
+[Landroid.icu.text.Bidi$Point;
+[Landroid.icu.text.BidiRun;
 [Landroid.icu.text.BidiTransform$Mirroring;
 [Landroid.icu.text.BidiTransform$Order;
 [Landroid.icu.text.BidiTransform$ReorderingScheme;
@@ -15898,7 +15905,9 @@ sun.util.logging.PlatformLogger
 [Landroid.icu.util.Region$RegionType;
 [Landroid.icu.util.StringTrieBuilder$Option;
 [Landroid.icu.util.StringTrieBuilder$State;
+[Landroid.icu.util.TimeArrayTimeZoneRule;
 [Landroid.icu.util.TimeZone$SystemTimeZoneType;
+[Landroid.icu.util.TimeZoneRule;
 [Landroid.icu.util.ULocale$AvailableType;
 [Landroid.icu.util.ULocale$Category;
 [Landroid.icu.util.ULocale$Minimize;

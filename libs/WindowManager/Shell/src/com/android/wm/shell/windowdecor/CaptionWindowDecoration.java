@@ -101,6 +101,16 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     @Override
     void relayout(ActivityManager.RunningTaskInfo taskInfo) {
+        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        relayout(taskInfo, t, t);
+        mSyncQueue.runInSync(transaction -> {
+            transaction.merge(t);
+            t.close();
+        });
+    }
+
+    void relayout(ActivityManager.RunningTaskInfo taskInfo,
+            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT) {
         final int shadowRadiusDp = taskInfo.isFocused
                 ? DECOR_SHADOW_FOCUSED_THICKNESS_IN_DIP : DECOR_SHADOW_UNFOCUSED_THICKNESS_IN_DIP;
         final boolean isFreeform = mTaskInfo.configuration.windowConfiguration.getWindowingMode()
@@ -110,18 +120,12 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
         WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
-        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         relayout(taskInfo, R.layout.caption_window_decoration, oldRootView,
-                DECOR_CAPTION_HEIGHT_IN_DIP, outset, shadowRadiusDp, t, wct, mResult);
+                DECOR_CAPTION_HEIGHT_IN_DIP, outset, shadowRadiusDp, startT, finishT, wct, mResult);
         taskInfo = null; // Clear it just in case we use it accidentally
 
-        mSyncQueue.runInSync(transaction -> {
-            transaction.merge(t);
-            t.close();
-
-            mTaskOrganizer.applyTransaction(wct);
-        });
+        mTaskOrganizer.applyTransaction(wct);
 
         if (mResult.mRootView == null) {
             // This means something blocks the window decor from showing, e.g. the task is hidden.
