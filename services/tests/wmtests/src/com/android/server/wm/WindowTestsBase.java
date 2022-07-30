@@ -64,7 +64,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
-import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -915,13 +914,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
      */
     protected static class ActivityBuilder {
         static final int DEFAULT_FAKE_UID = 12345;
+        static final String DEFAULT_PROCESS_NAME = "procName";
+        static int sProcNameSeq;
 
         private final ActivityTaskManagerService mService;
 
         private ComponentName mComponent;
         private String mTargetActivity;
         private Task mTask;
-        private String mProcessName = "name";
+        private String mProcessName = DEFAULT_PROCESS_NAME;
         private String mAffinity;
         private int mUid = DEFAULT_FAKE_UID;
         private boolean mCreateTask = false;
@@ -1109,6 +1110,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             aInfo.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
             aInfo.applicationInfo.packageName = mComponent.getPackageName();
             aInfo.applicationInfo.uid = mUid;
+            if (DEFAULT_PROCESS_NAME.equals(mProcessName)) {
+                mProcessName += ++sProcNameSeq;
+            }
             aInfo.processName = mProcessName;
             aInfo.packageName = mComponent.getPackageName();
             aInfo.name = mComponent.getClassName();
@@ -1173,16 +1177,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             if (mWpc != null) {
                 wpc = mWpc;
             } else {
-                wpc = new WindowProcessController(mService,
-                        aInfo.applicationInfo, mProcessName, mUid,
-                        UserHandle.getUserId(mUid), mock(Object.class),
-                        mock(WindowProcessListener.class));
-                wpc.setThread(mock(IApplicationThread.class));
+                final WindowProcessController p = mService.getProcessController(mProcessName, mUid);
+                wpc = p != null ? p : SystemServicesTestRule.addProcess(
+                        mService, aInfo.applicationInfo, mProcessName, 0 /* pid */);
             }
-            wpc.setThread(mock(IApplicationThread.class));
             activity.setProcess(wpc);
-            doReturn(wpc).when(mService).getProcessController(
-                    activity.processName, activity.info.applicationInfo.uid);
 
             // Resume top activities to make sure all other signals in the system are connected.
             mService.mRootWindowContainer.resumeFocusedTasksTopActivities();

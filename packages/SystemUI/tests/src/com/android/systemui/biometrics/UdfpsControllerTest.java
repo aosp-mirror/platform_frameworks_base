@@ -740,12 +740,12 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 anyString(),
                 any(),
                 eq("udfps-onStart-click"),
-                eq(UdfpsController.VIBRATION_ATTRIBUTES));
+                eq(UdfpsController.UDFPS_VIBRATION_ATTRIBUTES));
 
         // THEN make sure vibration attributes has so that it always will play the haptic,
         // even in battery saver mode
         assertEquals(VibrationAttributes.USAGE_COMMUNICATION_REQUEST,
-                UdfpsController.VIBRATION_ATTRIBUTES.getUsage());
+                UdfpsController.UDFPS_VIBRATION_ATTRIBUTES.getUsage());
     }
 
     @Test
