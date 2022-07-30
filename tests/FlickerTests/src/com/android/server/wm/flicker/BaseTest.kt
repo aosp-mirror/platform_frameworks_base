@@ -40,6 +40,7 @@ abstract class BaseTest @JvmOverloads constructor(
         testSpec.setIsTablet(
             WindowManagerStateHelper(instrumentation).currentState.wmState.isTablet
         )
+        tapl.setExpectedRotationCheckEnabled(true)
     }
 
     /**

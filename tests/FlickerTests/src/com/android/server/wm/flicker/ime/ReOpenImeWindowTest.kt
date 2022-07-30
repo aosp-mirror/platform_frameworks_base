@@ -30,7 +30,6 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.ComponentMatcher
-import com.android.server.wm.traces.common.ComponentMatcher.Companion.LAUNCHER
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -68,6 +67,7 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
         transitions {
             device.reopenAppFromOverview(wmHelper)
             wmHelper.StateSyncBuilder()
+                .withFullScreenApp(testApp)
                 .withImeShown()
                 .waitForAndVerify()
         }
@@ -111,9 +111,9 @@ open class ReOpenImeWindowTest(testSpec: FlickerTestParameter) : BaseTest(testSp
     @Test
     fun launcherWindowBecomesInvisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(LAUNCHER)
+            this.isAppWindowVisible(ComponentMatcher.LAUNCHER)
                     .then()
-                    .isAppWindowInvisible(LAUNCHER)
+                    .isAppWindowInvisible(ComponentMatcher.LAUNCHER)
         }
     }
 

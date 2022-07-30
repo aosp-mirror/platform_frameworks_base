@@ -172,6 +172,11 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * The state used to update port id, does not actually change the state of the player
      */
     public static final int PLAYER_UPDATE_PORT_ID = 6;
+    /**
+     * @hide
+     * Used to update the mute state of a player through its port id
+     */
+    public static final int PLAYER_UPDATE_MUTED = 7;
 
     /** @hide */
     @IntDef({
@@ -183,6 +188,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         PLAYER_STATE_STOPPED,
         PLAYER_UPDATE_DEVICE_ID,
         PLAYER_UPDATE_PORT_ID,
+        PLAYER_UPDATE_MUTED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlayerState {}
@@ -198,9 +204,53 @@ public final class AudioPlaybackConfiguration implements Parcelable {
             case PLAYER_STATE_STOPPED: return "PLAYER_STATE_STOPPED";
             case PLAYER_UPDATE_DEVICE_ID: return "PLAYER_UPDATE_DEVICE_ID";
             case PLAYER_UPDATE_PORT_ID: return "PLAYER_UPDATE_PORT_ID";
+            case PLAYER_UPDATE_MUTED: return "PLAYER_UPDATE_MUTED";
             default:
                 return "invalid state " + state;
         }
+    }
+
+    /**
+     * @hide
+     * Used to update the mute state of a player through its port ID. Must be kept in sync with
+     * frameworks/native/include/audiomanager/AudioManager.h
+     */
+    public static final String EXTRA_PLAYER_EVENT_MUTE =
+            "android.media.extra.PLAYER_EVENT_MUTE";
+
+    /**
+     * @hide
+     * Mute state used for anonymization.
+     */
+    public static final int PLAYER_MUTE_INVALID = -1;
+    /**
+     * @hide
+     * Flag used when muted by master volume.
+     */
+    public static final int PLAYER_MUTE_MASTER = (1 << 0);
+    /**
+     * @hide
+     * Flag used when muted by stream volume.
+     */
+    public static final int PLAYER_MUTE_STREAM_VOLUME = (1 << 1);
+    /**
+     * @hide
+     * Flag used when muted by stream mute.
+     */
+    public static final int PLAYER_MUTE_STREAM_MUTED = (1 << 2);
+    /**
+     * @hide
+     * Flag used when playback is restricted by AppOps manager with OP_PLAY_AUDIO.
+     */
+    public static final int PLAYER_MUTE_PLAYBACK_RESTRICTED = (1 << 3);
+
+    /** @hide */
+    @IntDef(
+            flag = true,
+            value = {PLAYER_MUTE_MASTER, PLAYER_MUTE_STREAM_VOLUME, PLAYER_MUTE_STREAM_MUTED,
+                    PLAYER_MUTE_PLAYBACK_RESTRICTED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PlayerMuteEvent {
     }
 
     // immutable data
@@ -219,6 +269,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     private int mDeviceId;
 
     private int mSessionId;
+
+    @PlayerMuteEvent private int mMutedState;
 
     /**
      * Never use without initializing parameters afterwards
@@ -240,6 +292,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         mPlayerType = pic.mPlayerType;
         mClientUid = uid;
         mClientPid = pid;
+        mMutedState = PLAYER_MUTE_INVALID;
         mDeviceId = PLAYER_DEVICEID_INVALID;
         mPlayerState = PLAYER_STATE_IDLE;
         mPlayerAttr = pic.mAttributes;
@@ -288,6 +341,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         anonymCopy.mPlayerAttr = builder.build();
         anonymCopy.mDeviceId = in.mDeviceId;
         // anonymized data
+        anonymCopy.mMutedState = PLAYER_MUTE_INVALID;
         anonymCopy.mPlayerType = PLAYER_TYPE_UNKNOWN;
         anonymCopy.mClientUid = PLAYER_UPID_INVALID;
         anonymCopy.mClientPid = PLAYER_UPID_INVALID;
@@ -344,6 +398,14 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     @SystemApi
     public @IntRange(from = 0) int getSessionId() {
         return mSessionId;
+    }
+
+    /**
+     * @hide
+     * @return the mute state as a combination of {@link PlayerMuteEvent} flags
+     */
+    @PlayerMuteEvent public int getMutedState() {
+        return mMutedState;
     }
 
     /**
@@ -426,12 +488,24 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     /**
      * @hide
-     * Handle a change of audio session Id
+     * Handle a change of audio session ID
      * @param sessionId the audio session ID
      */
     public boolean handleSessionIdEvent(int sessionId) {
         final boolean changed = sessionId != mSessionId;
         mSessionId = sessionId;
+        return changed;
+    }
+
+    /**
+     * @hide
+     * Handle a change of the muted state
+     * @param mutedState the mute reason as a combination of {@link PlayerMuteEvent} flags
+     * @return true if the state changed, false otherwise
+     */
+    public boolean handleMutedEvent(@PlayerMuteEvent int mutedState) {
+        final boolean changed = mMutedState != mutedState;
+        mMutedState = mutedState;
         return changed;
     }
 
@@ -486,16 +560,17 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     /**
      * @hide
-     * Returns true if the player is considered "active", i.e. actively playing, and thus
-     * in a state that should make it considered for the list public (sanitized) active playback
-     * configurations
+     * Returns true if the player is considered "active", i.e. actively playing with unmuted
+     * volume, and thus in a state that should make it considered for the list public (sanitized)
+     * active playback configurations
      * @return true if active
      */
     @SystemApi
     public boolean isActive() {
         switch (mPlayerState) {
             case PLAYER_STATE_STARTED:
-                return true;
+                return mMutedState == 0
+                        || mMutedState == PLAYER_MUTE_INVALID;  // only send true if not muted
             case PLAYER_STATE_UNKNOWN:
             case PLAYER_STATE_RELEASED:
             case PLAYER_STATE_IDLE:
@@ -532,7 +607,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mPlayerIId, mDeviceId, mPlayerType, mClientUid, mClientPid,
+        return Objects.hash(mPlayerIId, mDeviceId, mMutedState, mPlayerType, mClientUid, mClientPid,
                 mSessionId);
     }
 
@@ -545,6 +620,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mPlayerIId);
         dest.writeInt(mDeviceId);
+        dest.writeInt(mMutedState);
         dest.writeInt(mPlayerType);
         dest.writeInt(mClientUid);
         dest.writeInt(mClientPid);
@@ -561,6 +637,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     private AudioPlaybackConfiguration(Parcel in) {
         mPlayerIId = in.readInt();
         mDeviceId = in.readInt();
+        mMutedState = in.readInt();
         mPlayerType = in.readInt();
         mClientUid = in.readInt();
         mClientPid = in.readInt();
@@ -580,6 +657,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
         return ((mPlayerIId == that.mPlayerIId)
                 && (mDeviceId == that.mDeviceId)
+                && (mMutedState == that.mMutedState)
                 && (mPlayerType == that.mPlayerType)
                 && (mClientUid == that.mClientUid)
                 && (mClientPid == that.mClientPid))
@@ -594,7 +672,13 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                 + " u/pid:" + mClientUid + "/" + mClientPid
                 + " state:" + toLogFriendlyPlayerState(mPlayerState)
                 + " attr:" + mPlayerAttr
-                + " sessionId:" + mSessionId;
+                + " sessionId:" + mSessionId
+                + " mutedState:"
+                + " muteFromMasterMute=" + ((mMutedState & PLAYER_MUTE_MASTER) != 0)
+                + " muteFromStreamVolume=" + ((mMutedState & PLAYER_MUTE_STREAM_VOLUME) != 0)
+                + " muteFromStreamMuted=" + ((mMutedState & PLAYER_MUTE_STREAM_MUTED) != 0)
+                + " muteFromPlaybackRestricted=" + ((mMutedState & PLAYER_MUTE_PLAYBACK_RESTRICTED)
+                != 0);
     }
 
     //=====================================================================
@@ -678,6 +762,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
             case PLAYER_STATE_STOPPED: return "stopped";
             case PLAYER_UPDATE_DEVICE_ID: return "device updated";
             case PLAYER_UPDATE_PORT_ID: return "port updated";
+            case PLAYER_UPDATE_MUTED: return "muted updated";
             default:
                 return "unknown player state - FIXME";
         }

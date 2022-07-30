@@ -16,6 +16,14 @@
 
 package com.android.server.audio;
 
+import static android.media.AudioPlaybackConfiguration.EXTRA_PLAYER_EVENT_MUTE;
+import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_MASTER;
+import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_PLAYBACK_RESTRICTED;
+import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_STREAM_MUTED;
+import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_STREAM_VOLUME;
+import static android.media.AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
+import static android.media.AudioPlaybackConfiguration.PLAYER_UPDATE_MUTED;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -24,6 +32,7 @@ import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
+import android.media.AudioPlaybackConfiguration.PlayerMuteEvent;
 import android.media.AudioSystem;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.PlayerBase;
@@ -33,7 +42,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -346,6 +357,56 @@ public final class PlaybackActivityMonitor
         }
         if (change) {
             dispatchPlaybackChange(event == AudioPlaybackConfiguration.PLAYER_STATE_RELEASED);
+        }
+    }
+
+    /**
+     * Update event for port
+     * @param portId Port id to update
+     * @param event The new port event
+     * @param extras The values associated with this event
+     * @param binderUid Calling binder uid
+     */
+    public void portEvent(int portId, int event, @Nullable PersistableBundle extras,
+            int binderUid) {
+        if (!UserHandle.isCore(binderUid)) {
+            Log.e(TAG, "Forbidden operation from uid " + binderUid);
+            return;
+        }
+
+        if (DEBUG) {
+            Log.v(TAG, TextUtils.formatSimple("portEvent(portId=%d, event=%s, extras=%s)",
+                    portId, AudioPlaybackConfiguration.playerStateToString(event), extras));
+        }
+
+        synchronized (mPlayerLock) {
+            int piid = mPortIdToPiid.get(portId, PLAYER_PIID_INVALID);
+            if (piid == PLAYER_PIID_INVALID) {
+                if (DEBUG) {
+                    Log.v(TAG, "No piid assigned for invalid/internal port id " + portId);
+                }
+                return;
+            }
+            final AudioPlaybackConfiguration apc = mPlayers.get(piid);
+            if (apc == null) {
+                if (DEBUG) {
+                    Log.v(TAG, "No AudioPlaybackConfiguration assigned for piid " + piid);
+                }
+                return;
+            }
+
+            if (apc.getPlayerType()
+                    == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
+                // FIXME SoundPool not ready for state reporting
+                return;
+            }
+
+            if (event == AudioPlaybackConfiguration.PLAYER_UPDATE_MUTED) {
+                mEventHandler.sendMessage(
+                        mEventHandler.obtainMessage(MSG_L_UPDATE_PLAYER_MUTED_EVENT, piid,
+                                portId,
+                                extras));
+            }
         }
     }
 
@@ -1062,18 +1123,32 @@ public final class PlaybackActivityMonitor
 
         @Override
         public String eventToString() {
-            if (mEvent == AudioPlaybackConfiguration.PLAYER_UPDATE_PORT_ID) {
-                return AudioPlaybackConfiguration.toLogFriendlyPlayerState(mEvent) + " portId:"
-                        + mEventValue + " mapped to player piid:" + mPlayerIId;
-            }
-
             StringBuilder builder = new StringBuilder("player piid:").append(mPlayerIId).append(
-                            " state:")
+                            " event:")
                     .append(AudioPlaybackConfiguration.toLogFriendlyPlayerState(mEvent));
-            if (mEventValue != 0) {
-                builder.append(" DeviceId:").append(mEventValue);
+
+            switch (mEvent) {
+                case AudioPlaybackConfiguration.PLAYER_UPDATE_PORT_ID:
+                    return AudioPlaybackConfiguration.toLogFriendlyPlayerState(mEvent) + " portId:"
+                            + mEventValue + " mapped to player piid:" + mPlayerIId;
+                case AudioPlaybackConfiguration.PLAYER_UPDATE_DEVICE_ID:
+                    if (mEventValue != 0) {
+                        builder.append(" deviceId:").append(mEventValue);
+                    }
+                    return builder.toString();
+                case AudioPlaybackConfiguration.PLAYER_UPDATE_MUTED:
+                    builder.append(" muteFromMasterMute:").append(
+                            (mEventValue & PLAYER_MUTE_MASTER) != 0);
+                    builder.append(" muteFromStreamVolume:").append(
+                            (mEventValue & PLAYER_MUTE_STREAM_VOLUME) != 0);
+                    builder.append(" muteFromStreamMute:").append(
+                            (mEventValue & PLAYER_MUTE_STREAM_MUTED) != 0);
+                    builder.append(" muteFromPlaybackRestricted:").append(
+                            (mEventValue & PLAYER_MUTE_PLAYBACK_RESTRICTED) != 0);
+                    return builder.toString();
+                default:
+                    return builder.toString();
             }
-            return builder.toString();
         }
     }
 
@@ -1323,11 +1398,21 @@ public final class PlaybackActivityMonitor
     private static final int MSG_L_UPDATE_PORT_EVENT = 2;
 
     /**
+     * event for player getting muted
+     * args:
+     *     msg.arg1: piid
+     *     msg.arg2: port id
+     *     msg.obj: extras describing the mute reason
+     *         type: PersistableBundle
+     */
+    private static final int MSG_L_UPDATE_PLAYER_MUTED_EVENT = 3;
+
+    /**
      * clear all ports assigned to a given piid
      * args:
      *     msg.arg1: the piid
      */
-    private static final int MSG_L_CLEAR_PORTS_FOR_PIID = 3;
+    private static final int MSG_L_CLEAR_PORTS_FOR_PIID = 4;
 
     private void initEventHandler() {
         mEventThread = new HandlerThread(TAG);
@@ -1347,6 +1432,28 @@ public final class PlaybackActivityMonitor
                     case MSG_L_UPDATE_PORT_EVENT:
                         synchronized (mPlayerLock) {
                             mPortIdToPiid.put(/*portId*/msg.arg1, /*piid*/msg.arg2);
+                        }
+                        break;
+                    case MSG_L_UPDATE_PLAYER_MUTED_EVENT:
+                        // TODO: replace PersistableBundle with own struct
+                        PersistableBundle extras = (PersistableBundle) msg.obj;
+                        if (extras == null) {
+                            Log.w(TAG, "Received mute event with no extras");
+                            break;
+                        }
+                        @PlayerMuteEvent int eventValue = extras.getInt(EXTRA_PLAYER_EVENT_MUTE);
+
+                        synchronized (mPlayerLock) {
+                            int piid = msg.arg1;
+
+                            sEventLogger.log(
+                                    new PlayerEvent(piid, PLAYER_UPDATE_MUTED, eventValue));
+
+                            final AudioPlaybackConfiguration apc = mPlayers.get(piid);
+                            if (apc == null || !apc.handleMutedEvent(eventValue)) {
+                                break;  // do not dispatch
+                            }
+                            dispatchPlaybackChange(/* iplayerReleased= */false);
                         }
                         break;
                     case MSG_L_CLEAR_PORTS_FOR_PIID:

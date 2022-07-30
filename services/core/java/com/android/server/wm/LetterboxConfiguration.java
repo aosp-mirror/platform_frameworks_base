@@ -300,7 +300,7 @@ final class LetterboxConfiguration {
     /**
      * Gets color of letterbox background which is used when {@link
      * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
-     * fallback for other backfround types.
+     * fallback for other background types.
      */
     Color getLetterboxBackgroundColor() {
         if (mLetterboxBackgroundColorOverride != null) {

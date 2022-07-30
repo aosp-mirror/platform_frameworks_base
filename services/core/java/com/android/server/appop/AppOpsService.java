@@ -7287,6 +7287,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return true;
             }
 
+            // TODO (b/240617242) add overload for checkOp to support attribution tags
             if (isCheckOp) {
                 return !perUserExclusions.includes(packageName);
             }

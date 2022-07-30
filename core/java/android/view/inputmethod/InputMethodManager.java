@@ -3610,7 +3610,7 @@ public final class InputMethodManager {
     @Deprecated
     public void setAdditionalInputMethodSubtypes(@NonNull String imiId,
             @NonNull InputMethodSubtype[] subtypes) {
-        mServiceInvoker.setAdditionalInputMethodSubtypes(imiId, subtypes);
+        mServiceInvoker.setAdditionalInputMethodSubtypes(imiId, subtypes, UserHandle.myUserId());
     }
 
     @Nullable

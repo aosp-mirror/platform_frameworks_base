@@ -62,6 +62,7 @@ import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
+import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastMetadata;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
@@ -816,7 +817,9 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             Log.d(TAG, "getBroadcastMetadata: LE Audio Broadcast is null");
             return "";
         }
-        return broadcast.getLocalBluetoothLeBroadcastMetaData().convertToQrCodeString();
+        final LocalBluetoothLeBroadcastMetadata metadata =
+                broadcast.getLocalBluetoothLeBroadcastMetaData();
+        return metadata != null ? metadata.convertToQrCodeString() : "";
     }
 
     boolean isActiveRemoteDevice(@NonNull MediaDevice device) {

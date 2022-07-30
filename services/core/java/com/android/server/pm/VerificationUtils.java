@@ -16,7 +16,10 @@
 
 package com.android.server.pm;
 
+import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+
 import static com.android.server.pm.PackageManagerService.PACKAGE_MIME_TYPE;
+import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -24,8 +27,10 @@ import android.content.Intent;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Slog;
 
 final class VerificationUtils {
     /**
@@ -90,5 +95,41 @@ final class VerificationUtils {
 
         context.sendBroadcastAsUser(intent, user,
                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT);
+    }
+
+    static void processVerificationResponse(int verificationId, PackageVerificationState state,
+            PackageVerificationResponse response, String failureReason, PackageManagerService pms) {
+        state.setVerifierResponse(response.callerUid, response.code);
+        if (!state.isVerificationComplete()) {
+            return;
+        }
+
+        final VerifyingSession verifyingSession = state.getVerifyingSession();
+        final Uri originUri = Uri.fromFile(verifyingSession.mOriginInfo.mResolvedFile);
+
+        final int verificationCode =
+                state.isInstallAllowed() ? response.code : PackageManager.VERIFICATION_REJECT;
+
+        VerificationUtils.broadcastPackageVerified(verificationId, originUri,
+                verificationCode, null,
+                verifyingSession.mDataLoaderType, verifyingSession.getUser(),
+                pms.mContext);
+
+        if (state.isInstallAllowed()) {
+            Slog.i(TAG, "Continuing with installation of " + originUri);
+        } else {
+            String errorMsg = failureReason + " for " + originUri;
+            Slog.i(TAG, errorMsg);
+            verifyingSession.setReturnCode(
+                    PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE, errorMsg);
+        }
+
+        if (state.areAllVerificationsComplete()) {
+            pms.mPendingVerification.remove(verificationId);
+        }
+
+        Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
+
+        verifyingSession.handleVerificationFinished();
     }
 }

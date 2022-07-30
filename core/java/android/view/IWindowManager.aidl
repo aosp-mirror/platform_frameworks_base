@@ -958,4 +958,18 @@ interface IWindowManager
      * means the recents app can control the SystemUI flags, and vice-versa.
      */
     void setRecentsAppBehindSystemBars(boolean behindSystemBars);
+
+    /**
+     * Gets the background color of the letterbox. Considered invalid if the background has
+     * multiple colors {@link #isLetterboxBackgroundMultiColored}. Should be called by SystemUI when
+     * computing the letterbox appearance for status bar treatment.
+     */
+    int getLetterboxBackgroundColorInArgb();
+
+    /**
+     * Whether the outer area of the letterbox has multiple colors (e.g. blurred background).
+     * Should be called by SystemUI when computing the letterbox appearance for status bar
+     * treatment.
+     */
+    boolean isLetterboxBackgroundMultiColored();
 }

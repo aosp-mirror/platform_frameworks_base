@@ -55,12 +55,15 @@ class OpenImeWindowFromFixedOrientationAppTest(
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
             test {
+                tapl.setExpectedRotationCheckEnabled(false)
+            }
+            test {
                 // Launch the activity with expecting IME will be shown.
                 imeTestApp.launchViaIntent(wmHelper)
             }
             eachRun {
                 // Swiping out the IME activity to home.
-                device.pressHome()
+                tapl.goHome()
                 wmHelper.StateSyncBuilder()
                     .withHomeActivityVisible()
                     .waitForAndVerify()

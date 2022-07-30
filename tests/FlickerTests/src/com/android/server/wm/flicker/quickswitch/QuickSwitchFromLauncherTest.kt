@@ -60,12 +60,15 @@ class QuickSwitchFromLauncherTest(testSpec: FlickerTestParameter) : BaseTest(tes
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
             test {
+                tapl.setExpectedRotationCheckEnabled(false)
+            }
+            test {
                 tapl.setExpectedRotation(testSpec.startRotation)
             }
 
             eachRun {
                 testApp.launchViaIntent(wmHelper)
-                device.pressHome()
+                tapl.goHome()
                 wmHelper.StateSyncBuilder()
                     .withHomeActivityVisible()
                     .withWindowSurfaceDisappeared(testApp)

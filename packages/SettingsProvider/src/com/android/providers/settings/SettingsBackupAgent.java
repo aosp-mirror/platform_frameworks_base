@@ -1076,7 +1076,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             SoftApConfiguration storedConfig = mWifiManager.getSoftApConfiguration();
 
             if (isNeedToNotifyUserConfigurationHasChanged(configInCloud, storedConfig)) {
-                Log.d(TAG, "restored ap configuration requires a conversion, notify the user");
+                Log.d(TAG, "restored ap configuration requires a conversion, notify the user"
+                        + ", configInCloud is " + configInCloud + " but storedConfig is "
+                        + storedConfig);
                 WifiSoftApConfigChangedNotifier.notifyUserOfConfigConversion(this);
             }
         }
@@ -1115,9 +1117,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                         == storedConfig.getBridgedModeOpportunisticShutdownTimeoutMillis()
                 && Objects.equals(configInCloud.getVendorElements(),
                         storedConfig.getVendorElements())
-                && (configInCloud.getPersistentRandomizedMacAddress() != null
-                        ? Objects.equals(configInCloud.getPersistentRandomizedMacAddress(),
-                        storedConfig.getPersistentRandomizedMacAddress()) : true)
                 && Arrays.equals(configInCloud.getAllowedAcsChannels(
                         SoftApConfiguration.BAND_2GHZ),
                         storedConfig.getAllowedAcsChannels(SoftApConfiguration.BAND_2GHZ))

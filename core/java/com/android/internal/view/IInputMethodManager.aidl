@@ -92,7 +92,11 @@ interface IInputMethodManager {
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     @nullable InputMethodSubtype getCurrentInputMethodSubtype(int userId);
 
-    void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
+    void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes,
+            int userId);
+
     // This is kept due to @UnsupportedAppUsage.
     // TODO(Bug 113914148): Consider removing this.
     int getInputMethodWindowVisibleHeight(in IInputMethodClient client);

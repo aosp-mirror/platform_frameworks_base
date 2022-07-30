@@ -117,6 +117,10 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_W
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
@@ -1446,7 +1450,8 @@ public class WindowManagerService extends IWindowManager.Stub
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
             int displayId, int requestUserId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame) {
+            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         Arrays.fill(outActiveControls, null);
         int[] appOp = new int[1];
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
@@ -1863,11 +1868,15 @@ public class WindowManagerService extends IWindowManager.Stub
             getInsetsSourceControls(win, outActiveControls);
 
             if (win.mLayoutAttached) {
-                outAttachedFrame.set(win.getParentWindow().getCompatFrame());
+                outAttachedFrame.set(win.getParentWindow().getFrame());
+                if (win.mInvGlobalScale != 1f) {
+                    outAttachedFrame.scale(win.mInvGlobalScale);
+                }
             } else {
                 // Make this invalid which indicates a null attached frame.
                 outAttachedFrame.set(0, 0, -1, -1);
             }
+            outSizeCompatScale[0] = win.getSizeCompatScale();
         }
 
         Binder.restoreCallingIdentity(origId);
@@ -9280,6 +9289,35 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /**
+     * Gets the background color of the letterbox. Considered invalid if the background has
+     * multiple colors {@link #isLetterboxBackgroundMultiColored}
+     */
+    @Override
+    public int getLetterboxBackgroundColorInArgb() {
+        return mLetterboxConfiguration.getLetterboxBackgroundColor().toArgb();
+    }
+
+    /**
+     *  Whether the outer area of the letterbox has multiple colors (e.g. blurred background).
+     */
+    @Override
+    public boolean isLetterboxBackgroundMultiColored() {
+        @LetterboxConfiguration.LetterboxBackgroundType int letterboxBackgroundType =
+                mLetterboxConfiguration.getLetterboxBackgroundType();
+        switch (letterboxBackgroundType) {
+            case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING:
+            case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND:
+            case LETTERBOX_BACKGROUND_WALLPAPER:
+                return true;
+            case LETTERBOX_BACKGROUND_SOLID_COLOR:
+                return false;
+            default:
+                throw new AssertionError(
+                        "Unexpected letterbox background type: " + letterboxBackgroundType);
         }
     }
 }

@@ -88,6 +88,7 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
         final InsetsState mOutInsetsState = new InsetsState();
         final InsetsSourceControl[] mOutControls = new InsetsSourceControl[0];
         final Rect mOutAttachedFrame = new Rect();
+        final float[] mOutSizeCompatScale = { 1f };
 
         TestWindow() {
             mLayoutParams.setTitle(TestWindow.class.getName());
@@ -106,7 +107,7 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
                 long startTime = SystemClock.elapsedRealtimeNanos();
                 session.addToDisplay(this, mLayoutParams, View.VISIBLE,
                         Display.DEFAULT_DISPLAY, mRequestedVisibilities, inputChannel,
-                        mOutInsetsState, mOutControls, mOutAttachedFrame);
+                        mOutInsetsState, mOutControls, mOutAttachedFrame, mOutSizeCompatScale);
                 final long elapsedTimeNsOfAdd = SystemClock.elapsedRealtimeNanos() - startTime;
                 state.addExtraResult("add", elapsedTimeNsOfAdd);
 

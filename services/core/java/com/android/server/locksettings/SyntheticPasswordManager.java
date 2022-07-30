@@ -135,8 +135,8 @@ public class SyntheticPasswordManager {
     private static final byte PROTECTOR_TYPE_STRONG_TOKEN_BASED = 1;
     private static final byte PROTECTOR_TYPE_WEAK_TOKEN_BASED = 2;
 
-    // 256-bit synthetic password
-    private static final byte SYNTHETIC_PASSWORD_LENGTH = 256 / 8;
+    // The security strength of the synthetic password, in bytes
+    private static final int SYNTHETIC_PASSWORD_SECURITY_STRENGTH = 256 / 8;
 
     private static final int PASSWORD_SCRYPT_LOG_N = 11;
     private static final int PASSWORD_SCRYPT_LOG_R = 3;
@@ -275,8 +275,8 @@ public class SyntheticPasswordManager {
          */
         static SyntheticPassword create() {
             SyntheticPassword result = new SyntheticPassword(SYNTHETIC_PASSWORD_VERSION_V3);
-            byte[] escrowSplit0 = secureRandom(SYNTHETIC_PASSWORD_LENGTH);
-            byte[] escrowSplit1 = secureRandom(SYNTHETIC_PASSWORD_LENGTH);
+            byte[] escrowSplit0 = secureRandom(SYNTHETIC_PASSWORD_SECURITY_STRENGTH);
+            byte[] escrowSplit1 = secureRandom(SYNTHETIC_PASSWORD_SECURITY_STRENGTH);
             result.recreate(escrowSplit0, escrowSplit1);
             byte[] encrypteEscrowSplit0 = SyntheticPasswordCrypto.encrypt(result.mSyntheticPassword,
                     PERSONALIZATION_E0, escrowSplit0);

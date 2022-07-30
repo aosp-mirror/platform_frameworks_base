@@ -75,7 +75,7 @@ open class MultiBubblesScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen
                     Until.findObjects(
                         By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)
                     ), FIND_OBJECT_TIMEOUT
-                )
+                ) ?: error("No bubbles found")
                 for (entry in bubbles) {
                     entry?.run { entry.click() } ?: error("Bubble not found")
                     SystemClock.sleep(1000)

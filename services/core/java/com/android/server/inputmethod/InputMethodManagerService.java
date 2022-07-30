@@ -2016,49 +2016,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    // ---------------------------------------------------------------------------------------
-    // Check whether or not this is a valid IPC. Assumes an IPC is valid when either
-    // 1) it comes from the system process
-    // 2) the calling process' user id is identical to the current user id IMMS thinks.
-    @GuardedBy("ImfLock.class")
-    private boolean calledFromValidUserLocked() {
-        final int uid = Binder.getCallingUid();
-        final int userId = UserHandle.getUserId(uid);
-        if (DEBUG) {
-            Slog.d(TAG, "--- calledFromForegroundUserOrSystemProcess ? "
-                    + "calling uid = " + uid + " system uid = " + Process.SYSTEM_UID
-                    + " calling userId = " + userId + ", foreground user id = "
-                    + mSettings.getCurrentUserId() + ", calling pid = " + Binder.getCallingPid()
-                    + InputMethodUtils.getApiCallStack());
-        }
-        if (uid == Process.SYSTEM_UID) {
-            return true;
-        }
-        if (userId == mSettings.getCurrentUserId()) {
-            return true;
-        }
-
-        // Caveat: A process which has INTERACT_ACROSS_USERS_FULL gets results for the
-        // foreground user, not for the user of that process. Accordingly InputMethodManagerService
-        // must not manage background users' states in any functions.
-        // Note that privacy-sensitive IPCs, such as setInputMethod, are still securely guarded
-        // by a token.
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-                == PackageManager.PERMISSION_GRANTED) {
-            if (DEBUG) {
-                Slog.d(TAG, "--- Access granted because the calling process has "
-                        + "the INTERACT_ACROSS_USERS_FULL permission");
-            }
-            return true;
-        }
-        // TODO(b/34886274): The semantics of this verification is actually not well-defined.
-        Slog.w(TAG, "--- IPC called from background users. Ignore. callers="
-                + Debug.getCallers(10));
-        return false;
-    }
-
-
     /**
      * Returns true iff the caller is identified to be the current input method with the token.
      * @param token The window token given to the input method when it was started.
@@ -3200,8 +3157,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // Used to load label
                 final CharSequence title = mRes.getText(
                         com.android.internal.R.string.select_input_method);
+                final int currentUserId = mSettings.getCurrentUserId();
+                final Context userAwareContext = mContext.getUserId() == currentUserId
+                        ? mContext
+                        : mContext.createContextAsUser(UserHandle.of(currentUserId), 0 /* flags */);
                 final CharSequence summary = InputMethodUtils.getImeAndSubtypeDisplayName(
-                        mContext, imi, mCurrentSubtype);
+                        userAwareContext, imi, mCurrentSubtype);
                 mImeSwitcherNotification.setContentTitle(title)
                         .setContentText(summary)
                         .setContentIntent(mImeSwitchPendingIntent);
@@ -4161,7 +4122,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
+    public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes,
+            @UserIdInt int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
+
         // By this IPC call, only a process which shares the same uid with the IME can add
         // additional input method subtypes to the IME.
         if (TextUtils.isEmpty(imiId) || subtypes == null) return;
@@ -4175,23 +4141,32 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         synchronized (ImfLock.class) {
-            if (!calledFromValidUserLocked()) {
-                return;
-            }
             if (!mSystemReady) {
                 return;
             }
-            if (!mSettings.setAdditionalInputMethodSubtypes(imiId, toBeAdded,
-                    mAdditionalSubtypeMap, mIPackageManager)) {
+
+            if (mSettings.getCurrentUserId() == userId) {
+                if (!mSettings.setAdditionalInputMethodSubtypes(imiId, toBeAdded,
+                        mAdditionalSubtypeMap, mIPackageManager)) {
+                    return;
+                }
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
                 return;
             }
 
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+            final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
+            final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap,
+                    userId, false);
+            final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
+                    new ArrayMap<>();
+            AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+            settings.setAdditionalInputMethodSubtypes(imiId, toBeAdded, additionalSubtypeMap,
+                    mIPackageManager);
         }
     }
 
@@ -4341,7 +4316,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         im.registerInputDeviceListener(new InputManager.InputDeviceListener() {
             @Override
             public void onInputDeviceAdded(int deviceId) {
-                if (isStylusDevice(im.getInputDevice(deviceId))) {
+                InputDevice device = im.getInputDevice(deviceId);
+                if (device != null && isStylusDevice(device)) {
                     add(deviceId);
                 }
             }
@@ -4353,7 +4329,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
             @Override
             public void onInputDeviceChanged(int deviceId) {
-                if (isStylusDevice(im.getInputDevice(deviceId))) {
+                InputDevice device = im.getInputDevice(deviceId);
+                if (device == null) {
+                    return;
+                }
+                if (isStylusDevice(device)) {
                     add(deviceId);
                 } else {
                     remove(deviceId);
@@ -4452,8 +4432,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (!im.isInputDeviceEnabled(id)) {
                 continue;
             }
-            InputDevice inputDevice = im.getInputDevice(id);
-            if (isStylusDevice(inputDevice)) {
+            InputDevice device = im.getInputDevice(id);
+            if (device != null && isStylusDevice(device)) {
                 stylusIds.add(id);
             }
         }
