@@ -45,7 +45,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.PixelFormat;
@@ -343,5 +348,25 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
         final InsetsSource navBarSource = state.peekSource(ITYPE_NAVIGATION_BAR);
         assertEquals(attrs.height - 10, navBarSource.getFrame().height());
+    }
+
+    @Test
+    public void testCanSystemBarsBeShownByUser() {
+        ((TestWindowManagerPolicy) mWm.mPolicy).mIsUserSetupComplete = true;
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        final WindowState windowState = mock(WindowState.class);
+        final InsetsSourceProvider provider = mock(InsetsSourceProvider.class);
+        final InsetsControlTarget controlTarget = mock(InsetsControlTarget.class);
+        when(provider.getControlTarget()).thenReturn(controlTarget);
+        when(windowState.getControllableInsetProvider()).thenReturn(provider);
+        when(controlTarget.getRequestedVisibility(anyInt())).thenReturn(true);
+
+        displayPolicy.setCanSystemBarsBeShownByUser(false);
+        displayPolicy.requestTransientBars(windowState, true);
+        verify(controlTarget, never()).showInsets(anyInt(), anyBoolean());
+
+        displayPolicy.setCanSystemBarsBeShownByUser(true);
+        displayPolicy.requestTransientBars(windowState, true);
+        verify(controlTarget).showInsets(anyInt(), anyBoolean());
     }
 }
