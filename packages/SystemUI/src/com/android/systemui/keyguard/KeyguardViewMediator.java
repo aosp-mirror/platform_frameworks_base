@@ -627,13 +627,13 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 case TelephonyManager.SIM_STATE_PUK_REQUIRED:
                     synchronized (KeyguardViewMediator.this) {
                         mSimWasLocked.append(slotId, true);
+                        mPendingPinLock = true;
                         if (!mShowing) {
                             if (DEBUG_SIM_STATES) Log.d(TAG,
                                     "INTENT_VALUE_ICC_LOCKED and keygaurd isn't "
                                     + "showing; need to show keyguard so user can enter sim pin");
                             doKeyguardLocked(null);
                         } else {
-                            mPendingPinLock = true;
                             resetStateLocked();
                         }
                     }
@@ -2991,6 +2991,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         pw.print("  mPendingReset: "); pw.println(mPendingReset);
         pw.print("  mPendingLock: "); pw.println(mPendingLock);
         pw.print("  wakeAndUnlocking: "); pw.println(mWakeAndUnlocking);
+        pw.print("  mPendingPinLock: "); pw.println(mPendingPinLock);
     }
 
     /**
