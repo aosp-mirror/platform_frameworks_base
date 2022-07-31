@@ -225,6 +225,7 @@ android_library {
         "androidx.exifinterface_exifinterface",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
+        "kotlinx_coroutines_test",
         "iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
