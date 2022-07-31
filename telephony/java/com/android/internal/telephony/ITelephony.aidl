@@ -2548,9 +2548,6 @@ interface ITelephony {
     CellIdentity getLastKnownCellIdentity(int subId, String callingPackage,
             String callingFeatureId);
 
-    /** Check if telephony new data stack is enabled. */
-    boolean isUsingNewDataStack();
-
     /**
      *  @return true if the modem service is set successfully, false otherwise.
      */
