@@ -121,7 +121,6 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
@@ -129,7 +128,6 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -220,7 +218,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private BatteryController mBatteryController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private StatusBarNotificationPresenter mNotificationPresenter;
-    @Mock private NotificationFilter mNotificationFilter;
     @Mock private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     @Mock private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -242,7 +239,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private AutoHideController mAutoHideController;
     @Mock private StatusBarWindowController mStatusBarWindowController;
     @Mock private StatusBarWindowStateController mStatusBarWindowStateController;
-    @Mock private NotificationViewHierarchyManager mNotificationViewHierarchyManager;
     @Mock private UserSwitcherController mUserSwitcherController;
     @Mock private Bubbles mBubbles;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
@@ -283,7 +279,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private OperatorNameViewController mOperatorNameViewController;
     @Mock private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     @Mock private ActivityLaunchAnimator mActivityLaunchAnimator;
-    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private NotifLiveDataStore mNotifLiveDataStore;
     @Mock private InteractionJankMonitor mJankMonitor;
     @Mock private DeviceStateManager mDeviceStateManager;
@@ -298,7 +293,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectTestDependency(NotificationFilter.class, mNotificationFilter);
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
         IThermalService thermalService = mock(IThermalService.class);
@@ -310,7 +304,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mPowerManager,
                         mDreamManager,
                         mAmbientDisplayConfiguration,
-                        mNotificationFilter,
                         mStatusBarStateController,
                         mKeyguardStateController,
                         mBatteryController,
@@ -410,7 +403,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mNotificationGutsManager,
                 notificationLogger,
                 mNotificationInterruptStateProvider,
-                mNotificationViewHierarchyManager,
                 new PanelExpansionStateManager(),
                 mKeyguardViewMediator,
                 new DisplayMetrics(),
@@ -472,7 +464,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mWallpaperManager,
                 Optional.of(mStartingSurface),
                 mActivityLaunchAnimator,
-                mNotifPipelineFlags,
                 mJankMonitor,
                 mDeviceStateManager,
                 mWiredChargingRippleController, mDreamManager);
@@ -659,7 +650,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void testShouldHeadsUp_nonSuppressedGroupSummary() throws Exception {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mNotificationFilter.shouldFilterOut(any())).thenReturn(false);
         when(mDreamManager.isDreaming()).thenReturn(false);
 
         Notification n = new Notification.Builder(getContext(), "a")
@@ -683,7 +673,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void testShouldHeadsUp_suppressedGroupSummary() throws Exception {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mNotificationFilter.shouldFilterOut(any())).thenReturn(false);
         when(mDreamManager.isDreaming()).thenReturn(false);
 
         Notification n = new Notification.Builder(getContext(), "a")
@@ -707,7 +696,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void testShouldHeadsUp_suppressedHeadsUp() throws Exception {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mNotificationFilter.shouldFilterOut(any())).thenReturn(false);
         when(mDreamManager.isDreaming()).thenReturn(false);
 
         Notification n = new Notification.Builder(getContext(), "a").build();
@@ -729,7 +717,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void testShouldHeadsUp_noSuppressedHeadsUp() throws Exception {
         when(mPowerManager.isScreenOn()).thenReturn(true);
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
-        when(mNotificationFilter.shouldFilterOut(any())).thenReturn(false);
         when(mDreamManager.isDreaming()).thenReturn(false);
 
         Notification n = new Notification.Builder(getContext(), "a").build();
@@ -1041,7 +1028,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 PowerManager powerManager,
                 IDreamManager dreamManager,
                 AmbientDisplayConfiguration ambientDisplayConfiguration,
-                NotificationFilter filter,
                 StatusBarStateController controller,
                 KeyguardStateController keyguardStateController,
                 BatteryController batteryController,
@@ -1055,7 +1041,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                     powerManager,
                     dreamManager,
                     ambientDisplayConfiguration,
-                    filter,
                     batteryController,
                     controller,
                     keyguardStateController,

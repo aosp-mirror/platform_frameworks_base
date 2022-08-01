@@ -46,11 +46,9 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
-import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
-import com.android.systemui.statusbar.notification.collection.NotifLiveDataStoreImpl;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.legacy.LegacyNotificationRanker;
@@ -113,7 +111,6 @@ public class NotificationEntryManager implements
     private final Lazy<NotificationRemoteInputManager> mRemoteInputManagerLazy;
     private final LeakDetector mLeakDetector;
     private final IStatusBarService mStatusBarService;
-    private final NotifLiveDataStoreImpl mNotifLiveDataStore;
     private final DumpManager mDumpManager;
     private final Executor mBgExecutor;
 
@@ -141,7 +138,6 @@ public class NotificationEntryManager implements
     private final List<NotifCollectionListener> mNotifCollectionListeners = new ArrayList<>();
 
     private LegacyNotificationRanker mRanker = new LegacyNotificationRankerStub();
-    private NotificationPresenter mPresenter;
     private RankingMap mLatestRankingMap;
 
     @VisibleForTesting
@@ -161,7 +157,6 @@ public class NotificationEntryManager implements
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
             IStatusBarService statusBarService,
-            NotifLiveDataStoreImpl notifLiveDataStore,
             DumpManager dumpManager,
             @Background Executor bgExecutor
     ) {
@@ -172,7 +167,6 @@ public class NotificationEntryManager implements
         mRemoteInputManagerLazy = notificationRemoteInputManagerLazy;
         mLeakDetector = leakDetector;
         mStatusBarService = statusBarService;
-        mNotifLiveDataStore = notifLiveDataStore;
         mDumpManager = dumpManager;
         mBgExecutor = bgExecutor;
     }
@@ -248,10 +242,6 @@ public class NotificationEntryManager implements
     /** Remove a {@link NotificationRemoveInterceptor} */
     public void removeNotificationRemoveInterceptor(NotificationRemoveInterceptor interceptor) {
         mRemoveInterceptors.remove(interceptor);
-    }
-
-    public void setUpWithPresenter(NotificationPresenter presenter) {
-        mPresenter = presenter;
     }
 
     /** Adds multiple {@link NotificationLifetimeExtender}s. */
@@ -663,11 +653,6 @@ public class NotificationEntryManager implements
             listener.onEntryBind(entry, notification);
         }
 
-        // Construct the expanded view.
-        if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
-            mNotificationRowBinderLazy.get().inflateViews(entry, null, mInflationCallback);
-        }
-
         mPendingNotifications.put(key, entry);
         mLogger.logNotifAdded(entry.getKey());
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
@@ -724,10 +709,6 @@ public class NotificationEntryManager implements
             listener.onEntryUpdated(entry, fromSystem);
         }
 
-        if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
-            mNotificationRowBinderLazy.get().inflateViews(entry, null, mInflationCallback);
-        }
-
         updateNotifications("updateNotificationInternal");
 
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
@@ -752,17 +733,7 @@ public class NotificationEntryManager implements
      * @param reason why the notifications are updating
      */
     public void updateNotifications(String reason) {
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
-            mLogger.logUseWhileNewPipelineActive("updateNotifications", reason);
-            return;
-        }
-        Trace.beginSection("NotificationEntryManager.updateNotifications");
-        reapplyFilterAndSort(reason);
-        if (mPresenter != null) {
-            mPresenter.updateNotificationViews(reason);
-        }
-        mNotifLiveDataStore.setActiveNotifList(getVisibleNotifications());
-        Trace.endSection();
+        mLogger.logUseWhileNewPipelineActive("updateNotifications", reason);
     }
 
     public void updateNotificationRanking(RankingMap rankingMap) {
@@ -939,26 +910,12 @@ public class NotificationEntryManager implements
 
     /** Resorts / filters the current notification set with the current RankingMap */
     public void reapplyFilterAndSort(String reason) {
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
-            mLogger.logUseWhileNewPipelineActive("reapplyFilterAndSort", reason);
-            return;
-        }
-        Trace.beginSection("NotificationEntryManager.reapplyFilterAndSort");
-        updateRankingAndSort(mRanker.getRankingMap(), reason);
-        Trace.endSection();
+        mLogger.logUseWhileNewPipelineActive("reapplyFilterAndSort", reason);
     }
 
     /** Calls to NotificationRankingManager and updates mSortedAndFiltered */
     private void updateRankingAndSort(RankingMap rankingMap, String reason) {
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
-            mLogger.logUseWhileNewPipelineActive("updateRankingAndSort", reason);
-            return;
-        }
-        Trace.beginSection("NotificationEntryManager.updateRankingAndSort");
-        mSortedAndFiltered.clear();
-        mSortedAndFiltered.addAll(mRanker.updateRanking(
-                rankingMap, mActiveNotifications.values(), reason));
-        Trace.endSection();
+        mLogger.logUseWhileNewPipelineActive("updateRankingAndSort", reason);
     }
 
     /** dump the current active notification list. Called from CentralSurfaces */
