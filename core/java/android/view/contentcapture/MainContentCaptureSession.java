@@ -64,6 +64,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -630,7 +631,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         mComponentName = null;
         mEvents = null;
         if (mDirectServiceInterface != null) {
-            mDirectServiceInterface.asBinder().unlinkToDeath(mDirectServiceVulture, 0);
+            try {
+                mDirectServiceInterface.asBinder().unlinkToDeath(mDirectServiceVulture, 0);
+            } catch (NoSuchElementException e) {
+                Log.w(TAG, "IContentCaptureDirectManager does not exist");
+            }
         }
         mDirectServiceInterface = null;
         mHandler.removeMessages(MSG_FLUSH);
