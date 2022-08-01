@@ -27,6 +27,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.settingslib.utils.BuildCompatUtils;
+import com.android.settingslib.widget.R;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
