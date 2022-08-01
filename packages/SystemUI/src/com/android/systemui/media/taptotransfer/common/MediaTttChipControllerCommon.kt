@@ -112,12 +112,16 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
             // The chip is new, so set up all our callbacks and inflate the view
             configurationController.addCallback(displayScaleListener)
             tapGestureDetector.addOnGestureDetectedCallback(TAG, this::onScreenTapped)
-            // Wake the screen so the user will see the chip
-            powerManager.wakeUp(
-                SystemClock.uptimeMillis(),
-                PowerManager.WAKE_REASON_APPLICATION,
-                "com.android.systemui:media_tap_to_transfer_activated"
-            )
+            // Wake the screen if necessary so the user will see the chip. (Per b/239426653, we want
+            // the chip to show over the dream state, so we should only wake up if the screen is
+            // completely off.)
+            if (!powerManager.isScreenOn) {
+                powerManager.wakeUp(
+                        SystemClock.uptimeMillis(),
+                        PowerManager.WAKE_REASON_APPLICATION,
+                        "com.android.systemui:media_tap_to_transfer_activated"
+                )
+            }
 
             inflateAndUpdateChip(newChipInfo)
         }

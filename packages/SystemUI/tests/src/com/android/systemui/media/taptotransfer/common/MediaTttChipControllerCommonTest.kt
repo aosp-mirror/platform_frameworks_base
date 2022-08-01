@@ -115,12 +115,29 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayChip_chipAddedAndGestureDetectionStartedAndScreenOn() {
+    fun displayChip_chipAddedAndGestureDetectionStarted() {
         controllerCommon.displayChip(getState())
 
         verify(windowManager).addView(any(), any())
         verify(tapGestureDetector).addOnGestureDetectedCallback(any(), any())
+    }
+
+    @Test
+    fun displayChip_screenOff_screenWakes() {
+        whenever(powerManager.isScreenOn).thenReturn(false)
+
+        controllerCommon.displayChip(getState())
+
         verify(powerManager).wakeUp(any(), any(), any())
+    }
+
+    @Test
+    fun displayChip_screenAlreadyOn_screenNotWoken() {
+        whenever(powerManager.isScreenOn).thenReturn(true)
+
+        controllerCommon.displayChip(getState())
+
+        verify(powerManager, never()).wakeUp(any(), any(), any())
     }
 
     @Test
