@@ -50,8 +50,8 @@
   </string-array>
   <string-array name="hdcp_checking_titles">
     <item msgid="2377230797542526134">"ఎప్పటికీ తనిఖీ చేయవద్దు"</item>
-    <item msgid="3919638466823112484">"DRM కంటెంట్‌కు మాత్రమే తనిఖీ చేయండి"</item>
-    <item msgid="9048424957228926377">"ఎల్లప్పుడూ తనిఖీ చేయండి"</item>
+    <item msgid="3919638466823112484">"DRM కంటెంట్‌కు మాత్రమే చెక్ చేయండి"</item>
+    <item msgid="9048424957228926377">"ఎల్లప్పుడూ చెక్ చేయండి"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"ఎప్పటికీ HDCP తనిఖీని ఉపయోగించవద్దు"</item>
@@ -151,9 +151,9 @@
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
     <item msgid="8019740759207729126"></item>
-    <item msgid="204248102837117183">", సక్రియంగా ఉంది"</item>
-    <item msgid="253388653486517049">", (మీడియా) సక్రియంగా ఉంది"</item>
-    <item msgid="5001852592115448348">", (ఫోన్) సక్రియంగా ఉంది"</item>
+    <item msgid="204248102837117183">", యాక్టివ్‌గా ఉంది"</item>
+    <item msgid="253388653486517049">", (మీడియా) యాక్టివ్‌గా ఉంది"</item>
+    <item msgid="5001852592115448348">", (ఫోన్) యాక్టివ్‌గా ఉంది"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="1191094707770726722">"ఆఫ్"</item>
