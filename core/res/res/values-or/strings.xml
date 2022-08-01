@@ -652,7 +652,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"ଆପଣଙ୍କ ଫୋନକୁ ସମ୍ପୂର୍ଣ୍ଣ ସିଧା ଦେଖନ୍ତୁ"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"ଆପଣଙ୍କ ଫୋନକୁ ସମ୍ପୂର୍ଣ୍ଣ ସିଧା ଦେଖନ୍ତୁ"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"ଆପଣଙ୍କ ଫୋନକୁ ସମ୍ପୂର୍ଣ୍ଣ ସିଧା ଦେଖନ୍ତୁ"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"ଆପଣଙ୍କର ମୁହଁ ଲୁଚାଉଥିବା ଜିନିଷକୁ କାଢ଼ି ଦିଅନ୍ତୁ।"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"ଆପଣଙ୍କ ମୁହଁକୁ ଲୁଚାଉଥିବା ଯେ କୌଣସି ଜିନିଷକୁ କାଢ଼ି ଦିଅନ୍ତୁ।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"କଳା ବାର୍ ସମେତ ଆପଣଙ୍କ ସ୍କ୍ରିନ୍‌ର ଶୀର୍ଷକୁ ସଫା କରନ୍ତୁ"</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"ଆପଣଙ୍କ ଫେସ ସମ୍ପୂର୍ଣ୍ଣ ଭାବରେ ଦେଖାଯିବା ଆବଶ୍ଯକ"</string>
     <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"ଆପଣଙ୍କ ଫେସ ସମ୍ପୂର୍ଣ୍ଣ ଭାବରେ ଦେଖାଯିବା ଆବଶ୍ଯକ"</string>
@@ -1335,9 +1335,9 @@
     <string name="sim_added_message" msgid="6602906609509958680">"ମୋବାଇଲ୍‍ ନେଟ୍‍ୱର୍କ ଆକ୍ସେସ୍‌ କରିବା ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସ୍‍କୁ ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"ମୋବାଇଲ୍ ସେବା ସକ୍ରିୟ କରନ୍ତୁ"</string>
-    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"ଆପଣଙ୍କର ନୂତନ SIMକୁ ସକ୍ରିୟ କରିବା ପାଇଁ କ୍ୟାରିଅର୍‌ ଆପ୍‌କୁ ଡାଉନଲୋଡ୍ କରନ୍ତୁ"</string>
-    <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"ଆପଣଙ୍କର ନୂତନ SIMକୁ ସକ୍ରିୟ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g> ଆପ୍‌କୁ ଡାଉନଲୋଡ୍ କରନ୍ତୁ"</string>
-    <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"ଆପ୍‌ ଡାଉନଲୋଡ୍‌ କରନ୍ତୁ"</string>
+    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"ଆପଣଙ୍କର ନୂତନ SIMକୁ ସକ୍ରିୟ କରିବା ପାଇଁ କ୍ୟାରିଅର୍‌ ଆପ୍‌କୁ ଡାଉନଲୋଡ କରନ୍ତୁ"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"ଆପଣଙ୍କର ନୂତନ SIMକୁ ସକ୍ରିୟ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g> ଆପ୍‌କୁ ଡାଉନଲୋଡ କରନ୍ତୁ"</string>
+    <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"ଆପ୍‌ ଡାଉନଲୋଡ କରନ୍ତୁ"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"ନୂଆ SIM କାର୍ଡ ଭର୍ତ୍ତି କରାଗଲା"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"ଏହା ସେଟଅପ୍‌ କରିବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"ସମୟ ସେଟ୍ କରନ୍ତୁ"</string>

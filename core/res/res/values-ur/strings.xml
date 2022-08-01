@@ -634,7 +634,7 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"فنگر پرنٹ اَن لاک"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"فنگر پرنٹ سینسر کا استعمال نہیں کر سکتے"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ایک مرمت فراہم کنندہ کو ملاحظہ کریں۔"</string>
-    <string name="face_acquired_insufficient" msgid="6889245852748492218">"آپ کے چہرے کا ماڈل تخلیق نہیں کیا جا سکتا۔ پھر کوشش کریں۔"</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"آپکے چہرے کا ماڈل تخلیق نہیں ہو سکا۔ پھر کوشش کریں۔"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"کافی روشنی ہے۔ ہلکی روشنی میں آزمائیں۔"</string>
     <string name="face_acquired_too_dark" msgid="7919016380747701228">"تیز روشنی میں آزمائیں"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"فون کو تھوڑا دور کریں"</string>
@@ -656,7 +656,7 @@
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"سیاہ بار سمیت، اپنی اسکرین کے اوپری حصے کو صاف کریں"</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"آپ کا چہرہ مکمل طور پر دکھائی دینا ضروری ہے"</string>
     <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"آپ کا چہرہ مکمل طور پر دکھائی دینا ضروری ہے"</string>
-    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"آپ کے چہرے کا ماڈل تخلیق نہیں کیا جا سکتا۔ پھر کوشش کریں۔"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"آپکے چہرے کا ماڈل تخلیق نہیں ہو سکا۔ پھر کوشش کریں۔"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"گہرے چشمے کا پتہ چلا۔ آپ کا چہرہ مکمل طور پر دکھائی دینا ضروری ہے۔"</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"چہرے کو ڈھانپنے کا پتہ چلا۔ آپ کا چہرہ مکمل طور پر دکھائی دینا ضروری ہے۔"</string>
   <string-array name="face_acquired_vendor">

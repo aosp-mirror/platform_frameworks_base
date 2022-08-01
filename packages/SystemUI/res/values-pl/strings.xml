@@ -956,7 +956,7 @@
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zatrzymano"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Gotowe"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Skopiowano"</string>
-    <string name="clipboard_edit_source" msgid="9156488177277788029">"Od: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
+    <string name="clipboard_edit_source" msgid="9156488177277788029">"Z: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="3335990369850165486">"Odrzuć skopiowany tekst"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Edytuj skopiowany tekst"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Edytuj skopiowany obraz"</string>

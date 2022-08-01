@@ -634,7 +634,7 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Opplåsing med fingeravtrykk"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Kan ikke bruke fingeravtrykkssensoren"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Gå til en reparasjonsleverandør."</string>
-    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Kan ikke opprette ansiktsmodellen. Prøv på nytt."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Kan ikke lage ansiktsmodell. Prøv på nytt."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"For lyst. Prøv svakere belysning."</string>
     <string name="face_acquired_too_dark" msgid="7919016380747701228">"Prøv sterkere belysning"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Flytt telefonen lengre unna"</string>
@@ -656,7 +656,7 @@
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Rengjør den øverste delen av skjermen, inkludert den svarte linjen"</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Ansiktet må være helt synlig"</string>
     <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Ansiktet må være helt synlig"</string>
-    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan ikke opprette ansiktsmodellen. Prøv på nytt."</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan ikke lage ansiktsmodell. Prøv på nytt."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Mørke briller er registrert. Ansiktet må være helt synlig."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ansiktsdekke er registrert. Ansiktet må være helt synlig."</string>
   <string-array name="face_acquired_vendor">

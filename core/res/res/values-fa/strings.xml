@@ -634,7 +634,7 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"قفل‌گشایی با اثر انگشت"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"امکان استفاده از حسگر اثر انگشت وجود ندارد"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"به ارائه‌دهنده خدمات تعمیر مراجعه کنید."</string>
-    <string name="face_acquired_insufficient" msgid="6889245852748492218">"مدل چهره‌تان ایجاد نشد. دوباره امتحان کنید."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"مدل چهره ایجاد نشد. دوباره امتحان کنید."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"خیلی روشن است. روشنایی‌اش را ملایم‌تر کنید."</string>
     <string name="face_acquired_too_dark" msgid="7919016380747701228">"نور را بیشتر کنید"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"تلفن را دورتر ببرید"</string>
@@ -652,11 +652,11 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"مستقیم‌تر به تلفن نگاه کنید"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"مستقیم‌تر به تلفن نگاه کنید"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"مستقیم‌تر به تلفن نگاه کنید"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"هرچیزی را که حائل چهره‌تان است بردارید."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"هر چیزی که جلو صورت شما را می‌گیرد بردارید."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"بالای صفحه و همچنین نوار مشکی را تمیز کنید."</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"چهره‌تان باید کاملاً نمایان باشد"</string>
     <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"چهره‌تان باید کاملاً نمایان باشد"</string>
-    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"مدل چهره‌تان ایجاد نشد. دوباره امتحان کنید."</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"مدل چهره ایجاد نشد. دوباره امتحان کنید."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"عینک تیره شناسایی شد. چهره‌تان باید کاملاً نمایان باشد."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"پوشش صورت شناسایی شد. چهره‌تان باید کاملاً نمایان باشد."</string>
   <string-array name="face_acquired_vendor">

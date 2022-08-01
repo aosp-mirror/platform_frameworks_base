@@ -304,7 +304,7 @@
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"క్యాలెండర్"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS మెసేజ్‌లను పంపడం, వీక్షించడం"</string>
+    <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS మెసేజ్‌లను పంపడం, చూడటం"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"ఫైల్స్"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"మీ పరికరంలోని ఫైల్స్‌ని యాక్సెస్ చేస్తుంది"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"మ్యూజిక్, ఆడియో"</string>
@@ -369,7 +369,7 @@
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"మీ పరికరం స్వీకరించిన సెల్ ప్రసార మెసేజ్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది. ఎమర్జెన్సీ పరిస్థితుల గురించి మిమ్మల్ని హెచ్చరించడానికి కొన్ని లొకేషన్లలో సెల్ ప్రసార అలర్ట్‌లు డెలివరీ చేయబడతాయి. ఎమర్జెన్సీ సెల్ ప్రసార అలర్ట్‌ను స్వీకరించినప్పుడు హానికరమైన యాప్‌లు మీ పరికరం పనితీరుకు లేదా నిర్వహణకు ఆటంకం కలిగించే అవకాశం ఉంది."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"చందా చేయబడిన ఫీడ్‌లను చదవడం"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"ప్రస్తుతం సింక్ చేసిన ఫీడ్‌ల గురించి వివరాలను పొందడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_sendSms" msgid="7757368721742014252">"SMS మెసేజ్‌లను పంపడం, వీక్షించడం"</string>
+    <string name="permlab_sendSms" msgid="7757368721742014252">"SMS మెసేజ్‌లను పంపడం, చూడటం"</string>
     <string name="permdesc_sendSms" msgid="6757089798435130769">"SMS మెసేజ్‌లు పంపడానికి యాప్‌ను అనుమతిస్తుంది. దీని వలన ఊహించని ఛార్జీలు విధించబడవచ్చు. హానికరమైన యాప్‌లు మీ నిర్ధారణ లేకుండానే మెసేజ్‌లను పంపడం ద్వారా మీకు డబ్బు ఖర్చయ్యేలా చేయవచ్చు."</string>
     <string name="permlab_readSms" msgid="5164176626258800297">"మీ టెక్స్ట్ మెసేజ్‌లు (SMS లేదా MMS) చదవడం"</string>
     <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"ఈ యాప్‌ మీ టాబ్లెట్‌లో స్టోర్ చేసిన అన్ని SMS (టెక్స్ట్) మెసేజ్‌లను చదవగలదు."</string>
@@ -415,7 +415,7 @@
     <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"టాబ్లెట్‌లో నిల్వ చేసిన మీ కాంటాక్ట్‌లకు సంబంధించిన డేటాను చదవడానికి యాప్‌ను అనుమతిస్తుంది. కాంటాక్ట్‌లను క్రియేట్ చేసిన మీ టాబ్లెట్‌లోని ఖాతాలకు కూడా యాప్‌లకు యాక్సెస్ ఉంటుంది. ఇందులో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా క్రియేట్ చేయబడిన ఖాతాలు ఉండవచ్చు. ఈ అనుమతి, మీ కాంటాక్ట్ డేటాను సేవ్ చేయడానికి యాప్‌లను అనుమతిస్తుంది, హానికరమైన యాప్‌లు మీకు తెలియకుండానే కాంటాక్ట్ డేటాను షేర్ చేయవచ్చు."</string>
     <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"మీ Android TV పరికరంలో నిల్వ చేసిన కాంటాక్ట్‌లకు సంబంధించిన డేటాను చదవడానికి యాప్‌ను అనుమతిస్తుంది. కాంటాక్ట్‌లను క్రియేట్ చేసిన మీ Android TV పరికరంలోని ఖాతాలకు కూడా యాప్‌లకు యాక్సెస్ ఉంటుంది. ఇందులో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా క్రియేట్ చేయబడిన ఖాతాలు ఉండవచ్చు. ఈ అనుమతి, మీ కాంటాక్ట్ డేటాను సేవ్ చేయడానికి యాప్‌లను అనుమతిస్తుంది, హానికరమైన యాప్‌లు మీకు తెలియకుండానే కాంటాక్ట్ డేటాను షేర్ చేయవచ్చు."</string>
     <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"ఫోన్‌లో నిల్వ చేసిన మీ కాంటాక్ట్‌లకు సంబంధించిన డేటాను చదవడానికి యాప్‌ను అనుమతిస్తుంది. కాంటాక్ట్‌లను క్రియేట్ చేసిన మీ ఫోన్‌లోని ఖాతాలను కూడా యాప్‌లు యాక్సెస్ చేయగలవు. ఇందులో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా క్రియేట్ చేయబడిన ఖాతాలు ఉండవచ్చు. ఈ అనుమతి, మీ కాంటాక్ట్ డేటాను సేవ్ చేయడానికి యాప్‌లను అనుమతిస్తుంది, హానికరమైన యాప్‌లు మీకు తెలియకుండానే కాంటాక్ట్ డేటాను షేర్ చేయవచ్చు."</string>
-    <string name="permlab_writeContacts" msgid="8919430536404830430">"మీ కాంటాక్ట్‌లను సవరించడం"</string>
+    <string name="permlab_writeContacts" msgid="8919430536404830430">"మీ కాంటాక్ట్‌లను ఎడిట్ చేయడం"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"మీ టాబ్లెట్‌లో నిల్వ చేసి ఉన్న కాంటాక్ట్‌లకు సంబంధించిన డేటాను ఎడిట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి, కాంటాక్ట్ డేటాను తొలగించడానికి యాప్‌లను అనుమతిస్తుంది."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"మీ Android TV పరికరంలో నిల్వ చేసి ఉన్న కాంటాక్ట్‌లకు సంబంధించిన డేటాను ఎడిట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి, కాంటాక్ట్ డేటాను తొలగించడానికి యాప్‌లను అనుమతిస్తుంది."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"మీ ఫోన్‌లో నిల్వ చేసి ఉన్న కాంటాక్ట్‌లకు సంబంధించిన డేటాను ఎడిట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి, కాంటాక్ట్ డేటాను తొలగించడానికి యాప్‌లను అనుమతిస్తుంది."</string>
@@ -433,7 +433,7 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ఈ యాప్ మీ టాబ్లెట్‌లో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు మరియు మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ఈ యాప్‌ మీ Android TV పరికరంలో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు, మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"ఈ యాప్ మీ ఫోన్‌లో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు మరియు మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
-    <string name="permlab_writeCalendar" msgid="6422137308329578076">"యజమానికి తెలియకుండానే క్యాలెండర్ ఈవెంట్‌లను జోడించి లేదా సవరించి, అతిథులకు ఈమెయిల్‌ పంపడం"</string>
+    <string name="permlab_writeCalendar" msgid="6422137308329578076">"యజమానికి తెలియకుండానే క్యాలెండర్ ఈవెంట్‌లను జోడించి లేదా ఎడిట్ చేసి, అతిథులకు ఈమెయిల్‌ పంపడం"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"ఈ యాప్ మీ టాబ్లెట్‌లో క్యాలెండర్ ఈవెంట్లను జోడించగలదు, తీసివేయగలదు లేదా మార్చగలదు. ఈ యాప్ క్యాలెండర్ ఓనర్ల నుండి వచ్చినట్లుగా మెసేజ్‌లను పంపగలదు లేదా ఈవెంట్లను వాటి ఓనర్లకు తెలియకుండానే మార్చగలదు."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"ఈ యాప్ మీ Android TV పరికరంలో క్యాలెండర్ ఈవెంట్లను జోడించగలదు, తీసివేయగలదు లేదా మార్చగలదు. ఈ యాప్ క్యాలెండర్ ఓనర్ల నుండి వచ్చినట్లుగా మెసేజ్‌లను పంపగలదు లేదా ఈవెంట్లను వాటి ఓనర్లకు తెలియకుండానే మార్చగలదు."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"ఈ యాప్ మీ ఫోన్‌లో క్యాలెండర్ ఈవెంట్లను జోడించగలదు, తీసివేయగలదు లేదా మార్చగలదు. ఈ యాప్ క్యాలెండర్ ఓనర్ల నుండి వచ్చినట్లుగా మెసేజ్‌లను పంపగలదు, లేదా ఈవెంట్లను వాటి ఓనర్లకు తెలియకుండానే మార్చగలదు."</string>
@@ -508,16 +508,16 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"టాబ్లెట్‌కు తెలిసిన ఖాతాల లిస్ట్‌ను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా క్రియేట్ చేయబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"మీ Android TV పరికరానికి తెలిసిన ఖాతాల లిస్ట్‌ను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా క్రియేట్ చేయబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"ఫోన్‌కు తెలిసిన ఖాతాల లిస్ట్‌ను పొందడానికి యాప్‌ను అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన యాప్‌ల ద్వారా క్రియేట్ చేయబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
-    <string name="permlab_accessNetworkState" msgid="2349126720783633918">"నెట్‌వర్క్ కనెక్షన్‌లను వీక్షించడం"</string>
-    <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"ఏ నెట్‌వర్క్‌లు ఉన్నాయి మరియు కనెక్ట్ చేయబడ్డాయి వంటి నెట్‌వర్క్ కనెక్షన్‌ల గురించి సమాచారాన్ని వీక్షించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_accessNetworkState" msgid="2349126720783633918">"నెట్‌వర్క్ కనెక్షన్‌లను చూడటం"</string>
+    <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"ఏ నెట్‌వర్క్‌లు ఉన్నాయి మరియు కనెక్ట్ చేయబడ్డాయి వంటి నెట్‌వర్క్ కనెక్షన్‌ల గురించి సమాచారాన్ని చూడటానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"నెట్‌వర్క్‌ను పూర్తిగా యాక్సెస్ చేయగలగడం"</string>
     <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"నెట్‌వర్క్ సాకెట్‌లను క్రియేట్ చేయడానికి మరియు అనుకూల నెట్‌వర్క్ ప్రోటోకాల్‌లను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది. బ్రౌజర్ మరియు ఇతర యాప్‌లు ఇంటర్నెట్‌కు డేటా పంపడానికి మార్గాలను అందిస్తాయి, కనుక ఇంటర్నెట్‌కు డేటా పంపడానికి ఈ అనుమతి అవసరం లేదు."</string>
     <string name="permlab_changeNetworkState" msgid="8945711637530425586">"నెట్‌వర్క్ కనెక్టివిటీని మార్చడం"</string>
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"నెట్‌వర్క్ కనెక్టివిటీ యొక్క స్థితిని మార్చడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"టీథర్ చేయబడిన కనెక్టివిటీని మార్చడం"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"టీథర్ చేసిన నెట్‌వర్క్ కనెక్టివిటీ యొక్క స్థితిని మార్చడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_accessWifiState" msgid="5552488500317911052">"Wi-Fi కనెక్షన్‌లను వీక్షించడం"</string>
-    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Wi-Fi ప్రారంభించబడిందా, లేదా మరియు కనెక్ట్ చేయబడిన Wi-Fi పరికరాల పేరు వంటి Wi-Fi నెట్‌వర్కింగ్ గురించి సమాచారాన్ని వీక్షించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_accessWifiState" msgid="5552488500317911052">"Wi-Fi కనెక్షన్‌లను చూడటం"</string>
+    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Wi-Fi ప్రారంభించబడిందా, లేదా మరియు కనెక్ట్ చేయబడిన Wi-Fi పరికరాల పేరు వంటి Wi-Fi నెట్‌వర్కింగ్ గురించి సమాచారాన్ని చూడటానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"Wi-Fiకి కనెక్ట్ చేయడం మరియు దాని నుండి డిస్‌కనెక్ట్ చేయడం"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Wi-Fi యాక్సెస్ స్థానాలకు కనెక్ట్ చేయడానికి మరియు వాటి నుండి డిస్‌కనెక్ట్ చేయడానికి మరియు Wi-Fi నెట్‌వర్క్‌ల కోసం పరికర కాన్ఫిగరేషన్‌కు మార్పులు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"Wi-Fi Multicast స్వీకరణను అనుమతించడం"</string>
@@ -535,9 +535,9 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"మీ Android TV పరికరాన్ని WiMAX నెట్‌వర్క్‌లకు కనెక్ట్ చేయడానికి లేదా డిస్‌కనెక్ట్ చేయడానికి యాప్‌ని అనుమతిస్తుంది."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"WiMAX నెట్‌వర్క్‌లకు ఫోన్‌ను కనెక్ట్ చేయడానికి మరియు వాటి నుండి ఫోన్‌ను డిస్‌కనెక్ట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"బ్లూటూత్ పరికరాలతో జత చేయడం"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"టాబ్లెట్‌లో బ్లూటూత్ యొక్క కాన్ఫిగరేషన్‌ను వీక్షించడానికి మరియు జత చేయబడిన పరికరాలతో కనెక్షన్‌లను ఏర్పాటు చేయడానికి మరియు ఆమోదించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"టాబ్లెట్‌లో బ్లూటూత్ యొక్క కాన్ఫిగరేషన్‌ను చూడటానికి మరియు జత చేయబడిన పరికరాలతో కనెక్షన్‌లను ఏర్పాటు చేయడానికి మరియు ఆమోదించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"మీ Android TV పరికరం బ్లూటూత్ యొక్క కాన్ఫిగరేషన్‌ను చూడడానికి, జత చేయబడిన పరికరాలతో కనెక్షన్‌లను ఏర్పాటు చేయడానికి మరియు ఆమోదించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"ఫోన్‌లో బ్లూటూత్ యొక్క కాన్ఫిగరేషన్‌ను వీక్షించడానికి మరియు జత చేయబడిన పరికరాలతో కనెక్షన్‌లను ఏర్పాటు చేయడానికి మరియు ఆమోదించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"ఫోన్‌లో బ్లూటూత్ యొక్క కాన్ఫిగరేషన్‌ను చూడటానికి మరియు జత చేయబడిన పరికరాలతో కనెక్షన్‌లను ఏర్పాటు చేయడానికి మరియు ఆమోదించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"సమీపంలోని బ్లూటూత్ పరికరాలను కనుగొని పెయిర్ చేయండి"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"సమీపంలోని బ్లూటూత్ పరికరాలను కనుగొనడానికి, పెయిర్ చేయడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"పెయిర్ చేసిన బ్లూటూత్ పరికరాలకు కనెక్ట్ అవ్వండి"</string>
@@ -652,7 +652,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"మీ ముఖానికి అడ్డుగా ఉన్నవాటిని తీసివేస్తుంది."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"మీ ముఖానికి అడ్డుగా ఉన్నవాటిని తీసివేయండి."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"నల్లని పట్టీతో సహా మీ స్క్రీన్ పైభాగం అంతటినీ శుభ్రంగా తుడవండి"</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"మీ ముఖం పూర్తిగా కనిపించాలి"</string>
     <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"మీ ముఖం పూర్తిగా కనిపించాలి"</string>
@@ -687,7 +687,7 @@
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"\'సింక్\'ను ఆన్, ఆఫ్‌ల మధ్య టోగుల్ చేయడం"</string>
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"ఖాతా యొక్క సింక్‌ సెట్టింగ్‌లను ఎడిట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, ఇది ఒక ఖాతాతో వ్యక్తుల యాప్ యొక్క సింక్‌ను ప్రారంభించడానికి ఉపయోగించబడవచ్చు."</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"సింక్ గణాంకాలను చదవగలగడం"</string>
-    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"ఖాతా యొక్క సింక్‌ గణాంకాలను అలాగే సింక్‌ ఈవెంట్‌ల చరిత్రను మరియు ఎంత డేటా సమకాలీకరించబడింది అనేవాటిని చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"ఖాతా యొక్క సింక్‌ గణాంకాలను అలాగే సింక్‌ ఈవెంట్‌ల చరిత్రను మరియు ఎంత డేటా సింక్ చేయబడింది అనేవాటిని చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను చదువుతుంది"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readMediaAudio" msgid="8723513075731763810">"షేర్ చేయబడిన స్టోరేజ్ నుండి ఆడియో ఫైల్‌లను చదవండి"</string>
@@ -716,7 +716,7 @@
     <string name="permdesc_readNetworkUsageHistory" msgid="1112962304941637102">"నిర్దిష్ట నెట్‌వర్క్‌లు మరియు యాప్‌ల కోసం చారిత్రాత్మక నెట్‌వర్క్ వినియోగాన్ని చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"నెట్‌వర్క్ విధానాన్ని నిర్వహించడం"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"నెట్‌వర్క్ విధానాలను నిర్వహించడానికి మరియు యాప్-నిర్దిష్ట నిబంధనలను నిర్వచించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"నెట్‌వర్క్ వినియోగ అకౌంటింగ్‌ను సవరించడం"</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"నెట్‌వర్క్ వినియోగ అకౌంటింగ్‌ను ఎడిట్ చేయడం"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"యాప్‌లలో నెట్‌వర్క్ వినియోగం ఎలా గణించాలనే దాన్ని ఎడిట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌ల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"నోటిఫికేషన్‌లను యాక్సెస్ చేయడం"</string>
     <string name="permdesc_accessNotifications" msgid="761730149268789668">"నోటిఫికేషన్‌లను, ఇతర యాప్‌ల ద్వారా పోస్ట్ చేయబడిన వాటిని తిరిగి పొందడానికి, పరిశీలించడానికి మరియు క్లియర్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -1048,7 +1048,7 @@
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"ఇన్‌స్టాల్ చేయబడిన అలారం గడియారం యాప్‌లో అలారంను సెట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. కొన్ని అలారం గల గడియారం యాప్‌లు ఈ ఫీచర్‌ను అమలు చేయకపోవచ్చు."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"వాయిస్ మెయిల్‌ను జోడించడం"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"మీ వాయిస్ మెయిల్ ఇన్‌బాక్స్‌కు మెసేజ్‌లను జోడించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"బ్రౌజర్ భౌగోళిక స్థానం అనుమతులను సవరించడం"</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"బ్రౌజర్ భౌగోళిక స్థానం అనుమతులను ఎడిట్ చేయడం"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"బ్రౌజర్ యొక్క భౌగోళిక లొకేషన్ అనుమతులను ఎడిట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. హానికరమైన యాప్‌లు ఏకపక్ష వెబ్ సైట్‌లకు లొకేషన్ సమాచారాన్ని అనుమతించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
     <string name="save_password_message" msgid="2146409467245462965">"మీరు బ్రౌజర్ ఈ పాస్‌వర్డ్‌ను గుర్తుపెట్టుకోవాలని కోరుకుంటున్నారా?"</string>
     <string name="save_password_notnow" msgid="2878327088951240061">"ఇప్పుడు కాదు"</string>
@@ -1450,7 +1450,7 @@
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"ఇన్‌స్టాల్ సెషన్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది. ఇది సక్రియ ప్యాకేజీ ఇన్‌స్టాలేషన్‌ల గురించి వివరాలను చూడటానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"ఇన్‌స్టాల్ ప్యాకేజీలను రిక్వెస్ట్ చేయడం"</string>
     <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"ప్యాకేజీల ఇన్‌స్టాలేషన్ రిక్వెస్ట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"ప్యాకేజీలను తొలగించడానికి అభ్యర్థించు"</string>
+    <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"ప్యాకేజీలను తొలగించడానికి రిక్వెస్ట్ చేయండి"</string>
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"ప్యాకేజీల తొలగింపును రిక్వెస్ట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"బ్యాటరీ అనుకూలీకరణలను విస్మరించడానికి అడగాలి"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ఆ యాప్ కోసం బ్యాటరీ అనుకూలీకరణలు విస్మరించేలా అనుమతి కోరడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -1851,7 +1851,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"అన్‌పిన్ చేయడానికి ముందు అన్‌లాక్ ఆకృతి కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"అన్‌పిన్ చేయడానికి ముందు పాస్‌వర్డ్ కోసం అడుగు"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"మీ నిర్వాహకులు ఇన్‌స్టాల్ చేశారు"</string>
-    <string name="package_updated_device_owner" msgid="7560272363805506941">"మీ నిర్వాహకులు నవీకరించారు"</string>
+    <string name="package_updated_device_owner" msgid="7560272363805506941">"మీ నిర్వాహకులు అప్‌డేట్ చేశారు"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"సరే"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"బ్యాటరీ సేవర్ ముదురు రంగు రూపాన్ని ఆన్ చేసి, బ్యాక్‌గ్రౌండ్ యాక్టివిటీ, కొన్ని విజువల్ ఎఫెక్ట్‌లు, నిర్దిష్ట ఫీచర్‌లు, ఇంకా కొన్ని నెట్‌వర్క్ కనెక్షన్‌లను పరిమితం చేస్తుంది లేదా ఆఫ్ చేస్తుంది."</string>
@@ -1956,12 +1956,12 @@
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ఈ యాప్ పాత వెర్షన్ Android కోసం రూపొందించబడింది మరియు అది సరిగ్గా పని చేయకపోవచ్చు. అప్‌డేట్‌ల కోసం చెక్ చేయడానికి ప్రయత్నించండి లేదా డెవలపర్‌ని సంప్రదించండి."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"అప్‌డేట్ కోసం చెక్ చేయండి"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"మీకు కొత్త మెసేజ్‌లు ఉన్నాయి"</string>
-    <string name="new_sms_notification_content" msgid="3197949934153460639">"వీక్షించడానికి SMS యాప్‌ను తెరవండి"</string>
+    <string name="new_sms_notification_content" msgid="3197949934153460639">"చూడటానికి SMS యాప్‌ను తెరవండి"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"కొంత ఫంక్షనాలిటీ పరిమితం కావచ్చు"</string>
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"కార్యాలయ ప్రొఫైల్ లాక్ అయింది"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"కార్యాలయ ప్రొఫైల్ అన్‌లాక్ చేయుటకు నొక్కండి"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది"</string>
-    <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"ఫైళ్లను వీక్షించడానికి నొక్కండి"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"ఫైళ్లను చూడటానికి నొక్కండి"</string>
     <string name="pin_target" msgid="8036028973110156895">"పిన్ చేయి"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g>ను పిన్ చేయండి"</string>
     <string name="unpin_target" msgid="3963318576590204447">"అన్‌‌పిన్‌ ‌చేయి"</string>

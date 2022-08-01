@@ -652,7 +652,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"আপনার ফোনের দিকে আরও সরাসরি তাকান"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"আপনার ফোনের দিকে আরও সরাসরি তাকান"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"আপনার ফোনের দিকে আরও সরাসরি তাকান"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"আপনার ফেসকে আড়াল করে এমন সব কিছু সরিয়ে দিন।"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"আপনার মুখকে আড়াল করে এমন সব কিছু সরিয়ে দিন।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ব্ল্যাক বার সহ আপনার স্ক্রিনের উপরের অংশ মুছে ফেলুন"</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"আপনার মুখ পুরোপুরি দৃশ্যমান হতে হবে"</string>
     <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"আপনার মুখ পুরোপুরি দৃশ্যমান হতে হবে"</string>

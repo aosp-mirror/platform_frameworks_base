@@ -1693,8 +1693,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                         ((i != idx) || notifyCurrentIndex)) {
                     TotalCaptureResult result = previewMap.valueAt(i).second;
                     Long timestamp = result.get(CaptureResult.SENSOR_TIMESTAMP);
-                    mCaptureResultHandler.onCaptureCompleted(timestamp,
-                            initializeFilteredResults(result));
+                    if (mCaptureResultHandler != null) {
+                        mCaptureResultHandler.onCaptureCompleted(timestamp,
+                                initializeFilteredResults(result));
+                    }
 
                     Log.w(TAG, "Preview frame drop with timestamp: " + previewMap.keyAt(i));
                     final long ident = Binder.clearCallingIdentity();
