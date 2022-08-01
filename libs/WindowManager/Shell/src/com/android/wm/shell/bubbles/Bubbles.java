@@ -23,12 +23,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.app.NotificationChannel;
 import android.content.pm.UserInfo;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
-import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
 
@@ -42,6 +40,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -284,7 +283,7 @@ public interface Bubbles {
 
         void getPendingOrActiveEntry(String key, Consumer<BubbleEntry> callback);
 
-        void getShouldRestoredEntries(ArraySet<String> savedBubbleKeys,
+        void getShouldRestoredEntries(Set<String> savedBubbleKeys,
                 Consumer<List<BubbleEntry>> callback);
 
         void setNotificationInterruption(String key);
