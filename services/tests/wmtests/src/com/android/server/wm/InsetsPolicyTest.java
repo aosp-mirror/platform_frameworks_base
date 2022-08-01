@@ -253,7 +253,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         assertEquals(ITYPE_NAVIGATION_BAR, panelControls[0].getType());
     }
 
-    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testShowTransientBars_bothCanBeTransient_appGetsBothFakeControls() {
         final WindowState statusBar = addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar");
@@ -295,7 +295,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
                 .getSource(ITYPE_NAVIGATION_BAR).isVisible());
     }
 
-    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testShowTransientBars_statusBarCanBeTransient_appGetsStatusBarFakeControl() {
         addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar")
@@ -325,7 +325,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         }
     }
 
-    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testAbortTransientBars_bothCanBeAborted_appGetsBothRealControls() {
         final InsetsSource statusBarSource = addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar")

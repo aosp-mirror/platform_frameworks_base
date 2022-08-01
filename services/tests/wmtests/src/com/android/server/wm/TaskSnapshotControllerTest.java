@@ -190,7 +190,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         }
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
     @Test
     public void testCreateTaskSnapshotWithExcludingIme() {
         Task task = mAppWindow.mActivityRecord.getTask();
@@ -209,7 +209,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         }
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
     @Test
     public void testCreateTaskSnapshotWithIncludingIme() {
         Task task = mAppWindow.mActivityRecord.getTask();
@@ -237,7 +237,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         }
     }
 
-    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testPrepareTaskSnapshot() {
         mAppWindow.mWinAnimator.mLastAlpha = 1f;
