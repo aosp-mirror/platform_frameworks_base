@@ -70,12 +70,10 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseSetArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -109,8 +107,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -177,8 +177,8 @@ public class BubbleController implements ConfigurationChangeListener {
     private int mCurrentUserId;
     // Current profiles of the user (e.g. user with a workprofile)
     private SparseArray<UserInfo> mCurrentProfiles;
-    // Saves notification keys of active bubbles when users are switched.
-    private final SparseSetArray<String> mSavedBubbleKeysPerUser;
+    // Saves data about active bubbles when users are switched.
+    private final SparseArray<UserBubbleData> mSavedUserBubbleData;
 
     // Used when ranking updates occur and we check if things should bubble / unbubble
     private NotificationListenerService.Ranking mTmpRanking;
@@ -271,7 +271,7 @@ public class BubbleController implements ConfigurationChangeListener {
         mCurrentUserId = ActivityManager.getCurrentUser();
         mBubblePositioner = positioner;
         mBubbleData = data;
-        mSavedBubbleKeysPerUser = new SparseSetArray<>();
+        mSavedUserBubbleData = new SparseArray<>();
         mBubbleIconFactory = new BubbleIconFactory(context);
         mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(context);
         mDisplayController = displayController;
@@ -419,6 +419,13 @@ public class BubbleController implements ConfigurationChangeListener {
         // Clear out any persisted bubbles on disk that no longer have a valid user.
         List<UserInfo> users = mUserManager.getAliveUsers();
         mDataRepository.sanitizeBubbles(users);
+
+        // Init profiles
+        SparseArray<UserInfo> userProfiles = new SparseArray<>();
+        for (UserInfo user : mUserManager.getProfiles(mCurrentUserId)) {
+            userProfiles.put(user.id, user);
+        }
+        mCurrentProfiles = userProfiles;
 
         mShellController.addConfigurationChangeListener(this);
     }
@@ -774,11 +781,13 @@ public class BubbleController implements ConfigurationChangeListener {
      */
     private void saveBubbles(@UserIdInt int userId) {
         // First clear any existing keys that might be stored.
-        mSavedBubbleKeysPerUser.remove(userId);
+        mSavedUserBubbleData.remove(userId);
+        UserBubbleData userBubbleData = new UserBubbleData();
         // Add in all active bubbles for the current user.
         for (Bubble bubble : mBubbleData.getBubbles()) {
-            mSavedBubbleKeysPerUser.add(userId, bubble.getKey());
+            userBubbleData.add(bubble.getKey(), bubble.showInShade());
         }
+        mSavedUserBubbleData.put(userId, userBubbleData);
     }
 
     /**
@@ -787,22 +796,23 @@ public class BubbleController implements ConfigurationChangeListener {
      * @param userId the id of the user
      */
     private void restoreBubbles(@UserIdInt int userId) {
-        ArraySet<String> savedBubbleKeys = mSavedBubbleKeysPerUser.get(userId);
-        if (savedBubbleKeys == null) {
+        UserBubbleData savedBubbleData = mSavedUserBubbleData.get(userId);
+        if (savedBubbleData == null) {
             // There were no bubbles saved for this used.
             return;
         }
-        mSysuiProxy.getShouldRestoredEntries(savedBubbleKeys, (entries) -> {
+        mSysuiProxy.getShouldRestoredEntries(savedBubbleData.getKeys(), (entries) -> {
             mMainExecutor.execute(() -> {
                 for (BubbleEntry e : entries) {
                     if (canLaunchInTaskView(mContext, e)) {
-                        updateBubble(e, true /* suppressFlyout */, false /* showInShade */);
+                        boolean showInShade = savedBubbleData.isShownInShade(e.getKey());
+                        updateBubble(e, true /* suppressFlyout */, showInShade);
                     }
                 }
             });
         });
         // Finally, remove the entries for this user now that bubbles are restored.
-        mSavedBubbleKeysPerUser.remove(userId);
+        mSavedUserBubbleData.remove(userId);
     }
 
     @Override
@@ -993,7 +1003,19 @@ public class BubbleController implements ConfigurationChangeListener {
      */
     @VisibleForTesting
     public void updateBubble(BubbleEntry notif) {
-        updateBubble(notif, false /* suppressFlyout */, true /* showInShade */);
+        int bubbleUserId = notif.getStatusBarNotification().getUserId();
+        if (isCurrentProfile(bubbleUserId)) {
+            updateBubble(notif, false /* suppressFlyout */, true /* showInShade */);
+        } else {
+            // Skip update, but store it in user bubbles so it gets restored after user switch
+            mSavedUserBubbleData.get(bubbleUserId, new UserBubbleData()).add(notif.getKey(),
+                    true /* shownInShade */);
+            if (DEBUG_BUBBLE_CONTROLLER) {
+                Log.d(TAG,
+                        "Ignore update to bubble for not active user. Bubble userId=" + bubbleUserId
+                                + " current userId=" + mCurrentUserId);
+            }
+        }
     }
 
     /**
@@ -1840,6 +1862,35 @@ public class BubbleController implements ConfigurationChangeListener {
             } catch (InterruptedException e) {
                 Slog.e(TAG, "Failed to dump BubbleController in 2s");
             }
+        }
+    }
+
+    /**
+     * Bubble data that is stored per user.
+     * Used to store and restore active bubbles during user switching.
+     */
+    private static class UserBubbleData {
+        private final Map<String, Boolean> mKeyToShownInShadeMap = new HashMap<>();
+
+        /**
+         * Add bubble key and whether it should be shown in notification shade
+         */
+        void add(String key, boolean shownInShade) {
+            mKeyToShownInShadeMap.put(key, shownInShade);
+        }
+
+        /**
+         * Get all bubble keys stored for this user
+         */
+        Set<String> getKeys() {
+            return mKeyToShownInShadeMap.keySet();
+        }
+
+        /**
+         * Check if this bubble with the given key should be shown in the notification shade
+         */
+        boolean isShownInShade(String key) {
+            return mKeyToShownInShadeMap.get(key);
         }
     }
 }

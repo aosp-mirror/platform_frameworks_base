@@ -20,13 +20,18 @@ import android.os.Trace
 import android.util.Log
 import com.android.systemui.log.dagger.LogModule
 import com.android.systemui.util.collection.RingBuffer
+import com.google.errorprone.annotations.CompileTimeConstant
 import java.io.PrintWriter
 import java.text.SimpleDateFormat
+import java.util.Arrays.stream
 import java.util.Locale
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import kotlin.concurrent.thread
 import kotlin.math.max
+
+const val UNBOUNDED_STACK_TRACE = -1
+const val NESTED_TRACE_DEPTH = 10
 
 /**
  * A simple ring buffer of recyclable log messages
@@ -69,12 +74,18 @@ import kotlin.math.max
  * @param maxSize The maximum number of messages to keep in memory at any one time. Buffers start
  * out empty and grow up to [maxSize] as new messages are logged. Once the buffer's size reaches
  * the maximum, it behaves like a ring buffer.
+ * @param rootStackTraceDepth The number of stack trace elements to be logged for an exception when
+ * the logBuffer is dumped. Defaulted to -1 [UNBOUNDED_STACK_TRACE] to print the entire stack trace.
+ * @param nestedStackTraceDepth The number of stack trace elements to be logged for any nested
+ * exceptions present in [Throwable.cause] or [Throwable.suppressedExceptions].
  */
 class LogBuffer @JvmOverloads constructor(
     private val name: String,
     private val maxSize: Int,
     private val logcatEchoTracker: LogcatEchoTracker,
-    private val systrace: Boolean = true
+    private val systrace: Boolean = true,
+    private val rootStackTraceDepth: Int = UNBOUNDED_STACK_TRACE,
+    private val nestedStackTraceDepth: Int = NESTED_TRACE_DEPTH,
 ) {
     private val buffer = RingBuffer(maxSize) { LogMessageImpl.create() }
 
@@ -107,11 +118,11 @@ class LogBuffer @JvmOverloads constructor(
      * May also log the message to logcat if echoing is enabled for this buffer or tag.
      *
      * The actual string of the log message is not constructed until it is needed. To accomplish
-     * this, logging a message is a two-step process. First, a fresh instance  of [LogMessage] is
-     * obtained and is passed to the [initializer]. The initializer stores any relevant data on the
-     * message's fields. The message is then inserted into the buffer where it waits until it is
-     * either pushed out by newer messages or it needs to printed. If and when this latter moment
-     * occurs, the [printer] function is called on the message. It reads whatever data the
+     * this, logging a message is a two-step process. First, a fresh instance of [LogMessage] is
+     * obtained and is passed to the [messageInitializer]. The initializer stores any relevant data
+     * on the message's fields. The message is then inserted into the buffer where it waits until it
+     * is either pushed out by newer messages or it needs to printed. If and when this latter moment
+     * occurs, the [messagePrinter] function is called on the message. It reads whatever data the
      * initializer stored and converts it to a human-readable log message.
      *
      * @param tag A string of at most 23 characters, used for grouping logs into categories or
@@ -120,25 +131,47 @@ class LogBuffer @JvmOverloads constructor(
      * echoed. In general, a module should split most of its logs into either INFO or DEBUG level.
      * INFO level should be reserved for information that other parts of the system might care
      * about, leaving the specifics of code's day-to-day operations to DEBUG.
-     * @param initializer A function that will be called immediately to store relevant data on the
-     * log message. The value of `this` will be the LogMessage to be initialized.
-     * @param printer A function that will be called if and when the message needs to be dumped to
-     * logcat or a bug report. It should read the data stored by the initializer and convert it to
-     * a human-readable string. The value of `this` will be the LogMessage to be printed.
-     * **IMPORTANT:** The printer should ONLY ever reference fields on the LogMessage and NEVER any
-     * variables in its enclosing scope. Otherwise, the runtime will need to allocate a new instance
-     * of the printer for each call, thwarting our attempts at avoiding any sort of allocation.
+     * @param messageInitializer A function that will be called immediately to store relevant data
+     * on the log message. The value of `this` will be the LogMessage to be initialized.
+     * @param messagePrinter A function that will be called if and when the message needs to be
+     * dumped to logcat or a bug report. It should read the data stored by the initializer and
+     * convert it to a human-readable string. The value of `this` will be the LogMessage to be
+     * printed. **IMPORTANT:** The printer should ONLY ever reference fields on the LogMessage and
+     * NEVER any variables in its enclosing scope. Otherwise, the runtime will need to allocate a
+     * new instance of the printer for each call, thwarting our attempts at avoiding any sort of
+     * allocation.
+     * @param exception Provide any exception that need to be logged. This is saved as
+     * [LogMessage.exception]
      */
+    @JvmOverloads
     inline fun log(
-        tag: String,
-        level: LogLevel,
-        initializer: LogMessage.() -> Unit,
-        noinline printer: LogMessage.() -> String
+            tag: String,
+            level: LogLevel,
+            messageInitializer: MessageInitializer,
+            noinline messagePrinter: MessagePrinter,
+            exception: Throwable? = null,
     ) {
-        val message = obtain(tag, level, printer)
-        initializer(message)
+        val message = obtain(tag, level, messagePrinter, exception)
+        messageInitializer(message)
         commit(message)
     }
+
+    /**
+     * Logs a compile-time string constant [message] to the log buffer. Use sparingly.
+     *
+     * May also log the message to logcat if echoing is enabled for this buffer or tag. This is for
+     * simpler use-cases where [message] is a compile time string constant. For use-cases where the
+     * log message is built during runtime, use the [LogBuffer.log] overloaded method that takes in
+     * an initializer and a message printer.
+     *
+     * Log buffers are limited by the number of entries, so logging more frequently
+     * will limit the time window that the LogBuffer covers in a bug report.  Richer logs, on the
+     * other hand, make a bug report more actionable, so using the [log] with a messagePrinter to
+     * add more detail to every log may do more to improve overall logging than adding more logs
+     * with this method.
+     */
+    fun log(tag: String, level: LogLevel, @CompileTimeConstant message: String) =
+            log(tag, level, {str1 = message}, { str1!! })
 
     /**
      * You should call [log] instead of this method.
@@ -151,15 +184,16 @@ class LogBuffer @JvmOverloads constructor(
      */
     @Synchronized
     fun obtain(
-        tag: String,
-        level: LogLevel,
-        printer: (LogMessage) -> String
-    ): LogMessageImpl {
+            tag: String,
+            level: LogLevel,
+            messagePrinter: MessagePrinter,
+            exception: Throwable? = null,
+    ): LogMessage {
         if (!mutable) {
             return FROZEN_MESSAGE
         }
         val message = buffer.advance()
-        message.reset(tag, level, System.currentTimeMillis(), printer)
+        message.reset(tag, level, System.currentTimeMillis(), messagePrinter, exception)
         return message
     }
 
@@ -230,19 +264,79 @@ class LogBuffer @JvmOverloads constructor(
         }
     }
 
-    private fun dumpMessage(message: LogMessage, pw: PrintWriter) {
-        pw.print(DATE_FORMAT.format(message.timestamp))
+    private fun dumpMessage(
+        message: LogMessage,
+        pw: PrintWriter
+    ) {
+        val formattedTimestamp = DATE_FORMAT.format(message.timestamp)
+        val shortLevel = message.level.shortString
+        val messageToPrint = message.messagePrinter(message)
+        val tag = message.tag
+        printLikeLogcat(pw, formattedTimestamp, shortLevel, tag, messageToPrint)
+        message.exception?.let { ex ->
+            printException(
+                pw,
+                formattedTimestamp,
+                shortLevel,
+                ex,
+                tag,
+                stackTraceDepth = rootStackTraceDepth)
+        }
+    }
+
+    private fun printException(
+            pw: PrintWriter,
+            timestamp: String,
+            level: String,
+            exception: Throwable,
+            tag: String,
+            exceptionMessagePrefix: String = "",
+            stackTraceDepth: Int = UNBOUNDED_STACK_TRACE
+    ) {
+        val message = "$exceptionMessagePrefix$exception"
+        printLikeLogcat(pw, timestamp, level, tag, message)
+        var stacktraceStream = stream(exception.stackTrace)
+        if (stackTraceDepth != UNBOUNDED_STACK_TRACE) {
+            stacktraceStream = stacktraceStream.limit(stackTraceDepth.toLong())
+        }
+        stacktraceStream.forEach { line ->
+            printLikeLogcat(pw, timestamp, level, tag, "\tat $line")
+        }
+        exception.cause?.let { cause ->
+            printException(pw, timestamp, level, cause, tag, "Caused by: ", nestedStackTraceDepth)
+        }
+        exception.suppressedExceptions.forEach { suppressed ->
+            printException(
+                pw,
+                timestamp,
+                level,
+                suppressed,
+                tag,
+                "Suppressed: ",
+                nestedStackTraceDepth
+            )
+        }
+    }
+
+    private fun printLikeLogcat(
+        pw: PrintWriter,
+        formattedTimestamp: String,
+        shortLogLevel: String,
+        tag: String,
+        message: String
+    ) {
+        pw.print(formattedTimestamp)
         pw.print(" ")
-        pw.print(message.level.shortString)
+        pw.print(shortLogLevel)
         pw.print(" ")
-        pw.print(message.tag)
+        pw.print(tag)
         pw.print(": ")
-        pw.println(message.printer(message))
+        pw.println(message)
     }
 
     private fun echo(message: LogMessage, toLogcat: Boolean, toSystrace: Boolean) {
         if (toLogcat || toSystrace) {
-            val strMessage = message.printer(message)
+            val strMessage = message.messagePrinter(message)
             if (toSystrace) {
                 echoToSystrace(message, strMessage)
             }
@@ -259,15 +353,21 @@ class LogBuffer @JvmOverloads constructor(
 
     private fun echoToLogcat(message: LogMessage, strMessage: String) {
         when (message.level) {
-            LogLevel.VERBOSE -> Log.v(message.tag, strMessage)
-            LogLevel.DEBUG -> Log.d(message.tag, strMessage)
-            LogLevel.INFO -> Log.i(message.tag, strMessage)
-            LogLevel.WARNING -> Log.w(message.tag, strMessage)
-            LogLevel.ERROR -> Log.e(message.tag, strMessage)
-            LogLevel.WTF -> Log.wtf(message.tag, strMessage)
+            LogLevel.VERBOSE -> Log.v(message.tag, strMessage, message.exception)
+            LogLevel.DEBUG -> Log.d(message.tag, strMessage, message.exception)
+            LogLevel.INFO -> Log.i(message.tag, strMessage, message.exception)
+            LogLevel.WARNING -> Log.w(message.tag, strMessage, message.exception)
+            LogLevel.ERROR -> Log.e(message.tag, strMessage, message.exception)
+            LogLevel.WTF -> Log.wtf(message.tag, strMessage, message.exception)
         }
     }
 }
+
+/**
+ * A function that will be called immediately to store relevant data on the log message. The value
+ * of `this` will be the LogMessage to be initialized.
+ */
+typealias MessageInitializer = LogMessage.() -> Unit
 
 private const val TAG = "LogBuffer"
 private val DATE_FORMAT = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US)
