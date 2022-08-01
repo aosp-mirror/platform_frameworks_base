@@ -25,7 +25,7 @@ package com.android.systemui.log
  *
  * When a message is logged, the code doing the logging stores data in one or more of the generic
  * fields ([str1], [int1], etc). When it comes time to dump the message to logcat/bugreport/etc, the
- * [printer] function reads the data stored in the generic fields and converts that to a human-
+ * [messagePrinter] function reads the data stored in the generic fields and converts that to a human-
  * readable string. Thus, for every log type there must be a specialized initializer function that
  * stores data specific to that log type and a specialized printer function that prints that data.
  *
@@ -35,7 +35,8 @@ interface LogMessage {
     val level: LogLevel
     val tag: String
     val timestamp: Long
-    val printer: LogMessage.() -> String
+    val messagePrinter: MessagePrinter
+    val exception: Throwable?
 
     var str1: String?
     var str2: String?
@@ -50,3 +51,13 @@ interface LogMessage {
     var bool3: Boolean
     var bool4: Boolean
 }
+
+/**
+ * A function that will be called if and when the message needs to be dumped to
+ * logcat or a bug report. It should read the data stored by the initializer and convert it to
+ * a human-readable string. The value of `this` will be the LogMessage to be printed.
+ * **IMPORTANT:** The printer should ONLY ever reference fields on the LogMessage and NEVER any
+ * variables in its enclosing scope. Otherwise, the runtime will need to allocate a new instance
+ * of the printer for each call, thwarting our attempts at avoiding any sort of allocation.
+ */
+typealias MessagePrinter = LogMessage.() -> String
