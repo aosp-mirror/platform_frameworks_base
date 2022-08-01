@@ -243,7 +243,7 @@ public class QSCarrierGroupController {
             mActivityStarter.postStartActivityDismissingKeyguard(
                     new Intent(Settings.ACTION_WIRELESS_SETTINGS), 0);
         };
-        view.setOnClickListener(onClickListener);
+
         mNoSimTextView = view.getNoSimTextView();
         mNoSimTextView.setOnClickListener(onClickListener);
         mMainHandler = new H(mainLooper, this::handleUpdateCarrierInfo, this::handleUpdateState);
