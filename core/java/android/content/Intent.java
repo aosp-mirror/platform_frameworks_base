@@ -7124,12 +7124,18 @@ public class Intent implements Parcelable, Cloneable {
      */
     private static final int LOCAL_FLAG_FROM_URI = 1 << 4;
 
+    /**
+     * Local flag indicating this instance was created by the system.
+     */
+    /** @hide */
+    public static final int LOCAL_FLAG_FROM_SYSTEM = 1 << 5;
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // toUri() and parseUri() options.
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "URI_" }, value = {
+    @IntDef(flag = true, prefix = {"URI_"}, value = {
             URI_ALLOW_UNSAFE,
             URI_ANDROID_APP_SCHEME,
             URI_INTENT_SCHEME,
@@ -10535,7 +10541,9 @@ public class Intent implements Parcelable, Cloneable {
         // delivered Intent then it would have been reported when that Intent left the sending
         // process.
         if ((src.mLocalFlags & LOCAL_FLAG_FROM_PARCEL) != 0
-                && (src.mLocalFlags & LOCAL_FLAG_FROM_PROTECTED_COMPONENT) == 0) {
+                && (src.mLocalFlags & (
+                        LOCAL_FLAG_FROM_PROTECTED_COMPONENT
+                                | LOCAL_FLAG_FROM_SYSTEM)) == 0) {
             mLocalFlags |= LOCAL_FLAG_UNFILTERED_EXTRAS;
         }
         return this;
@@ -11878,13 +11886,14 @@ public class Intent implements Parcelable, Cloneable {
         // Detect cases where we're about to launch a potentially unsafe intent
         if (StrictMode.vmUnsafeIntentLaunchEnabled()) {
             if ((mLocalFlags & LOCAL_FLAG_FROM_PARCEL) != 0
-                    && (mLocalFlags & LOCAL_FLAG_FROM_PROTECTED_COMPONENT) == 0) {
+                    && (mLocalFlags
+                    & (LOCAL_FLAG_FROM_PROTECTED_COMPONENT | LOCAL_FLAG_FROM_SYSTEM)) == 0) {
                 StrictMode.onUnsafeIntentLaunch(this);
             } else if ((mLocalFlags & LOCAL_FLAG_UNFILTERED_EXTRAS) != 0) {
                 StrictMode.onUnsafeIntentLaunch(this);
             } else if ((mLocalFlags & LOCAL_FLAG_FROM_URI) != 0
                     && !(mCategories != null && mCategories.contains(CATEGORY_BROWSABLE)
-                        && mComponent == null)) {
+                    && mComponent == null)) {
                 // Since the docs for #URI_ALLOW_UNSAFE recommend setting the category to browsable
                 // for an implicit Intent parsed from a URI a violation should be reported if these
                 // conditions are not met.
@@ -11897,6 +11906,17 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public void prepareToEnterProcess(boolean fromProtectedComponent, AttributionSource source) {
+        if (fromProtectedComponent) {
+            prepareToEnterProcess(LOCAL_FLAG_FROM_PROTECTED_COMPONENT, source);
+        } else {
+            prepareToEnterProcess(0, source);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void prepareToEnterProcess(int localFlags, AttributionSource source) {
         // We just entered destination process, so we should be able to read all
         // parcelables inside.
         setDefusable(true);
@@ -11904,13 +11924,15 @@ public class Intent implements Parcelable, Cloneable {
         if (mSelector != null) {
             // We can't recursively claim that this data is from a protected
             // component, since it may have been filled in by a malicious app
-            mSelector.prepareToEnterProcess(false, source);
+            mSelector.prepareToEnterProcess(0, source);
         }
         if (mClipData != null) {
             mClipData.prepareToEnterProcess(source);
         }
         if (mOriginalIntent != null) {
-            mOriginalIntent.prepareToEnterProcess(false, source);
+            // We can't recursively claim that this data is from a protected
+            // component, since it may have been filled in by a malicious app
+            mOriginalIntent.prepareToEnterProcess(0, source);
         }
 
         if (mContentUserHint != UserHandle.USER_CURRENT) {
@@ -11920,9 +11942,7 @@ public class Intent implements Parcelable, Cloneable {
             }
         }
 
-        if (fromProtectedComponent) {
-            mLocalFlags |= LOCAL_FLAG_FROM_PROTECTED_COMPONENT;
-        }
+        mLocalFlags |= localFlags;
 
         // Special attribution fix-up logic for any BluetoothDevice extras
         // passed via Bluetooth intents

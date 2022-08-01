@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
@@ -10802,14 +10803,19 @@ public class DevicePolicyManager {
      */
     public Intent createAdminSupportIntent(@NonNull String restriction) {
         throwIfParentInstance("createAdminSupportIntent");
+        Intent result = null;
         if (mService != null) {
             try {
-                return mService.createAdminSupportIntent(restriction);
+                result = mService.createAdminSupportIntent(restriction);
+                if (result != null) {
+                    result.prepareToEnterProcess(LOCAL_FLAG_FROM_SYSTEM,
+                            mContext.getAttributionSource());
+                }
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
-        return null;
+        return result;
     }
 
     /**
