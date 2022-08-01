@@ -301,6 +301,35 @@ public class BackupManagerServiceRoboTest {
         verify(mUserOneService, never()).initializeTransports(transports, /* observer */ null);
     }
 
+    /**
+     * Test that the backup services throws a {@link SecurityException} if the caller does not have
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testIsUserReadyForBackup_withoutPermission_throwsSecurityException() {
+        BackupManagerService backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        expectThrows(
+                SecurityException.class,
+                () -> backupManagerService.isUserReadyForBackup(mUserOneId));
+    }
+
+    /**
+     * Test that the backup service does not throw a {@link SecurityException} if the caller has
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testIsUserReadyForBackup_withPermission_callsMethodForUser() {
+        BackupManagerService backupManagerService = createService();
+        registerUser(backupManagerService, UserHandle.USER_SYSTEM, mUserSystemService);
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ true);
+
+        assertThat(backupManagerService.isUserReadyForBackup(mUserOneId)).isTrue();
+    }
+
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testClearBackupData_onRegisteredUser_callsMethodForUser() throws Exception {
