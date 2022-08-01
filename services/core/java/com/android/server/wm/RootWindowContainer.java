@@ -3343,9 +3343,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     @VisibleForTesting
     void getRunningTasks(int maxNum, List<ActivityManager.RunningTaskInfo> list,
-            int flags, int callingUid, ArraySet<Integer> profileIds) {
-        mTaskSupervisor.getRunningTasks().getTasks(maxNum, list, flags, this, callingUid,
-                profileIds);
+            int flags, int callingUid, ArraySet<Integer> profileIds, int displayId) {
+        WindowContainer root = this;
+        if (displayId != INVALID_DISPLAY) {
+            root = getDisplayContent(displayId);
+            if (root == null) {
+                return;
+            }
+        }
+        mTaskSupervisor.getRunningTasks().getTasks(maxNum, list, flags, mService.getRecentTasks(),
+                root, callingUid, profileIds);
     }
 
     void startPowerModeLaunchIfNeeded(boolean forceSend, ActivityRecord targetActivity) {

@@ -1531,10 +1531,10 @@ public class RecentTasksTest extends WindowTestsBase {
         public boolean mLastAllowed;
 
         @Override
-        void getTasks(int maxNum, List<RunningTaskInfo> list, int flags,
-                RootWindowContainer root, int callingUid, ArraySet<Integer> profileIds) {
+        void getTasks(int maxNum, List<RunningTaskInfo> list, int flags, RecentTasks recentTasks,
+                WindowContainer root, int callingUid, ArraySet<Integer> profileIds) {
             mLastAllowed = (flags & FLAG_ALLOWED) == FLAG_ALLOWED;
-            super.getTasks(maxNum, list, flags, root, callingUid, profileIds);
+            super.getTasks(maxNum, list, flags, recentTasks, root, callingUid, profileIds);
         }
     }
 }
