@@ -5434,10 +5434,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             final long callingId = Binder.clearCallingIdentity();
             try {
-                final PackageStateInternal packageState =
-                        snapshot.getPackageStateForInstalledAndFiltered(
-                                packageName, callingUid, userId);
+                final PackageStateInternal packageState = snapshot.getPackageStateInternal(
+                        packageName);
                 if (packageState == null) {
+                    return false;
+                }
+
+                final PackageUserStateInternal userState = packageState.getUserStateOrDefault(
+                        userId);
+                if (userState.isHidden() == hidden || !userState.isInstalled()
+                        || snapshot.shouldFilterApplication(packageState, callingUid, userId)) {
                     return false;
                 }
 
@@ -5467,10 +5473,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 if (hidden && !UserHandle.isSameApp(callingUid, packageState.getAppId())
                         && mProtectedPackages.isPackageStateProtected(userId, packageName)) {
                     Slog.w(TAG, "Not hiding protected package: " + packageName);
-                    return false;
-                }
-
-                if (packageState.getUserStateOrDefault(userId).isHidden() == hidden) {
                     return false;
                 }
 
