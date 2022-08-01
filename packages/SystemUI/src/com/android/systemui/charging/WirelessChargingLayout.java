@@ -33,7 +33,7 @@ import android.widget.TextView;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.ripple.RippleShader;
+import com.android.systemui.ripple.RippleShader.RippleShape;
 import com.android.systemui.ripple.RippleView;
 
 import java.text.NumberFormat;
@@ -41,37 +41,36 @@ import java.text.NumberFormat;
 /**
  * @hide
  */
-public class WirelessChargingLayout extends FrameLayout {
-    public static final int UNKNOWN_BATTERY_LEVEL = -1;
+final class WirelessChargingLayout extends FrameLayout {
     private static final long RIPPLE_ANIMATION_DURATION = 1500;
     private static final int SCRIM_COLOR = 0x4C000000;
     private static final int SCRIM_FADE_DURATION = 300;
     private RippleView mRippleView;
 
-    public WirelessChargingLayout(Context context) {
+    WirelessChargingLayout(Context context, int transmittingBatteryLevel, int batteryLevel,
+            boolean isDozing, RippleShape rippleShape) {
         super(context);
-        init(context, null, false);
+        init(context, null, transmittingBatteryLevel, batteryLevel, isDozing, rippleShape);
     }
 
-    public WirelessChargingLayout(Context context, int transmittingBatteryLevel, int batteryLevel,
-            boolean isDozing) {
+    private WirelessChargingLayout(Context context) {
         super(context);
-        init(context, null, transmittingBatteryLevel, batteryLevel, isDozing);
+        init(context, null, /* isDozing= */ false, RippleShape.CIRCLE);
     }
 
-    public WirelessChargingLayout(Context context, AttributeSet attrs) {
+    private WirelessChargingLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs, false);
+        init(context, attrs, /* isDozing= */false, RippleShape.CIRCLE);
     }
 
-    private void init(Context c, AttributeSet attrs, boolean isDozing) {
-        init(c, attrs, -1, -1, false);
+    private void init(Context c, AttributeSet attrs, boolean isDozing, RippleShape rippleShape) {
+        init(c, attrs, -1, -1, isDozing, rippleShape);
     }
 
     private void init(Context context, AttributeSet attrs, int transmittingBatteryLevel,
-            int batteryLevel, boolean isDozing) {
+            int batteryLevel, boolean isDozing, RippleShape rippleShape) {
         final boolean showTransmittingBatteryLevel =
-                (transmittingBatteryLevel != UNKNOWN_BATTERY_LEVEL);
+                (transmittingBatteryLevel != WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL);
 
         // set style based on background
         int style = R.style.ChargingAnim_WallpaperBackground;
@@ -84,7 +83,7 @@ public class WirelessChargingLayout extends FrameLayout {
         // amount of battery:
         final TextView percentage = findViewById(R.id.wireless_charging_percentage);
 
-        if (batteryLevel != UNKNOWN_BATTERY_LEVEL) {
+        if (batteryLevel != WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL) {
             percentage.setText(NumberFormat.getPercentInstance().format(batteryLevel / 100f));
             percentage.setAlpha(0);
         }
@@ -138,8 +137,7 @@ public class WirelessChargingLayout extends FrameLayout {
         animatorSetScrim.start();
 
         mRippleView = findViewById(R.id.wireless_charging_ripple);
-        // TODO: Make rounded box shape if the device is tablet.
-        mRippleView.setupShader(RippleShader.RippleShape.CIRCLE);
+        mRippleView.setupShader(rippleShape);
         OnAttachStateChangeListener listener = new OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View view) {
@@ -233,8 +231,12 @@ public class WirelessChargingLayout extends FrameLayout {
             int width = getMeasuredWidth();
             int height = getMeasuredHeight();
             mRippleView.setCenter(width * 0.5f, height * 0.5f);
-            float maxSize = Math.max(width, height);
-            mRippleView.setMaxSize(maxSize, maxSize);
+            if (mRippleView.getRippleShape() == RippleShape.ROUNDED_BOX) {
+                mRippleView.setMaxSize(width * 1.5f, height * 1.5f);
+            } else {
+                float maxSize = Math.max(width, height);
+                mRippleView.setMaxSize(maxSize, maxSize);
+            }
             mRippleView.setColor(Utils.getColorAttr(mRippleView.getContext(),
                     android.R.attr.colorAccent).getDefaultColor());
         }
