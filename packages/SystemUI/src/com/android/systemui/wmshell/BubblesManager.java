@@ -40,7 +40,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.ZenModeConfig;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -83,6 +82,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -262,7 +262,7 @@ public class BubblesManager implements Dumpable {
             }
 
             @Override
-            public void getShouldRestoredEntries(ArraySet<String> savedBubbleKeys,
+            public void getShouldRestoredEntries(Set<String> savedBubbleKeys,
                     Consumer<List<BubbleEntry>> callback) {
                 sysuiMainExecutor.execute(() -> {
                     List<BubbleEntry> result = new ArrayList<>();

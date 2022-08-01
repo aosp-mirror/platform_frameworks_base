@@ -5324,7 +5324,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void setRunningRemoteTransitionDelegate(IApplicationThread caller) {
+    public void setRunningRemoteTransitionDelegate(IApplicationThread delegate) {
+        final TransitionController controller = getTransitionController();
+        // A quick path without entering WM lock.
+        if (delegate != null && controller.mRemotePlayer.reportRunning(delegate)) {
+            // The delegate was known as running remote transition.
+            return;
+        }
         mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "setRunningRemoteTransition");
         final int callingPid = Binder.getCallingPid();
@@ -5341,13 +5347,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 Slog.e(TAG, msg);
                 throw new SecurityException(msg);
             }
-            final WindowProcessController wpc = getProcessController(caller);
+            final WindowProcessController wpc = getProcessController(delegate);
             if (wpc == null) {
-                Slog.w(TAG, "Unable to find process for application " + caller);
+                Slog.w(TAG, "setRunningRemoteTransition: no process for " + delegate);
                 return;
             }
-            wpc.setRunningRemoteAnimation(true /* running */);
-            callingProc.addRemoteAnimationDelegate(wpc);
+            controller.mRemotePlayer.update(wpc, true /* running */, false /* predict */);
         }
     }
 

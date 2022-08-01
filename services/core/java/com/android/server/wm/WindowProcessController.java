@@ -77,7 +77,6 @@ import com.android.server.wm.ActivityTaskManagerService.HotPath;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -226,10 +225,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     /** Whether our process is currently running a {@link IRemoteAnimationRunner} */
     private boolean mRunningRemoteAnimation;
-
-    /** List of "chained" processes that are running remote animations for this process */
-    private final ArrayList<WeakReference<WindowProcessController>> mRemoteAnimationDelegates =
-            new ArrayList<>();
 
     // The bits used for mActivityStateFlags.
     private static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 1 << 16;
@@ -1663,30 +1658,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         updateRunningRemoteOrRecentsAnimation();
     }
 
-    /**
-     * Marks another process as a "delegate" animator. This means that process is doing some part
-     * of a remote animation on behalf of this process.
-     */
-    void addRemoteAnimationDelegate(WindowProcessController delegate) {
-        if (!isRunningRemoteTransition()) {
-            throw new IllegalStateException("Can't add a delegate to a process which isn't itself"
-                    + " running a remote animation");
-        }
-        mRemoteAnimationDelegates.add(new WeakReference<>(delegate));
-    }
-
     void updateRunningRemoteOrRecentsAnimation() {
-        if (!isRunningRemoteTransition()) {
-            // Clean-up any delegates
-            for (int i = 0; i < mRemoteAnimationDelegates.size(); ++i) {
-                final WindowProcessController delegate = mRemoteAnimationDelegates.get(i).get();
-                if (delegate == null) continue;
-                delegate.setRunningRemoteAnimation(false);
-                delegate.setRunningRecentsAnimation(false);
-            }
-            mRemoteAnimationDelegates.clear();
-        }
-
         // Posting on handler so WM lock isn't held when we call into AM.
         mAtm.mH.sendMessage(PooledLambda.obtainMessage(
                 WindowProcessListener::setRunningRemoteAnimation, mListener,

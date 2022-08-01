@@ -55,7 +55,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.IApplicationThread;
 import android.app.WindowConfiguration;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -1449,11 +1448,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             synchronized (mGlobalLock) {
                 final WindowProcessController wpc =
                         mService.getProcessController(callerPid, callerUid);
-                IApplicationThread appThread = null;
-                if (wpc != null) {
-                    appThread = wpc.getThread();
-                }
-                mTransitionController.registerTransitionPlayer(player, appThread);
+                mTransitionController.registerTransitionPlayer(player, wpc);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
