@@ -71,6 +71,7 @@ import androidx.test.filters.Suppress;
 
 import com.android.frameworks.servicestests.R;
 import com.android.internal.content.InstallLocationUtils;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
@@ -341,9 +342,9 @@ public class PackageManagerTests extends AndroidTestCase {
         return Uri.fromFile(outFile);
     }
 
-    private ParsingPackage parsePackage(Uri packageURI) {
+    private ParsedPackage parsePackage(Uri packageURI) {
         final String archiveFilePath = packageURI.getPath();
-        ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefaultOneTime(
+        ParseResult<ParsedPackage> result = ParsingPackageUtils.parseDefaultOneTime(
                 new File(archiveFilePath), 0 /*flags*/, Collections.emptyList(),
                 false /*collectCertificates*/);
         if (result.isError()) {
@@ -433,7 +434,7 @@ public class PackageManagerTests extends AndroidTestCase {
         return INSTALL_LOC_ERR;
     }
 
-    private void assertInstall(ParsingPackage pkg, int flags, int expInstallLocation) {
+    private void assertInstall(ParsedPackage pkg, int flags, int expInstallLocation) {
         try {
             String pkgName = pkg.getPackageName();
             ApplicationInfo info = getPm().getApplicationInfo(pkgName, 0);
@@ -581,14 +582,14 @@ public class PackageManagerTests extends AndroidTestCase {
     class InstallParams {
         Uri packageURI;
 
-        ParsingPackage pkg;
+        ParsedPackage pkg;
 
         InstallParams(String outFileName, int rawResId) {
             this.pkg = getParsedPackage(outFileName, rawResId);
             this.packageURI = Uri.fromFile(new File(pkg.getPath()));
         }
 
-        InstallParams(ParsingPackage pkg) {
+        InstallParams(ParsedPackage pkg) {
             this.packageURI = Uri.fromFile(new File(pkg.getPath()));
             this.pkg = pkg;
         }
@@ -696,7 +697,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    private ParsingPackage getParsedPackage(String outFileName, int rawResId) {
+    private ParsedPackage getParsedPackage(String outFileName, int rawResId) {
         PackageManager pm = mContext.getPackageManager();
         File filesDir = mContext.getFilesDir();
         File outFile = new File(filesDir, outFileName);
@@ -712,7 +713,7 @@ public class PackageManagerTests extends AndroidTestCase {
     private void installFromRawResource(InstallParams ip, int flags, boolean cleanUp, boolean fail,
             int result, int expInstallLocation) throws Exception {
         PackageManager pm = mContext.getPackageManager();
-        ParsingPackage pkg = ip.pkg;
+        ParsedPackage pkg = ip.pkg;
         Uri packageURI = ip.packageURI;
         if ((flags & PackageManager.INSTALL_REPLACE_EXISTING) == 0) {
             // Make sure the package doesn't exist
@@ -1876,7 +1877,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
         String apk1Name = "install1.apk";
         String apk2Name = "install2.apk";
-        ParsingPackage pkg1 = getParsedPackage(apk1Name, apk1);
+        var pkg1 = getParsedPackage(apk1Name, apk1);
         try {
             InstallParams ip = installFromRawResource(apk1Name, apk1, 0, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -2474,7 +2475,7 @@ public class PackageManagerTests extends AndroidTestCase {
             File outFile = new File(filesDir, apk2Name);
             int rawResId = apk2;
             Uri packageURI = getInstallablePackage(rawResId, outFile);
-            ParsingPackage pkg = parsePackage(packageURI);
+            var pkg = parsePackage(packageURI);
             try {
                 getPi().uninstall(pkg.getPackageName(),
                         PackageManager.DELETE_ALL_USERS,
@@ -2544,8 +2545,8 @@ public class PackageManagerTests extends AndroidTestCase {
             int retCode, int expMatchResult) throws Exception {
         String apk1Name = "install1.apk";
         String apk2Name = "install2.apk";
-        ParsingPackage pkg1 = getParsedPackage(apk1Name, apk1);
-        ParsingPackage pkg2 = getParsedPackage(apk2Name, apk2);
+        var pkg1 = getParsedPackage(apk1Name, apk1);
+        var pkg2 = getParsedPackage(apk2Name, apk2);
 
         try {
             // Clean up before testing first.
@@ -2641,7 +2642,7 @@ public class PackageManagerTests extends AndroidTestCase {
                     false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
             PackageManager pm = mContext.getPackageManager();
             // Delete app2
-            ParsingPackage pkg = getParsedPackage(apk2Name, apk2);
+            var pkg = getParsedPackage(apk2Name, apk2);
             try {
                 getPi().uninstall(pkg.getPackageName(), PackageManager.DELETE_ALL_USERS,
                         null /*statusReceiver*/);

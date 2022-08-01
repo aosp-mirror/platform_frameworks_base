@@ -75,7 +75,6 @@ import com.android.server.pm.pkg.component.ParsedProcess;
 import com.android.server.pm.pkg.component.ParsedProvider;
 import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.pm.pkg.component.ParsedUsesPermission;
-import com.android.server.pm.pkg.parsing.ParsingPackageRead;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.pkg.parsing.ParsingUtils;
 
@@ -142,7 +141,7 @@ public class PackageInfoUtils {
         PackageInfo info = new PackageInfo();
         info.packageName = pkg.getPackageName();
         info.splitNames = pkg.getSplitNames();
-        ParsingPackageUtils.fillVersionCodes(pkg, info);
+        AndroidPackageUtils.fillVersionCodes(pkg, info);
         info.baseRevisionCode = pkg.getBaseRevisionCode();
         info.splitRevisionCodes = pkg.getSplitRevisionCodes();
         info.versionName = pkg.getVersionName();
@@ -462,7 +461,7 @@ public class PackageInfoUtils {
         }
 
         // Make shallow copy so we can store the metadata/libraries safely
-        ApplicationInfo info = ParsingPackageUtils.toAppInfoWithoutState(pkg);
+        ApplicationInfo info = AndroidPackageUtils.toAppInfoWithoutState(pkg);
 
         updateApplicationInfo(info, flags, state);
 
@@ -1100,7 +1099,7 @@ public class PackageInfoUtils {
     }
 
     @NonNull
-    public static File getDataDir(ParsingPackageRead pkg, int userId) {
+    public static File getDataDir(AndroidPackage pkg, int userId) {
         if ("android".equals(pkg.getPackageName())) {
             return Environment.getDataSystemDirectory();
         }

@@ -218,13 +218,13 @@ public class PackageParserTest {
         setKnownFields(pkg);
 
         Parcel p = Parcel.obtain();
-        ((Parcelable) pkg).writeToParcel(p, 0 /* flags */);
+        ((Parcelable) pkg.hideAsParsed().hideAsFinal()).writeToParcel(p, 0 /* flags */);
 
         p.setDataPosition(0);
-        ParsingPackage deserialized = new PackageImpl(p);
+        AndroidPackage deserialized = new PackageImpl(p);
 
         p.setDataPosition(0);
-        ParsingPackage deserialized2 = new PackageImpl(p);
+        AndroidPackage deserialized2 = new PackageImpl(p);
 
         assertSame(deserialized.getPackageName(), deserialized2.getPackageName());
         assertSame(deserialized.getPermission(),

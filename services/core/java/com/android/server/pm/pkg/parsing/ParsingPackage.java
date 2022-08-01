@@ -24,12 +24,14 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
-import android.content.pm.PackageManager.Property;
+import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
 import android.os.Bundle;
+import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
+import com.android.internal.R;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedApexSystemService;
@@ -44,6 +46,7 @@ import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.pm.pkg.component.ParsedUsesPermission;
 
 import java.security.PublicKey;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,7 +56,7 @@ import java.util.Set;
  * @hide
  */
 @SuppressWarnings("UnusedReturnValue")
-public interface ParsingPackage extends ParsingPackageRead {
+public interface ParsingPackage {
 
     ParsingPackage addActivity(ParsedActivity parsedActivity);
 
@@ -84,7 +87,7 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage addPreferredActivityFilter(String className, ParsedIntentInfo intentInfo);
 
     /** Add a property to the application scope */
-    ParsingPackage addProperty(Property property);
+    ParsingPackage addProperty(PackageManager.Property property);
 
     ParsingPackage addProtectedBroadcast(String protectedBroadcast);
 
@@ -394,4 +397,137 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     @CallSuper
     ParsedPackage hideAsParsed();
+
+    // The remaining methods are copied out of [AndroidPackage] so that the parsing variant does
+    // not implement the final API interface and can't accidentally be used without finalizing
+    // the parsing process.
+
+    @NonNull
+    List<ParsedActivity> getActivities();
+
+    @NonNull
+    List<ParsedAttribution> getAttributions();
+
+    @NonNull
+    String getBaseApkPath();
+
+    @Nullable
+    String getClassLoaderName();
+
+    @NonNull
+    List<ConfigurationInfo> getConfigPreferences();
+
+    @NonNull
+    List<ParsedInstrumentation> getInstrumentations();
+
+    @NonNull
+    Map<String, ArraySet<PublicKey>> getKeySetMapping();
+
+    @NonNull
+    List<String> getLibraryNames();
+
+    float getMaxAspectRatio();
+
+    int getMaxSdkVersion();
+
+    @Nullable
+    Bundle getMetaData();
+
+    float getMinAspectRatio();
+
+    int getMinSdkVersion();
+
+    String getPackageName();
+
+    @Nullable
+    String getPermission();
+
+    @NonNull
+    List<ParsedPermission> getPermissions();
+
+    @NonNull
+    String getProcessName();
+
+    @NonNull
+    List<ParsedProvider> getProviders();
+
+    @NonNull
+    List<String> getRequestedPermissions();
+
+    @Nullable
+    Boolean getResizeableActivity();
+
+    @Nullable
+    String getSdkLibName();
+
+    @NonNull
+    List<ParsedService> getServices();
+
+    @Nullable
+    String getSharedUserId();
+
+    @NonNull
+    String[] getSplitCodePaths();
+
+    @NonNull
+    String[] getSplitNames();
+
+    @Nullable
+    String getStaticSharedLibName();
+
+    int getTargetSdkVersion();
+
+    @Nullable
+    String getTaskAffinity();
+
+    int getUiOptions();
+
+    @NonNull
+    List<String> getUsesLibraries();
+
+    @NonNull
+    List<String> getUsesNativeLibraries();
+
+    @NonNull
+    List<ParsedUsesPermission> getUsesPermissions();
+
+    @NonNull
+    List<String> getUsesSdkLibraries();
+
+    @Nullable
+    long[] getUsesSdkLibrariesVersionsMajor();
+
+    @NonNull
+    List<String> getUsesStaticLibraries();
+
+    @Nullable
+    String getZygotePreloadName();
+
+    boolean isAllowBackup();
+
+    boolean isAllowTaskReparenting();
+
+    boolean isAnyDensity();
+
+    boolean isBaseHardwareAccelerated();
+
+    boolean isCantSaveState();
+
+    boolean isProfileable();
+
+    boolean isProfileableByShell();
+
+    boolean isResizeable();
+
+    boolean isResizeableActivityViaSdkVersion();
+
+    boolean isStaticSharedLibrary();
+
+    boolean isSupportsExtraLargeScreens();
+
+    boolean isSupportsLargeScreens();
+
+    boolean isSupportsNormalScreens();
+
+    boolean isSupportsSmallScreens();
 }

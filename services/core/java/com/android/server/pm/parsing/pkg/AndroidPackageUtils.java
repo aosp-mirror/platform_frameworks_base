@@ -19,16 +19,11 @@ package com.android.server.pm.parsing.pkg;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VersionedPackage;
 import android.content.pm.dex.DexMetadataHelper;
-import com.android.server.pm.pkg.parsing.ParsingPackageRead;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedInstrumentation;
-import com.android.server.pm.pkg.component.ParsedProvider;
-import com.android.server.pm.pkg.component.ParsedService;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.incremental.IncrementalManager;
@@ -38,7 +33,13 @@ import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
 import com.android.server.pm.PackageManagerException;
+import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.component.ParsedActivity;
+import com.android.server.pm.pkg.component.ParsedInstrumentation;
+import com.android.server.pm.pkg.component.ParsedProvider;
+import com.android.server.pm.pkg.component.ParsedService;
+import com.android.server.pm.pkg.parsing.ParsingPackageHidden;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -259,11 +260,6 @@ public class AndroidPackageUtils {
         return ApplicationInfo.HIDDEN_API_ENFORCEMENT_ENABLED;
     }
 
-    public static int getIcon(ParsingPackageRead pkg) {
-        return (ParsingPackageUtils.sUseRoundIcon && pkg.getRoundIconRes() != 0)
-                ? pkg.getRoundIconRes() : pkg.getIconRes();
-    }
-
     /**
      * Returns false iff the provided flags include the {@link PackageManager#MATCH_SYSTEM_ONLY}
      * flag and the provided package is not a system package. Otherwise returns {@code true}.
@@ -337,5 +333,14 @@ public class AndroidPackageUtils {
         }
 
         return pkg.getManifestPackageName();
+    }
+
+    public static void fillVersionCodes(@NonNull AndroidPackage pkg, @NonNull PackageInfo info) {
+        info.versionCode = ((ParsingPackageHidden) pkg).getVersionCode();
+        info.versionCodeMajor = ((ParsingPackageHidden) pkg).getVersionCodeMajor();
+    }
+
+    public static ApplicationInfo toAppInfoWithoutState(AndroidPackageApi pkg) {
+        return ((ParsingPackageHidden) pkg).toAppInfoWithoutState();
     }
 }

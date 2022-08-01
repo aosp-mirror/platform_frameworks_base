@@ -82,7 +82,6 @@ import com.android.server.pm.pkg.component.ParsedUsesPermission;
 import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
 import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackageHidden;
-import com.android.server.pm.pkg.parsing.ParsingPackageRead;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.pkg.parsing.ParsingUtils;
 
@@ -370,7 +369,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackage,
     @DataClass.ParcelWith(ForInternedString.class)
     private String zygotePreloadName;
     /**
-     * @see ParsingPackageRead#getResizeableActivity()
+     * @see AndroidPackage#getResizeableActivity()
      */
     @Nullable
     @DataClass.ParcelWith(Parcelling.BuiltIn.ForBoolean.class)
@@ -1182,9 +1181,6 @@ public class PackageImpl implements ParsedPackage, AndroidPackage,
         return requiresSmallestWidthDp;
     }
 
-    /**
-     * @see ParsingPackageRead#getResizeableActivity()
-     */
     @Nullable
     @Override
     public Boolean getResizeableActivity() {
@@ -2191,9 +2187,6 @@ public class PackageImpl implements ParsedPackage, AndroidPackage,
         return this;
     }
 
-    /**
-     * @see ParsingPackageRead#getResizeableActivity()
-     */
     @Override
     public PackageImpl setResizeableActivity(@Nullable Boolean value) {
         resizeableActivity = value;

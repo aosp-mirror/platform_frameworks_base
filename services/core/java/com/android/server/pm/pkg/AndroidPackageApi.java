@@ -20,9 +20,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.PackageInfo;
 import android.util.SparseArray;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -37,7 +39,7 @@ import java.util.List;
 
 /**
  * Explicit interface used for consumers like mainline who need a {@link SystemApi @SystemApi} form
- * of {@link AndroidPackage}. *
+ * of {@link AndroidPackage}.
  * @hide
  */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
@@ -45,8 +47,17 @@ public interface AndroidPackageApi {
 
     boolean areAttributionsUserVisible();
 
+    @NonNull
+    List<ParsedActivity> getActivities();
+
+    @NonNull
+    List<String> getAdoptPermissions();
+
     @Nullable
     String getAppComponentFactory();
+
+    @NonNull
+    List<ParsedAttribution> getAttributions();
 
     int getAutoRevokePermissions();
 
@@ -58,6 +69,8 @@ public interface AndroidPackageApi {
     @NonNull
     String getBaseApkPath();
 
+    int getBaseRevisionCode();
+
     int getCategory();
 
     @Nullable
@@ -68,9 +81,20 @@ public interface AndroidPackageApi {
 
     int getCompatibleWidthLimitDp();
 
+    int getCompileSdkVersion();
+
+    @Nullable
+    String getCompileSdkVersionCodeName();
+
+    @NonNull
+    List<ConfigurationInfo> getConfigPreferences();
+
     int getDataExtractionRules();
 
     int getDescriptionRes();
+
+    @NonNull
+    List<FeatureGroupInfo> getFeatureGroups();
 
     int getFullBackupContent();
 
@@ -78,13 +102,21 @@ public interface AndroidPackageApi {
 
     int getIconRes();
 
+    @NonNull
+    List<String> getImplicitPermissions();
+
     int getInstallLocation();
+
+    @NonNull
+    List<ParsedInstrumentation> getInstrumentations();
 
     int getLabelRes();
 
     int getLargestWidthLimitDp();
 
     int getLogo();
+
+    long getLongVersionCode();
 
     @Nullable
     String getManageSpaceActivityName();
@@ -99,10 +131,25 @@ public interface AndroidPackageApi {
 
     int getNativeHeapZeroInitialized();
 
+    /**
+         * @see ApplicationInfo#nativeLibraryDir
+         */
+    @Nullable
+    String getNativeLibraryDir();
+
+    /**
+         * @see ApplicationInfo#nativeLibraryRootDir
+         */
+    @Nullable
+    String getNativeLibraryRootDir();
+
     int getNetworkSecurityConfigRes();
 
     @Nullable
     CharSequence getNonLocalizedLabel();
+
+    @NonNull
+    String getPackageName();
 
     @NonNull
     String getPath();
@@ -111,7 +158,25 @@ public interface AndroidPackageApi {
     String getPermission();
 
     @NonNull
+    List<ParsedPermission> getPermissions();
+
+    @NonNull
     String getProcessName();
+
+    @NonNull
+    List<ParsedProvider> getProviders();
+
+    @NonNull
+    List<ParsedActivity> getReceivers();
+
+    @NonNull
+    List<FeatureInfo> getRequestedFeatures();
+
+    @NonNull
+    List<String> getRequestedPermissions();
+
+    @Nullable
+    String getRequiredAccountType();
 
     int getRequiresSmallestWidthDp();
 
@@ -119,7 +184,24 @@ public interface AndroidPackageApi {
     @Nullable
     Boolean getResizeableActivity();
 
+    @Nullable
+    String getRestrictedAccountType();
+
     int getRoundIconRes();
+
+    /**
+         * @see ApplicationInfo#secondaryNativeLibraryDir
+         */
+    @Nullable
+    String getSecondaryNativeLibraryDir();
+
+    @NonNull
+    List<ParsedService> getServices();
+
+    @Nullable
+    String getSharedUserId();
+
+    int getSharedUserLabel();
 
     @NonNull
     String[] getSplitClassLoaderNames();
@@ -130,9 +212,15 @@ public interface AndroidPackageApi {
     @Nullable
     SparseArray<int[]> getSplitDependencies();
 
-    int getTargetSdkVersion();
+    @NonNull
+    String[] getSplitNames();
+
+    @NonNull
+    int[] getSplitRevisionCodes();
 
     int getTargetSandboxVersion();
+
+    int getTargetSdkVersion();
 
     @Nullable
     String getTaskAffinity();
@@ -140,6 +228,18 @@ public interface AndroidPackageApi {
     int getTheme();
 
     int getUiOptions();
+
+    /**
+         * This is an appId, the {@link ApplicationInfo#uid} if the user ID is
+         * {@link android.os.UserHandle#SYSTEM}.
+         *
+         * @deprecated Use {@link PackageState#getAppId()} instead.
+         */
+    @Deprecated
+    int getUid();
+
+    @Nullable
+    String getVersionName();
 
     @Nullable
     String getVolumeUuid();
@@ -167,11 +267,18 @@ public interface AndroidPackageApi {
 
     boolean isAnyDensity();
 
+    boolean isApex();
+
     boolean isBackupInForeground();
 
     boolean isBaseHardwareAccelerated();
 
     boolean isCantSaveState();
+
+    /**
+     * @see PackageInfo#coreApp
+     */
+    boolean isCoreApp();
 
     boolean isCrossProfile();
 
@@ -186,6 +293,11 @@ public interface AndroidPackageApi {
     boolean isExternalStorage();
 
     boolean isExtractNativeLibs();
+
+    /**
+         * @see ApplicationInfo#FLAG_FACTORY_TEST
+         */
+    boolean isFactoryTest();
 
     boolean isFullBackupOnly();
 
@@ -203,11 +315,36 @@ public interface AndroidPackageApi {
 
     boolean isMultiArch();
 
+    /**
+         * @see ApplicationInfo#nativeLibraryRootRequiresIsa
+         */
+    boolean isNativeLibraryRootRequiresIsa();
+
+    /**
+         * @see ApplicationInfo#PRIVATE_FLAG_ODM
+         */
+    boolean isOdm();
+
+    /**
+         * @see ApplicationInfo#PRIVATE_FLAG_OEM
+         */
+    boolean isOem();
+
     boolean isOverlay();
 
     boolean isPartiallyDirectBootAware();
 
     boolean isPersistent();
+
+    /**
+         * @see ApplicationInfo#PRIVATE_FLAG_PRIVILEGED
+         */
+    boolean isPrivileged();
+
+    /**
+         * @see ApplicationInfo#PRIVATE_FLAG_PRODUCT
+         */
+    boolean isProduct();
 
     boolean isProfileable();
 
@@ -215,15 +352,27 @@ public interface AndroidPackageApi {
 
     boolean isRequestLegacyExternalStorage();
 
+    boolean isRequiredForAllUsers();
+
     boolean isResizeable();
 
     boolean isResizeableActivityViaSdkVersion();
 
     boolean isRestoreAnyVersion();
 
+    boolean isSdkLibrary();
+
+    /**
+         * @see ApplicationInfo#PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY
+         */
+    boolean isSignedWithPlatformKey();
+
     boolean isStaticSharedLibrary();
 
-    boolean isSdkLibrary();
+    /**
+     * @see PackageInfo#isStub
+     */
+    boolean isStub();
 
     boolean isSupportsExtraLargeScreens();
 
@@ -235,6 +384,16 @@ public interface AndroidPackageApi {
 
     boolean isSupportsSmallScreens();
 
+    /**
+     * @see ApplicationInfo#FLAG_SYSTEM
+     */
+    boolean isSystem();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_SYSTEM_EXT
+     */
+    boolean isSystemExt();
+
     boolean isTestOnly();
 
     boolean isUseEmbeddedDex();
@@ -243,115 +402,10 @@ public interface AndroidPackageApi {
 
     boolean isUsesNonSdkApi();
 
-    boolean isVmSafeMode();
-
-    @NonNull
-    List<ParsedActivity> getActivities();
-
-    @NonNull
-    List<ParsedAttribution> getAttributions();
-
-    @NonNull
-    List<String> getAdoptPermissions();
-
-    int getBaseRevisionCode();
-
-    int getCompileSdkVersion();
-
-    @Nullable
-    String getCompileSdkVersionCodeName();
-
-    @NonNull
-    List<ConfigurationInfo> getConfigPreferences();
-
-    @NonNull
-    List<FeatureGroupInfo> getFeatureGroups();
-
-    @NonNull
-    List<String> getImplicitPermissions();
-
-    @NonNull
-    List<ParsedInstrumentation> getInstrumentations();
-
-    long getLongVersionCode();
-
-    @NonNull
-    String getPackageName();
-
-    @NonNull
-    List<ParsedPermission> getPermissions();
-
-    @NonNull
-    List<ParsedProvider> getProviders();
-
-    @NonNull
-    List<ParsedActivity> getReceivers();
-
-    @NonNull
-    List<FeatureInfo> getRequestedFeatures();
-
-    @NonNull
-    List<String> getRequestedPermissions();
-
-    @Nullable
-    String getRequiredAccountType();
-
-    @Nullable
-    String getRestrictedAccountType();
-
-    @NonNull
-    List<ParsedService> getServices();
-
-    @Nullable
-    String getSharedUserId();
-
-    int getSharedUserLabel();
-
-    @NonNull
-    String[] getSplitNames();
-
-    @NonNull
-    int[] getSplitRevisionCodes();
-
-    @Nullable
-    String getVersionName();
-
-    boolean isRequiredForAllUsers();
-
-    @Nullable
-    String getNativeLibraryDir();
-
-    @Nullable
-    String getNativeLibraryRootDir();
-
-    @Nullable
-    String getSecondaryNativeLibraryDir();
-
-    int getUid();
-
-    boolean isFactoryTest();
-
-    boolean isApex();
-
-    boolean isNativeLibraryRootRequiresIsa();
-
-    boolean isOdm();
-
-    boolean isOem();
-
-    boolean isPrivileged();
-
-    boolean isProduct();
-
-    boolean isSignedWithPlatformKey();
-
-    boolean isSystem();
-
-    boolean isSystemExt();
-
+    /**
+         * @see ApplicationInfo#PRIVATE_FLAG_VENDOR
+         */
     boolean isVendor();
 
-    boolean isCoreApp();
-
-    boolean isStub();
+    boolean isVmSafeMode();
 }

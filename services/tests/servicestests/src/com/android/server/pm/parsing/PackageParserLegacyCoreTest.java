@@ -580,21 +580,21 @@ public class PackageParserLegacyCoreTest {
         apexInfo.versionCode = 191000070;
         int flags = PackageManager.GET_META_DATA | PackageManager.GET_SIGNING_CERTIFICATES;
 
-        ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefaultOneTime(apexFile,
+        ParseResult<ParsedPackage> result = ParsingPackageUtils.parseDefaultOneTime(apexFile,
                 flags, Collections.emptyList(), false /*collectCertificates*/);
         if (result.isError()) {
             throw new IllegalStateException(result.getErrorMessage(), result.getException());
         }
 
         ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
-        ParsingPackage pkg = result.getResult();
+        ParsedPackage pkg = result.getResult();
         ParseResult<SigningDetails> ret = ParsingPackageUtils.getSigningDetails(
                 input, pkg, false /*skipVerify*/);
         if (ret.isError()) {
             throw new IllegalStateException(ret.getErrorMessage(), ret.getException());
         }
         pkg.setSigningDetails(ret.getResult());
-        PackageInfo pi = PackageInfoUtils.generate(pkg.hideAsParsed().setApex(true), apexInfo,
+        PackageInfo pi = PackageInfoUtils.generate(pkg.setApex(true).hideAsFinal(), apexInfo,
                 flags, null, UserHandle.USER_SYSTEM);
 
         assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);

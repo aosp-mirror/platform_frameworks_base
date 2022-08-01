@@ -24,6 +24,7 @@ import android.content.pm.parsing.result.ParseResult
 import android.platform.test.annotations.Presubmit
 import androidx.test.InstrumentationRegistry
 import com.android.frameworks.servicestests.R
+import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Rule
@@ -114,7 +115,7 @@ class PackageParsingDeferErrorTest {
         assertThat(result.isError).isTrue()
     }
 
-    private fun parseFile(@RawRes id: Int): ParseResult<ParsingPackage> {
+    private fun parseFile(@RawRes id: Int): ParseResult<ParsedPackage> {
         val file = tempFolder.newFile()
         context.resources.openRawResource(id).use { input ->
             file.outputStream().use { output ->
