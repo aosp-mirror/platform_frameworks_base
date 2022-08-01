@@ -26,7 +26,6 @@ import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
@@ -38,7 +37,6 @@ import com.android.internal.widget.CachingIconView
 import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.view.ViewUtil
@@ -61,7 +59,6 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
         @Main private val mainExecutor: DelayableExecutor,
         private val accessibilityManager: AccessibilityManager,
         private val configurationController: ConfigurationController,
-        private val tapGestureDetector: TapGestureDetector,
         private val powerManager: PowerManager,
         @LayoutRes private val chipLayoutRes: Int,
 ) {
@@ -111,7 +108,6 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
         } else {
             // The chip is new, so set up all our callbacks and inflate the view
             configurationController.addCallback(displayScaleListener)
-            tapGestureDetector.addOnGestureDetectedCallback(TAG, this::onScreenTapped)
             // Wake the screen if necessary so the user will see the chip. (Per b/239426653, we want
             // the chip to show over the dream state, so we should only wake up if the screen is
             // completely off.)
@@ -176,7 +172,6 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
         if (chipView == null) { return }
         logger.logChipRemoval(removalReason)
         configurationController.removeCallback(displayScaleListener)
-        tapGestureDetector.removeOnGestureDetectedCallback(TAG)
         windowManager.removeView(chipView)
         chipView = null
         chipInfo = null
@@ -260,15 +255,6 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
             },
             isAppIcon = false
         )
-    }
-
-    private fun onScreenTapped(e: MotionEvent) {
-        val view = chipView ?: return
-        // If the tap is within the chip bounds, we shouldn't hide the chip (in case users think the
-        // chip is tappable).
-        if (!viewUtil.touchIsWithinView(view, e.x, e.y)) {
-            removeChip(MediaTttRemovalReason.REASON_SCREEN_TAP)
-        }
     }
 }
 
