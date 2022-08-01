@@ -2748,8 +2748,6 @@ public class DisplayPolicy {
     public void takeScreenshot(int screenshotType, int source) {
         if (mScreenshotHelper != null) {
             mScreenshotHelper.takeScreenshot(screenshotType,
-                    getStatusBar() != null && getStatusBar().isVisible(),
-                    getNavigationBar() != null && getNavigationBar().isVisible(),
                     source, mHandler, null /* completionConsumer */);
         }
     }
