@@ -29,7 +29,9 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,6 +61,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.KeyguardNotificationSuppressor;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.NotificationStateChangedListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -322,6 +325,38 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         assertFalse(mLockscreenUserManager.isLockscreenPublicMode(mCurrentUser.id));
         mLockscreenUserManager.setLockscreenPublicMode(true, mCurrentUser.id);
         assertTrue(mLockscreenUserManager.isLockscreenPublicMode(mCurrentUser.id));
+    }
+
+    @Test
+    public void testUpdateIsPublicMode() {
+        when(mKeyguardStateController.isMethodSecure()).thenReturn(true);
+
+        NotificationStateChangedListener listener = mock(NotificationStateChangedListener.class);
+        mLockscreenUserManager.addNotificationStateChangedListener(listener);
+        mLockscreenUserManager.mCurrentProfiles.append(0, mock(UserInfo.class));
+
+        // first call explicitly sets user 0 to not public; notifies
+        mLockscreenUserManager.updatePublicMode();
+        assertFalse(mLockscreenUserManager.isLockscreenPublicMode(0));
+        verify(listener).onNotificationStateChanged();
+        clearInvocations(listener);
+
+        // calling again has no changes; does not notify
+        mLockscreenUserManager.updatePublicMode();
+        assertFalse(mLockscreenUserManager.isLockscreenPublicMode(0));
+        verify(listener, never()).onNotificationStateChanged();
+
+        // Calling again with keyguard now showing makes user 0 public; notifies
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        mLockscreenUserManager.updatePublicMode();
+        assertTrue(mLockscreenUserManager.isLockscreenPublicMode(0));
+        verify(listener).onNotificationStateChanged();
+        clearInvocations(listener);
+
+        // calling again has no changes; does not notify
+        mLockscreenUserManager.updatePublicMode();
+        assertTrue(mLockscreenUserManager.isLockscreenPublicMode(0));
+        verify(listener, never()).onNotificationStateChanged();
     }
 
     @Test
