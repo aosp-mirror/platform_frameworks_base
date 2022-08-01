@@ -16,7 +16,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.settingslib.collapsingtoolbar">
+          package="com.android.settingslib.widget">
 
     <uses-sdk android:minSdkVersion="29" />
 
