@@ -650,7 +650,7 @@
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Příliš mnoho pohybu. Držte telefon nehybně."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Zaznamenejte obličej znovu."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Obličej se nepodařilo rozpoznat. Zkuste to znovu."</string>
-    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Trochu změňte polohu hlavy"</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Mírně pohněte hlavou"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Dívejte se přímo na telefon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Dívejte se přímo na telefon"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Dívejte se přímo na telefon"</string>

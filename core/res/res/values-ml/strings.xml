@@ -634,7 +634,7 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ഫിംഗർപ്രിന്റ് അൺലോക്ക്"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"വിരലടയാള സെൻസർ ഉപയോഗിക്കാനാകുന്നില്ല"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"റിപ്പയർ കേന്ദ്രം സന്ദർശിക്കുക."</string>
-    <string name="face_acquired_insufficient" msgid="6889245852748492218">"മുഖ മോഡൽ സൃഷ്ടിക്കാനാകില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"മുഖ മോഡൽ സൃഷ്ടിക്കാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"വളരെയധികം തെളിച്ചം. സൗമ്യതയേറിയ പ്രകാശം ശ്രമിക്കൂ."</string>
     <string name="face_acquired_too_dark" msgid="7919016380747701228">"കൂടുതൽ വെളിച്ചമുള്ളയിടത്ത് പരീക്ഷിച്ച് നോക്കൂ"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ഫോൺ കൂടുതൽ ദൂരേയ്ക്ക് നീക്കുക"</string>

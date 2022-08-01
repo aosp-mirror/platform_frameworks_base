@@ -637,7 +637,7 @@
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Жүзүңүздүн үлгүсү түзүлгөн жок. Кайталаңыз."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Өтө жарык. Жарыктыкты азайтып көрүңүз."</string>
     <string name="face_acquired_too_dark" msgid="7919016380747701228">"Жарыгыраак жерге туруңуз"</string>
-    <string name="face_acquired_too_close" msgid="4453646176196302462">"Телефонду алысыраак жылдырыңыз"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Телефонду алыстатыңыз"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Телефонду жакындатыңыз"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Телефонду жогору жылдырыңыз"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Телефонду ылдый жылдырыңыз"</string>
@@ -652,7 +652,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Телефонуңузду караңыз"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Телефонуңузду караңыз"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Телефонуңузду караңыз"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Жүзүңүздү жашырып турган нерселерди алып салыңыз."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Жүзүңүз жакшы көрүнбөй жатат."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Экраныңыздын жогору жагын, анын ичинде тилкени да тазалаңыз"</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Жүзүңүз толук көрүнүшү керек"</string>
     <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Жүзүңүз толук көрүнүшү керек"</string>

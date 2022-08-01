@@ -648,7 +648,7 @@
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"För mycket rörelse. Håll mobilen stilla."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Registrera ansiktet på nytt."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Ansiktet kändes inte igen. Försök igen."</string>
-    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Rör lite på huvudet."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Rör lite på huvudet"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Titta rakt på telefonen"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Titta rakt på telefonen"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Titta rakt på telefonen"</string>
