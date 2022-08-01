@@ -500,7 +500,7 @@ public class SystemActions extends CoreStartable {
 
     private void handleTakeScreenshot() {
         ScreenshotHelper screenshotHelper = new ScreenshotHelper(mContext);
-        screenshotHelper.takeScreenshot(WindowManager.TAKE_SCREENSHOT_FULLSCREEN, true, true,
+        screenshotHelper.takeScreenshot(WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
                 SCREENSHOT_ACCESSIBILITY_ACTIONS, new Handler(Looper.getMainLooper()), null);
     }
 

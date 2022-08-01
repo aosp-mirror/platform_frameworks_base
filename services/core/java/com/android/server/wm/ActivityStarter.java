@@ -1661,9 +1661,6 @@ class ActivityStarter {
                 && transitionController.getTransitionPlayer() != null)
                 ? transitionController.createTransition(TRANSIT_OPEN) : null;
         RemoteTransition remoteTransition = r.takeRemoteTransition();
-        if (newTransition != null && remoteTransition != null) {
-            newTransition.setRemoteTransition(remoteTransition);
-        }
         transitionController.collect(r);
         try {
             mService.deferWindowLayout();
