@@ -39,6 +39,7 @@ import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttRemovalReason
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.gesture.TapGestureDetector
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.view.ViewUtil
 import javax.inject.Inject
@@ -49,32 +50,32 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class MediaTttChipControllerSender @Inject constructor(
-    commandQueue: CommandQueue,
-    context: Context,
-    @MediaTttSenderLogger logger: MediaTttLogger,
-    windowManager: WindowManager,
-    viewUtil: ViewUtil,
-    @Main mainExecutor: DelayableExecutor,
-    accessibilityManager: AccessibilityManager,
-    tapGestureDetector: TapGestureDetector,
-    powerManager: PowerManager,
-    private val uiEventLogger: MediaTttSenderUiEventLogger
+        commandQueue: CommandQueue,
+        context: Context,
+        @MediaTttSenderLogger logger: MediaTttLogger,
+        windowManager: WindowManager,
+        viewUtil: ViewUtil,
+        @Main mainExecutor: DelayableExecutor,
+        accessibilityManager: AccessibilityManager,
+        configurationController: ConfigurationController,
+        tapGestureDetector: TapGestureDetector,
+        powerManager: PowerManager,
+        private val uiEventLogger: MediaTttSenderUiEventLogger
 ) : MediaTttChipControllerCommon<ChipSenderInfo>(
-    context,
-    logger,
-    windowManager,
-    viewUtil,
-    mainExecutor,
-    accessibilityManager,
-    tapGestureDetector,
-    powerManager,
-    R.layout.media_ttt_chip
+        context,
+        logger,
+        windowManager,
+        viewUtil,
+        mainExecutor,
+        accessibilityManager,
+        configurationController,
+        tapGestureDetector,
+        powerManager,
+        R.layout.media_ttt_chip,
 ) {
     override val windowLayoutParams = commonWindowLayoutParams.apply {
         gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
     }
-
-    private var currentlyDisplayedChipState: ChipStateSender? = null
 
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
         override fun updateMediaTapToTransferSenderDisplay(
@@ -116,16 +117,18 @@ class MediaTttChipControllerSender @Inject constructor(
 
     /** Displays the chip view for the given state. */
     override fun updateChipView(
-            chipInfo: ChipSenderInfo,
-            currentChipView: ViewGroup) {
-        val chipState = chipInfo.state
-        currentlyDisplayedChipState = chipState
+            newChipInfo: ChipSenderInfo,
+            currentChipView: ViewGroup
+    ) {
+        super.updateChipView(newChipInfo, currentChipView)
+
+        val chipState = newChipInfo.state
 
         // App icon
-        setIcon(currentChipView, chipInfo.routeInfo.packageName)
+        setIcon(currentChipView, newChipInfo.routeInfo.packageName)
 
         // Text
-        val otherDeviceName = chipInfo.routeInfo.name.toString()
+        val otherDeviceName = newChipInfo.routeInfo.name.toString()
         currentChipView.requireViewById<TextView>(R.id.text).apply {
             text = chipState.getChipTextString(context, otherDeviceName)
         }
@@ -137,7 +140,7 @@ class MediaTttChipControllerSender @Inject constructor(
         // Undo
         val undoView = currentChipView.requireViewById<View>(R.id.undo)
         val undoClickListener = chipState.undoClickListener(
-                this, chipInfo.routeInfo, chipInfo.undoCallback, uiEventLogger
+                this, newChipInfo.routeInfo, newChipInfo.undoCallback, uiEventLogger
         )
         undoView.setOnClickListener(undoClickListener)
         undoView.visibility = (undoClickListener != null).visibleIfTrue()
@@ -161,12 +164,11 @@ class MediaTttChipControllerSender @Inject constructor(
     override fun removeChip(removalReason: String) {
         // Don't remove the chip if we're mid-transfer since the user should still be able to
         // see the status of the transfer. (But do remove it if it's finally timed out.)
-        if (currentlyDisplayedChipState?.isMidTransfer == true
-                && removalReason != MediaTttRemovalReason.REASON_TIMEOUT) {
+        if (chipInfo?.state?.isMidTransfer == true &&
+                removalReason != MediaTttRemovalReason.REASON_TIMEOUT) {
             return
         }
         super.removeChip(removalReason)
-        currentlyDisplayedChipState = null
     }
 
     private fun Boolean.visibleIfTrue(): Int {
