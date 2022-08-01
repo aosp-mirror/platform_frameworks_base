@@ -68,7 +68,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.app.WindowConfiguration;
 import android.content.Context;
@@ -522,14 +521,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                                 finishedCallback.onAnimationFinished();
                             }
                         };
+                Transitions.setRunningRemoteTransitionDelegate(adapter.getCallingApplication());
                 try {
-                    try {
-                        ActivityTaskManager.getService().setRunningRemoteTransitionDelegate(
-                                adapter.getCallingApplication());
-                    } catch (SecurityException e) {
-                        Slog.e(TAG, "Unable to boost animation thread. This should only happen"
-                                + " during unit tests");
-                    }
                     adapter.getRunner().onAnimationStart(transit, apps, wallpapers,
                             augmentedNonApps, wrapCallback);
                 } catch (RemoteException e) {

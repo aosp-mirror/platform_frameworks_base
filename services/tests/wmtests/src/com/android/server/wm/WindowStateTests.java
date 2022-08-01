@@ -418,7 +418,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(app.canAffectSystemUiFlags());
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_STATUS_BAR})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_STATUS_BAR })
     @Test
     public void testVisibleWithInsetsProvider() {
         final WindowState statusBar = mStatusBarWindow;
@@ -694,7 +694,7 @@ public class WindowStateTests extends WindowTestsBase {
         verify(t).setMatrix(child2.mSurfaceControl, w.mInvGlobalScale, 0, 0, w.mInvGlobalScale);
     }
 
-    @UseTestDisplay(addWindows = {W_ABOVE_ACTIVITY, W_NOTIFICATION_SHADE})
+    @SetupWindows(addWindows = { W_ABOVE_ACTIVITY, W_NOTIFICATION_SHADE })
     @Test
     public void testRequestDrawIfNeeded() {
         final WindowState startingApp = createWindow(null /* parent */,
@@ -739,7 +739,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(startingApp.getOrientationChanging());
     }
 
-    @UseTestDisplay(addWindows = W_ABOVE_ACTIVITY)
+    @SetupWindows(addWindows = W_ABOVE_ACTIVITY)
     @Test
     public void testReportResizedWithRemoteException() {
         final WindowState win = mChildAppWindowAbove;
@@ -769,7 +769,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(win.getOrientationChanging());
     }
 
-    @UseTestDisplay(addWindows = W_ABOVE_ACTIVITY)
+    @SetupWindows(addWindows = W_ABOVE_ACTIVITY)
     @Test
     public void testRequestResizeForBlastSync() {
         final WindowState win = mChildAppWindowAbove;
@@ -907,7 +907,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(mAtm.mActiveUids.hasNonAppVisibleWindow(uid));
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
     @Test
     public void testNeedsRelativeLayeringToIme_notAttached() {
         WindowState sameTokenWindow = createWindow(null, TYPE_BASE_APPLICATION, mAppWindow.mToken,
@@ -920,7 +920,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
     @Test
     public void testNeedsRelativeLayeringToIme_startingWindow() {
         WindowState sameTokenWindow = createWindow(null, TYPE_APPLICATION_STARTING,
@@ -963,7 +963,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(overlay.getWindowFrames().hasInsetsChanged());
     }
 
-    @UseTestDisplay(addWindows = {W_INPUT_METHOD, W_ACTIVITY})
+    @SetupWindows(addWindows = { W_INPUT_METHOD, W_ACTIVITY })
     @Test
     public void testImeAlwaysReceivesVisibleNavigationBarInsets() {
         final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
@@ -1053,7 +1053,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY})
+    @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testUpdateImeControlTargetWhenLeavingMultiWindow() {
         WindowState app = createWindow(null, TYPE_BASE_APPLICATION,
@@ -1079,7 +1079,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertEquals(mAppWindow, mDisplayContent.getImeTarget(IME_TARGET_CONTROL).getWindow());
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD, W_NOTIFICATION_SHADE})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD, W_NOTIFICATION_SHADE })
     @Test
     public void testNotificationShadeHasImeInsetsWhenMultiWindow() {
         WindowState app = createWindow(null, TYPE_BASE_APPLICATION,

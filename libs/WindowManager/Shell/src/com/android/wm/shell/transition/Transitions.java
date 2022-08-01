@@ -31,6 +31,8 @@ import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTas
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityTaskManager;
+import android.app.IApplicationThread;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -232,6 +234,19 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** Unregisters a remote transition and all associated filters */
     public void unregisterRemote(@NonNull RemoteTransition remoteTransition) {
         mRemoteTransitionHandler.removeFiltered(remoteTransition);
+    }
+
+    /** Boosts the process priority of remote animation player. */
+    public static void setRunningRemoteTransitionDelegate(IApplicationThread appThread) {
+        if (appThread == null) return;
+        try {
+            ActivityTaskManager.getService().setRunningRemoteTransitionDelegate(appThread);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Unable to boost animation process. This should only happen"
+                    + " during unit tests");
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**

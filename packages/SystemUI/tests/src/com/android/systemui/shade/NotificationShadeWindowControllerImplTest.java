@@ -28,7 +28,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -44,8 +43,6 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.view.WindowManager;
 
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ViewTreeLifecycleOwner;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
@@ -185,24 +182,6 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         // Instead, we're not relying on SurfaceControl#setOpaque on
         // NotificationShadeDepthController.
         verify(mWindowManager, never()).updateViewLayout(any(), mLayoutParameters.capture());
-    }
-
-    @Test
-    public void attach_setsUpLifecycleOwner() {
-        mNotificationShadeWindowController.attach();
-
-        assertThat(ViewTreeLifecycleOwner.get(mNotificationShadeWindowView)).isNotNull();
-    }
-
-    @Test
-    public void attach_doesNotSetUpLifecycleOwnerIfAlreadySet() {
-        final LifecycleOwner previouslySet = mock(LifecycleOwner.class);
-        ViewTreeLifecycleOwner.set(mNotificationShadeWindowView, previouslySet);
-
-        mNotificationShadeWindowController.attach();
-
-        assertThat(ViewTreeLifecycleOwner.get(mNotificationShadeWindowView))
-                .isEqualTo(previouslySet);
     }
 
     @Test

@@ -810,7 +810,6 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSourceProviders.size()).isEqualTo(0);
     }
 
-    @UseTestDisplay
     @Test
     public void testTaskInfoCallback() {
         final ArrayList<RunningTaskInfo> lastReportedTiles = new ArrayList<>();
@@ -842,8 +841,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
         lastReportedTiles.clear();
         called[0] = false;
-        final Task rootTask2 = createTask(
-                mDisplayContent, WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME);
+        final Task rootTask2 = mDisplayContent.getDefaultTaskDisplayArea().getRootHomeTask();
         wct = new WindowContainerTransaction();
         wct.reparent(rootTask2.mRemoteToken.toWindowContainerToken(),
                 info1.token, true /* onTop */);
@@ -869,7 +867,6 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertEquals(ACTIVITY_TYPE_UNDEFINED, lastReportedTiles.get(0).topActivityType);
     }
 
-    @UseTestDisplay
     @Test
     public void testHierarchyTransaction() {
         final ArrayMap<IBinder, RunningTaskInfo> lastReportedTiles = new ArrayMap<>();
@@ -890,23 +887,22 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
 
+        // 2 + 1 (home) = 3
         final int initialRootTaskCount = mWm.mAtmService.mTaskOrganizerController.getRootTasks(
                 mDisplayContent.mDisplayId, null /* activityTypes */).size();
-
         final Task rootTask = createTask(
                 mDisplayContent, WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD);
-        final Task rootTask2 = createTask(
-                mDisplayContent, WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME);
 
         // Check getRootTasks works
         List<RunningTaskInfo> roots = mWm.mAtmService.mTaskOrganizerController.getRootTasks(
                 mDisplayContent.mDisplayId, null /* activityTypes */);
-        assertEquals(initialRootTaskCount + 2, roots.size());
+        assertEquals(initialRootTaskCount + 1, roots.size());
 
         lastReportedTiles.clear();
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.reparent(rootTask.mRemoteToken.toWindowContainerToken(),
                 info1.token, true /* onTop */);
+        final Task rootTask2 = mDisplayContent.getDefaultTaskDisplayArea().getRootHomeTask();
         wct.reparent(rootTask2.mRemoteToken.toWindowContainerToken(),
                 info2.token, true /* onTop */);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
@@ -940,7 +936,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // Check that getRootTasks doesn't include children of tiles
         roots = mWm.mAtmService.mTaskOrganizerController.getRootTasks(mDisplayContent.mDisplayId,
                 null /* activityTypes */);
-        assertEquals(initialRootTaskCount, roots.size());
+        // Home (rootTask2) was moved into task1, so only remain 2 roots: task1 and task2.
+        assertEquals(initialRootTaskCount - 1, roots.size());
 
         lastReportedTiles.clear();
         wct = new WindowContainerTransaction();

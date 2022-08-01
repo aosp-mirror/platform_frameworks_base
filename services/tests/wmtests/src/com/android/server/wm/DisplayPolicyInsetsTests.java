@@ -36,7 +36,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @Presubmit
-@WindowTestsBase.UseTestDisplay(
+@WindowTestsBase.SetupWindows(
         addWindows = { WindowTestsBase.W_STATUS_BAR, WindowTestsBase.W_NAVIGATION_BAR })
 @RunWith(WindowTestRunner.class)
 public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {

@@ -110,6 +110,7 @@ import org.junit.BeforeClass;
 import org.junit.runner.Description;
 import org.mockito.Mockito;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -151,7 +152,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
      */
     DisplayContent mDisplayContent;
 
-    // The following fields are only available depending on the usage of annotation UseTestDisplay.
+    // The following fields are only available depending on the usage of annotation UseTestDisplay
+    // and UseCommonWindows.
     WindowState mWallpaperWindow;
     WindowState mImeWindow;
     WindowState mImeDialogWindow;
@@ -214,14 +216,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // Only create an additional test display for annotated test class/method because it may
         // significantly increase the execution time.
         final Description description = mSystemServicesTestRule.getDescription();
-        UseTestDisplay testDisplayAnnotation = description.getAnnotation(UseTestDisplay.class);
-        if (testDisplayAnnotation == null) {
-            testDisplayAnnotation = description.getTestClass().getAnnotation(UseTestDisplay.class);
-        }
-        if (testDisplayAnnotation != null) {
-            createTestDisplay(testDisplayAnnotation);
+        final UseTestDisplay useTestDisplay = getAnnotation(description, UseTestDisplay.class);
+        if (useTestDisplay != null) {
+            createTestDisplay(useTestDisplay);
         } else {
             mDisplayContent = mDefaultDisplay;
+            final SetupWindows setupWindows = getAnnotation(description, SetupWindows.class);
+            if (setupWindows != null) {
+                addCommonWindows(setupWindows.addAllCommonWindows(), setupWindows.addWindows());
+            }
         }
 
         // Ensure letterbox aspect ratio is not overridden on any device target.
@@ -290,10 +293,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
     private void createTestDisplay(UseTestDisplay annotation) {
         beforeCreateTestDisplay();
         mDisplayContent = createNewDisplayWithImeSupport(DISPLAY_IME_POLICY_LOCAL);
+        addCommonWindows(annotation.addAllCommonWindows(), annotation.addWindows());
+        mDisplayContent.getInsetsPolicy().setRemoteInsetsControllerControlsSystemBars(false);
 
-        final boolean addAll = annotation.addAllCommonWindows();
-        final @CommonTypes int[] requestedWindows = annotation.addWindows();
+        // Adding a display will cause freezing the display. Make sure to wait until it's
+        // unfrozen to not run into race conditions with the tests.
+        waitUntilHandlersIdle();
+    }
 
+    private void addCommonWindows(boolean addAll, @CommonTypes int[] requestedWindows) {
         if (addAll || ArrayUtils.contains(requestedWindows, W_WALLPAPER)) {
             mWallpaperWindow = createCommonWindow(null, TYPE_WALLPAPER, "wallpaperWindow");
         }
@@ -346,12 +354,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mChildAppWindowBelow = createCommonWindow(mAppWindow, TYPE_APPLICATION_MEDIA_OVERLAY,
                     "mChildAppWindowBelow");
         }
-
-        mDisplayContent.getInsetsPolicy().setRemoteInsetsControllerControlsSystemBars(false);
-
-        // Adding a display will cause freezing the display. Make sure to wait until it's
-        // unfrozen to not run into race conditions with the tests.
-        waitUntilHandlersIdle();
     }
 
     private WindowManager.LayoutParams getNavBarLayoutParamsForRotation(int rotation) {
@@ -830,7 +832,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     TestTransitionPlayer registerTestTransitionPlayer() {
         final TestTransitionPlayer testPlayer = new TestTransitionPlayer(
                 mAtm.getTransitionController(), mAtm.mWindowOrganizerController);
-        testPlayer.mController.registerTransitionPlayer(testPlayer, null /* appThread */);
+        testPlayer.mController.registerTransitionPlayer(testPlayer, null /* playerProc */);
         return testPlayer;
     }
 
@@ -877,11 +879,21 @@ class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     /**
+     * The annotation to provide common windows on default display. This is mutually exclusive
+     * with {@link UseTestDisplay}.
+     */
+    @Target({ ElementType.METHOD, ElementType.TYPE })
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface SetupWindows {
+        boolean addAllCommonWindows() default false;
+        @CommonTypes int[] addWindows() default {};
+    }
+
+    /**
      * The annotation for class and method (higher priority) to create a non-default display that
      * will be assigned to {@link #mDisplayContent}. It is used if the test needs
      * <ul>
      * <li>Pure empty display.</li>
-     * <li>Configured common windows.</li>
      * <li>Independent and customizable orientation.</li>
      * <li>Cross display operation.</li>
      * </ul>
@@ -894,6 +906,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
     @interface UseTestDisplay {
         boolean addAllCommonWindows() default false;
         @CommonTypes int[] addWindows() default {};
+    }
+
+    static <T extends Annotation> T getAnnotation(Description desc, Class<T> type) {
+        final T annotation = desc.getAnnotation(type);
+        if (annotation != null) return annotation;
+        return desc.getTestClass().getAnnotation(type);
     }
 
     /** Creates and adds a {@link TestDisplayContent} to supervisor at the given position. */

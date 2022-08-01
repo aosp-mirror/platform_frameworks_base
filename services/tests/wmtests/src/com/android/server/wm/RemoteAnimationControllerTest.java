@@ -749,7 +749,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         }
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testLaunchRemoteAnimationWithoutImeBehind() {
         final WindowState win1 = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin1");

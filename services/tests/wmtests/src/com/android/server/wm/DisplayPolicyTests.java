@@ -167,7 +167,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 dimmingNonImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
     }
 
-    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR })
+    @SetupWindows(addWindows = W_NAVIGATION_BAR)
     @Test
     public void testUpdateLightNavigationBarLw() {
         DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
@@ -204,7 +204,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueLightNavBar));
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_STATUS_BAR})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_STATUS_BAR })
     @Test
     public void testComputeTopFullscreenOpaqueWindow() {
         final WindowManager.LayoutParams attrs = mAppWindow.mAttrs;
@@ -292,7 +292,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         return win;
     }
 
-    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
+    @SetupWindows(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
     @Test
     public void testImeMinimalSourceFrame() {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
@@ -328,7 +328,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertTrue(imeSource.getFrame().contains(navBarSource.getFrame()));
     }
 
-    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR })
+    @SetupWindows(addWindows = W_NAVIGATION_BAR)
     @Test
     public void testInsetsGivenContentFrame() {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
