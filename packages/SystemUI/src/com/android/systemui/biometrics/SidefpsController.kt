@@ -43,6 +43,8 @@ import android.view.View.AccessibilityDelegate
 import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
+import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
 import android.view.accessibility.AccessibilityEvent
 import androidx.annotation.RawRes
 import com.airbnb.lottie.LottieAnimationView
@@ -130,7 +132,7 @@ class SidefpsController @Inject constructor(
         fitInsetsTypes = 0 // overrides default, avoiding status bars during layout
         gravity = Gravity.TOP or Gravity.LEFT
         layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-        privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
+        privateFlags = PRIVATE_FLAG_TRUSTED_OVERLAY or PRIVATE_FLAG_NO_MOVE_ANIMATION
     }
 
     init {
