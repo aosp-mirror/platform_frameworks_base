@@ -3235,6 +3235,13 @@ public final class Parcel {
      * Same as {@link #readList(List, ClassLoader)} but accepts {@code clazz} parameter as
      * the type required for each item.
      *
+     * <p><b>Warning: </b> if the list contains items implementing the {@link Parcelable} interface,
+     * the class that implements {@link Parcelable} has to be the immediately
+     * enclosing class of the runtime type of its CREATOR field (that is,
+     * {@link Class#getEnclosingClass()} has to return the parcelable implementing class),
+     * otherwise this method might throw an exception. If the Parcelable class does not enclose the
+     * CREATOR, use the deprecated {@link #readList(List, ClassLoader)} instead.
+     *
      * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
      * is not an instance of that class or any of its children classes or there was an error
      * trying to instantiate an element.
@@ -3463,6 +3470,13 @@ public final class Parcel {
      * Same as {@link #readArrayList(ClassLoader)} but accepts {@code clazz} parameter as
      * the type required for each item.
      *
+     * <p><b>Warning: </b> if the list contains items implementing the {@link Parcelable} interface,
+     * the class that implements {@link Parcelable} has to be the immediately
+     * enclosing class of the runtime type of its CREATOR field (that is,
+     * {@link Class#getEnclosingClass()} has to return the parcelable implementing class),
+     * otherwise this method might throw an exception. If the Parcelable class does not enclose the
+     * CREATOR, use the deprecated {@link #readArrayList(ClassLoader)} instead.
+     *
      * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
      * is not an instance of that class or any of its children classes or there was an error
      * trying to instantiate an element.
@@ -3497,6 +3511,13 @@ public final class Parcel {
      * Same as {@link #readArray(ClassLoader)} but accepts {@code clazz} parameter as
      * the type required for each item.
      *
+     * <p><b>Warning: </b> if the list contains items implementing the {@link Parcelable} interface,
+     * the class that implements {@link Parcelable} has to be the immediately
+     * enclosing class of the runtime type of its CREATOR field (that is,
+     * {@link Class#getEnclosingClass()} has to return the parcelable implementing class),
+     * otherwise this method might throw an exception. If the Parcelable class does not enclose the
+     * CREATOR, use the deprecated {@link #readArray(ClassLoader)} instead.
+     *
      * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
      * is not an instance of that class or any of its children classes or there was an error
      * trying to instantiate an element.
@@ -3529,6 +3550,13 @@ public final class Parcel {
     /**
      * Same as {@link #readSparseArray(ClassLoader)} but accepts {@code clazz} parameter as
      * the type required for each item.
+     *
+     * <p><b>Warning: </b> if the list contains items implementing the {@link Parcelable} interface,
+     * the class that implements {@link Parcelable} has to be the immediately
+     * enclosing class of the runtime type of its CREATOR field (that is,
+     * {@link Class#getEnclosingClass()} has to return the parcelable implementing class),
+     * otherwise this method might throw an exception. If the Parcelable class does not enclose the
+     * CREATOR, use the deprecated {@link #readSparseArray(ClassLoader)} instead.
      *
      * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
      * is not an instance of that class or any of its children classes or there was an error
@@ -3846,6 +3874,13 @@ public final class Parcel {
     /**
      * Same as {@link #readParcelableList(List, ClassLoader)} but accepts {@code clazz} parameter as
      * the type required for each item.
+     *
+     * <p><b>Warning: </b> if the list contains items implementing the {@link Parcelable} interface,
+     * the class that implements {@link Parcelable} has to be the immediately
+     * enclosing class of the runtime type of its CREATOR field (that is,
+     * {@link Class#getEnclosingClass()} has to return the parcelable implementing class),
+     * otherwise this method might throw an exception. If the Parcelable class does not enclose the
+     * CREATOR, use the deprecated {@link #readParcelableList(List, ClassLoader)} instead.
      *
      * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
      * is not an instance of that class or any of its children classes or there was an error
@@ -4744,6 +4779,12 @@ public final class Parcel {
      * Same as {@link #readParcelable(ClassLoader)} but accepts {@code clazz} parameter as the type
      * required for each item.
      *
+     * <p><b>Warning: </b> the class that implements {@link Parcelable} has to be the immediately
+     * enclosing class of the runtime type of its CREATOR field (that is,
+     * {@link Class#getEnclosingClass()} has to return the parcelable implementing class),
+     * otherwise this method might throw an exception. If the Parcelable class does not enclose the
+     * CREATOR, use the deprecated {@link #readParcelable(ClassLoader)} instead.
+     *
      * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
      * is not an instance of that class or any of its children classes or there was an error
      * trying to instantiate an element.
@@ -4811,6 +4852,12 @@ public final class Parcel {
     /**
      * Same as {@link #readParcelableCreator(ClassLoader)} but accepts {@code clazz} parameter
      * as the required type.
+     *
+     * <p><b>Warning: </b> the class that implements {@link Parcelable} has to be the immediately
+     * enclosing class of the runtime type of its CREATOR field (that is,
+     * {@link Class#getEnclosingClass()} has to return the parcelable implementing class),
+     * otherwise this method might throw an exception. If the Parcelable class does not enclose the
+     * CREATOR, use the deprecated {@link #readParcelableCreator(ClassLoader) instead.
      *
      * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
      * is not an instance of that class or any of its children classes or there there was an error
@@ -4938,6 +4985,12 @@ public final class Parcel {
     /**
      * Same as {@link #readParcelableArray(ClassLoader)}  but accepts {@code clazz} parameter as
      * the type required for each item.
+     *
+     * <p><b>Warning: </b> the class that implements {@link Parcelable} has to be the immediately
+     * enclosing class of the runtime type of its CREATOR field (that is,
+     * {@link Class#getEnclosingClass()} has to return the parcelable implementing class),
+     * otherwise this method might throw an exception. If the Parcelable class does not enclose the
+     * CREATOR, use the deprecated {@link #readParcelableArray(ClassLoader)} instead.
      *
      * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
      * is not an instance of that class or any of its children classes or there was an error
