@@ -67,6 +67,9 @@ public abstract class EconomicPolicy {
     static final int REGULATION_WEALTH_RECLAMATION = TYPE_REGULATION | 2;
     static final int REGULATION_PROMOTION = TYPE_REGULATION | 3;
     static final int REGULATION_DEMOTION = TYPE_REGULATION | 4;
+    /** App is fully restricted from running in the background. */
+    static final int REGULATION_BG_RESTRICTED = TYPE_REGULATION | 5;
+    static final int REGULATION_BG_UNRESTRICTED = TYPE_REGULATION | 6;
 
     static final int REWARD_NOTIFICATION_SEEN = TYPE_REWARD | 0;
     static final int REWARD_NOTIFICATION_INTERACTION = TYPE_REWARD | 1;
@@ -210,7 +213,7 @@ public abstract class EconomicPolicy {
      * exists to ensure that no single app accumulate all available resources and increases fairness
      * for all apps.
      */
-    abstract long getMaxSatiatedBalance();
+    abstract long getMaxSatiatedBalance(int userId, @NonNull String pkgName);
 
     /**
      * Returns the maximum number of cakes that should be consumed during a full 100% discharge

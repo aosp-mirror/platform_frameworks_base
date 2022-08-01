@@ -134,8 +134,11 @@ public class AlarmManagerEconomicPolicyTest {
                 mEconomicPolicy.getInitialSatiatedConsumptionLimit());
         assertEquals(EconomyManager.DEFAULT_AM_HARD_CONSUMPTION_LIMIT_CAKES,
                 mEconomicPolicy.getHardSatiatedConsumptionLimit());
+        final String pkgRestricted = "com.pkg.restricted";
+        when(mIrs.isPackageRestricted(anyInt(), eq(pkgRestricted))).thenReturn(true);
+        assertEquals(0, mEconomicPolicy.getMaxSatiatedBalance(0, pkgRestricted));
         assertEquals(EconomyManager.DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES,
-                mEconomicPolicy.getMaxSatiatedBalance());
+                mEconomicPolicy.getMaxSatiatedBalance(0, "com.any.other.app"));
         final String pkgExempted = "com.pkg.exempted";
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED_CAKES,
@@ -154,7 +157,10 @@ public class AlarmManagerEconomicPolicyTest {
 
         assertEquals(arcToCake(5), mEconomicPolicy.getInitialSatiatedConsumptionLimit());
         assertEquals(arcToCake(25), mEconomicPolicy.getHardSatiatedConsumptionLimit());
-        assertEquals(arcToCake(10), mEconomicPolicy.getMaxSatiatedBalance());
+        final String pkgRestricted = "com.pkg.restricted";
+        when(mIrs.isPackageRestricted(anyInt(), eq(pkgRestricted))).thenReturn(true);
+        assertEquals(arcToCake(0), mEconomicPolicy.getMaxSatiatedBalance(0, pkgRestricted));
+        assertEquals(arcToCake(10), mEconomicPolicy.getMaxSatiatedBalance(0, "com.any.other.app"));
         final String pkgExempted = "com.pkg.exempted";
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(arcToCake(9), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
@@ -172,7 +178,10 @@ public class AlarmManagerEconomicPolicyTest {
 
         assertEquals(arcToCake(1), mEconomicPolicy.getInitialSatiatedConsumptionLimit());
         assertEquals(arcToCake(1), mEconomicPolicy.getHardSatiatedConsumptionLimit());
-        assertEquals(arcToCake(1), mEconomicPolicy.getMaxSatiatedBalance());
+        final String pkgRestricted = "com.pkg.restricted";
+        when(mIrs.isPackageRestricted(anyInt(), eq(pkgRestricted))).thenReturn(true);
+        assertEquals(arcToCake(0), mEconomicPolicy.getMaxSatiatedBalance(0, pkgRestricted));
+        assertEquals(arcToCake(1), mEconomicPolicy.getMaxSatiatedBalance(0, "com.any.other.app"));
         final String pkgExempted = "com.pkg.exempted";
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
@@ -187,7 +196,8 @@ public class AlarmManagerEconomicPolicyTest {
 
         assertEquals(arcToCake(5), mEconomicPolicy.getInitialSatiatedConsumptionLimit());
         assertEquals(arcToCake(5), mEconomicPolicy.getHardSatiatedConsumptionLimit());
-        assertEquals(arcToCake(13), mEconomicPolicy.getMaxSatiatedBalance());
+        assertEquals(arcToCake(0), mEconomicPolicy.getMaxSatiatedBalance(0, pkgRestricted));
+        assertEquals(arcToCake(13), mEconomicPolicy.getMaxSatiatedBalance(0, "com.any.other.app"));
         assertEquals(arcToCake(13), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
         assertEquals(arcToCake(13), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
     }

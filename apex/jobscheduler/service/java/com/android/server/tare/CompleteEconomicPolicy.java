@@ -36,7 +36,6 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     /** Lazily populated set of rewards covered by this policy. */
     private final SparseArray<Reward> mRewards = new SparseArray<>();
     private final int[] mCostModifiers;
-    private long mMaxSatiatedBalance;
     private long mInitialConsumptionLimit;
     private long mHardConsumptionLimit;
 
@@ -80,16 +79,13 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     }
 
     private void updateLimits() {
-        long maxSatiatedBalance = 0;
         long initialConsumptionLimit = 0;
         long hardConsumptionLimit = 0;
         for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
             final EconomicPolicy economicPolicy = mEnabledEconomicPolicies.valueAt(i);
-            maxSatiatedBalance += economicPolicy.getMaxSatiatedBalance();
             initialConsumptionLimit += economicPolicy.getInitialSatiatedConsumptionLimit();
             hardConsumptionLimit += economicPolicy.getHardSatiatedConsumptionLimit();
         }
-        mMaxSatiatedBalance = maxSatiatedBalance;
         mInitialConsumptionLimit = initialConsumptionLimit;
         mHardConsumptionLimit = hardConsumptionLimit;
     }
@@ -104,8 +100,12 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
-    long getMaxSatiatedBalance() {
-        return mMaxSatiatedBalance;
+    long getMaxSatiatedBalance(int userId, @NonNull String pkgName) {
+        long max = 0;
+        for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
+            max += mEnabledEconomicPolicies.valueAt(i).getMaxSatiatedBalance(userId, pkgName);
+        }
+        return max;
     }
 
     @Override

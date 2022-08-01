@@ -172,6 +172,9 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
 
     @Override
     long getMinSatiatedBalance(final int userId, @NonNull final String pkgName) {
+        if (mIrs.isPackageRestricted(userId, pkgName)) {
+            return 0;
+        }
         if (mIrs.isPackageExempted(userId, pkgName)) {
             return mMinSatiatedBalanceExempted;
         }
@@ -180,7 +183,10 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
-    long getMaxSatiatedBalance() {
+    long getMaxSatiatedBalance(int userId, @NonNull String pkgName) {
+        if (mIrs.isPackageRestricted(userId, pkgName)) {
+            return 0;
+        }
         return mMaxSatiatedBalance;
     }
 
