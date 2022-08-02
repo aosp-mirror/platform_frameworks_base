@@ -16,27 +16,18 @@
 
 package com.android.systemui.statusbar.pipeline.dagger
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.CoreStartable
 import com.android.systemui.statusbar.pipeline.ConnectivityInfoProcessor
-import dagger.Lazy
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import java.util.Optional
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 
 @Module
-class StatusBarPipelineModule {
-    @Provides
-    @SysUISingleton
-    fun provideConnectivityInfoProcessor(
-            featureFlags: FeatureFlags,
-            processorLazy: Lazy<ConnectivityInfoProcessor>
-    ): Optional<ConnectivityInfoProcessor> {
-        return if (featureFlags.isEnabled(Flags.NEW_STATUS_BAR_PIPELINE)) {
-            Optional.of(processorLazy.get())
-        } else {
-            Optional.empty()
-        }
-    }
+abstract class StatusBarPipelineModule {
+    /** Inject into ConnectivityInfoProcessor. */
+    @Binds
+    @IntoMap
+    @ClassKey(ConnectivityInfoProcessor::class)
+    abstract fun bindConnectivityInfoProcessor(cip: ConnectivityInfoProcessor): CoreStartable
 }

@@ -230,6 +230,7 @@ public class RemoteTransitionCompat implements Parcelable {
         private IBinder mTransition = null;
         private boolean mKeyguardLocked = false;
         private RemoteAnimationTargetCompat[] mAppearedTargets;
+        private boolean mWillFinishToHome = false;
 
         void setup(RecentsAnimationControllerCompat wrapped, TransitionInfo info,
                 IRemoteTransitionFinishedCallback finishCB,
@@ -392,7 +393,7 @@ public class RemoteTransitionCompat implements Parcelable {
                 if (toHome) wct.reorder(mRecentsTask, true /* toTop */);
                 else wct.restoreTransientOrder(mRecentsTask);
             }
-            if (!toHome && mPausingTasks != null && mOpeningLeashes == null) {
+            if (!toHome && !mWillFinishToHome && mPausingTasks != null && mOpeningLeashes == null) {
                 // The gesture went back to opening the app rather than continuing with
                 // recents, so end the transition by moving the app back to the top (and also
                 // re-showing it's task).
@@ -476,6 +477,7 @@ public class RemoteTransitionCompat implements Parcelable {
         }
 
         @Override public void setWillFinishToHome(boolean willFinishToHome) {
+            mWillFinishToHome = willFinishToHome;
             if (mWrapped != null) mWrapped.setWillFinishToHome(willFinishToHome);
         }
 

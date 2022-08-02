@@ -385,6 +385,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
             @Nullable Transition transition, @NonNull CallerInfo caller,
             @Nullable Transition finishTransition) {
+        if (t.getTaskFragmentOrganizer() != null && !mTaskFragmentOrganizerController
+                .isOrganizerRegistered(t.getTaskFragmentOrganizer())) {
+            Slog.e(TAG, "Caller organizer=" + t.getTaskFragmentOrganizer()
+                    + " is no longer registered");
+            return;
+        }
         int effects = 0;
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();

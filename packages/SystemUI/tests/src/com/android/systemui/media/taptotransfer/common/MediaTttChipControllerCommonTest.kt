@@ -32,6 +32,8 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.gesture.TapGestureDetector
+import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -53,7 +55,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 class MediaTttChipControllerCommonTest : SysuiTestCase() {
-    private lateinit var controllerCommon: MediaTttChipControllerCommon<ChipInfo>
+    private lateinit var controllerCommon: TestControllerCommon
 
     private lateinit var fakeClock: FakeSystemClock
     private lateinit var fakeExecutor: FakeExecutor
@@ -67,6 +69,8 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     private lateinit var logger: MediaTttLogger
     @Mock
     private lateinit var accessibilityManager: AccessibilityManager
+    @Mock
+    private lateinit var configurationController: ConfigurationController
     @Mock
     private lateinit var windowManager: WindowManager
     @Mock
@@ -98,14 +102,15 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         fakeExecutor = FakeExecutor(fakeClock)
 
         controllerCommon = TestControllerCommon(
-            context,
-            logger,
-            windowManager,
-            viewUtil,
-            fakeExecutor,
-            accessibilityManager,
-            tapGestureDetector,
-            powerManager
+                context,
+                logger,
+                windowManager,
+                viewUtil,
+                fakeExecutor,
+                accessibilityManager,
+                configurationController,
+                tapGestureDetector,
+                powerManager,
         )
     }
 
@@ -183,6 +188,19 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         fakeClock.advanceTime(TIMEOUT_MS + 1)
 
         verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun displayScaleChange_chipReinflatedWithMostRecentState() {
+        controllerCommon.displayChip(getState(name = "First name"))
+        controllerCommon.displayChip(getState(name = "Second name"))
+        reset(windowManager)
+
+        getConfigurationListener().onDensityOrFontScaleChanged()
+
+        verify(windowManager).removeView(any())
+        verify(windowManager).addView(any(), any())
+        assertThat(controllerCommon.mostRecentChipInfo?.name).isEqualTo("Second name")
     }
 
     @Test
@@ -341,7 +359,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         verify(windowManager, never()).removeView(any())
     }
 
-    private fun getState() = ChipInfo()
+    private fun getState(name: String = "name") = ChipInfo(name)
 
     private fun getChipView(): ViewGroup {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
@@ -351,6 +369,12 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
     private fun ViewGroup.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
 
+    private fun getConfigurationListener(): ConfigurationListener {
+        val callbackCaptor = argumentCaptor<ConfigurationListener>()
+        verify(configurationController).addCallback(capture(callbackCaptor))
+        return callbackCaptor.value
+    }
+
     inner class TestControllerCommon(
         context: Context,
         logger: MediaTttLogger,
@@ -358,8 +382,9 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         viewUtil: ViewUtil,
         @Main mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
+        configurationController: ConfigurationController,
         tapGestureDetector: TapGestureDetector,
-        powerManager: PowerManager
+        powerManager: PowerManager,
     ) : MediaTttChipControllerCommon<ChipInfo>(
         context,
         logger,
@@ -367,16 +392,22 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         viewUtil,
         mainExecutor,
         accessibilityManager,
+        configurationController,
         tapGestureDetector,
         powerManager,
-        R.layout.media_ttt_chip
+        R.layout.media_ttt_chip,
     ) {
+        var mostRecentChipInfo: ChipInfo? = null
+
         override val windowLayoutParams = commonWindowLayoutParams
-        override fun updateChipView(chipInfo: ChipInfo, currentChipView: ViewGroup) {}
+        override fun updateChipView(newChipInfo: ChipInfo, currentChipView: ViewGroup) {
+            super.updateChipView(newChipInfo, currentChipView)
+            mostRecentChipInfo = newChipInfo
+        }
         override fun getIconSize(isAppIcon: Boolean): Int = ICON_SIZE
     }
 
-    inner class ChipInfo : ChipInfoCommon {
+    inner class ChipInfo(val name: String) : ChipInfoCommon {
         override fun getTimeoutMs() = 1L
     }
 }

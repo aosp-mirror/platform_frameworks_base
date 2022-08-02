@@ -42,6 +42,8 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
+import com.android.systemui.keyguard.domain.usecase.KeyguardUseCaseModule;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -66,7 +68,11 @@ import dagger.Provides;
         KeyguardStatusBarViewComponent.class,
         KeyguardStatusViewComponent.class,
         KeyguardUserSwitcherComponent.class},
-        includes = {FalsingModule.class})
+        includes = {
+            FalsingModule.class,
+            KeyguardRepositoryModule.class,
+            KeyguardUseCaseModule.class,
+        })
 public class KeyguardModule {
     /**
      * Provides our instance of KeyguardViewMediator which is considered optional.

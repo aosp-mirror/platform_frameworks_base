@@ -37,7 +37,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -60,13 +59,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private final List<NotificationInterruptSuppressor> mSuppressors = new ArrayList<>();
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
-    private final NotificationFilter mNotificationFilter;
     private final ContentResolver mContentResolver;
     private final PowerManager mPowerManager;
     private final IDreamManager mDreamManager;
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     private final BatteryController mBatteryController;
-    private final ContentObserver mHeadsUpObserver;
     private final HeadsUpManager mHeadsUpManager;
     private final NotificationInterruptLogger mLogger;
     private final NotifPipelineFlags mFlags;
@@ -81,7 +78,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             PowerManager powerManager,
             IDreamManager dreamManager,
             AmbientDisplayConfiguration ambientDisplayConfiguration,
-            NotificationFilter notificationFilter,
             BatteryController batteryController,
             StatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
@@ -95,14 +91,13 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         mDreamManager = dreamManager;
         mBatteryController = batteryController;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
-        mNotificationFilter = notificationFilter;
         mStatusBarStateController = statusBarStateController;
         mKeyguardStateController = keyguardStateController;
         mHeadsUpManager = headsUpManager;
         mLogger = logger;
         mFlags = flags;
         mKeyguardNotificationVisibilityProvider = keyguardNotificationVisibilityProvider;
-        mHeadsUpObserver = new ContentObserver(mainHandler) {
+        ContentObserver headsUpObserver = new ContentObserver(mainHandler) {
             @Override
             public void onChange(boolean selfChange) {
                 boolean wasUsing = mUseHeadsUp;
@@ -125,12 +120,12 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             mContentResolver.registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED),
                     true,
-                    mHeadsUpObserver);
+                    headsUpObserver);
             mContentResolver.registerContentObserver(
                     Settings.Global.getUriFor(SETTING_HEADS_UP_TICKER), true,
-                    mHeadsUpObserver);
+                    headsUpObserver);
         }
-        mHeadsUpObserver.onChange(true); // set up
+        headsUpObserver.onChange(true); // set up
     }
 
     @Override

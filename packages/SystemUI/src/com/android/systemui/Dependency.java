@@ -81,7 +81,6 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
@@ -323,7 +322,6 @@ public class Dependency {
     @Inject Lazy<SmartReplyConstants> mSmartReplyConstants;
     @Inject Lazy<NotificationListener> mNotificationListener;
     @Inject Lazy<NotificationLogger> mNotificationLogger;
-    @Inject Lazy<NotificationViewHierarchyManager> mNotificationViewHierarchyManager;
     @Inject Lazy<NotificationFilter> mNotificationFilter;
     @Inject Lazy<KeyguardDismissUtil> mKeyguardDismissUtil;
     @Inject Lazy<SmartReplyController> mSmartReplyController;
@@ -540,8 +538,6 @@ public class Dependency {
         mProviders.put(SmartReplyConstants.class, mSmartReplyConstants::get);
         mProviders.put(NotificationListener.class, mNotificationListener::get);
         mProviders.put(NotificationLogger.class, mNotificationLogger::get);
-        mProviders.put(NotificationViewHierarchyManager.class,
-                mNotificationViewHierarchyManager::get);
         mProviders.put(NotificationFilter.class, mNotificationFilter::get);
         mProviders.put(KeyguardDismissUtil.class, mKeyguardDismissUtil::get);
         mProviders.put(SmartReplyController.class, mSmartReplyController::get);

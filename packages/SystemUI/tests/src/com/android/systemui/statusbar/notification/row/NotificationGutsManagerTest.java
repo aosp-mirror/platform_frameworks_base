@@ -156,13 +156,13 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         mGutsManager = new NotificationGutsManager(mContext,
                 () -> Optional.of(mCentralSurfaces), mHandler, mHandler, mAccessibilityManager,
-                mHighPriorityProvider, mINotificationManager, mNotificationEntryManager,
+                mHighPriorityProvider, mINotificationManager,
                 mPeopleSpaceWidgetManager, mLauncherApps, mShortcutManager,
                 mChannelEditorDialogController, mContextTracker, mAssistantFeedbackController,
                 Optional.of(mBubblesManager), new UiEventLoggerFake(), mOnUserInteractionCallback,
                 mShadeController, mock(DumpManager.class));
         mGutsManager.setUpWithPresenter(mPresenter, mNotificationListContainer,
-                mCheckSaveListener, mOnSettingsClickListener);
+                mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
     }
 

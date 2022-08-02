@@ -32,6 +32,7 @@ import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
@@ -46,6 +47,7 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.IRemoteAnimationFinishedCallback;
+import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -334,17 +336,37 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public void startShortcut(String packageName, String shortcutId, @SplitPosition int position,
             @Nullable Bundle options, UserHandle user) {
+        IRemoteAnimationRunner wrapper = new IRemoteAnimationRunner.Stub() {
+            @Override
+            public void onAnimationStart(@WindowManager.TransitionOldType int transit,
+                    RemoteAnimationTarget[] apps,
+                    RemoteAnimationTarget[] wallpapers,
+                    RemoteAnimationTarget[] nonApps,
+                    final IRemoteAnimationFinishedCallback finishedCallback) {
+                try {
+                    finishedCallback.onAnimationFinished();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to invoke onAnimationFinished", e);
+                }
+                final WindowContainerTransaction evictWct = new WindowContainerTransaction();
+                mStageCoordinator.prepareEvictNonOpeningChildTasks(position, apps, evictWct);
+                mSyncQueue.queue(evictWct);
+            }
+            @Override
+            public void onAnimationCancelled(boolean isKeyguardOccluded) {
+            }
+        };
         options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options,
                 null /* wct */);
-        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
-        mStageCoordinator.prepareEvictChildTasks(position, evictWct);
+        RemoteAnimationAdapter wrappedAdapter = new RemoteAnimationAdapter(wrapper,
+                0 /* duration */, 0 /* statusBarTransitionDelay */);
+        ActivityOptions activityOptions = ActivityOptions.fromBundle(options);
+        activityOptions.update(ActivityOptions.makeRemoteAnimation(wrappedAdapter));
 
         try {
-            LauncherApps launcherApps =
-                    mContext.getSystemService(LauncherApps.class);
+            LauncherApps launcherApps = mContext.getSystemService(LauncherApps.class);
             launcherApps.startShortcut(packageName, shortcutId, null /* sourceBounds */,
-                    options, user);
-            mSyncQueue.queue(evictWct);
+                    activityOptions.toBundle(), user);
         } catch (ActivityNotFoundException e) {
             Slog.e(TAG, "Failed to launch shortcut", e);
         }
