@@ -6577,6 +6577,13 @@
                 android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.HANDLE_QUERY_PACKAGE_RESTART" />
 
+    <!-- Allows financed device kiosk apps to perform actions on the Device Lock service
+         <p>Protection level: internal|role
+         <p>Intended for use by the FINANCED_DEVICE_KIOSK role only.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_LOCK_STATE"
+                android:protectionLevel="internal|role" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

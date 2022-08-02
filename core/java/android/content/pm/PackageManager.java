@@ -4194,6 +4194,14 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CREDENTIALS = "android.software.credentials";
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports locking (for example, by a financing provider in case of a missed
+     * payment).
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_DEVICE_LOCK = "android.software.device_lock";
+
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 
