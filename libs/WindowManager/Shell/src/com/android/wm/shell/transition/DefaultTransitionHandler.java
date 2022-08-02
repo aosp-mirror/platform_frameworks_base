@@ -109,6 +109,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,6 +137,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private final TransactionPool mTransactionPool;
     private final DisplayController mDisplayController;
     private final Context mContext;
+    private final Handler mMainHandler;
     private final ShellExecutor mMainExecutor;
     private final ShellExecutor mAnimExecutor;
     private final TransitionAnimation mTransitionAnimation;
@@ -167,27 +169,33 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
     };
 
-    DefaultTransitionHandler(@NonNull DisplayController displayController,
-            @NonNull TransactionPool transactionPool, Context context,
+    DefaultTransitionHandler(@NonNull Context context,
+            @NonNull ShellInit shellInit,
+            @NonNull DisplayController displayController,
+            @NonNull TransactionPool transactionPool,
             @NonNull ShellExecutor mainExecutor, @NonNull Handler mainHandler,
             @NonNull ShellExecutor animExecutor) {
         mDisplayController = displayController;
         mTransactionPool = transactionPool;
         mContext = context;
+        mMainHandler = mainHandler;
         mMainExecutor = mainExecutor;
         mAnimExecutor = animExecutor;
         mTransitionAnimation = new TransitionAnimation(context, false /* debug */, Transitions.TAG);
         mCurrentUserId = UserHandle.myUserId();
+        mDevicePolicyManager = mContext.getSystemService(DevicePolicyManager.class);
+        shellInit.addInitCallback(this::onInit, this);
+    }
 
-        mDevicePolicyManager = context.getSystemService(DevicePolicyManager.class);
+    private void onInit() {
         updateEnterpriseThumbnailDrawable();
         mContext.registerReceiver(
                 mEnterpriseResourceUpdatedReceiver,
                 new IntentFilter(ACTION_DEVICE_POLICY_RESOURCE_UPDATED),
                 /* broadcastPermission = */ null,
-                mainHandler);
+                mMainHandler);
 
-        AttributeCache.init(context);
+        AttributeCache.init(mContext);
     }
 
     private void updateEnterpriseThumbnailDrawable() {

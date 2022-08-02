@@ -31,7 +31,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
-import android.content.Context;
 import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
@@ -56,6 +55,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
 
 import java.io.PrintWriter;
@@ -186,39 +186,43 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     @Nullable
     private RunningTaskInfo mLastFocusedTaskInfo;
 
-    public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context) {
-        this(null /* taskOrganizerController */, mainExecutor, context, null /* compatUI */,
+    public ShellTaskOrganizer(ShellExecutor mainExecutor) {
+        this(null /* shellInit */, null /* taskOrganizerController */, null /* compatUI */,
                 Optional.empty() /* unfoldAnimationController */,
-                Optional.empty() /* recentTasksController */);
+                Optional.empty() /* recentTasksController */,
+                mainExecutor);
     }
 
-    public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context, @Nullable
-            CompatUIController compatUI) {
-        this(null /* taskOrganizerController */, mainExecutor, context, compatUI,
-                Optional.empty() /* unfoldAnimationController */,
-                Optional.empty() /* recentTasksController */);
-    }
-
-    public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context, @Nullable
-            CompatUIController compatUI,
+    public ShellTaskOrganizer(ShellInit shellInit,
+            @Nullable CompatUIController compatUI,
             Optional<UnfoldAnimationController> unfoldAnimationController,
-            Optional<RecentTasksController> recentTasks) {
-        this(null /* taskOrganizerController */, mainExecutor, context, compatUI,
-                unfoldAnimationController, recentTasks);
+            Optional<RecentTasksController> recentTasks,
+            ShellExecutor mainExecutor) {
+        this(shellInit, null /* taskOrganizerController */, compatUI,
+                unfoldAnimationController, recentTasks, mainExecutor);
     }
 
     @VisibleForTesting
-    protected ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController,
-            ShellExecutor mainExecutor, Context context, @Nullable CompatUIController compatUI,
+    protected ShellTaskOrganizer(ShellInit shellInit,
+            ITaskOrganizerController taskOrganizerController,
+            @Nullable CompatUIController compatUI,
             Optional<UnfoldAnimationController> unfoldAnimationController,
-            Optional<RecentTasksController> recentTasks) {
+            Optional<RecentTasksController> recentTasks,
+            ShellExecutor mainExecutor) {
         super(taskOrganizerController, mainExecutor);
         mCompatUI = compatUI;
         mRecentTasks = recentTasks;
         mUnfoldAnimationController = unfoldAnimationController.orElse(null);
-        if (compatUI != null) {
-            compatUI.setCompatUICallback(this);
+        if (shellInit != null) {
+            shellInit.addInitCallback(this::onInit, this);
         }
+    }
+
+    private void onInit() {
+        if (mCompatUI != null) {
+            mCompatUI.setCompatUICallback(this);
+        }
+        registerOrganizer();
     }
 
     @Override
