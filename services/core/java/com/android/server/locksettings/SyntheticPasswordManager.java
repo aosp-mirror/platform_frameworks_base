@@ -1347,19 +1347,13 @@ public class SyntheticPasswordManager {
     private byte[] transformUnderWeaverSecret(byte[] data, byte[] secret) {
         byte[] weaverSecret = SyntheticPasswordCrypto.personalizedHash(
                 PERSONALIZATION_WEAVER_PASSWORD, secret);
-        byte[] result = new byte[data.length + weaverSecret.length];
-        System.arraycopy(data, 0, result, 0, data.length);
-        System.arraycopy(weaverSecret, 0, result, data.length, weaverSecret.length);
-        return result;
+        return ArrayUtils.concat(data, weaverSecret);
     }
 
     private byte[] transformUnderSecdiscardable(byte[] data, byte[] rawSecdiscardable) {
         byte[] secdiscardable = SyntheticPasswordCrypto.personalizedHash(
                 PERSONALIZATION_SECDISCARDABLE, rawSecdiscardable);
-        byte[] result = new byte[data.length + secdiscardable.length];
-        System.arraycopy(data, 0, result, 0, data.length);
-        System.arraycopy(secdiscardable, 0, result, data.length, secdiscardable.length);
-        return result;
+        return ArrayUtils.concat(data, secdiscardable);
     }
 
     private byte[] createSecdiscardable(long protectorId, int userId) {

@@ -25,7 +25,8 @@ import android.system.keystore2.Domain;
 import android.system.keystore2.KeyDescriptor;
 import android.util.Slog;
 
-import java.io.ByteArrayOutputStream;
+import com.android.internal.util.ArrayUtils;
+
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -94,10 +95,7 @@ public class SyntheticPasswordCrypto {
         if (spec.getTLen() != AES_GCM_TAG_SIZE * 8) {
             throw new IllegalArgumentException("Invalid tag length: " + spec.getTLen() + " bits");
         }
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        outputStream.write(iv);
-        outputStream.write(ciphertext);
-        return outputStream.toByteArray();
+        return ArrayUtils.concat(iv, ciphertext);
     }
 
     public static byte[] encrypt(byte[] keyBytes, byte[] personalization, byte[] message) {

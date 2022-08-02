@@ -58,6 +58,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.CleanupManager;
@@ -1287,7 +1288,7 @@ public class RecoverableKeyStoreManagerTest {
         return SecureBox.encrypt(
                 /*theirPublicKey=*/ null,
                 /*sharedSecret=*/ keyClaimant,
-                /*header=*/ KeySyncUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
+                /*header=*/ ArrayUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
                 /*payload=*/ locallyEncryptedRecoveryKey);
     }
 
