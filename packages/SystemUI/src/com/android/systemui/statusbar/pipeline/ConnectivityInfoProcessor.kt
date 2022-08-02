@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline
 
+import android.content.Context
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 
@@ -27,4 +29,18 @@ import javax.inject.Inject
  * displayed in the RHS of the status bar.
  */
 @SysUISingleton
-class ConnectivityInfoProcessor @Inject constructor()
+class ConnectivityInfoProcessor @Inject constructor(
+        context: Context,
+        private val statusBarPipelineFlags: StatusBarPipelineFlags,
+) : CoreStartable(context) {
+    override fun start() {
+        if (statusBarPipelineFlags.isNewPipelineEnabled()) {
+            init()
+        }
+    }
+
+    /** Initializes this processor and everything it depends on. */
+    private fun init() {
+        // TODO(b/238425913): Register all the connectivity callbacks here.
+    }
+}

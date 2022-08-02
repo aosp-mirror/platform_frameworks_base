@@ -42,6 +42,7 @@ import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCom
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.gesture.TapGestureDetector
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.view.ViewUtil
@@ -54,27 +55,29 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class MediaTttChipControllerReceiver @Inject constructor(
-    commandQueue: CommandQueue,
-    context: Context,
-    @MediaTttReceiverLogger logger: MediaTttLogger,
-    windowManager: WindowManager,
-    viewUtil: ViewUtil,
-    mainExecutor: DelayableExecutor,
-    accessibilityManager: AccessibilityManager,
-    tapGestureDetector: TapGestureDetector,
-    powerManager: PowerManager,
-    @Main private val mainHandler: Handler,
-    private val uiEventLogger: MediaTttReceiverUiEventLogger,
+        commandQueue: CommandQueue,
+        context: Context,
+        @MediaTttReceiverLogger logger: MediaTttLogger,
+        windowManager: WindowManager,
+        viewUtil: ViewUtil,
+        mainExecutor: DelayableExecutor,
+        accessibilityManager: AccessibilityManager,
+        configurationController: ConfigurationController,
+        tapGestureDetector: TapGestureDetector,
+        powerManager: PowerManager,
+        @Main private val mainHandler: Handler,
+        private val uiEventLogger: MediaTttReceiverUiEventLogger,
 ) : MediaTttChipControllerCommon<ChipReceiverInfo>(
-    context,
-    logger,
-    windowManager,
-    viewUtil,
-    mainExecutor,
-    accessibilityManager,
-    tapGestureDetector,
-    powerManager,
-    R.layout.media_ttt_chip_receiver
+        context,
+        logger,
+        windowManager,
+        viewUtil,
+        mainExecutor,
+        accessibilityManager,
+        configurationController,
+        tapGestureDetector,
+        powerManager,
+        R.layout.media_ttt_chip_receiver,
 ) {
     @SuppressLint("WrongConstant") // We're allowed to use LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
     override val windowLayoutParams = commonWindowLayoutParams.apply {
@@ -140,12 +143,13 @@ class MediaTttChipControllerReceiver @Inject constructor(
         )
     }
 
-    override fun updateChipView(chipInfo: ChipReceiverInfo, currentChipView: ViewGroup) {
+    override fun updateChipView(newChipInfo: ChipReceiverInfo, currentChipView: ViewGroup) {
+        super.updateChipView(newChipInfo, currentChipView)
         setIcon(
                 currentChipView,
-                chipInfo.routeInfo.packageName,
-                chipInfo.appIconDrawableOverride,
-                chipInfo.appNameOverride
+                newChipInfo.routeInfo.packageName,
+                newChipInfo.appIconDrawableOverride,
+                newChipInfo.appNameOverride
         )
     }
 

@@ -16,8 +16,8 @@
 
 package com.android.systemui.dreams.complication;
 
-import static com.android.systemui.dreams.complication.dagger.DreamClockTimeComplicationModule.DREAM_CLOCK_TIME_COMPLICATION_LAYOUT_PARAMS;
 import static com.android.systemui.dreams.complication.dagger.DreamClockTimeComplicationModule.DREAM_CLOCK_TIME_COMPLICATION_VIEW;
+import static com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule.DREAM_CLOCK_TIME_COMPLICATION_LAYOUT_PARAMS;
 
 import android.content.Context;
 import android.view.View;

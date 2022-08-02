@@ -19,8 +19,8 @@ package com.android.systemui.dreams.complication;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE_AFTER_UNLOCK;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.UNAVAILABLE;
-import static com.android.systemui.dreams.complication.dagger.DreamHomeControlsComplicationComponent.DreamHomeControlsModule.DREAM_HOME_CONTROLS_CHIP_LAYOUT_PARAMS;
 import static com.android.systemui.dreams.complication.dagger.DreamHomeControlsComplicationComponent.DreamHomeControlsModule.DREAM_HOME_CONTROLS_CHIP_VIEW;
+import static com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule.DREAM_HOME_CONTROLS_CHIP_LAYOUT_PARAMS;
 
 import android.content.Context;
 import android.content.Intent;

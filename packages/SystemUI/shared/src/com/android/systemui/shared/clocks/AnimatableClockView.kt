@@ -20,12 +20,15 @@ import android.annotation.ColorInt
 import android.annotation.FloatRange
 import android.annotation.IntRange
 import android.annotation.SuppressLint
+import android.app.compat.ChangeIdStateCache.invalidate
 import android.content.Context
 import android.graphics.Canvas
 import android.text.TextUtils
 import android.text.format.DateFormat
 import android.util.AttributeSet
 import android.widget.TextView
+import com.android.internal.R.attr.contentDescription
+import com.android.internal.R.attr.format
 import com.android.systemui.animation.GlyphCallback
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.TextAnimator
@@ -74,6 +77,12 @@ class AnimatableClockView @JvmOverloads constructor(
 
     val lockScreenWeight: Int
         get() = if (useBoldedVersion()) lockScreenWeightInternal + 100 else lockScreenWeightInternal
+
+    /**
+     * The number of pixels below the baseline. For fonts that support languages such as
+     * Burmese, this space can be significant and should be accounted for when computing layout.
+     */
+    val bottom get() = paint?.fontMetrics?.bottom ?: 0f
 
     init {
         val animatableClockViewAttributes = context.obtainStyledAttributes(
@@ -133,6 +142,15 @@ class AnimatableClockView @JvmOverloads constructor(
         // relayout if the text didn't actually change.
         if (!TextUtils.equals(text, formattedText)) {
             text = formattedText
+
+            // Because the TextLayout may mutate under the hood as a result of the new text, we
+            // notify the TextAnimator that it may have changed and request a measure/layout. A
+            // crash will occur on the next invocation of setTextStyle if the layout is mutated
+            // without being notified TextInterpolator being notified.
+            if (layout != null) {
+                textAnimator?.updateLayout(layout)
+            }
+            requestLayout()
         }
     }
 

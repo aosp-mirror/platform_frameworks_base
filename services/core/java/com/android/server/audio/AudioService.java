@@ -3934,14 +3934,12 @@ public class AudioService extends IAudioService.Stub
             case AudioSystem.MODE_IN_COMMUNICATION:
             case AudioSystem.MODE_IN_CALL:
             case AudioSystem.MODE_NORMAL:
+            case AudioSystem.MODE_CALL_SCREENING:
+            case AudioSystem.MODE_CALL_REDIRECT:
+            case AudioSystem.MODE_COMMUNICATION_REDIRECT:
                 break;
-            case AudioSystem.MODE_RINGTONE:
-                // not changing anything for ringtone
-                return;
-            case AudioSystem.MODE_CURRENT:
-            case AudioSystem.MODE_INVALID:
             default:
-                // don't know what to do in this case, better bail
+                // no-op is enough for all other values
                 return;
         }
 
@@ -3962,6 +3960,34 @@ public class AudioService extends IAudioService.Stub
                     newMode, streamType, index));
             mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
         }
+    }
+
+    private void setLeAudioVolumeOnModeUpdate(int mode) {
+        switch (mode) {
+            case AudioSystem.MODE_IN_COMMUNICATION:
+            case AudioSystem.MODE_IN_CALL:
+            case AudioSystem.MODE_NORMAL:
+            case AudioSystem.MODE_CALL_SCREENING:
+            case AudioSystem.MODE_CALL_REDIRECT:
+            case AudioSystem.MODE_COMMUNICATION_REDIRECT:
+                break;
+            default:
+                // no-op is enough for all other values
+                return;
+        }
+
+        int streamType = getBluetoothContextualVolumeStream(mode);
+
+        // Currently, DEVICE_OUT_BLE_HEADSET is the only output type for LE_AUDIO profile.
+        // (See AudioDeviceBroker#createBtDeviceInfo())
+        int index = mStreamStates[streamType].getIndex(AudioSystem.DEVICE_OUT_BLE_HEADSET);
+        int maxIndex = mStreamStates[streamType].getMaxIndex();
+
+        if (DEBUG_VOL) {
+            Log.d(TAG, "setLeAudioVolumeOnModeUpdate postSetLeAudioVolumeIndex index="
+                    + index + " maxIndex=" + maxIndex + " streamType=" + streamType);
+        }
+        mDeviceBroker.postSetLeAudioVolumeIndex(index, maxIndex, streamType);
     }
 
     private void setStreamVolume(int streamType, int index, int flags,
@@ -5339,6 +5365,10 @@ public class AudioService extends IAudioService.Stub
 
                 // change of mode may require volume to be re-applied on some devices
                 updateAbsVolumeMultiModeDevices(previousMode, mode);
+
+                // Forcefully set LE audio volume as a workaround, since the value of 'device'
+                // is not DEVICE_OUT_BLE_* even when BLE is connected.
+                setLeAudioVolumeOnModeUpdate(mode);
 
                 // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all SCO
                 // connections not started by the application changing the mode when pid changes
