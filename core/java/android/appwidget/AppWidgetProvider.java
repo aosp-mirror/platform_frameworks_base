@@ -127,7 +127,8 @@ public class AppWidgetProvider extends BroadcastReceiver {
 
     /**
      * Called in response to the {@link AppWidgetManager#ACTION_APPWIDGET_OPTIONS_CHANGED}
-     * broadcast when this widget has been layed out at a new size.
+     * broadcast when this widget has been layed out at a new size or its options changed via
+     * {@link AppWidgetManager#updateAppWidgetOptions}.
      *
      * {@more}
      *
@@ -136,7 +137,7 @@ public class AppWidgetProvider extends BroadcastReceiver {
      * @param appWidgetManager A {@link AppWidgetManager} object you can call {@link
      *                  AppWidgetManager#updateAppWidget} on.
      * @param appWidgetId The appWidgetId of the widget whose size changed.
-     * @param newOptions The appWidgetId of the widget whose size changed.
+     * @param newOptions The new options of the changed widget.
      *
      * @see AppWidgetManager#ACTION_APPWIDGET_OPTIONS_CHANGED
      */
