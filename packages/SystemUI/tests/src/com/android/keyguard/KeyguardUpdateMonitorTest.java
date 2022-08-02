@@ -86,6 +86,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor.BiometricAuthenticated;
+import com.android.keyguard.logging.KeyguardUpdateMonitorLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -179,6 +180,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private KeyguardUpdateMonitorCallback mTestCallback;
     @Mock
     private ActiveUnlockConfig mActiveUnlockConfig;
+    @Mock
+    private KeyguardUpdateMonitorLogger mKeyguardUpdateMonitorLogger;
     // Direct executor
     private Executor mBackgroundExecutor = Runnable::run;
     private Executor mMainExecutor = Runnable::run;
@@ -1189,7 +1192,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mBackgroundExecutor, mMainExecutor,
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager,
-                    mInteractionJankMonitor, mLatencyTracker, mActiveUnlockConfig);
+                    mInteractionJankMonitor, mLatencyTracker, mActiveUnlockConfig,
+                    mKeyguardUpdateMonitorLogger);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 

@@ -277,4 +277,14 @@ public class LogModule {
     public static LogBuffer provideStatusBarNetworkControllerBuffer(LogBufferFactory factory) {
         return factory.create("StatusBarNetworkControllerLog", 20);
     }
+
+    /**
+     * Provides a {@link LogBuffer} for use by {@link com.android.keyguard.KeyguardUpdateMonitor}.
+     */
+    @Provides
+    @SysUISingleton
+    @KeyguardUpdateMonitorLog
+    public static LogBuffer provideKeyguardUpdateMonitorLogBuffer(LogBufferFactory factory) {
+        return factory.create("KeyguardUpdateMonitorLog", 200);
+    }
 }
