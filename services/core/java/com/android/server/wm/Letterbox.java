@@ -138,6 +138,11 @@ public class Letterbox {
         return mInner;
     }
 
+    /** @return The frame that contains the inner frame and the insets. */
+    Rect getOuterFrame() {
+        return mOuter;
+    }
+
     /**
      * Returns {@code true} if the letterbox does not overlap with the bar, or the letterbox can
      * fully cover the window frame.
