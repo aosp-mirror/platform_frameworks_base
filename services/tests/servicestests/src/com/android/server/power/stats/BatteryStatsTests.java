@@ -34,6 +34,7 @@ import org.junit.runners.Suite;
         BatteryStatsHistoryIteratorTest.class,
         BatteryStatsHistoryTest.class,
         BatteryStatsImplTest.class,
+        BatteryStatsManagerTest.class,
         BatteryStatsNoteTest.class,
         BatteryStatsSamplingTimerTest.class,
         BatteryStatsSensorTest.class,

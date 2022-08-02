@@ -1,7 +1,6 @@
 package com.android.internal.util;
 
 import static android.content.Intent.ACTION_USER_SWITCHED;
-import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OTHER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,6 +28,10 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.WindowManager;
+import android.view.WindowManager.ScreenshotSource;
+import android.view.WindowManager.ScreenshotType;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -42,24 +45,28 @@ public class ScreenshotHelper {
      * Describes a screenshot request (to make it easier to pass data through to the handler).
      */
     public static class ScreenshotRequest implements Parcelable {
-        private int mSource;
-        private boolean mHasStatusBar;
-        private boolean mHasNavBar;
-        private Bundle mBitmapBundle;
-        private Rect mBoundsInScreen;
-        private Insets mInsets;
-        private int mTaskId;
-        private int mUserId;
-        private ComponentName mTopComponent;
+        private final int mSource;
+        private final Bundle mBitmapBundle;
+        private final Rect mBoundsInScreen;
+        private final Insets mInsets;
+        private final int mTaskId;
+        private final int mUserId;
+        private final ComponentName mTopComponent;
 
-        ScreenshotRequest(int source, boolean hasStatus, boolean hasNav) {
+        @VisibleForTesting
+        public ScreenshotRequest(int source) {
             mSource = source;
-            mHasStatusBar = hasStatus;
-            mHasNavBar = hasNav;
+            mBitmapBundle = null;
+            mBoundsInScreen = null;
+            mInsets = null;
+            mTaskId = -1;
+            mUserId = -1;
+            mTopComponent = null;
         }
 
-        ScreenshotRequest(int source, Bundle bitmapBundle, Rect boundsInScreen, Insets insets,
-                int taskId, int userId, ComponentName topComponent) {
+        @VisibleForTesting
+        public ScreenshotRequest(int source, Bundle bitmapBundle, Rect boundsInScreen,
+                Insets insets, int taskId, int userId, ComponentName topComponent) {
             mSource = source;
             mBitmapBundle = bitmapBundle;
             mBoundsInScreen = boundsInScreen;
@@ -71,29 +78,26 @@ public class ScreenshotHelper {
 
         ScreenshotRequest(Parcel in) {
             mSource = in.readInt();
-            mHasStatusBar = in.readBoolean();
-            mHasNavBar = in.readBoolean();
-
             if (in.readInt() == 1) {
                 mBitmapBundle = in.readBundle(getClass().getClassLoader());
-                mBoundsInScreen = in.readParcelable(Rect.class.getClassLoader(), android.graphics.Rect.class);
-                mInsets = in.readParcelable(Insets.class.getClassLoader(), android.graphics.Insets.class);
+                mBoundsInScreen = in.readParcelable(Rect.class.getClassLoader(), Rect.class);
+                mInsets = in.readParcelable(Insets.class.getClassLoader(), Insets.class);
                 mTaskId = in.readInt();
                 mUserId = in.readInt();
-                mTopComponent = in.readParcelable(ComponentName.class.getClassLoader(), android.content.ComponentName.class);
+                mTopComponent = in.readParcelable(ComponentName.class.getClassLoader(),
+                        ComponentName.class);
+            } else {
+                mBitmapBundle = null;
+                mBoundsInScreen = null;
+                mInsets = null;
+                mTaskId = -1;
+                mUserId = -1;
+                mTopComponent = null;
             }
         }
 
         public int getSource() {
             return mSource;
-        }
-
-        public boolean getHasStatusBar() {
-            return mHasStatusBar;
-        }
-
-        public boolean getHasNavBar() {
-            return mHasNavBar;
         }
 
         public Bundle getBitmapBundle() {
@@ -112,7 +116,6 @@ public class ScreenshotHelper {
             return mTaskId;
         }
 
-
         public int getUserId() {
             return mUserId;
         }
@@ -129,8 +132,6 @@ public class ScreenshotHelper {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mSource);
-            dest.writeBoolean(mHasStatusBar);
-            dest.writeBoolean(mHasNavBar);
             if (mBitmapBundle == null) {
                 dest.writeInt(0);
             } else {
@@ -144,7 +145,8 @@ public class ScreenshotHelper {
             }
         }
 
-        public static final @NonNull Parcelable.Creator<ScreenshotRequest> CREATOR =
+        @NonNull
+        public static final Parcelable.Creator<ScreenshotRequest> CREATOR =
                 new Parcelable.Creator<ScreenshotRequest>() {
 
                     @Override
@@ -254,113 +256,71 @@ public class ScreenshotHelper {
 
     /**
      * Request a screenshot be taken.
-     *
+     * <p>
      * Added to support reducing unit test duration; the method variant without a timeout argument
      * is recommended for general use.
      *
-     * @param screenshotType     The type of screenshot, for example either
-     *                           {@link android.view.WindowManager#TAKE_SCREENSHOT_FULLSCREEN}
-     *                           or
-     *                           {@link android.view.WindowManager#TAKE_SCREENSHOT_SELECTED_REGION}
-     * @param hasStatus          {@code true} if the status bar is currently showing. {@code false}
-     *                           if not.
-     * @param hasNav             {@code true} if the navigation bar is currently showing. {@code
-     *                           false} if not.
-     * @param source             The source of the screenshot request. One of
-     *                           {SCREENSHOT_GLOBAL_ACTIONS, SCREENSHOT_KEY_CHORD,
-     *                           SCREENSHOT_OVERVIEW, SCREENSHOT_OTHER}
-     * @param handler            A handler used in case the screenshot times out
-     * @param completionConsumer Consumes `false` if a screenshot was not taken, and `true` if the
-     *                           screenshot was taken.
+     * @param screenshotType The type of screenshot, defined by {@link ScreenshotType}
+     * @param source The source of the screenshot request, defined by {@link ScreenshotSource}
+     * @param handler used to process messages received from the screenshot service
+     * @param completionConsumer receives the URI of the captured screenshot, once saved or
+     *         null if no screenshot was saved
      */
-    public void takeScreenshot(final int screenshotType, final boolean hasStatus,
-            final boolean hasNav, int source, @NonNull Handler handler,
-            @Nullable Consumer<Uri> completionConsumer) {
-        ScreenshotRequest screenshotRequest = new ScreenshotRequest(source, hasStatus, hasNav);
-        takeScreenshot(screenshotType, SCREENSHOT_TIMEOUT_MS, handler, screenshotRequest,
+    public void takeScreenshot(@ScreenshotType int screenshotType, @ScreenshotSource int source,
+            @NonNull Handler handler, @Nullable Consumer<Uri> completionConsumer) {
+        ScreenshotRequest screenshotRequest = new ScreenshotRequest(source);
+        takeScreenshot(screenshotType, handler, screenshotRequest, SCREENSHOT_TIMEOUT_MS,
                 completionConsumer);
     }
 
     /**
-     * Request a screenshot be taken, with provided reason.
-     *
-     * @param screenshotType     The type of screenshot, for example either
-     *                           {@link android.view.WindowManager#TAKE_SCREENSHOT_FULLSCREEN}
-     *                           or
-     *                           {@link android.view.WindowManager#TAKE_SCREENSHOT_SELECTED_REGION}
-     * @param hasStatus          {@code true} if the status bar is currently showing. {@code false}
-     *                           if
-     *                           not.
-     * @param hasNav             {@code true} if the navigation bar is currently showing. {@code
-     *                           false}
-     *                           if not.
-     * @param handler            A handler used in case the screenshot times out
-     * @param completionConsumer Consumes `false` if a screenshot was not taken, and `true` if the
-     *                           screenshot was taken.
-     */
-    public void takeScreenshot(final int screenshotType, final boolean hasStatus,
-            final boolean hasNav, @NonNull Handler handler,
-            @Nullable Consumer<Uri> completionConsumer) {
-        takeScreenshot(screenshotType, hasStatus, hasNav, SCREENSHOT_TIMEOUT_MS, handler,
-                completionConsumer);
-    }
-
-    /**
-     * Request a screenshot be taken with a specific timeout.
-     *
+     * Request a screenshot be taken.
+     * <p>
      * Added to support reducing unit test duration; the method variant without a timeout argument
      * is recommended for general use.
      *
-     * @param screenshotType     The type of screenshot, for example either
-     *                           {@link android.view.WindowManager#TAKE_SCREENSHOT_FULLSCREEN}
-     *                           or
-     *                           {@link android.view.WindowManager#TAKE_SCREENSHOT_SELECTED_REGION}
-     * @param hasStatus          {@code true} if the status bar is currently showing. {@code false}
-     *                           if
-     *                           not.
-     * @param hasNav             {@code true} if the navigation bar is currently showing. {@code
-     *                           false}
-     *                           if not.
-     * @param timeoutMs          If the screenshot hasn't been completed within this time period,
-     *                           the screenshot attempt will be cancelled and `completionConsumer`
-     *                           will be run.
-     * @param handler            A handler used in case the screenshot times out
-     * @param completionConsumer Consumes `false` if a screenshot was not taken, and `true` if the
-     *                           screenshot was taken.
+     * @param screenshotType The type of screenshot, defined by {@link ScreenshotType}
+     * @param source The source of the screenshot request, defined by {@link ScreenshotSource}
+     * @param handler used to process messages received from the screenshot service
+     * @param timeoutMs time limit for processing, intended only for testing
+     * @param completionConsumer receives the URI of the captured screenshot, once saved or
+     *         null if no screenshot was saved
      */
-    public void takeScreenshot(final int screenshotType, final boolean hasStatus,
-            final boolean hasNav, long timeoutMs, @NonNull Handler handler,
-            @Nullable Consumer<Uri> completionConsumer) {
-        ScreenshotRequest screenshotRequest = new ScreenshotRequest(SCREENSHOT_OTHER, hasStatus,
-                hasNav);
-        takeScreenshot(screenshotType, timeoutMs, handler, screenshotRequest, completionConsumer);
+    @VisibleForTesting
+    public void takeScreenshot(@ScreenshotType int screenshotType, @ScreenshotSource int source,
+            @NonNull Handler handler, long timeoutMs, @Nullable Consumer<Uri> completionConsumer) {
+        ScreenshotRequest screenshotRequest = new ScreenshotRequest(source);
+        takeScreenshot(screenshotType, handler, screenshotRequest, timeoutMs, completionConsumer);
     }
 
     /**
      * Request that provided image be handled as if it was a screenshot.
      *
-     * @param screenshotBundle   Bundle containing the buffer and color space of the screenshot.
-     * @param boundsInScreen     The bounds in screen coordinates that the bitmap orginated from.
-     * @param insets             The insets that the image was shown with, inside the screenbounds.
-     * @param taskId             The taskId of the task that the screen shot was taken of.
-     * @param userId             The userId of user running the task provided in taskId.
-     * @param topComponent       The component name of the top component running in the task.
-     * @param handler            A handler used in case the screenshot times out
-     * @param completionConsumer Consumes `false` if a screenshot was not taken, and `true` if the
-     *                           screenshot was taken.
+     * @param screenshotBundle Bundle containing the buffer and color space of the screenshot.
+     * @param boundsInScreen The bounds in screen coordinates that the bitmap originated from.
+     * @param insets The insets that the image was shown with, inside the screen bounds.
+     * @param taskId The taskId of the task that the screen shot was taken of.
+     * @param userId The userId of user running the task provided in taskId.
+     * @param topComponent The component name of the top component running in the task.
+     * @param source The source of the screenshot request, defined by {@link ScreenshotSource}
+     * @param handler A handler used in case the screenshot times out
+     * @param completionConsumer receives the URI of the captured screenshot, once saved or
+     *         null if no screenshot was saved
      */
     public void provideScreenshot(@NonNull Bundle screenshotBundle, @NonNull Rect boundsInScreen,
-            @NonNull Insets insets, int taskId, int userId, ComponentName topComponent, int source,
-            @NonNull Handler handler, @Nullable Consumer<Uri> completionConsumer) {
-        ScreenshotRequest screenshotRequest =
-                new ScreenshotRequest(source, screenshotBundle, boundsInScreen, insets, taskId,
-                        userId, topComponent);
-        takeScreenshot(WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE, SCREENSHOT_TIMEOUT_MS,
-                handler, screenshotRequest, completionConsumer);
+            @NonNull Insets insets, int taskId, int userId, ComponentName topComponent,
+            @ScreenshotSource int source, @NonNull Handler handler,
+            @Nullable Consumer<Uri> completionConsumer) {
+        ScreenshotRequest screenshotRequest = new ScreenshotRequest(source, screenshotBundle,
+                boundsInScreen, insets, taskId, userId, topComponent);
+        takeScreenshot(WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE, handler, screenshotRequest,
+                SCREENSHOT_TIMEOUT_MS,
+                completionConsumer);
     }
 
-    private void takeScreenshot(final int screenshotType, long timeoutMs, @NonNull Handler handler,
-            ScreenshotRequest screenshotRequest, @Nullable Consumer<Uri> completionConsumer) {
+    private void takeScreenshot(@ScreenshotType int screenshotType, @NonNull Handler handler,
+            ScreenshotRequest screenshotRequest, long timeoutMs,
+            @Nullable Consumer<Uri> completionConsumer) {
         synchronized (mScreenshotLock) {
 
             final Runnable mScreenshotTimeout = () -> {

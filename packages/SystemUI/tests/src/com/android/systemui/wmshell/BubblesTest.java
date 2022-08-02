@@ -43,6 +43,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -142,7 +143,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -251,6 +255,8 @@ public class BubblesTest extends SysuiTestCase {
     private TaskViewTransitions mTaskViewTransitions;
     @Mock
     private Optional<OneHandedController> mOneHandedOptional;
+    @Mock
+    private UserManager mUserManager;
 
     private TestableBubblePositioner mPositioner;
 
@@ -313,6 +319,9 @@ public class BubblesTest extends SysuiTestCase {
         mPositioner.setMaxBubbles(5);
         mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, syncExecutor);
 
+        when(mUserManager.getProfiles(ActivityManager.getCurrentUser())).thenReturn(
+                Collections.singletonList(mock(UserInfo.class)));
+
         TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
                 new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
                         mock(PowerManager.class),
@@ -337,7 +346,7 @@ public class BubblesTest extends SysuiTestCase {
                 mStatusBarService,
                 mWindowManager,
                 mWindowManagerShellWrapper,
-                mock(UserManager.class),
+                mUserManager,
                 mLauncherApps,
                 mBubbleLogger,
                 mTaskStackListener,
@@ -1023,7 +1032,7 @@ public class BubblesTest extends SysuiTestCase {
         assertThat(mBubbleData.getOverflowBubbleWithKey(mBubbleEntry2.getKey())).isNotNull();
 
         // Switch users
-        mBubbleController.onUserChanged(secondUserId);
+        switchUser(secondUserId);
         assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
 
         // Give this user some bubbles
@@ -1038,6 +1047,41 @@ public class BubblesTest extends SysuiTestCase {
 
         // Would have loaded bubbles twice because of user switch
         verify(mDataRepository, times(2)).loadBubbles(anyInt(), any());
+    }
+
+    @Test
+    public void testOnUserChanged_bubblesRestored() {
+        int firstUserId = mBubbleEntry.getStatusBarNotification().getUser().getIdentifier();
+        int secondUserId = mBubbleEntryUser11.getStatusBarNotification().getUser().getIdentifier();
+        // Mock current profile
+        when(mLockscreenUserManager.isCurrentProfile(firstUserId)).thenReturn(true);
+        when(mLockscreenUserManager.isCurrentProfile(secondUserId)).thenReturn(false);
+
+        mBubbleController.updateBubble(mBubbleEntry);
+        assertThat(mBubbleController.hasBubbles()).isTrue();
+        // We start with 1 bubble
+        assertThat(mBubbleData.getBubbles()).hasSize(1);
+
+        // Switch to second user
+        switchUser(secondUserId);
+
+        // Second user has no bubbles
+        assertThat(mBubbleController.hasBubbles()).isFalse();
+
+        // Send bubble update for first user, ensure it does not show up
+        mBubbleController.updateBubble(mBubbleEntry2);
+        assertThat(mBubbleController.hasBubbles()).isFalse();
+
+        // Start returning notif for first user again
+        when(mCommonNotifCollection.getAllNotifs()).thenReturn(Arrays.asList(mRow, mRow2));
+
+        // Switch back to first user
+        switchUser(firstUserId);
+
+        // Check we now have two bubbles, one previous and one new that came in
+        assertThat(mBubbleController.hasBubbles()).isTrue();
+        // Now there are 2 bubbles
+        assertThat(mBubbleData.getBubbles()).hasSize(2);
     }
 
     /**
@@ -1441,6 +1485,14 @@ public class BubblesTest extends SysuiTestCase {
                 .build();
     }
 
+    private void switchUser(int userId) {
+        when(mLockscreenUserManager.isCurrentProfile(anyInt())).thenAnswer(
+                (Answer<Boolean>) invocation -> invocation.<Integer>getArgument(0) == userId);
+        SparseArray<UserInfo> userInfos = new SparseArray<>(1);
+        userInfos.put(userId, mock(UserInfo.class));
+        mBubbleController.onCurrentProfilesChanged(userInfos);
+        mBubbleController.onUserChanged(userId);
+    }
 
     /**
      * Asserts that the bubble stack is expanded and also validates the cached state is updated.
