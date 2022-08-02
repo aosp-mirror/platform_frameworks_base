@@ -3393,6 +3393,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             pw.println(prefix + "mLastOrientationSource=" + mLastOrientationSource);
             pw.println(prefix + "deepestLastOrientationSource=" + getLastOrientationSource());
         }
+        if (mLocalInsetsSourceProviders != null && mLocalInsetsSourceProviders.size() != 0) {
+            pw.println(prefix + mLocalInsetsSourceProviders.size() + " LocalInsetsSourceProviders");
+            final String childPrefix = prefix + "  ";
+            for (int i = 0; i < mLocalInsetsSourceProviders.size(); ++i) {
+                mLocalInsetsSourceProviders.valueAt(i).dump(pw, childPrefix);
+            }
+        }
     }
 
     final void updateSurfacePositionNonOrganized() {
