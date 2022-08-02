@@ -243,6 +243,6 @@ enum class ChipStateSender(
 // Give the Transfer*Triggered states a longer timeout since those states represent an active
 // process and we should keep the user informed about it as long as possible (but don't allow it to
 // continue indefinitely).
-private const val TRANSFER_TRIGGERED_TIMEOUT_MILLIS = 15000L
+private const val TRANSFER_TRIGGERED_TIMEOUT_MILLIS = 30000L
 
 private const val TAG = "ChipStateSender"

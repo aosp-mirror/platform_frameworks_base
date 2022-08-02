@@ -38,7 +38,6 @@ import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCom
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttRemovalReason
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.view.ViewUtil
@@ -58,7 +57,6 @@ class MediaTttChipControllerSender @Inject constructor(
         @Main mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
-        tapGestureDetector: TapGestureDetector,
         powerManager: PowerManager,
         private val uiEventLogger: MediaTttSenderUiEventLogger
 ) : MediaTttChipControllerCommon<ChipSenderInfo>(
@@ -69,7 +67,6 @@ class MediaTttChipControllerSender @Inject constructor(
         mainExecutor,
         accessibilityManager,
         configurationController,
-        tapGestureDetector,
         powerManager,
         R.layout.media_ttt_chip,
 ) {
