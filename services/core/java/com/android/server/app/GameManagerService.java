@@ -649,6 +649,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
             return xmlFound;
         }
 
+        GameModeConfiguration getOrAddDefaultGameModeConfiguration(int gameMode) {
+            synchronized (mModeConfigLock) {
+                mModeConfigs.putIfAbsent(gameMode, new GameModeConfiguration(gameMode));
+                return mModeConfigs.get(gameMode);
+            }
+        }
+
         /**
          * GameModeConfiguration contains all the values for all the interventions associated with
          * a game mode.
@@ -659,16 +666,25 @@ public final class GameManagerService extends IGameManagerService.Stub {
             public static final String MODE_KEY = "mode";
             public static final String SCALING_KEY = "downscaleFactor";
             public static final String FPS_KEY = "fps";
-            public static final String DEFAULT_SCALING = "1.0";
-            public static final String DEFAULT_FPS = "";
             public static final String ANGLE_KEY = "useAngle";
             public static final String LOADING_BOOST_KEY = "loadingBoost";
 
+            public static final float DEFAULT_SCALING = -1f;
+            public static final String DEFAULT_FPS = "";
+            public static final boolean DEFAULT_USE_ANGLE = false;
+            public static final int DEFAULT_LOADING_BOOST_DURATION = -1;
+
             private final @GameMode int mGameMode;
-            private String mScaling;
-            private String mFps;
+            private float mScaling = DEFAULT_SCALING;
+            private String mFps = DEFAULT_FPS;
             private final boolean mUseAngle;
             private final int mLoadingBoostDuration;
+
+            GameModeConfiguration(int gameMode) {
+                mGameMode = gameMode;
+                mUseAngle = DEFAULT_USE_ANGLE;
+                mLoadingBoostDuration = DEFAULT_LOADING_BOOST_DURATION;
+            }
 
             GameModeConfiguration(KeyValueListParser parser) {
                 mGameMode = parser.getInt(MODE_KEY, GameManager.GAME_MODE_UNSUPPORTED);
@@ -677,7 +693,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 // GameManagerService) will not do anything for the app (like window scaling or
                 // using ANGLE).
                 mScaling = !mAllowDownscale || willGamePerformOptimizations(mGameMode)
-                        ? DEFAULT_SCALING : parser.getString(SCALING_KEY, DEFAULT_SCALING);
+                        ? DEFAULT_SCALING : parser.getFloat(SCALING_KEY, DEFAULT_SCALING);
 
                 mFps = mAllowFpsOverride && !willGamePerformOptimizations(mGameMode)
                         ? parser.getString(FPS_KEY, DEFAULT_FPS) : DEFAULT_FPS;
@@ -686,17 +702,18 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 // - The app has not opted in to performing the work itself AND
                 // - The Phenotype config has enabled it.
                 mUseAngle = mAllowAngle && !willGamePerformOptimizations(mGameMode)
-                        && parser.getBoolean(ANGLE_KEY, false);
+                        && parser.getBoolean(ANGLE_KEY, DEFAULT_USE_ANGLE);
 
-                mLoadingBoostDuration = willGamePerformOptimizations(mGameMode) ? -1
-                        : parser.getInt(LOADING_BOOST_KEY, -1);
+                mLoadingBoostDuration = willGamePerformOptimizations(mGameMode)
+                        ? DEFAULT_LOADING_BOOST_DURATION
+                        : parser.getInt(LOADING_BOOST_KEY, DEFAULT_LOADING_BOOST_DURATION);
             }
 
             public int getGameMode() {
                 return mGameMode;
             }
 
-            public synchronized String getScaling() {
+            public synchronized float getScaling() {
                 return mScaling;
             }
 
@@ -712,7 +729,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 return mLoadingBoostDuration;
             }
 
-            public synchronized void setScaling(String scaling) {
+            public synchronized void setScaling(float scaling) {
                 mScaling = scaling;
             }
 
@@ -740,7 +757,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
              * Get the corresponding compat change id for the current scaling string.
              */
             public long getCompatChangeId() {
-                return GameManagerService.getCompatChangeId(mScaling);
+                return GameManagerService.getCompatChangeId(String.valueOf(mScaling));
             }
         }
 
@@ -813,7 +830,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
 
         /**
-         * Insert a new GameModeConfiguration
+         * Inserts a new GameModeConfiguration
          */
         public void addModeConfig(GameModeConfiguration config) {
             if (config.isActive()) {
@@ -937,7 +954,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private @GameMode int getGameModeFromSettings(String packageName, @UserIdInt int userId) {
         synchronized (mLock) {
             if (!mSettings.containsKey(userId)) {
-                Slog.w(TAG, "User ID '" + userId + "' does not have a Game Mode"
+                Slog.d(TAG, "User ID '" + userId + "' does not have a Game Mode"
                         + " selected for package: '" + packageName + "'");
                 return GameManager.GAME_MODE_UNSUPPORTED;
             }
@@ -1163,6 +1180,66 @@ public final class GameManagerService extends IGameManagerService.Stub {
         mGameServiceController.setGameServiceProvider(packageName);
     }
 
+
+    /**
+     * Updates the resolution scaling factor for the package's target game mode and activates it.
+     *
+     * @param scalingFactor enable scaling override over any other compat scaling if positive,
+     *                      disable otherwise
+     * @throws SecurityException        if caller doesn't have
+     *                                  {@link android.Manifest.permission#MANAGE_GAME_MODE}
+     *                                  permission.
+     * @throws IllegalArgumentException if the user ID provided doesn't exist.
+     */
+    @Override
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public void updateResolutionScalingFactor(String packageName, int gameMode, float scalingFactor,
+            int userId) throws SecurityException, IllegalArgumentException {
+        checkPermission(Manifest.permission.MANAGE_GAME_MODE);
+        synchronized (mLock) {
+            if (!mSettings.containsKey(userId)) {
+                throw new IllegalArgumentException("User " + userId + " wasn't started");
+            }
+        }
+        setGameModeConfigOverride(packageName, userId, gameMode, null /*fpsStr*/,
+                Float.toString(scalingFactor));
+    }
+
+    /**
+     * Gets the resolution scaling factor for the package's target game mode.
+     *
+     * @return scaling factor for the game mode if exists or negative value otherwise.
+     * @throws SecurityException        if caller doesn't have
+     *                                  {@link android.Manifest.permission#MANAGE_GAME_MODE}
+     *                                  permission.
+     * @throws IllegalArgumentException if the user ID provided doesn't exist.
+     */
+    @Override
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public float getResolutionScalingFactor(String packageName, int gameMode, int userId)
+            throws SecurityException, IllegalArgumentException {
+        checkPermission(Manifest.permission.MANAGE_GAME_MODE);
+        synchronized (mLock) {
+            if (!mSettings.containsKey(userId)) {
+                throw new IllegalArgumentException("User " + userId + " wasn't started");
+            }
+        }
+        return getResolutionScalingFactorInternal(packageName, gameMode, userId);
+    }
+
+    float getResolutionScalingFactorInternal(String packageName, int gameMode, int userId) {
+        final GamePackageConfiguration packageConfig = getConfig(packageName);
+        if (packageConfig == null) {
+            return GamePackageConfiguration.GameModeConfiguration.DEFAULT_SCALING;
+        }
+        final GamePackageConfiguration.GameModeConfiguration modeConfig =
+                packageConfig.getGameModeConfiguration(gameMode);
+        if (modeConfig != null) {
+            return modeConfig.getScaling();
+        }
+        return GamePackageConfiguration.GameModeConfiguration.DEFAULT_SCALING;
+    }
+
     /**
      * Notified when boot is completed.
      */
@@ -1319,6 +1396,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
         long scaleId = modeConfig.getCompatChangeId();
         if (scaleId == 0) {
+            disableCompatScale(packageName);
             Slog.w(TAG, "Invalid downscaling change id " + scaleId + " for "
                     + packageName);
             return;
@@ -1408,7 +1486,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
         // modify GameModeConfiguration intervention settings
         GamePackageConfiguration.GameModeConfiguration overrideModeConfig =
-                overrideConfig.getGameModeConfiguration(gameMode);
+                overrideConfig.getOrAddDefaultGameModeConfiguration(gameMode);
 
         if (fpsStr != null) {
             overrideModeConfig.setFpsStr(fpsStr);
@@ -1417,10 +1495,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     GamePackageConfiguration.GameModeConfiguration.DEFAULT_FPS);
         }
         if (scaling != null) {
-            overrideModeConfig.setScaling(scaling);
-        } else {
-            overrideModeConfig.setScaling(
-                    GamePackageConfiguration.GameModeConfiguration.DEFAULT_SCALING);
+            overrideModeConfig.setScaling(Float.parseFloat(scaling));
         }
         Slog.i(TAG, "Package Name: " + packageName
                 + " FPS: " + String.valueOf(overrideModeConfig.getFps())
@@ -1470,7 +1545,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
 
             // If the game mode to reset is the only mode other than standard mode,
-            // The override config is removed.
+            // the override config is removed.
             if (modes.length <= 2) {
                 synchronized (mOverrideConfigLock) {
                     mOverrideConfigs.remove(packageName);
@@ -1646,7 +1721,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     final int useAngle = gameModeConfiguration.getUseAngle() ? 1 : 0;
                     sb.append(TextUtils.formatSimple("angle=%d", useAngle));
                     sb.append(",");
-                    final String scaling = gameModeConfiguration.getScaling();
+                    final float scaling = gameModeConfiguration.getScaling();
                     sb.append("scaling=");
                     sb.append(scaling);
                     sb.append(",");

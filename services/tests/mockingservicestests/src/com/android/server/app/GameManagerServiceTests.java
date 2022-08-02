@@ -578,7 +578,7 @@ public class GameManagerServiceTests {
     }
 
     private void checkDownscaling(GameManagerService gameManagerService,
-                int gameMode, String scaling) {
+                int gameMode, float scaling) {
         if (gameManagerService == null) {
             gameManagerService = new GameManagerService(mMockContext, mTestLooper.getLooper());
             startUser(gameManagerService, USER_ID_1);
@@ -586,7 +586,7 @@ public class GameManagerServiceTests {
         }
         GameManagerService.GamePackageConfiguration config =
                 gameManagerService.getConfig(mPackageName);
-        assertEquals(config.getGameModeConfiguration(gameMode).getScaling(), scaling);
+        assertEquals(scaling, config.getGameModeConfiguration(gameMode).getScaling(), 0.01f);
     }
 
     private void checkAngleEnabled(GameManagerService gameManagerService, int gameMode,
@@ -715,7 +715,7 @@ public class GameManagerServiceTests {
 
         checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
                 GameManager.GAME_MODE_STANDARD);
-        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, "0.3");
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0.3f);
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 120);
     }
 
@@ -735,7 +735,7 @@ public class GameManagerServiceTests {
 
         checkReportedModes(gameManagerService, GameManager.GAME_MODE_BATTERY,
                 GameManager.GAME_MODE_STANDARD);
-        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, "0.5");
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, 0.5f);
         checkFps(gameManagerService, GameManager.GAME_MODE_BATTERY, 60);
     }
 
@@ -757,9 +757,9 @@ public class GameManagerServiceTests {
 
         checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
                 GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
-        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, "0.3");
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0.3f);
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 120);
-        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, "0.5");
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, 0.5f);
         checkFps(gameManagerService, GameManager.GAME_MODE_BATTERY, 60);
     }
 
@@ -782,7 +782,7 @@ public class GameManagerServiceTests {
 
         checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
                 GameManager.GAME_MODE_STANDARD);
-        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, "0.5");
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0.5f);
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 90);
     }
 
@@ -805,7 +805,7 @@ public class GameManagerServiceTests {
 
         checkReportedModes(gameManagerService, GameManager.GAME_MODE_BATTERY,
                 GameManager.GAME_MODE_STANDARD);
-        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, "0.7");
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, 0.7f);
         checkFps(gameManagerService, GameManager.GAME_MODE_BATTERY, 30);
     }
 
@@ -829,9 +829,9 @@ public class GameManagerServiceTests {
 
         checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
                 GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
-        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, "0.5");
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0.5f);
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 90);
-        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, "0.7");
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, 0.7f);
         checkFps(gameManagerService, GameManager.GAME_MODE_BATTERY, 30);
     }
 
@@ -858,9 +858,9 @@ public class GameManagerServiceTests {
 
         checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
                 GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
-        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, "0.3");
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0.3f);
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 120);
-        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, "0.7");
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, 0.7f);
         checkFps(gameManagerService, GameManager.GAME_MODE_BATTERY, 30);
     }
 
@@ -933,7 +933,7 @@ public class GameManagerServiceTests {
     public void testInterventionAllowScalingDefault() throws Exception {
         mockDeviceConfigPerformance();
         mockModifyGameModeGranted();
-        checkDownscaling(null, GameManager.GAME_MODE_PERFORMANCE, "0.5");
+        checkDownscaling(null, GameManager.GAME_MODE_PERFORMANCE, 0.5f);
     }
 
     /**
@@ -944,7 +944,7 @@ public class GameManagerServiceTests {
         mockDeviceConfigPerformance();
         mockInterventionAllowDownscaleFalse();
         mockModifyGameModeGranted();
-        checkDownscaling(null, GameManager.GAME_MODE_PERFORMANCE, "1.0");
+        checkDownscaling(null, GameManager.GAME_MODE_PERFORMANCE, -1.0f);
     }
 
     /**
@@ -956,7 +956,7 @@ public class GameManagerServiceTests {
         mockDeviceConfigPerformance();
         mockInterventionAllowDownscaleTrue();
         mockModifyGameModeGranted();
-        checkDownscaling(null, GameManager.GAME_MODE_PERFORMANCE, "0.5");
+        checkDownscaling(null, GameManager.GAME_MODE_PERFORMANCE, 0.5f);
     }
 
     /**
@@ -1403,5 +1403,103 @@ public class GameManagerServiceTests {
         assertEquals(splitLine[5], "3");
         assertEquals(splitLine[6], "angle=0,scaling=0.7,fps=30");
 
+    }
+
+    @Test
+    public void testUpdateResolutionScalingFactor() {
+        mockModifyGameModeGranted();
+        mockDeviceConfigBattery();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        float scalingFactor = 0.123f;
+        gameManagerService.updateResolutionScalingFactor(mPackageName,
+                GameManager.GAME_MODE_BATTERY, scalingFactor,
+                USER_ID_1);
+        assertEquals(scalingFactor, gameManagerService.getResolutionScalingFactor(mPackageName,
+                GameManager.GAME_MODE_BATTERY, USER_ID_1), 0.001f);
+        scalingFactor = 0.321f;
+        gameManagerService.updateResolutionScalingFactor(mPackageName,
+                GameManager.GAME_MODE_BATTERY, scalingFactor,
+                USER_ID_1);
+        assertEquals(scalingFactor, gameManagerService.getResolutionScalingFactor(mPackageName,
+                GameManager.GAME_MODE_BATTERY, USER_ID_1), 0.001f);
+    }
+
+    @Test
+    public void testUpdateResolutionScalingFactor_noDeviceConfig() {
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        float scalingFactor = 0.123f;
+        gameManagerService.updateResolutionScalingFactor(mPackageName,
+                GameManager.GAME_MODE_BATTERY, scalingFactor,
+                USER_ID_1);
+        assertEquals(scalingFactor, gameManagerService.getResolutionScalingFactor(mPackageName,
+                GameManager.GAME_MODE_BATTERY, USER_ID_1), 0.001f);
+        scalingFactor = 0.321f;
+        gameManagerService.updateResolutionScalingFactor(mPackageName,
+                GameManager.GAME_MODE_BATTERY, scalingFactor,
+                USER_ID_1);
+        assertEquals(scalingFactor, gameManagerService.getResolutionScalingFactor(mPackageName,
+                GameManager.GAME_MODE_BATTERY,
+                USER_ID_1), 0.001f);
+    }
+
+    @Test
+    public void testUpdateResolutionScalingFactor_permissionDenied() {
+        mockModifyGameModeDenied();
+        mockDeviceConfigAll();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        float scalingFactor = 0.123f;
+        assertThrows(SecurityException.class, () -> {
+            gameManagerService.updateResolutionScalingFactor(mPackageName,
+                    GameManager.GAME_MODE_BATTERY, scalingFactor,
+                    USER_ID_1);
+        });
+        mockModifyGameModeGranted();
+        assertEquals(0.7f, gameManagerService.getResolutionScalingFactor(mPackageName,
+                GameManager.GAME_MODE_BATTERY, USER_ID_1), 0.001f);
+    }
+
+    @Test
+    public void testUpdateResolutionScalingFactor_noUserId() {
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_2);
+        final float scalingFactor = 0.123f;
+        assertThrows(IllegalArgumentException.class, () -> {
+            gameManagerService.updateResolutionScalingFactor(mPackageName,
+                    GameManager.GAME_MODE_BATTERY, scalingFactor,
+                    USER_ID_1);
+        });
+    }
+
+    @Test
+    public void testGetResolutionScalingFactor_permissionDenied() {
+        mockModifyGameModeDenied();
+        mockDeviceConfigAll();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        assertThrows(SecurityException.class, () -> {
+            gameManagerService.getResolutionScalingFactor(mPackageName,
+                    GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        });
+    }
+
+    @Test
+    public void testGetResolutionScalingFactor_noUserId() {
+        mockModifyGameModeDenied();
+        mockDeviceConfigAll();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_2);
+        assertEquals(-1f, gameManagerService.getResolutionScalingFactor(mPackageName,
+                GameManager.GAME_MODE_BATTERY, USER_ID_1), 0.001f);
     }
 }
