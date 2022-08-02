@@ -146,25 +146,10 @@ filegroup {
 filegroup {
     name: "SystemUI-tests-utils",
     srcs: [
-        "tests/src/com/android/systemui/SysuiBaseFragmentTest.java",
-        "tests/src/com/android/systemui/SysuiTestCase.java",
-        "tests/src/com/android/systemui/TestableDependency.java",
-        "tests/src/com/android/systemui/classifier/FalsingManagerFake.java",
-        "tests/src/com/android/systemui/statusbar/notification/collection/NotificationEntryBuilder.java",
-        "tests/src/com/android/systemui/statusbar/RankingBuilder.java",
-        "tests/src/com/android/systemui/statusbar/SbnBuilder.java",
-        "tests/src/com/android/systemui/SysuiTestableContext.java",
-        "tests/src/com/android/systemui/util/**/*Fake.java",
-        "tests/src/com/android/systemui/utils/leaks/BaseLeakChecker.java",
-        "tests/src/com/android/systemui/utils/leaks/LeakCheckedTest.java",
-        "tests/src/com/android/systemui/**/Fake*.java",
-        "tests/src/com/android/systemui/**/Fake*.kt",
+        "tests/utils/src/**/*.java",
+        "tests/utils/src/**/*.kt",
     ],
-    exclude_srcs: [
-        "tests/src/com/android/systemui/**/*Test.java",
-        "tests/src/com/android/systemui/**/*Test.kt",
-    ],
-    path: "tests/src",
+    path: "tests/utils/src",
 }
 
 java_library {
@@ -172,8 +157,8 @@ java_library {
     srcs: [
         "src/com/android/systemui/util/concurrency/DelayableExecutor.java",
         "src/com/android/systemui/util/time/SystemClock.java",
-        "tests/src/com/android/systemui/util/concurrency/FakeExecutor.java",
-        "tests/src/com/android/systemui/util/time/FakeSystemClock.java",
+        "tests/utils/src/com/android/systemui/util/concurrency/FakeExecutor.java",
+        "tests/utils/src/com/android/systemui/util/time/FakeSystemClock.java",
     ],
     jarjar_rules: ":jarjar-rules-shared",
 }
@@ -196,6 +181,7 @@ android_library {
         "src/**/*.java",
         "src/**/I*.aidl",
         ":ReleaseJavaFiles",
+        ":SystemUI-tests-utils",
     ],
     static_libs: [
         "WifiTrackerLib",
