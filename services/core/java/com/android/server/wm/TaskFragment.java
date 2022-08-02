@@ -401,6 +401,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mTaskFragmentOrganizerProcessName = processName;
     }
 
+    void onTaskFragmentOrganizerRemoved() {
+        mTaskFragmentOrganizer = null;
+    }
+
     /** Whether this TaskFragment is organized by the given {@code organizer}. */
     boolean hasTaskFragmentOrganizer(ITaskFragmentOrganizer organizer) {
         return organizer != null && mTaskFragmentOrganizer != null
