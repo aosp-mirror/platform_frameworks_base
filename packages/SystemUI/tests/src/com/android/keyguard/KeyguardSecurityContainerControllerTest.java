@@ -318,7 +318,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     @Test
     public void onBouncerVisibilityChanged_withoutSidedSecurity_sideFpsHintHidden() {
         setupConditionsToEnableSideFpsHint();
-        setSidedSecurityMode(false);
+        setSideFpsHintEnabledFromResources(false);
         reset(mSidefpsController);
 
         mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
@@ -383,7 +383,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
     private void setupConditionsToEnableSideFpsHint() {
         attachView();
-        setSidedSecurityMode(true);
+        setSideFpsHintEnabledFromResources(true);
         setFingerprintDetectionRunning(true);
         setNeedsStrongAuth(false);
     }
@@ -399,8 +399,9 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 BiometricSourceType.FINGERPRINT);
     }
 
-    private void setSidedSecurityMode(boolean sided) {
-        when(mView.isSidedSecurityMode()).thenReturn(sided);
+    private void setSideFpsHintEnabledFromResources(boolean enabled) {
+        when(mResources.getBoolean(R.bool.config_show_sidefps_hint_on_bouncer)).thenReturn(
+                enabled);
     }
 
     private void setNeedsStrongAuth(boolean needed) {
