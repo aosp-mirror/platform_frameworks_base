@@ -19,6 +19,7 @@ package com.android.systemui.dreams.complication;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_AIR_QUALITY;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_CAST_INFO;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_DATE;
+import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_HOME_CONTROLS;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_NONE;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_TIME;
 import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_WEATHER;
@@ -48,6 +49,8 @@ public class ComplicationUtils {
                 return COMPLICATION_TYPE_AIR_QUALITY;
             case DreamBackend.COMPLICATION_TYPE_CAST_INFO:
                 return COMPLICATION_TYPE_CAST_INFO;
+            case DreamBackend.COMPLICATION_TYPE_HOME_CONTROLS:
+                return COMPLICATION_TYPE_HOME_CONTROLS;
             default:
                 return COMPLICATION_TYPE_NONE;
         }
