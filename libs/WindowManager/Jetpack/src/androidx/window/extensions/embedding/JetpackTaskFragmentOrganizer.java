@@ -271,56 +271,49 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     }
 
     @Override
-    public void onTaskFragmentAppeared(@NonNull TaskFragmentInfo taskFragmentInfo) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
+    public void onTaskFragmentAppeared(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentInfo taskFragmentInfo) {
         final IBinder fragmentToken = taskFragmentInfo.getFragmentToken();
         mFragmentInfos.put(fragmentToken, taskFragmentInfo);
         mCallback.onTaskFragmentAppeared(wct, taskFragmentInfo);
-        applyTransaction(wct);
     }
 
     @Override
-    public void onTaskFragmentInfoChanged(@NonNull TaskFragmentInfo taskFragmentInfo) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
+    public void onTaskFragmentInfoChanged(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentInfo taskFragmentInfo) {
         final IBinder fragmentToken = taskFragmentInfo.getFragmentToken();
         mFragmentInfos.put(fragmentToken, taskFragmentInfo);
         mCallback.onTaskFragmentInfoChanged(wct, taskFragmentInfo);
-        applyTransaction(wct);
     }
 
     @Override
-    public void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
+    public void onTaskFragmentVanished(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentInfo taskFragmentInfo) {
         mFragmentInfos.remove(taskFragmentInfo.getFragmentToken());
         mCallback.onTaskFragmentVanished(wct, taskFragmentInfo);
-        applyTransaction(wct);
     }
 
     @Override
-    public void onTaskFragmentParentInfoChanged(int taskId, @NonNull Configuration parentConfig) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
+    public void onTaskFragmentParentInfoChanged(@NonNull WindowContainerTransaction wct,
+            int taskId, @NonNull Configuration parentConfig) {
         mCallback.onTaskFragmentParentInfoChanged(wct, taskId, parentConfig);
-        applyTransaction(wct);
     }
 
     @Override
-    public void onActivityReparentedToTask(int taskId, @NonNull Intent activityIntent,
-            @NonNull IBinder activityToken) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
+    public void onActivityReparentedToTask(@NonNull WindowContainerTransaction wct,
+            int taskId, @NonNull Intent activityIntent, @NonNull IBinder activityToken) {
         mCallback.onActivityReparentedToTask(wct, taskId, activityIntent, activityToken);
-        applyTransaction(wct);
     }
 
     @Override
-    public void onTaskFragmentError(@NonNull IBinder errorCallbackToken,
+    public void onTaskFragmentError(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder errorCallbackToken,
             @Nullable TaskFragmentInfo taskFragmentInfo,
             int opType, @NonNull Throwable exception) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (taskFragmentInfo != null) {
             final IBinder fragmentToken = taskFragmentInfo.getFragmentToken();
             mFragmentInfos.put(fragmentToken, taskFragmentInfo);
         }
         mCallback.onTaskFragmentError(wct, taskFragmentInfo, opType);
-        applyTransaction(wct);
     }
 }
