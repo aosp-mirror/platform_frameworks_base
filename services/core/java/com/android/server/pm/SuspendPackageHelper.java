@@ -126,10 +126,9 @@ public final class SuspendPackageHelper {
                 unmodifiablePackages.add(packageName);
                 continue;
             }
-            final PackageStateInternal packageState =
-                    snapshot.getPackageStateForInstalledAndFiltered(
-                            packageName, callingUid, userId);
-            if (packageState == null) {
+            final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
+            if (packageState == null || !packageState.getUserStateOrDefault(userId).isInstalled()
+                    || snapshot.shouldFilterApplication(packageState, callingUid, userId)) {
                 Slog.w(TAG, "Could not find package setting for package: " + packageName
                         + ". Skipping suspending/un-suspending.");
                 unmodifiablePackages.add(packageName);
