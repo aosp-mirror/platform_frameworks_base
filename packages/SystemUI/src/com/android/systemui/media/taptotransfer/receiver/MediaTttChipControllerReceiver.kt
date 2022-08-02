@@ -41,7 +41,6 @@ import com.android.systemui.media.taptotransfer.common.DEFAULT_TIMEOUT_MILLIS
 import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -63,7 +62,6 @@ class MediaTttChipControllerReceiver @Inject constructor(
         mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
-        tapGestureDetector: TapGestureDetector,
         powerManager: PowerManager,
         @Main private val mainHandler: Handler,
         private val uiEventLogger: MediaTttReceiverUiEventLogger,
@@ -75,7 +73,6 @@ class MediaTttChipControllerReceiver @Inject constructor(
         mainExecutor,
         accessibilityManager,
         configurationController,
-        tapGestureDetector,
         powerManager,
         R.layout.media_ttt_chip_receiver,
 ) {
