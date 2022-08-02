@@ -16,6 +16,7 @@
 
 package android.text.method;
 
+import android.annotation.NonNull;
 import android.text.Layout;
 import android.text.Spannable;
 import android.view.InputDevice;
@@ -190,6 +191,9 @@ public class BaseMovementMethod implements MovementMethod {
                 } else if (KeyEvent.metaStateHasModifiers(movementMetaState,
                         KeyEvent.META_ALT_ON)) {
                     return top(widget, buffer);
+                } else if (KeyEvent.metaStateHasModifiers(movementMetaState,
+                        KeyEvent.META_CTRL_ON)) {
+                    return previousParagraph(widget, buffer);
                 }
                 break;
 
@@ -199,6 +203,9 @@ public class BaseMovementMethod implements MovementMethod {
                 } else if (KeyEvent.metaStateHasModifiers(movementMetaState,
                         KeyEvent.META_ALT_ON)) {
                     return bottom(widget, buffer);
+                } else if (KeyEvent.metaStateHasModifiers(movementMetaState,
+                        KeyEvent.META_CTRL_ON)) {
+                    return nextParagraph(widget, buffer);
                 }
                 break;
 
@@ -396,6 +403,28 @@ public class BaseMovementMethod implements MovementMethod {
      * @return True if the event was handled.
      */
     protected boolean end(TextView widget, Spannable buffer) {
+        return false;
+    }
+
+    /**
+     * Performs a previous paragraph movement action.
+     *
+     * @param widget the text view
+     * @param buffer the text buffer
+     * @return true if the event was handled, otherwise false.
+     */
+    public boolean previousParagraph(@NonNull TextView widget, @NonNull Spannable buffer) {
+        return false;
+    }
+
+    /**
+     * Performs a next paragraph movement action.
+     *
+     * @param widget the text view
+     * @param buffer the text buffer
+     * @return true if the event was handled, otherwise false.
+     */
+    public boolean nextParagraph(@NonNull TextView widget, @NonNull Spannable buffer) {
         return false;
     }
 
