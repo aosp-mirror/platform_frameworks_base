@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone
 
 import android.annotation.ColorInt
-import android.graphics.Color
 import android.graphics.Rect
 import android.view.InsetsFlags
 import android.view.ViewDebug
@@ -39,7 +38,13 @@ import javax.inject.Inject
 class LetterboxAppearance(
     @Appearance val appearance: Int,
     val appearanceRegions: Array<AppearanceRegion>
-)
+) {
+    override fun toString(): String {
+        val appearanceString =
+                ViewDebug.flagsToString(InsetsFlags::class.java, "appearance", appearance)
+        return "LetterboxAppearance{$appearanceString, ${appearanceRegions.contentToString()}}"
+    }
+}
 
 /**
  * Responsible for calculating the [Appearance] and [AppearanceRegion] for the status bar when apps
@@ -51,6 +56,7 @@ class LetterboxAppearanceCalculator
 constructor(
     private val lightBarController: LightBarController,
     private val dumpManager: DumpManager,
+    private val letterboxBackgroundProvider: LetterboxBackgroundProvider,
 ) : OnStatusBarViewInitializedListener, CentralSurfacesComponent.Startable {
 
     private var statusBarBoundsProvider: StatusBarBoundsProvider? = null
@@ -184,13 +190,11 @@ constructor(
 
     @ColorInt
     private fun outerLetterboxBackgroundColor(): Int {
-        // TODO(b/238607453): retrieve this information from WindowManager.
-        return Color.BLACK
+        return letterboxBackgroundProvider.letterboxBackgroundColor
     }
 
     private fun isOuterLetterboxMultiColored(): Boolean {
-        // TODO(b/238607453): retrieve this information from WindowManager.
-        return false
+        return letterboxBackgroundProvider.isLetterboxBackgroundMultiColored
     }
 
     private fun getEndSideIconsBounds(): Rect {
