@@ -35,8 +35,6 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTE
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.CURRENT_LSKF_BASED_PROTECTOR_ID_KEY;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
-import static com.android.internal.widget.LockPatternUtils.PROFILE_KEY_NAME_DECRYPT;
-import static com.android.internal.widget.LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
@@ -210,6 +208,9 @@ public class LockSettingsService extends ILockSettings.Stub {
     // sensor's enrollment. If biometric enrollment requests a password handle that has expired, the
     // user's credential must be presented again, e.g. via ConfirmLockPattern/ConfirmLockPassword.
     private static final int GK_PW_HANDLE_STORE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
+
+    private static final String PROFILE_KEY_NAME_ENCRYPT = "profile_key_name_encrypt_";
+    private static final String PROFILE_KEY_NAME_DECRYPT = "profile_key_name_decrypt_";
 
     // Order of holding lock: mSeparateChallengeLock -> mSpManager -> this
     // Do not call into ActivityManager while holding mSpManager lock.

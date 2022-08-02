@@ -44,12 +44,14 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
         mGateKeeper = gatekeeper;
     }
 
-    private ArrayMap<String, byte[]> mBlobs = new ArrayMap<>();
+    private final ArrayMap<String, byte[]> mBlobs = new ArrayMap<>();
 
     @Override
-    protected byte[] decryptSPBlob(String blobKeyName, byte[] blob, byte[] protectorSecret) {
-        if (mBlobs.containsKey(blobKeyName) && !Arrays.equals(mBlobs.get(blobKeyName), blob)) {
-            throw new AssertionFailedError("blobKeyName content is overwritten: " + blobKeyName);
+    protected byte[] decryptSpBlob(String protectorKeyAlias, byte[] blob, byte[] protectorSecret) {
+        if (mBlobs.containsKey(protectorKeyAlias) &&
+                !Arrays.equals(mBlobs.get(protectorKeyAlias), blob)) {
+            throw new AssertionFailedError("Blob was overwritten; protectorKeyAlias="
+                    + protectorKeyAlias);
         }
         ByteBuffer buffer = ByteBuffer.allocate(blob.length);
         buffer.put(blob, 0, blob.length);
@@ -72,7 +74,7 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
     }
 
     @Override
-    protected byte[] createSPBlob(String blobKeyName, byte[] data, byte[] protectorSecret,
+    protected byte[] createSpBlob(String protectorKeyAlias, byte[] data, byte[] protectorSecret,
             long sid) {
         ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES + data.length + Integer.BYTES
                 + protectorSecret.length + Long.BYTES);
@@ -82,12 +84,12 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
         buffer.put(protectorSecret);
         buffer.putLong(sid);
         byte[] result = buffer.array();
-        mBlobs.put(blobKeyName, result);
+        mBlobs.put(protectorKeyAlias, result);
         return result;
     }
 
     @Override
-    protected void destroySPBlobKey(String keyAlias) {
+    protected void destroyProtectorKey(String keyAlias) {
     }
 
     @Override

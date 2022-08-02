@@ -127,18 +127,20 @@ public class SyntheticPasswordCrypto {
     }
 
     /**
-     * Decrypt a legacy SP blob which did the Keystore and software encryption layers in the wrong
+     * Decrypts a legacy SP blob which did the Keystore and software encryption layers in the wrong
      * order.
      */
-    public static byte[] decryptBlobV1(String keyAlias, byte[] blob, byte[] protectorSecret) {
+    public static byte[] decryptBlobV1(String protectorKeyAlias, byte[] blob,
+            byte[] protectorSecret) {
         try {
             KeyStore keyStore = getKeyStore();
-            SecretKey keyStoreKey = (SecretKey) keyStore.getKey(keyAlias, null);
-            if (keyStoreKey == null) {
-                throw new IllegalStateException("SP key is missing: " + keyAlias);
+            SecretKey protectorKey = (SecretKey) keyStore.getKey(protectorKeyAlias, null);
+            if (protectorKey == null) {
+                throw new IllegalStateException("SP protector key is missing: "
+                        + protectorKeyAlias);
             }
             byte[] intermediate = decrypt(protectorSecret, PROTECTOR_SECRET_PERSONALIZATION, blob);
-            return decrypt(keyStoreKey, intermediate);
+            return decrypt(protectorKey, intermediate);
         } catch (Exception e) {
             Slog.e(TAG, "Failed to decrypt V1 blob", e);
             throw new IllegalStateException("Failed to decrypt blob", e);
@@ -163,15 +165,17 @@ public class SyntheticPasswordCrypto {
     /**
      * Decrypts an SP blob that was created by {@link #createBlob}.
      */
-    public static byte[] decryptBlob(String keyAlias, byte[] blob, byte[] protectorSecret) {
+    public static byte[] decryptBlob(String protectorKeyAlias, byte[] blob,
+            byte[] protectorSecret) {
         try {
             final KeyStore keyStore = getKeyStore();
 
-            SecretKey keyStoreKey = (SecretKey) keyStore.getKey(keyAlias, null);
-            if (keyStoreKey == null) {
-                throw new IllegalStateException("SP key is missing: " + keyAlias);
+            SecretKey protectorKey = (SecretKey) keyStore.getKey(protectorKeyAlias, null);
+            if (protectorKey == null) {
+                throw new IllegalStateException("SP protector key is missing: "
+                        + protectorKeyAlias);
             }
-            byte[] intermediate = decrypt(keyStoreKey, blob);
+            byte[] intermediate = decrypt(protectorKey, blob);
             return decrypt(protectorSecret, PROTECTOR_SECRET_PERSONALIZATION, intermediate);
         } catch (CertificateException | IOException | BadPaddingException
                 | IllegalBlockSizeException
@@ -185,20 +189,21 @@ public class SyntheticPasswordCrypto {
 
     /**
      * Creates a new SP blob by encrypting the given data.  Two encryption layers are applied: an
-     * inner layer using a hash of protectorSecret as the key, and an outer layer using a new
-     * Keystore key with the given alias and optionally bound to a SID.
+     * inner layer using a hash of protectorSecret as the key, and an outer layer using the
+     * protector key, which is a Keystore key that is optionally bound to a SID.  This method
+     * creates the protector key and stores it under protectorKeyAlias.
      *
      * The reason we use a layer of software encryption, instead of using protectorSecret as the
      * applicationId of the Keystore key, is to work around buggy KeyMint implementations that don't
      * cryptographically bind the applicationId to the key.  The Keystore layer has to be the outer
      * layer, so that LSKF verification is ratelimited by Gatekeeper when Weaver is unavailable.
      */
-    public static byte[] createBlob(String keyAlias, byte[] data, byte[] protectorSecret,
+    public static byte[] createBlob(String protectorKeyAlias, byte[] data, byte[] protectorSecret,
             long sid) {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
             keyGenerator.init(AES_GCM_KEY_SIZE * 8, new SecureRandom());
-            SecretKey keyStoreKey = keyGenerator.generateKey();
+            SecretKey protectorKey = keyGenerator.generateKey();
             final KeyStore keyStore = getKeyStore();
             KeyProtection.Builder builder = new KeyProtection.Builder(KeyProperties.PURPOSE_DECRYPT)
                     .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
@@ -212,9 +217,9 @@ public class SyntheticPasswordCrypto {
             final KeyProtection protNonRollbackResistant = builder.build();
             builder.setRollbackResistant(true);
             final KeyProtection protRollbackResistant = builder.build();
-            final KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(keyStoreKey);
+            final KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(protectorKey);
             try {
-                keyStore.setEntry(keyAlias, entry, protRollbackResistant);
+                keyStore.setEntry(protectorKeyAlias, entry, protRollbackResistant);
                 Slog.i(TAG, "Using rollback-resistant key");
             } catch (KeyStoreException e) {
                 if (!(e.getCause() instanceof android.security.KeyStoreException)) {
@@ -226,11 +231,11 @@ public class SyntheticPasswordCrypto {
                 }
                 Slog.w(TAG, "Rollback-resistant keys unavailable.  Falling back to "
                         + "non-rollback-resistant key");
-                keyStore.setEntry(keyAlias, entry, protNonRollbackResistant);
+                keyStore.setEntry(protectorKeyAlias, entry, protNonRollbackResistant);
             }
 
             byte[] intermediate = encrypt(protectorSecret, PROTECTOR_SECRET_PERSONALIZATION, data);
-            return encrypt(keyStoreKey, intermediate);
+            return encrypt(protectorKey, intermediate);
         } catch (CertificateException | IOException | BadPaddingException
                 | IllegalBlockSizeException
                 | KeyStoreException | NoSuchPaddingException | NoSuchAlgorithmException
@@ -241,15 +246,15 @@ public class SyntheticPasswordCrypto {
         }
     }
 
-    public static void destroyBlobKey(String keyAlias) {
+    public static void destroyProtectorKey(String keyAlias) {
         KeyStore keyStore;
         try {
             keyStore = getKeyStore();
             keyStore.deleteEntry(keyAlias);
-            Slog.i(TAG, "SP key deleted: " + keyAlias);
+            Slog.i(TAG, "Deleted SP protector key " + keyAlias);
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException
                 | IOException e) {
-            Slog.e(TAG, "Failed to destroy blob", e);
+            Slog.e(TAG, "Failed to delete SP protector key " + keyAlias, e);
         }
     }
 
