@@ -439,6 +439,7 @@ public final class AutoFillUI {
                             log(MetricsEvent.TYPE_DISMISS);
                             hideFillDialogUiThread(callback);
                             callback.requestShowSoftInput(focusedId);
+                            callback.requestFallbackFromFillDialog();
                         }
 
                         @Override
