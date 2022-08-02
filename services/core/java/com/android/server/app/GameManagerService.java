@@ -333,7 +333,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     removeMessages(POPULATE_GAME_MODE_SETTINGS, msg.obj);
                     final int userId = (int) msg.obj;
                     final String[] packageNames = getInstalledGamePackageNames(userId);
-                    updateConfigsForUser(userId, packageNames);
+                    updateConfigsForUser(userId, false /*checkGamePackage*/, packageNames);
                     break;
                 }
                 case SET_GAME_STATE: {
@@ -402,7 +402,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
         @Override
         public void onPropertiesChanged(Properties properties) {
             final String[] packageNames = properties.getKeyset().toArray(new String[0]);
-            updateConfigsForUser(ActivityManager.getCurrentUser(), packageNames);
+            updateConfigsForUser(ActivityManager.getCurrentUser(), true /*checkGamePackage*/,
+                    packageNames);
         }
 
         @Override
@@ -717,7 +718,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 mFps = fpsStr;
             }
 
-            public boolean isValid() {
+            public boolean isActive() {
                 return (mGameMode == GameManager.GAME_MODE_STANDARD
                         || mGameMode == GameManager.GAME_MODE_PERFORMANCE
                         || mGameMode == GameManager.GAME_MODE_BATTERY)
@@ -809,15 +810,15 @@ public final class GameManagerService extends IGameManagerService.Stub {
          * Insert a new GameModeConfiguration
          */
         public void addModeConfig(GameModeConfiguration config) {
-            if (config.isValid()) {
+            if (config.isActive()) {
                 mModeConfigs.put(config.getGameMode(), config);
             } else {
-                Slog.w(TAG, "Invalid game mode config for "
+                Slog.w(TAG, "Attempt to add inactive game mode config for "
                         + mPackageName + ":" + config.toString());
             }
         }
 
-        public boolean isValid() {
+        public boolean isActive() {
             return mModeConfigs.size() > 0 || mBatteryModeOptedIn || mPerfModeOptedIn;
         }
 
@@ -1569,20 +1570,27 @@ public final class GameManagerService extends IGameManagerService.Stub {
      * @hide
      */
     @VisibleForTesting
-    void updateConfigsForUser(@UserIdInt int userId, String... packageNames) {
+    void updateConfigsForUser(@UserIdInt int userId, boolean checkGamePackage,
+            String... packageNames) {
+        if (checkGamePackage) {
+            packageNames = Arrays.stream(packageNames).filter(
+                    p -> isPackageGame(p, userId)).toArray(String[]::new);
+        }
         try {
             synchronized (mDeviceConfigLock) {
                 for (final String packageName : packageNames) {
                     final GamePackageConfiguration config =
                             new GamePackageConfiguration(packageName, userId);
-                    if (config.isValid()) {
+                    if (config.isActive()) {
                         if (DEBUG) {
                             Slog.i(TAG, "Adding config: " + config.toString());
                         }
                         mConfigs.put(packageName, config);
                     } else {
-                        Slog.w(TAG, "Invalid package config for "
-                                + config.getPackageName() + ":" + config.toString());
+                        if (DEBUG) {
+                            Slog.w(TAG, "Inactive package config for "
+                                    + config.getPackageName() + ":" + config.toString());
+                        }
                         mConfigs.remove(packageName);
                     }
                 }
@@ -1760,7 +1768,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     }
                     switch (intent.getAction()) {
                         case ACTION_PACKAGE_ADDED:
-                            updateConfigsForUser(userId, packageName);
+                            updateConfigsForUser(userId, true /*checkGamePackage*/, packageName);
                             break;
                         case ACTION_PACKAGE_REMOVED:
                             disableCompatScale(packageName);
