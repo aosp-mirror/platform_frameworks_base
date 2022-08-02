@@ -204,7 +204,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentInfoChanged(mTaskFragmentInfo);
+        verify(mOrganizer).onTaskFragmentInfoChanged(eq(mTaskFragmentInfo));
     }
 
     @Test
@@ -231,7 +231,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         verify(mOrganizer, never()).onTaskFragmentAppeared(any());
         verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
         verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(anyInt(), any());
-        verify(mOrganizer).onTaskFragmentVanished(mTaskFragmentInfo);
+        verify(mOrganizer).onTaskFragmentVanished(eq(mTaskFragmentInfo));
 
         // Not trigger onTaskFragmentInfoChanged.
         // Call onTaskFragmentAppeared before calling onTaskFragmentInfoChanged.
@@ -247,7 +247,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         verify(mOrganizer, never()).onTaskFragmentAppeared(any());
         verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
         verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(anyInt(), any());
-        verify(mOrganizer).onTaskFragmentVanished(mTaskFragmentInfo);
+        verify(mOrganizer).onTaskFragmentVanished(eq(mTaskFragmentInfo));
     }
 
     @Test
@@ -298,7 +298,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 mErrorToken, null /* taskFragment */, -1 /* opType */, exception);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentError(eq(mErrorToken), eq(null), eq(-1), eq(exception));
+        verify(mOrganizer).onTaskFragmentError(eq(mErrorToken), eq(null), eq(-1),
+                eq(exception));
     }
 
     @Test
@@ -324,8 +325,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onActivityReparentedToTask(activity);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onActivityReparentedToTask(task.mTaskId, activity.intent,
-                activity.token);
+        verify(mOrganizer).onActivityReparentedToTask(eq(task.mTaskId), eq(activity.intent),
+                eq(activity.token));
 
         // Notify organizer if there is any embedded in the Task.
         final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
@@ -340,7 +341,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.dispatchPendingEvents();
 
         verify(mOrganizer, times(2))
-                .onActivityReparentedToTask(task.mTaskId, activity.intent, activity.token);
+                .onActivityReparentedToTask(eq(task.mTaskId), eq(activity.intent),
+                        eq(activity.token));
     }
 
     @Test

@@ -19,6 +19,8 @@ package androidx.window.extensions.embedding;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMockTaskFragmentInfo;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
@@ -36,7 +38,6 @@ import static org.mockito.Mockito.never;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentInfo;
@@ -62,25 +63,27 @@ import java.util.List;
  * Build/Install/Run:
  *  atest WMJetpackUnitTests:TaskFragmentContainerTest
  */
+// Suppress GuardedBy warning on unit tests
+@SuppressWarnings("GuardedBy")
 @Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TaskFragmentContainerTest {
     @Mock
     private SplitPresenter mPresenter;
-    @Mock
     private SplitController mController;
     @Mock
     private TaskFragmentInfo mInfo;
     @Mock
-    private Handler mHandler;
+    private WindowContainerTransaction mTransaction;
     private Activity mActivity;
     private Intent mIntent;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        doReturn(mHandler).when(mController).getHandler();
+        mController = new SplitController();
+        spyOn(mController);
         mActivity = createMockActivity();
         mIntent = new Intent();
     }
@@ -123,7 +126,7 @@ public class TaskFragmentContainerTest {
 
         // Remove all references after the container has appeared in server.
         doReturn(new ArrayList<>()).when(mInfo).getActivities();
-        container.setInfo(mInfo);
+        container.setInfo(mTransaction, mInfo);
         container.finish(true /* shouldFinishDependent */, mPresenter, wct, mController);
 
         verify(mActivity, never()).finish();
@@ -137,7 +140,7 @@ public class TaskFragmentContainerTest {
         final TaskFragmentContainer container0 = new TaskFragmentContainer(mActivity,
                 null /* pendingAppearedIntent */, taskContainer, mController);
         final TaskFragmentInfo info = createMockTaskFragmentInfo(container0, mActivity);
-        container0.setInfo(info);
+        container0.setInfo(mTransaction, info);
         // Request to reparent the activity to a new TaskFragment.
         final TaskFragmentContainer container1 = new TaskFragmentContainer(mActivity,
                 null /* pendingAppearedIntent */, taskContainer, mController);
@@ -163,7 +166,7 @@ public class TaskFragmentContainerTest {
 
         final TaskFragmentInfo info0 = createMockTaskFragmentInfo(pendingActivityContainer,
                 mActivity);
-        pendingActivityContainer.setInfo(info0);
+        pendingActivityContainer.setInfo(mTransaction, info0);
 
         assertTrue(pendingActivityContainer.mPendingAppearedActivities.isEmpty());
 
@@ -175,7 +178,7 @@ public class TaskFragmentContainerTest {
 
         final TaskFragmentInfo info1 = createMockTaskFragmentInfo(pendingIntentContainer,
                 mActivity);
-        pendingIntentContainer.setInfo(info1);
+        pendingIntentContainer.setInfo(mTransaction, info1);
 
         assertNull(pendingIntentContainer.getPendingAppearedIntent());
     }
@@ -191,18 +194,19 @@ public class TaskFragmentContainerTest {
         final TaskFragmentInfo info = mock(TaskFragmentInfo.class);
         doReturn(new ArrayList<>()).when(info).getActivities();
         doReturn(true).when(info).isEmpty();
-        container.setInfo(info);
+        container.setInfo(mTransaction, info);
 
         assertTrue(container.isWaitingActivityAppear());
 
         doReturn(false).when(info).isEmpty();
-        container.setInfo(info);
+        container.setInfo(mTransaction, info);
 
         assertFalse(container.isWaitingActivityAppear());
     }
 
     @Test
     public void testAppearEmptyTimeout() {
+        doNothing().when(mController).onTaskFragmentAppearEmptyTimeout(any(), any());
         final TaskContainer taskContainer = new TaskContainer(TASK_ID);
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
                 mIntent, taskContainer, mController);
@@ -213,20 +217,20 @@ public class TaskFragmentContainerTest {
         final TaskFragmentInfo info = mock(TaskFragmentInfo.class);
         container.mInfo = null;
         doReturn(true).when(info).isEmpty();
-        container.setInfo(info);
+        container.setInfo(mTransaction, info);
 
         assertNotNull(container.mAppearEmptyTimeout);
 
         // Not set if it is not appeared empty.
         doReturn(new ArrayList<>()).when(info).getActivities();
         doReturn(false).when(info).isEmpty();
-        container.setInfo(info);
+        container.setInfo(mTransaction, info);
 
         assertNull(container.mAppearEmptyTimeout);
 
         // Remove timeout after the container becomes non-empty.
         doReturn(false).when(info).isEmpty();
-        container.setInfo(info);
+        container.setInfo(mTransaction, info);
 
         assertNull(container.mAppearEmptyTimeout);
 
@@ -234,7 +238,7 @@ public class TaskFragmentContainerTest {
         container.mInfo = null;
         container.setPendingAppearedIntent(mIntent);
         doReturn(true).when(info).isEmpty();
-        container.setInfo(info);
+        container.setInfo(mTransaction, info);
         container.mAppearEmptyTimeout.run();
 
         assertNull(container.mAppearEmptyTimeout);
@@ -260,7 +264,7 @@ public class TaskFragmentContainerTest {
         final List<IBinder> runningActivities = Lists.newArrayList(activity0.getActivityToken(),
                 activity1.getActivityToken());
         doReturn(runningActivities).when(mInfo).getActivities();
-        container.setInfo(mInfo);
+        container.setInfo(mTransaction, mInfo);
         activities = container.collectNonFinishingActivities();
 
         assertEquals(3, activities.size());
@@ -295,7 +299,7 @@ public class TaskFragmentContainerTest {
         final Activity activity = createMockActivity();
         final List<IBinder> runningActivities = Lists.newArrayList(activity.getActivityToken());
         doReturn(runningActivities).when(mInfo).getActivities();
-        container.setInfo(mInfo);
+        container.setInfo(mTransaction, mInfo);
 
         assertEquals(activity, container.getBottomMostActivity());
     }

@@ -78,6 +78,8 @@ import org.mockito.MockitoAnnotations;
  * Build/Install/Run:
  *  atest WMJetpackUnitTests:SplitPresenterTest
  */
+// Suppress GuardedBy warning on unit tests
+@SuppressWarnings("GuardedBy")
 @Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -226,8 +228,9 @@ public class SplitPresenterTest {
                 mTransaction, splitContainer, mActivity, secondaryActivity,
                 null /* secondaryIntent */));
 
-        primaryTf.setInfo(createMockTaskFragmentInfo(primaryTf, mActivity));
-        secondaryTf.setInfo(createMockTaskFragmentInfo(secondaryTf, secondaryActivity));
+        primaryTf.setInfo(mTransaction, createMockTaskFragmentInfo(primaryTf, mActivity));
+        secondaryTf.setInfo(mTransaction,
+                createMockTaskFragmentInfo(secondaryTf, secondaryActivity));
 
         assertEquals(RESULT_EXPANDED, mPresenter.expandSplitContainerIfNeeded(mTransaction,
                 splitContainer, mActivity, secondaryActivity, null /* secondaryIntent */));
