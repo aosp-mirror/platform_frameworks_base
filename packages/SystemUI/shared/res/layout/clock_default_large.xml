@@ -18,6 +18,7 @@
 -->
 <com.android.systemui.shared.clocks.AnimatableClockView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/animatable_clock_view_large"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"

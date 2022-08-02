@@ -439,6 +439,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             state |= DISABLE_CLOCK;
         }
 
+
         if (mNetworkController != null && EncryptionHelper.IS_DATA_ENCRYPTED) {
             if (mNetworkController.hasEmergencyCryptKeeperText()) {
                 state |= DISABLE_NOTIFICATION_ICONS;
@@ -446,6 +447,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             if (!mNetworkController.isRadioOn()) {
                 state |= DISABLE_SYSTEM_INFO;
             }
+        }
+
+        // The shelf will be hidden when dozing with a custom clock, we must show notification
+        // icons in this occasion.
+        if (mStatusBarStateController.isDozing()
+                && mNotificationPanelViewController.hasCustomClock()) {
+            state |= DISABLE_CLOCK | DISABLE_SYSTEM_INFO;
         }
 
         if (mOngoingCallController.hasOngoingCall()) {
