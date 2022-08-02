@@ -20,20 +20,16 @@ import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
+import com.android.wm.shell.flicker.appWindowBecomesInvisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
-import com.android.wm.shell.flicker.layerBecomesVisible
-import com.android.wm.shell.flicker.layerIsVisibleAtEnd
-import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisible
-import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
-import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
+import com.android.wm.shell.flicker.layerBecomesInvisible
+import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesInvisible
+import com.android.wm.shell.flicker.splitScreenDividerBecomesInvisible
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -43,152 +39,143 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test enter split screen by dragging app icon from notification.
- * This test is only for large screen devices.
+ * Test dismiss split screen by go home.
  *
- * To run this test: `atest WMShellFlickerTests:EnterSplitScreenByDragFromNotification`
+ * To run this test: `atest WMShellFlickerTests:DismissSplitScreenByGoHome`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class EnterSplitScreenByDragFromNotification(
+class DismissSplitScreenByGoHome(
     testSpec: FlickerTestParameter
 ) : SplitScreenBase(testSpec) {
 
-    private val sendNotificationApp = SplitScreenHelper.getSendNotification(instrumentation)
-
+    // TODO(b/231399940): Remove this once we can use recent shortcut to enter split.
     @Before
-    fun before() {
+    open fun before() {
         Assume.assumeTrue(tapl.isTablet)
     }
 
-    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
             setup {
                 eachRun {
-                    // Send a notification
-                    sendNotificationApp.launchViaIntent(wmHelper)
-                    val sendNotification = device.wait(
-                        Until.findObject(By.text("Send Notification")),
-                        SplitScreenHelper.TIMEOUT_MS
-                    )
-                    sendNotification?.click() ?: error("Send notification button not found")
-
-                    tapl.goHome()
                     primaryApp.launchViaIntent(wmHelper)
+                    // TODO(b/231399940): Use recent shortcut to enter split.
+                    tapl.launchedAppState.taskbar
+                            .openAllApps()
+                            .getAppIcon(secondaryApp.appName)
+                            .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
+                    SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
                 }
             }
             transitions {
-                SplitScreenHelper.dragFromNotificationToSplit(instrumentation, device, wmHelper)
-                SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, sendNotificationApp)
-            }
-            teardown {
-                eachRun {
-                    sendNotificationApp.exit(wmHelper)
-                }
+                tapl.goHome()
+                wmHelper.StateSyncBuilder()
+                        .withAppTransitionIdle()
+                        .withHomeActivityVisible()
+                        .waitForAndVerify()
             }
         }
 
     @Presubmit
     @Test
-    fun splitScreenDividerBecomesVisible() = testSpec.splitScreenDividerBecomesVisible()
+    fun splitScreenDividerBecomesVisible() = testSpec.splitScreenDividerBecomesInvisible()
 
     @Presubmit
     @Test
-    fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp)
+    fun primaryAppLayerBecomesInvisible() = testSpec.layerBecomesInvisible(primaryApp)
 
     @Presubmit
     @Test
-    fun secondaryAppLayerBecomesVisible() =
-        testSpec.layerBecomesVisible(sendNotificationApp)
+    fun secondaryAppLayerBecomesInvisible() = testSpec.layerBecomesInvisible(primaryApp)
 
     @Presubmit
     @Test
-    fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
+    fun primaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
         primaryApp, splitLeftTop = false)
 
     @Presubmit
     @Test
-    fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisible(
-        sendNotificationApp, splitLeftTop = true)
+    fun secondaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
+        secondaryApp, splitLeftTop = true)
 
     @Presubmit
     @Test
-    fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp)
+    fun primaryAppWindowBecomesInvisible() = testSpec.appWindowBecomesInvisible(primaryApp)
 
     @Presubmit
     @Test
-    fun secondaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(sendNotificationApp)
+    fun secondaryAppWindowBecomesInvisible() = testSpec.appWindowBecomesInvisible(secondaryApp)
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun entireScreenCovered() =
-        super.entireScreenCovered()
+            super.entireScreenCovered()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun navBarLayerIsVisibleAtStartAndEnd() =
-        super.navBarLayerIsVisibleAtStartAndEnd()
+            super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun navBarLayerPositionAtStartAndEnd() =
-        super.navBarLayerPositionAtStartAndEnd()
+            super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun navBarWindowIsAlwaysVisible() =
-        super.navBarWindowIsAlwaysVisible()
+            super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun statusBarLayerIsVisibleAtStartAndEnd() =
-        super.statusBarLayerIsVisibleAtStartAndEnd()
+            super.statusBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
+            super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun statusBarWindowIsAlwaysVisible() =
-        super.statusBarWindowIsAlwaysVisible()
+            super.statusBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() =
-        super.taskBarLayerIsVisibleAtStartAndEnd()
+            super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun taskBarWindowIsAlwaysVisible() =
-        super.taskBarWindowIsAlwaysVisible()
+            super.taskBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+            super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
@@ -198,8 +185,7 @@ class EnterSplitScreenByDragFromNotification(
                 repetitions = SplitScreenHelper.TEST_REPETITIONS,
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
                 supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
-            )
+                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
         }
     }
 }
