@@ -586,6 +586,9 @@ public class AppWidgetManager {
      * The extras can be used to embed additional information about this widget to be accessed
      * by the associated widget's AppWidgetProvider.
      *
+     * <p>
+     * The new options are merged into existing options using {@link Bundle#putAll} semantics.
+     *
      * @see #getAppWidgetOptions(int)
      *
      * @param appWidgetId The AppWidget instances for which to set the RemoteViews.
