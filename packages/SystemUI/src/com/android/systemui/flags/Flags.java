@@ -99,6 +99,12 @@ public class Flags {
 
     public static final BooleanFlag LOCKSCREEN_CUSTOM_CLOCKS = new BooleanFlag(207, false);
 
+    /**
+     * Flag to enable the usage of the new bouncer data source. This is a refactor of and
+     * eventual replacement of KeyguardBouncer.java.
+     */
+    public static final BooleanFlag MODERN_BOUNCER = new BooleanFlag(208, true);
+
     /***************************************/
     // 300 - power menu
     public static final BooleanFlag POWER_MENU_LITE =
