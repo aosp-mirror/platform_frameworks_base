@@ -91,7 +91,10 @@ public class Flags {
      * Whether the KeyguardBottomArea(View|Controller) should use the modern architecture or the old
      * one.
      */
-    public static final BooleanFlag MODERN_BOTTOM_AREA = new BooleanFlag(206, false);
+    public static final BooleanFlag MODERN_BOTTOM_AREA = new BooleanFlag(
+            206,
+            /* default= */ false,
+            /* teamfood= */ true);
 
     /***************************************/
     // 300 - power menu
