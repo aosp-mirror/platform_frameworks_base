@@ -13,9 +13,9 @@
  */
 package com.android.systemui.plugins
 
+import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.view.View
-import com.android.internal.colorextraction.ColorExtractor
 import com.android.systemui.plugins.annotations.ProvidesInterface
 import java.io.PrintWriter
 import java.util.Locale
@@ -57,7 +57,15 @@ interface Clock {
     val events: ClockEvents
 
     /** Triggers for various animations */
-    val animation: ClockAnimation
+    val animations: ClockAnimations
+
+    /** Initializes various rendering parameters. If never called, provides reasonable defaults. */
+    fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float) {
+        events.onColorPaletteChanged(resources)
+        animations.doze(dozeFraction)
+        animations.fold(foldFraction)
+        events.onTimeTick()
+    }
 
     /** Optional method for dumping debug information */
     fun dump(pw: PrintWriter) { }
@@ -80,15 +88,12 @@ interface ClockEvents {
     /** Call whenever font settings change */
     fun onFontSettingChanged() { }
 
-    /** Call whenever the color pallete should update */
-    fun onColorPaletteChanged(palette: ColorExtractor.GradientColors) { }
+    /** Call whenever the color palette should update */
+    fun onColorPaletteChanged(resources: Resources) { }
 }
 
 /** Methods which trigger various clock animations */
-interface ClockAnimation {
-    /** Initializes the doze & fold animation positions. Defaults to neither folded nor dozing. */
-    fun initialize(dozeFraction: Float, foldFraction: Float) { }
-
+interface ClockAnimations {
     /** Runs an enter animation (if any) */
     fun enter() { }
 
