@@ -20,6 +20,7 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE;
@@ -33,6 +34,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.SparseArray;
+import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
@@ -330,6 +332,19 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     void evictAllChildren(WindowContainerTransaction wct) {
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
             final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
+            wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+        }
+    }
+
+    void evictNonOpeningChildren(RemoteAnimationTarget[] apps, WindowContainerTransaction wct) {
+        final SparseArray<ActivityManager.RunningTaskInfo> toBeEvict = mChildrenTaskInfo.clone();
+        for (int i = 0; i < apps.length; i++) {
+            if (apps[i].mode == MODE_OPENING) {
+                toBeEvict.remove(apps[i].taskId);
+            }
+        }
+        for (int i = toBeEvict.size() - 1; i >= 0; i--) {
+            final ActivityManager.RunningTaskInfo taskInfo = toBeEvict.valueAt(i);
             wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
         }
     }

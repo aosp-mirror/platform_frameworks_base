@@ -33,11 +33,13 @@ import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTROLS
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_TEXT
+import androidx.annotation.CallSuper
 import com.android.internal.widget.CachingIconView
 import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.gesture.TapGestureDetector
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.view.ViewUtil
 
@@ -52,17 +54,17 @@ import com.android.systemui.util.view.ViewUtil
  * display the chip in a certain state, since they receive <T> in [updateChipView].
  */
 abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
-    internal val context: Context,
-    internal val logger: MediaTttLogger,
-    internal val windowManager: WindowManager,
-    private val viewUtil: ViewUtil,
-    @Main private val mainExecutor: DelayableExecutor,
-    private val accessibilityManager: AccessibilityManager,
-    private val tapGestureDetector: TapGestureDetector,
-    private val powerManager: PowerManager,
-    @LayoutRes private val chipLayoutRes: Int
+        internal val context: Context,
+        internal val logger: MediaTttLogger,
+        internal val windowManager: WindowManager,
+        private val viewUtil: ViewUtil,
+        @Main private val mainExecutor: DelayableExecutor,
+        private val accessibilityManager: AccessibilityManager,
+        private val configurationController: ConfigurationController,
+        private val tapGestureDetector: TapGestureDetector,
+        private val powerManager: PowerManager,
+        @LayoutRes private val chipLayoutRes: Int,
 ) {
-
     /**
      * Window layout params that will be used as a starting point for the [windowLayoutParams] of
      * all subclasses.
@@ -89,42 +91,40 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
     /** The chip view currently being displayed. Null if the chip is not being displayed. */
     private var chipView: ViewGroup? = null
 
+    /** The chip info currently being displayed. Null if the chip is not being displayed. */
+    internal var chipInfo: T? = null
+
     /** A [Runnable] that, when run, will cancel the pending timeout of the chip. */
     private var cancelChipViewTimeout: Runnable? = null
 
     /**
-     * Displays the chip with the current state.
+     * Displays the chip with the provided [newChipInfo].
      *
      * This method handles inflating and attaching the view, then delegates to [updateChipView] to
      * display the correct information in the chip.
      */
-    fun displayChip(chipInfo: T) {
-        val oldChipView = chipView
-        if (chipView == null) {
-            chipView = LayoutInflater
-                .from(context)
-                .inflate(chipLayoutRes, null) as ViewGroup
-        }
-        val currentChipView = chipView!!
+    fun displayChip(newChipInfo: T) {
+        val currentChipView = chipView
 
-        updateChipView(chipInfo, currentChipView)
-
-        // Add view if necessary
-        if (oldChipView == null) {
+        if (currentChipView != null) {
+            updateChipView(newChipInfo, currentChipView)
+        } else {
+            // The chip is new, so set up all our callbacks and inflate the view
+            configurationController.addCallback(displayScaleListener)
             tapGestureDetector.addOnGestureDetectedCallback(TAG, this::onScreenTapped)
-            windowManager.addView(chipView, windowLayoutParams)
             // Wake the screen so the user will see the chip
             powerManager.wakeUp(
                 SystemClock.uptimeMillis(),
                 PowerManager.WAKE_REASON_APPLICATION,
                 "com.android.systemui:media_tap_to_transfer_activated"
             )
-            animateChipIn(currentChipView)
+
+            inflateAndUpdateChip(newChipInfo)
         }
 
         // Cancel and re-set the chip timeout each time we get a new state.
         val timeout = accessibilityManager.getRecommendedTimeoutMillis(
-            chipInfo.getTimeoutMs().toInt(),
+            newChipInfo.getTimeoutMs().toInt(),
             // Not all chips have controls so FLAG_CONTENT_CONTROLS might be superfluous, but
             // include it just to be safe.
             FLAG_CONTENT_ICONS or FLAG_CONTENT_TEXT or FLAG_CONTENT_CONTROLS
@@ -136,6 +136,32 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
         )
     }
 
+    /** Inflates a new chip view, updates it with [newChipInfo], and adds the view to the window. */
+    private fun inflateAndUpdateChip(newChipInfo: T) {
+        val newChipView = LayoutInflater
+                .from(context)
+                .inflate(chipLayoutRes, null) as ViewGroup
+        chipView = newChipView
+        updateChipView(newChipInfo, newChipView)
+        windowManager.addView(newChipView, windowLayoutParams)
+        animateChipIn(newChipView)
+    }
+
+    /** Removes then re-inflates the chip. */
+    private fun reinflateChip() {
+        val currentChipInfo = chipInfo
+        if (chipView == null || currentChipInfo == null) { return }
+
+        windowManager.removeView(chipView)
+        inflateAndUpdateChip(currentChipInfo)
+    }
+
+    private val displayScaleListener = object : ConfigurationController.ConfigurationListener {
+        override fun onDensityOrFontScaleChanged() {
+            reinflateChip()
+        }
+    }
+
     /**
      * Hides the chip.
      *
@@ -145,17 +171,22 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
     open fun removeChip(removalReason: String) {
         if (chipView == null) { return }
         logger.logChipRemoval(removalReason)
+        configurationController.removeCallback(displayScaleListener)
         tapGestureDetector.removeOnGestureDetectedCallback(TAG)
         windowManager.removeView(chipView)
         chipView = null
+        chipInfo = null
         // No need to time the chip out since it's already gone
         cancelChipViewTimeout?.run()
     }
 
     /**
-     * A method implemented by subclasses to update [currentChipView] based on [chipInfo].
+     * A method implemented by subclasses to update [currentChipView] based on [newChipInfo].
      */
-    abstract fun updateChipView(chipInfo: T, currentChipView: ViewGroup)
+    @CallSuper
+    open fun updateChipView(newChipInfo: T, currentChipView: ViewGroup) {
+        chipInfo = newChipInfo
+    }
 
     /**
      * A method that can be implemented by subclcasses to do custom animations for when the chip

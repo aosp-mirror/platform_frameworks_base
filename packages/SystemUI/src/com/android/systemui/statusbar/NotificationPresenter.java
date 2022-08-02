@@ -50,16 +50,6 @@ public interface NotificationPresenter extends ExpandableNotificationRow.OnExpan
     boolean isDeviceInVrMode();
 
     /**
-     * Updates the visual representation of the notifications.
-     */
-    void updateNotificationViews(String reason);
-
-    /**
-     * Called when the row states are updated by {@link NotificationViewHierarchyManager}.
-     */
-    void onUpdateRowStates();
-
-    /**
      * @return true if the shade is collapsing.
      */
     boolean isCollapsing();

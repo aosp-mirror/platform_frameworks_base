@@ -45,6 +45,8 @@ import android.view.View
 import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
+import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
 import android.view.WindowMetrics
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
@@ -437,6 +439,44 @@ class SidefpsControllerTest : SysuiTestCase() {
         whenEver(fingerprintManager.sensorPropertiesInternal).thenReturn(null)
 
         assertThat(fingerprintManager.hasSideFpsSensor()).isFalse()
+    }
+
+    @Test
+    fun testLayoutParams_hasNoMoveAnimationWindowFlag() = testWithDisplay(
+        deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED
+    ) {
+        sideFpsController.overlayOffsets = sensorLocation
+        sideFpsController.updateOverlayParams(
+            windowManager.defaultDisplay,
+            indicatorBounds
+        )
+        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+        executor.runAllReady()
+
+        verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+
+        val lpFlags = overlayViewParamsCaptor.value.privateFlags
+
+        assertThat((lpFlags and PRIVATE_FLAG_NO_MOVE_ANIMATION) != 0).isTrue()
+    }
+
+    @Test
+    fun testLayoutParams_hasTrustedOverlayWindowFlag() = testWithDisplay(
+        deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED
+    ) {
+        sideFpsController.overlayOffsets = sensorLocation
+        sideFpsController.updateOverlayParams(
+            windowManager.defaultDisplay,
+            indicatorBounds
+        )
+        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+        executor.runAllReady()
+
+        verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+
+        val lpFlags = overlayViewParamsCaptor.value.privateFlags
+
+        assertThat((lpFlags and PRIVATE_FLAG_TRUSTED_OVERLAY) != 0).isTrue()
     }
 }
 

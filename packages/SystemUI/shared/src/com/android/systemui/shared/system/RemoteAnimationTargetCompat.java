@@ -79,6 +79,8 @@ public class RemoteAnimationTargetCompat {
     // Fields used only to unrap into RemoteAnimationTarget
     private final Rect startBounds;
 
+    public final boolean willShowImeOnTarget;
+
     public RemoteAnimationTargetCompat(RemoteAnimationTarget app) {
         taskId = app.taskId;
         mode = app.mode;
@@ -102,6 +104,7 @@ public class RemoteAnimationTargetCompat {
         windowType = app.windowType;
         windowConfiguration = app.windowConfiguration;
         startBounds = app.startBounds;
+        willShowImeOnTarget = app.willShowImeOnTarget;
     }
 
     private static int newModeToLegacyMode(int newMode) {
@@ -118,13 +121,14 @@ public class RemoteAnimationTargetCompat {
     }
 
     public RemoteAnimationTarget unwrap() {
-        return new RemoteAnimationTarget(
+        final RemoteAnimationTarget target = new RemoteAnimationTarget(
                 taskId, mode, leash, isTranslucent, clipRect, contentInsets,
                 prefixOrderIndex, position, localBounds, screenSpaceBounds, windowConfiguration,
                 isNotInRecents, mStartLeash, startBounds, taskInfo, allowEnterPip, windowType
         );
+        target.setWillShowImeOnTarget(willShowImeOnTarget);
+        return target;
     }
-
 
     /**
      * Almost a copy of Transitions#setupStartState.
@@ -234,6 +238,7 @@ public class RemoteAnimationTargetCompat {
             ? change.getTaskInfo().configuration.windowConfiguration
             : new WindowConfiguration();
         startBounds = change.getStartAbsBounds();
+        willShowImeOnTarget = (change.getFlags() & TransitionInfo.FLAG_WILL_IME_SHOWN) != 0;
     }
 
     public static RemoteAnimationTargetCompat[] wrap(RemoteAnimationTarget[] apps) {

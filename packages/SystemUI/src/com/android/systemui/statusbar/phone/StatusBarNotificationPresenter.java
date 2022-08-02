@@ -41,7 +41,6 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
-import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -50,7 +49,6 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
@@ -82,7 +80,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
 
     private final ActivityStarter mActivityStarter;
     private final KeyguardStateController mKeyguardStateController;
-    private final NotificationViewHierarchyManager mViewHierarchyManager;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final NotifShadeEventSource mNotifShadeEventSource;
@@ -94,10 +91,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final AboveShelfObserver mAboveShelfObserver;
     private final DozeScrimController mDozeScrimController;
-    private final ScrimController mScrimController;
     private final KeyguardIndicationController mKeyguardIndicationController;
     private final CentralSurfaces mCentralSurfaces;
-    private final com.android.systemui.shade.ShadeController mShadeController;
     private final LockscreenShadeTransitionController mShadeTransitionController;
     private final CommandQueue mCommandQueue;
 
@@ -112,23 +107,21 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     protected boolean mVrMode;
 
     @Inject
-    StatusBarNotificationPresenter(Context context,
+    StatusBarNotificationPresenter(
+            Context context,
             NotificationPanelViewController panel,
             HeadsUpManagerPhone headsUp,
             NotificationShadeWindowView statusBarWindow,
             ActivityStarter activityStarter,
             NotificationStackScrollLayoutController stackScrollerController,
             DozeScrimController dozeScrimController,
-            ScrimController scrimController,
             NotificationShadeWindowController notificationShadeWindowController,
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardStateController keyguardStateController,
             KeyguardIndicationController keyguardIndicationController,
             CentralSurfaces centralSurfaces,
-            ShadeController shadeController,
             LockscreenShadeTransitionController shadeTransitionController,
             CommandQueue commandQueue,
-            NotificationViewHierarchyManager notificationViewHierarchyManager,
             NotificationLockscreenUserManager lockscreenUserManager,
             SysuiStatusBarStateController sysuiStatusBarStateController,
             NotifShadeEventSource notifShadeEventSource,
@@ -149,10 +142,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
         mKeyguardIndicationController = keyguardIndicationController;
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
         mCentralSurfaces = centralSurfaces;
-        mShadeController = shadeController;
         mShadeTransitionController = shadeTransitionController;
         mCommandQueue = commandQueue;
-        mViewHierarchyManager = notificationViewHierarchyManager;
         mLockscreenUserManager = lockscreenUserManager;
         mStatusBarStateController = sysuiStatusBarStateController;
         mNotifShadeEventSource = notifShadeEventSource;
@@ -166,7 +157,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
                 R.id.notification_container_parent));
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mDozeScrimController = dozeScrimController;
-        mScrimController = scrimController;
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -187,16 +177,13 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
 
         initController.addPostInitTask(() -> {
             mKeyguardIndicationController.init();
-            mViewHierarchyManager.setUpWithPresenter(this,
-                    stackScrollerController.getNotifStackController(),
-                    mNotifListContainer);
             mNotifShadeEventSource.setShadeEmptiedCallback(this::maybeClosePanelForShadeEmptied);
             mNotifShadeEventSource.setNotifRemovedByUserCallback(this::maybeEndAmbientPulse);
             notificationInterruptStateProvider.addSuppressor(mInterruptSuppressor);
             mLockscreenUserManager.setUpWithPresenter(this);
             mMediaManager.setUpWithPresenter(this);
             mGutsManager.setUpWithPresenter(
-                    this, mNotifListContainer, mCheckSaveListener, mOnSettingsClickListener);
+                    this, mNotifListContainer, mOnSettingsClickListener);
             // ForegroundServiceNotificationListener adds its listener in its constructor
             // but we need to request it here in order for it to be instantiated.
             // TODO: figure out how to do this correctly once Dependency.get() is gone.
@@ -230,24 +217,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             // Finish the pulse.
             mDozeScrimController.pulseOutNow();
         }
-    }
-
-    @Override
-    public void updateNotificationViews(final String reason) {
-        if (!mNotifPipelineFlags.checkLegacyPipelineEnabled()) {
-            return;
-        }
-        // The function updateRowStates depends on both of these being non-null, so check them here.
-        // We may be called before they are set from DeviceProvisionedController's callback.
-        if (mScrimController == null) return;
-
-        // Do not modify the notifications during collapse.
-        if (isCollapsing()) {
-            mShadeController.addPostCollapseAction(() -> updateNotificationViews(reason));
-            return;
-        }
-        mViewHierarchyManager.updateNotificationViews();
-        mNotificationPanel.updateNotificationViews(reason);
     }
 
     @Override
@@ -301,11 +270,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     @Override
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
         mMediaManager.updateMediaMetaData(metaDataChanged, allowEnterAnimation);
-    }
-
-    @Override
-    public void onUpdateRowStates() {
-        mNotificationPanel.onUpdateRowStates();
     }
 
     @Override

@@ -610,6 +610,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
+    void prepareEvictNonOpeningChildTasks(@SplitPosition int position, RemoteAnimationTarget[] apps,
+            WindowContainerTransaction wct) {
+        if (position == mSideStagePosition) {
+            mSideStage.evictNonOpeningChildren(apps, wct);
+        } else {
+            mMainStage.evictNonOpeningChildren(apps, wct);
+        }
+    }
+
     void prepareEvictInvisibleChildTasks(WindowContainerTransaction wct) {
         mMainStage.evictInvisibleChildren(wct);
         mSideStage.evictInvisibleChildren(wct);
