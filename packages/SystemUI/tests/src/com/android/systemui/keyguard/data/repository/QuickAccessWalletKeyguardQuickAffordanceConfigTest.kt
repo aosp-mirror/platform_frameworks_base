@@ -26,7 +26,6 @@ import com.android.systemui.containeddrawable.ContainedDrawable
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.QuickAccessWalletKeyguardQuickAffordanceConfig
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.wallet.controller.QuickAccessWalletController
@@ -48,7 +47,6 @@ import org.mockito.MockitoAnnotations
 class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
 
     @Mock private lateinit var walletController: QuickAccessWalletController
-    @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var activityStarter: ActivityStarter
 
     private lateinit var underTest: QuickAccessWalletKeyguardQuickAffordanceConfig
@@ -59,7 +57,6 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
 
         underTest =
             QuickAccessWalletKeyguardQuickAffordanceConfig(
-                keyguardStateController,
                 walletController,
                 activityStarter,
             )
@@ -67,7 +64,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
 
     @Test
     fun `affordance - keyguard showing - has wallet card - visible model`() = runBlockingTest {
-        val callback = setUpState()
+        setUpState()
         var latest: KeyguardQuickAffordanceConfig.State? = null
 
         val job = underTest.state.onEach { latest = it }.launchIn(this)
@@ -76,25 +73,11 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         assertThat(visibleModel.icon).isEqualTo(ContainedDrawable.WithDrawable(ICON))
         assertThat(visibleModel.contentDescriptionResourceId).isNotNull()
         job.cancel()
-        callback?.let { verify(keyguardStateController).removeCallback(it) }
-    }
-
-    @Test
-    fun `affordance - keyguard not showing - model is none`() = runBlockingTest {
-        val callback = setUpState(isKeyguardShowing = false)
-        var latest: KeyguardQuickAffordanceConfig.State? = null
-
-        val job = underTest.state.onEach { latest = it }.launchIn(this)
-
-        assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.State.Hidden)
-
-        job.cancel()
-        callback?.let { verify(keyguardStateController).removeCallback(it) }
     }
 
     @Test
     fun `affordance - wallet not enabled - model is none`() = runBlockingTest {
-        val callback = setUpState(isWalletEnabled = false)
+        setUpState(isWalletEnabled = false)
         var latest: KeyguardQuickAffordanceConfig.State? = null
 
         val job = underTest.state.onEach { latest = it }.launchIn(this)
@@ -102,12 +85,11 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.State.Hidden)
 
         job.cancel()
-        callback?.let { verify(keyguardStateController).removeCallback(it) }
     }
 
     @Test
     fun `affordance - query not successful - model is none`() = runBlockingTest {
-        val callback = setUpState(isWalletQuerySuccessful = false)
+        setUpState(isWalletQuerySuccessful = false)
         var latest: KeyguardQuickAffordanceConfig.State? = null
 
         val job = underTest.state.onEach { latest = it }.launchIn(this)
@@ -115,12 +97,11 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.State.Hidden)
 
         job.cancel()
-        callback?.let { verify(keyguardStateController).removeCallback(it) }
     }
 
     @Test
     fun `affordance - missing icon - model is none`() = runBlockingTest {
-        val callback = setUpState(hasWalletIcon = false)
+        setUpState(hasWalletIcon = false)
         var latest: KeyguardQuickAffordanceConfig.State? = null
 
         val job = underTest.state.onEach { latest = it }.launchIn(this)
@@ -128,12 +109,11 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.State.Hidden)
 
         job.cancel()
-        callback?.let { verify(keyguardStateController).removeCallback(it) }
     }
 
     @Test
     fun `affordance - no selected card - model is none`() = runBlockingTest {
-        val callback = setUpState(hasWalletIcon = false)
+        setUpState(hasWalletIcon = false)
         var latest: KeyguardQuickAffordanceConfig.State? = null
 
         val job = underTest.state.onEach { latest = it }.launchIn(this)
@@ -141,7 +121,6 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.State.Hidden)
 
         job.cancel()
-        callback?.let { verify(keyguardStateController).removeCallback(it) }
     }
 
     @Test
@@ -159,21 +138,11 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     private fun setUpState(
-        isKeyguardShowing: Boolean = true,
         isWalletEnabled: Boolean = true,
         isWalletQuerySuccessful: Boolean = true,
         hasWalletIcon: Boolean = true,
         hasSelectedCard: Boolean = true,
-    ): KeyguardStateController.Callback? {
-        var returnedCallback: KeyguardStateController.Callback? = null
-        whenever(keyguardStateController.isShowing).thenReturn(isKeyguardShowing)
-        whenever(keyguardStateController.addCallback(any())).thenAnswer { invocation ->
-            with(invocation.arguments[0] as KeyguardStateController.Callback) {
-                returnedCallback = this
-                onKeyguardShowingChanged()
-            }
-        }
-
+    ) {
         whenever(walletController.isWalletEnabled).thenReturn(isWalletEnabled)
 
         val walletClient: QuickAccessWalletClient = mock()
@@ -203,8 +172,6 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
                 }
             }
         }
-
-        return returnedCallback
     }
 
     companion object {

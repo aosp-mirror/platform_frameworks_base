@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.domain.usecase.ObserveBottomAreaAlphaUseCas
 import com.android.systemui.keyguard.domain.usecase.ObserveClockPositionUseCase
 import com.android.systemui.keyguard.domain.usecase.ObserveDozeAmountUseCase
 import com.android.systemui.keyguard.domain.usecase.ObserveIsDozingUseCase
+import com.android.systemui.keyguard.domain.usecase.ObserveIsKeyguardShowingUseCase
 import com.android.systemui.keyguard.domain.usecase.ObserveKeyguardQuickAffordanceUseCase
 import com.android.systemui.keyguard.domain.usecase.OnKeyguardQuickAffordanceClickedUseCase
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordanceModel
@@ -65,7 +66,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     private lateinit var affordanceRepository: FakeKeyguardQuickAffordanceRepository
     private lateinit var repository: FakeKeyguardRepository
     private lateinit var isDozingUseCase: ObserveIsDozingUseCase
-    private lateinit var dozeAmountUseCase: ObserveDozeAmountUseCase
+    private lateinit var isKeyguardShowingUseCase: ObserveIsKeyguardShowingUseCase
     private lateinit var launchQuickAffordanceUseCase: FakeLaunchKeyguardQuickAffordanceUseCase
     private lateinit var homeControlsQuickAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var quickAccessWalletAffordanceConfig: FakeKeyguardQuickAffordanceConfig
@@ -83,8 +84,8 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             ObserveIsDozingUseCase(
                 repository = repository,
             )
-        dozeAmountUseCase =
-            ObserveDozeAmountUseCase(
+        isKeyguardShowingUseCase =
+            ObserveIsKeyguardShowingUseCase(
                 repository = repository,
             )
         launchQuickAffordanceUseCase = FakeLaunchKeyguardQuickAffordanceUseCase()
@@ -98,7 +99,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                     ObserveKeyguardQuickAffordanceUseCase(
                         repository = affordanceRepository,
                         isDozingUseCase = isDozingUseCase,
-                        dozeAmountUseCase = dozeAmountUseCase,
+                        isKeyguardShowingUseCase = isKeyguardShowingUseCase,
                     ),
                 onQuickAffordanceClickedUseCase =
                     OnKeyguardQuickAffordanceClickedUseCase(
@@ -140,12 +141,13 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun `startButton - present and not dozing - visible model - starts activity on click`() =
+    fun `startButton - present - not dozing - lockscreen showing - visible model - starts activity on click`() = // ktlint-disable max-line-length
         runBlockingTest {
             var latest: KeyguardQuickAffordanceViewModel? = null
             val job = underTest.startButton.onEach { latest = it }.launchIn(this)
 
             repository.setDozing(false)
+            repository.setKeyguardShowing(true)
             val testConfig =
                 TestConfig(
                     isVisible = true,
@@ -168,12 +170,13 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `endButton - present and not dozing - visible model - do nothing on click`() =
+    fun `endButton - present - not dozing - lockscreen showing - visible model - do nothing on click`() = // ktlint-disable max-line-length
         runBlockingTest {
             var latest: KeyguardQuickAffordanceViewModel? = null
             val job = underTest.endButton.onEach { latest = it }.launchIn(this)
 
             repository.setDozing(false)
+            repository.setKeyguardShowing(true)
             val config =
                 TestConfig(
                     isVisible = true,
@@ -197,35 +200,38 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `startButton - not present and not dozing - model is none`() = runBlockingTest {
-        var latest: KeyguardQuickAffordanceViewModel? = null
-        val job = underTest.startButton.onEach { latest = it }.launchIn(this)
+    fun `startButton - not present - not dozing - lockscreen showing - model is none`() =
+        runBlockingTest {
+            var latest: KeyguardQuickAffordanceViewModel? = null
+            val job = underTest.startButton.onEach { latest = it }.launchIn(this)
 
-        repository.setDozing(false)
-        val config =
-            TestConfig(
-                isVisible = false,
-            )
-        val configKey =
-            setUpQuickAffordanceModel(
-                position = KeyguardQuickAffordancePosition.BOTTOM_START,
+            repository.setDozing(false)
+            repository.setKeyguardShowing(true)
+            val config =
+                TestConfig(
+                    isVisible = false,
+                )
+            val configKey =
+                setUpQuickAffordanceModel(
+                    position = KeyguardQuickAffordancePosition.BOTTOM_START,
+                    testConfig = config,
+                )
+
+            assertQuickAffordanceViewModel(
+                viewModel = latest,
                 testConfig = config,
+                configKey = configKey,
             )
-
-        assertQuickAffordanceViewModel(
-            viewModel = latest,
-            testConfig = config,
-            configKey = configKey,
-        )
-        job.cancel()
-    }
+            job.cancel()
+        }
 
     @Test
-    fun `startButton - present but dozing - model is none`() = runBlockingTest {
+    fun `startButton - present - dozing - lockscreen showing - model is none`() = runBlockingTest {
         var latest: KeyguardQuickAffordanceViewModel? = null
         val job = underTest.startButton.onEach { latest = it }.launchIn(this)
 
         repository.setDozing(true)
+        repository.setKeyguardShowing(true)
         val config =
             TestConfig(
                 isVisible = true,
@@ -246,6 +252,35 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         )
         job.cancel()
     }
+
+    @Test
+    fun `startButton - present - not dozing - lockscreen not showing - model is none`() =
+        runBlockingTest {
+            var latest: KeyguardQuickAffordanceViewModel? = null
+            val job = underTest.startButton.onEach { latest = it }.launchIn(this)
+
+            repository.setDozing(false)
+            repository.setKeyguardShowing(false)
+            val config =
+                TestConfig(
+                    isVisible = true,
+                    icon = mock(),
+                    canShowWhileLocked = false,
+                    intent = Intent("action"),
+                )
+            val configKey =
+                setUpQuickAffordanceModel(
+                    position = KeyguardQuickAffordancePosition.BOTTOM_START,
+                    testConfig = config,
+                )
+
+            assertQuickAffordanceViewModel(
+                viewModel = latest,
+                testConfig = TestConfig(isVisible = false),
+                configKey = configKey,
+            )
+            job.cancel()
+        }
 
     @Test
     fun animateButtonReveal() = runBlockingTest {
@@ -287,6 +322,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
 
     @Test
     fun isIndicationAreaPadded() = runBlockingTest {
+        repository.setKeyguardShowing(true)
         val values = mutableListOf<Boolean>()
         val job = underTest.isIndicationAreaPadded.onEach(values::add).launchIn(this)
 

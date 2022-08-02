@@ -29,31 +29,58 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.containeddrawable.ContainedDrawable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.statusbar.policy.KeyguardStateControllerExt.isKeyguardShowing
 import com.android.systemui.wallet.controller.QuickAccessWalletController
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 
 /** Quick access wallet quick affordance data source. */
 @SysUISingleton
 class QuickAccessWalletKeyguardQuickAffordanceConfig
 @Inject
 constructor(
-    private val keyguardStateController: KeyguardStateController,
     private val walletController: QuickAccessWalletController,
     private val activityStarter: ActivityStarter,
 ) : KeyguardQuickAffordanceConfig {
 
-    override val state: Flow<KeyguardQuickAffordanceConfig.State> =
-        keyguardStateController
-            .isKeyguardShowing(TAG)
-            .flatMapLatest { isKeyguardShowing ->
-                stateInternal(isKeyguardShowing)
+    override val state: Flow<KeyguardQuickAffordanceConfig.State> = conflatedCallbackFlow {
+        val callback =
+            object : QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
+                override fun onWalletCardsRetrieved(response: GetWalletCardsResponse?) {
+                    trySendWithFailureLogging(
+                        state(
+                            isFeatureEnabled = walletController.isWalletEnabled,
+                            hasCard = response?.walletCards?.isNotEmpty() == true,
+                            tileIcon = walletController.walletClient.tileIcon,
+                        ),
+                        TAG,
+                    )
+                }
+
+                override fun onWalletCardRetrievalError(error: GetWalletCardsError?) {
+                    Log.e(TAG, "Wallet card retrieval error, message: \"${error?.message}\"")
+                    trySendWithFailureLogging(
+                        KeyguardQuickAffordanceConfig.State.Hidden,
+                        TAG,
+                    )
+                }
             }
+
+        walletController.setupWalletChangeObservers(
+            callback,
+            QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE,
+            QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE
+        )
+        walletController.updateWalletPreference()
+        walletController.queryWalletCards(callback)
+
+        awaitClose {
+            walletController.unregisterWalletChangeObservers(
+                QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE,
+                QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE
+            )
+        }
+    }
 
     override fun onQuickAffordanceClicked(
         animationController: ActivityLaunchAnimator.Controller?,
@@ -64,53 +91,6 @@ constructor(
             /* hasCard= */ true,
         )
         return KeyguardQuickAffordanceConfig.OnClickedResult.Handled
-    }
-
-    private fun stateInternal(
-        isKeyguardShowing: Boolean
-    ): Flow<KeyguardQuickAffordanceConfig.State> {
-        if (!isKeyguardShowing) {
-            return flowOf(KeyguardQuickAffordanceConfig.State.Hidden)
-        }
-
-        return conflatedCallbackFlow {
-            val callback =
-                object : QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
-                    override fun onWalletCardsRetrieved(response: GetWalletCardsResponse?) {
-                        trySendWithFailureLogging(
-                            state(
-                                isFeatureEnabled = walletController.isWalletEnabled,
-                                hasCard = response?.walletCards?.isNotEmpty() == true,
-                                tileIcon = walletController.walletClient.tileIcon,
-                            ),
-                            TAG,
-                        )
-                    }
-
-                    override fun onWalletCardRetrievalError(error: GetWalletCardsError?) {
-                        Log.e(TAG, "Wallet card retrieval error, message: \"${error?.message}\"")
-                        trySendWithFailureLogging(
-                            KeyguardQuickAffordanceConfig.State.Hidden,
-                            TAG,
-                        )
-                    }
-                }
-
-            walletController.setupWalletChangeObservers(
-                callback,
-                QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE,
-                QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE
-            )
-            walletController.updateWalletPreference()
-            walletController.queryWalletCards(callback)
-
-            awaitClose {
-                walletController.unregisterWalletChangeObservers(
-                    QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE,
-                    QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE
-                )
-            }
-        }
     }
 
     private fun state(
