@@ -9755,6 +9755,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 record.mThumbnailAdapter != null ? record.mThumbnailAdapter.mCapturedLeash : null,
                 record.mStartBounds, task.getTaskInfo(), checkEnterPictureInPictureAppOpsState());
         target.setShowBackdrop(record.mShowBackdrop);
+        target.setWillShowImeOnTarget(mStartingData != null && mStartingData.hasImeSurface());
         target.hasAnimatingParent = record.hasAnimatingParent();
         return target;
     }
