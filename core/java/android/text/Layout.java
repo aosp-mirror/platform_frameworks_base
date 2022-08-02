@@ -18,6 +18,7 @@ package android.text;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -1309,6 +1310,101 @@ public abstract class Layout {
             horizontal[offset] = lineStartPos + wid[offset];
         }
         return horizontal;
+    }
+
+    /**
+     * Return the characters' bounds in the given range. The {@code bounds} array will be filled
+     * starting from {@code boundsStart} (inclusive). The coordinates are in local text layout.
+     *
+     * @param start the start index to compute the character bounds, inclusive.
+     * @param end the end index to compute the character bounds, exclusive.
+     * @param bounds the array to fill in the character bounds. The array is divided into segments
+     *               of four where each index in that segment represents left, top, right and
+     *               bottom of the character.
+     * @param boundsStart the inclusive start index in the array to start filling in the values
+     *                    from.
+     *
+     * @throws IndexOutOfBoundsException if the range defined by {@code start} and {@code end}
+     * exceeds the range of the text, or {@code bounds} doesn't have enough space to store the
+     * result.
+     * @throws IllegalArgumentException if {@code bounds} is null.
+     */
+    public void fillCharacterBounds(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
+            @NonNull float[] bounds, @IntRange(from = 0) int boundsStart) {
+        if (start < 0 || end < start || end > mText.length()) {
+            throw new IndexOutOfBoundsException("given range: " + start + ", " + end + " is "
+                    + "out of the text range: 0, " + mText.length());
+        }
+
+        if (bounds == null) {
+            throw  new IllegalArgumentException("bounds can't be null.");
+        }
+
+        final int neededLength = 4 * (end - start);
+        if (neededLength > bounds.length - boundsStart) {
+            throw new IndexOutOfBoundsException("bounds doesn't have enough space to store the "
+                    + "result, needed: " + neededLength + " had: "
+                    + (bounds.length - boundsStart));
+        }
+
+        if (start == end) {
+            return;
+        }
+
+        final int startLine = getLineForOffset(start);
+        final int endLine = getLineForOffset(end - 1);
+        float[] horizontalBounds = null;
+        for (int line = startLine; line <= endLine; ++line) {
+            final int lineStart = getLineStart(line);
+            final int lineEnd = getLineEnd(line);
+            final int lineLength = lineEnd - lineStart;
+
+            final int dir = getParagraphDirection(line);
+            final boolean hasTab = getLineContainsTab(line);
+            final Directions directions = getLineDirections(line);
+
+            TabStops tabStops = null;
+            if (hasTab && mText instanceof Spanned) {
+                // Just checking this line should be good enough, tabs should be
+                // consistent across all lines in a paragraph.
+                TabStopSpan[] tabs = getParagraphSpans((Spanned) mText, lineStart, lineEnd,
+                        TabStopSpan.class);
+                if (tabs.length > 0) {
+                    tabStops = new TabStops(TAB_INCREMENT, tabs); // XXX should reuse
+                }
+            }
+
+            final TextLine tl = TextLine.obtain();
+            tl.set(mPaint, mText, lineStart, lineEnd, dir, directions, hasTab, tabStops,
+                    getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
+                    isFallbackLineSpacingEnabled());
+            if (horizontalBounds == null || horizontalBounds.length < 2 * lineLength) {
+                horizontalBounds = new float[2 * lineLength];
+            }
+
+            tl.measureAllBounds(horizontalBounds, null);
+            TextLine.recycle(tl);
+            final int lineLeft = getParagraphLeft(line);
+            final int lineRight = getParagraphRight(line);
+            final int lineStartPos = getLineStartPos(line, lineLeft, lineRight);
+
+            final int lineTop = getLineTop(line);
+            final int lineBottom = getLineBottom(line);
+
+            final int startIndex = Math.max(start, lineStart);
+            final int endIndex = Math.min(end, lineEnd);
+            for (int index = startIndex; index < endIndex; ++index) {
+                final int offset = index - lineStart;
+                final float left = horizontalBounds[offset * 2] + lineStartPos;
+                final float right = horizontalBounds[offset * 2 + 1] + lineStartPos;
+
+                final int boundsIndex = boundsStart + 4 * (index - start);
+                bounds[boundsIndex] = left;
+                bounds[boundsIndex + 1] = lineTop;
+                bounds[boundsIndex + 2] = right;
+                bounds[boundsIndex + 3] = lineBottom;
+            }
+        }
     }
 
     /**

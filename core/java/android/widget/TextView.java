@@ -12530,64 +12530,38 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void populateCharacterBounds(CursorAnchorInfo.Builder builder,
             int startIndex, int endIndex, float viewportToContentHorizontalOffset,
             float viewportToContentVerticalOffset) {
-        final int minLine = mLayout.getLineForOffset(startIndex);
-        final int maxLine = mLayout.getLineForOffset(endIndex - 1);
         final Rect rect = new Rect();
         getLocalVisibleRect(rect);
         final RectF visibleRect = new RectF(rect);
-        for (int line = minLine; line <= maxLine; ++line) {
-            final int lineStart = mLayout.getLineStart(line);
-            final int lineEnd = mLayout.getLineEnd(line);
-            final int offsetStart = Math.max(lineStart, startIndex);
-            final int offsetEnd = Math.min(lineEnd, endIndex);
-            final boolean ltrLine =
-                    mLayout.getParagraphDirection(line) == Layout.DIR_LEFT_TO_RIGHT;
-            final float[] widths = new float[offsetEnd - offsetStart];
-            mLayout.getPaint().getTextWidths(mTransformed, offsetStart, offsetEnd, widths);
-            final float top = mLayout.getLineTop(line);
-            final float bottom = mLayout.getLineBottom(line);
-            for (int offset = offsetStart; offset < offsetEnd; ++offset) {
-                final float charWidth = widths[offset - offsetStart];
-                final boolean isRtl = mLayout.isRtlCharAt(offset);
-                // TODO: This doesn't work perfectly for text with custom styles and
-                // TAB chars.
-                final float left;
-                if (ltrLine) {
-                    if (isRtl) {
-                        left = mLayout.getSecondaryHorizontal(offset) - charWidth;
-                    } else {
-                        left = mLayout.getPrimaryHorizontal(offset);
-                    }
-                } else {
-                    if (!isRtl) {
-                        left = mLayout.getSecondaryHorizontal(offset);
-                    } else {
-                        left = mLayout.getPrimaryHorizontal(offset) - charWidth;
-                    }
-                }
-                final float right = left + charWidth;
-                // TODO: Check top-right and bottom-left as well.
-                final float localLeft = left + viewportToContentHorizontalOffset;
-                final float localRight = right + viewportToContentHorizontalOffset;
-                final float localTop = top + viewportToContentVerticalOffset;
-                final float localBottom = bottom + viewportToContentVerticalOffset;
-                final boolean isTopLeftVisible = visibleRect.contains(localLeft, localTop);
-                final boolean isBottomRightVisible =
-                        visibleRect.contains(localRight, localBottom);
-                int characterBoundsFlags = 0;
-                if (isTopLeftVisible || isBottomRightVisible) {
-                    characterBoundsFlags |= FLAG_HAS_VISIBLE_REGION;
-                }
-                if (!isTopLeftVisible || !isBottomRightVisible) {
-                    characterBoundsFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
-                }
-                if (isRtl) {
-                    characterBoundsFlags |= CursorAnchorInfo.FLAG_IS_RTL;
-                }
-                // Here offset is the index in Java chars.
-                builder.addCharacterBounds(offset, localLeft, localTop, localRight,
-                        localBottom, characterBoundsFlags);
+
+        final float[] characterBounds = new float[4 * (endIndex - startIndex)];
+        mLayout.fillCharacterBounds(startIndex, endIndex, characterBounds, 0);
+        final int limit = endIndex - startIndex;
+        for (int offset = 0; offset < limit; ++offset) {
+            final float left =
+                    characterBounds[offset * 4] + viewportToContentHorizontalOffset;
+            final float top =
+                    characterBounds[offset * 4 + 1] + viewportToContentVerticalOffset;
+            final float right =
+                    characterBounds[offset * 4 + 2] + viewportToContentHorizontalOffset;
+            final float bottom =
+                    characterBounds[offset * 4 + 3] + viewportToContentVerticalOffset;
+
+            final boolean hasVisibleRegion = visibleRect.intersects(left, top, right, bottom);
+            final boolean hasInVisibleRegion = !visibleRect.contains(left, top, right, bottom);
+            int characterBoundsFlags = 0;
+            if (hasVisibleRegion) {
+                characterBoundsFlags |= FLAG_HAS_VISIBLE_REGION;
             }
+            if (hasInVisibleRegion) {
+                characterBoundsFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
+            }
+
+            if (mLayout.isRtlCharAt(offset)) {
+                characterBoundsFlags |= CursorAnchorInfo.FLAG_IS_RTL;
+            }
+            builder.addCharacterBounds(offset + startIndex, left, top, right, bottom,
+                    characterBoundsFlags);
         }
     }
 
