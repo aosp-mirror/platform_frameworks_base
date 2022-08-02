@@ -20,7 +20,10 @@ import static com.android.wm.shell.unfold.UnfoldAnimationControllerTest.TestUnfo
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager.RunningTaskInfo;
@@ -33,6 +36,7 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.unfold.animation.UnfoldTaskAnimator;
 
 import org.junit.Before;
@@ -65,6 +69,8 @@ public class UnfoldAnimationControllerTest extends ShellTestCase {
     @Mock
     private UnfoldTransitionHandler mUnfoldTransitionHandler;
     @Mock
+    private ShellInit mShellInit;
+    @Mock
     private SurfaceControl mLeash;
 
     private UnfoldAnimationController mUnfoldAnimationController;
@@ -85,12 +91,18 @@ public class UnfoldAnimationControllerTest extends ShellTestCase {
         animators.add(mTaskAnimator1);
         animators.add(mTaskAnimator2);
         mUnfoldAnimationController = new UnfoldAnimationController(
+                mShellInit,
                 mTransactionPool,
                 mProgressProvider,
                 animators,
                 () -> Optional.of(mUnfoldTransitionHandler),
                 mShellExecutor
         );
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
     }
 
     @Test
@@ -244,7 +256,8 @@ public class UnfoldAnimationControllerTest extends ShellTestCase {
 
     @Test
     public void testInit_initsAndStartsAnimators() {
-        mUnfoldAnimationController.init();
+        mUnfoldAnimationController.onInit();
+        mShellExecutor.flushAll();
 
         assertThat(mTaskAnimator1.mInitialized).isTrue();
         assertThat(mTaskAnimator1.mStarted).isTrue();

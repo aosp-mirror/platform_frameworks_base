@@ -29,6 +29,7 @@ import android.view.InsetsVisibilities;
 import androidx.annotation.BinderThread;
 
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -45,17 +46,20 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
     private final SparseArray<CopyOnWriteArrayList<OnInsetsChangedListener>> mListeners =
             new SparseArray<>();
 
-    public DisplayInsetsController(IWindowManager wmService, DisplayController displayController,
+    public DisplayInsetsController(IWindowManager wmService,
+            ShellInit shellInit,
+            DisplayController displayController,
             ShellExecutor mainExecutor) {
         mWmService = wmService;
         mDisplayController = displayController;
         mMainExecutor = mainExecutor;
+        shellInit.addInitCallback(this::onInit, this);
     }
 
     /**
      * Starts listening for insets for each display.
      **/
-    public void initialize() {
+    public void onInit() {
         mDisplayController.addDisplayWindowListener(this);
     }
 

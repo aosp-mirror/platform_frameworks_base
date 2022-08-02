@@ -24,25 +24,8 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
-import com.android.wm.shell.bubbles.BubbleController;
-import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.common.DisplayImeController;
-import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.draganddrop.DragAndDropController;
-import com.android.wm.shell.freeform.FreeformComponents;
-import com.android.wm.shell.fullscreen.FullscreenTaskListener;
-import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
-import com.android.wm.shell.pip.phone.PipTouchHandler;
-import com.android.wm.shell.recents.RecentTasksController;
-import com.android.wm.shell.splitscreen.SplitScreenController;
-import com.android.wm.shell.startingsurface.StartingWindowController;
-import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.unfold.UnfoldAnimationController;
-import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,31 +34,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class ShellInitTest extends ShellTestCase {
 
-    @Mock private ShellController mShellController;
-    @Mock private DisplayController mDisplayController;
-    @Mock private DisplayImeController mDisplayImeController;
-    @Mock private DisplayInsetsController mDisplayInsetsController;
-    @Mock private DragAndDropController mDragAndDropController;
-    @Mock private ShellTaskOrganizer mShellTaskOrganizer;
-    @Mock private KidsModeTaskOrganizer mKidsModeTaskOrganizer;
-    @Mock private Optional<BubbleController> mBubblesOptional;
-    @Mock private Optional<SplitScreenController> mSplitScreenOptional;
-    @Mock private Optional<PipTouchHandler> mPipTouchHandlerOptional;
-    @Mock private FullscreenTaskListener mFullscreenTaskListener;
-    @Mock private Optional<UnfoldAnimationController> mUnfoldAnimationController;
-    @Mock private Optional<UnfoldTransitionHandler> mUnfoldTransitionHandler;
-    @Mock private Optional<FreeformComponents> mFreeformComponentsOptional;
-    @Mock private Optional<RecentTasksController> mRecentTasks;
-    @Mock private Optional<ActivityEmbeddingController> mActivityEmbeddingController;
-    @Mock private Transitions mTransitions;
-    @Mock private StartingWindowController mStartingWindow;
     @Mock private ShellExecutor mMainExecutor;
 
     private ShellInit mImpl;
@@ -83,12 +47,7 @@ public class ShellInitTest extends ShellTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mImpl = new ShellInit(mShellController, mDisplayController, mDisplayImeController,
-                mDisplayInsetsController, mDragAndDropController, mShellTaskOrganizer,
-                mKidsModeTaskOrganizer, mBubblesOptional, mSplitScreenOptional,
-                mPipTouchHandlerOptional, mFullscreenTaskListener, mUnfoldAnimationController,
-                mUnfoldTransitionHandler, mFreeformComponentsOptional, mRecentTasks,
-                mActivityEmbeddingController, mTransitions, mStartingWindow, mMainExecutor);
+        mImpl = new ShellInit(mMainExecutor);
     }
 
     @Test

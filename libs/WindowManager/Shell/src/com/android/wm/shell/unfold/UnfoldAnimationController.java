@@ -24,13 +24,14 @@ import android.app.TaskInfo;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider.UnfoldListener;
 import com.android.wm.shell.unfold.animation.UnfoldTaskAnimator;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 import dagger.Lazy;
 
@@ -47,7 +48,7 @@ import dagger.Lazy;
 public class UnfoldAnimationController implements UnfoldListener {
 
     private final ShellUnfoldProgressProvider mUnfoldProgressProvider;
-    private final Executor mExecutor;
+    private final ShellExecutor mExecutor;
     private final TransactionPool mTransactionPool;
     private final List<UnfoldTaskAnimator> mAnimators;
     private final Lazy<Optional<UnfoldTransitionHandler>> mUnfoldTransitionHandler;
@@ -55,28 +56,36 @@ public class UnfoldAnimationController implements UnfoldListener {
     private final SparseArray<SurfaceControl> mTaskSurfaces = new SparseArray<>();
     private final SparseArray<UnfoldTaskAnimator> mAnimatorsByTaskId = new SparseArray<>();
 
-    public UnfoldAnimationController(@NonNull TransactionPool transactionPool,
+    public UnfoldAnimationController(
+            @NonNull ShellInit shellInit,
+            @NonNull TransactionPool transactionPool,
             @NonNull ShellUnfoldProgressProvider unfoldProgressProvider,
             @NonNull List<UnfoldTaskAnimator> animators,
             @NonNull Lazy<Optional<UnfoldTransitionHandler>> unfoldTransitionHandler,
-            @NonNull Executor executor) {
+            @NonNull ShellExecutor executor) {
         mUnfoldProgressProvider = unfoldProgressProvider;
         mUnfoldTransitionHandler = unfoldTransitionHandler;
         mTransactionPool = transactionPool;
         mExecutor = executor;
         mAnimators = animators;
+        // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
+        //                    override for this controller from the base module
+        if (unfoldProgressProvider != ShellUnfoldProgressProvider.NO_PROVIDER) {
+            shellInit.addInitCallback(this::onInit, this);
+        }
     }
 
     /**
      * Initializes the controller, starts listening for the external events
      */
-    public void init() {
+    public void onInit() {
         mUnfoldProgressProvider.addListener(mExecutor, this);
 
         for (int i = 0; i < mAnimators.size(); i++) {
             final UnfoldTaskAnimator animator = mAnimators.get(i);
             animator.init();
-            animator.start();
+            // TODO(b/238217847): See #provideSplitTaskUnfoldAnimatorBase
+            mExecutor.executeDelayed(animator::start, 0);
         }
     }
 

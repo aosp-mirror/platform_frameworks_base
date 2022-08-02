@@ -19,6 +19,7 @@ package com.android.wm.shell.common;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.times;
@@ -37,6 +38,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,6 +57,8 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
     private IWindowManager mWm;
     @Mock
     private DisplayController mDisplayController;
+    @Mock
+    private ShellInit mShellInit;
     private DisplayInsetsController mController;
     private SparseArray<IDisplayWindowInsetsController> mInsetsControllersByDisplayId;
     private TestShellExecutor mExecutor;
@@ -69,8 +73,13 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         mInsetsControllersByDisplayId = new SparseArray<>();
         mDisplayIdCaptor =  ArgumentCaptor.forClass(Integer.class);
         mInsetsControllerCaptor = ArgumentCaptor.forClass(IDisplayWindowInsetsController.class);
-        mController = new DisplayInsetsController(mWm, mDisplayController, mExecutor);
+        mController = new DisplayInsetsController(mWm, mShellInit, mDisplayController, mExecutor);
         addDisplay(DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
     }
 
     @Test
