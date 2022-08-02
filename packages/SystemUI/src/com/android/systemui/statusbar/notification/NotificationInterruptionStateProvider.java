@@ -492,19 +492,6 @@ public class NotificationInterruptionStateProvider {
         return mPresenter;
     }
 
-    /**
-     * When an entry was added, should we launch its fullscreen intent? Examples are Alarms or
-     * incoming calls.
-     *
-     * @param entry the entry that was added
-     * @return {@code true} if we should launch the full screen intent
-     */
-    public boolean shouldLaunchFullScreenIntentWhenAdded(NotificationEntry entry) {
-        return entry.notification.getNotification().fullScreenIntent != null
-            && (!shouldHeadsUp(entry)
-                || mStatusBarStateController.getState() == StatusBarState.KEYGUARD);
-    }
-
     /** A component which can suppress heads-up notifications due to the overall state of the UI. */
     public interface HeadsUpSuppressor {
         /**
