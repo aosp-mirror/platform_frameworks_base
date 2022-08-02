@@ -38,6 +38,7 @@ import android.os.Trace;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -125,6 +126,9 @@ public class ShadeListBuilder implements Dumpable {
     private List<ListEntry> mReadOnlyNotifList = Collections.unmodifiableList(mNotifList);
     private List<ListEntry> mReadOnlyNewNotifList = Collections.unmodifiableList(mNewNotifList);
     private final NotifPipelineChoreographer mChoreographer;
+
+    private int mConsecutiveReentrantRebuilds = 0;
+    @VisibleForTesting public static final int MAX_CONSECUTIVE_REENTRANT_REBUILDS = 3;
 
     @Inject
     public ShadeListBuilder(
@@ -310,7 +314,7 @@ public class ShadeListBuilder implements Dumpable {
 
                     mLogger.logOnBuildList(reason);
                     mAllEntries = entries;
-                    mChoreographer.schedule();
+                    scheduleRebuild(/* reentrant = */ false);
                 }
             };
 
@@ -1332,11 +1336,64 @@ public class ShadeListBuilder implements Dumpable {
         throw new RuntimeException("Missing default sectioner!");
     }
 
-    private void rebuildListIfBefore(@PipelineState.StateName int state) {
-        mPipelineState.requireIsBefore(state);
-        if (mPipelineState.is(STATE_IDLE)) {
-            mChoreographer.schedule();
+    private void rebuildListIfBefore(@PipelineState.StateName int rebuildState) {
+        final @PipelineState.StateName int currentState = mPipelineState.getState();
+
+        // If the pipeline is idle, requesting an invalidation is always okay, and starts a new run.
+        if (currentState == STATE_IDLE) {
+            scheduleRebuild(/* reentrant = */ false, rebuildState);
+            return;
         }
+
+        // If the pipeline is running, it is okay to request an invalidation of a *later* stage.
+        // Since the current pipeline run hasn't run it yet, no new pipeline run is needed.
+        if (rebuildState > currentState) {
+            return;
+        }
+
+        // If the pipeline is running, it is bad to request an invalidation of *earlier* stages or
+        // the *current* stage; this will run the pipeline more often than needed, and may even
+        // cause an infinite loop of pipeline runs.
+        //
+        // Unfortunately, there are some unfixed bugs that cause reentrant pipeline runs, so we keep
+        // a counter and allow a few reentrant runs in a row between any two non-reentrant runs.
+        //
+        // It is technically possible for a *pair* of invalidations, one reentrant and one not, to
+        // trigger *each other*, alternating responsibility for pipeline runs in an infinite loop
+        // but constantly resetting the reentrant run counter. Hopefully that doesn't happen.
+        scheduleRebuild(/* reentrant = */ true, rebuildState);
+    }
+
+    private void scheduleRebuild(boolean reentrant) {
+        scheduleRebuild(reentrant, STATE_IDLE);
+    }
+
+    private void scheduleRebuild(boolean reentrant, @PipelineState.StateName int rebuildState) {
+        if (!reentrant) {
+            mConsecutiveReentrantRebuilds = 0;
+            mChoreographer.schedule();
+            return;
+        }
+
+        final @PipelineState.StateName int currentState = mPipelineState.getState();
+
+        final String rebuildStateName = PipelineState.getStateName(rebuildState);
+        final String currentStateName = PipelineState.getStateName(currentState);
+        final IllegalStateException exception = new IllegalStateException(
+                "Reentrant notification pipeline rebuild of state " + rebuildStateName
+                        + " while pipeline in state " + currentStateName + ".");
+
+        mConsecutiveReentrantRebuilds++;
+
+        if (mConsecutiveReentrantRebuilds > MAX_CONSECUTIVE_REENTRANT_REBUILDS) {
+            Log.e(TAG, "Crashing after more than " + MAX_CONSECUTIVE_REENTRANT_REBUILDS
+                    + " consecutive reentrant notification pipeline rebuilds.", exception);
+            throw exception;
+        }
+
+        Log.e(TAG, "Allowing " + mConsecutiveReentrantRebuilds
+                + " consecutive reentrant notification pipeline rebuild(s).", exception);
+        mChoreographer.schedule();
     }
 
     private static int countChildren(List<ListEntry> entries) {
