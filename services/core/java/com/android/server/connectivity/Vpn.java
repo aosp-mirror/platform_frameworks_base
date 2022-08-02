@@ -222,6 +222,11 @@ public class Vpn {
      */
     private static final int VPN_DEFAULT_SCORE = 101;
 
+    /**
+     * The initial token value of IKE session.
+     */
+    private static final int STARTING_TOKEN = -1;
+
     // TODO: create separate trackers for each unique VPN to support
     // automated reconnection
 
@@ -785,7 +790,7 @@ public class Vpn {
         }
     }
 
-    private boolean isVpnApp(String packageName) {
+    private static boolean isVpnApp(String packageName) {
         return packageName != null && !VpnConfig.LEGACY_VPN.equals(packageName);
     }
 
@@ -2589,7 +2594,7 @@ public class Vpn {
     }
 
     @Nullable
-    protected synchronized NetworkCapabilities getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
+    private synchronized NetworkCapabilities getRedactedNetworkCapabilities(
             NetworkCapabilities nc) {
         if (nc == null) return null;
         return mConnectivityManager.getRedactedNetworkCapabilitiesForPackage(
@@ -2597,8 +2602,7 @@ public class Vpn {
     }
 
     @Nullable
-    protected synchronized LinkProperties getRedactedLinkPropertiesOfUnderlyingNetwork(
-            LinkProperties lp) {
+    private synchronized LinkProperties getRedactedLinkProperties(LinkProperties lp) {
         if (lp == null) return null;
         return mConnectivityManager.getRedactedLinkPropertiesForPackage(lp, mOwnerUID, mPackage);
     }
@@ -2712,11 +2716,13 @@ public class Vpn {
         private boolean mIsRunning = true;
 
         /**
-         * The token used by the primary/current/active IKE session.
+         * The token that identifies the most recently created IKE session.
          *
-         * <p>This token MUST be updated when the VPN switches to use a new IKE session.
+         * <p>This token is monotonically increasing and will never be reset in the lifetime of this
+         * Ikev2VpnRunner, but it does get reset across runs. It also MUST be accessed on the
+         * executor thread and updated when a new IKE session is created.
          */
-        private int mCurrentToken = -1;
+        private int mCurrentToken = STARTING_TOKEN;
 
         @Nullable private IpSecTunnelInterface mTunnelIface;
         @Nullable private Network mActiveNetwork;
@@ -3208,7 +3214,7 @@ public class Vpn {
                         mExecutor.schedule(
                                 () -> {
                                     if (isActiveToken(token)) {
-                                        handleSessionLost(null, network);
+                                        handleSessionLost(null /* exception */, network);
                                     } else {
                                         Log.d(
                                                 TAG,
@@ -3225,7 +3231,7 @@ public class Vpn {
                                 TimeUnit.MILLISECONDS);
             } else {
                 Log.d(TAG, "Call handleSessionLost for losing network " + network);
-                handleSessionLost(null, network);
+                handleSessionLost(null /* exception */, network);
             }
         }
 
@@ -3293,70 +3299,69 @@ public class Vpn {
             // already terminated due to other failures.
             cancelHandleNetworkLostTimeout();
 
-            synchronized (Vpn.this) {
-                String category = null;
-                int errorClass = -1;
-                int errorCode = -1;
-                if (exception instanceof IkeProtocolException) {
-                    final IkeProtocolException ikeException = (IkeProtocolException) exception;
-                    category = VpnManager.CATEGORY_EVENT_IKE_ERROR;
-                    errorCode = ikeException.getErrorType();
+            String category = null;
+            int errorClass = -1;
+            int errorCode = -1;
+            if (exception instanceof IllegalArgumentException) {
+                // Failed to build IKE/ChildSessionParams; fatal profile configuration error
+                markFailedAndDisconnect(exception);
+                return;
+            }
 
-                    switch (ikeException.getErrorType()) {
-                        case IkeProtocolException.ERROR_TYPE_NO_PROPOSAL_CHOSEN: // Fallthrough
-                        case IkeProtocolException.ERROR_TYPE_INVALID_KE_PAYLOAD: // Fallthrough
-                        case IkeProtocolException.ERROR_TYPE_AUTHENTICATION_FAILED: // Fallthrough
-                        case IkeProtocolException.ERROR_TYPE_SINGLE_PAIR_REQUIRED: // Fallthrough
-                        case IkeProtocolException.ERROR_TYPE_FAILED_CP_REQUIRED: // Fallthrough
-                        case IkeProtocolException.ERROR_TYPE_TS_UNACCEPTABLE:
-                            // All the above failures are configuration errors, and are terminal
-                            errorClass = VpnManager.ERROR_CLASS_NOT_RECOVERABLE;
-                            break;
-                        // All other cases possibly recoverable.
-                        default:
-                            // All the above failures are configuration errors, and are terminal
-                            errorClass = VpnManager.ERROR_CLASS_RECOVERABLE;
-                    }
-                } else if (exception instanceof IllegalArgumentException) {
-                    // Failed to build IKE/ChildSessionParams; fatal profile configuration error
-                    markFailedAndDisconnect(exception);
-                    return;
-                } else if (exception instanceof IkeNetworkLostException) {
-                    category = VpnManager.CATEGORY_EVENT_NETWORK_ERROR;
-                    errorClass = VpnManager.ERROR_CLASS_RECOVERABLE;
-                    errorCode = VpnManager.ERROR_CODE_NETWORK_LOST;
-                } else if (exception instanceof IkeNonProtocolException) {
-                    category = VpnManager.CATEGORY_EVENT_NETWORK_ERROR;
-                    errorClass = VpnManager.ERROR_CLASS_RECOVERABLE;
-                    if (exception.getCause() instanceof UnknownHostException) {
-                        errorCode = VpnManager.ERROR_CODE_NETWORK_UNKNOWN_HOST;
-                    } else if (exception.getCause() instanceof IkeTimeoutException) {
-                        errorCode = VpnManager.ERROR_CODE_NETWORK_PROTOCOL_TIMEOUT;
-                    } else if (exception.getCause() instanceof IOException) {
-                        errorCode = VpnManager.ERROR_CODE_NETWORK_IO;
-                    }
-                } else if (exception != null) {
-                    Log.wtf(TAG, "onSessionLost: exception = " + exception);
+            if (exception instanceof IkeProtocolException) {
+                final IkeProtocolException ikeException = (IkeProtocolException) exception;
+                category = VpnManager.CATEGORY_EVENT_IKE_ERROR;
+                errorCode = ikeException.getErrorType();
+
+                switch (ikeException.getErrorType()) {
+                    case IkeProtocolException.ERROR_TYPE_NO_PROPOSAL_CHOSEN: // Fallthrough
+                    case IkeProtocolException.ERROR_TYPE_INVALID_KE_PAYLOAD: // Fallthrough
+                    case IkeProtocolException.ERROR_TYPE_AUTHENTICATION_FAILED: // Fallthrough
+                    case IkeProtocolException.ERROR_TYPE_SINGLE_PAIR_REQUIRED: // Fallthrough
+                    case IkeProtocolException.ERROR_TYPE_FAILED_CP_REQUIRED: // Fallthrough
+                    case IkeProtocolException.ERROR_TYPE_TS_UNACCEPTABLE:
+                        // All the above failures are configuration errors, and are terminal
+                        errorClass = VpnManager.ERROR_CLASS_NOT_RECOVERABLE;
+                        break;
+                    // All other cases possibly recoverable.
+                    default:
+                        errorClass = VpnManager.ERROR_CLASS_RECOVERABLE;
                 }
+            } else if (exception instanceof IkeNetworkLostException) {
+                category = VpnManager.CATEGORY_EVENT_NETWORK_ERROR;
+                errorClass = VpnManager.ERROR_CLASS_RECOVERABLE;
+                errorCode = VpnManager.ERROR_CODE_NETWORK_LOST;
+            } else if (exception instanceof IkeNonProtocolException) {
+                category = VpnManager.CATEGORY_EVENT_NETWORK_ERROR;
+                errorClass = VpnManager.ERROR_CLASS_RECOVERABLE;
+                if (exception.getCause() instanceof UnknownHostException) {
+                    errorCode = VpnManager.ERROR_CODE_NETWORK_UNKNOWN_HOST;
+                } else if (exception.getCause() instanceof IkeTimeoutException) {
+                    errorCode = VpnManager.ERROR_CODE_NETWORK_PROTOCOL_TIMEOUT;
+                } else if (exception.getCause() instanceof IOException) {
+                    errorCode = VpnManager.ERROR_CODE_NETWORK_IO;
+                }
+            } else if (exception != null) {
+                Log.wtf(TAG, "onSessionLost: exception = " + exception);
+            }
 
+            synchronized (Vpn.this) {
                 // TODO(b/230548427): Remove SDK check once VPN related stuff are
                 //  decoupled from ConnectivityServiceTest.
                 if (SdkLevel.isAtLeastT() && category != null && isVpnApp(mPackage)) {
                     sendEventToVpnManagerApp(category, errorClass, errorCode,
                             getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                             mActiveNetwork,
-                            getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                    mUnderlyingNetworkCapabilities),
-                            getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                    mUnderlyingLinkProperties));
+                            getRedactedNetworkCapabilities(mUnderlyingNetworkCapabilities),
+                            getRedactedLinkProperties(mUnderlyingLinkProperties));
                 }
+            }
 
-                if (errorClass == VpnManager.ERROR_CLASS_NOT_RECOVERABLE) {
-                    markFailedAndDisconnect(exception);
-                    return;
-                } else {
-                    scheduleRetryNewIkeSession();
-                }
+            if (errorClass == VpnManager.ERROR_CLASS_NOT_RECOVERABLE) {
+                markFailedAndDisconnect(exception);
+                return;
+            } else {
+                scheduleRetryNewIkeSession();
             }
 
             mUnderlyingNetworkCapabilities = null;
