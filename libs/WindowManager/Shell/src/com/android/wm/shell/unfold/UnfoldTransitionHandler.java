@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.transition.Transitions.TransitionFinishCallback;
 import com.android.wm.shell.transition.Transitions.TransitionHandler;
@@ -59,11 +60,13 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
 
     private final List<UnfoldTaskAnimator> mAnimators = new ArrayList<>();
 
-    public UnfoldTransitionHandler(ShellUnfoldProgressProvider unfoldProgressProvider,
+    public UnfoldTransitionHandler(ShellInit shellInit,
+            ShellUnfoldProgressProvider unfoldProgressProvider,
             FullscreenUnfoldTaskAnimator fullscreenUnfoldAnimator,
             SplitTaskUnfoldAnimator splitUnfoldTaskAnimator,
             TransactionPool transactionPool,
-            Executor executor, Transitions transitions) {
+            Executor executor,
+            Transitions transitions) {
         mUnfoldProgressProvider = unfoldProgressProvider;
         mTransactionPool = transactionPool;
         mExecutor = executor;
@@ -71,9 +74,18 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
 
         mAnimators.add(splitUnfoldTaskAnimator);
         mAnimators.add(fullscreenUnfoldAnimator);
+        // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
+        //                    override for this controller from the base module
+        if (unfoldProgressProvider != ShellUnfoldProgressProvider.NO_PROVIDER
+                && Transitions.ENABLE_SHELL_TRANSITIONS) {
+            shellInit.addInitCallback(this::onInit, this);
+        }
     }
 
-    public void init() {
+    /**
+     * Called when the transition handler is initialized.
+     */
+    public void onInit() {
         for (int i = 0; i < mAnimators.size(); i++) {
             mAnimators.get(i).init();
         }

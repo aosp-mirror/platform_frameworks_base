@@ -45,7 +45,6 @@ public final class ShellCommandHandler {
     private final Optional<RecentTasksController> mRecentTasks;
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final KidsModeTaskOrganizer mKidsModeTaskOrganizer;
-    private final ShellExecutor mMainExecutor;
 
     public ShellCommandHandler(
             ShellController shellController,
@@ -64,7 +63,6 @@ public final class ShellCommandHandler {
         mPipOptional = pipOptional;
         mOneHandedOptional = oneHandedOptional;
         mHideDisplayCutout = hideDisplayCutout;
-        mMainExecutor = mainExecutor;
         // TODO(238217847): To be removed once the command handler dependencies are inverted
         shellController.setShellCommandHandler(this);
     }

@@ -84,6 +84,7 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -114,6 +115,14 @@ public class ShellTransitionTests extends ShellTestCase {
     public void setUp() {
         doAnswer(invocation -> invocation.getArguments()[1])
                 .when(mOrganizer).startTransition(anyInt(), any(), any());
+    }
+
+    @Test
+    public void instantiate_addInitCallback() {
+        ShellInit shellInit = mock(ShellInit.class);
+        final Transitions t = new Transitions(mContext, shellInit, mOrganizer, mTransactionPool,
+                createTestDisplayController(), mMainExecutor, mMainHandler, mAnimExecutor);
+        verify(shellInit, times(1)).addInitCallback(any(), eq(t));
     }
 
     @Test
@@ -832,14 +841,18 @@ public class ShellTransitionTests extends ShellTestCase {
         } catch (RemoteException e) {
             // No remote stuff happening, so this can't be hit
         }
-        DisplayController out = new DisplayController(mContext, mockWM, mMainExecutor);
-        out.initialize();
+        ShellInit shellInit = new ShellInit(mMainExecutor);
+        DisplayController out = new DisplayController(mContext, mockWM, shellInit, mMainExecutor);
+        shellInit.init();
         return out;
     }
 
     private Transitions createTestTransitions() {
-        return new Transitions(mOrganizer, mTransactionPool, createTestDisplayController(),
-                mContext, mMainExecutor, mMainHandler, mAnimExecutor);
+        ShellInit shellInit = new ShellInit(mMainExecutor);
+        final Transitions t = new Transitions(mContext, shellInit, mOrganizer, mTransactionPool,
+                createTestDisplayController(), mMainExecutor, mMainHandler, mAnimExecutor);
+        shellInit.init();
+        return t;
     }
 //
 //    private class TestDisplayController extends DisplayController {

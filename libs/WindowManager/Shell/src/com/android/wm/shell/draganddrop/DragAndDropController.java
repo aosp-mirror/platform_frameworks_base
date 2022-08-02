@@ -62,9 +62,9 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 /**
  * Handles the global drag and drop handling for the Shell.
@@ -94,6 +94,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
     }
 
     public DragAndDropController(Context context,
+            ShellInit shellInit,
             ShellController shellController,
             DisplayController displayController,
             UiEventLogger uiEventLogger,
@@ -105,12 +106,27 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         mLogger = new DragAndDropEventLogger(uiEventLogger);
         mIconProvider = iconProvider;
         mMainExecutor = mainExecutor;
+        shellInit.addInitCallback(this::onInit, this);
     }
 
-    public void initialize(Optional<SplitScreenController> splitscreen) {
-        mSplitScreen = splitscreen.orElse(null);
-        mDisplayController.addDisplayWindowListener(this);
+    /**
+     * Called when the controller is initialized.
+     */
+    public void onInit() {
+        // TODO(b/238217847): The dependency from SplitscreenController on DragAndDropController is
+        // inverted, which leads to SplitscreenController not setting its instance until after
+        // onDisplayAdded.  We can remove this post once we fix that dependency.
+        mMainExecutor.executeDelayed(() -> {
+            mDisplayController.addDisplayWindowListener(this);
+        }, 0);
         mShellController.addConfigurationChangeListener(this);
+    }
+
+    /**
+     * Sets the splitscreen controller to use if the feature is available.
+     */
+    public void setSplitScreenController(SplitScreenController splitscreen) {
+        mSplitScreen = splitscreen;
     }
 
     /** Adds a listener to be notified of drag and drop events. */

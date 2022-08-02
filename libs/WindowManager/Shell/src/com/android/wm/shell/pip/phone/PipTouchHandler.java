@@ -57,6 +57,7 @@ import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
 
@@ -165,6 +166,7 @@ public class PipTouchHandler {
 
     @SuppressLint("InflateParams")
     public PipTouchHandler(Context context,
+            ShellInit shellInit,
             PhonePipMenuController menuController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
@@ -173,7 +175,6 @@ public class PipTouchHandler {
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
             ShellExecutor mainExecutor) {
-        // Initialize the Pip input consumer
         mContext = context;
         mMainExecutor = mainExecutor;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -213,9 +214,17 @@ public class PipTouchHandler {
                 mMotionHelper, pipTaskOrganizer, mPipBoundsAlgorithm.getSnapAlgorithm(),
                 this::onAccessibilityShowMenu, this::updateMovementBounds,
                 this::animateToUnStashedState, mainExecutor);
+
+        // TODO(b/181599115): This should really be initializes as part of the pip controller, but
+        // until all PIP implementations derive from the controller, just initialize the touch handler
+        // if it is needed
+        shellInit.addInitCallback(this::onInit, this);
     }
 
-    public void init() {
+    /**
+     * Called when the touch handler is initialized.
+     */
+    public void onInit() {
         Resources res = mContext.getResources();
         mEnableResize = res.getBoolean(R.bool.config_pipEnableResizeForMenu);
         reloadResources();

@@ -44,6 +44,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 import com.android.wm.shell.util.SplitBounds;
 
@@ -85,28 +86,32 @@ public class RecentTasksController implements TaskStackListenerCallback,
     @Nullable
     public static RecentTasksController create(
             Context context,
+            ShellInit shellInit,
             TaskStackListenerImpl taskStackListener,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         if (!context.getResources().getBoolean(com.android.internal.R.bool.config_hasRecents)) {
             return null;
         }
-        return new RecentTasksController(context, taskStackListener, mainExecutor);
+        return new RecentTasksController(context, shellInit, taskStackListener, mainExecutor);
     }
 
-    RecentTasksController(Context context, TaskStackListenerImpl taskStackListener,
+    RecentTasksController(Context context,
+            ShellInit shellInit,
+            TaskStackListenerImpl taskStackListener,
             ShellExecutor mainExecutor) {
         mContext = context;
         mIsDesktopMode = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
         mTaskStackListener = taskStackListener;
         mMainExecutor = mainExecutor;
+        shellInit.addInitCallback(this::onInit, this);
     }
 
     public RecentTasks asRecentTasks() {
         return mImpl;
     }
 
-    public void init() {
+    private void onInit() {
         mTaskStackListener.addListener(this);
     }
 

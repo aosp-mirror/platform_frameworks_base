@@ -32,6 +32,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
@@ -43,19 +44,34 @@ import java.util.Optional;
 public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = "FullscreenTaskListener";
 
+    private final ShellTaskOrganizer mShellTaskOrganizer;
     private final SyncTransactionQueue mSyncQueue;
     private final Optional<RecentTasksController> mRecentTasksOptional;
 
     private final SparseArray<TaskData> mDataByTaskId = new SparseArray<>();
 
+    /**
+     * This constructor is used by downstream products.
+     */
     public FullscreenTaskListener(SyncTransactionQueue syncQueue) {
-        this(syncQueue, Optional.empty());
+        this(null /* shellInit */, null /* shellTaskOrganizer */, syncQueue, Optional.empty());
     }
 
-    public FullscreenTaskListener(SyncTransactionQueue syncQueue,
-            Optional<RecentTasksController> recentTasks) {
+    public FullscreenTaskListener(ShellInit shellInit,
+            ShellTaskOrganizer shellTaskOrganizer,
+            SyncTransactionQueue syncQueue,
+            Optional<RecentTasksController> recentTasksOptional) {
+        mShellTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
-        mRecentTasksOptional = recentTasks;
+        mRecentTasksOptional = recentTasksOptional;
+        // Note: Some derivative FullscreenTaskListener implementations do not use ShellInit
+        if (shellInit != null) {
+            shellInit.addInitCallback(this::onInit, this);
+        }
+    }
+
+    private void onInit() {
+        mShellTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_FULLSCREEN);
     }
 
     @Override
