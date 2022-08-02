@@ -21,10 +21,12 @@ import android.graphics.drawable.Drawable
 import android.testing.AndroidTestingRunner
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shared.clocks.DefaultClock.Companion.DOZE_COLOR
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import java.util.Locale
@@ -35,6 +37,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
@@ -58,14 +61,16 @@ class DefaultClockProviderTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        whenever(layoutInflater.inflate(R.layout.clock_default_small, null))
+        whenever(layoutInflater.inflate(eq(R.layout.clock_default_small), any(), anyBoolean()))
             .thenReturn(mockSmallClockView)
-        whenever(layoutInflater.inflate(R.layout.clock_default_large, null))
+        whenever(layoutInflater.inflate(eq(R.layout.clock_default_large), any(), anyBoolean()))
             .thenReturn(mockLargeClockView)
         whenever(resources.getDrawable(R.drawable.clock_default_thumbnail, null))
             .thenReturn(mockClockThumbnail)
+        whenever(mockSmallClockView.getLayoutParams()).thenReturn(FrameLayout.LayoutParams(10, 10))
+        whenever(mockLargeClockView.getLayoutParams()).thenReturn(FrameLayout.LayoutParams(10, 10))
 
-        provider = DefaultClockProvider(layoutInflater, resources)
+        provider = DefaultClockProvider(context, layoutInflater, resources)
     }
 
     @Test
@@ -95,6 +100,7 @@ class DefaultClockProviderTest : SysuiTestCase() {
         verify(mockLargeClockView, times(2)).setColors(eq(DOZE_COLOR), anyInt())
         verify(mockSmallClockView).refreshTime()
         verify(mockLargeClockView).refreshTime()
+        verify(mockLargeClockView).setLayoutParams(any())
     }
 
     @Test
@@ -132,7 +138,7 @@ class DefaultClockProviderTest : SysuiTestCase() {
 
         verify(mockSmallClockView).setTextSize(eq(TypedValue.COMPLEX_UNIT_PX), anyFloat())
         verify(mockLargeClockView).setTextSize(eq(TypedValue.COMPLEX_UNIT_PX), anyFloat())
-        verify(mockLargeClockView).setPadding(eq(0), anyInt(), eq(0), eq(0))
+        verify(mockLargeClockView).setLayoutParams(any())
     }
 
     @Test

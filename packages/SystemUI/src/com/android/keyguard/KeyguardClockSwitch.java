@@ -8,7 +8,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
@@ -106,9 +105,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
 
         // Attach small and big clock views to hierarchy.
-        mSmallClockFrame.addView(clock.getSmallClock(), -1,
-                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT));
+        mSmallClockFrame.addView(clock.getSmallClock());
         mLargeClockFrame.addView(clock.getLargeClock());
     }
 
@@ -223,7 +220,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardClockSwitch:");
-        pw.println("  mClockFrame: " + mSmallClockFrame);
+        pw.println("  mSmallClockFrame: " + mSmallClockFrame);
         pw.println("  mLargeClockFrame: " + mLargeClockFrame);
         pw.println("  mStatusArea: " + mStatusArea);
         pw.println("  mDisplayedClockSize: " + mDisplayedClockSize);
