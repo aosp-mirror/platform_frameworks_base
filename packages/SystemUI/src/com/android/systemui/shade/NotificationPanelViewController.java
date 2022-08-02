@@ -1504,10 +1504,7 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     private void updateKeyguardStatusViewAlignment(boolean animate) {
-        boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
-                .getVisibleNotificationCount() != 0
-                || mMediaDataManager.hasActiveMediaOrRecommendation();
-        boolean shouldBeCentered = !mSplitShadeEnabled || !hasVisibleNotifications || mDozing;
+        boolean shouldBeCentered = shouldKeyguardStatusViewBeCentered();
         if (mStatusViewCentered != shouldBeCentered) {
             mStatusViewCentered = shouldBeCentered;
             ConstraintSet constraintSet = new ConstraintSet();
@@ -1529,6 +1526,15 @@ public final class NotificationPanelViewController extends PanelViewController {
             constraintSet.applyTo(mNotificationContainerParent);
         }
         mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(mStatusViewCentered));
+    }
+
+    private boolean shouldKeyguardStatusViewBeCentered() {
+        boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
+                .getVisibleNotificationCount() != 0
+                || mMediaDataManager.hasActiveMediaOrRecommendation();
+        boolean isOnAod = mDozing && mDozeParameters.getAlwaysOn();
+        return !mSplitShadeEnabled || !hasVisibleNotifications || isOnAod
+                || hasPulsingNotifications();
     }
 
     /**
