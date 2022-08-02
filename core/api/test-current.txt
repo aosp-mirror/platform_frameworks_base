@@ -823,6 +823,8 @@ package android.content.pm {
   }
 
   public abstract class PackageManager {
+    method public abstract void addCrossProfileIntentFilter(@NonNull android.content.IntentFilter, int, int, int);
+    method public abstract void clearCrossProfileIntentFilters(int);
     method @Deprecated @Nullable public final String getContentCaptureServicePackageName();
     method @Nullable public String getDefaultTextClassifierPackageName();
     method @RequiresPermission(android.Manifest.permission.INJECT_EVENTS) public android.os.IBinder getHoldLockToken();
