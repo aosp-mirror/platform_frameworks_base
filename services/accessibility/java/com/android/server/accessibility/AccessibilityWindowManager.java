@@ -146,11 +146,8 @@ public class AccessibilityWindowManager {
             if (getWindowTokenForUserAndWindowIdLocked(resolvedUserId, windowId) == null) {
                 return;
             }
-            final AccessibilityWindowAttributes currentAttrs = mWindowAttributes.get(windowId);
-            if (currentAttrs == null || !currentAttrs.equals(attributes)) {
-                mWindowAttributes.put(windowId, attributes);
-                shouldComputeWindows = findWindowInfoByIdLocked(windowId) != null;
-            }
+            mWindowAttributes.put(windowId, attributes);
+            shouldComputeWindows = findWindowInfoByIdLocked(windowId) != null;
         }
         if (shouldComputeWindows) {
             mWindowManagerInternal.computeWindowsForAccessibility(displayId);
