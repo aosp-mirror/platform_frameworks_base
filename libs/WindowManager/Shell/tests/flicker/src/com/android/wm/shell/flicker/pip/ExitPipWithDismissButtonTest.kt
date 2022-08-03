@@ -69,7 +69,7 @@ class ExitPipWithDismissButtonTest(testSpec: FlickerTestParameter) : ExitPipTran
      */
     @Presubmit
     @Test
-    fun focusDoesNotChange() {
+    fun focusChanges() {
         testSpec.assertEventLog {
             this.focusChanges("PipMenuView", "NexusLauncherActivity")
         }
