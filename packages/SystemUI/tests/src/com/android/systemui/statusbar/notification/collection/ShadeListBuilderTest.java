@@ -34,6 +34,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -136,6 +137,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         allowTestableLooperAsMainThread();
+        when(mNotifPipelineFlags.isStabilityIndexFixEnabled()).thenReturn(true);
 
         mListBuilder = new ShadeListBuilder(
                 mDumpManager,
@@ -1996,22 +1998,89 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
-    public void testStableOrdering() {
+    public void testActiveOrdering_withLegacyStability() {
+        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(false);
+        assertOrder("ABCDEFG", "ABCDEFG", "ABCDEFG", true); // no change
+        assertOrder("ABCDEFG", "ACDEFXBG", "ACDEFXBG", true); // X
+        assertOrder("ABCDEFG", "ACDEFBG", "ACDEFBG", true); // no change
+        assertOrder("ABCDEFG", "ACDEFBXZG", "ACDEFBXZG", true); // Z and X
+        assertOrder("ABCDEFG", "AXCDEZFBG", "AXCDEZFBG", true); // Z and X + gap
+    }
+
+    @Test
+    public void testStableOrdering_withLegacyStability() {
+        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(false);
         mStabilityManager.setAllowEntryReordering(false);
-        assertOrder("ABCDEFG", "ACDEFXBG", "XABCDEFG"); // X
-        assertOrder("ABCDEFG", "ACDEFBG", "ABCDEFG"); // no change
-        assertOrder("ABCDEFG", "ACDEFBXZG", "XZABCDEFG"); // Z and X
-        assertOrder("ABCDEFG", "AXCDEZFBG", "XZABCDEFG"); // Z and X + gap
-        verify(mStabilityManager, times(4)).onEntryReorderSuppressed();
+        assertOrder("ABCDEFG", "ABCDEFG", "ABCDEFG", true); // no change
+        assertOrder("ABCDEFG", "ACDEFXBG", "XABCDEFG", false); // X
+        assertOrder("ABCDEFG", "ACDEFBG", "ABCDEFG", false); // no change
+        assertOrder("ABCDEFG", "ACDEFBXZG", "XZABCDEFG", false); // Z and X
+        assertOrder("ABCDEFG", "AXCDEZFBG", "XZABCDEFG", false); // Z and X + gap
+    }
+
+    @Test
+    public void testStableOrdering() {
+        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(true);
+        mStabilityManager.setAllowEntryReordering(false);
+        // No input or output
+        assertOrder("", "", "", true);
+        // Remove everything
+        assertOrder("ABCDEFG", "", "", true);
+        // Literally no changes
+        assertOrder("ABCDEFG", "ABCDEFG", "ABCDEFG", true);
+
+        // No stable order
+        assertOrder("", "ABCDEFG", "ABCDEFG", true);
+
+        // F moved after A, and...
+        assertOrder("ABCDEFG", "AFBCDEG", "ABCDEFG", false);   // No other changes
+        assertOrder("ABCDEFG", "AXFBCDEG", "AXBCDEFG", false); // Insert X before F
+        assertOrder("ABCDEFG", "AFXBCDEG", "AXBCDEFG", false); // Insert X after F
+        assertOrder("ABCDEFG", "AFBCDEXG", "ABCDEFXG", false); // Insert X where F was
+
+        // B moved after F, and...
+        assertOrder("ABCDEFG", "ACDEFBG", "ABCDEFG", false);   // No other changes
+        assertOrder("ABCDEFG", "ACDEFXBG", "ABCDEFXG", false); // Insert X before B
+        assertOrder("ABCDEFG", "ACDEFBXG", "ABCDEFXG", false); // Insert X after B
+        assertOrder("ABCDEFG", "AXCDEFBG", "AXBCDEFG", false); // Insert X where B was
+
+        // Swap F and B, and...
+        assertOrder("ABCDEFG", "AFCDEBG", "ABCDEFG", false);   // No other changes
+        assertOrder("ABCDEFG", "AXFCDEBG", "AXBCDEFG", false); // Insert X before F
+        assertOrder("ABCDEFG", "AFXCDEBG", "AXBCDEFG", false); // Insert X after F
+        assertOrder("ABCDEFG", "AFCXDEBG", "AXBCDEFG", false); // Insert X between CD (or: ABCXDEFG)
+        assertOrder("ABCDEFG", "AFCDXEBG", "ABCDXEFG", false); // Insert X between DE (or: ABCDEFXG)
+        assertOrder("ABCDEFG", "AFCDEXBG", "ABCDEFXG", false); // Insert X before B
+        assertOrder("ABCDEFG", "AFCDEBXG", "ABCDEFXG", false); // Insert X after B
+
+        // Remove a bunch of entries at once
+        assertOrder("ABCDEFGHIJKL", "ACEGHI", "ACEGHI", true);
+
+        // Remove a bunch of entries and scramble
+        assertOrder("ABCDEFGHIJKL", "GCEHAI", "ACEGHI", false);
+
+        // Add a bunch of entries at once
+        assertOrder("ABCDEFG", "AVBWCXDYZEFG", "AVBWCXDYZEFG", true);
+
+        // Add a bunch of entries and reverse originals
+        // NOTE: Some of these don't have obviously correct answers
+        assertOrder("ABCDEFG", "GFEBCDAVWXYZ", "ABCDEFGVWXYZ", false); // appended
+        assertOrder("ABCDEFG", "VWXYZGFEBCDA", "VWXYZABCDEFG", false); // prepended
+        assertOrder("ABCDEFG", "GFEBVWXYZCDA", "ABCDEFGVWXYZ", false); // closer to back: append
+        assertOrder("ABCDEFG", "GFEVWXYZBCDA", "VWXYZABCDEFG", false); // closer to front: prepend
+        assertOrder("ABCDEFG", "GFEVWBXYZCDA", "VWABCDEFGXYZ", false); // split new entries
+
+        // Swap 2 pairs ("*BC*NO*"->"*NO*CB*"), remove EG, add UVWXYZ throughout
+        assertOrder("ABCDEFGHIJKLMNOP", "AUNOVDFHWXIJKLMYCBZP", "AUVBCDFHWXIJKLMNOYZP", false);
     }
 
     @Test
     public void testActiveOrdering() {
-        assertOrder("ABCDEFG", "ACDEFXBG", "ACDEFXBG"); // X
-        assertOrder("ABCDEFG", "ACDEFBG", "ACDEFBG"); // no change
-        assertOrder("ABCDEFG", "ACDEFBXZG", "ACDEFBXZG"); // Z and X
-        assertOrder("ABCDEFG", "AXCDEZFBG", "AXCDEZFBG"); // Z and X + gap
-        verify(mStabilityManager, never()).onEntryReorderSuppressed();
+        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(true);
+        assertOrder("ABCDEFG", "ACDEFXBG", "ACDEFXBG", true); // X
+        assertOrder("ABCDEFG", "ACDEFBG", "ACDEFBG", true); // no change
+        assertOrder("ABCDEFG", "ACDEFBXZG", "ACDEFBXZG", true); // Z and X
+        assertOrder("ABCDEFG", "AXCDEZFBG", "AXCDEZFBG", true); // Z and X + gap
     }
 
     @Test
@@ -2060,6 +2129,52 @@ public class ShadeListBuilderTest extends SysuiTestCase {
                 notif(0),
                 notif(2)
         );
+    }
+
+    @Test
+    public void stableOrderingDisregardedWithSectionChange() {
+        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(true);
+        // GIVEN the first sectioner's packages can be changed from run-to-run
+        List<String> mutableSectionerPackages = new ArrayList<>();
+        mutableSectionerPackages.add(PACKAGE_1);
+        mListBuilder.setSectioners(asList(
+                new PackageSectioner(mutableSectionerPackages, null),
+                new PackageSectioner(List.of(PACKAGE_1, PACKAGE_2, PACKAGE_3), null)));
+        mStabilityManager.setAllowEntryReordering(false);
+
+        // WHEN the list is originally built with reordering disabled (and section changes allowed)
+        addNotif(0, PACKAGE_1).setRank(4);
+        addNotif(1, PACKAGE_1).setRank(5);
+        addNotif(2, PACKAGE_2).setRank(1);
+        addNotif(3, PACKAGE_2).setRank(2);
+        addNotif(4, PACKAGE_3).setRank(3);
+        dispatchBuild();
+
+        // VERIFY the order and that entry reordering has not been suppressed
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                notif(2),
+                notif(3),
+                notif(4)
+        );
+        verify(mStabilityManager, never()).onEntryReorderSuppressed();
+
+        // WHEN the first section now claims PACKAGE_3 notifications
+        mutableSectionerPackages.add(PACKAGE_3);
+        dispatchBuild();
+
+        // VERIFY the re-sectioned notification is inserted at #1 of the first section, which
+        // is the correct position based on its rank, rather than #3 in the new section simply
+        // because it was #3 in its previous section.
+        verifyBuiltList(
+                notif(4),
+                notif(0),
+                notif(1),
+                notif(2),
+                notif(3)
+        );
+        verify(mStabilityManager, never()).onEntryReorderSuppressed();
     }
 
     @Test
@@ -2335,25 +2450,34 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         return addGroupChildWithTag(index, packageId, groupId, null);
     }
 
-    private void assertOrder(String visible, String active, String expected) {
+    private void assertOrder(String visible, String active, String expected,
+            boolean isOrderedCorrectly) {
         StringBuilder differenceSb = new StringBuilder();
+        NotifSection section = new NotifSection(mock(NotifSectioner.class), 0);
         for (char c : active.toCharArray()) {
             if (visible.indexOf(c) < 0) differenceSb.append(c);
         }
         String difference = differenceSb.toString();
 
+        int globalIndex = 0;
         for (int i = 0; i < visible.length(); i++) {
-            addNotif(i, String.valueOf(visible.charAt(i)))
-                    .setRank(active.indexOf(visible.charAt(i)))
+            final char c = visible.charAt(i);
+            // Skip notifications which aren't active anymore
+            if (!active.contains(String.valueOf(c))) continue;
+            addNotif(globalIndex++, String.valueOf(c))
+                    .setRank(active.indexOf(c))
+                    .setSection(section)
                     .setStableIndex(i);
-
         }
 
-        for (int i = 0; i < difference.length(); i++) {
-            addNotif(i + visible.length(), String.valueOf(difference.charAt(i)))
-                    .setRank(active.indexOf(difference.charAt(i)))
+        for (char c : difference.toCharArray()) {
+            addNotif(globalIndex++, String.valueOf(c))
+                    .setRank(active.indexOf(c))
+                    .setSection(section)
                     .setStableIndex(-1);
         }
+
+        clearInvocations(mStabilityManager);
 
         dispatchBuild();
         StringBuilder resultSb = new StringBuilder();
@@ -2364,6 +2488,9 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         assertEquals("visible [" + visible + "] active [" + active + "]",
                 expected, resultSb.toString());
         mEntrySet.clear();
+
+        verify(mStabilityManager, isOrderedCorrectly ? never() : times(1))
+                .onEntryReorderSuppressed();
     }
 
     private int nextId(String packageName) {

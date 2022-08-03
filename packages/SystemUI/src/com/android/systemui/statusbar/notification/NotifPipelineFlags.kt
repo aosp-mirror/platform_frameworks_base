@@ -57,4 +57,8 @@ class NotifPipelineFlags @Inject constructor(
     val isStabilityIndexFixEnabled: Boolean by lazy {
         featureFlags.isEnabled(Flags.STABILITY_INDEX_FIX)
     }
+
+    val isSemiStableSortEnabled: Boolean by lazy {
+        featureFlags.isEnabled(Flags.SEMI_STABLE_SORT)
+    }
 }

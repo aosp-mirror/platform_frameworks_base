@@ -54,6 +54,9 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState;
+import com.android.systemui.statusbar.notification.collection.listbuilder.SemiStableSort;
+import com.android.systemui.statusbar.notification.collection.listbuilder.SemiStableSort.StableOrder;
+import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeListBuilderHelper;
 import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeListBuilderLogger;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.DefaultNotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator;
@@ -96,12 +99,14 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
     // used exclusivly by ShadeListBuilder#notifySectionEntriesUpdated
     // TODO replace temp with collection pool for readability
     private final ArrayList<ListEntry> mTempSectionMembers = new ArrayList<>();
-    private final NotifPipelineFlags mFlags;
+    private NotifPipelineFlags mFlags;
     private final boolean mAlwaysLogList;
 
     private List<ListEntry> mNotifList = new ArrayList<>();
     private List<ListEntry> mNewNotifList = new ArrayList<>();
 
+    private final SemiStableSort mSemiStableSort = new SemiStableSort();
+    private final StableOrder<ListEntry> mStableOrder = this::getStableOrderRank;
     private final PipelineState mPipelineState = new PipelineState();
     private final Map<String, GroupEntry> mGroups = new ArrayMap<>();
     private Collection<NotificationEntry> mAllEntries = Collections.emptyList();
@@ -529,7 +534,7 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
             List<NotifFilter> filters) {
         Trace.beginSection("ShadeListBuilder.filterNotifs");
         final long now = mSystemClock.uptimeMillis();
-        for (ListEntry entry : entries)  {
+        for (ListEntry entry : entries) {
             if (entry instanceof GroupEntry) {
                 final GroupEntry groupEntry = (GroupEntry) entry;
 
@@ -960,7 +965,8 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
      * filtered out during any of the filtering steps.
      */
     private void annulAddition(ListEntry entry) {
-        entry.getAttachState().detach();
+        // NOTE(b/241229236): Don't clear stableIndex until we fix stability fragility
+        entry.getAttachState().detach(/* includingStableIndex= */ mFlags.isSemiStableSortEnabled());
     }
 
     private void assignSections() {
@@ -980,7 +986,16 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
 
     private void sortListAndGroups() {
         Trace.beginSection("ShadeListBuilder.sortListAndGroups");
-        // Assign sections to top-level elements and sort their children
+        if (mFlags.isSemiStableSortEnabled()) {
+            sortWithSemiStableSort();
+        } else {
+            sortWithLegacyStability();
+        }
+        Trace.endSection();
+    }
+
+    private void sortWithLegacyStability() {
+        // Sort all groups and the top level list
         for (ListEntry entry : mNotifList) {
             if (entry instanceof GroupEntry) {
                 GroupEntry parent = (GroupEntry) entry;
@@ -993,16 +1008,15 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
         // Check for suppressed order changes
         if (!getStabilityManager().isEveryChangeAllowed()) {
             mForceReorderable = true;
-            boolean isSorted = isShadeSorted();
+            boolean isSorted = isShadeSortedLegacy();
             mForceReorderable = false;
             if (!isSorted) {
                 getStabilityManager().onEntryReorderSuppressed();
             }
         }
-        Trace.endSection();
     }
 
-    private boolean isShadeSorted() {
+    private boolean isShadeSortedLegacy() {
         if (!isSorted(mNotifList, mTopLevelComparator)) {
             return false;
         }
@@ -1014,6 +1028,43 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
             }
         }
         return true;
+    }
+
+    private void sortWithSemiStableSort() {
+        // Sort each group's children
+        boolean allSorted = true;
+        for (ListEntry entry : mNotifList) {
+            if (entry instanceof GroupEntry) {
+                GroupEntry parent = (GroupEntry) entry;
+                allSorted &= sortGroupChildren(parent.getRawChildren());
+            }
+        }
+        // Sort each section within the top level list
+        mNotifList.sort(mTopLevelComparator);
+        if (!getStabilityManager().isEveryChangeAllowed()) {
+            for (List<ListEntry> subList : getSectionSubLists(mNotifList)) {
+                allSorted &= mSemiStableSort.stabilizeTo(subList, mStableOrder, mNewNotifList);
+            }
+            applyNewNotifList();
+        }
+        assignIndexes(mNotifList);
+        if (!allSorted) {
+            // Report suppressed order changes
+            getStabilityManager().onEntryReorderSuppressed();
+        }
+    }
+
+    private Iterable<List<ListEntry>> getSectionSubLists(List<ListEntry> entries) {
+        return ShadeListBuilderHelper.INSTANCE.getSectionSubLists(entries);
+    }
+
+    private boolean sortGroupChildren(List<NotificationEntry> entries) {
+        if (getStabilityManager().isEveryChangeAllowed()) {
+            entries.sort(mGroupChildrenComparator);
+            return true;
+        } else {
+            return mSemiStableSort.sort(entries, mStableOrder, mGroupChildrenComparator);
+        }
     }
 
     /** Determine whether the items in the list are sorted according to the comparator */
@@ -1212,7 +1263,7 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
                 o2.getSectionIndex());
         if (cmp != 0) return cmp;
 
-        cmp = Integer.compare(
+        cmp = mFlags.isSemiStableSortEnabled() ? 0 : Integer.compare(
                 getStableOrderIndex(o1),
                 getStableOrderIndex(o2));
         if (cmp != 0) return cmp;
@@ -1241,7 +1292,7 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
 
 
     private final Comparator<NotificationEntry> mGroupChildrenComparator = (o1, o2) -> {
-        int cmp = Integer.compare(
+        int cmp = mFlags.isSemiStableSortEnabled() ? 0 : Integer.compare(
                 getStableOrderIndex(o1),
                 getStableOrderIndex(o2));
         if (cmp != 0) return cmp;
@@ -1272,7 +1323,23 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
             // let the stability manager constrain or allow reordering
             return -1;
         }
+        // NOTE(b/241229236): Can't use cleared section index until we fix stability fragility
         return entry.getPreviousAttachState().getStableIndex();
+    }
+
+    @Nullable
+    private Integer getStableOrderRank(ListEntry entry) {
+        if (getStabilityManager().isEntryReorderingAllowed(entry)) {
+            // let the stability manager constrain or allow reordering
+            return null;
+        }
+        if (entry.getAttachState().getSectionIndex()
+                != entry.getPreviousAttachState().getSectionIndex()) {
+            // stable index is only valid within the same section; otherwise we allow reordering
+            return null;
+        }
+        final int stableIndex = entry.getPreviousAttachState().getStableIndex();
+        return stableIndex == -1 ? null : stableIndex;
     }
 
     private boolean applyFilters(NotificationEntry entry, long now, List<NotifFilter> filters) {
