@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.service.dreams.IDreamManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
@@ -38,19 +37,16 @@ import org.mockito.junit.MockitoJUnit
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class DialogLaunchAnimatorTest : SysuiTestCase() {
-    private val launchAnimator = LaunchAnimator(TEST_TIMINGS, TEST_INTERPOLATORS)
     private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
     private val attachedViews = mutableSetOf<View>()
 
-    @Mock lateinit var dreamManager: IDreamManager
     @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
     @get:Rule val rule = MockitoJUnit.rule()
 
     @Before
     fun setUp() {
-        dialogLaunchAnimator = DialogLaunchAnimator(
-            dreamManager, interactionJankMonitor, launchAnimator, isForTesting = true
-        )
+        dialogLaunchAnimator =
+            fakeDialogLaunchAnimator(interactionJankMonitor = interactionJankMonitor)
     }
 
     @After
@@ -153,6 +149,22 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun testActivityLaunchWhenLockedWithoutAlternateAuth() {
+        val dialogLaunchAnimator =
+            fakeDialogLaunchAnimator(isUnlocked = false, isShowingAlternateAuthOnUnlock = false)
+        val dialog = createAndShowDialog(dialogLaunchAnimator)
+        assertNull(dialogLaunchAnimator.createActivityLaunchController(dialog.contentView))
+    }
+
+    @Test
+    fun testActivityLaunchWhenLockedWithAlternateAuth() {
+        val dialogLaunchAnimator =
+            fakeDialogLaunchAnimator(isUnlocked = false, isShowingAlternateAuthOnUnlock = true)
+        val dialog = createAndShowDialog(dialogLaunchAnimator)
+        assertNotNull(dialogLaunchAnimator.createActivityLaunchController(dialog.contentView))
+    }
+
+    @Test
     fun testDialogAnimationIsChangedByAnimator() {
         // Important: the power menu animation relies on this behavior to know when to animate (see
         // http://ag/16774605).
@@ -193,11 +205,13 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         verify(interactionJankMonitor).end(InteractionJankMonitor.CUJ_USER_DIALOG_OPEN)
     }
 
-    private fun createAndShowDialog(): TestDialog {
+    private fun createAndShowDialog(
+        animator: DialogLaunchAnimator = dialogLaunchAnimator,
+    ): TestDialog {
         val touchSurface = createTouchSurface()
         return runOnMainThreadAndWaitForIdleSync {
             val dialog = TestDialog(context)
-            dialogLaunchAnimator.showFromView(dialog, touchSurface)
+            animator.showFromView(dialog, touchSurface)
             dialog
         }
     }
