@@ -53220,6 +53220,12 @@ package android.view.inputmethod {
     field public static final int CURSOR_UPDATE_MONITOR = 2; // 0x2
     field public static final int GET_EXTRACTED_TEXT_MONITOR = 1; // 0x1
     field public static final int GET_TEXT_WITH_STYLES = 1; // 0x1
+    field public static final int HANDWRITING_GESTURE_RESULT_CANCELLED = 4; // 0x4
+    field public static final int HANDWRITING_GESTURE_RESULT_FAILED = 3; // 0x3
+    field public static final int HANDWRITING_GESTURE_RESULT_FALLBACK = 5; // 0x5
+    field public static final int HANDWRITING_GESTURE_RESULT_SUCCESS = 1; // 0x1
+    field public static final int HANDWRITING_GESTURE_RESULT_UNKNOWN = 0; // 0x0
+    field public static final int HANDWRITING_GESTURE_RESULT_UNSUPPORTED = 2; // 0x2
     field public static final int INPUT_CONTENT_GRANT_READ_URI_PERMISSION = 1; // 0x1
   }
 
