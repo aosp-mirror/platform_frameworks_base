@@ -201,7 +201,6 @@ public class GameManagerServiceTests {
     public void tearDown() throws Exception {
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
         GameManagerService gameManagerService = new GameManagerService(mMockContext);
-        gameManagerService.disableCompatScale(mPackageName);
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }

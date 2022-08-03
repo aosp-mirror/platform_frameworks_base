@@ -25,20 +25,6 @@ import static com.android.internal.R.styleable.GameModeConfig_allowGameDownscali
 import static com.android.internal.R.styleable.GameModeConfig_allowGameFpsOverride;
 import static com.android.internal.R.styleable.GameModeConfig_supportsBatteryGameMode;
 import static com.android.internal.R.styleable.GameModeConfig_supportsPerformanceGameMode;
-import static com.android.server.wm.CompatModePackages.DOWNSCALED;
-import static com.android.server.wm.CompatModePackages.DOWNSCALE_30;
-import static com.android.server.wm.CompatModePackages.DOWNSCALE_35;
-import static com.android.server.wm.CompatModePackages.DOWNSCALE_40;
-import static com.android.server.wm.CompatModePackages.DOWNSCALE_45;
-import static com.android.server.wm.CompatModePackages.DOWNSCALE_50;
-import static com.android.server.wm.CompatModePackages.DOWNSCALE_55;
-import static com.android.server.wm.CompatModePackages.DOWNSCALE_60;
-import static com.android.server.wm.CompatModePackages.DOWNSCALE_65;
-import static com.android.server.wm.CompatModePackages.DOWNSCALE_70;
-import static com.android.server.wm.CompatModePackages.DOWNSCALE_75;
-import static com.android.server.wm.CompatModePackages.DOWNSCALE_80;
-import static com.android.server.wm.CompatModePackages.DOWNSCALE_85;
-import static com.android.server.wm.CompatModePackages.DOWNSCALE_90;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -48,10 +34,10 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.GameManager;
 import android.app.GameManager.GameMode;
+import android.app.GameManagerInternal;
 import android.app.GameModeInfo;
 import android.app.GameState;
 import android.app.IGameManagerService;
-import android.app.compat.PackageOverride;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -75,9 +61,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManagerInternal;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
@@ -92,8 +76,6 @@ import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.compat.CompatibilityOverrideConfig;
-import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -140,10 +122,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
     static final int WRITE_SETTINGS_DELAY = 10 * 1000;  // 10 seconds
     static final int LOADING_BOOST_MAX_DURATION = 5 * 1000;  // 5 seconds
 
-    static final PackageOverride COMPAT_ENABLED = new PackageOverride.Builder().setEnabled(true)
-            .build();
-    static final PackageOverride COMPAT_DISABLED = new PackageOverride.Builder().setEnabled(false)
-            .build();
     private static final String PACKAGE_NAME_MSG_KEY = "packageName";
     private static final String USER_ID_MSG_KEY = "userId";
     private static final String GAME_MODE_INTERVENTION_LIST_FILE_NAME =
@@ -156,7 +134,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private final Handler mHandler;
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
-    private final IPlatformCompat mPlatformCompat;
     private final PowerManagerInternal mPowerManagerInternal;
     private final File mSystemDir;
     @VisibleForTesting
@@ -180,8 +157,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
         mHandler = new SettingsHandler(looper);
         mPackageManager = mContext.getPackageManager();
         mUserManager = mContext.getSystemService(UserManager.class);
-        mPlatformCompat = IPlatformCompat.Stub.asInterface(
-                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mSystemDir = new File(Environment.getDataDirectory(), "system");
         mSystemDir.mkdirs();
@@ -212,8 +187,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
         mHandler = new SettingsHandler(looper);
         mPackageManager = mContext.getPackageManager();
         mUserManager = mContext.getSystemService(UserManager.class);
-        mPlatformCompat = IPlatformCompat.Stub.asInterface(
-                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mSystemDir = new File(dataDir, "system");
         mSystemDir.mkdirs();
@@ -326,10 +299,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     break;
                 }
                 case POPULATE_GAME_MODE_SETTINGS: {
-                    // Scan all game packages and re-enforce the configured compat mode overrides
-                    // as the DeviceConfig may have be wiped/since last reboot and we can't risk
-                    // having overrides configured for packages that no longer have any DeviceConfig
-                    // and thus any way to escape compat mode.
                     removeMessages(POPULATE_GAME_MODE_SETTINGS, msg.obj);
                     final int userId = (int) msg.obj;
                     final String[] packageNames = getInstalledGamePackageNames(userId);
@@ -410,39 +379,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
         public void finalize() {
             DeviceConfig.removeOnPropertiesChangedListener(this);
         }
-    }
-
-    // Turn the raw string to the corresponding CompatChange id.
-    static long getCompatChangeId(String raw) {
-        switch (raw) {
-            case "0.3":
-                return DOWNSCALE_30;
-            case "0.35":
-                return DOWNSCALE_35;
-            case "0.4":
-                return DOWNSCALE_40;
-            case "0.45":
-                return DOWNSCALE_45;
-            case "0.5":
-                return DOWNSCALE_50;
-            case "0.55":
-                return DOWNSCALE_55;
-            case "0.6":
-                return DOWNSCALE_60;
-            case "0.65":
-                return DOWNSCALE_65;
-            case "0.7":
-                return DOWNSCALE_70;
-            case "0.75":
-                return DOWNSCALE_75;
-            case "0.8":
-                return DOWNSCALE_80;
-            case "0.85":
-                return DOWNSCALE_85;
-            case "0.9":
-                return DOWNSCALE_90;
-        }
-        return 0;
     }
 
     public enum FrameRate {
@@ -752,13 +688,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
                         + mUseAngle + ",Fps:" + mFps + ",Loading Boost Duration:"
                         + mLoadingBoostDuration + "]";
             }
-
-            /**
-             * Get the corresponding compat change id for the current scaling string.
-             */
-            public long getCompatChangeId() {
-                return GameManagerService.getCompatChangeId(String.valueOf(mScaling));
-            }
         }
 
         public String getPackageName() {
@@ -856,6 +785,14 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
     }
 
+    private final class LocalService extends GameManagerInternal {
+        @Override
+        public float getResolutionScalingFactor(String packageName, int userId) {
+            final int gameMode = getGameModeFromSettings(packageName, userId);
+            return getResolutionScalingFactorInternal(packageName, gameMode, userId);
+        }
+    }
+
     /**
      * SystemService lifecycle for GameService.
      *
@@ -866,13 +803,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
         public Lifecycle(Context context) {
             super(context);
+            mService = new GameManagerService(context);
         }
 
         @Override
         public void onStart() {
-            final Context context = getContext();
-            mService = new GameManagerService(context);
             publishBinderService(Context.GAME_SERVICE, mService);
+            mService.publishLocalService();
             mService.registerDeviceConfigListener();
             mService.registerPackageReceiver();
         }
@@ -955,7 +892,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         synchronized (mLock) {
             if (!mSettings.containsKey(userId)) {
                 Slog.d(TAG, "User ID '" + userId + "' does not have a Game Mode"
-                        + " selected for package: '" + packageName + "'");
+                            + " selected for package: '" + packageName + "'");
                 return GameManager.GAME_MODE_UNSUPPORTED;
             }
 
@@ -1185,7 +1122,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
      * Updates the resolution scaling factor for the package's target game mode and activates it.
      *
      * @param scalingFactor enable scaling override over any other compat scaling if positive,
-     *                      disable otherwise
+     *                      or disable the override otherwise
      * @throws SecurityException        if caller doesn't have
      *                                  {@link android.Manifest.permission#MANAGE_GAME_MODE}
      *                                  permission.
@@ -1316,28 +1253,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
     }
 
     /**
-     * @hide
-     */
-    @VisibleForTesting
-    public void disableCompatScale(String packageName) {
-        final long uid = Binder.clearCallingIdentity();
-        try {
-            Slog.i(TAG, "Disabling downscale for " + packageName);
-            final ArrayMap<Long, PackageOverride> overrides = new ArrayMap<>();
-            overrides.put(DOWNSCALED, COMPAT_DISABLED);
-            final CompatibilityOverrideConfig changeConfig = new CompatibilityOverrideConfig(
-                    overrides);
-            try {
-                mPlatformCompat.putOverridesOnReleaseBuilds(changeConfig, packageName);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to call IPlatformCompat#putOverridesOnReleaseBuilds", e);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(uid);
-        }
-    }
-
-    /**
      * Remove frame rate override due to mode switch
      */
     private void resetFps(String packageName, @UserIdInt int userId) {
@@ -1348,61 +1263,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
         } catch (PackageManager.NameNotFoundException e) {
             return;
         }
-    }
-
-    private void enableCompatScale(String packageName, long scaleId) {
-        final long uid = Binder.clearCallingIdentity();
-        try {
-            Slog.i(TAG, "Enabling downscale: " + scaleId + " for " + packageName);
-            final ArrayMap<Long, PackageOverride> overrides = new ArrayMap<>();
-            overrides.put(DOWNSCALED, COMPAT_ENABLED);
-            overrides.put(DOWNSCALE_30, COMPAT_DISABLED);
-            overrides.put(DOWNSCALE_35, COMPAT_DISABLED);
-            overrides.put(DOWNSCALE_40, COMPAT_DISABLED);
-            overrides.put(DOWNSCALE_45, COMPAT_DISABLED);
-            overrides.put(DOWNSCALE_50, COMPAT_DISABLED);
-            overrides.put(DOWNSCALE_55, COMPAT_DISABLED);
-            overrides.put(DOWNSCALE_60, COMPAT_DISABLED);
-            overrides.put(DOWNSCALE_65, COMPAT_DISABLED);
-            overrides.put(DOWNSCALE_70, COMPAT_DISABLED);
-            overrides.put(DOWNSCALE_75, COMPAT_DISABLED);
-            overrides.put(DOWNSCALE_80, COMPAT_DISABLED);
-            overrides.put(DOWNSCALE_85, COMPAT_DISABLED);
-            overrides.put(DOWNSCALE_90, COMPAT_DISABLED);
-            overrides.put(scaleId, COMPAT_ENABLED);
-            final CompatibilityOverrideConfig changeConfig = new CompatibilityOverrideConfig(
-                    overrides);
-            try {
-                mPlatformCompat.putOverridesOnReleaseBuilds(changeConfig, packageName);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to call IPlatformCompat#putOverridesOnReleaseBuilds", e);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(uid);
-        }
-    }
-
-    private void updateCompatModeDownscale(GamePackageConfiguration packageConfig,
-            String packageName, @GameMode int gameMode) {
-
-        if (DEBUG) {
-            Slog.v(TAG, dumpDeviceConfigs());
-        }
-        final GamePackageConfiguration.GameModeConfiguration modeConfig =
-                packageConfig.getGameModeConfiguration(gameMode);
-        if (modeConfig == null) {
-            Slog.i(TAG, "Game mode " + gameMode + " not found for " + packageName);
-            return;
-        }
-        long scaleId = modeConfig.getCompatChangeId();
-        if (scaleId == 0) {
-            disableCompatScale(packageName);
-            Slog.w(TAG, "Invalid downscaling change id " + scaleId + " for "
-                    + packageName);
-            return;
-        }
-
-        enableCompatScale(packageName, scaleId);
     }
 
     private int modeToBitmask(@GameMode int gameMode) {
@@ -1442,20 +1302,17 @@ public final class GameManagerService extends IGameManagerService.Stub {
             @GameMode int gameMode, @UserIdInt int userId) {
         if (gameMode == GameManager.GAME_MODE_STANDARD
                 || gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
-            disableCompatScale(packageName);
             resetFps(packageName, userId);
             return;
         }
         final GamePackageConfiguration packageConfig = getConfig(packageName);
         if (packageConfig == null) {
-            disableCompatScale(packageName);
             Slog.v(TAG, "Package configuration not found for " + packageName);
             return;
         }
         if (packageConfig.willGamePerformOptimizations(gameMode)) {
             return;
         }
-        updateCompatModeDownscale(packageConfig, packageName, gameMode);
         updateFps(packageConfig, packageName, gameMode, userId);
         updateUseAngle(packageName, gameMode);
     }
@@ -1670,7 +1527,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 }
             }
         } catch (Exception e) {
-            Slog.e(TAG, "Failed to update compat modes for user " + userId + ": " + e);
+            Slog.e(TAG, "Failed to update configs for user " + userId + ": " + e);
         }
 
         final Message msg = mHandler.obtainMessage(WRITE_GAME_MODE_INTERVENTION_LIST_FILE);
@@ -1821,14 +1678,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
                             updateConfigsForUser(userId, true /*checkGamePackage*/, packageName);
                             break;
                         case ACTION_PACKAGE_REMOVED:
-                            disableCompatScale(packageName);
-                            // If EXTRA_REPLACING is true, it means there will be an
-                            // ACTION_PACKAGE_ADDED triggered after this because this
-                            // is an updated package that gets installed. Hence, disable
-                            // resolution downscaling effort but avoid removing the server
-                            // or commandline overriding configurations because those will
-                            // not change but the package game mode configurations may change
-                            // which may opt in and/or opt out some game mode configurations.
                             if (!intent.getBooleanExtra(EXTRA_REPLACING, false)) {
                                 synchronized (mOverrideConfigLock) {
                                     mOverrideConfigs.remove(packageName);
@@ -1858,6 +1707,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
     private void registerDeviceConfigListener() {
         mDeviceConfigListener = new DeviceConfigListener();
+    }
+
+    private void publishLocalService() {
+        LocalServices.addService(GameManagerInternal.class, new LocalService());
     }
 
     private String dumpDeviceConfigs() {
