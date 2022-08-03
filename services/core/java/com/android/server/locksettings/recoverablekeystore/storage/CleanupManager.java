@@ -35,7 +35,6 @@ import java.util.Map;
 public class CleanupManager {
     private static final String TAG = "CleanupManager";
 
-    private final Context mContext;
     private final UserManager mUserManager;
     private final RecoverableKeyStoreDb mDatabase;
     private final RecoverySnapshotStorage mSnapshotStorage;
@@ -54,7 +53,6 @@ public class CleanupManager {
             RecoverableKeyStoreDb recoverableKeyStoreDb,
             ApplicationKeyStorage applicationKeyStorage) {
         return new CleanupManager(
-                context,
                 snapshotStorage,
                 recoverableKeyStoreDb,
                 UserManager.get(context),
@@ -63,12 +61,10 @@ public class CleanupManager {
 
     @VisibleForTesting
     CleanupManager(
-            Context context,
             RecoverySnapshotStorage snapshotStorage,
             RecoverableKeyStoreDb recoverableKeyStoreDb,
             UserManager userManager,
             ApplicationKeyStorage applicationKeyStorage) {
-        mContext = context;
         mSnapshotStorage = snapshotStorage;
         mDatabase = recoverableKeyStoreDb;
         mUserManager = userManager;

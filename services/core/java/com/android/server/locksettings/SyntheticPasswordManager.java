@@ -36,6 +36,7 @@ import android.security.GateKeeper;
 import android.security.Scrypt;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -590,7 +591,7 @@ public class SyntheticPasswordManager {
         // Remove potential persistent state (in RPMB), to prevent them from accumulating and
         // causing problems.
         try {
-            gatekeeper.clearSecureUserId(fakeUid(userId));
+            gatekeeper.clearSecureUserId(fakeUserId(userId));
         } catch (RemoteException ignore) {
             Slog.w(TAG, "Failed to clear SID from gatekeeper");
         }
@@ -800,13 +801,13 @@ public class SyntheticPasswordManager {
             // In case GK enrollment leaves persistent state around (in RPMB), this will nuke them
             // to prevent them from accumulating and causing problems.
             try {
-                gatekeeper.clearSecureUserId(fakeUid(userId));
+                gatekeeper.clearSecureUserId(fakeUserId(userId));
             } catch (RemoteException ignore) {
                 Slog.w(TAG, "Failed to clear SID from gatekeeper");
             }
             GateKeeperResponse response;
             try {
-                response = gatekeeper.enroll(fakeUid(userId), null, null,
+                response = gatekeeper.enroll(fakeUserId(userId), null, null,
                         stretchedLskfToGkPassword(stretchedLskf));
             } catch (RemoteException e) {
                 throw new IllegalStateException("Failed to enroll LSKF for new SP protector for "
@@ -840,7 +841,7 @@ public class SyntheticPasswordManager {
 
             GateKeeperResponse response;
             try {
-                response = gatekeeper.verifyChallenge(fakeUid(persistentData.userId),
+                response = gatekeeper.verifyChallenge(fakeUserId(persistentData.userId),
                         0 /* challenge */, pwd.passwordHandle,
                         stretchedLskfToGkPassword(stretchedLskf));
             } catch (RemoteException e) {
@@ -1029,7 +1030,7 @@ public class SyntheticPasswordManager {
                     userId));
 
         if (!credential.checkAgainstStoredType(pwd.credentialType)) {
-            Slog.e(TAG, String.format("Credential type mismatch: expected %d actual %d",
+            Slog.e(TAG, TextUtils.formatSimple("Credential type mismatch: expected %d actual %d",
                     pwd.credentialType, credential.getType()));
             result.gkResponse = VerifyCredentialResponse.ERROR;
             return result;
@@ -1059,7 +1060,7 @@ public class SyntheticPasswordManager {
             byte[] gkPassword = stretchedLskfToGkPassword(stretchedLskf);
             GateKeeperResponse response;
             try {
-                response = gatekeeper.verifyChallenge(fakeUid(userId), 0L,
+                response = gatekeeper.verifyChallenge(fakeUserId(userId), 0L,
                         pwd.passwordHandle, gkPassword);
             } catch (RemoteException e) {
                 Slog.e(TAG, "gatekeeper verify failed", e);
@@ -1072,7 +1073,7 @@ public class SyntheticPasswordManager {
                 if (response.getShouldReEnroll()) {
                     GateKeeperResponse reenrollResponse;
                     try {
-                        reenrollResponse = gatekeeper.enroll(fakeUid(userId),
+                        reenrollResponse = gatekeeper.enroll(fakeUserId(userId),
                                 pwd.passwordHandle, gkPassword, gkPassword);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Fail to invoke gatekeeper.enroll", e);
@@ -1452,8 +1453,8 @@ public class SyntheticPasswordManager {
         return result;
     }
 
-    private int fakeUid(int uid) {
-        return 100000 + uid;
+    private int fakeUserId(int userId) {
+        return 100000 + userId;
     }
 
     protected static byte[] secureRandom(int length) {
@@ -1466,7 +1467,7 @@ public class SyntheticPasswordManager {
     }
 
     private String getProtectorKeyAlias(long protectorId) {
-        return String.format("%s%x", PROTECTOR_KEY_ALIAS_PREFIX, protectorId);
+        return TextUtils.formatSimple("%s%x", PROTECTOR_KEY_ALIAS_PREFIX, protectorId);
     }
 
     private byte[] stretchLskf(LockscreenCredential credential, PasswordData data) {
