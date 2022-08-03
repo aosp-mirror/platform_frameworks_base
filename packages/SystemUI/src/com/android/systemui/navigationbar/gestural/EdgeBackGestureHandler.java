@@ -568,10 +568,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private void resetEdgeBackPlugin() {
         if (mIsNewBackAffordanceEnabled) {
             setEdgeBackPlugin(
-                    mBackPanelControllerFactory.create(mContext, mBackAnimation));
+                    mBackPanelControllerFactory.create(mContext));
         } else {
             setEdgeBackPlugin(
-                    new NavigationBarEdgePanel(mContext, mBackAnimation, mLatencyTracker));
+                    new NavigationBarEdgePanel(mContext, mLatencyTracker));
         }
     }
 
