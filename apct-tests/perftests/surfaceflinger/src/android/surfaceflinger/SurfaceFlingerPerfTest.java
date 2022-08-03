@@ -48,6 +48,5 @@ public class SurfaceFlingerPerfTest {
         while (state.keepRunning()) {
             // Do Something
         }
-
     }
 }
