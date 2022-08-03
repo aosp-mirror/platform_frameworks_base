@@ -1204,6 +1204,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
         assert(state != Display.STATE_UNKNOWN);
 
+        boolean skipRampBecauseOfProximityChangeToNegative = false;
         // Apply the proximity sensor.
         if (mProximitySensor != null) {
             if (mPowerRequest.useProximitySensor && state != Display.STATE_OFF) {
@@ -1241,6 +1242,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 // the screen back on.  Also turn it back on if we've been asked to ignore the
                 // prox sensor temporarily.
                 mScreenOffBecauseOfProximity = false;
+                skipRampBecauseOfProximityChangeToNegative = true;
                 sendOnProximityNegativeWithWakelock();
             }
         } else {
@@ -1521,8 +1523,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
             final boolean wasOrWillBeInVr =
                     (state == Display.STATE_VR || oldState == Display.STATE_VR);
-            final boolean initialRampSkip =
-                    state == Display.STATE_ON && mSkipRampState != RAMP_STATE_SKIP_NONE;
+            final boolean initialRampSkip = (state == Display.STATE_ON && mSkipRampState
+                    != RAMP_STATE_SKIP_NONE) || skipRampBecauseOfProximityChangeToNegative;
             // While dozing, sometimes the brightness is split into buckets. Rather than animating
             // through the buckets, which is unlikely to be smooth in the first place, just jump
             // right to the suggested brightness.
