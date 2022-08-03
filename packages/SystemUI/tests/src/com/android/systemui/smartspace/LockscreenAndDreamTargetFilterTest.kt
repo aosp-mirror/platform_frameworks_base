@@ -27,13 +27,14 @@ import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.smartspace.filters.LockscreenTargetFilter
+import com.android.systemui.smartspace.filters.LockscreenAndDreamTargetFilter
 import com.android.systemui.util.concurrency.Execution
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,18 +42,17 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.atLeast
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.Executor
 
 @SmallTest
 @TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner::class)
-class LockscreenTargetFilterTest : SysuiTestCase() {
+class LockscreenAndDreamTargetFilterTest : SysuiTestCase() {
     @Mock
     private lateinit var secureSettings: SecureSettings
 
@@ -99,7 +99,7 @@ class LockscreenTargetFilterTest : SysuiTestCase() {
         `when`(secureSettings
                 .getIntForUser(eq(setting) ?: setting, anyInt(), anyInt()))
                 .thenReturn(0)
-        var filter = LockscreenTargetFilter(secureSettings, userTracker, execution, handler,
+        var filter = LockscreenAndDreamTargetFilter(secureSettings, userTracker, execution, handler,
                 contentResolver, uiExecution)
 
         filter.addListener(listener)
@@ -132,7 +132,7 @@ class LockscreenTargetFilterTest : SysuiTestCase() {
         `when`(secureSettings
                 .getIntForUser(eq(setting) ?: setting, anyInt(), anyInt()))
                 .thenReturn(0)
-        var filter = LockscreenTargetFilter(secureSettings, userTracker, execution, handler,
+        var filter = LockscreenAndDreamTargetFilter(secureSettings, userTracker, execution, handler,
                 contentResolver, uiExecution)
 
         filter.addListener(listener)
