@@ -148,6 +148,12 @@ class AutomaticBrightnessController {
     // The currently accepted nominal ambient light level.
     private float mAmbientLux;
 
+    // The last calculated ambient light level (long time window).
+    private float mSlowAmbientLux;
+
+    // The last calculated ambient light level (short time window).
+    private float mFastAmbientLux;
+
     // The last ambient lux value prior to passing the darkening or brightening threshold.
     private float mPreThresholdLux;
 
@@ -437,6 +443,14 @@ class AutomaticBrightnessController {
     @VisibleForTesting
     float getAmbientLux() {
         return mAmbientLux;
+    }
+
+    float getSlowAmbientLux() {
+        return mSlowAmbientLux;
+    }
+
+    float getFastAmbientLux() {
+        return mFastAmbientLux;
     }
 
     private boolean setDisplayPolicy(int policy) {
@@ -811,20 +825,20 @@ class AutomaticBrightnessController {
         // proposed ambient light value since the slow value might be sufficiently far enough away
         // from the fast value to cause a recalculation while its actually just converging on
         // the fast value still.
-        float slowAmbientLux = calculateAmbientLux(time, mAmbientLightHorizonLong);
-        float fastAmbientLux = calculateAmbientLux(time, mAmbientLightHorizonShort);
+        mSlowAmbientLux = calculateAmbientLux(time, mAmbientLightHorizonLong);
+        mFastAmbientLux = calculateAmbientLux(time, mAmbientLightHorizonShort);
 
-        if ((slowAmbientLux >= mAmbientBrighteningThreshold
-                && fastAmbientLux >= mAmbientBrighteningThreshold
+        if ((mSlowAmbientLux >= mAmbientBrighteningThreshold
+                && mFastAmbientLux >= mAmbientBrighteningThreshold
                 && nextBrightenTransition <= time)
-                || (slowAmbientLux <= mAmbientDarkeningThreshold
-                        && fastAmbientLux <= mAmbientDarkeningThreshold
+                || (mSlowAmbientLux <= mAmbientDarkeningThreshold
+                        && mFastAmbientLux <= mAmbientDarkeningThreshold
                         && nextDarkenTransition <= time)) {
             mPreThresholdLux = mAmbientLux;
-            setAmbientLux(fastAmbientLux);
+            setAmbientLux(mFastAmbientLux);
             if (mLoggingEnabled) {
                 Slog.d(TAG, "updateAmbientLux: "
-                        + ((fastAmbientLux > mAmbientLux) ? "Brightened" : "Darkened") + ": "
+                        + ((mFastAmbientLux > mAmbientLux) ? "Brightened" : "Darkened") + ": "
                         + "mBrighteningLuxThreshold=" + mAmbientBrighteningThreshold + ", "
                         + "mAmbientLightRingBuffer=" + mAmbientLightRingBuffer + ", "
                         + "mAmbientLux=" + mAmbientLux);
