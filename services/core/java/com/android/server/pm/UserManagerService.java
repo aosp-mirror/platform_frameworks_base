@@ -89,6 +89,7 @@ import android.os.storage.StorageManagerInternal;
 import android.provider.Settings;
 import android.security.GateKeeper;
 import android.service.gatekeeper.IGateKeeperService;
+import android.service.voice.VoiceInteractionManagerInternal;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -4366,6 +4367,11 @@ public class UserManagerService extends IUserManager.Stub {
         Binder.withCleanCallingIdentity(() -> {
             mPm.onNewUserCreated(preCreatedUser.id, /* convertedFromPreCreated= */ true);
             dispatchUserAdded(preCreatedUser, token);
+            VoiceInteractionManagerInternal vimi = LocalServices
+                    .getService(VoiceInteractionManagerInternal.class);
+            if (vimi != null) {
+                vimi.onPreCreatedUserConversion(preCreatedUser.id);
+            }
         });
         return preCreatedUser;
     }
