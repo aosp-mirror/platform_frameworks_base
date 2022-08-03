@@ -16,6 +16,11 @@ package com.android.systemui.statusbar.phone.fragment;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_IN;
+import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_OUT;
+import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.IDLE;
+import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.RUNNING_CHIP_ANIM;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -25,6 +30,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.animation.Animator;
 import android.app.Fragment;
 import android.app.StatusBarManager;
 import android.content.Context;
@@ -127,7 +133,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
-    public void testDisableSystemInfo() {
+    public void testDisableSystemInfo_systemAnimationIdle_doesHide() {
+        when(mAnimationScheduler.getAnimationState()).thenReturn(IDLE);
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_SYSTEM_INFO, 0, false);
@@ -137,6 +144,98 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
         assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+    }
+
+    @Test
+    public void testSystemStatusAnimation_startedDisabled_finishedWithAnimator_showsSystemInfo() {
+        // GIVEN the status bar hides the system info via disable flags, while there is no event
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+        when(mAnimationScheduler.getAnimationState()).thenReturn(IDLE);
+        fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_SYSTEM_INFO, 0, false);
+        assertEquals(View.INVISIBLE, getSystemIconAreaView().getVisibility());
+
+        // WHEN the disable flags are cleared during a system event animation
+        when(mAnimationScheduler.getAnimationState()).thenReturn(RUNNING_CHIP_ANIM);
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN the view is made visible again, but still low alpha
+        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(0, getSystemIconAreaView().getAlpha(), 0.01);
+
+        // WHEN the system event animation finishes
+        when(mAnimationScheduler.getAnimationState()).thenReturn(ANIMATING_OUT);
+        Animator anim = fragment.onSystemEventAnimationFinish(false);
+        anim.start();
+        processAllMessages();
+        anim.end();
+
+        // THEN the system info is full alpha
+        assertEquals(1, getSystemIconAreaView().getAlpha(), 0.01);
+    }
+
+    @Test
+    public void testSystemStatusAnimation_systemInfoDisabled_staysInvisible() {
+        // GIVEN the status bar hides the system info via disable flags, while there is no event
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+        when(mAnimationScheduler.getAnimationState()).thenReturn(IDLE);
+        fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_SYSTEM_INFO, 0, false);
+        assertEquals(View.INVISIBLE, getSystemIconAreaView().getVisibility());
+
+        // WHEN the system event animation finishes
+        when(mAnimationScheduler.getAnimationState()).thenReturn(ANIMATING_OUT);
+        Animator anim = fragment.onSystemEventAnimationFinish(false);
+        anim.start();
+        processAllMessages();
+        anim.end();
+
+        // THEN the system info is at full alpha, but still INVISIBLE (since the disable flag is
+        // still set)
+        assertEquals(1, getSystemIconAreaView().getAlpha(), 0.01);
+        assertEquals(View.INVISIBLE, getSystemIconAreaView().getVisibility());
+    }
+
+
+    @Test
+    public void testSystemStatusAnimation_notDisabled_animatesAlphaZero() {
+        // GIVEN the status bar is not disabled
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+        when(mAnimationScheduler.getAnimationState()).thenReturn(ANIMATING_IN);
+        // WHEN the system event animation begins
+        Animator anim = fragment.onSystemEventAnimationBegin();
+        anim.start();
+        processAllMessages();
+        anim.end();
+
+        // THEN the system info is visible but alpha 0
+        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(0, getSystemIconAreaView().getAlpha(), 0.01);
+    }
+
+    @Test
+    public void testSystemStatusAnimation_notDisabled_animatesBackToAlphaOne() {
+        // GIVEN the status bar is not disabled
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+        when(mAnimationScheduler.getAnimationState()).thenReturn(ANIMATING_IN);
+        // WHEN the system event animation begins
+        Animator anim = fragment.onSystemEventAnimationBegin();
+        anim.start();
+        processAllMessages();
+        anim.end();
+
+        // THEN the system info is visible but alpha 0
+        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(0, getSystemIconAreaView().getAlpha(), 0.01);
+
+        // WHEN the system event animation finishes
+        when(mAnimationScheduler.getAnimationState()).thenReturn(ANIMATING_OUT);
+        anim = fragment.onSystemEventAnimationFinish(false);
+        anim.start();
+        processAllMessages();
+        anim.end();
+
+        // THEN the syste info is full alpha and VISIBLE
+        assertEquals(View.VISIBLE, getSystemIconAreaView().getVisibility());
+        assertEquals(1, getSystemIconAreaView().getAlpha(), 0.01);
     }
 
     @Test
