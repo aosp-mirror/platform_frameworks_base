@@ -29,7 +29,7 @@ class ObserveKeyguardQuickAffordanceUseCase
 constructor(
     private val repository: KeyguardQuickAffordanceRepository,
     private val isDozingUseCase: ObserveIsDozingUseCase,
-    private val dozeAmountUseCase: ObserveDozeAmountUseCase,
+    private val isKeyguardShowingUseCase: ObserveIsKeyguardShowingUseCase,
 ) {
     operator fun invoke(
         position: KeyguardQuickAffordancePosition
@@ -37,9 +37,9 @@ constructor(
         return combine(
             repository.affordance(position),
             isDozingUseCase(),
-            dozeAmountUseCase(),
-        ) { affordance, isDozing, dozeAmount ->
-            if (!isDozing && dozeAmount == 0f) {
+            isKeyguardShowingUseCase(),
+        ) { affordance, isDozing, isKeyguardShowing ->
+            if (!isDozing && isKeyguardShowing) {
                 affordance
             } else {
                 KeyguardQuickAffordanceModel.Hidden

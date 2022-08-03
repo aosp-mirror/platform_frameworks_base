@@ -109,6 +109,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,6 +137,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private final TransactionPool mTransactionPool;
     private final DisplayController mDisplayController;
     private final Context mContext;
+    private final Handler mMainHandler;
     private final ShellExecutor mMainExecutor;
     private final ShellExecutor mAnimExecutor;
     private final TransitionAnimation mTransitionAnimation;
@@ -152,8 +154,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     private final int mCurrentUserId;
 
-    private ScreenRotationAnimation mRotationAnimation;
-
     private Drawable mEnterpriseThumbnailDrawable;
 
     private BroadcastReceiver mEnterpriseResourceUpdatedReceiver = new BroadcastReceiver() {
@@ -167,27 +167,33 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
     };
 
-    DefaultTransitionHandler(@NonNull DisplayController displayController,
-            @NonNull TransactionPool transactionPool, Context context,
+    DefaultTransitionHandler(@NonNull Context context,
+            @NonNull ShellInit shellInit,
+            @NonNull DisplayController displayController,
+            @NonNull TransactionPool transactionPool,
             @NonNull ShellExecutor mainExecutor, @NonNull Handler mainHandler,
             @NonNull ShellExecutor animExecutor) {
         mDisplayController = displayController;
         mTransactionPool = transactionPool;
         mContext = context;
+        mMainHandler = mainHandler;
         mMainExecutor = mainExecutor;
         mAnimExecutor = animExecutor;
         mTransitionAnimation = new TransitionAnimation(context, false /* debug */, Transitions.TAG);
         mCurrentUserId = UserHandle.myUserId();
+        mDevicePolicyManager = mContext.getSystemService(DevicePolicyManager.class);
+        shellInit.addInitCallback(this::onInit, this);
+    }
 
-        mDevicePolicyManager = context.getSystemService(DevicePolicyManager.class);
+    private void onInit() {
         updateEnterpriseThumbnailDrawable();
         mContext.registerReceiver(
                 mEnterpriseResourceUpdatedReceiver,
                 new IntentFilter(ACTION_DEVICE_POLICY_RESOURCE_UPDATED),
                 /* broadcastPermission = */ null,
-                mainHandler);
+                mMainHandler);
 
-        AttributeCache.init(context);
+        AttributeCache.init(mContext);
     }
 
     private void updateEnterpriseThumbnailDrawable() {
@@ -332,12 +338,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
         final Runnable onAnimFinish = () -> {
             if (!animations.isEmpty()) return;
-
-            if (mRotationAnimation != null) {
-                mRotationAnimation.kill();
-                mRotationAnimation = null;
-            }
-
             mAnimations.remove(transition);
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
         };
@@ -357,11 +357,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     isSeamlessDisplayChange = isRotationSeamless(info, mDisplayController);
                     final int anim = getRotationAnimation(info);
                     if (!(isSeamlessDisplayChange || anim == ROTATION_ANIMATION_JUMPCUT)) {
-                        mRotationAnimation = new ScreenRotationAnimation(mContext, mSurfaceSession,
-                                mTransactionPool, startTransaction, change, info.getRootLeash(),
-                                anim);
-                        mRotationAnimation.startAnimation(animations, onAnimFinish,
-                                mTransitionAnimationScaleSetting, mMainExecutor, mAnimExecutor);
+                        startRotationAnimation(startTransaction, change, info, anim, animations,
+                                onAnimFinish);
                         continue;
                     }
                 } else {
@@ -404,6 +401,13 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     // Skip non-tasks since those usually have null bounds.
                     startTransaction.setWindowCrop(change.getLeash(),
                             change.getEndAbsBounds().width(), change.getEndAbsBounds().height());
+                }
+                // Rotation change of independent non display window container.
+                if (change.getParent() == null
+                        && change.getStartRotation() != change.getEndRotation()) {
+                    startRotationAnimation(startTransaction, change, info,
+                            ROTATION_ANIMATION_ROTATE, animations, onAnimFinish);
+                    continue;
                 }
             }
 
@@ -532,6 +536,31 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         for (int i = anims.size() - 1; i >= 0; --i) {
             final Animator anim = anims.get(i);
             mAnimExecutor.execute(anim::end);
+        }
+    }
+
+    private void startRotationAnimation(SurfaceControl.Transaction startTransaction,
+            TransitionInfo.Change change, TransitionInfo info, int animHint,
+            ArrayList<Animator> animations, Runnable onAnimFinish) {
+        final ScreenRotationAnimation anim = new ScreenRotationAnimation(mContext, mSurfaceSession,
+                mTransactionPool, startTransaction, change, info.getRootLeash(), animHint);
+        // The rotation animation may consist of 3 animations: fade-out screenshot, fade-in real
+        // content, and background color. The item of "animGroup" will be removed if the sub
+        // animation is finished. Then if the list becomes empty, the rotation animation is done.
+        final ArrayList<Animator> animGroup = new ArrayList<>(3);
+        final ArrayList<Animator> animGroupStore = new ArrayList<>(3);
+        final Runnable finishCallback = () -> {
+            if (!animGroup.isEmpty()) return;
+            anim.kill();
+            animations.removeAll(animGroupStore);
+            onAnimFinish.run();
+        };
+        anim.startAnimation(animGroup, finishCallback, mTransitionAnimationScaleSetting,
+                mMainExecutor, mAnimExecutor);
+        for (int i = animGroup.size() - 1; i >= 0; i--) {
+            final Animator animator = animGroup.get(i);
+            animGroupStore.add(animator);
+            animations.add(animator);
         }
     }
 

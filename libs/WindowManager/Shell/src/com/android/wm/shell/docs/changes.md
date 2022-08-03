@@ -44,9 +44,23 @@ to SysUI where it posts the work to the main Shell thread.
 
 ### Component initialization
 To initialize the component:
-- On the Shell side, update `ShellInitImpl` to get a signal to initialize when the SysUI is started
+- On the Shell side, you potentially need to do two things to initialize the component:
+  - Inject `ShellInit` into your component and add an init callback
+  - Ensure that your component is a part of the dagger dependency graph, either by:
+    - Making this component a dependency of an existing component already exposed to SystemUI
+    - Explicitly add this component to the WMShellBaseModule @ShellCreateTrigger provider or
+      the @ShellCreateTriggerOverride provider for your product module to expose it explicitly 
+      if it is a completely independent component
 - On the SysUI side, update `WMShell` to setup any bindings for the component that depend on
   SysUI code
+
+To verify that your component is being initialized at startup, you can enable the `WM_SHELL_INIT` 
+protolog group and restart the SysUI process:
+```shell
+adb shell wm logging enable-text WM_SHELL_INIT
+adb shell kill `pid com.android.systemui`
+adb logcat *:S WindowManagerShell
+```
 
 ### General Do's & Dont's
 Do:

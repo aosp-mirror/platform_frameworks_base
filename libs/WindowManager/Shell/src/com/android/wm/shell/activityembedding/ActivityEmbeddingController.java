@@ -28,6 +28,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 /**
@@ -38,13 +39,17 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
     private final Context mContext;
     private final Transitions mTransitions;
 
-    public ActivityEmbeddingController(Context context, Transitions transitions) {
+    public ActivityEmbeddingController(Context context, ShellInit shellInit,
+            Transitions transitions) {
         mContext = context;
         mTransitions = transitions;
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            shellInit.addInitCallback(this::onInit, this);
+        }
     }
 
     /** Registers to handle transitions. */
-    public void init() {
+    public void onInit() {
         mTransitions.addHandler(this);
     }
 

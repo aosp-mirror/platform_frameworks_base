@@ -20,6 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.data.model.Position
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.argumentCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
@@ -31,6 +32,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -38,6 +40,7 @@ import org.mockito.MockitoAnnotations
 class KeyguardRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var statusBarStateController: StatusBarStateController
+    @Mock private lateinit var keyguardStateController: KeyguardStateController
 
     private lateinit var underTest: KeyguardRepositoryImpl
 
@@ -45,7 +48,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        underTest = KeyguardRepositoryImpl(statusBarStateController)
+        underTest = KeyguardRepositoryImpl(statusBarStateController, keyguardStateController)
     }
 
     @Test
@@ -97,6 +100,28 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
         underTest.setClockPosition(3, 1)
         assertThat(underTest.clockPosition.value).isEqualTo(Position(3, 1))
+    }
+
+    @Test
+    fun isKeyguardShowing() = runBlockingTest {
+        whenever(keyguardStateController.isShowing).thenReturn(false)
+        var latest: Boolean? = null
+        val job = underTest.isKeyguardShowing.onEach { latest = it }.launchIn(this)
+
+        assertThat(latest).isFalse()
+
+        val captor = argumentCaptor<KeyguardStateController.Callback>()
+        verify(keyguardStateController).addCallback(captor.capture())
+
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        captor.value.onKeyguardShowingChanged()
+        assertThat(latest).isTrue()
+
+        whenever(keyguardStateController.isShowing).thenReturn(false)
+        captor.value.onKeyguardShowingChanged()
+        assertThat(latest).isFalse()
+
+        job.cancel()
     }
 
     @Test
