@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -52,6 +52,9 @@ open class OpenAppAfterCameraTest(
         get() = {
             super.transition(this)
             setup {
+                test{
+                    tapl.setExpectedRotationCheckEnabled(false)
+                }
                 eachRun {
                     // 1. Open camera - cold -> close it first
                     cameraApp.exit(wmHelper)
@@ -76,9 +79,98 @@ open class OpenAppAfterCameraTest(
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Presubmit
+    @Postsubmit
     @Test
     override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun focusChanges() = super.focusChanges()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appWindowReplacesLauncherAsTopWindow() =
+            super.appWindowReplacesLauncherAsTopWindow()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appWindowAsTopWindowAtEnd() = super.appWindowAsTopWindowAtEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appWindowIsTopWindowAtEnd() = super.appWindowIsTopWindowAtEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisibleAtStartAndEnd() =
+            super.statusBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+            super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         /**
