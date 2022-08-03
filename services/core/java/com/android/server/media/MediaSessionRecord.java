@@ -61,8 +61,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.NoSuchElementException;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * This is the system implementation of a Session. Apps will interact with the
@@ -1159,6 +1159,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public void sendCommand(String packageName, int pid, int uid, String command, Bundle args,
                 ResultReceiver cb) {
             try {
+                final String reason = TAG + ":" + command;
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onCommand(packageName, pid, uid, command, args, cb);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in sendCommand.", e);
@@ -1168,6 +1171,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public void sendCustomAction(String packageName, int pid, int uid, String action,
                 Bundle args) {
             try {
+                final String reason = TAG + ":custom-" + action;
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onCustomAction(packageName, pid, uid, action, args);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in sendCustomAction.", e);
@@ -1176,6 +1182,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void prepare(String packageName, int pid, int uid) {
             try {
+                final String reason = TAG + ":prepare";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onPrepare(packageName, pid, uid);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in prepare.", e);
@@ -1185,6 +1194,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public void prepareFromMediaId(String packageName, int pid, int uid, String mediaId,
                 Bundle extras) {
             try {
+                final String reason = TAG + ":prepareFromMediaId";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onPrepareFromMediaId(packageName, pid, uid, mediaId, extras);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in prepareFromMediaId.", e);
@@ -1194,6 +1206,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public void prepareFromSearch(String packageName, int pid, int uid, String query,
                 Bundle extras) {
             try {
+                final String reason = TAG + ":prepareFromSearch";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onPrepareFromSearch(packageName, pid, uid, query, extras);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in prepareFromSearch.", e);
@@ -1202,6 +1217,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void prepareFromUri(String packageName, int pid, int uid, Uri uri, Bundle extras) {
             try {
+                final String reason = TAG + ":prepareFromUri";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onPrepareFromUri(packageName, pid, uid, uri, extras);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in prepareFromUri.", e);
@@ -1210,6 +1228,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void play(String packageName, int pid, int uid) {
             try {
+                final String reason = TAG + ":play";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onPlay(packageName, pid, uid);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in play.", e);
@@ -1219,6 +1240,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public void playFromMediaId(String packageName, int pid, int uid, String mediaId,
                 Bundle extras) {
             try {
+                final String reason = TAG + ":playFromMediaId";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onPlayFromMediaId(packageName, pid, uid, mediaId, extras);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in playFromMediaId.", e);
@@ -1228,6 +1252,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public void playFromSearch(String packageName, int pid, int uid, String query,
                 Bundle extras) {
             try {
+                final String reason = TAG + ":playFromSearch";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onPlayFromSearch(packageName, pid, uid, query, extras);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in playFromSearch.", e);
@@ -1236,6 +1263,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void playFromUri(String packageName, int pid, int uid, Uri uri, Bundle extras) {
             try {
+                final String reason = TAG + ":playFromUri";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onPlayFromUri(packageName, pid, uid, uri, extras);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in playFromUri.", e);
@@ -1244,6 +1274,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void skipToTrack(String packageName, int pid, int uid, long id) {
             try {
+                final String reason = TAG + ":skipToTrack";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onSkipToTrack(packageName, pid, uid, id);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in skipToTrack", e);
@@ -1252,6 +1285,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void pause(String packageName, int pid, int uid) {
             try {
+                final String reason = TAG + ":pause";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onPause(packageName, pid, uid);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in pause.", e);
@@ -1260,6 +1296,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void stop(String packageName, int pid, int uid) {
             try {
+                final String reason = TAG + ":stop";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onStop(packageName, pid, uid);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in stop.", e);
@@ -1268,6 +1307,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void next(String packageName, int pid, int uid) {
             try {
+                final String reason = TAG + ":next";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onNext(packageName, pid, uid);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in next.", e);
@@ -1276,6 +1318,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void previous(String packageName, int pid, int uid) {
             try {
+                final String reason = TAG + ":previous";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onPrevious(packageName, pid, uid);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in previous.", e);
@@ -1284,6 +1329,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void fastForward(String packageName, int pid, int uid) {
             try {
+                final String reason = TAG + ":fastForward";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onFastForward(packageName, pid, uid);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in fastForward.", e);
@@ -1292,6 +1340,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void rewind(String packageName, int pid, int uid) {
             try {
+                final String reason = TAG + ":rewind";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onRewind(packageName, pid, uid);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in rewind.", e);
@@ -1300,6 +1351,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void seekTo(String packageName, int pid, int uid, long pos) {
             try {
+                final String reason = TAG + ":seekTo";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onSeekTo(packageName, pid, uid, pos);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in seekTo.", e);
@@ -1308,6 +1362,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void rate(String packageName, int pid, int uid, Rating rating) {
             try {
+                final String reason = TAG + ":rate";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onRate(packageName, pid, uid, rating);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in rate.", e);
@@ -1316,6 +1373,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void setPlaybackSpeed(String packageName, int pid, int uid, float speed) {
             try {
+                final String reason = TAG + ":setPlaybackSpeed";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onSetPlaybackSpeed(packageName, pid, uid, speed);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in setPlaybackSpeed.", e);
@@ -1325,6 +1385,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public void adjustVolume(String packageName, int pid, int uid, boolean asSystemService,
                 int direction) {
             try {
+                final String reason = TAG + ":adjustVolume";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 if (asSystemService) {
                     mCb.onAdjustVolume(mContext.getPackageName(), Process.myPid(),
                             Process.SYSTEM_UID, direction);
@@ -1338,6 +1401,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         public void setVolumeTo(String packageName, int pid, int uid, int value) {
             try {
+                final String reason = TAG + ":setVolumeTo";
+                mService.tempAllowlistTargetPkgIfPossible(getUid(), getPackageName(),
+                        pid, uid, packageName, reason);
                 mCb.onSetVolumeTo(packageName, pid, uid, value);
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote failure in setVolumeTo.", e);

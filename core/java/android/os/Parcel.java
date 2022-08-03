@@ -767,7 +767,7 @@ public final class Parcel {
     }
 
     /**
-     * Set the bytes in data to be the raw bytes of this Parcel.
+     * Fills the raw bytes of this Parcel with the supplied data.
      */
     public final void unmarshall(@NonNull byte[] data, int offset, int length) {
         nativeUnmarshall(mNativePtr, data, offset, length);

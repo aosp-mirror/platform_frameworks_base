@@ -519,7 +519,7 @@ public final class Bitmap implements Parcelable {
         ARGB_8888   (5),
 
         /**
-         * Each pixels is stored on 8 bytes. Each channel (RGB and alpha
+         * Each pixel is stored on 8 bytes. Each channel (RGB and alpha
          * for translucency) is stored as a
          * {@link android.util.Half half-precision floating point value}.
          *
