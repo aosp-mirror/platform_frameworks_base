@@ -109,7 +109,11 @@ android_test {
     data: [
         ":BstatsTestApp",
         ":JobTestApp",
+        ":SimpleServiceTestApp1",
+        ":SimpleServiceTestApp2",
+        ":SimpleServiceTestApp3",
         ":StubTestApp",
+        ":SuspendTestApp",
     ],
 
     java_resources: [

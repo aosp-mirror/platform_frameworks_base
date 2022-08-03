@@ -632,6 +632,11 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final Rect mainFrame = window.getRelativeFrame();
         final StartingWindowAnimationAdaptor adaptor = new StartingWindowAnimationAdaptor();
         window.startAnimation(t, adaptor, false, ANIMATION_TYPE_STARTING_REVEAL);
+        if (adaptor.mAnimationLeash == null) {
+            Slog.e(TAG, "Cannot start starting window animation, the window " + window
+                    + " was removed");
+            return null;
+        }
         t.setPosition(adaptor.mAnimationLeash, mainFrame.left, mainFrame.top);
         return adaptor.mAnimationLeash;
     }
@@ -679,13 +684,15 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         if (topActivity != null) {
             removalInfo.deferRemoveForIme = topActivity.mDisplayContent
                     .mayImeShowOnLaunchingActivity(topActivity);
-            if (removalInfo.playRevealAnimation && playShiftUpAnimation) {
-                final WindowState mainWindow =
-                        topActivity.findMainWindow(false/* includeStartingApp */);
-                if (mainWindow != null) {
-                    removalInfo.windowAnimationLeash = applyStartingWindowAnimation(mainWindow);
-                    removalInfo.mainFrame = mainWindow.getRelativeFrame();
-                }
+            final WindowState mainWindow =
+                    topActivity.findMainWindow(false/* includeStartingApp */);
+            // No app window for this activity, app might be crashed.
+            // Remove starting window immediately without playing reveal animation.
+            if (mainWindow == null || mainWindow.mRemoved) {
+                removalInfo.playRevealAnimation = false;
+            } else if (removalInfo.playRevealAnimation && playShiftUpAnimation) {
+                removalInfo.windowAnimationLeash = applyStartingWindowAnimation(mainWindow);
+                removalInfo.mainFrame = mainWindow.getRelativeFrame();
             }
         }
         try {

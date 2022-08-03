@@ -78,6 +78,19 @@ class SplitScreenHelper(
                 Components.SendNotificationActivity.COMPONENT.toFlickerComponent()
             )
 
+        fun waitForSplitComplete(
+                wmHelper: WindowManagerStateHelper,
+                primaryApp: IComponentMatcher,
+                secondaryApp: IComponentMatcher,
+        ) {
+            wmHelper.StateSyncBuilder()
+                    .withAppTransitionIdle()
+                    .withWindowSurfaceAppeared(primaryApp)
+                    .withWindowSurfaceAppeared(secondaryApp)
+                    .withSplitDividerVisible()
+                    .waitForAndVerify()
+        }
+
         fun dragFromNotificationToSplit(
             instrumentation: Instrumentation,
             device: UiDevice,
@@ -190,12 +203,11 @@ class SplitScreenHelper(
         }
 
         fun createShortcutOnHotseatIfNotExist(
-            taplInstrumentation: LauncherInstrumentation,
+            tapl: LauncherInstrumentation,
             appName: String
         ) {
-            taplInstrumentation.workspace
-                .deleteAppIcon(taplInstrumentation.workspace.getHotseatAppIcon(0))
-            val allApps = taplInstrumentation.workspace.switchToAllApps()
+            tapl.workspace.deleteAppIcon(tapl.workspace.getHotseatAppIcon(0))
+            val allApps = tapl.workspace.switchToAllApps()
             allApps.freeze()
             try {
                 allApps.getAppIcon(appName).dragToHotseat(0)

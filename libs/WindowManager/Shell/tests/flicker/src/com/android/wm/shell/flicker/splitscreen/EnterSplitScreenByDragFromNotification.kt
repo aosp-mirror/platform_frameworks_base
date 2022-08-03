@@ -84,6 +84,7 @@ class EnterSplitScreenByDragFromNotification(
             }
             transitions {
                 SplitScreenHelper.dragFromNotificationToSplit(instrumentation, device, wmHelper)
+                SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, sendNotificationApp)
             }
             teardown {
                 eachRun {
@@ -94,7 +95,7 @@ class EnterSplitScreenByDragFromNotification(
 
     @Presubmit
     @Test
-    fun dividerBecomesVisible() = testSpec.splitScreenDividerBecomesVisible()
+    fun splitScreenDividerBecomesVisible() = testSpec.splitScreenDividerBecomesVisible()
 
     @Presubmit
     @Test
@@ -108,14 +109,12 @@ class EnterSplitScreenByDragFromNotification(
     @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-        testSpec.endRotation, primaryApp, false /* splitLeftTop */
-    )
+        primaryApp, splitLeftTop = false)
 
     @Presubmit
     @Test
     fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisible(
-        testSpec.endRotation, sendNotificationApp, true /* splitLeftTop */
-    )
+        sendNotificationApp, splitLeftTop = true)
 
     @Presubmit
     @Test
@@ -123,8 +122,7 @@ class EnterSplitScreenByDragFromNotification(
 
     @Presubmit
     @Test
-    fun secondaryAppWindowIsVisibleAtEnd() =
-        testSpec.appWindowIsVisibleAtEnd(sendNotificationApp)
+    fun secondaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(sendNotificationApp)
 
     /** {@inheritDoc} */
     @Postsubmit

@@ -97,6 +97,10 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.domain.usecase.SetClockPositionUseCase;
+import com.android.systemui.keyguard.domain.usecase.SetKeyguardBottomAreaAlphaUseCase;
+import com.android.systemui.keyguard.domain.usecase.SetKeyguardBottomAreaAnimateDozingTransitionsUseCase;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
@@ -373,6 +377,11 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private ViewParent mViewParent;
     @Mock
     private ViewTreeObserver mViewTreeObserver;
+    @Mock private KeyguardBottomAreaViewModel mKeyguardBottomAreaViewModel;
+    @Mock private SetClockPositionUseCase mSetClockPositionUseCase;
+    @Mock private SetKeyguardBottomAreaAlphaUseCase mSetKeyguardBottomAreaAlphaUseCase;
+    @Mock private SetKeyguardBottomAreaAnimateDozingTransitionsUseCase
+            mSetKeyguardBottomAreaAnimateDozingTransitionsUseCase;
     private NotificationPanelViewController.PanelEventsEmitter mPanelEventsEmitter;
     private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
@@ -564,7 +573,11 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController,
                 mShadeTransitionController,
                 mSystemClock,
-                mock(CameraGestureHelper.class));
+                mock(CameraGestureHelper.class),
+                () -> mKeyguardBottomAreaViewModel,
+                () -> mSetClockPositionUseCase,
+                () -> mSetKeyguardBottomAreaAlphaUseCase,
+                () -> mSetKeyguardBottomAreaAnimateDozingTransitionsUseCase);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},

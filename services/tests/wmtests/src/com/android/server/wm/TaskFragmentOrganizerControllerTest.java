@@ -420,6 +420,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     @Test
     public void testApplyTransaction_enforceHierarchyChange_setAdjacentRoots()
             throws RemoteException {
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(mIOrganizer);
         final TaskFragment taskFragment2 =
                 new TaskFragment(mAtm, new Binder(), true /* createdByOrganizer */);
         final WindowContainerToken token2 = taskFragment2.mRemoteToken.toWindowContainerToken();
@@ -592,6 +593,25 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mWindowOrganizerController.applyTransaction(mTransaction);
 
         assertEquals(activity0, mDisplayContent.mFocusedApp);
+    }
+
+    @Test
+    public void testApplyTransaction_skipTransactionForUnregisterOrganizer() {
+        final ActivityRecord ownerActivity = createActivityRecord(mDisplayContent);
+        final IBinder fragmentToken = new Binder();
+
+        // Allow organizer to create TaskFragment and start/reparent activity to TaskFragment.
+        createTaskFragmentFromOrganizer(mTransaction, ownerActivity, fragmentToken);
+        mAtm.mWindowOrganizerController.applyTransaction(mTransaction);
+
+        // Nothing should happen as the organizer is not registered.
+        assertNull(mAtm.mWindowOrganizerController.getTaskFragment(fragmentToken));
+
+        mController.registerOrganizer(mIOrganizer);
+        mAtm.mWindowOrganizerController.applyTransaction(mTransaction);
+
+        // Successfully created when the organizer is registered.
+        assertNotNull(mAtm.mWindowOrganizerController.getTaskFragment(fragmentToken));
     }
 
     @Test

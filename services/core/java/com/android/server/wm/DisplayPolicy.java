@@ -318,12 +318,19 @@ public class DisplayPolicy {
      */
     private final ArrayList<WindowState> mStatusBarBackgroundWindows = new ArrayList<>();
 
+    /**
+     * A collection of {@link LetterboxDetails} of all visible activities to be sent to SysUI in
+     * order to determine status bar appearance
+     */
+    private final ArrayList<LetterboxDetails> mLetterboxDetails = new ArrayList<>();
+
     private String mFocusedApp;
     private int mLastDisableFlags;
     private int mLastAppearance;
     private int mLastBehavior;
     private InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
     private AppearanceRegion[] mLastStatusBarAppearanceRegions;
+    private LetterboxDetails[] mLastLetterboxDetails;
 
     /** The union of checked bounds while building {@link #mStatusBarAppearanceRegionList}. */
     private final Rect mStatusBarColorCheckedBounds = new Rect();
@@ -1638,6 +1645,7 @@ public class DisplayPolicy {
         mNavBarColorWindowCandidate = null;
         mNavBarBackgroundWindow = null;
         mStatusBarAppearanceRegionList.clear();
+        mLetterboxDetails.clear();
         mStatusBarBackgroundWindows.clear();
         mStatusBarColorCheckedBounds.setEmpty();
         mStatusBarBackgroundCheckedBounds.setEmpty();
@@ -1717,6 +1725,16 @@ public class DisplayPolicy {
                             win.mAttrs.insetsFlags.appearance & APPEARANCE_LIGHT_STATUS_BARS,
                             new Rect(win.getFrame())));
                     mStatusBarColorCheckedBounds.union(sTmpRect);
+                    // Check if current activity is letterboxed in order create a LetterboxDetails
+                    // component to be passed to SysUI for status bar treatment
+                    final ActivityRecord currentActivity = win.getActivityRecord();
+                    if (currentActivity != null) {
+                        final LetterboxDetails currentLetterboxDetails = currentActivity
+                                .mLetterboxUiController.getLetterboxDetails();
+                        if (currentLetterboxDetails != null) {
+                            mLetterboxDetails.add(currentLetterboxDetails);
+                        }
+                    }
                 }
             }
 
@@ -2404,12 +2422,15 @@ public class DisplayPolicy {
             callStatusBarSafely(statusBar -> statusBar.setDisableFlags(displayId, disableFlags,
                     cause));
         }
+        final LetterboxDetails[] letterboxDetails = new LetterboxDetails[mLetterboxDetails.size()];
+        mLetterboxDetails.toArray(letterboxDetails);
         if (mLastAppearance == appearance
                 && mLastBehavior == behavior
                 && mRequestedVisibilities.equals(win.getRequestedVisibilities())
                 && Objects.equals(mFocusedApp, focusedApp)
                 && mLastFocusIsFullscreen == isFullscreen
-                && Arrays.equals(mLastStatusBarAppearanceRegions, statusBarAppearanceRegions)) {
+                && Arrays.equals(mLastStatusBarAppearanceRegions, statusBarAppearanceRegions)
+                && Arrays.equals(mLastLetterboxDetails, letterboxDetails)) {
             return;
         }
         if (mDisplayContent.isDefaultDisplay && mLastFocusIsFullscreen != isFullscreen
@@ -2425,9 +2446,10 @@ public class DisplayPolicy {
         mFocusedApp = focusedApp;
         mLastFocusIsFullscreen = isFullscreen;
         mLastStatusBarAppearanceRegions = statusBarAppearanceRegions;
+        mLastLetterboxDetails = letterboxDetails;
         callStatusBarSafely(statusBar -> statusBar.onSystemBarAttributesChanged(displayId,
                 appearance, statusBarAppearanceRegions, isNavbarColorManagedByIme, behavior,
-                requestedVisibilities, focusedApp, new LetterboxDetails[]{}));
+                requestedVisibilities, focusedApp, letterboxDetails));
     }
 
     private void callStatusBarSafely(Consumer<StatusBarManagerInternal> consumer) {
@@ -2839,6 +2861,12 @@ public class DisplayPolicy {
             pw.print(prefix); pw.println("mLastStatusBarAppearanceRegions=");
             for (int i = mLastStatusBarAppearanceRegions.length - 1; i >= 0; i--) {
                 pw.print(prefixInner);  pw.println(mLastStatusBarAppearanceRegions[i]);
+            }
+        }
+        if (mLastLetterboxDetails != null) {
+            pw.print(prefix); pw.println("mLastLetterboxDetails=");
+            for (int i = mLastLetterboxDetails.length - 1; i >= 0; i--) {
+                pw.print(prefixInner);  pw.println(mLastLetterboxDetails[i]);
             }
         }
         if (!mStatusBarBackgroundWindows.isEmpty()) {

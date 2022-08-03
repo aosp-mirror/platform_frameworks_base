@@ -35,8 +35,6 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTE
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.CURRENT_LSKF_BASED_PROTECTOR_ID_KEY;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
-import static com.android.internal.widget.LockPatternUtils.PROFILE_KEY_NAME_DECRYPT;
-import static com.android.internal.widget.LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
@@ -122,6 +120,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -147,7 +146,6 @@ import com.android.server.wm.WindowManagerInternal;
 
 import libcore.util.HexEncoding;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -210,6 +208,9 @@ public class LockSettingsService extends ILockSettings.Stub {
     // sensor's enrollment. If biometric enrollment requests a password handle that has expired, the
     // user's credential must be presented again, e.g. via ConfirmLockPattern/ConfirmLockPassword.
     private static final int GK_PW_HANDLE_STORE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
+
+    private static final String PROFILE_KEY_NAME_ENCRYPT = "profile_key_name_encrypt_";
+    private static final String PROFILE_KEY_NAME_DECRYPT = "profile_key_name_decrypt_";
 
     // Order of holding lock: mSeparateChallengeLock -> mSpManager -> this
     // Do not call into ActivityManager while holding mSpManager lock.
@@ -1847,8 +1848,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     @VisibleForTesting /** Note: this method is overridden in unit tests */
     protected void tieProfileLockToParent(int userId, LockscreenCredential password) {
         if (DEBUG) Slog.v(TAG, "tieProfileLockToParent for user: " + userId);
-        byte[] encryptionResult;
-        byte[] iv;
+        final byte[] iv;
+        final byte[] ciphertext;
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
             keyGenerator.init(new SecureRandom());
@@ -1877,7 +1878,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                         KeyProperties.KEY_ALGORITHM_AES + "/" + KeyProperties.BLOCK_MODE_GCM + "/"
                                 + KeyProperties.ENCRYPTION_PADDING_NONE);
                 cipher.init(Cipher.ENCRYPT_MODE, keyStoreEncryptionKey);
-                encryptionResult = cipher.doFinal(password.getCredential());
+                ciphertext = cipher.doFinal(password.getCredential());
                 iv = cipher.getIV();
             } finally {
                 // The original key can now be discarded.
@@ -1888,17 +1889,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                 | NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException e) {
             throw new IllegalStateException("Failed to encrypt key", e);
         }
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try {
-            if (iv.length != PROFILE_KEY_IV_SIZE) {
-                throw new IllegalArgumentException("Invalid iv length: " + iv.length);
-            }
-            outputStream.write(iv);
-            outputStream.write(encryptionResult);
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to concatenate byte arrays", e);
+        if (iv.length != PROFILE_KEY_IV_SIZE) {
+            throw new IllegalArgumentException("Invalid iv length: " + iv.length);
         }
-        mStorage.writeChildProfileLock(userId, outputStream.toByteArray());
+        mStorage.writeChildProfileLock(userId, ArrayUtils.concat(iv, ciphertext));
     }
 
     private void setUserKeyProtection(int userId, byte[] key) {

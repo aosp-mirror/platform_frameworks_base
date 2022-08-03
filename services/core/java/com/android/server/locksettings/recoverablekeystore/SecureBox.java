@@ -18,6 +18,7 @@ package com.android.server.locksettings.recoverablekeystore;
 
 import android.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -69,7 +70,7 @@ public class SecureBox {
 
     private static final byte[] VERSION = new byte[] {(byte) 0x02, 0}; // LITTLE_ENDIAN_TWO_BYTES(2)
     private static final byte[] HKDF_SALT =
-            concat("SECUREBOX".getBytes(StandardCharsets.UTF_8), VERSION);
+            ArrayUtils.concat("SECUREBOX".getBytes(StandardCharsets.UTF_8), VERSION);
     private static final byte[] HKDF_INFO_WITH_PUBLIC_KEY =
             "P256 HKDF-SHA-256 AES-128-GCM".getBytes(StandardCharsets.UTF_8);
     private static final byte[] HKDF_INFO_WITHOUT_PUBLIC_KEY =
@@ -199,13 +200,13 @@ public class SecureBox {
         }
 
         byte[] randNonce = genRandomNonce();
-        byte[] keyingMaterial = concat(dhSecret, sharedSecret);
+        byte[] keyingMaterial = ArrayUtils.concat(dhSecret, sharedSecret);
         SecretKey encryptionKey = hkdfDeriveKey(keyingMaterial, HKDF_SALT, hkdfInfo);
         byte[] ciphertext = aesGcmEncrypt(encryptionKey, randNonce, payload, header);
         if (senderKeyPair == null) {
-            return concat(VERSION, randNonce, ciphertext);
+            return ArrayUtils.concat(VERSION, randNonce, ciphertext);
         } else {
-            return concat(
+            return ArrayUtils.concat(
                     VERSION, encodePublicKey(senderKeyPair.getPublic()), randNonce, ciphertext);
         }
     }
@@ -268,7 +269,7 @@ public class SecureBox {
 
         byte[] randNonce = readEncryptedPayload(ciphertextBuffer, GCM_NONCE_LEN_BYTES);
         byte[] ciphertext = readEncryptedPayload(ciphertextBuffer, ciphertextBuffer.remaining());
-        byte[] keyingMaterial = concat(dhSecret, sharedSecret);
+        byte[] keyingMaterial = ArrayUtils.concat(dhSecret, sharedSecret);
         SecretKey decryptionKey = hkdfDeriveKey(keyingMaterial, HKDF_SALT, hkdfInfo);
         return aesGcmDecrypt(decryptionKey, randNonce, ciphertext, header);
     }
@@ -444,25 +445,6 @@ public class SecureBox {
         byte[] nonce = new byte[GCM_NONCE_LEN_BYTES];
         new SecureRandom().nextBytes(nonce);
         return nonce;
-    }
-
-    @VisibleForTesting
-    static byte[] concat(byte[]... inputs) {
-        int length = 0;
-        for (int i = 0; i < inputs.length; i++) {
-            if (inputs[i] == null) {
-                inputs[i] = EMPTY_BYTE_ARRAY;
-            }
-            length += inputs[i].length;
-        }
-
-        byte[] output = new byte[length];
-        int outputPos = 0;
-        for (byte[] input : inputs) {
-            System.arraycopy(input, /*srcPos=*/ 0, output, outputPos, input.length);
-            outputPos += input.length;
-        }
-        return output;
     }
 
     private static byte[] emptyByteArrayIfNull(@Nullable byte[] input) {

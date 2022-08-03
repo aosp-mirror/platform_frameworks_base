@@ -204,6 +204,10 @@ public class Flags {
             new DeviceConfigBooleanFlag(1102, "record_task_content",
                     NAMESPACE_WINDOW_MANAGER, false, true);
 
+    @Keep
+    public static final SysPropBooleanFlag HIDE_NAVBAR_WINDOW =
+            new SysPropBooleanFlag(1103, "persist.wm.debug.hide_navbar_window", false);
+
     // 1200 - predictive back
     @Keep
     public static final SysPropBooleanFlag WM_ENABLE_PREDICTIVE_BACK = new SysPropBooleanFlag(

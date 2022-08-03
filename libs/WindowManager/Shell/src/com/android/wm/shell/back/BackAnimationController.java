@@ -30,15 +30,20 @@ import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.hardware.HardwareBuffer;
+import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.util.Log;
 import android.view.IWindowFocusObserver;
+import android.view.InputDevice;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -295,6 +300,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         } else if (keyAction == MotionEvent.ACTION_UP || keyAction == MotionEvent.ACTION_CANCEL) {
             ProtoLog.d(WM_SHELL_BACK_PREVIEW,
                     "Finishing gesture with event action: %d", keyAction);
+            if (keyAction == MotionEvent.ACTION_CANCEL) {
+                mTriggerBack = false;
+            }
             onGestureFinished(true);
         }
     }
@@ -324,7 +332,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Received backNavigationInfo:%s", backNavigationInfo);
         if (backNavigationInfo == null) {
             Log.e(TAG, "Received BackNavigationInfo is null.");
-            finishAnimation();
             return;
         }
         int backType = backNavigationInfo.getType();
@@ -400,6 +407,25 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         dispatchOnBackProgressed(targetCallback, backEvent);
     }
 
+    private void injectBackKey() {
+        sendBackEvent(KeyEvent.ACTION_DOWN);
+        sendBackEvent(KeyEvent.ACTION_UP);
+    }
+
+    private void sendBackEvent(int action) {
+        final long when = SystemClock.uptimeMillis();
+        final KeyEvent ev = new KeyEvent(when, when, action, KeyEvent.KEYCODE_BACK, 0 /* repeat */,
+                0 /* metaState */, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
+                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
+                InputDevice.SOURCE_KEYBOARD);
+
+        ev.setDisplayId(mContext.getDisplay().getDisplayId());
+        if (!InputManager.getInstance()
+                .injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC)) {
+            Log.e(TAG, "Inject input event fail");
+        }
+    }
+
     private void onGestureFinished(boolean fromTouch) {
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "onGestureFinished() mTriggerBack == %s", mTriggerBack);
         if (fromTouch) {
@@ -408,7 +434,17 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             mBackGestureStarted = false;
         }
 
-        if (mTransitionInProgress || mBackNavigationInfo == null) {
+        if (mTransitionInProgress) {
+            return;
+        }
+
+        if (mBackNavigationInfo == null) {
+            // No focus window found or core are running recents animation, inject back key as
+            // legacy behavior.
+            if (mTriggerBack) {
+                injectBackKey();
+            }
+            finishAnimation();
             return;
         }
 

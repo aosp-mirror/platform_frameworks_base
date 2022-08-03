@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams;
+package com.android.systemui.dreams.complication;
+
+import static com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule.DREAM_SMARTSPACE_LAYOUT_PARAMS;
 
 import android.content.Context;
 import android.os.Parcelable;
@@ -23,21 +25,33 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.systemui.CoreStartable;
-import com.android.systemui.dreams.complication.Complication;
-import com.android.systemui.dreams.complication.ComplicationLayoutParams;
-import com.android.systemui.dreams.complication.ComplicationViewModel;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.smartspace.DreamSmartspaceController;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Provider;
 
 /**
  * {@link SmartSpaceComplication} embodies the SmartSpace view found on the lockscreen as a
  * {@link Complication}
  */
 public class SmartSpaceComplication implements Complication {
+    private final Provider<SmartSpaceComplicationViewHolder> mViewHolderProvider;
+
+    @Inject
+    public SmartSpaceComplication(Provider<SmartSpaceComplicationViewHolder> viewHolderProvider) {
+        mViewHolderProvider = viewHolderProvider;
+    }
+
+    @Override
+    public ViewHolder createView(ComplicationViewModel model) {
+        return mViewHolderProvider.get();
+    }
+
     /**
      * {@link CoreStartable} responsbile for registering {@link SmartSpaceComplication} with
      * SystemUI.
@@ -89,17 +103,20 @@ public class SmartSpaceComplication implements Complication {
         }
     }
 
-    private static class SmartSpaceComplicationViewHolder implements ViewHolder {
+    static class SmartSpaceComplicationViewHolder implements ViewHolder {
         private View mView = null;
-        private static final int SMARTSPACE_COMPLICATION_WEIGHT = 10;
         private final DreamSmartspaceController mSmartSpaceController;
         private final Context mContext;
+        private final ComplicationLayoutParams mLayoutParams;
 
+        @Inject
         protected SmartSpaceComplicationViewHolder(
                 Context context,
-                DreamSmartspaceController smartSpaceController) {
+                DreamSmartspaceController smartSpaceController,
+                @Named(DREAM_SMARTSPACE_LAYOUT_PARAMS) ComplicationLayoutParams layoutParams) {
             mSmartSpaceController = smartSpaceController;
             mContext = context;
+            mLayoutParams = layoutParams;
         }
 
         @Override
@@ -119,25 +136,7 @@ public class SmartSpaceComplication implements Complication {
 
         @Override
         public ComplicationLayoutParams getLayoutParams() {
-            return new ComplicationLayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ComplicationLayoutParams.POSITION_TOP | ComplicationLayoutParams.POSITION_START,
-                    ComplicationLayoutParams.DIRECTION_DOWN,
-                    SMARTSPACE_COMPLICATION_WEIGHT, true);
+            return mLayoutParams;
         }
-    }
-
-    private final DreamSmartspaceController mSmartSpaceController;
-    private final Context mContext;
-
-    @Inject
-    public SmartSpaceComplication(Context context,
-            DreamSmartspaceController smartSpaceController) {
-        mContext = context;
-        mSmartSpaceController = smartSpaceController;
-    }
-
-    @Override
-    public ViewHolder createView(ComplicationViewModel model) {
-        return new SmartSpaceComplicationViewHolder(mContext, mSmartSpaceController);
     }
 }
