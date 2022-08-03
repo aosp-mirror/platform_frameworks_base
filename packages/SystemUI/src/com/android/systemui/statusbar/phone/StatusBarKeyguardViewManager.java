@@ -735,8 +735,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
         mNotificationShadeWindowController.setKeyguardOccluded(mOccluded);
 
-        // setDozing(false) will call reset once we stop dozing.
-        if (!mDozing) {
+        // setDozing(false) will call reset once we stop dozing. Also, if we're going away, there's
+        // no need to reset the keyguard views as we'll be gone shortly. Resetting now could cause
+        // unexpected visible behavior if the keyguard is still visible as we're animating unlocked.
+        if (!mDozing && !mKeyguardStateController.isKeyguardGoingAway()) {
             // If Keyguard is reshown, don't hide the bouncer as it might just have been requested
             // by a FLAG_DISMISS_KEYGUARD_ACTIVITY.
             reset(isOccluding /* hideBouncerWhenShowing*/);
