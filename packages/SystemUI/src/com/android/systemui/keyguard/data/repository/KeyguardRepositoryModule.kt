@@ -30,7 +30,8 @@ interface KeyguardRepositoryModule {
         impl: KeyguardQuickAffordanceRepositoryImpl
     ): KeyguardQuickAffordanceRepository
 
-    @Binds fun keyguardQuickAffordanceConfigs(
+    @Binds
+    fun keyguardQuickAffordanceConfigs(
         impl: KeyguardQuickAffordanceConfigsImpl
     ): KeyguardQuickAffordanceConfigs
 }

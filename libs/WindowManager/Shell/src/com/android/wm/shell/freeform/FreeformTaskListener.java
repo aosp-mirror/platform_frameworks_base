@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.freeform;
 
+import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FREEFORM;
+
 import android.app.ActivityManager.RunningTaskInfo;
 import android.util.Log;
 import android.util.SparseArray;
@@ -27,6 +29,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
@@ -42,6 +45,7 @@ public class FreeformTaskListener<T extends AutoCloseable>
         implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = "FreeformTaskListener";
 
+    private final ShellTaskOrganizer mShellTaskOrganizer;
     private final WindowDecorViewModel<T> mWindowDecorationViewModel;
 
     private final SparseArray<State<T>> mTasks = new SparseArray<>();
@@ -53,8 +57,19 @@ public class FreeformTaskListener<T extends AutoCloseable>
         T mWindowDecoration;
     }
 
-    public FreeformTaskListener(WindowDecorViewModel<T> windowDecorationViewModel) {
+    public FreeformTaskListener(
+            ShellInit shellInit,
+            ShellTaskOrganizer shellTaskOrganizer,
+            WindowDecorViewModel<T> windowDecorationViewModel) {
+        mShellTaskOrganizer = shellTaskOrganizer;
         mWindowDecorationViewModel = windowDecorationViewModel;
+        if (shellInit != null) {
+            shellInit.addInitCallback(this::onInit, this);
+        }
+    }
+
+    private void onInit() {
+        mShellTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_FREEFORM);
     }
 
     @Override

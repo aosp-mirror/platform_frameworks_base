@@ -55,7 +55,6 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_CLEAR_ALL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_DIALOG_OPEN;
-import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_EXPAND_COLLAPSE_LOCK;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_APPEAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_DISAPPEAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_NOTIFICATION_ADD;
@@ -155,7 +154,6 @@ public class InteractionJankMonitor {
 
     // Every value must have a corresponding entry in CUJ_STATSD_INTERACTION_TYPE.
     public static final int CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE = 0;
-    public static final int CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE_LOCK = 1;
     public static final int CUJ_NOTIFICATION_SHADE_SCROLL_FLING = 2;
     public static final int CUJ_NOTIFICATION_SHADE_ROW_EXPAND = 3;
     public static final int CUJ_NOTIFICATION_SHADE_ROW_SWIPE = 4;
@@ -226,7 +224,7 @@ public class InteractionJankMonitor {
     public static final int[] CUJ_TO_STATSD_INTERACTION_TYPE = {
             // This should be mapping to CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE.
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE,
-            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_EXPAND_COLLAPSE_LOCK,
+            NO_STATSD_LOGGING, // This is deprecated.
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_SCROLL_FLING,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_EXPAND,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_SWIPE,
@@ -310,7 +308,6 @@ public class InteractionJankMonitor {
     /** @hide */
     @IntDef({
             CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE,
-            CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE_LOCK,
             CUJ_NOTIFICATION_SHADE_SCROLL_FLING,
             CUJ_NOTIFICATION_SHADE_ROW_EXPAND,
             CUJ_NOTIFICATION_SHADE_ROW_SWIPE,
@@ -738,8 +735,6 @@ public class InteractionJankMonitor {
         switch (cujType) {
             case CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE:
                 return "SHADE_EXPAND_COLLAPSE";
-            case CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE_LOCK:
-                return "SHADE_EXPAND_COLLAPSE_LOCK";
             case CUJ_NOTIFICATION_SHADE_SCROLL_FLING:
                 return "SHADE_SCROLL_FLING";
             case CUJ_NOTIFICATION_SHADE_ROW_EXPAND:

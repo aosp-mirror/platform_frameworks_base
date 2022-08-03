@@ -1900,8 +1900,10 @@ public class DisplayPolicy {
     /**
      * Called when the resource overlays change.
      */
-    public void onOverlayChangedLw() {
+    void onOverlayChanged() {
         updateCurrentUserResources();
+        // Update the latest display size, cutout.
+        mDisplayContent.updateDisplayInfo();
         onConfigurationChanged();
         mSystemGestures.onConfigurationChanged();
     }
@@ -2933,7 +2935,10 @@ public class DisplayPolicy {
             return;
         }
 
-        mDisplayContent.unregisterPointerEventListener(mPointerLocationView);
+        if (!mDisplayContent.isRemoved()) {
+            mDisplayContent.unregisterPointerEventListener(mPointerLocationView);
+        }
+
         final WindowManager wm = mContext.getSystemService(WindowManager.class);
         wm.removeView(mPointerLocationView);
         mPointerLocationView = null;
@@ -2958,6 +2963,9 @@ public class DisplayPolicy {
         mHandler.post(mGestureNavigationSettingsObserver::unregister);
         mHandler.post(mForceShowNavBarSettingsObserver::unregister);
         mImmersiveModeConfirmation.release();
+        if (mService.mPointerLocationEnabled) {
+            setPointerLocationEnabled(false);
+        }
     }
 
     @VisibleForTesting

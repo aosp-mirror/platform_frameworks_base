@@ -1608,6 +1608,8 @@
     <string name="dream_complication_title_aqi">Air Quality</string>
     <!-- Screensaver overlay which displays cast info. [CHAR LIMIT=20] -->
     <string name="dream_complication_title_cast_info">Cast Info</string>
+    <!-- Screensaver overlay which displays home controls. [CHAR LIMIT=20] -->
+    <string name="dream_complication_title_home_controls">Home Controls</string>
 
     <!-- Title for a screen allowing the user to choose a profile picture. [CHAR LIMIT=NONE] -->
     <string name="avatar_picker_title">Choose a profile picture</string>

@@ -37,6 +37,8 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.Clock;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -118,7 +120,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             SecureSettings secureSettings,
             @Main Executor uiExecutor,
             DumpManager dumpManager,
-            ClockEventController clockEventController) {
+            ClockEventController clockEventController,
+            FeatureFlags featureFlags) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mClockRegistry = clockRegistry;
@@ -131,6 +134,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mDumpManager = dumpManager;
         mClockEventController = clockEventController;
 
+        mClockRegistry.setEnabled(featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS));
         mClockChangedListener = () -> {
             setClock(mClockRegistry.createCurrentClock());
         };
@@ -259,9 +263,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         mCurrentClockSize = clockSize;
 
+        Clock clock = getClock();
         boolean appeared = mView.switchToClock(clockSize, animate);
-        if (animate && appeared && clockSize == LARGE) {
-            getClock().getAnimations().enter();
+        if (clock != null && animate && appeared && clockSize == LARGE) {
+            clock.getAnimations().enter();
         }
     }
 

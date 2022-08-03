@@ -84,7 +84,7 @@ class ScreenRotationAnimation {
     private final Context mContext;
     private final TransactionPool mTransactionPool;
     private final float[] mTmpFloats = new float[9];
-    /** The leash of display. */
+    /** The leash of the changing window container. */
     private final SurfaceControl mSurfaceControl;
     private final Rect mStartBounds = new Rect();
     private final Rect mEndBounds = new Rect();

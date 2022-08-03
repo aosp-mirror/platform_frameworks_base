@@ -1069,6 +1069,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1075136930": {
+      "message": "startLockTaskMode: Can't lock due to auth",
+      "level": "WARN",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/LockTaskController.java"
+    },
     "-1069336896": {
       "message": "onRootTaskOrderChanged(): rootTask=%s",
       "level": "DEBUG",

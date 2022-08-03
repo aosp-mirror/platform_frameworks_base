@@ -21,7 +21,6 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.PowerManager
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -31,7 +30,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -76,8 +74,6 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     @Mock
     private lateinit var viewUtil: ViewUtil
     @Mock
-    private lateinit var tapGestureDetector: TapGestureDetector
-    @Mock
     private lateinit var powerManager: PowerManager
 
     @Before
@@ -109,29 +105,42 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
                 fakeExecutor,
                 accessibilityManager,
                 configurationController,
-                tapGestureDetector,
                 powerManager,
         )
     }
 
     @Test
-    fun displayChip_chipAddedAndGestureDetectionStartedAndScreenOn() {
+    fun displayChip_chipAdded() {
         controllerCommon.displayChip(getState())
 
         verify(windowManager).addView(any(), any())
-        verify(tapGestureDetector).addOnGestureDetectedCallback(any(), any())
+    }
+
+    @Test
+    fun displayChip_screenOff_screenWakes() {
+        whenever(powerManager.isScreenOn).thenReturn(false)
+
+        controllerCommon.displayChip(getState())
+
         verify(powerManager).wakeUp(any(), any(), any())
     }
 
     @Test
-    fun displayChip_twice_chipAndGestureDetectionNotAddedTwice() {
+    fun displayChip_screenAlreadyOn_screenNotWoken() {
+        whenever(powerManager.isScreenOn).thenReturn(true)
+
+        controllerCommon.displayChip(getState())
+
+        verify(powerManager, never()).wakeUp(any(), any(), any())
+    }
+
+    @Test
+    fun displayChip_twice_chipNotAddedTwice() {
         controllerCommon.displayChip(getState())
         reset(windowManager)
-        reset(tapGestureDetector)
 
         controllerCommon.displayChip(getState())
         verify(windowManager, never()).addView(any(), any())
-        verify(tapGestureDetector, never()).addOnGestureDetectedCallback(any(), any())
     }
 
     @Test
@@ -204,7 +213,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     }
 
     @Test
-    fun removeChip_chipRemovedAndGestureDetectionStoppedAndRemovalLogged() {
+    fun removeChip_chipRemovedAndRemovalLogged() {
         // First, add the chip
         controllerCommon.displayChip(getState())
 
@@ -213,7 +222,6 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         controllerCommon.removeChip(reason)
 
         verify(windowManager).removeView(any())
-        verify(tapGestureDetector).removeOnGestureDetectedCallback(any())
         verify(logger).logChipRemoval(reason)
     }
 
@@ -325,40 +333,6 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         assertThat(chipView.getAppIconView().measuredHeight).isEqualTo(ICON_SIZE)
     }
 
-    @Test
-    fun tapGestureDetected_outsideViewBounds_viewHidden() {
-        controllerCommon.displayChip(getState())
-        whenever(viewUtil.touchIsWithinView(any(), any(), any())).thenReturn(false)
-        val gestureCallbackCaptor = argumentCaptor<(MotionEvent) -> Unit>()
-        verify(tapGestureDetector).addOnGestureDetectedCallback(
-            any(), capture(gestureCallbackCaptor)
-        )
-        val callback = gestureCallbackCaptor.value!!
-
-        callback.invoke(
-            MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
-        )
-
-        verify(windowManager).removeView(any())
-    }
-
-    @Test
-    fun tapGestureDetected_insideViewBounds_viewNotHidden() {
-        controllerCommon.displayChip(getState())
-        whenever(viewUtil.touchIsWithinView(any(), any(), any())).thenReturn(true)
-        val gestureCallbackCaptor = argumentCaptor<(MotionEvent) -> Unit>()
-        verify(tapGestureDetector).addOnGestureDetectedCallback(
-            any(), capture(gestureCallbackCaptor)
-        )
-        val callback = gestureCallbackCaptor.value!!
-
-        callback.invoke(
-            MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
-        )
-
-        verify(windowManager, never()).removeView(any())
-    }
-
     private fun getState(name: String = "name") = ChipInfo(name)
 
     private fun getChipView(): ViewGroup {
@@ -383,7 +357,6 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         @Main mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
-        tapGestureDetector: TapGestureDetector,
         powerManager: PowerManager,
     ) : MediaTttChipControllerCommon<ChipInfo>(
         context,
@@ -393,7 +366,6 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         mainExecutor,
         accessibilityManager,
         configurationController,
-        tapGestureDetector,
         powerManager,
         R.layout.media_ttt_chip,
     ) {

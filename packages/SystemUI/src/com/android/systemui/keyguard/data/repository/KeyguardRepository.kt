@@ -21,6 +21,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.common.data.model.Position
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -48,6 +49,15 @@ interface KeyguardRepository {
      * screen.
      */
     val clockPosition: StateFlow<Position>
+
+    /**
+     * Observable for whether the keyguard is showing.
+     *
+     * Note: this is also `true` when the lock-screen is occluded with an `Activity` "above" it in
+     * the z-order (which is not really above the system UI window, but rather - the lock-screen
+     * becomes invisible to reveal the "occluding activity").
+     */
+    val isKeyguardShowing: Flow<Boolean>
 
     /**
      * Observable for whether we are in doze state.
@@ -91,6 +101,7 @@ class KeyguardRepositoryImpl
 @Inject
 constructor(
     statusBarStateController: StatusBarStateController,
+    keyguardStateController: KeyguardStateController,
 ) : KeyguardRepository {
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
@@ -101,6 +112,29 @@ constructor(
 
     private val _clockPosition = MutableStateFlow(Position(0, 0))
     override val clockPosition = _clockPosition.asStateFlow()
+
+    override val isKeyguardShowing: Flow<Boolean> = conflatedCallbackFlow {
+        val callback =
+            object : KeyguardStateController.Callback {
+                override fun onKeyguardShowingChanged() {
+                    trySendWithFailureLogging(
+                        keyguardStateController.isShowing,
+                        TAG,
+                        "updated isKeyguardShowing"
+                    )
+                }
+            }
+
+        keyguardStateController.addCallback(callback)
+        // Adding the callback does not send an initial update.
+        trySendWithFailureLogging(
+            keyguardStateController.isShowing,
+            TAG,
+            "initial isKeyguardShowing"
+        )
+
+        awaitClose { keyguardStateController.removeCallback(callback) }
+    }
 
     override val isDozing: Flow<Boolean> = conflatedCallbackFlow {
         val callback =
