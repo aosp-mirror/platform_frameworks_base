@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -67,12 +68,53 @@ public class AssistUtils {
                 ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
     }
 
-    public boolean showSessionForActiveService(Bundle args, int sourceFlags,
-            IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken) {
+    /**
+     * Shows the session for the currently active service. Used to start a new session from system
+     * affordances.
+     *
+     * @param args the bundle to pass as arguments to the voice interaction session
+     * @param sourceFlags flags indicating the source of this show
+     * @param showCallback optional callback to be notified when the session was shown
+     * @param activityToken optional token of activity that needs to be on top
+     *
+     * @deprecated Use {@link #showSessionForActiveService(Bundle, int, String,
+     *             IVoiceInteractionSessionShowCallback, IBinder)} instead
+     */
+    @Deprecated
+    public boolean showSessionForActiveService(@NonNull Bundle args, int sourceFlags,
+            @Nullable IVoiceInteractionSessionShowCallback showCallback,
+            @Nullable IBinder activityToken) {
+        return showSessionForActiveServiceInternal(args, sourceFlags, /* attributionTag */ null,
+                showCallback, activityToken);
+    }
+
+    /**
+     * Shows the session for the currently active service. Used to start a new session from system
+     * affordances.
+     *
+     * @param args the bundle to pass as arguments to the voice interaction session
+     * @param sourceFlags flags indicating the source of this show
+     * @param attributionTag the attribution tag of the calling context or {@code null} for default
+     *                       attribution
+     * @param showCallback optional callback to be notified when the session was shown
+     * @param activityToken optional token of activity that needs to be on top
+     */
+    public boolean showSessionForActiveService(@NonNull Bundle args, int sourceFlags,
+            @Nullable String attributionTag,
+            @Nullable IVoiceInteractionSessionShowCallback showCallback,
+            @Nullable IBinder activityToken) {
+        return showSessionForActiveServiceInternal(args, sourceFlags, attributionTag, showCallback,
+                activityToken);
+    }
+
+    private boolean showSessionForActiveServiceInternal(@NonNull Bundle args, int sourceFlags,
+            @Nullable String attributionTag,
+            @Nullable IVoiceInteractionSessionShowCallback showCallback,
+            @Nullable IBinder activityToken) {
         try {
             if (mVoiceInteractionManagerService != null) {
                 return mVoiceInteractionManagerService.showSessionForActiveService(args,
-                        sourceFlags, showCallback, activityToken);
+                        sourceFlags, attributionTag, showCallback, activityToken);
             }
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call showSessionForActiveService", e);

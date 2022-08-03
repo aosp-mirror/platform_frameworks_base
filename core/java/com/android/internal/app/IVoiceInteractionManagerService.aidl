@@ -39,15 +39,16 @@ import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 
 interface IVoiceInteractionManagerService {
-    void showSession(in Bundle sessionArgs, int flags);
+    void showSession(in Bundle sessionArgs, int flags, String attributionTag);
     boolean deliverNewSession(IBinder token, IVoiceInteractionSession session,
             IVoiceInteractor interactor);
-    boolean showSessionFromSession(IBinder token, in Bundle sessionArgs, int flags);
+    boolean showSessionFromSession(IBinder token, in Bundle sessionArgs, int flags,
+            String attributionTag);
     boolean hideSessionFromSession(IBinder token);
     int startVoiceActivity(IBinder token, in Intent intent, String resolvedType,
-            String callingFeatureId);
+            String attributionTag);
     int startAssistantActivity(IBinder token, in Intent intent, String resolvedType,
-            String callingFeatureId);
+            String attributionTag);
     void setKeepAwake(IBinder token, boolean keepAwake);
     void closeSystemDialogs(IBinder token);
     void finish(IBinder token);
@@ -125,12 +126,14 @@ interface IVoiceInteractionManagerService {
      *
      * @param args the bundle to pass as arguments to the voice interaction session
      * @param sourceFlags flags indicating the source of this show
+     * @param attributionTag the attribution tag of the calling context or {@code null} for default
+     *                       attribution
      * @param showCallback optional callback to be notified when the session was shown
      * @param activityToken optional token of activity that needs to be on top
      * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
     @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
-    boolean showSessionForActiveService(in Bundle args, int sourceFlags,
+    boolean showSessionForActiveService(in Bundle args, int sourceFlags, String attributionTag,
             IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken);
 
     /**
