@@ -22,11 +22,12 @@ import android.os.Handler
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.view.OneShotPreDrawListener
+import com.android.internal.util.LatencyTracker
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.statusbar.LightRevealScrim
-import com.android.systemui.statusbar.phone.ScreenOffAnimation
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.ScreenOffAnimation
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.unfold.FoldAodAnimationController.FoldAodAnimationStatus
 import com.android.systemui.util.settings.GlobalSettings
@@ -47,7 +48,8 @@ constructor(
     private val context: Context,
     private val deviceStateManager: DeviceStateManager,
     private val wakefulnessLifecycle: WakefulnessLifecycle,
-    private val globalSettings: GlobalSettings
+    private val globalSettings: GlobalSettings,
+    private val latencyTracker: LatencyTracker,
 ) : CallbackController<FoldAodAnimationStatus>, ScreenOffAnimation, WakefulnessLifecycle.Observer {
 
     private lateinit var mCentralSurfaces: CentralSurfaces
@@ -64,12 +66,14 @@ constructor(
     private var isAnimationPlaying = false
 
     private val statusListeners = arrayListOf<FoldAodAnimationStatus>()
+    private val foldToAodLatencyTracker = FoldToAodLatencyTracker()
 
     private val startAnimationRunnable = Runnable {
-        mCentralSurfaces.notificationPanelViewController.startFoldToAodAnimation {
-            // End action
-            setAnimationState(playing = false)
-        }
+        mCentralSurfaces.notificationPanelViewController.startFoldToAodAnimation(
+            /* startAction= */ { foldToAodLatencyTracker.onAnimationStarted() },
+            /* endAction= */ { setAnimationState(playing = false) },
+            /* cancelAction= */ { setAnimationState(playing = false) },
+        )
     }
 
     override fun initialize(centralSurfaces: CentralSurfaces, lightRevealScrim: LightRevealScrim) {
@@ -82,11 +86,13 @@ constructor(
     /** Returns true if we should run fold to AOD animation */
     override fun shouldPlayAnimation(): Boolean = shouldPlayAnimation
 
-    override fun startAnimation(): Boolean =
-        if (alwaysOnEnabled &&
+    private fun shouldStartAnimation(): Boolean =
+        alwaysOnEnabled &&
             wakefulnessLifecycle.lastSleepReason == PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD &&
             globalSettings.getString(Settings.Global.ANIMATOR_DURATION_SCALE) != "0"
-        ) {
+
+    override fun startAnimation(): Boolean =
+        if (shouldStartAnimation()) {
             setAnimationState(playing = true)
             mCentralSurfaces.notificationPanelViewController.prepareFoldToAodAnimation()
             true
@@ -97,6 +103,7 @@ constructor(
 
     override fun onStartedWakingUp() {
         if (isAnimationPlaying) {
+            foldToAodLatencyTracker.cancel()
             handler.removeCallbacks(startAnimationRunnable)
             mCentralSurfaces.notificationPanelViewController.cancelFoldToAodAnimation()
         }
@@ -137,7 +144,8 @@ constructor(
             // but we should wait for the initial animation preparations to be drawn
             // (setting initial alpha/translation)
             OneShotPreDrawListener.add(
-                mCentralSurfaces.notificationPanelViewController.view, onReady
+                mCentralSurfaces.notificationPanelViewController.view,
+                onReady
             )
         } else {
             // No animation, call ready callback immediately
@@ -209,5 +217,41 @@ constructor(
                     isFoldHandled = false
                 }
                 this.isFolded = isFolded
-            })
+                if (isFolded) {
+                    foldToAodLatencyTracker.onFolded()
+                }
+            }
+        )
+
+    /**
+     * Tracks the latency of fold to AOD using [LatencyTracker].
+     *
+     * Events that trigger start and end are:
+     *
+     * - Start: Once [DeviceStateManager] sends the folded signal [FoldToAodLatencyTracker.onFolded]
+     * is called and latency tracking starts.
+     * - End: Once the fold -> AOD animation starts, [FoldToAodLatencyTracker.onAnimationStarted] is
+     * called, and latency tracking stops.
+     */
+    private inner class FoldToAodLatencyTracker {
+
+        /** Triggers the latency logging, if needed. */
+        fun onFolded() {
+            if (shouldStartAnimation()) {
+                latencyTracker.onActionStart(LatencyTracker.ACTION_FOLD_TO_AOD)
+            }
+        }
+        /**
+         * Called once the Fold -> AOD animation is started.
+         *
+         * For latency tracking, this determines the end of the fold to aod action.
+         */
+        fun onAnimationStarted() {
+            latencyTracker.onActionEnd(LatencyTracker.ACTION_FOLD_TO_AOD)
+        }
+
+        fun cancel() {
+            latencyTracker.onActionCancel(LatencyTracker.ACTION_FOLD_TO_AOD)
+        }
+    }
 }
