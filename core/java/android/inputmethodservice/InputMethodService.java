@@ -953,6 +953,15 @@ public class InputMethodService extends AbstractInputMethodService {
          * @hide
          */
         @Override
+        public void updateEditorToolType(int toolType) {
+            onUpdateEditorToolType(toolType);
+        }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @Override
         public void canStartStylusHandwriting(int requestId) {
             if (DEBUG) Log.v(TAG, "canStartStylusHandwriting()");
             if (mHandwritingRequestId.isPresent()) {
@@ -3012,14 +3021,30 @@ public class InputMethodService extends AbstractInputMethodService {
      * not call to inform the IME of this interaction.
      * @param focusChanged true if the user changed the focused view by this click.
      * @see InputMethodManager#viewClicked(View)
+     * @see #onUpdateEditorToolType(int)
      * @deprecated The method may not be called for composite {@link View} that works as a giant
      *             "Canvas", which can host its own UI hierarchy and sub focus state.
      *             {@link android.webkit.WebView} is a good example. Application / IME developers
      *             should not rely on this method. If your goal is just being notified when an
      *             on-going input is interrupted, simply monitor {@link #onFinishInput()}.
+     *             If your goal is to know what {@link MotionEvent#getToolType(int)} clicked on
+     *             editor, use {@link #onUpdateEditorToolType(int)} instead.
      */
     @Deprecated
     public void onViewClicked(boolean focusChanged) {
+        // Intentionally empty
+    }
+
+    /**
+     * Called when the user tapped or clicked an {@link android.widget.Editor}.
+     * This can be useful when IME makes a decision of showing Virtual keyboard based on what
+     * {@link MotionEvent#getToolType(int)} was used to click the editor.
+     * e.g. when toolType is {@link MotionEvent#TOOL_TYPE_STYLUS}, IME may choose to show a
+     * companion widget instead of normal virtual keyboard.
+     * <p> Default implementation does nothing. </p>
+     * @param toolType what {@link MotionEvent#getToolType(int)} was used to click on editor.
+     */
+    public void onUpdateEditorToolType(int toolType) {
         // Intentionally empty
     }
 

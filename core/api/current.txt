@@ -18904,6 +18904,7 @@ package android.inputmethodservice {
     method public void onUnbindInput();
     method @Deprecated public void onUpdateCursor(android.graphics.Rect);
     method public void onUpdateCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfo);
+    method public void onUpdateEditorToolType(int);
     method public void onUpdateExtractedText(int, android.view.inputmethod.ExtractedText);
     method public void onUpdateExtractingViews(android.view.inputmethod.EditorInfo);
     method public void onUpdateExtractingVisibility(android.view.inputmethod.EditorInfo);
@@ -52968,9 +52969,11 @@ package android.view.inputmethod {
     method @Nullable public android.view.inputmethod.SurroundingText getInitialSurroundingText(@IntRange(from=0) int, @IntRange(from=0) int, int);
     method @Nullable public CharSequence getInitialTextAfterCursor(@IntRange(from=0) int, int);
     method @Nullable public CharSequence getInitialTextBeforeCursor(@IntRange(from=0) int, int);
+    method public int getInitialToolType();
     method public final void makeCompatible(int);
     method public void setInitialSurroundingSubText(@NonNull CharSequence, int);
     method public void setInitialSurroundingText(@NonNull CharSequence);
+    method public void setInitialToolType(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.EditorInfo> CREATOR;
     field public static final int IME_ACTION_DONE = 6; // 0x6
