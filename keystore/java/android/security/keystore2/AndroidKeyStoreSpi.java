@@ -20,6 +20,7 @@ import static android.security.keystore2.AndroidKeyStoreCipherSpiBase.DEFAULT_MG
 
 import android.annotation.NonNull;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.security.keymint.EcCurve;
 import android.hardware.security.keymint.HardwareAuthenticatorType;
 import android.hardware.security.keymint.KeyParameter;
 import android.hardware.security.keymint.SecurityLevel;
@@ -67,6 +68,14 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.EdECKey;
+import java.security.interfaces.EdECPrivateKey;
+import java.security.interfaces.XECKey;
+import java.security.interfaces.XECPrivateKey;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.NamedParameterSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -567,22 +576,14 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                         spec.getMaxUsageCount()
                 ));
             }
-            if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(key.getAlgorithm())) {
-                if (key instanceof ECKey) {
-                    ECKey ecKey = (ECKey) key;
-                    importArgs.add(KeyStore2ParameterUtils.makeEnum(
-                            KeymasterDefs.KM_TAG_EC_CURVE,
-                            KeyProperties.EcCurve.toKeymasterCurve(ecKey.getParams())
-                    ));
-                }
+            if (KeymasterDefs.KM_ALGORITHM_EC
+                    == KeyProperties.KeyAlgorithm.toKeymasterAsymmetricKeyAlgorithm(
+                            key.getAlgorithm())) {
+                importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                        KeymasterDefs.KM_TAG_EC_CURVE,
+                        getKeymasterEcCurve(key)
+                ));
             }
-            /* TODO: check for Ed25519(EdDSA) or X25519(XDH) key algorithm and
-             *  add import args for KM_TAG_EC_CURVE as EcCurve.CURVE_25519.
-             *  Currently conscrypt does not support EdDSA key import and XDH keys are not an
-             *  instance of XECKey, hence these conditions are not added, once it is fully
-             *  implemented by conscrypt, we can add CURVE_25519 argument for EdDSA and XDH
-             *  algorithms.
-             */
         } catch (IllegalArgumentException | IllegalStateException e) {
             throw new KeyStoreException(e);
         }
@@ -606,6 +607,31 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         } catch (android.security.KeyStoreException e) {
             throw new KeyStoreException("Failed to store private key", e);
         }
+    }
+
+    private int getKeymasterEcCurve(PrivateKey key) {
+        if (key instanceof ECKey) {
+            ECParameterSpec param = ((ECPrivateKey) key).getParams();
+            int kmECCurve = KeymasterUtils.getKeymasterEcCurve(KeymasterUtils.getCurveName(param));
+            if (kmECCurve >= 0) {
+                return kmECCurve;
+            }
+        } else if (key instanceof XECKey) {
+            AlgorithmParameterSpec param = ((XECPrivateKey) key).getParams();
+            if (param.equals(NamedParameterSpec.X25519)) {
+                return EcCurve.CURVE_25519;
+            }
+        } else if (key.getAlgorithm().equals("XDH")) {
+            // TODO com.android.org.conscrypt.OpenSSLX25519PrivateKey does not implement XECKey,
+            //  this case is not required once it implements XECKey interface(b/214203951).
+            return EcCurve.CURVE_25519;
+        } else if (key instanceof EdECKey) {
+            AlgorithmParameterSpec param = ((EdECPrivateKey) key).getParams();
+            if (param.equals(NamedParameterSpec.ED25519)) {
+                return EcCurve.CURVE_25519;
+            }
+        }
+        throw new IllegalArgumentException("Unexpected Key " + key.getClass().getName());
     }
 
     private static void assertCanReplace(String alias, @Domain int targetDomain,
