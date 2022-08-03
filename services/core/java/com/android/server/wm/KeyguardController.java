@@ -41,6 +41,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.KeyguardControllerProto.AOD_SHOWING;
+import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_GOING_AWAY;
 import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_PER_DISPLAY;
 import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_SHOWING;
 
@@ -671,6 +672,7 @@ class KeyguardController {
             proto.write(KeyguardPerDisplayProto.KEYGUARD_SHOWING, mKeyguardShowing);
             proto.write(KeyguardPerDisplayProto.AOD_SHOWING, mAodShowing);
             proto.write(KeyguardPerDisplayProto.KEYGUARD_OCCLUDED, mOccluded);
+            proto.write(KeyguardPerDisplayProto.KEYGUARD_GOING_AWAY, mKeyguardGoingAway);
             proto.end(token);
         }
     }
@@ -691,6 +693,7 @@ class KeyguardController {
         final long token = proto.start(fieldId);
         proto.write(AOD_SHOWING, default_state.mAodShowing);
         proto.write(KEYGUARD_SHOWING, default_state.mKeyguardShowing);
+        proto.write(KEYGUARD_GOING_AWAY, default_state.mKeyguardGoingAway);
         writeDisplayStatesToProto(proto, KEYGUARD_PER_DISPLAY);
         proto.end(token);
     }
