@@ -47,6 +47,7 @@ int register_android_graphics_CanvasProperty(JNIEnv* env);
 int register_android_graphics_ColorFilter(JNIEnv* env);
 int register_android_graphics_ColorSpace(JNIEnv* env);
 int register_android_graphics_FontFamily(JNIEnv* env);
+int register_android_graphics_HardwareRendererObserver(JNIEnv* env);
 int register_android_graphics_Matrix(JNIEnv* env);
 int register_android_graphics_Paint(JNIEnv* env);
 int register_android_graphics_Path(JNIEnv* env);
@@ -83,6 +84,7 @@ static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_ColorSpace),
         REG_JNI(register_android_graphics_CreateJavaOutputStreamAdaptor),
         REG_JNI(register_android_graphics_FontFamily),
+        REG_JNI(register_android_graphics_HardwareRendererObserver),
         REG_JNI(register_android_graphics_Graphics),
         REG_JNI(register_android_graphics_ImageDecoder),
         REG_JNI(register_android_graphics_MaskFilter),
