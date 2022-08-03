@@ -142,6 +142,11 @@ public class LatencyTracker {
      */
     public static final int ACTION_LOAD_SHARE_SHEET = 16;
 
+    /**
+     * Time it takes to show AOD display after folding the device.
+     */
+    public static final int ACTION_FOLD_TO_AOD = 17;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -160,6 +165,7 @@ public class LatencyTracker {
         ACTION_UDFPS_ILLUMINATE,
         ACTION_SHOW_BACK_ARROW,
         ACTION_LOAD_SHARE_SHEET,
+        ACTION_FOLD_TO_AOD,
     };
 
     /** @hide */
@@ -181,6 +187,7 @@ public class LatencyTracker {
         ACTION_UDFPS_ILLUMINATE,
         ACTION_SHOW_BACK_ARROW,
         ACTION_LOAD_SHARE_SHEET,
+        ACTION_FOLD_TO_AOD
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -204,6 +211,7 @@ public class LatencyTracker {
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_UDFPS_ILLUMINATE,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_BACK_ARROW,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -297,6 +305,8 @@ public class LatencyTracker {
                 return "ACTION_SHOW_BACK_ARROW";
             case 17:
                 return "ACTION_LOAD_SHARE_SHEET";
+            case 19:
+                return "ACTION_FOLD_TO_AOD";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }

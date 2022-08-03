@@ -2738,8 +2738,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     class BrightnessEvent {
         static final int FLAG_RBC = 0x1;
         static final int FLAG_INVALID_LUX = 0x2;
-        static final int FLAG_DOZE_SCALE = 0x3;
-        static final int FLAG_USER_SET = 0x4;
+        static final int FLAG_DOZE_SCALE = 0x4;
+        static final int FLAG_USER_SET = 0x8;
+        static final int FLAG_IDLE_CURVE = 0x16;
 
         public final BrightnessReason reason = new BrightnessReason();
 
@@ -2843,7 +2844,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             return ((flags & FLAG_USER_SET) != 0 ? "user_set " : "")
                     + ((flags & FLAG_RBC) != 0 ? "rbc " : "")
                     + ((flags & FLAG_INVALID_LUX) != 0 ? "invalid_lux " : "")
-                    + ((flags & FLAG_DOZE_SCALE) != 0 ? "doze_scale " : "");
+                    + ((flags & FLAG_DOZE_SCALE) != 0 ? "doze_scale " : "")
+                    + ((flags & FLAG_DOZE_SCALE) != 0 ? "idle_curve " : "");
         }
     }
 

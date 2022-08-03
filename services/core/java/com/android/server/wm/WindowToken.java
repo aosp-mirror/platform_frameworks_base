@@ -46,6 +46,7 @@ import android.view.DisplayInfo;
 import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.WindowType;
 import android.window.WindowContext;
 
@@ -557,6 +558,12 @@ class WindowToken extends WindowContainer<WindowState> {
         if (parent == null) {
             // The window may be detached or detaching.
             return;
+        }
+        if (mTransitionController.isShellTransitionsEnabled()
+                && asActivityRecord() != null && isVisible()) {
+            // Trigger an activity level rotation transition.
+            mTransitionController.requestTransitionIfNeeded(WindowManager.TRANSIT_CHANGE, this);
+            mTransitionController.setReady(this);
         }
         final int originalRotation = getWindowConfiguration().getRotation();
         onConfigurationChanged(parent.getConfiguration());

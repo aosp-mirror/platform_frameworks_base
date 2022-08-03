@@ -17,9 +17,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import com.android.systemui.common.data.model.Position
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -36,18 +34,13 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _clockPosition = MutableStateFlow(Position(0, 0))
     override val clockPosition: StateFlow<Position> = _clockPosition
 
-    private val _isDozing =
-        MutableSharedFlow<Boolean>(
-            replay = 1,
-            onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        )
+    private val _isKeyguardShowing = MutableStateFlow(false)
+    override val isKeyguardShowing: Flow<Boolean> = _isKeyguardShowing
+
+    private val _isDozing = MutableStateFlow(false)
     override val isDozing: Flow<Boolean> = _isDozing
 
-    private val _dozeAmount =
-        MutableSharedFlow<Float>(
-            replay = 1,
-            onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        )
+    private val _dozeAmount = MutableStateFlow(0f)
     override val dozeAmount: Flow<Float> = _dozeAmount
 
     init {
@@ -67,11 +60,15 @@ class FakeKeyguardRepository : KeyguardRepository {
         _clockPosition.value = Position(x, y)
     }
 
+    fun setKeyguardShowing(isShowing: Boolean) {
+        _isKeyguardShowing.value = isShowing
+    }
+
     fun setDozing(isDozing: Boolean) {
-        _isDozing.tryEmit(isDozing)
+        _isDozing.value = isDozing
     }
 
     fun setDozeAmount(dozeAmount: Float) {
-        _dozeAmount.tryEmit(dozeAmount)
+        _dozeAmount.value = dozeAmount
     }
 }

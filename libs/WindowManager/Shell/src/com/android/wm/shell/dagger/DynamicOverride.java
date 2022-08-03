@@ -92,6 +92,8 @@ import javax.inject.Qualifier;
  *
  * For example, this uses the same setup as above, but the interface provided (if bound) is used
  * otherwise the default is created:
+ *
+ * BaseModule:
  *   @BindsOptionalOf
  *   @DynamicOverride
  *   abstract Interface dynamicInterface();

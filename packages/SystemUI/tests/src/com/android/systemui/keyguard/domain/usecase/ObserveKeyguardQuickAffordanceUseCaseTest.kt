@@ -43,20 +43,21 @@ class ObserveKeyguardQuickAffordanceUseCaseTest : SysuiTestCase() {
     private lateinit var repository: FakeKeyguardRepository
     private lateinit var quickAffordanceRepository: FakeKeyguardQuickAffordanceRepository
     private lateinit var isDozingUseCase: ObserveIsDozingUseCase
-    private lateinit var dozeAmountUseCase: ObserveDozeAmountUseCase
+    private lateinit var isKeyguardShowingUseCase: ObserveIsKeyguardShowingUseCase
 
     @Before
     fun setUp() {
         repository = FakeKeyguardRepository()
+        repository.setKeyguardShowing(true)
         isDozingUseCase = ObserveIsDozingUseCase(repository)
-        dozeAmountUseCase = ObserveDozeAmountUseCase(repository)
+        isKeyguardShowingUseCase = ObserveIsKeyguardShowingUseCase(repository)
         quickAffordanceRepository = FakeKeyguardQuickAffordanceRepository()
 
         underTest =
             ObserveKeyguardQuickAffordanceUseCase(
                 repository = quickAffordanceRepository,
                 isDozingUseCase = isDozingUseCase,
-                dozeAmountUseCase = dozeAmountUseCase,
+                isKeyguardShowingUseCase = isKeyguardShowingUseCase,
             )
     }
 
@@ -75,9 +76,10 @@ class ObserveKeyguardQuickAffordanceUseCaseTest : SysuiTestCase() {
         )
 
         var latest: KeyguardQuickAffordanceModel? = null
-        val job = underTest(KeyguardQuickAffordancePosition.BOTTOM_END)
-            .onEach { latest = it }
-            .launchIn(this)
+        val job =
+            underTest(KeyguardQuickAffordancePosition.BOTTOM_END)
+                .onEach { latest = it }
+                .launchIn(this)
 
         assertThat(latest).isInstanceOf(KeyguardQuickAffordanceModel.Visible::class.java)
         val visibleModel = latest as KeyguardQuickAffordanceModel.Visible
@@ -104,16 +106,17 @@ class ObserveKeyguardQuickAffordanceUseCaseTest : SysuiTestCase() {
         )
 
         var latest: KeyguardQuickAffordanceModel? = null
-        val job = underTest(KeyguardQuickAffordancePosition.BOTTOM_END)
-            .onEach { latest = it }
-            .launchIn(this)
+        val job =
+            underTest(KeyguardQuickAffordancePosition.BOTTOM_END)
+                .onEach { latest = it }
+                .launchIn(this)
         assertThat(latest).isEqualTo(KeyguardQuickAffordanceModel.Hidden)
         job.cancel()
     }
 
     @Test
-    fun `invoke - affordance not visible doze amount is not 0`() = runBlockingTest {
-        repository.setDozeAmount(0.3f)
+    fun `invoke - affordance not visible when lockscreen is not showing`() = runBlockingTest {
+        repository.setKeyguardShowing(false)
         val configKey = HomeControlsKeyguardQuickAffordanceConfig::class
         val model =
             KeyguardQuickAffordanceModel.Visible(
@@ -127,9 +130,10 @@ class ObserveKeyguardQuickAffordanceUseCaseTest : SysuiTestCase() {
         )
 
         var latest: KeyguardQuickAffordanceModel? = null
-        val job = underTest(KeyguardQuickAffordancePosition.BOTTOM_END)
-            .onEach { latest = it }
-            .launchIn(this)
+        val job =
+            underTest(KeyguardQuickAffordancePosition.BOTTOM_END)
+                .onEach { latest = it }
+                .launchIn(this)
         assertThat(latest).isEqualTo(KeyguardQuickAffordanceModel.Hidden)
         job.cancel()
     }
@@ -142,9 +146,10 @@ class ObserveKeyguardQuickAffordanceUseCaseTest : SysuiTestCase() {
         )
 
         var latest: KeyguardQuickAffordanceModel? = null
-        val job = underTest(KeyguardQuickAffordancePosition.BOTTOM_START)
-            .onEach { latest = it }
-            .launchIn(this)
+        val job =
+            underTest(KeyguardQuickAffordancePosition.BOTTOM_START)
+                .onEach { latest = it }
+                .launchIn(this)
         assertThat(latest).isEqualTo(KeyguardQuickAffordanceModel.Hidden)
         job.cancel()
     }

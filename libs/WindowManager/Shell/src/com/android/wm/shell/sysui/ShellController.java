@@ -44,10 +44,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ShellController {
     private static final String TAG = ShellController.class.getSimpleName();
 
+    private final ShellInit mShellInit;
     private final ShellExecutor mMainExecutor;
     private final ShellInterfaceImpl mImpl = new ShellInterfaceImpl();
 
-    private ShellInit mShellInit;
     private ShellCommandHandler mShellCommandHandler;
 
     private final CopyOnWriteArrayList<ConfigurationChangeListener> mConfigChangeListeners =
@@ -57,7 +57,8 @@ public class ShellController {
     private Configuration mLastConfiguration;
 
 
-    public ShellController(ShellExecutor mainExecutor) {
+    public ShellController(ShellInit shellInit, ShellExecutor mainExecutor) {
+        mShellInit = shellInit;
         mMainExecutor = mainExecutor;
     }
 
@@ -66,15 +67,6 @@ public class ShellController {
      */
     public ShellInterface asShell() {
         return mImpl;
-    }
-
-    /**
-     * Sets the init handler to call back to.
-     * TODO(238217847): This is only exposed this way until we can remove the dependencies from the
-     *                  init handler to other classes.
-     */
-    public void setShellInit(ShellInit shellInit) {
-        mShellInit = shellInit;
     }
 
     /**

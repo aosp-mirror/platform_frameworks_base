@@ -495,14 +495,15 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                                         mPipBoundsState.getBounds(),
                                         mPipBoundsState.getAspectRatio());
                         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
-                        mPipTaskOrganizer.scheduleAnimateResizePip(destinationBounds,
-                                mEnterAnimationDuration,
-                                null /* updateBoundsCallback */);
-
-                        mTouchHandler.onAspectRatioChanged();
-                        updateMovementBounds(null /* toBounds */, false /* fromRotation */,
-                                false /* fromImeAdjustment */, false /* fromShelfAdjustment */,
-                                null /* windowContainerTransaction */);
+                        if (!destinationBounds.equals(mPipBoundsState.getBounds())) {
+                            mPipTaskOrganizer.scheduleAnimateResizePip(destinationBounds,
+                                    mEnterAnimationDuration,
+                                    null /* updateBoundsCallback */);
+                            mTouchHandler.onAspectRatioChanged();
+                            updateMovementBounds(null /* toBounds */, false /* fromRotation */,
+                                    false /* fromImeAdjustment */, false /* fromShelfAdjustment */,
+                                    null /* windowContainerTransaction */);
+                        }
                     }
 
                     @Override
