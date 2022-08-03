@@ -27,8 +27,9 @@ import android.util.TimeUtils;
 public final class BrightnessEvent {
     public static final int FLAG_RBC = 0x1;
     public static final int FLAG_INVALID_LUX = 0x2;
-    public static final int FLAG_DOZE_SCALE = 0x3;
-    public static final int FLAG_USER_SET = 0x4;
+    public static final int FLAG_DOZE_SCALE = 0x4;
+    public static final int FLAG_USER_SET = 0x8;
+    public static final int FLAG_IDLE_CURVE = 0x16;
 
     private BrightnessReason mReason = new BrightnessReason();
     private int mDisplayId;
@@ -257,6 +258,7 @@ public final class BrightnessEvent {
         return ((mFlags & FLAG_USER_SET) != 0 ? "user_set " : "")
                 + ((mFlags & FLAG_RBC) != 0 ? "rbc " : "")
                 + ((mFlags & FLAG_INVALID_LUX) != 0 ? "invalid_lux " : "")
-                + ((mFlags & FLAG_DOZE_SCALE) != 0 ? "doze_scale " : "");
+                + ((mFlags & FLAG_DOZE_SCALE) != 0 ? "doze_scale " : "")
+                + ((mFlags & FLAG_IDLE_CURVE) != 0 ? "idle_curve " : "");
     }
 }

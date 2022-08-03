@@ -345,7 +345,9 @@ class AutomaticBrightnessController {
             brightnessEvent.setFlags(brightnessEvent.getFlags()
                     | (!mAmbientLuxValid ? BrightnessEvent.FLAG_INVALID_LUX : 0)
                     | (mDisplayPolicy == DisplayPowerRequest.POLICY_DOZE
-                        ? BrightnessEvent.FLAG_DOZE_SCALE : 0));
+                        ? BrightnessEvent.FLAG_DOZE_SCALE : 0)
+                    | (mCurrentBrightnessMapper.isForIdleMode()
+                        ? BrightnessEvent.FLAG_IDLE_CURVE : 0));
         }
 
         if (!mAmbientLuxValid) {
