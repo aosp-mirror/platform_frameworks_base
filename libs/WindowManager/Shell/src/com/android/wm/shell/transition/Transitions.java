@@ -358,7 +358,7 @@ public class Transitions implements RemoteCallable<Transitions> {
             // Put all the OPEN/SHOW on top
             if ((change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
                 // Wallpaper is always at the bottom.
-                layer = 0;
+                layer = -zSplitLine;
             } else if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
                 if (isOpening) {
                     // put on top
