@@ -2568,6 +2568,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     }
                     task = r.getTask();
                 }
+                // If {@code isSystemCaller} is {@code true}, it means the user intends to stop
+                // pinned mode through UI; otherwise, it's called by an app and we need to stop
+                // locked or pinned mode, subject to checks.
                 getLockTaskController().stopLockTaskMode(task, isSystemCaller, callingUid);
             }
             // Launch in-call UI if a call is ongoing. This is necessary to allow stopping the lock
