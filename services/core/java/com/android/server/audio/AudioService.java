@@ -3934,14 +3934,12 @@ public class AudioService extends IAudioService.Stub
             case AudioSystem.MODE_IN_COMMUNICATION:
             case AudioSystem.MODE_IN_CALL:
             case AudioSystem.MODE_NORMAL:
+            case AudioSystem.MODE_CALL_SCREENING:
+            case AudioSystem.MODE_CALL_REDIRECT:
+            case AudioSystem.MODE_COMMUNICATION_REDIRECT:
                 break;
-            case AudioSystem.MODE_RINGTONE:
-                // not changing anything for ringtone
-                return;
-            case AudioSystem.MODE_CURRENT:
-            case AudioSystem.MODE_INVALID:
             default:
-                // don't know what to do in this case, better bail
+                // no-op is enough for all other values
                 return;
         }
 
@@ -3969,14 +3967,12 @@ public class AudioService extends IAudioService.Stub
             case AudioSystem.MODE_IN_COMMUNICATION:
             case AudioSystem.MODE_IN_CALL:
             case AudioSystem.MODE_NORMAL:
+            case AudioSystem.MODE_CALL_SCREENING:
+            case AudioSystem.MODE_CALL_REDIRECT:
+            case AudioSystem.MODE_COMMUNICATION_REDIRECT:
                 break;
-            case AudioSystem.MODE_RINGTONE:
-                // not changing anything for ringtone
-                return;
-            case AudioSystem.MODE_CURRENT:
-            case AudioSystem.MODE_INVALID:
             default:
-                // don't know what to do in this case, better bail
+                // no-op is enough for all other values
                 return;
         }
 
