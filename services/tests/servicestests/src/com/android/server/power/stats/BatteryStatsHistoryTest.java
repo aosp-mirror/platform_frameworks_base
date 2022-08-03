@@ -28,6 +28,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BatteryStatsHistory;
+import com.android.internal.os.Clock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,13 +50,14 @@ public class BatteryStatsHistoryTest {
     private final Parcel mHistoryBuffer = Parcel.obtain();
     private File mSystemDir;
     private File mHistoryDir;
+    private final Clock mClock = new MockClock();
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         Context context = InstrumentationRegistry.getContext();
         mSystemDir = context.getDataDir();
-        mHistoryDir = new File(mSystemDir, BatteryStatsHistory.HISTORY_DIR);
+        mHistoryDir = new File(mSystemDir, "battery-history");
         String[] files = mHistoryDir.list();
         if (files != null) {
             for (int i = 0; i < files.length; i++) {
@@ -67,8 +69,8 @@ public class BatteryStatsHistoryTest {
 
     @Test
     public void testConstruct() {
-        BatteryStatsHistory history =
-                new BatteryStatsHistory(mHistoryBuffer, mSystemDir, () -> 32);
+        BatteryStatsHistory history = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32, 1024,
+                null, mClock);
         createActiveFile(history);
         verifyFileNumbers(history, Arrays.asList(0));
         verifyActiveFile(history, "0.bin");
@@ -76,8 +78,8 @@ public class BatteryStatsHistoryTest {
 
     @Test
     public void testStartNextFile() {
-        BatteryStatsHistory history =
-                new BatteryStatsHistory(mHistoryBuffer, mSystemDir, () -> 32);
+        BatteryStatsHistory history = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32, 1024,
+                null, mClock);
         List<Integer> fileList = new ArrayList<>();
         fileList.add(0);
         createActiveFile(history);
@@ -114,13 +116,13 @@ public class BatteryStatsHistoryTest {
         assertEquals(0, history.getHistoryUsedSize());
 
         // create a new BatteryStatsHistory object, it will pick up existing history files.
-        BatteryStatsHistory history2 =
-                new BatteryStatsHistory(mHistoryBuffer, mSystemDir, () -> 32);
-        // verify construct can pick up all files from file system.
+        BatteryStatsHistory history2 = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32, 1024,
+                null, mClock);
+        // verify constructor can pick up all files from file system.
         verifyFileNumbers(history2, fileList);
         verifyActiveFile(history2, "33.bin");
 
-        history2.resetAllFiles();
+        history2.reset();
         createActiveFile(history2);
         // verify all existing files are deleted.
         for (int i = 2; i < 33; ++i) {

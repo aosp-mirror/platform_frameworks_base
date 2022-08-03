@@ -657,7 +657,7 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
 
         // Now that we have finally received all the data, we can tell mStats about it.
         synchronized (mStats) {
-            mStats.addHistoryEventLocked(
+            mStats.recordHistoryEventLocked(
                     elapsedRealtime,
                     uptime,
                     BatteryStats.HistoryItem.EVENT_COLLECT_EXTERNAL_STATS,

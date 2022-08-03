@@ -63,6 +63,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     MockBatteryStatsImpl(Clock clock, File historyDirectory) {
         super(clock, historyDirectory);
         initTimersAndCounters();
+        setMaxHistoryBuffer(128 * 1024);
 
         setExternalStatsSyncLocked(mExternalStatsSync);
         informThatAllExternalStatsAreFlushed();
@@ -102,12 +103,6 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     public boolean isOnBattery() {
         return mForceOnBattery ? true : super.isOnBattery();
-    }
-
-    public void forceRecordAllHistory() {
-        mHaveBatteryLevel = true;
-        mRecordingHistory = true;
-        mRecordAllHistory = true;
     }
 
     public TimeBase getOnBatteryBackgroundTimeBase(int uid) {
@@ -201,12 +196,14 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     @GuardedBy("this")
     public MockBatteryStatsImpl setMaxHistoryFiles(int maxHistoryFiles) {
         mConstants.MAX_HISTORY_FILES = maxHistoryFiles;
+        mConstants.onChange();
         return this;
     }
 
     @GuardedBy("this")
     public MockBatteryStatsImpl setMaxHistoryBuffer(int maxHistoryBuffer) {
         mConstants.MAX_HISTORY_BUFFER = maxHistoryBuffer;
+        mConstants.onChange();
         return this;
     }
 
