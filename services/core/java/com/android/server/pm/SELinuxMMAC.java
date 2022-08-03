@@ -27,8 +27,8 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.server.compat.PlatformCompat;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.SharedUserApi;
 
 import libcore.io.IoUtils;

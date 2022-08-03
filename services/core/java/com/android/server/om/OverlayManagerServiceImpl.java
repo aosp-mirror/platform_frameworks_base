@@ -47,7 +47,7 @@ import android.util.Slog;
 
 import com.android.internal.content.om.OverlayConfig;
 import com.android.internal.util.CollectionUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

@@ -74,7 +74,7 @@ public interface PackageState {
      * app once the device reboots or otherwise re-scans it.
      */
     @Nullable
-    AndroidPackageApi getAndroidPackage();
+    AndroidPackage getAndroidPackage();
 
     /**
      * The non-user-specific UID, or the UID if the user ID is
@@ -86,7 +86,7 @@ public interface PackageState {
      * Value set through {@link PackageManager#setApplicationCategoryHint(String, int)}. Only
      * applied if the application itself does not declare a category.
      *
-     * @see AndroidPackageApi#getCategory()
+     * @see AndroidPackage#getCategory()
      */
     int getCategoryOverride();
 
@@ -121,7 +121,7 @@ public interface PackageState {
 
     /**
      * Cached here in case the physical code directory on device is unmounted.
-     * @see AndroidPackageApi#getLongVersionCode()
+     * @see AndroidPackage#getLongVersionCode()
      */
     long getVersionCode();
 
@@ -134,14 +134,14 @@ public interface PackageState {
     Map<String, Set<String>> getMimeGroups();
 
     /**
-     * @see AndroidPackageApi#getPackageName()
+     * @see AndroidPackage#getPackageName()
      */
     @NonNull
     String getPackageName();
 
     /**
      * TODO: Rename this to getCodePath
-     * @see AndroidPackageApi#getPath()
+     * @see AndroidPackage#getPath()
      */
     @NonNull
     File getPath();
@@ -227,13 +227,13 @@ public interface PackageState {
     long[] getUsesStaticLibrariesVersions();
 
     /**
-     * @see AndroidPackageApi#getVolumeUuid()
+     * @see AndroidPackage#getVolumeUuid()
      */
     @Nullable
     String getVolumeUuid();
 
     /**
-     * @see AndroidPackageApi#isExternalStorage()
+     * @see AndroidPackage#isExternalStorage()
      */
     boolean isExternalStorage();
 
@@ -257,22 +257,22 @@ public interface PackageState {
     boolean isInstallPermissionsFixed();
 
     /**
-     * @see AndroidPackageApi#isOdm()
+     * @see AndroidPackage#isOdm()
      */
     boolean isOdm();
 
     /**
-     * @see AndroidPackageApi#isOem()
+     * @see AndroidPackage#isOem()
      */
     boolean isOem();
 
     /**
-     * @see AndroidPackageApi#isPrivileged()
+     * @see AndroidPackage#isPrivileged()
      */
     boolean isPrivileged();
 
     /**
-     * @see AndroidPackageApi#isProduct()
+     * @see AndroidPackage#isProduct()
      */
     boolean isProduct();
 
@@ -282,12 +282,12 @@ public interface PackageState {
     boolean isRequiredForSystemUser();
 
     /**
-     * @see AndroidPackageApi#isSystem()
+     * @see AndroidPackage#isSystem()
      */
     boolean isSystem();
 
     /**
-     * @see AndroidPackageApi#isSystemExt()
+     * @see AndroidPackage#isSystemExt()
      */
     boolean isSystemExt();
 
@@ -308,7 +308,7 @@ public interface PackageState {
     boolean isApkInUpdatedApex();
 
     /**
-     * @see AndroidPackageApi#isVendor()
+     * @see AndroidPackage#isVendor()
      */
     boolean isVendor();
 }

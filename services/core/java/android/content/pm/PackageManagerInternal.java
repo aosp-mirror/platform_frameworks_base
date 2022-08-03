@@ -48,8 +48,7 @@ import com.android.server.pm.KnownPackages;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.dex.DynamicCodeLogger;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.pkg.AndroidPackageApi;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
@@ -644,7 +643,7 @@ public abstract class PackageManagerInternal {
      * Returns the {@link SystemApi} variant of a package for use with mainline.
      */
     @Nullable
-    public abstract AndroidPackageApi getAndroidPackage(@NonNull String packageName);
+    public abstract AndroidPackage getAndroidPackage(@NonNull String packageName);
 
     @Nullable
     public abstract PackageStateInternal getPackageStateInternal(@NonNull String packageName);

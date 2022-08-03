@@ -37,7 +37,8 @@ import android.util.ArraySet
 import android.util.SparseArray
 import android.util.Xml
 import com.android.server.pm.Computer
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.parsing.pkg.AndroidPackageInternal
+import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageUserStateInternal
 import com.android.server.pm.pkg.component.ParsedActivityImpl
@@ -1046,7 +1047,7 @@ class DomainVerificationPackageTest {
         otherDomains: List<String> = listOf(),
         isSystemApp: Boolean = false
     ) = mockThrowOnUnmocked<PackageStateInternal> {
-        val pkg = mockThrowOnUnmocked<AndroidPackage> {
+        val pkg = mockThrowOnUnmocked<AndroidPackageInternal> {
             whenever(packageName) { pkgName }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
             whenever(isEnabled) { true }
