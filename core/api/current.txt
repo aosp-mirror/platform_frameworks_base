@@ -9048,6 +9048,11 @@ package android.companion {
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void stopObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
     field public static final String EXTRA_ASSOCIATION = "android.companion.extra.ASSOCIATION";
     field @Deprecated public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
+    field public static final int RESULT_CANCELED = 0; // 0x0
+    field public static final int RESULT_DISCOVERY_TIMEOUT = 2; // 0x2
+    field public static final int RESULT_INTERNAL_ERROR = 3; // 0x3
+    field public static final int RESULT_OK = -1; // 0xffffffff
+    field public static final int RESULT_USER_REJECTED = 1; // 0x1
   }
 
   public abstract static class CompanionDeviceManager.Callback {

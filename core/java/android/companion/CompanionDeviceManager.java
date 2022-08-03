@@ -21,6 +21,7 @@ import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_P
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER;
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -56,6 +57,8 @@ import libcore.io.IoUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -84,50 +87,77 @@ public final class CompanionDeviceManager {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "CDM_CompanionDeviceManager";
 
+    /** @hide */
+    @IntDef(prefix = {"RESULT_"}, value = {
+            RESULT_OK,
+            RESULT_CANCELED,
+            RESULT_USER_REJECTED,
+            RESULT_DISCOVERY_TIMEOUT,
+            RESULT_INTERNAL_ERROR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ResultCode {}
+
     /**
-     * The result code to propagate back to the originating activity, indicates the association
-     * dialog is explicitly declined by the users.
-     *
-     * @hide
+     * The result code to propagate back to the user activity, indicates the association
+     * is created successfully.
+     */
+    public static final int RESULT_OK = -1;
+
+    /**
+     * The result code to propagate back to the user activity, indicates if the association dialog
+     * is implicitly cancelled.
+     * E.g. phone is locked, switch to another app or press outside the dialog.
+     */
+    public static final int RESULT_CANCELED = 0;
+
+    /**
+     * The result code to propagate back to the user activity, indicates the association dialog
+     * is explicitly declined by the users.
      */
     public static final int RESULT_USER_REJECTED = 1;
 
     /**
-     * The result code to propagate back to the originating activity, indicates the association
+     * The result code to propagate back to the user activity, indicates the association
      * dialog is dismissed if there's no device found after 20 seconds.
-     *
-     * @hide
      */
     public static final int RESULT_DISCOVERY_TIMEOUT = 2;
 
     /**
-     * The result code to propagate back to the originating activity, indicates the internal error
+     * The result code to propagate back to the user activity, indicates the internal error
      * in CompanionDeviceManager.
-     *
-     * @hide
      */
     public static final int RESULT_INTERNAL_ERROR = 3;
 
     /**
-     *  Requesting applications will receive the String in {@link Callback#onFailure} if the
-     *  association dialog is explicitly declined by the users. e.g. press the Don't allow button.
+     * Requesting applications will receive the String in {@link Callback#onFailure} if the
+     * association dialog is explicitly declined by the users. E.g. press the Don't allow
+     * button.
      *
      * @hide
      */
     public static final String REASON_USER_REJECTED = "user_rejected";
 
     /**
-     *  Requesting applications will receive the String in {@link Callback#onFailure} if there's
-     *  no device found after 20 seconds.
+     * Requesting applications will receive the String in {@link Callback#onFailure} if there's
+     * no devices found after 20 seconds.
      *
      * @hide
      */
     public static final String REASON_DISCOVERY_TIMEOUT = "discovery_timeout";
 
     /**
-     *  Requesting applications will receive the String in {@link Callback#onFailure} if the
-     *  association dialog is in-explicitly declined by the users. e.g. phone is locked, switch to
-     *  another app or press outside the dialog.
+     * Requesting applications will receive the String in {@link Callback#onFailure} if there's
+     * an internal error.
+     *
+     * @hide
+     */
+    public static final String REASON_INTERNAL_ERROR = "internal_error";
+
+    /**
+     * Requesting applications will receive the String in {@link Callback#onFailure} if the
+     * association dialog is implicitly cancelled. E.g. phone is locked, switch to
+     * another app or press outside the dialog.
      *
      * @hide
      */

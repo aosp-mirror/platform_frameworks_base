@@ -20,6 +20,8 @@ import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.companion.CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME;
+import static android.companion.CompanionDeviceManager.REASON_INTERNAL_ERROR;
+import static android.companion.CompanionDeviceManager.RESULT_INTERNAL_ERROR;
 import static android.content.ComponentName.createRelative;
 
 import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
@@ -40,7 +42,6 @@ import android.app.PendingIntent;
 import android.companion.AssociatedDevice;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
-import android.companion.CompanionDeviceManager;
 import android.companion.IAssociationRequestCallback;
 import android.content.ComponentName;
 import android.content.Context;
@@ -348,8 +349,7 @@ class AssociationRequestsProcessor {
             // Send the association back via the app's callback
             if (callback != null) {
                 try {
-                    // TODO: update to INTERNAL_ERROR once it's added.
-                    callback.onFailure(CompanionDeviceManager.REASON_CANCELED);
+                    callback.onFailure(REASON_INTERNAL_ERROR);
                 } catch (RemoteException ignore) {
                 }
             }
@@ -358,7 +358,7 @@ class AssociationRequestsProcessor {
             // back to the app via Activity.setResult().
             if (resultReceiver != null) {
                 final Bundle data = new Bundle();
-                resultReceiver.send(CompanionDeviceManager.RESULT_INTERNAL_ERROR, data);
+                resultReceiver.send(RESULT_INTERNAL_ERROR, data);
             }
         }
     }
