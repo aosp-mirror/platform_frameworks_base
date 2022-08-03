@@ -25,9 +25,12 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.wm.shell.flicker.appWindowBecomesInvisible
+import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerBecomesInvisible
+import com.android.wm.shell.flicker.layerIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesInvisible
 import com.android.wm.shell.flicker.splitScreenDividerBecomesInvisible
 import org.junit.Assume
@@ -39,18 +42,16 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test dismiss split screen by go home.
+ * Test dismiss split screen by dragging the divider bar.
  *
- * To run this test: `atest WMShellFlickerTests:DismissSplitScreenByGoHome`
+ * To run this test: `atest WMShellFlickerTests:DismissSplitScreenByDivider`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class DismissSplitScreenByGoHome(
-    testSpec: FlickerTestParameter
-) : SplitScreenBase(testSpec) {
+class DismissSplitScreenByDivider (testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
 
     // TODO(b/231399940): Remove this once we can use recent shortcut to enter split.
     @Before
@@ -63,6 +64,7 @@ class DismissSplitScreenByGoHome(
             super.transition(this)
             setup {
                 eachRun {
+                    tapl.goHome()
                     primaryApp.launchViaIntent(wmHelper)
                     // TODO(b/231399940): Use recent shortcut to enter split.
                     tapl.launchedAppState.taskbar
@@ -73,10 +75,10 @@ class DismissSplitScreenByGoHome(
                 }
             }
             transitions {
-                tapl.goHome()
+                SplitScreenHelper.dragDividerToDismissSplit(device, wmHelper)
                 wmHelper.StateSyncBuilder()
                     .withAppTransitionIdle()
-                    .withHomeActivityVisible()
+                    .withFullScreenApp(secondaryApp)
                     .waitForAndVerify()
             }
         }
@@ -91,7 +93,7 @@ class DismissSplitScreenByGoHome(
 
     @Presubmit
     @Test
-    fun secondaryAppLayerBecomesInvisible() = testSpec.layerBecomesInvisible(primaryApp)
+    fun secondaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(secondaryApp)
 
     @Presubmit
     @Test
@@ -100,8 +102,19 @@ class DismissSplitScreenByGoHome(
 
     @Presubmit
     @Test
-    fun secondaryAppBoundsBecomesInvisible() = testSpec.splitAppLayerBoundsBecomesInvisible(
-        secondaryApp, splitLeftTop = true)
+    fun secondaryAppBoundsIsFullscreenAtEnd() {
+        testSpec.assertLayers {
+            this.isVisible(secondaryApp)
+                .then()
+                .isInvisible(secondaryApp)
+                .then()
+                .isVisible(secondaryApp)
+                .invoke("secondaryAppBoundsIsFullscreenAtEnd") {
+                    val displayBounds = WindowUtils.getDisplayBounds(testSpec.endRotation)
+                    it.visibleRegion(secondaryApp).coversExactly(displayBounds)
+                }
+        }
+    }
 
     @Presubmit
     @Test
@@ -109,7 +122,7 @@ class DismissSplitScreenByGoHome(
 
     @Presubmit
     @Test
-    fun secondaryAppWindowBecomesInvisible() = testSpec.appWindowBecomesInvisible(secondaryApp)
+    fun secondaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(secondaryApp)
 
     /** {@inheritDoc} */
     @Postsubmit
