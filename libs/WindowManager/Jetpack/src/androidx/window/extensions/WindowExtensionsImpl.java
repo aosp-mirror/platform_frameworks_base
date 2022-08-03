@@ -38,9 +38,10 @@ public class WindowExtensionsImpl implements WindowExtensions {
     private volatile SplitController mSplitController;
     private volatile WindowAreaComponent mWindowAreaComponent;
 
+    // TODO(b/241126279) Introduce constants to better version functionality
     @Override
     public int getVendorApiLevel() {
-        return 1;
+        return 2;
     }
 
     /**
