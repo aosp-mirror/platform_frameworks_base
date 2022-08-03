@@ -170,8 +170,6 @@ filegroup {
         "com/android/internal/util/IndentingPrintWriter.java",
         "com/android/internal/util/MessageUtils.java",
         "com/android/internal/util/WakeupMessage.java",
-        // TODO: delete as soon as NetworkStatsFactory stops using
-        "com/android/internal/util/ProcFileReader.java",
     ],
 }
 

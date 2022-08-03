@@ -135,7 +135,7 @@ void InputQueue::handleMessage(const Message& message) {
     switch(message.what) {
     case MSG_FINISH_INPUT:
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        ScopedLocalRef<jobject> inputQueueObj(env, jniGetReferent(env, mInputQueueWeakGlobal));
+        ScopedLocalRef<jobject> inputQueueObj(env, GetReferent(env, mInputQueueWeakGlobal));
         if (!inputQueueObj.get()) {
             ALOGW("InputQueue was finalized without being disposed");
             return;
