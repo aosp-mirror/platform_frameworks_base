@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 /**
  * Activity manager local system service interface.
@@ -623,6 +624,11 @@ public abstract class ActivityManagerInternal {
      * broadcast my be sent to; any app Ids < {@link android.os.Process#FIRST_APPLICATION_UID} are
      * automatically allowlisted.
      *
+     * @param filterExtrasForReceiver A function to filter intent extras for the given receiver by
+     * using the rules of package visibility. Returns extras with legitimate package info that the
+     * receiver is able to access, or {@code null} if none of the packages is visible to the
+     * receiver.
+     *
      * @see com.android.server.am.ActivityManagerService#broadcastIntentWithFeature(
      *      IApplicationThread, String, Intent, String, IIntentReceiver, int, String, Bundle,
      *      String[], int, Bundle, boolean, boolean, int)
@@ -630,7 +636,9 @@ public abstract class ActivityManagerInternal {
     public abstract int broadcastIntent(Intent intent,
             IIntentReceiver resultTo,
             String[] requiredPermissions, boolean serialized,
-            int userId, int[] appIdAllowList, @Nullable Bundle bOptions);
+            int userId, int[] appIdAllowList,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            @Nullable Bundle bOptions);
 
     /**
      * Add uid to the ActivityManagerService PendingStartActivityUids list.

@@ -430,7 +430,8 @@ public class BroadcastRecordTest {
                 userId,
                 false /* allowBackgroundActivityStarts */,
                 null /* activityStartsToken */,
-                false /* timeoutExempt */ );
+                false /* timeoutExempt */,
+                null /* filterExtrasForReceiver */);
     }
 
     private static int getAppId(int i) {

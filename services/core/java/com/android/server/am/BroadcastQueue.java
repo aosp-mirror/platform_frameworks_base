@@ -361,8 +361,8 @@ public final class BroadcastQueue {
                     + ": " + r);
             mService.notifyPackageUse(r.intent.getComponent().getPackageName(),
                                       PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER);
-            thread.scheduleReceiver(new Intent(r.intent), r.curReceiver,
-                    null /* compatInfo (unused but need to keep method signature) */,
+            thread.scheduleReceiver(prepareReceiverIntent(r.intent, r.curFilteredExtras),
+                    r.curReceiver, null /* compatInfo (unused but need to keep method signature) */,
                     r.resultCode, r.resultData, r.resultExtras, r.ordered, r.userId,
                     app.mState.getReportedProcState());
             if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
@@ -590,6 +590,7 @@ public final class BroadcastQueue {
         r.curFilter = null;
         r.curReceiver = null;
         r.curApp = null;
+        r.curFilteredExtras = null;
         mPendingBroadcast = null;
 
         r.resultCode = resultCode;
@@ -941,6 +942,24 @@ public final class BroadcastQueue {
             skip = true;
         }
 
+        // Filter packages in the intent extras, skipping delivery if none of the packages is
+        // visible to the receiver.
+        Bundle filteredExtras = null;
+        if (!skip && r.filterExtrasForReceiver != null) {
+            final Bundle extras = r.intent.getExtras();
+            if (extras != null) {
+                filteredExtras = r.filterExtrasForReceiver.apply(filter.receiverList.uid, extras);
+                if (filteredExtras == null) {
+                    if (DEBUG_BROADCAST) {
+                        Slog.v(TAG, "Skipping delivery to "
+                                + filter.receiverList.app
+                                + " : receiver is filtered by the package visibility");
+                    }
+                    skip = true;
+                }
+            }
+        }
+
         if (skip) {
             r.delivery[index] = BroadcastRecord.DELIVERY_SKIPPED;
             return;
@@ -997,7 +1016,7 @@ public final class BroadcastQueue {
                 maybeScheduleTempAllowlistLocked(filter.owningUid, r, r.options);
                 maybeReportBroadcastDispatchedEventLocked(r, filter.owningUid);
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
-                        new Intent(r.intent), r.resultCode, r.resultData,
+                        prepareReceiverIntent(r.intent, filteredExtras), r.resultCode, r.resultData,
                         r.resultExtras, r.ordered, r.initialSticky, r.userId,
                         filter.receiverList.uid, r.callingUid,
                         r.dispatchTime - r.enqueueTime,
@@ -1162,6 +1181,15 @@ public final class BroadcastQueue {
         return r.intent.toString()
                 + " from " + r.callerPackage + " (pid=" + r.callingPid
                 + ", uid=" + r.callingUid + ") to " + component.flattenToShortString();
+    }
+
+    private static Intent prepareReceiverIntent(@NonNull Intent originalIntent,
+            @Nullable Bundle filteredExtras) {
+        final Intent intent = new Intent(originalIntent);
+        if (filteredExtras != null) {
+            intent.replaceExtras(filteredExtras);
+        }
+        return intent;
     }
 
     final void processNextBroadcastLocked(boolean fromMsg, boolean skipOomAdj) {
@@ -1834,6 +1862,24 @@ public final class BroadcastQueue {
             }
         }
 
+        // Filter packages in the intent extras, skipping delivery if none of the packages is
+        // visible to the receiver.
+        Bundle filteredExtras = null;
+        if (!skip && r.filterExtrasForReceiver != null) {
+            final Bundle extras = r.intent.getExtras();
+            if (extras != null) {
+                filteredExtras = r.filterExtrasForReceiver.apply(receiverUid, extras);
+                if (filteredExtras == null) {
+                    if (DEBUG_BROADCAST) {
+                        Slog.v(TAG, "Skipping delivery to "
+                                + info.activityInfo.packageName + " / " + receiverUid
+                                + " : receiver is filtered by the package visibility");
+                    }
+                    skip = true;
+                }
+            }
+        }
+
         if (skip) {
             if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                     "Skipping delivery of ordered [" + mQueueName + "] "
@@ -1852,6 +1898,7 @@ public final class BroadcastQueue {
         r.state = BroadcastRecord.APP_RECEIVE;
         r.curComponent = component;
         r.curReceiver = info.activityInfo;
+        r.curFilteredExtras = filteredExtras;
         if (DEBUG_MU && r.callingUid > UserHandle.PER_USER_RANGE) {
             Slog.v(TAG_MU, "Updated broadcast record activity info for secondary user, "
                     + info.activityInfo + ", callingUid = " + r.callingUid + ", uid = "

@@ -199,7 +199,7 @@ public final class DistractingPackageHelper {
                     Intent.ACTION_DISTRACTING_PACKAGES_CHANGED, null /* pkg */,
                     extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null /* targetPkg */,
                     null /* finishedReceiver */, new int[]{userId}, null /* instantUserIds */,
-                    allowList, null /* bOptions */));
+                    allowList, null /* filterExtrasForReceiver */, null /* bOptions */));
         }
     }
 }

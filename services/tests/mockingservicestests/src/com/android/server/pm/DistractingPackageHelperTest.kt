@@ -53,7 +53,7 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         verify(pms).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED),
                 nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-                nullable(), nullable(), nullable())
+                nullable(), nullable(), nullable(), nullable())
 
         val modifiedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
         val distractionFlags = bundleCaptor.value.getInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS)
@@ -78,7 +78,8 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         verify(pms, never()).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper, never()).sendPackageBroadcast(
                 eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), bundleCaptor.capture(),
-                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable())
+                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable(),
+                nullable())
         assertThat(unactionedPackages).isEmpty()
     }
 
@@ -156,7 +157,7 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         verify(pms).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED),
                 nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-                nullable(), nullable(), nullable())
+                nullable(), nullable(), nullable(), nullable())
         val modifiedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
         val distractionFlags = bundleCaptor.value.getInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS)
         assertThat(modifiedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
@@ -172,7 +173,7 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         verify(pms, never()).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper, never()).sendPackageBroadcast(eq(
                 Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), nullable(), anyInt(),
-                nullable(), nullable(), any(), nullable(), nullable(), nullable())
+                nullable(), nullable(), any(), nullable(), nullable(), nullable(), nullable())
     }
 
     @Test
@@ -183,7 +184,7 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         verify(pms, never()).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper, never()).sendPackageBroadcast(eq(
                 Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), nullable(), anyInt(),
-                nullable(), nullable(), any(), nullable(), nullable(), nullable())
+                nullable(), nullable(), any(), nullable(), nullable(), nullable(), nullable())
 
         distractingPackageHelper.removeDistractingPackageRestrictions(pms.snapshotComputer(),
                 arrayOfNulls(0), TEST_USER_ID)
@@ -191,7 +192,7 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         verify(pms, never()).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper, never()).sendPackageBroadcast(eq(
                 Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), nullable(), anyInt(),
-                nullable(), nullable(), any(), nullable(), nullable(), nullable())
+                nullable(), nullable(), any(), nullable(), nullable(), nullable(), nullable())
     }
 
     @Test
@@ -202,7 +203,7 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         testHandler.flush()
         verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED),
                 nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
-                nullable(), nullable(), nullable())
+                nullable(), nullable(), nullable(), nullable())
 
         var changedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
         var changedUids = bundleCaptor.value.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
@@ -222,7 +223,8 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         testHandler.flush()
         verify(broadcastHelper, times(2)).sendPackageBroadcast(
                 eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), bundleCaptor.capture(),
-                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable())
+                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable(),
+                nullable())
 
         bundleCaptor.allValues.forEachIndexed { i, it ->
             var changedPackages = it.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
@@ -244,7 +246,8 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         testHandler.flush()
         verify(broadcastHelper, times(2)).sendPackageBroadcast(
                 eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), bundleCaptor.capture(),
-                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable())
+                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable(),
+                nullable())
 
         bundleCaptor.allValues.forEachIndexed { i, it ->
             var changedPackages = it.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
