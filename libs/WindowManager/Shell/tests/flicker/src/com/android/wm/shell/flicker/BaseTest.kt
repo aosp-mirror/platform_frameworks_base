@@ -49,7 +49,10 @@ abstract class BaseTest @JvmOverloads constructor(
 ) {
     init {
         testSpec.setIsTablet(
-            WindowManagerStateHelper(instrumentation).currentState.wmState.isTablet
+            WindowManagerStateHelper(
+                instrumentation,
+                clearCacheAfterParsing = false
+            ).currentState.wmState.isTablet
         )
     }
 
