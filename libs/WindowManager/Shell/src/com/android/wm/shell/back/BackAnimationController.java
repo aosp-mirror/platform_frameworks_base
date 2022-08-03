@@ -38,6 +38,7 @@ import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.IWindowFocusObserver;
 import android.view.InputDevice;
@@ -187,6 +188,31 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_BACK_ANIMATION,
                 this::createExternalInterface, this);
+
+        initBackAnimationRunners();
+    }
+
+    private void initBackAnimationRunners() {
+        final IOnBackInvokedCallback dummyCallback = new IOnBackInvokedCallback.Default();
+        final IRemoteAnimationRunner dummyRunner = new IRemoteAnimationRunner.Default() {
+            @Override
+            public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
+                    RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
+                    IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
+                // Animation missing. Simply finish animation.
+                finishedCallback.onAnimationFinished();
+            }
+        };
+
+        final BackAnimationRunner dummyBackRunner =
+                new BackAnimationRunner(dummyCallback, dummyRunner);
+        final CrossTaskBackAnimation crossTaskAnimation = new CrossTaskBackAnimation(mContext);
+        mAnimationDefinition.set(BackNavigationInfo.TYPE_CROSS_TASK,
+                new BackAnimationRunner(crossTaskAnimation.mCallback, crossTaskAnimation.mRunner));
+        // TODO (238474994): register cross activity animation when it's completed.
+        mAnimationDefinition.set(BackNavigationInfo.TYPE_CROSS_ACTIVITY, dummyBackRunner);
+        // TODO (236760237): register dialog close animation when it's completed.
+        mAnimationDefinition.set(BackNavigationInfo.TYPE_DIALOG_CLOSE, dummyBackRunner);
     }
 
     private void setupAnimationDeveloperSettingsObserver(
