@@ -1251,7 +1251,15 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testComputeImeControlTarget() throws Exception {
         final DisplayContent dc = createNewDisplay();
         dc.setRemoteInsetsController(createDisplayWindowInsetsController());
-        dc.setImeInputTarget(createWindow(null, TYPE_BASE_APPLICATION, "app"));
+        dc.mCurrentFocus = createWindow(null, TYPE_BASE_APPLICATION, "app");
+
+        // Expect returning null IME control target when the focus window has not yet been the
+        // IME input target (e.g. IME is restarting) in fullscreen windowing mode.
+        dc.setImeInputTarget(null);
+        assertFalse(dc.mCurrentFocus.inMultiWindowMode());
+        assertNull(dc.computeImeControlTarget());
+
+        dc.setImeInputTarget(dc.mCurrentFocus);
         dc.setImeLayeringTarget(dc.getImeInputTarget().getWindowState());
         assertEquals(dc.getImeInputTarget().getWindowState(), dc.computeImeControlTarget());
     }
