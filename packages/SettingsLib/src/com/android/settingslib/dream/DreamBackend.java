@@ -92,7 +92,8 @@ public class DreamBackend {
             COMPLICATION_TYPE_WEATHER,
             COMPLICATION_TYPE_AIR_QUALITY,
             COMPLICATION_TYPE_CAST_INFO,
-            COMPLICATION_TYPE_HOME_CONTROLS
+            COMPLICATION_TYPE_HOME_CONTROLS,
+            COMPLICATION_TYPE_SMARTSPACE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ComplicationType {}
@@ -103,6 +104,7 @@ public class DreamBackend {
     public static final int COMPLICATION_TYPE_AIR_QUALITY = 4;
     public static final int COMPLICATION_TYPE_CAST_INFO = 5;
     public static final int COMPLICATION_TYPE_HOME_CONTROLS = 6;
+    public static final int COMPLICATION_TYPE_SMARTSPACE = 7;
 
     private final Context mContext;
     private final IDreamManager mDreamManager;
@@ -350,6 +352,9 @@ public class DreamBackend {
                 break;
             case COMPLICATION_TYPE_HOME_CONTROLS:
                 res = R.string.dream_complication_title_home_controls;
+                break;
+            case COMPLICATION_TYPE_SMARTSPACE:
+                res = R.string.dream_complication_title_smartspace;
                 break;
             default:
                 return null;
