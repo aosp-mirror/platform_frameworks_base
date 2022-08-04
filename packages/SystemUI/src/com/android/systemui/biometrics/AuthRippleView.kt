@@ -75,12 +75,12 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         }
     private var radius: Float = 0f
         set(value) {
-            rippleShader.radius = value
+            rippleShader.setMaxSize(value * 2f, value * 2f)
             field = value
         }
     private var origin: PointF = PointF()
         set(value) {
-            rippleShader.origin = value
+            rippleShader.setCenter(value.x, value.y)
             field = value
         }
 

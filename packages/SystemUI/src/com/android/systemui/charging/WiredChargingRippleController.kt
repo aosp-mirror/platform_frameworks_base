@@ -19,7 +19,6 @@ package com.android.systemui.charging
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.PixelFormat
-import android.graphics.PointF
 import android.os.SystemProperties
 import android.util.DisplayMetrics
 import android.view.View
@@ -85,7 +84,7 @@ class WiredChargingRippleController @Inject constructor(
     private var debounceLevel = 0
 
     @VisibleForTesting
-    var rippleView: RippleView = RippleView(context, attrs = null)
+    var rippleView: RippleView = RippleView(context, attrs = null).also { it.setupShader() }
 
     init {
         pluggedIn = batteryController.isPluggedIn
@@ -177,20 +176,25 @@ class WiredChargingRippleController @Inject constructor(
         context.display.getRealMetrics(displayMetrics)
         val width = displayMetrics.widthPixels
         val height = displayMetrics.heightPixels
-        rippleView.radius = Integer.max(width, height).toFloat()
-        rippleView.origin = when (RotationUtils.getExactRotation(context)) {
+        val maxDiameter = Integer.max(width, height) * 2f
+        rippleView.setMaxSize(maxDiameter, maxDiameter)
+        when (RotationUtils.getExactRotation(context)) {
             RotationUtils.ROTATION_LANDSCAPE -> {
-                PointF(width * normalizedPortPosY, height * (1 - normalizedPortPosX))
+                rippleView.setCenter(
+                        width * normalizedPortPosY, height * (1 - normalizedPortPosX))
             }
             RotationUtils.ROTATION_UPSIDE_DOWN -> {
-                PointF(width * (1 - normalizedPortPosX), height * (1 - normalizedPortPosY))
+                rippleView.setCenter(
+                        width * (1 - normalizedPortPosX), height * (1 - normalizedPortPosY))
             }
             RotationUtils.ROTATION_SEASCAPE -> {
-                PointF(width * (1 - normalizedPortPosY), height * normalizedPortPosX)
+                rippleView.setCenter(
+                        width * (1 - normalizedPortPosY), height * normalizedPortPosX)
             }
             else -> {
                 // ROTATION_NONE
-                PointF(width * normalizedPortPosX, height * normalizedPortPosY)
+                rippleView.setCenter(
+                        width * normalizedPortPosX, height * normalizedPortPosY)
             }
         }
     }
