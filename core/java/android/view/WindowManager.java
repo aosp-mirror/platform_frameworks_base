@@ -834,8 +834,8 @@ public interface WindowManager extends ViewManager {
      *
      * <p>Default is {@code false}.
      *
-     * <p>The system enforcement will be added in Android 14, but some devices may start following
-     * the requirement before that. The best practice for apps is to always explicitly set this
+     * <p>The system enforcement is added in Android 14, but some devices may start following the
+     * requirement before that. The best practice for apps is to always explicitly set this
      * property in AndroidManifest instead of relying on the default value.
      *
      * <p>Example usage:
