@@ -19,11 +19,11 @@ package com.android.systemui.shade;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
+import static com.android.systemui.shade.PanelView.DEBUG;
 
 import static java.lang.Float.isNaN;
 
@@ -53,7 +53,6 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.doze.DozeLog;
-import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -77,7 +76,6 @@ import java.io.PrintWriter;
 import java.util.List;
 
 public abstract class PanelViewController {
-    public static final boolean DEBUG = PanelView.DEBUG;
     public static final String TAG = PanelView.class.getSimpleName();
     public static final float FLING_MAX_LENGTH_SECONDS = 0.6f;
     public static final float FLING_SPEED_UP_FACTOR = 0.6f;
@@ -97,7 +95,7 @@ public abstract class PanelViewController {
     protected boolean mTouchSlopExceededBeforeDown;
     private float mMinExpandHeight;
     private boolean mPanelUpdateWhenAnimatorEnds;
-    private boolean mVibrateOnOpening;
+    private final boolean mVibrateOnOpening;
     protected boolean mIsLaunchAnimationRunning;
     private int mFixedDuration = NO_FIXED_DURATION;
     protected float mOverExpansion;
@@ -144,7 +142,6 @@ public abstract class PanelViewController {
     private int mTouchSlop;
     private float mSlopMultiplier;
     protected boolean mHintAnimationRunning;
-    private boolean mOverExpandedBeforeFling;
     private boolean mTouchAboveFalsingThreshold;
     private int mUnlockFalsingThreshold;
     private boolean mTouchStartedInEmptyArea;
@@ -155,9 +152,9 @@ public abstract class PanelViewController {
 
     private ValueAnimator mHeightAnimator;
     private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
-    private FlingAnimationUtils mFlingAnimationUtils;
-    private FlingAnimationUtils mFlingAnimationUtilsClosing;
-    private FlingAnimationUtils mFlingAnimationUtilsDismissing;
+    private final FlingAnimationUtils mFlingAnimationUtils;
+    private final FlingAnimationUtils mFlingAnimationUtilsClosing;
+    private final FlingAnimationUtils mFlingAnimationUtilsDismissing;
     private final LatencyTracker mLatencyTracker;
     private final FalsingManager mFalsingManager;
     private final DozeLog mDozeLog;
@@ -178,9 +175,9 @@ public abstract class PanelViewController {
     /**
      * Whether or not the PanelView can be expanded or collapsed with a drag.
      */
-    private boolean mNotificationsDragEnabled;
+    private final boolean mNotificationsDragEnabled;
 
-    private Interpolator mBounceInterpolator;
+    private final Interpolator mBounceInterpolator;
     protected KeyguardBottomAreaView mKeyguardBottomArea;
 
     /**
@@ -201,7 +198,6 @@ public abstract class PanelViewController {
     protected final AmbientState mAmbientState;
     protected final LockscreenGestureLogger mLockscreenGestureLogger;
     private final PanelExpansionStateManager mPanelExpansionStateManager;
-    private final TouchHandler mTouchHandler;
     private final InteractionJankMonitor mInteractionJankMonitor;
     protected final SystemClock mSystemClock;
 
@@ -229,8 +225,6 @@ public abstract class PanelViewController {
         return mAmbientState;
     }
 
-    private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
-
     public PanelViewController(
             PanelView view,
             FalsingManager falsingManager,
@@ -247,9 +241,7 @@ public abstract class PanelViewController {
             PanelExpansionStateManager panelExpansionStateManager,
             AmbientState ambientState,
             InteractionJankMonitor interactionJankMonitor,
-            KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             SystemClock systemClock) {
-        mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardFadingAwayChanged() {
@@ -261,7 +253,7 @@ public abstract class PanelViewController {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLockscreenGestureLogger = lockscreenGestureLogger;
         mPanelExpansionStateManager = panelExpansionStateManager;
-        mTouchHandler = createTouchHandler();
+        TouchHandler touchHandler = createTouchHandler();
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -274,7 +266,7 @@ public abstract class PanelViewController {
         });
 
         mView.addOnLayoutChangeListener(createLayoutChangeListener());
-        mView.setOnTouchListener(mTouchHandler);
+        mView.setOnTouchListener(touchHandler);
         mView.setOnConfigurationChangedListener(createOnConfigurationChangedListener());
 
         mResources = mView.getResources();
@@ -398,7 +390,7 @@ public abstract class PanelViewController {
     public void startExpandMotion(float newX, float newY, boolean startTracking,
             float expandedHeight) {
         if (!mHandlingPointerUp && !mStatusBarStateController.isDozing()) {
-            beginJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+            beginJankMonitoring();
         }
         mInitialOffsetOnTouch = expandedHeight;
         mInitialTouchY = newY;
@@ -475,7 +467,7 @@ public abstract class PanelViewController {
         } else if (!mCentralSurfaces.isBouncerShowing()
                 && !mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()
                 && !mKeyguardStateController.isKeyguardGoingAway()) {
-            boolean expands = onEmptySpaceClick(mInitialTouchX);
+            boolean expands = onEmptySpaceClick();
             onTrackingStopped(expands);
         }
         mVelocityTracker.clear();
@@ -670,7 +662,7 @@ public abstract class PanelViewController {
             @Override
             public void onAnimationStart(Animator animation) {
                 if (!mStatusBarStateController.isDozing()) {
-                    beginJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                    beginJankMonitoring();
                 }
             }
 
@@ -702,10 +694,8 @@ public abstract class PanelViewController {
         mIsSpringBackAnimation = true;
         ValueAnimator animator = ValueAnimator.ofFloat(mOverExpansion, 0);
         animator.addUpdateListener(
-                animation -> {
-                    setOverExpansionInternal((float) animation.getAnimatedValue(),
-                            false /* isFromGesture */);
-                });
+                animation -> setOverExpansionInternal((float) animation.getAnimatedValue(),
+                        false /* isFromGesture */));
         animator.setDuration(SHADE_OPEN_SPRING_BACK_DURATION);
         animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         animator.addListener(new AnimatorListenerAdapter() {
@@ -731,10 +721,10 @@ public abstract class PanelViewController {
         setAnimator(null);
         mKeyguardStateController.notifyPanelFlingEnd();
         if (!cancelled) {
-            endJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+            endJankMonitoring();
             notifyExpandingFinished();
         } else {
-            cancelJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+            cancelJankMonitoring();
         }
         updatePanelExpansionAndVisibility();
     }
@@ -771,13 +761,6 @@ public abstract class PanelViewController {
         }
 
         setExpandedHeight(currentMaxPanelHeight);
-    }
-
-    private float getStackHeightFraction(float height) {
-        final float gestureFraction = height / getMaxPanelHeight();
-        final float stackHeightFraction = Interpolators.ACCELERATE_DECELERATE
-                .getInterpolation(gestureFraction);
-        return stackHeightFraction;
     }
 
     public void setExpandedHeightInternal(float h) {
@@ -911,13 +894,8 @@ public abstract class PanelViewController {
         return !isFullyCollapsed() && !mTracking && !mClosing;
     }
 
-    private final Runnable mFlingCollapseRunnable = new Runnable() {
-        @Override
-        public void run() {
-            fling(0, false /* expand */, mNextCollapseSpeedUpFactor,
-                    false /* expandBecauseOfFalsing */);
-        }
-    };
+    private final Runnable mFlingCollapseRunnable = () -> fling(0, false /* expand */,
+            mNextCollapseSpeedUpFactor, false /* expandBecauseOfFalsing */);
 
     public void expand(final boolean animate) {
         if (!isFullyCollapsed() && !isCollapsing()) {
@@ -950,7 +928,7 @@ public abstract class PanelViewController {
                             mView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                             if (mAnimateAfterExpanding) {
                                 notifyExpandingStarted();
-                                beginJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                                beginJankMonitoring();
                                 fling(0, true /* expand */);
                             } else {
                                 setExpandedFraction(1f);
@@ -1150,7 +1128,7 @@ public abstract class PanelViewController {
      *
      * @return whether the panel will be expanded after the action performed by this method
      */
-    protected boolean onEmptySpaceClick(float x) {
+    protected boolean onEmptySpaceClick() {
         if (mHintAnimationRunning) {
             return true;
         }
@@ -1432,9 +1410,9 @@ public abstract class PanelViewController {
                     // mHeightAnimator is null, there is no remaining frame, ends instrumenting.
                     if (mHeightAnimator == null) {
                         if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                            endJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                            endJankMonitoring();
                         } else {
-                            cancelJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+                            cancelJankMonitoring();
                         }
                     }
                     break;
@@ -1465,28 +1443,32 @@ public abstract class PanelViewController {
         }
     }
 
-    private void beginJankMonitoring(int cuj) {
+    private void beginJankMonitoring() {
         if (mInteractionJankMonitor == null) {
             return;
         }
         InteractionJankMonitor.Configuration.Builder builder =
-                InteractionJankMonitor.Configuration.Builder.withView(cuj, mView)
+                InteractionJankMonitor.Configuration.Builder.withView(
+                                InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE,
+                                mView)
                         .setTag(isFullyCollapsed() ? "Expand" : "Collapse");
         mInteractionJankMonitor.begin(builder);
     }
 
-    private void endJankMonitoring(int cuj) {
+    private void endJankMonitoring() {
         if (mInteractionJankMonitor == null) {
             return;
         }
-        InteractionJankMonitor.getInstance().end(cuj);
+        InteractionJankMonitor.getInstance().end(
+                InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
     }
 
-    private void cancelJankMonitoring(int cuj) {
+    private void cancelJankMonitoring() {
         if (mInteractionJankMonitor == null) {
             return;
         }
-        InteractionJankMonitor.getInstance().cancel(cuj);
+        InteractionJankMonitor.getInstance().cancel(
+                InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
     }
 
     protected float getExpansionFraction() {

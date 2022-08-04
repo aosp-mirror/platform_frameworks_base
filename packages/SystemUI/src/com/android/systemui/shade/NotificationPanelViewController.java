@@ -44,7 +44,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
-import android.app.ActivityManager;
 import android.app.Fragment;
 import android.app.StatusBarManager;
 import android.content.ContentResolver;
@@ -288,7 +287,6 @@ public final class NotificationPanelViewController extends PanelViewController {
     private final NotificationPanelView mView;
     private final VibratorHelper mVibratorHelper;
     private final MetricsLogger mMetricsLogger;
-    private final ActivityManager mActivityManager;
     private final ConfigurationController mConfigurationController;
     private final Provider<FlingAnimationUtils.Builder> mFlingAnimationUtilsBuilder;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
@@ -341,14 +339,14 @@ public final class NotificationPanelViewController extends PanelViewController {
     private final RecordingController mRecordingController;
     private final PanelEventsEmitter mPanelEventsEmitter;
     private boolean mSplitShadeEnabled;
-    // The bottom padding reserved for elements of the keyguard measuring notifications
+    /** The bottom padding reserved for elements of the keyguard measuring notifications. */
     private float mKeyguardNotificationBottomPadding;
     /**
      * The top padding from where notification should start in lockscreen.
      * Should be static also during animations and should match the Y of the first notification.
      */
     private float mKeyguardNotificationTopPadding;
-    // Current max allowed keyguard notifications determined by measuring the panel
+    /** Current max allowed keyguard notifications determined by measuring the panel. */
     private int mMaxAllowedKeyguardNotifications;
 
     private KeyguardQsUserSwitchController mKeyguardQsUserSwitchController;
@@ -728,7 +726,6 @@ public final class NotificationPanelViewController extends PanelViewController {
             AccessibilityManager accessibilityManager, @DisplayId int displayId,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             MetricsLogger metricsLogger,
-            ActivityManager activityManager,
             ConfigurationController configurationController,
             Provider<FlingAnimationUtils.Builder> flingAnimationUtilsBuilder,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
@@ -798,7 +795,6 @@ public final class NotificationPanelViewController extends PanelViewController {
                 panelExpansionStateManager,
                 ambientState,
                 interactionJankMonitor,
-                keyguardUnlockAnimationController,
                 systemClock);
         mView = view;
         mVibratorHelper = vibratorHelper;
@@ -808,7 +804,6 @@ public final class NotificationPanelViewController extends PanelViewController {
         mQRCodeScannerController = qrCodeScannerController;
         mControlsComponent = controlsComponent;
         mMetricsLogger = metricsLogger;
-        mActivityManager = activityManager;
         mConfigurationController = configurationController;
         mFlingAnimationUtilsBuilder = flingAnimationUtilsBuilder;
         mMediaHierarchyManager = mediaHierarchyManager;
@@ -3969,7 +3964,7 @@ public final class NotificationPanelViewController extends PanelViewController {
      * notification data being displayed. In the new notification pipeline, this is handled in
      * {@link ShadeViewManager}.
      */
-    public void updateNotificationViews(String reason) {
+    public void updateNotificationViews() {
         mNotificationStackScrollLayoutController.updateFooter();
 
         mNotificationIconAreaController.updateNotificationIcons(createVisibleEntriesList());
@@ -4426,7 +4421,7 @@ public final class NotificationPanelViewController extends PanelViewController {
             NotificationStackScrollLayout.OnEmptySpaceClickListener {
         @Override
         public void onEmptySpaceClicked(float x, float y) {
-            onEmptySpaceClick(x);
+            onEmptySpaceClick();
         }
     }
 
