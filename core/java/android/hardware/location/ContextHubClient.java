@@ -81,7 +81,7 @@ public class ContextHubClient implements Closeable {
      *
      * @param clientProxy the proxy of the client at the service
      */
-    /* package */ void setClientProxy(IContextHubClient clientProxy) {
+    /* package */ synchronized void setClientProxy(IContextHubClient clientProxy) {
         Objects.requireNonNull(clientProxy, "IContextHubClient cannot be null");
         if (mClientProxy != null) {
             throw new IllegalStateException("Cannot change client proxy multiple times");
@@ -93,6 +93,7 @@ public class ContextHubClient implements Closeable {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+        this.notifyAll();
     }
 
     /**
@@ -221,8 +222,15 @@ public class ContextHubClient implements Closeable {
     }
 
     /** @hide */
-    public void callbackFinished() {
+    public synchronized void callbackFinished() {
         try {
+            while (mClientProxy == null) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
             mClientProxy.callbackFinished();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
