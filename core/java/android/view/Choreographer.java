@@ -765,11 +765,12 @@ public final class Choreographer {
                 startNanos = System.nanoTime();
                 final long jitterNanos = startNanos - frameTimeNanos;
                 if (jitterNanos >= frameIntervalNanos) {
-                    long lastFrameOffset = 0;
+                    frameTimeNanos = startNanos;
                     if (frameIntervalNanos == 0) {
                         Log.i(TAG, "Vsync data empty due to timeout");
                     } else {
-                        lastFrameOffset = jitterNanos % frameIntervalNanos;
+                        long lastFrameOffset = jitterNanos % frameIntervalNanos;
+                        frameTimeNanos = frameTimeNanos - lastFrameOffset;
                         final long skippedFrames = jitterNanos / frameIntervalNanos;
                         if (skippedFrames >= SKIPPED_FRAME_WARNING_LIMIT) {
                             Log.i(TAG, "Skipped " + skippedFrames + " frames!  "
@@ -785,8 +786,7 @@ public final class Choreographer {
                                     + " ms in the past.");
                         }
                     }
-                    frameTimeNanos = startNanos - lastFrameOffset;
-                    frameData.updateFrameData(frameTimeNanos);
+                    frameData = getUpdatedFrameData(frameTimeNanos, frameData, jitterNanos);
                 }
 
                 if (frameTimeNanos < mLastFrameTimeNanos) {
@@ -884,7 +884,7 @@ public final class Choreographer {
                     }
                     frameTimeNanos = now - lastFrameOffset;
                     mLastFrameTimeNanos = frameTimeNanos;
-                    frameData.updateFrameData(frameTimeNanos);
+                    frameData = getUpdatedFrameData(frameTimeNanos, frameData, jitterNanos);
                 }
             }
         }
@@ -998,9 +998,6 @@ public final class Choreographer {
 
     /** Holds data that describes one possible VSync frame event to render at. */
     public static class FrameTimeline {
-        static final FrameTimeline INVALID_FRAME_TIMELINE = new FrameTimeline(
-                FrameInfo.INVALID_VSYNC_ID, Long.MAX_VALUE, Long.MAX_VALUE);
-
         FrameTimeline(long vsyncId, long expectedPresentTimeNanos, long deadlineNanos) {
             this.mVsyncId = vsyncId;
             this.mExpectedPresentTimeNanos = expectedPresentTimeNanos;
@@ -1017,11 +1014,6 @@ public final class Choreographer {
          */
         public long getVsyncId() {
             return mVsyncId;
-        }
-
-        /** Reset the vsync ID to invalid. */
-        void resetVsyncId() {
-            mVsyncId = FrameInfo.INVALID_VSYNC_ID;
         }
 
         /**
@@ -1046,39 +1038,20 @@ public final class Choreographer {
      * information including deadline and expected present time.
      */
     public static class FrameData {
-        static final FrameTimeline[] INVALID_FRAME_TIMELINES = new FrameTimeline[0];
-        FrameData() {
-            this.mFrameTimelines = INVALID_FRAME_TIMELINES;
-            this.mPreferredFrameTimeline = FrameTimeline.INVALID_FRAME_TIMELINE;
-        }
-
         FrameData(long frameTimeNanos, DisplayEventReceiver.VsyncEventData vsyncEventData) {
-            FrameTimeline[] frameTimelines =
-                    new FrameTimeline[vsyncEventData.frameTimelines.length];
-            for (int i = 0; i <  vsyncEventData.frameTimelines.length; i++) {
-                DisplayEventReceiver.VsyncEventData.FrameTimeline frameTimeline =
-                        vsyncEventData.frameTimelines[i];
-                frameTimelines[i] = new FrameTimeline(frameTimeline.vsyncId,
-                        frameTimeline.expectedPresentTime, frameTimeline.deadline);
-            }
             this.mFrameTimeNanos = frameTimeNanos;
-            this.mFrameTimelines = frameTimelines;
-            this.mPreferredFrameTimeline =
-                    frameTimelines[vsyncEventData.preferredFrameTimelineIndex];
+            this.mFrameTimelines = convertFrameTimelines(vsyncEventData);
+            this.mPreferredFrameTimelineIndex =
+                    vsyncEventData.preferredFrameTimelineIndex;
         }
 
         private long mFrameTimeNanos;
-        private FrameTimeline[] mFrameTimelines;
-        private FrameTimeline mPreferredFrameTimeline;
+        private final FrameTimeline[] mFrameTimelines;
+        private int mPreferredFrameTimelineIndex;
 
-        void updateFrameData(long frameTimeNanos) {
+        void updateFrameData(long frameTimeNanos, int newPreferredFrameTimelineIndex) {
             mFrameTimeNanos = frameTimeNanos;
-            for (FrameTimeline ft : mFrameTimelines) {
-                // The ID is no longer valid because the frame time that was registered with the ID
-                // no longer matches.
-                // TODO(b/205721584): Ask SF for valid vsync information.
-                ft.resetVsyncId();
-            }
+            mPreferredFrameTimelineIndex = newPreferredFrameTimelineIndex;
         }
 
         /** The time in nanoseconds when the frame started being rendered. */
@@ -1096,7 +1069,7 @@ public final class Choreographer {
         /** The platform-preferred frame timeline. */
         @NonNull
         public FrameTimeline getPreferredFrameTimeline() {
-            return mPreferredFrameTimeline;
+            return mFrameTimelines[mPreferredFrameTimelineIndex];
         }
 
         private FrameTimeline[] convertFrameTimelines(
@@ -1110,6 +1083,38 @@ public final class Choreographer {
                         frameTimeline.expectedPresentTime, frameTimeline.deadline);
             }
             return frameTimelines;
+        }
+    }
+
+    /**
+     * Update the frame data when the frame is late.
+     *
+     * @param jitterNanos currentTime - frameTime
+     */
+    private FrameData getUpdatedFrameData(long frameTimeNanos, FrameData frameData,
+            long jitterNanos) {
+        int newPreferredIndex = 0;
+        FrameTimeline[] frameTimelines = frameData.getFrameTimelines();
+        final long minimumDeadline =
+                frameData.getPreferredFrameTimeline().getDeadlineNanos() + jitterNanos;
+        // Look for a non-past deadline timestamp in the existing frame data. Otherwise, binder
+        // query for new frame data. Note that binder is relatively slow, O(ms), so it is
+        // only called when the existing frame data does not hold a valid frame.
+        while (newPreferredIndex < frameTimelines.length - 1
+                && frameTimelines[newPreferredIndex].getDeadlineNanos()
+                < minimumDeadline) {
+            newPreferredIndex++;
+        }
+
+        long newPreferredDeadline =
+                frameData.getFrameTimelines()[newPreferredIndex].getDeadlineNanos();
+        if (newPreferredDeadline < minimumDeadline) {
+            DisplayEventReceiver.VsyncEventData latestVsyncEventData =
+                    mDisplayEventReceiver.getLatestVsyncEventData();
+            return new FrameData(frameTimeNanos, latestVsyncEventData);
+        } else {
+            frameData.updateFrameData(frameTimeNanos, newPreferredIndex);
+            return frameData;
         }
     }
 
