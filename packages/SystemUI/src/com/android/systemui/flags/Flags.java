@@ -223,7 +223,7 @@ public class Flags {
             new SysPropBooleanFlag(1202, "persist.wm.debug.predictive_back_always_enforce", false);
 
     public static final BooleanFlag NEW_BACK_AFFORDANCE =
-            new BooleanFlag(1203, false /* default */, true /* teamfood */);
+            new BooleanFlag(1203, false /* default */, false /* teamfood */);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
