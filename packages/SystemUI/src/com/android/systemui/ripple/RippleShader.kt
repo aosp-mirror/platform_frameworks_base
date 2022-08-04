@@ -36,7 +36,8 @@ class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.C
     /** Shapes that the [RippleShader] supports. */
     enum class RippleShape {
         CIRCLE,
-        ROUNDED_BOX
+        ROUNDED_BOX,
+        ELLIPSE
     }
 
     companion object {
@@ -57,12 +58,10 @@ class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.C
                 uniform float in_sparkle_strength;"""
 
         private const val SHADER_CIRCLE_MAIN = """vec4 main(vec2 p) {
-                // distortion only applies to circle
                 vec2 p_distorted = distort(p, in_time, in_distort_radial, in_distort_xy);
                 float radius = in_size.x * 0.5;
-
-                float sparkleRing = softRing(p_distorted, in_center, radius, in_blur);
-                float inside = softCircle(p_distorted, in_center, radius * 1.2, in_blur);
+                float sparkleRing = soften(circleRing(p_distorted-in_center, radius), in_blur);
+                float inside = soften(sdCircle(p_distorted-in_center, radius * 1.2), in_blur);
                 float sparkle = sparkles(p - mod(p, in_pixelDensity * 0.8), in_time * 0.00175)
                     * (1.-sparkleRing) * in_fadeSparkle;
 
@@ -75,9 +74,26 @@ class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.C
         """
 
         private const val SHADER_ROUNDED_BOX_MAIN = """vec4 main(vec2 p) {
-                float sparkleRing = softRoundedBoxRing(p, in_center, in_size, in_cornerRadius,
-                    in_thickness, in_blur);
-                float inside = softRoundedBox(p, in_center, in_size * 1.2, in_cornerRadius, in_blur);
+                float sparkleRing = soften(roundedBoxRing(p-in_center, in_size, in_cornerRadius,
+                    in_thickness), in_blur);
+                float inside = soften(sdRoundedBox(p-in_center, in_size * 1.2, in_cornerRadius),
+                    in_blur);
+                float sparkle = sparkles(p - mod(p, in_pixelDensity * 0.8), in_time * 0.00175)
+                    * (1.-sparkleRing) * in_fadeSparkle;
+
+                float rippleInsideAlpha = (1.-inside) * in_fadeFill;
+                float rippleRingAlpha = (1.-sparkleRing) * in_fadeRing;
+                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * 0.45;
+                vec4 ripple = in_color * rippleAlpha;
+                return mix(ripple, vec4(sparkle), sparkle * in_sparkle_strength);
+            }
+        """
+
+        private const val SHADER_ELLIPSE_MAIN = """vec4 main(vec2 p) {
+                vec2 p_distorted = distort(p, in_time, in_distort_radial, in_distort_xy);
+
+                float sparkleRing = soften(ellipseRing(p_distorted-in_center, in_size), in_blur);
+                float inside = soften(sdEllipse(p_distorted-in_center, in_size * 1.2), in_blur);
                 float sparkle = sparkles(p - mod(p, in_pixelDensity * 0.8), in_time * 0.00175)
                     * (1.-sparkleRing) * in_fadeSparkle;
 
@@ -90,13 +106,21 @@ class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.C
         """
 
         private const val CIRCLE_SHADER = SHADER_UNIFORMS + RippleShaderUtilLibrary.SHADER_LIB +
-                SdfShaderLibrary.CIRCLE_SDF + SHADER_CIRCLE_MAIN
+                SdfShaderLibrary.SHADER_SDF_OPERATION_LIB + SdfShaderLibrary.CIRCLE_SDF +
+                SHADER_CIRCLE_MAIN
         private const val ROUNDED_BOX_SHADER = SHADER_UNIFORMS +
-                RippleShaderUtilLibrary.SHADER_LIB + SdfShaderLibrary.ROUNDED_BOX_SDF +
-                SHADER_ROUNDED_BOX_MAIN
+                RippleShaderUtilLibrary.SHADER_LIB + SdfShaderLibrary.SHADER_SDF_OPERATION_LIB +
+                SdfShaderLibrary.ROUNDED_BOX_SDF + SHADER_ROUNDED_BOX_MAIN
+        private const val ELLIPSE_SHADER = SHADER_UNIFORMS + RippleShaderUtilLibrary.SHADER_LIB +
+                SdfShaderLibrary.SHADER_SDF_OPERATION_LIB + SdfShaderLibrary.ELLIPSE_SDF +
+                SHADER_ELLIPSE_MAIN
 
         private fun buildShader(rippleShape: RippleShape): String =
-                if (rippleShape == RippleShape.CIRCLE) CIRCLE_SHADER else ROUNDED_BOX_SHADER
+                when (rippleShape) {
+                    RippleShape.CIRCLE -> CIRCLE_SHADER
+                    RippleShape.ROUNDED_BOX -> ROUNDED_BOX_SHADER
+                    RippleShape.ELLIPSE -> ELLIPSE_SHADER
+                }
 
         private fun subProgress(start: Float, end: Float, progress: Float): Float {
             val min = Math.min(start, end)
