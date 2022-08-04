@@ -74,6 +74,8 @@ oneway interface IInputMethod {
 
     void hideSoftInput(in IBinder hideInputToken, int flags, in ResultReceiver resultReceiver);
 
+    void updateEditorToolType(int toolType);
+
     void changeInputMethodSubtype(in InputMethodSubtype subtype);
 
     void canStartStylusHandwriting(int requestId);

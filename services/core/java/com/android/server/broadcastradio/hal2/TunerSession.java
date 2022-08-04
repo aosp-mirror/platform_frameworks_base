@@ -27,6 +27,7 @@ import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.os.RemoteException;
+import android.util.Log;
 import android.util.MutableBoolean;
 import android.util.MutableInt;
 import android.util.Slog;
@@ -61,8 +62,13 @@ class TunerSession extends ITuner.Stub {
         mLock = Objects.requireNonNull(lock);
     }
 
+    private boolean isDebugEnabled() {
+        return Log.isLoggable(TAG, Log.DEBUG);
+    }
+
     @Override
     public void close() {
+        if (isDebugEnabled()) Slog.d(TAG, "Close");
         close(null);
     }
 
@@ -74,6 +80,7 @@ class TunerSession extends ITuner.Stub {
      * @param error Optional error to send to client before session is closed.
      */
     public void close(@Nullable Integer error) {
+        if (isDebugEnabled()) Slog.d(TAG, "Close on error " + error);
         synchronized (mLock) {
             if (mIsClosed) return;
             if (error != null) {
@@ -104,7 +111,7 @@ class TunerSession extends ITuner.Stub {
         synchronized (mLock) {
             checkNotClosedLocked();
             mDummyConfig = Objects.requireNonNull(config);
-            Slog.i(TAG, "Ignoring setConfiguration - not applicable for broadcastradio HAL 2.x");
+            Slog.i(TAG, "Ignoring setConfiguration - not applicable for broadcastradio HAL 2.0");
             mModule.fanoutAidlCallback(cb -> cb.onConfigurationChanged(config));
         }
     }
@@ -137,6 +144,10 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void step(boolean directionDown, boolean skipSubChannel) throws RemoteException {
+        if (isDebugEnabled()) {
+            Slog.d(TAG, "Step with directionDown " + directionDown
+                    + " skipSubChannel " + skipSubChannel);
+        }
         synchronized (mLock) {
             checkNotClosedLocked();
             int halResult = mHwSession.step(!directionDown);
@@ -146,6 +157,10 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void scan(boolean directionDown, boolean skipSubChannel) throws RemoteException {
+        if (isDebugEnabled()) {
+            Slog.d(TAG, "Scan with directionDown " + directionDown
+                    + " skipSubChannel " + skipSubChannel);
+        }
         synchronized (mLock) {
             checkNotClosedLocked();
             int halResult = mHwSession.scan(!directionDown, skipSubChannel);
@@ -155,6 +170,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void tune(ProgramSelector selector) throws RemoteException {
+        if (isDebugEnabled()) Slog.d(TAG, "Tune with selector " + selector);
         synchronized (mLock) {
             checkNotClosedLocked();
             int halResult = mHwSession.tune(Convert.programSelectorToHal(selector));
@@ -164,6 +180,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void cancel() {
+        Slog.i(TAG, "Cancel");
         synchronized (mLock) {
             checkNotClosedLocked();
             Utils.maybeRethrow(mHwSession::cancel);
@@ -172,23 +189,25 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void cancelAnnouncement() {
-        Slog.i(TAG, "Announcements control doesn't involve cancelling at the HAL level in 2.x");
+        Slog.i(TAG, "Announcements control doesn't involve cancelling at the HAL level in HAL 2.0");
     }
 
     @Override
     public Bitmap getImage(int id) {
+        if (isDebugEnabled()) Slog.d(TAG, "Get image for " + id);
         return mModule.getImage(id);
     }
 
     @Override
     public boolean startBackgroundScan() {
-        Slog.i(TAG, "Explicit background scan trigger is not supported with HAL 2.x");
+        Slog.i(TAG, "Explicit background scan trigger is not supported with HAL 2.0");
         mModule.fanoutAidlCallback(cb -> cb.onBackgroundScanComplete());
         return true;
     }
 
     @Override
     public void startProgramListUpdates(ProgramList.Filter filter) throws RemoteException {
+        if (isDebugEnabled()) Slog.d(TAG, "start programList updates " + filter);
         // If the AIDL client provides a null filter, it wants all updates, so use the most broad
         // filter.
         if (filter == null) {
@@ -247,6 +266,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void stopProgramListUpdates() throws RemoteException {
+        if (isDebugEnabled()) Slog.d(TAG, "Stop programList updates");
         synchronized (mLock) {
             checkNotClosedLocked();
             mProgramInfoCache = null;
@@ -270,7 +290,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public boolean isConfigFlagSet(int flag) {
-        Slog.v(TAG, "isConfigFlagSet " + ConfigFlag.toString(flag));
+        if (isDebugEnabled()) Slog.d(TAG, "Is ConfigFlagSet for " + ConfigFlag.toString(flag));
         synchronized (mLock) {
             checkNotClosedLocked();
 
@@ -292,7 +312,9 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void setConfigFlag(int flag, boolean value) throws RemoteException {
-        Slog.v(TAG, "setConfigFlag " + ConfigFlag.toString(flag) + " = " + value);
+        if (isDebugEnabled()) {
+            Slog.d(TAG, "Set ConfigFlag " + ConfigFlag.toString(flag) + " = " + value);
+        }
         synchronized (mLock) {
             checkNotClosedLocked();
             int halResult = mHwSession.setConfigFlag(flag, value);

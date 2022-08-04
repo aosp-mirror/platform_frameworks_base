@@ -1244,14 +1244,16 @@ public class Typeface {
             nativePtrs[i++] = entry.getValue().native_instance;
             writeString(namesBytes, entry.getKey());
         }
-        int typefacesBytesCount = nativeWriteTypefaces(null, nativePtrs);
         // int (typefacesBytesCount), typefaces, namesBytes
+        final int typefaceBytesCountSize = Integer.BYTES;
+        int typefacesBytesCount = nativeWriteTypefaces(null, typefaceBytesCountSize, nativePtrs);
         SharedMemory sharedMemory = SharedMemory.create(
-                "fontMap", Integer.BYTES + typefacesBytesCount + namesBytes.size());
+                "fontMap", typefaceBytesCountSize + typefacesBytesCount + namesBytes.size());
         ByteBuffer writableBuffer = sharedMemory.mapReadWrite().order(ByteOrder.BIG_ENDIAN);
         try {
             writableBuffer.putInt(typefacesBytesCount);
-            int writtenBytesCount = nativeWriteTypefaces(writableBuffer.slice(), nativePtrs);
+            int writtenBytesCount =
+                    nativeWriteTypefaces(writableBuffer, writableBuffer.position(), nativePtrs);
             if (writtenBytesCount != typefacesBytesCount) {
                 throw new IOException(String.format("Unexpected bytes written: %d, expected: %d",
                         writtenBytesCount, typefacesBytesCount));
@@ -1276,7 +1278,9 @@ public class Typeface {
             @NonNull ByteBuffer buffer, @NonNull Map<String, Typeface> out)
             throws IOException {
         int typefacesBytesCount = buffer.getInt();
-        long[] nativePtrs = nativeReadTypefaces(buffer.slice());
+        // Note: Do not call buffer.slice(), as nativeReadTypefaces() expects
+        // that buffer.address() is page-aligned.
+        long[] nativePtrs = nativeReadTypefaces(buffer, buffer.position());
         if (nativePtrs == null) {
             throw new IOException("Could not read typefaces");
         }
@@ -1598,9 +1602,10 @@ public class Typeface {
     private static native void nativeRegisterGenericFamily(String str, long nativePtr);
 
     private static native int nativeWriteTypefaces(
-            @Nullable ByteBuffer buffer, @NonNull long[] nativePtrs);
+            @Nullable ByteBuffer buffer, int position, @NonNull long[] nativePtrs);
 
-    private static native @Nullable long[] nativeReadTypefaces(@NonNull ByteBuffer buffer);
+    private static native
+            @Nullable long[] nativeReadTypefaces(@NonNull ByteBuffer buffer, int position);
 
     private static native void nativeForceSetStaticFinalField(String fieldName, Typeface typeface);
 

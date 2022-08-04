@@ -74,15 +74,12 @@ public final class AppPredictor {
 
     private static final String TAG = AppPredictor.class.getSimpleName();
 
-
     private final IPredictionManager mPredictionManager;
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private final AtomicBoolean mIsClosed = new AtomicBoolean(false);
 
     private final AppPredictionSessionId mSessionId;
     private final ArrayMap<Callback, CallbackWrapper> mRegisteredCallbacks = new ArrayMap<>();
-
-    private final IBinder mToken = new Binder();
 
     /**
      * Creates a new Prediction client.
@@ -99,7 +96,7 @@ public final class AppPredictor {
         mSessionId = new AppPredictionSessionId(
                 context.getPackageName() + ":" + UUID.randomUUID().toString(), context.getUserId());
         try {
-            mPredictionManager.createPredictionSession(predictionContext, mSessionId, mToken);
+            mPredictionManager.createPredictionSession(predictionContext, mSessionId, getToken());
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to create predictor", e);
             e.rethrowAsRuntimeException();
@@ -323,5 +320,13 @@ public final class AppPredictor {
                 Binder.restoreCallingIdentity(identity);
             }
         }
+    }
+
+    private static class Token {
+        static final IBinder sBinder = new Binder(TAG);
+    }
+
+    private static IBinder getToken() {
+        return Token.sBinder;
     }
 }

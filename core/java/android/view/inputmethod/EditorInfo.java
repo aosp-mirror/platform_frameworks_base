@@ -30,6 +30,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.content.res.Configuration;
+import android.inputmethodservice.InputMethodService;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.LocaleList;
@@ -40,6 +41,7 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.autofill.AutofillId;
 
@@ -564,6 +566,12 @@ public class EditorInfo implements InputType, Parcelable {
     @Nullable
     private SurroundingText mInitialSurroundingText = null;
 
+    /**
+     * Initial {@link MotionEvent#ACTION_UP} tool type {@link MotionEvent#getToolType(int)} that
+     * was used to focus this editor.
+     */
+    private int mInitialToolType = MotionEvent.TOOL_TYPE_UNKNOWN;
+
 
     /**
      * Editors may use this method to provide initial input text to IMEs. As the surrounding text
@@ -937,6 +945,31 @@ public class EditorInfo implements InputType, Parcelable {
     }
 
     /**
+     * Returns the initial {@link MotionEvent#ACTION_UP} tool type
+     * {@link MotionEvent#getToolType(int)} responsible for focus on the current editor.
+     *
+     * @see #setInitialToolType(int)
+     * @see MotionEvent#getToolType(int)
+     * @see InputMethodService#onUpdateEditorToolType(int)
+     * @return toolType {@link MotionEvent#getToolType(int)}.
+     */
+    public int getInitialToolType() {
+        return mInitialToolType;
+    }
+
+    /**
+     * Set the initial {@link MotionEvent#ACTION_UP} tool type {@link MotionEvent#getToolType(int)}.
+     * that brought focus to the view.
+     *
+     * @see #getInitialToolType()
+     * @see MotionEvent#getToolType(int)
+     * @see InputMethodService#onUpdateEditorToolType(int)
+     */
+    public void setInitialToolType(int toolType) {
+        mInitialToolType = toolType;
+    }
+
+    /**
      * Export the state of {@link EditorInfo} into a protocol buffer output stream.
      *
      * @param proto Stream to write the state to
@@ -972,6 +1005,7 @@ public class EditorInfo implements InputType, Parcelable {
                 + " actionId=" + actionId);
         pw.println(prefix + "initialSelStart=" + initialSelStart
                 + " initialSelEnd=" + initialSelEnd
+                + " initialToolType=" + mInitialToolType
                 + " initialCapsMode=0x"
                 + Integer.toHexString(initialCapsMode));
         pw.println(prefix + "hintText=" + hintText
@@ -1006,6 +1040,7 @@ public class EditorInfo implements InputType, Parcelable {
         newEditorInfo.initialSelStart = initialSelStart;
         newEditorInfo.initialSelEnd = initialSelEnd;
         newEditorInfo.initialCapsMode = initialCapsMode;
+        newEditorInfo.mInitialToolType = mInitialToolType;
         newEditorInfo.hintText = TextUtils.stringOrSpannedString(hintText);
         newEditorInfo.label = TextUtils.stringOrSpannedString(label);
         newEditorInfo.packageName = packageName;
@@ -1036,6 +1071,7 @@ public class EditorInfo implements InputType, Parcelable {
         dest.writeInt(initialSelStart);
         dest.writeInt(initialSelEnd);
         dest.writeInt(initialCapsMode);
+        dest.writeInt(mInitialToolType);
         TextUtils.writeToParcel(hintText, dest, flags);
         TextUtils.writeToParcel(label, dest, flags);
         dest.writeString(packageName);
@@ -1072,6 +1108,7 @@ public class EditorInfo implements InputType, Parcelable {
                     res.initialSelStart = source.readInt();
                     res.initialSelEnd = source.readInt();
                     res.initialCapsMode = source.readInt();
+                    res.mInitialToolType = source.readInt();
                     res.hintText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
                     res.label = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
                     res.packageName = source.readString();

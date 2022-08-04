@@ -1501,6 +1501,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Animate the screen brightness when the screen is on or dozing.
         // Skip the animation when the screen is off or suspended or transition to/from VR.
         boolean brightnessAdjusted = false;
+        final boolean brightnessIsTemporary =
+                mAppliedTemporaryBrightness || mAppliedTemporaryAutoBrightnessAdjustment;
         if (!mPendingScreenOff) {
             if (mSkipScreenOnBrightnessRamp) {
                 if (state == Display.STATE_ON) {
@@ -1533,8 +1535,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // level without it being a noticeable jump since any actual content isn't yet visible.
             final boolean isDisplayContentVisible =
                     mColorFadeEnabled && mPowerState.getColorFadeLevel() == 1.0f;
-            final boolean brightnessIsTemporary =
-                    mAppliedTemporaryBrightness || mAppliedTemporaryAutoBrightnessAdjustment;
             // We only want to animate the brightness if it is between 0.0f and 1.0f.
             // brightnessState can contain the values -1.0f and NaN, which we do not want to
             // animate to. To avoid this, we check the value first.
@@ -1607,7 +1607,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             brightnessAdjusted = saveBrightnessInfo(getScreenBrightnessSetting());
         }
 
-        if (brightnessAdjusted) {
+        // Only notify if the brightness adjustment is not temporary (i.e. slider has been released)
+        if (brightnessAdjusted && !brightnessIsTemporary) {
             postBrightnessChangeRunnable();
         }
 

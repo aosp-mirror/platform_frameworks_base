@@ -17,14 +17,12 @@
 
 package com.android.systemui.keyguard.data.quickaffordance
 
-import android.content.Context
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.containeddrawable.ContainedDrawable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -35,11 +33,8 @@ import kotlinx.coroutines.flow.Flow
 class QrCodeScannerKeyguardQuickAffordanceConfig
 @Inject
 constructor(
-    @Application context: Context,
     private val controller: QRCodeScannerController,
 ) : KeyguardQuickAffordanceConfig {
-
-    private val appContext = context.applicationContext
 
     override val state: Flow<KeyguardQuickAffordanceConfig.State> = conflatedCallbackFlow {
         val callback =

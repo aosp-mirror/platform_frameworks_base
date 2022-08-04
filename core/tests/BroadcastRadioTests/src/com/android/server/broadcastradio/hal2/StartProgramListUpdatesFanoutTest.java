@@ -58,7 +58,7 @@ import java.util.List;
 public class StartProgramListUpdatesFanoutTest {
     private static final String TAG = "BroadcastRadioTests.hal2.StartProgramListUpdatesFanout";
 
-    private static final VerificationWithTimeout CB_TIMEOUT = timeout(100);
+    private static final VerificationWithTimeout CB_TIMEOUT = timeout(500);
 
     // Mocks
     @Mock IBroadcastRadio mBroadcastRadioMock;

@@ -50,7 +50,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.recents.RecentTasksController;
-import com.android.wm.shell.startingsurface.StartingWindowController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
 
 import java.io.PrintWriter;
@@ -140,18 +140,18 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     @VisibleForTesting
     KidsModeTaskOrganizer(
-            ITaskOrganizerController taskOrganizerController,
-            ShellExecutor mainExecutor,
-            Handler mainHandler,
             Context context,
+            ITaskOrganizerController taskOrganizerController,
             SyncTransactionQueue syncTransactionQueue,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasks,
-            KidsModeSettingsObserver kidsModeSettingsObserver) {
-        super(taskOrganizerController, mainExecutor, context, /* compatUI= */ null,
-                unfoldAnimationController, recentTasks);
+            KidsModeSettingsObserver kidsModeSettingsObserver,
+            ShellExecutor mainExecutor,
+            Handler mainHandler) {
+        super(/* shellInit= */ null, taskOrganizerController, /* compatUI= */ null,
+                unfoldAnimationController, recentTasks, mainExecutor);
         mContext = context;
         mMainHandler = mainHandler;
         mSyncQueue = syncTransactionQueue;
@@ -161,27 +161,30 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
     }
 
     public KidsModeTaskOrganizer(
-            ShellExecutor mainExecutor,
-            Handler mainHandler,
             Context context,
+            ShellInit shellInit,
             SyncTransactionQueue syncTransactionQueue,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
             Optional<UnfoldAnimationController> unfoldAnimationController,
-            Optional<RecentTasksController> recentTasks) {
-        super(mainExecutor, context, /* compatUI= */ null, unfoldAnimationController, recentTasks);
+            Optional<RecentTasksController> recentTasks,
+            ShellExecutor mainExecutor,
+            Handler mainHandler) {
+        // Note: we don't call super with the shell init because we will be initializing manually
+        super(/* shellInit= */ null, /* compatUI= */ null, unfoldAnimationController, recentTasks,
+                mainExecutor);
         mContext = context;
         mMainHandler = mainHandler;
         mSyncQueue = syncTransactionQueue;
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
+        shellInit.addInitCallback(this::onInit, this);
     }
 
     /**
      * Initializes kids mode status.
      */
-    public void initialize(StartingWindowController startingWindowController) {
-        initStartingWindow(startingWindowController);
+    public void onInit() {
         if (mKidsModeSettingsObserver == null) {
             mKidsModeSettingsObserver = new KidsModeSettingsObserver(mMainHandler, mContext);
         }

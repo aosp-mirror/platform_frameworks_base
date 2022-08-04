@@ -223,6 +223,17 @@ final class IInputMethodInvoker {
     }
 
     @AnyThread
+    boolean updateEditorToolType(int toolType) {
+        try {
+            mTarget.updateEditorToolType(toolType);
+        } catch (RemoteException e) {
+            logRemoteException(e);
+            return false;
+        }
+        return true;
+    }
+
+    @AnyThread
     void changeInputMethodSubtype(InputMethodSubtype subtype) {
         try {
             mTarget.changeInputMethodSubtype(subtype);

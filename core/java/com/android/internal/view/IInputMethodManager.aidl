@@ -55,7 +55,7 @@ interface IInputMethodManager {
     InputMethodSubtype getLastInputMethodSubtype(int userId);
 
     boolean showSoftInput(in IInputMethodClient client, @nullable IBinder windowToken, int flags,
-            in @nullable ResultReceiver resultReceiver, int reason);
+            int lastClickToolType, in @nullable ResultReceiver resultReceiver, int reason);
     boolean hideSoftInput(in IInputMethodClient client, @nullable IBinder windowToken, int flags,
             in @nullable ResultReceiver resultReceiver, int reason);
 

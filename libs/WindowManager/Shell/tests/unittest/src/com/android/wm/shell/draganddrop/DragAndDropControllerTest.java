@@ -50,14 +50,13 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Optional;
 
 /**
  * Tests for the drag and drop controller.
@@ -68,6 +67,8 @@ public class DragAndDropControllerTest extends ShellTestCase {
 
     @Mock
     private Context mContext;
+    @Mock
+    private ShellInit mShellInit;
     @Mock
     private ShellController mShellController;
     @Mock
@@ -88,9 +89,14 @@ public class DragAndDropControllerTest extends ShellTestCase {
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        mController = new DragAndDropController(mContext, mShellController, mDisplayController,
-                mUiEventLogger, mIconProvider, mMainExecutor);
-        mController.initialize(Optional.of(mSplitScreenController));
+        mController = new DragAndDropController(mContext, mShellInit, mShellController,
+                mDisplayController, mUiEventLogger, mIconProvider, mMainExecutor);
+        mController.onInit();
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
     }
 
     @Test

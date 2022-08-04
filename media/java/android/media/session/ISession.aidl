@@ -35,7 +35,7 @@ interface ISession {
     ISessionController getController();
     void setFlags(int flags);
     void setActive(boolean active);
-    void setMediaButtonReceiver(in PendingIntent mbr, String sessionPackageName);
+    void setMediaButtonReceiver(in PendingIntent mbr);
     void setMediaButtonBroadcastReceiver(in ComponentName broadcastReceiver);
     void setLaunchPendingIntent(in PendingIntent pi);
     void destroySession();

@@ -27,7 +27,7 @@ class FakeKeyguardQuickAffordanceRepository : KeyguardQuickAffordanceRepository 
 
     private val modelByPosition =
         mutableMapOf<
-                KeyguardQuickAffordancePosition, MutableStateFlow<KeyguardQuickAffordanceModel>>()
+            KeyguardQuickAffordancePosition, MutableStateFlow<KeyguardQuickAffordanceModel>>()
 
     init {
         KeyguardQuickAffordancePosition.values().forEach { value ->

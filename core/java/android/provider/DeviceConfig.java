@@ -761,6 +761,13 @@ public final class DeviceConfig {
      */
     public static final String NAMESPACE_MEMORY_SAFETY_NATIVE = "memory_safety_native";
 
+    /**
+     * Namespace for wear OS platform features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_WEAR = "wear";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =

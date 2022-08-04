@@ -305,7 +305,8 @@ void MinikinFontSkiaFactory::write(minikin::BufferWriter* writer,
     }
 }
 
-static jint Typeface_writeTypefaces(JNIEnv *env, jobject, jobject buffer, jlongArray faceHandles) {
+static jint Typeface_writeTypefaces(JNIEnv* env, jobject, jobject buffer, jint position,
+                                    jlongArray faceHandles) {
     MinikinFontSkiaFactory::init();
     ScopedLongArrayRO faces(env, faceHandles);
     std::vector<Typeface*> typefaces;
@@ -314,7 +315,12 @@ static jint Typeface_writeTypefaces(JNIEnv *env, jobject, jobject buffer, jlongA
         typefaces.push_back(toTypeface(faces[i]));
     }
     void* addr = buffer == nullptr ? nullptr : env->GetDirectBufferAddress(buffer);
-    minikin::BufferWriter writer(addr);
+    if (addr != nullptr &&
+        reinterpret_cast<intptr_t>(addr) % minikin::BufferReader::kMaxAlignment != 0) {
+        ALOGE("addr (%p) must be aligned at kMaxAlignment, but it was not.", addr);
+        return 0;
+    }
+    minikin::BufferWriter writer(addr, position);
     std::vector<std::shared_ptr<minikin::FontCollection>> fontCollections;
     std::unordered_map<std::shared_ptr<minikin::FontCollection>, size_t> fcToIndex;
     for (Typeface* typeface : typefaces) {
@@ -334,11 +340,18 @@ static jint Typeface_writeTypefaces(JNIEnv *env, jobject, jobject buffer, jlongA
     return static_cast<jint>(writer.size());
 }
 
-static jlongArray Typeface_readTypefaces(JNIEnv *env, jobject, jobject buffer) {
+static jlongArray Typeface_readTypefaces(JNIEnv* env, jobject, jobject buffer, jint position) {
     MinikinFontSkiaFactory::init();
     void* addr = buffer == nullptr ? nullptr : env->GetDirectBufferAddress(buffer);
-    if (addr == nullptr) return nullptr;
-    minikin::BufferReader reader(addr);
+    if (addr == nullptr) {
+        ALOGE("Passed a null buffer.");
+        return nullptr;
+    }
+    if (reinterpret_cast<intptr_t>(addr) % minikin::BufferReader::kMaxAlignment != 0) {
+        ALOGE("addr (%p) must be aligned at kMaxAlignment, but it was not.", addr);
+        return nullptr;
+    }
+    minikin::BufferReader reader(addr, position);
     std::vector<std::shared_ptr<minikin::FontCollection>> fontCollections =
             minikin::FontCollection::readVector(&reader);
     uint32_t typefaceCount = reader.read<uint32_t>();
@@ -356,7 +369,6 @@ static jlongArray Typeface_readTypefaces(JNIEnv *env, jobject, jobject buffer) {
     env->SetLongArrayRegion(result, 0, typefaceCount, faceHandles.data());
     return result;
 }
-
 
 static void Typeface_forceSetStaticFinalField(JNIEnv *env, jclass cls, jstring fieldName,
         jobject typeface) {
@@ -417,8 +429,8 @@ static const JNINativeMethod gTypefaceMethods[] = {
         {"nativeGetSupportedAxes", "(J)[I", (void*)Typeface_getSupportedAxes},
         {"nativeRegisterGenericFamily", "(Ljava/lang/String;J)V",
          (void*)Typeface_registerGenericFamily},
-        {"nativeWriteTypefaces", "(Ljava/nio/ByteBuffer;[J)I", (void*)Typeface_writeTypefaces},
-        {"nativeReadTypefaces", "(Ljava/nio/ByteBuffer;)[J", (void*)Typeface_readTypefaces},
+        {"nativeWriteTypefaces", "(Ljava/nio/ByteBuffer;I[J)I", (void*)Typeface_writeTypefaces},
+        {"nativeReadTypefaces", "(Ljava/nio/ByteBuffer;I)[J", (void*)Typeface_readTypefaces},
         {"nativeForceSetStaticFinalField", "(Ljava/lang/String;Landroid/graphics/Typeface;)V",
          (void*)Typeface_forceSetStaticFinalField},
         {"nativeGetFamilySize", "(J)I", (void*)Typeface_getFamilySize},
