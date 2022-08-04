@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2021 The Android Open Source Project
+  Copyright (C) 2022 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -66,6 +66,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="2"
+            android:hyphenationFrequency="normalFast"
+            android:lineBreakWordStyle="phrase"
             android:textAppearance="?android:attr/textAppearanceListItem"/>
 
         <LinearLayout
@@ -80,6 +82,8 @@
                 android:layout_weight="1"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textAlignment="viewStart"
+                android:hyphenationFrequency="normalFast"
+                android:lineBreakWordStyle="phrase"
                 android:textColor="?android:attr/textColorSecondary"/>
 
             <TextView
@@ -97,7 +101,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/selector_extra_widget_container"
+        android:id="@+id/radio_extra_widget_container"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="horizontal"
@@ -109,7 +113,7 @@
             android:layout_marginBottom="16dp"
             android:background="?android:attr/dividerVertical" />
         <ImageView
-            android:id="@+id/selector_extra_widget"
+            android:id="@+id/radio_extra_widget"
             android:layout_width="match_parent"
             android:minWidth="@dimen/two_target_min_width"
             android:layout_height="fill_parent"
