@@ -43,6 +43,8 @@ import java.util.List;
 public class A2dpProfile implements LocalBluetoothProfile {
     private static final String TAG = "A2dpProfile";
 
+    private static final int SOURCE_CODEC_TYPE_OPUS = 6; // TODO remove in U
+
     private Context mContext;
 
     private BluetoothA2dp mService;
@@ -328,6 +330,12 @@ public class A2dpProfile implements LocalBluetoothProfile {
            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC:
                index = 5;
                break;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LC3:
+                index = 6;
+                break;
+            case SOURCE_CODEC_TYPE_OPUS: // TODO update in U
+                index = 7;
+                break;
            }
 
         if (index < 0) {
