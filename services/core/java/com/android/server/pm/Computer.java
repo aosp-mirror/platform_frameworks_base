@@ -500,6 +500,13 @@ public interface Computer extends PackageDataSnapshot {
     boolean isComponentEffectivelyEnabled(@NonNull ComponentInfo componentInfo,
             @UserIdInt int userId);
 
+    /**
+     * @return true if the runtime app user enabled state and the install-time app manifest enabled
+     * state are both effectively enabled for the given app. Or if the app cannot be found,
+     * returns false.
+     */
+    boolean isApplicationEffectivelyEnabled(@NonNull String packageName, @UserIdInt int userId);
+
     @Nullable
     KeySet getKeySetByAlias(@NonNull String packageName, @NonNull String alias);
 

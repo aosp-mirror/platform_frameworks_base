@@ -25,6 +25,7 @@ import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
 import static android.os.PowerWhitelistManager.REASON_PACKAGE_VERIFIER;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import static com.android.server.pm.PackageManagerService.CHECK_PENDING_INTEGRITY_VERIFICATION;
@@ -77,6 +78,7 @@ import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 final class VerifyingSession {
@@ -353,7 +355,7 @@ final class VerifyingSession {
         }
         final int verifierUserId = verifierUser.getIdentifier();
 
-        String[] requiredVerifierPackages = mPm.mRequiredVerifierPackages;
+        List<String> requiredVerifierPackages = Arrays.asList(mPm.mRequiredVerifierPackages);
         boolean requiredVerifierPackagesOverridden = false;
 
         // Allow verifier override for ADB installations which could already be unverified using
@@ -377,8 +379,7 @@ final class VerifyingSession {
                     // are not adding a new way to disable verifications.
                     if (!isAdbVerificationEnabled(pkgLite, verifierUserId,
                             requestedDisableVerification)) {
-                        requiredVerifierPackages = adbVerifierOverridePackages.toArray(
-                                new String[adbVerifierOverridePackages.size()]);
+                        requiredVerifierPackages = adbVerifierOverridePackages;
                         requiredVerifierPackagesOverridden = true;
                     }
                 }
@@ -396,6 +397,16 @@ final class VerifyingSession {
          * do, then we'll defer to them to verify the packages.
          */
         final Computer snapshot = mPm.snapshotComputer();
+
+        final int numRequiredVerifierPackages = requiredVerifierPackages.size();
+        for (int i = numRequiredVerifierPackages - 1; i >= 0; i--) {
+            if (!snapshot.isApplicationEffectivelyEnabled(requiredVerifierPackages.get(i),
+                    SYSTEM_UID)) {
+                Slog.w(TAG,
+                        "Required verifier: " + requiredVerifierPackages.get(i) + " is disabled");
+                requiredVerifierPackages.remove(i);
+            }
+        }
 
         for (String requiredVerifierPackage : requiredVerifierPackages) {
             final int requiredUid = snapshot.getPackageUid(requiredVerifierPackage,
@@ -514,7 +525,7 @@ final class VerifyingSession {
             }
         }
 
-        if (requiredVerifierPackages.length == 0) {
+        if (requiredVerifierPackages.size() == 0) {
             Slog.e(TAG, "No required verifiers");
             return;
         }
@@ -532,7 +543,7 @@ final class VerifyingSession {
 
             final Intent requiredIntent;
             final String receiverPermission;
-            if (!requiredVerifierPackagesOverridden || requiredVerifierPackages.length == 1) {
+            if (!requiredVerifierPackagesOverridden || requiredVerifierPackages.size() == 1) {
                 // Prod code OR test code+single verifier.
                 requiredIntent = new Intent(verification);
                 if (!requiredVerifierPackagesOverridden) {
@@ -657,7 +668,7 @@ final class VerifyingSession {
      * @return true if verification should be performed
      */
     private boolean isVerificationEnabled(PackageInfoLite pkgInfoLite, int userId,
-            String[] requiredVerifierPackages) {
+            List<String> requiredVerifierPackages) {
         if (!DEFAULT_VERIFY_ENABLE) {
             return false;
         }

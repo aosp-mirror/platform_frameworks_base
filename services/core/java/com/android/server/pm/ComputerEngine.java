@@ -5412,6 +5412,26 @@ public class ComputerEngine implements Computer {
         }
     }
 
+    @Override
+    public boolean isApplicationEffectivelyEnabled(@NonNull String packageName,
+            @UserIdInt int userId) {
+        try {
+            int appEnabledSetting = mSettings.getApplicationEnabledSetting(packageName, userId);
+            if (appEnabledSetting == COMPONENT_ENABLED_STATE_DEFAULT) {
+                final AndroidPackage pkg = getPackage(packageName);
+                if (pkg == null) {
+                    // Should not happen because getApplicationEnabledSetting would have thrown
+                    return false;
+                }
+                return pkg.isEnabled();
+            } else {
+                return appEnabledSetting == COMPONENT_ENABLED_STATE_ENABLED;
+            }
+        } catch (PackageManager.NameNotFoundException ignored) {
+            return false;
+        }
+    }
+
     @Nullable
     @Override
     public KeySet getKeySetByAlias(@NonNull String packageName, @NonNull String alias) {
