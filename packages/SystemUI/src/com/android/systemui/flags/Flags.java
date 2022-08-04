@@ -228,6 +228,10 @@ public class Flags {
     public static final BooleanFlag NEW_BACK_AFFORDANCE =
             new BooleanFlag(1203, false /* default */, false /* teamfood */);
 
+    // 1300 - screenshots
+
+    public static final BooleanFlag SCREENSHOT_REQUEST_PROCESSOR = new BooleanFlag(1300, false);
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |
