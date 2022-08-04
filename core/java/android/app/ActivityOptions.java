@@ -1454,6 +1454,11 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /** @hide */
+    public void setRemoteTransition(@Nullable RemoteTransition remoteTransition) {
+        mRemoteTransition = remoteTransition;
+    }
+
+    /** @hide */
     public static ActivityOptions fromBundle(Bundle bOptions) {
         return bOptions != null ? new ActivityOptions(bOptions) : null;
     }
