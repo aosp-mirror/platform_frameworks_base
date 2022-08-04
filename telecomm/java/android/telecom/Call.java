@@ -168,6 +168,18 @@ public final class Call {
     public static final String AVAILABLE_PHONE_ACCOUNTS = "selectPhoneAccountAccounts";
 
     /**
+     * Extra key intended for {@link InCallService}s that notify the user of an incoming call. When
+     * EXTRA_IS_SUPPRESSED_BY_DO_NOT_DISTURB returns true, the {@link InCallService} should not
+     * interrupt the user of the incoming call because the call is being suppressed by Do Not
+     * Disturb settings.
+     *
+     * This extra will be removed from the {@link Call} object for {@link InCallService}s that do
+     * not hold the {@link android.Manifest.permission#READ_CONTACTS} permission.
+     */
+    public static final String EXTRA_IS_SUPPRESSED_BY_DO_NOT_DISTURB =
+            "android.telecom.extra.IS_SUPPRESSED_BY_DO_NOT_DISTURB";
+
+    /**
      * Key for extra used to pass along a list of {@link PhoneAccountSuggestion}s to the in-call
      * UI when a call enters the {@link #STATE_SELECT_PHONE_ACCOUNT} state. The list included here
      * will have the same length and be in the same order as the list passed with

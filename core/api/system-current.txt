@@ -12327,6 +12327,8 @@ package android.telecom {
     field public static final int CS_BOUND = 6; // 0x6
     field public static final int DIRECT_TO_VM_FINISHED = 103; // 0x67
     field public static final int DIRECT_TO_VM_INITIATED = 102; // 0x66
+    field public static final int DND_CHECK_COMPLETED = 110; // 0x6e
+    field public static final int DND_CHECK_INITIATED = 109; // 0x6d
     field public static final int FILTERING_COMPLETED = 107; // 0x6b
     field public static final int FILTERING_INITIATED = 106; // 0x6a
     field public static final int FILTERING_TIMED_OUT = 108; // 0x6c
@@ -12366,6 +12368,7 @@ package android.telecom {
     field @NonNull public static final android.os.Parcelable.Creator<android.telecom.ParcelableCallAnalytics.EventTiming> CREATOR;
     field public static final int DIRECT_TO_VM_FINISHED_TIMING = 8; // 0x8
     field public static final int DISCONNECT_TIMING = 2; // 0x2
+    field public static final int DND_PRE_CALL_PRE_CHECK_TIMING = 12; // 0xc
     field public static final int FILTERING_COMPLETED_TIMING = 10; // 0xa
     field public static final int FILTERING_TIMED_OUT_TIMING = 11; // 0xb
     field public static final int HOLD_TIMING = 3; // 0x3
