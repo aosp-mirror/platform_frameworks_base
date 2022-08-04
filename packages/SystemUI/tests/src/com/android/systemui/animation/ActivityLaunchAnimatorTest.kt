@@ -159,7 +159,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     @Test
     fun doesNotStartIfAnimationIsCancelled() {
         val runner = activityLaunchAnimator.createRunner(controller)
-        runner.onAnimationCancelled()
+        runner.onAnimationCancelled(false /* isKeyguardOccluded */)
         runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
 
         waitForIdleSync()

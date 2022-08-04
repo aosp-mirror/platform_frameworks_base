@@ -65,6 +65,41 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     })
     private @interface Position {}
 
+    /**
+     * Result of {@link #expandSplitContainerIfNeeded(WindowContainerTransaction, SplitContainer,
+     * Activity, Activity, Intent)}.
+     * No need to expand the splitContainer because screen is big enough to
+     * {@link #shouldShowSideBySide(Rect, SplitRule, Pair)} and minimum dimensions is satisfied.
+     */
+    static final int RESULT_NOT_EXPANDED = 0;
+    /**
+     * Result of {@link #expandSplitContainerIfNeeded(WindowContainerTransaction, SplitContainer,
+     * Activity, Activity, Intent)}.
+     * The splitContainer should be expanded. It is usually because minimum dimensions is not
+     * satisfied.
+     * @see #shouldShowSideBySide(Rect, SplitRule, Pair)
+     */
+    static final int RESULT_EXPANDED = 1;
+    /**
+     * Result of {@link #expandSplitContainerIfNeeded(WindowContainerTransaction, SplitContainer,
+     * Activity, Activity, Intent)}.
+     * The splitContainer should be expanded, but the client side hasn't received
+     * {@link android.window.TaskFragmentInfo} yet. Fallback to create new expanded SplitContainer
+     * instead.
+     */
+    static final int RESULT_EXPAND_FAILED_NO_TF_INFO = 2;
+
+    /**
+     * Result of {@link #expandSplitContainerIfNeeded(WindowContainerTransaction, SplitContainer,
+     * Activity, Activity, Intent)}
+     */
+    @IntDef(value = {
+            RESULT_NOT_EXPANDED,
+            RESULT_EXPANDED,
+            RESULT_EXPAND_FAILED_NO_TF_INFO,
+    })
+    private @interface ResultCode {}
+
     private final SplitController mController;
 
     SplitPresenter(@NonNull Executor executor, SplitController controller) {
@@ -399,15 +434,19 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     /**
      * Expands the split container if the current split bounds are smaller than the Activity or
      * Intent that is added to the container.
+     *
+     * @return the {@link ResultCode} based on {@link #shouldShowSideBySide(Rect, SplitRule, Pair)}
+     * and if {@link android.window.TaskFragmentInfo} has reported to the client side.
      */
-    void expandSplitContainerIfNeeded(@NonNull WindowContainerTransaction wct,
+    @ResultCode
+    int expandSplitContainerIfNeeded(@NonNull WindowContainerTransaction wct,
             @NonNull SplitContainer splitContainer, @NonNull Activity primaryActivity,
             @Nullable Activity secondaryActivity, @Nullable Intent secondaryIntent) {
         if (secondaryActivity == null && secondaryIntent == null) {
             throw new IllegalArgumentException("Either secondaryActivity or secondaryIntent must be"
                     + " non-null.");
         }
-        final Rect taskBounds = getTaskBoundsFromActivity(primaryActivity);
+        final Rect taskBounds = getParentContainerBounds(primaryActivity);
         final Pair<Size, Size> minDimensionsPair;
         if (secondaryActivity != null) {
             minDimensionsPair = getActivitiesMinDimensionsPair(primaryActivity, secondaryActivity);
@@ -417,11 +456,17 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         }
         // Expand the splitContainer if minimum dimensions are not satisfied.
         if (!shouldShowSideBySide(taskBounds, splitContainer.getSplitRule(), minDimensionsPair)) {
-            expandTaskFragment(wct, splitContainer.getPrimaryContainer()
-                    .getTaskFragmentToken());
-            expandTaskFragment(wct, splitContainer.getSecondaryContainer()
-                    .getTaskFragmentToken());
+            // If the client side hasn't received TaskFragmentInfo yet, we can't change TaskFragment
+            // bounds. Return failure to create a new SplitContainer which fills task bounds.
+            if (splitContainer.getPrimaryContainer().getInfo() == null
+                    || splitContainer.getSecondaryContainer().getInfo() == null) {
+                return RESULT_EXPAND_FAILED_NO_TF_INFO;
+            }
+            expandTaskFragment(wct, splitContainer.getPrimaryContainer().getTaskFragmentToken());
+            expandTaskFragment(wct, splitContainer.getSecondaryContainer().getTaskFragmentToken());
+            return RESULT_EXPANDED;
         }
+        return RESULT_NOT_EXPANDED;
     }
 
     static boolean shouldShowSideBySide(@NonNull Rect parentBounds, @NonNull SplitRule rule) {
@@ -593,11 +638,19 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         if (container != null) {
             return getParentContainerBounds(container);
         }
-        return getTaskBoundsFromActivity(activity);
+        // Obtain bounds from Activity instead because the Activity hasn't been embedded yet.
+        return getNonEmbeddedActivityBounds(activity);
     }
 
+    /**
+     * Obtains the bounds from a non-embedded Activity.
+     * <p>
+     * Note that callers should use {@link #getParentContainerBounds(Activity)} instead for most
+     * cases unless we want to obtain task bounds before
+     * {@link TaskContainer#isTaskBoundsInitialized()}.
+     */
     @NonNull
-    static Rect getTaskBoundsFromActivity(@NonNull Activity activity) {
+    static Rect getNonEmbeddedActivityBounds(@NonNull Activity activity) {
         final WindowConfiguration windowConfiguration =
                 activity.getResources().getConfiguration().windowConfiguration;
         if (!activity.isInMultiWindowMode()) {

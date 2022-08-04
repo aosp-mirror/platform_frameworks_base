@@ -334,18 +334,7 @@ public class SmartspacePerUserService extends
         @NonNull
         private final SmartspaceConfig mSmartspaceConfig;
         private final RemoteCallbackList<ISmartspaceCallback> mCallbacks =
-                new RemoteCallbackList<ISmartspaceCallback>() {
-                    @Override
-                    public void onCallbackDied(ISmartspaceCallback callback) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "Binder died for session Id=" + mSessionId
-                                    + " and callback=" + callback.asBinder());
-                        }
-                        if (mCallbacks.getRegisteredCallbackCount() == 0) {
-                            destroy();
-                        }
-                    }
-                };
+                new RemoteCallbackList<>();
 
         SmartspaceSessionInfo(
                 @NonNull final SmartspaceSessionId id,

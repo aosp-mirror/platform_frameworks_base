@@ -20,14 +20,18 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.biometrics.BiometricConstants;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.function.BooleanSupplier;
 
 /**
  * Contains all the necessary information for a HAL operation.
@@ -84,6 +88,8 @@ public class BiometricSchedulerOperation {
     private final BaseClientMonitor mClientMonitor;
     @Nullable
     private final ClientMonitorCallback mClientCallback;
+    @NonNull
+    private final BooleanSupplier mIsDebuggable;
     @Nullable
     private ClientMonitorCallback mOnStartCallback;
     @OperationState
@@ -99,14 +105,33 @@ public class BiometricSchedulerOperation {
         this(clientMonitor, callback, STATE_WAITING_IN_QUEUE);
     }
 
+    @VisibleForTesting
+    BiometricSchedulerOperation(
+            @NonNull BaseClientMonitor clientMonitor,
+            @Nullable ClientMonitorCallback callback,
+            @NonNull BooleanSupplier isDebuggable
+    ) {
+        this(clientMonitor, callback, STATE_WAITING_IN_QUEUE, isDebuggable);
+    }
+
     protected BiometricSchedulerOperation(
             @NonNull BaseClientMonitor clientMonitor,
             @Nullable ClientMonitorCallback callback,
             @OperationState int state
     ) {
+        this(clientMonitor, callback, state, Build::isDebuggable);
+    }
+
+    private BiometricSchedulerOperation(
+            @NonNull BaseClientMonitor clientMonitor,
+            @Nullable ClientMonitorCallback callback,
+            @OperationState int state,
+            @NonNull BooleanSupplier isDebuggable
+    ) {
         mClientMonitor = clientMonitor;
         mClientCallback = callback;
         mState = state;
+        mIsDebuggable = isDebuggable;
         mCancelWatchdog = () -> {
             if (!isFinished()) {
                 Slog.e(TAG, "[Watchdog Triggered]: " + this);
@@ -144,13 +169,19 @@ public class BiometricSchedulerOperation {
      * @return if this operation started
      */
     public boolean start(@NonNull ClientMonitorCallback callback) {
-        checkInState("start",
+        if (errorWhenNoneOf("start",
                 STATE_WAITING_IN_QUEUE,
                 STATE_WAITING_FOR_COOKIE,
-                STATE_WAITING_IN_QUEUE_CANCELING);
+                STATE_WAITING_IN_QUEUE_CANCELING)) {
+            return false;
+        }
 
         if (mClientMonitor.getCookie() != 0) {
-            throw new IllegalStateException("operation requires cookie");
+            String err = "operation requires cookie";
+            if (mIsDebuggable.getAsBoolean()) {
+                throw new IllegalStateException(err);
+            }
+            Slog.e(TAG, err);
         }
 
         return doStart(callback);
@@ -164,13 +195,15 @@ public class BiometricSchedulerOperation {
      * @return if this operation started
      */
     public boolean startWithCookie(@NonNull ClientMonitorCallback callback, int cookie) {
-        checkInState("start",
-                STATE_WAITING_IN_QUEUE,
-                STATE_WAITING_FOR_COOKIE,
-                STATE_WAITING_IN_QUEUE_CANCELING);
-
         if (mClientMonitor.getCookie() != cookie) {
             Slog.e(TAG, "Mismatched cookie for operation: " + this + ", received: " + cookie);
+            return false;
+        }
+
+        if (errorWhenNoneOf("start",
+                STATE_WAITING_IN_QUEUE,
+                STATE_WAITING_FOR_COOKIE,
+                STATE_WAITING_IN_QUEUE_CANCELING)) {
             return false;
         }
 
@@ -217,10 +250,12 @@ public class BiometricSchedulerOperation {
      * immediately abort the operation and notify the client that it has finished unsuccessfully.
      */
     public void abort() {
-        checkInState("cannot abort a non-pending operation",
+        if (errorWhenNoneOf("abort",
                 STATE_WAITING_IN_QUEUE,
                 STATE_WAITING_FOR_COOKIE,
-                STATE_WAITING_IN_QUEUE_CANCELING);
+                STATE_WAITING_IN_QUEUE_CANCELING)) {
+            return;
+        }
 
         if (isHalOperation()) {
             ((HalClientMonitor<?>) mClientMonitor).unableToStart();
@@ -247,7 +282,9 @@ public class BiometricSchedulerOperation {
      *                 the callback used from {@link #start(ClientMonitorCallback)} is used)
      */
     public void cancel(@NonNull Handler handler, @NonNull ClientMonitorCallback callback) {
-        checkNotInState("cancel", STATE_FINISHED);
+        if (errorWhenOneOf("cancel", STATE_FINISHED)) {
+            return;
+        }
 
         final int currentState = mState;
         if (!isInterruptable()) {
@@ -402,21 +439,28 @@ public class BiometricSchedulerOperation {
         return mClientMonitor;
     }
 
-    private void checkNotInState(String message, @OperationState int... states) {
-        for (int state : states) {
-            if (mState == state) {
-                throw new IllegalStateException(message + ": illegal state= " + state);
+    private boolean errorWhenOneOf(String op, @OperationState int... states) {
+        final boolean isError = ArrayUtils.contains(states, mState);
+        if (isError) {
+            String err = op + ": mState must not be " + mState;
+            if (mIsDebuggable.getAsBoolean()) {
+                throw new IllegalStateException(err);
             }
+            Slog.e(TAG, err);
         }
+        return isError;
     }
 
-    private void checkInState(String message, @OperationState int... states) {
-        for (int state : states) {
-            if (mState == state) {
-                return;
+    private boolean errorWhenNoneOf(String op, @OperationState int... states) {
+        final boolean isError = !ArrayUtils.contains(states, mState);
+        if (isError) {
+            String err = op + ": mState=" + mState + " must be one of " + Arrays.toString(states);
+            if (mIsDebuggable.getAsBoolean()) {
+                throw new IllegalStateException(err);
             }
+            Slog.e(TAG, err);
         }
-        throw new IllegalStateException(message + ": illegal state= " + mState);
+        return isError;
     }
 
     @Override

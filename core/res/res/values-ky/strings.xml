@@ -626,7 +626,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Жүзүнөн таанып ачуу"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Жүзүнөн таанып ачуу функциясында маселе келип чыкты"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Жүзүңүздүн үлгүсүн өчүрүү үчүн басып, жаңы үлгүнү кошуңуз"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Жүзүнөн таанып ачууну жөндөө"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Жүзүнөн таанып ачууну тууралоо"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Телефонуңузду карап туруп эле кулпусун ачып алыңыз"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Жүзүнөн таанып ачуу функциясын колдонуу үчүн Жөндөөлөр &gt; Купуялык бөлүмүнө өтүп, "<b>"Камераны колдонууну"</b>" күйгүзүңүз"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Кулпусун ачуунун көбүрөөк жолдорун жөндөңүз"</string>
@@ -1229,7 +1229,7 @@
     <string name="smv_process" msgid="1398801497130695446">"<xliff:g id="PROCESS">%1$s</xliff:g> процесси өзүнүн мажбурланган StrictMode саясатын бузуп койду."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Телефон жаңырууда…"</string>
     <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"Планшет жаңыртылууда…"</string>
-    <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"Түзмөк жаңыртылууда…"</string>
+    <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"Түзмөк жаңырууда…"</string>
     <string name="android_start_title" product="default" msgid="4036708252778757652">"Телефон күйгүзүлүүдө…"</string>
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android жүргүзүлүүдө…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Планшет күйгүзүлүүдө…"</string>

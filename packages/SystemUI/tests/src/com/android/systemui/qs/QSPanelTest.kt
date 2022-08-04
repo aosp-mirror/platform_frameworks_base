@@ -150,6 +150,14 @@ class QSPanelTest : SysuiTestCase() {
         assertThat(footer.isVisibleToUser).isTrue()
     }
 
+    @Test
+    fun testBottomPadding() {
+        val padding = 10
+        context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_bottom, padding)
+        qsPanel.updatePadding()
+        assertThat(qsPanel.paddingBottom).isEqualTo(padding)
+    }
+
     private infix fun View.isLeftOf(other: View): Boolean {
         val rect = Rect()
         getBoundsOnScreen(rect)

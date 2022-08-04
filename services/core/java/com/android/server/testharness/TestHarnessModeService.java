@@ -189,6 +189,7 @@ public class TestHarnessModeService extends SystemService {
         if (adbManager.getAdbTempKeysFile() != null) {
             writeBytesToFile(persistentData.mAdbTempKeys, adbManager.getAdbTempKeysFile().toPath());
         }
+        adbManager.notifyKeyFilesUpdated();
     }
 
     private void configureUser() {
