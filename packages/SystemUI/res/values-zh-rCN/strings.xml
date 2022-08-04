@@ -291,7 +291,7 @@
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"颜色反转功能已开启。"</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"移动热点已关闭。"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"移动热点已开启。"</string>
-    <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"屏幕投射已停止。"</string>
+    <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"屏幕投放已停止。"</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6422896967647049692">"工作模式已暂停。"</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"工作模式已开启。"</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"流量节省程序已关闭。"</string>
@@ -375,10 +375,10 @@
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"WLAN 已开启"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"没有 WLAN 网络"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"正在开启…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"屏幕投射"</string>
-    <string name="quick_settings_casting" msgid="1435880708719268055">"正在投射"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"屏幕投放"</string>
+    <string name="quick_settings_casting" msgid="1435880708719268055">"正在投放"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"未命名设备"</string>
-    <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"已准备好投射"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"已准备好投放"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"没有可用设备"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"未连接到 WLAN 网络"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"亮度"</string>
@@ -506,10 +506,10 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"省电模式已开启"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"降低性能并限制后台流量"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"关闭省电模式"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"在录制或投射内容时，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>将可获取您屏幕上显示或设备中播放的所有信息，其中包括密码、付款明细、照片、消息以及您播放的音频等信息。"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"在录制或投射内容时，提供此功能的服务将可获取您屏幕上显示或设备中播放的所有信息，其中包括密码、付款明细、照片、消息以及您播放的音频等信息。"</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"要开始录制或投射内容吗？"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"要开始使用<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>录制或投射内容吗？"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"在录制或投放内容时，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>将可获取您屏幕上显示或设备中播放的所有信息，其中包括密码、付款明细、照片、消息以及您播放的音频等信息。"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"在录制或投放内容时，提供此功能的服务将可获取您屏幕上显示或设备中播放的所有信息，其中包括密码、付款明细、照片、消息以及您播放的音频等信息。"</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"要开始录制或投放内容吗？"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"要开始使用<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>录制或投放内容吗？"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"不再显示"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"全部清除"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
