@@ -229,7 +229,7 @@ class SplitScreenHelper(
                 ?.layerStackSpace
                 ?: error("Display not found")
             val dividerBar = device.wait(Until.findObject(dividerBarSelector), TIMEOUT_MS)
-            dividerBar.drag(Point(displayBounds.width, displayBounds.width))
+            dividerBar.drag(Point(displayBounds.width * 4 / 5, displayBounds.height * 4 / 5))
         }
 
         fun doubleTapDividerToSwitch(device: UiDevice) {
