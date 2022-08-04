@@ -643,7 +643,8 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image,
     return ACQUIRE_SUCCESS;
 }
 
-static jint ImageReader_detachImage(JNIEnv* env, jobject thiz, jobject image) {
+static jint ImageReader_detachImage(JNIEnv* env, jobject thiz, jobject image,
+                                    jboolean throwISEOnly) {
     ALOGV("%s:", __FUNCTION__);
     JNIImageReaderContext* ctx = ImageReader_getContext(env, thiz);
     if (ctx == NULL) {
@@ -666,8 +667,12 @@ static jint ImageReader_detachImage(JNIEnv* env, jobject thiz, jobject image) {
     res = bufferConsumer->detachBuffer(buffer->mSlot);
     if (res != OK) {
         ALOGE("Image detach failed: %s (%d)!!!", strerror(-res), res);
-        jniThrowRuntimeException(env,
-                "nativeDetachImage failed for image!!!");
+        if ((bool) throwISEOnly) {
+            jniThrowException(env, "java/lang/IllegalStateException",
+                    "nativeDetachImage failed for image!!!");
+        } else {
+             jniThrowRuntimeException(env, "nativeDetachImage failed for image!!!");
+        }
         return res;
     }
     return OK;
@@ -965,7 +970,7 @@ static const JNINativeMethod gImageReaderMethods[] = {
     {"nativeReleaseImage",     "(Landroid/media/Image;)V",   (void*)ImageReader_imageRelease },
     {"nativeImageSetup",       "(Landroid/media/Image;Z)I",   (void*)ImageReader_imageSetup },
     {"nativeGetSurface",       "()Landroid/view/Surface;",   (void*)ImageReader_getSurface },
-    {"nativeDetachImage",      "(Landroid/media/Image;)I",   (void*)ImageReader_detachImage },
+    {"nativeDetachImage",      "(Landroid/media/Image;Z)I",   (void*)ImageReader_detachImage },
     {"nativeCreateImagePlanes",
         "(ILandroid/graphics/GraphicBuffer;IIIIII)[Landroid/media/ImageReader$ImagePlane;",
                                                              (void*)ImageReader_createImagePlanes },
