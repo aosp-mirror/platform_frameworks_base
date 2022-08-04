@@ -39,6 +39,7 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
@@ -112,7 +113,7 @@ public class NavBarHelperTest extends SysuiTestCase {
         mNavBarHelper = new NavBarHelper(mContext, mAccessibilityManager,
                 mAccessibilityButtonModeObserver, mAccessibilityButtonTargetObserver,
                 mSystemActions, mOverviewProxyService, mAssistManagerLazy,
-                () -> Optional.of(mock(CentralSurfaces.class)),
+                () -> Optional.of(mock(CentralSurfaces.class)), mock(KeyguardViewController.class),
                 mNavigationModeController, mUserTracker, mDumpManager);
 
     }
