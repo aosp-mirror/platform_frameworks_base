@@ -35,12 +35,12 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.eq
-import org.mockito.Mockito.reset
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -63,6 +63,7 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
         controller = WiredChargingRippleController(
                 commandRegistry, batteryController, configurationController,
                 featureFlags, context, windowManager, systemClock, uiEventLogger)
+        rippleView.setupShader()
         controller.rippleView = rippleView // Replace the real ripple view with a mock instance
         controller.registerCallbacks()
     }
