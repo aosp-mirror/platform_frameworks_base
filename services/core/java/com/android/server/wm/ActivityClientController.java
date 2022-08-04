@@ -1020,6 +1020,7 @@ class ActivityClientController extends IActivityClientController.Stub {
     public boolean showAssistFromActivity(IBinder token, Bundle args) {
         final long ident = Binder.clearCallingIdentity();
         try {
+            final String callingAttributionTag;
             synchronized (mGlobalLock) {
                 final ActivityRecord caller = ActivityRecord.forTokenLocked(token);
                 final Task topRootTask = mService.getTopDisplayFocusedRootTask();
@@ -1035,9 +1036,10 @@ class ActivityClientController extends IActivityClientController.Stub {
                             + " is not visible");
                     return false;
                 }
+                callingAttributionTag = top.launchedFromFeatureId;
             }
             return mAssistUtils.showSessionForActiveService(args, SHOW_SOURCE_APPLICATION,
-                    null /* showCallback */, token);
+                    callingAttributionTag, null /* showCallback */, token);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1054,6 +1056,7 @@ class ActivityClientController extends IActivityClientController.Stub {
     @Override
     public void startLocalVoiceInteraction(IBinder callingActivity, Bundle options) {
         Slog.i(TAG, "Activity tried to startLocalVoiceInteraction");
+        final String callingAttributionTag;
         synchronized (mGlobalLock) {
             final Task topRootTask = mService.getTopDisplayFocusedRootTask();
             final ActivityRecord activity = topRootTask != null
@@ -1071,9 +1074,10 @@ class ActivityClientController extends IActivityClientController.Stub {
                 return;
             }
             activity.pendingVoiceInteractionStart = true;
+            callingAttributionTag = activity.launchedFromFeatureId;
         }
         LocalServices.getService(VoiceInteractionManagerInternal.class)
-                .startLocalVoiceInteraction(callingActivity, options);
+                .startLocalVoiceInteraction(callingActivity, callingAttributionTag, options);
     }
 
     @Override

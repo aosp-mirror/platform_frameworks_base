@@ -377,6 +377,15 @@ public interface InputMethod {
     }
 
     /**
+     * This method is called when the user tapped or clicked an {@link android.widget.Editor}.
+     * @param toolType {@link android.view.MotionEvent#getToolType(int)} used for clicking editor.
+     * @hide
+     */
+    default void updateEditorToolType(int toolType) {
+        // intentionally empty
+    }
+
+    /**
      * Start stylus handwriting session.
      * @hide
      */

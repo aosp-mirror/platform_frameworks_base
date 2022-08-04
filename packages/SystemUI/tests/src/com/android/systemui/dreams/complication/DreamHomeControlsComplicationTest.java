@@ -17,6 +17,9 @@
 package com.android.systemui.dreams.complication;
 
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE;
+import static com.android.systemui.dreams.complication.Complication.COMPLICATION_TYPE_HOME_CONTROLS;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -36,6 +39,7 @@ import com.android.systemui.controls.controller.StructureInfo;
 import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.dreams.complication.dagger.DreamHomeControlsComplicationComponent;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -69,6 +73,9 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     @Mock
     private ControlsListingController mControlsListingController;
 
+    @Mock
+    private DreamHomeControlsComplicationComponent.Factory mComponentFactory;
+
     @Captor
     private ArgumentCaptor<ControlsListingController.ControlsListingCallback> mCallbackCaptor;
 
@@ -82,6 +89,14 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
         when(mControlsComponent.getControlsListingController()).thenReturn(
                 Optional.of(mControlsListingController));
         when(mControlsComponent.getVisibility()).thenReturn(AVAILABLE);
+    }
+
+    @Test
+    public void complicationType() {
+        final DreamHomeControlsComplication complication =
+                new DreamHomeControlsComplication(mComponentFactory);
+        assertThat(complication.getRequiredTypeAvailability()).isEqualTo(
+                COMPLICATION_TYPE_HOME_CONTROLS);
     }
 
     @Test

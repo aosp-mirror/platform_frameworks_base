@@ -101,6 +101,7 @@ import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -227,6 +228,7 @@ public class BubbleController implements ConfigurationChangeListener {
 
   
     public BubbleController(Context context,
+            ShellInit shellInit,
             ShellController shellController,
             BubbleData data,
             @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
@@ -279,6 +281,7 @@ public class BubbleController implements ConfigurationChangeListener {
         mOneHandedOptional = oneHandedOptional;
         mDragAndDropController = dragAndDropController;
         mSyncQueue = syncQueue;
+        shellInit.addInitCallback(this::onInit, this);
     }
 
     private void registerOneHandedState(OneHandedController oneHanded) {
@@ -300,7 +303,7 @@ public class BubbleController implements ConfigurationChangeListener {
                 });
     }
 
-    public void initialize() {
+    protected void onInit() {
         mBubbleData.setListener(mBubbleDataListener);
         mBubbleData.setSuppressionChangedListener(this::onBubbleMetadataFlagChanged);
 

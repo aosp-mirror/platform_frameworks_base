@@ -66,24 +66,24 @@ class DismissSplitScreenByGoHome(
                     primaryApp.launchViaIntent(wmHelper)
                     // TODO(b/231399940): Use recent shortcut to enter split.
                     tapl.launchedAppState.taskbar
-                            .openAllApps()
-                            .getAppIcon(secondaryApp.appName)
-                            .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
+                        .openAllApps()
+                        .getAppIcon(secondaryApp.appName)
+                        .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
                     SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
                 }
             }
             transitions {
                 tapl.goHome()
                 wmHelper.StateSyncBuilder()
-                        .withAppTransitionIdle()
-                        .withHomeActivityVisible()
-                        .waitForAndVerify()
+                    .withAppTransitionIdle()
+                    .withHomeActivityVisible()
+                    .waitForAndVerify()
             }
         }
 
     @Presubmit
     @Test
-    fun splitScreenDividerBecomesVisible() = testSpec.splitScreenDividerBecomesInvisible()
+    fun splitScreenDividerBecomesInvisible() = testSpec.splitScreenDividerBecomesInvisible()
 
     @Presubmit
     @Test
@@ -115,67 +115,67 @@ class DismissSplitScreenByGoHome(
     @Postsubmit
     @Test
     override fun entireScreenCovered() =
-            super.entireScreenCovered()
+        super.entireScreenCovered()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun navBarLayerIsVisibleAtStartAndEnd() =
-            super.navBarLayerIsVisibleAtStartAndEnd()
+        super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun navBarLayerPositionAtStartAndEnd() =
-            super.navBarLayerPositionAtStartAndEnd()
+        super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun navBarWindowIsAlwaysVisible() =
-            super.navBarWindowIsAlwaysVisible()
+        super.navBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun statusBarLayerIsVisibleAtStartAndEnd() =
-            super.statusBarLayerIsVisibleAtStartAndEnd()
+        super.statusBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun statusBarLayerPositionAtStartAndEnd() =
-            super.statusBarLayerPositionAtStartAndEnd()
+        super.statusBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun statusBarWindowIsAlwaysVisible() =
-            super.statusBarWindowIsAlwaysVisible()
+        super.statusBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() =
-            super.taskBarLayerIsVisibleAtStartAndEnd()
+        super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun taskBarWindowIsAlwaysVisible() =
-            super.taskBarWindowIsAlwaysVisible()
+        super.taskBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-            super.visibleLayersShownMoreThanOneConsecutiveEntry()
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

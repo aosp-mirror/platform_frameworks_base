@@ -1872,15 +1872,21 @@ class UserController implements Handler.Callback {
     /** Called on handler thread */
     @VisibleForTesting
     void dispatchUserSwitchComplete(@UserIdInt int userId) {
+        final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("dispatchUserSwitchComplete-" + userId);
         mInjector.getWindowManager().setSwitchingUser(false);
         final int observerCount = mUserSwitchObservers.beginBroadcast();
         for (int i = 0; i < observerCount; i++) {
             try {
+                t.traceBegin("onUserSwitchComplete-" + userId + " #" + i + " "
+                        + mUserSwitchObservers.getBroadcastCookie(i));
                 mUserSwitchObservers.getBroadcastItem(i).onUserSwitchComplete(userId);
+                t.traceEnd();
             } catch (RemoteException e) {
             }
         }
         mUserSwitchObservers.finishBroadcast();
+        t.traceEnd();
     }
 
     private void dispatchLockedBootComplete(@UserIdInt int userId) {

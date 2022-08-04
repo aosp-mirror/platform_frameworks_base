@@ -48,6 +48,7 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 import com.android.wm.shell.util.SplitBounds;
 
@@ -71,6 +72,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private Context mContext;
     @Mock
     private TaskStackListenerImpl mTaskStackListener;
+    @Mock
+    private ShellInit mShellInit;
 
     private ShellTaskOrganizer mShellTaskOrganizer;
     private RecentTasksController mRecentTasksController;
@@ -80,10 +83,11 @@ public class RecentTasksControllerTest extends ShellTestCase {
     public void setUp() {
         mMainExecutor = new TestShellExecutor();
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
-        mRecentTasksController = spy(new RecentTasksController(mContext, mTaskStackListener,
-                mMainExecutor));
-        mShellTaskOrganizer = new ShellTaskOrganizer(mMainExecutor, mContext,
-                null /* sizeCompatUI */, Optional.empty(), Optional.of(mRecentTasksController));
+        mRecentTasksController = spy(new RecentTasksController(mContext, mShellInit,
+                mTaskStackListener, mMainExecutor));
+        mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit,
+                null /* sizeCompatUI */, Optional.empty(), Optional.of(mRecentTasksController),
+                mMainExecutor);
     }
 
     @Test

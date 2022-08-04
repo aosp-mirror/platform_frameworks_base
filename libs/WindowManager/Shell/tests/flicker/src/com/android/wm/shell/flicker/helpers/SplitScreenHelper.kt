@@ -43,12 +43,15 @@ class SplitScreenHelper(
         const val TIMEOUT_MS = 3_000L
         const val DRAG_DURATION_MS = 1_000L
         const val NOTIFICATION_SCROLLER = "notification_stack_scroller"
+        const val DIVIDER_BAR = "docked_divider_handle"
         const val GESTURE_STEP_MS = 16L
 
         private val notificationScrollerSelector: BySelector
             get() = By.res(SYSTEM_UI_PACKAGE_NAME, NOTIFICATION_SCROLLER)
         private val notificationContentSelector: BySelector
             get() = By.text("Notification content")
+        private val dividerBarSelector: BySelector
+            get() = By.res(SYSTEM_UI_PACKAGE_NAME, DIVIDER_BAR)
 
         fun getPrimary(instrumentation: Instrumentation): SplitScreenHelper =
             SplitScreenHelper(
@@ -79,16 +82,16 @@ class SplitScreenHelper(
             )
 
         fun waitForSplitComplete(
-                wmHelper: WindowManagerStateHelper,
-                primaryApp: IComponentMatcher,
-                secondaryApp: IComponentMatcher,
+            wmHelper: WindowManagerStateHelper,
+            primaryApp: IComponentMatcher,
+            secondaryApp: IComponentMatcher,
         ) {
             wmHelper.StateSyncBuilder()
-                    .withAppTransitionIdle()
-                    .withWindowSurfaceAppeared(primaryApp)
-                    .withWindowSurfaceAppeared(secondaryApp)
-                    .withSplitDividerVisible()
-                    .waitForAndVerify()
+                .withAppTransitionIdle()
+                .withWindowSurfaceAppeared(primaryApp)
+                .withWindowSurfaceAppeared(secondaryApp)
+                .withSplitDividerVisible()
+                .waitForAndVerify()
         }
 
         fun dragFromNotificationToSplit(
@@ -214,6 +217,18 @@ class SplitScreenHelper(
             } finally {
                 allApps.unfreeze()
             }
+        }
+
+        fun dragDividerToDismissSplit(
+            device: UiDevice,
+            wmHelper: WindowManagerStateHelper
+        ) {
+            val displayBounds = wmHelper.currentState.layerState
+                .displays.firstOrNull { !it.isVirtual }
+                ?.layerStackSpace
+                ?: error("Display not found")
+            val dividerBar = device.wait(Until.findObject(dividerBarSelector), TIMEOUT_MS)
+            dividerBar.drag(Point(displayBounds.width, displayBounds.width))
         }
     }
 }

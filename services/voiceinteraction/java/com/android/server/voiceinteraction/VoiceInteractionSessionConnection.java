@@ -29,6 +29,8 @@ import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_TASK_ID;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
@@ -263,9 +265,9 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         return flags;
     }
 
-    public boolean showLocked(Bundle args, int flags, int disabledContext,
-            IVoiceInteractionSessionShowCallback showCallback,
-            List<ActivityAssistInfo> topActivities) {
+    public boolean showLocked(@NonNull Bundle args, int flags, @Nullable String attributionTag,
+            int disabledContext, @Nullable IVoiceInteractionSessionShowCallback showCallback,
+            @NonNull List<ActivityAssistInfo> topActivities) {
         if (mBound) {
             if (!mFullyBound) {
                 mFullyBound = mContext.bindServiceAsUser(mBindIntent, mFullConnection,
@@ -291,12 +293,15 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                 for (int i = 0; i < topActivitiesCount; i++) {
                     topActivitiesToken.add(topActivities.get(i).getActivityToken());
                 }
+
                 mAssistDataRequester.requestAssistData(topActivitiesToken,
                         fetchData,
                         fetchScreenshot,
                         (disabledContext & VoiceInteractionSession.SHOW_WITH_ASSIST) == 0,
                         (disabledContext & VoiceInteractionSession.SHOW_WITH_SCREENSHOT) == 0,
-                        mCallingUid, mSessionComponentName.getPackageName());
+                        mCallingUid,
+                        mSessionComponentName.getPackageName(),
+                        attributionTag);
 
                 boolean needDisclosure = mAssistDataRequester.getPendingDataCount() > 0
                         || mAssistDataRequester.getPendingScreenshotCount() > 0;

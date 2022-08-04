@@ -242,7 +242,7 @@ public class VoiceInteractionService extends Service {
             throw new IllegalStateException("Not available until onReady() is called");
         }
         try {
-            mSystemService.showSession(args, flags);
+            mSystemService.showSession(args, flags, getAttributionTag());
         } catch (RemoteException e) {
         }
     }

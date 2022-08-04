@@ -2452,8 +2452,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             dc.setImeLayeringTarget(null);
             dc.computeImeTarget(true /* updateImeTarget */);
         }
-        if (dc.getImeInputTarget() == this
-                && (mActivityRecord == null || !mActivityRecord.isRelaunching())) {
+        if (dc.getImeInputTarget() == this && !inRelaunchingActivity()) {
             dc.updateImeInputAndControlTarget(null);
         }
 
@@ -2580,7 +2579,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // usually unnoticeable (e.g. covered by rotation animation) and the animation
                 // bounds could be inconsistent, such as depending on when the window applies
                 // its draw transaction with new rotation.
-                final boolean allowExitAnimation = !getDisplayContent().inTransition();
+                final boolean allowExitAnimation = !getDisplayContent().inTransition()
+                        // There will be a new window so the exit animation may not be visible or
+                        // look weird if its orientation is changed.
+                        && !inRelaunchingActivity();
 
                 if (wasVisible) {
                     final int transit = (!startingWindow) ? TRANSIT_EXIT : TRANSIT_PREVIEW_DONE;
@@ -3870,7 +3872,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // If the activity is scheduled to relaunch, skip sending the resized to ViewRootImpl now
         // since it will be destroyed anyway. This also prevents the client from receiving
         // windowing mode change before it is destroyed.
-        if (mActivityRecord != null && mActivityRecord.isRelaunching()) {
+        if (inRelaunchingActivity()) {
             return;
         }
         // If this is an activity or wallpaper and is invisible or going invisible, don't report
@@ -3954,6 +3956,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Slog.w(TAG, "Failed to report 'resized' to " + this + " due to " + e);
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    boolean inRelaunchingActivity() {
+        return mActivityRecord != null && mActivityRecord.isRelaunching();
     }
 
     boolean isClientLocal() {

@@ -51,8 +51,10 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -71,6 +73,7 @@ import java.util.Optional;
 public class SplitScreenControllerTests extends ShellTestCase {
 
     @Mock ShellController mShellController;
+    @Mock ShellInit mShellInit;
     @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock SyncTransactionQueue mSyncQueue;
     @Mock RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
@@ -78,6 +81,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     @Mock DisplayController mDisplayController;
     @Mock DisplayImeController mDisplayImeController;
     @Mock DisplayInsetsController mDisplayInsetsController;
+    @Mock DragAndDropController mDragAndDropController;
     @Mock Transitions mTransitions;
     @Mock TransactionPool mTransactionPool;
     @Mock IconProvider mIconProvider;
@@ -88,16 +92,21 @@ public class SplitScreenControllerTests extends ShellTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mSplitScreenController = spy(new SplitScreenController(mShellController, mTaskOrganizer,
-                mSyncQueue, mContext, mRootTDAOrganizer, mMainExecutor, mDisplayController,
-                mDisplayImeController, mDisplayInsetsController, mTransitions, mTransactionPool,
-                mIconProvider, mRecentTasks));
+        mSplitScreenController = spy(new SplitScreenController(mContext, mShellInit,
+                mShellController, mTaskOrganizer, mSyncQueue, mRootTDAOrganizer, mDisplayController,
+                mDisplayImeController, mDisplayInsetsController, mDragAndDropController,
+                mTransitions, mTransactionPool, mIconProvider, mRecentTasks, mMainExecutor));
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
     }
 
     @Test
     public void testControllerRegistersKeyguardChangeListener() {
         when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());
-        mSplitScreenController.onOrganizerRegistered();
+        mSplitScreenController.onInit();
         verify(mShellController, times(1)).addKeyguardChangeListener(any());
     }
 

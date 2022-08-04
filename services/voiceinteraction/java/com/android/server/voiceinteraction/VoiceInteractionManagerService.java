@@ -102,6 +102,7 @@ import com.android.server.UiThread;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.soundtrigger.SoundTriggerInternal;
+import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -134,18 +135,21 @@ public class VoiceInteractionManagerService extends SystemService {
     private final RemoteCallbackList<IVoiceInteractionSessionListener>
             mVoiceInteractionSessionListeners = new RemoteCallbackList<>();
 
+    // TODO(b/226201975): remove once RoleService supports pre-created users
+    private final ArrayList<UserHandle> mIgnoredPreCreatedUsers = new ArrayList<>();
+
     public VoiceInteractionManagerService(Context context) {
         super(context);
         mContext = context;
         mResolver = context.getContentResolver();
+        mUserManagerInternal = Objects.requireNonNull(
+                LocalServices.getService(UserManagerInternal.class));
         mDbHelper = new DatabaseHelper(context);
         mServiceStub = new VoiceInteractionManagerServiceStub();
         mAmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
         mAtmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityTaskManagerInternal.class));
-        mUserManagerInternal = Objects.requireNonNull(
-                LocalServices.getService(UserManagerInternal.class));
 
         LegacyPermissionManagerInternal permissionManagerInternal = LocalServices.getService(
                 LegacyPermissionManagerInternal.class);
@@ -223,12 +227,13 @@ public class VoiceInteractionManagerService extends SystemService {
 
     class LocalService extends VoiceInteractionManagerInternal {
         @Override
-        public void startLocalVoiceInteraction(IBinder callingActivity, Bundle options) {
+        public void startLocalVoiceInteraction(@NonNull IBinder callingActivity,
+                @Nullable String attributionTag, @NonNull Bundle options) {
             if (DEBUG) {
                 Slog.i(TAG, "startLocalVoiceInteraction " + callingActivity);
             }
             VoiceInteractionManagerService.this.mServiceStub.startLocalVoiceInteraction(
-                    callingActivity, options);
+                    callingActivity, attributionTag, options);
         }
 
         @Override
@@ -300,6 +305,25 @@ public class VoiceInteractionManagerService extends SystemService {
             }
             return hotwordDetectionConnection.mIdentity;
         }
+
+        @Override
+        public void onPreCreatedUserConversion(int userId) {
+            Slogf.d(TAG, "onPreCreatedUserConversion(%d)", userId);
+
+            for (int i = 0; i < mIgnoredPreCreatedUsers.size(); i++) {
+                UserHandle preCreatedUser = mIgnoredPreCreatedUsers.get(i);
+                if (preCreatedUser.getIdentifier() == userId) {
+                    Slogf.d(TAG, "Updating role on pre-created user %d", userId);
+                    mServiceStub.mRoleObserver.onRoleHoldersChanged(RoleManager.ROLE_ASSISTANT,
+                            preCreatedUser);
+                    mIgnoredPreCreatedUsers.remove(i);
+                    return;
+                }
+            }
+            Slogf.w(TAG, "onPreCreatedUserConversion(%d): not available on "
+                    + "mIgnoredPreCreatedUserIds (%s)", userId, mIgnoredPreCreatedUsers);
+        }
+
     }
 
     // implementation entry point and binder service
@@ -317,10 +341,12 @@ public class VoiceInteractionManagerService extends SystemService {
         private boolean mTemporarilyDisabled;
 
         private final boolean mEnableService;
+        // TODO(b/226201975): remove reference once RoleService supports pre-created users
+        private final RoleObserver mRoleObserver;
 
         VoiceInteractionManagerServiceStub() {
             mEnableService = shouldEnableService(mContext);
-            new RoleObserver(mContext.getMainExecutor());
+            mRoleObserver = new RoleObserver(mContext.getMainExecutor());
         }
 
         void handleUserStop(String packageName, int userHandle) {
@@ -383,14 +409,15 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         // TODO: VI Make sure the caller is the current user or profile
-        void startLocalVoiceInteraction(final IBinder token, Bundle options) {
+        void startLocalVoiceInteraction(@NonNull final IBinder token,
+                @Nullable String attributionTag, @NonNull Bundle options) {
             if (mImpl == null) return;
 
             final int callingUid = Binder.getCallingUid();
             final long caller = Binder.clearCallingIdentity();
             try {
                 mImpl.showSessionLocked(options,
-                        VoiceInteractionSession.SHOW_SOURCE_ACTIVITY,
+                        VoiceInteractionSession.SHOW_SOURCE_ACTIVITY, attributionTag,
                         new IVoiceInteractionSessionShowCallback.Stub() {
                             @Override
                             public void onFailed() {
@@ -898,13 +925,13 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void showSession(Bundle args, int flags) {
+        public void showSession(@NonNull Bundle args, int flags, @Nullable String attributionTag) {
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.showSessionLocked(args, flags, null, null);
+                    mImpl.showSessionLocked(args, flags, attributionTag, null, null);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -929,7 +956,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public boolean showSessionFromSession(IBinder token, Bundle sessionArgs, int flags) {
+        public boolean showSessionFromSession(@NonNull IBinder token, @NonNull Bundle sessionArgs,
+                int flags, @Nullable String attributionTag) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "showSessionFromSession without running voice interaction service");
@@ -937,7 +965,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.showSessionLocked(sessionArgs, flags, null, null);
+                    return mImpl.showSessionLocked(sessionArgs, flags, attributionTag, null, null);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -961,8 +989,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public int startVoiceActivity(IBinder token, Intent intent, String resolvedType,
-                String callingFeatureId) {
+        public int startVoiceActivity(@NonNull IBinder token, @NonNull Intent intent,
+                @Nullable String resolvedType, @Nullable String attributionTag) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "startVoiceActivity without running voice interaction service");
@@ -980,8 +1008,8 @@ public class VoiceInteractionManagerService extends SystemService {
                     } else {
                         Slog.w(TAG, "Cannot find ActivityInfo in startVoiceActivity.");
                     }
-                    return mImpl.startVoiceActivityLocked(
-                            callingFeatureId, callingPid, callingUid, token, intent, resolvedType);
+                    return mImpl.startVoiceActivityLocked(attributionTag, callingPid, callingUid,
+                            token, intent, resolvedType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -989,8 +1017,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public int startAssistantActivity(IBinder token, Intent intent, String resolvedType,
-                String callingFeatureId) {
+        public int startAssistantActivity(@NonNull IBinder token, @NonNull Intent intent,
+                @Nullable String resolvedType, @Nullable String attributionTag) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "startAssistantActivity without running voice interaction service");
@@ -1000,7 +1028,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.startAssistantActivityLocked(callingFeatureId, callingPid,
+                    return mImpl.startAssistantActivityLocked(attributionTag, callingPid,
                             callingUid, token, intent, resolvedType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
@@ -1669,8 +1697,10 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
-        public boolean showSessionForActiveService(Bundle args, int sourceFlags,
-                IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken) {
+        public boolean showSessionForActiveService(@NonNull Bundle args, int sourceFlags,
+                @Nullable String attributionTag,
+                @Nullable IVoiceInteractionSessionShowCallback showCallback,
+                @Nullable IBinder activityToken) {
             if (DEBUG_USER) Slog.d(TAG, "showSessionForActiveService()");
 
             synchronized (this) {
@@ -1691,7 +1721,7 @@ public class VoiceInteractionManagerService extends SystemService {
                             sourceFlags
                                     | VoiceInteractionSession.SHOW_WITH_ASSIST
                                     | VoiceInteractionSession.SHOW_WITH_SCREENSHOT,
-                            showCallback, activityToken);
+                            attributionTag, showCallback, activityToken);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -1882,6 +1912,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 pw.println("  mTemporarilyDisabled: " + mTemporarilyDisabled);
                 pw.println("  mCurUser: " + mCurUser);
                 pw.println("  mCurUserSupported: " + mCurUserSupported);
+                pw.println("  mIgnoredPreCreatedUsers: " + mIgnoredPreCreatedUsers);
                 dumpSupportedUsers(pw, "  ");
                 mDbHelper.dump(pw);
                 if (mImpl == null) {
@@ -1994,6 +2025,23 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
 
                 List<String> roleHolders = mRm.getRoleHoldersAsUser(roleName, user);
+
+                // TODO(b/226201975): this method is beling called when a pre-created user is added,
+                // at which point it doesn't have any role holders. But it's not called again when
+                // the actual user is added (i.e., when the  pre-created user is converted), so we
+                // need to save the user id and call this method again when it's converted
+                // (at onPreCreatedUserConversion()).
+                // Once RoleService properly handles pre-created users, this workaround should be
+                // removed.
+                if (roleHolders.isEmpty()) {
+                    UserInfo userInfo = mUserManagerInternal.getUserInfo(user.getIdentifier());
+                    if (userInfo != null && userInfo.preCreated) {
+                        Slogf.d(TAG, "onRoleHoldersChanged(): ignoring pre-created user %s for now",
+                                userInfo.toFullString());
+                        mIgnoredPreCreatedUsers.add(user);
+                        return;
+                    }
+                }
 
                 int userId = user.getIdentifier();
                 if (roleHolders.isEmpty()) {

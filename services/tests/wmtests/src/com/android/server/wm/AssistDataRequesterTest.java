@@ -87,6 +87,7 @@ public class AssistDataRequesterTest {
 
     private static final int TEST_UID = 0;
     private static final String TEST_PACKAGE = "";
+    private static final String TEST_ATTRIBUTION_TAG = "";
 
     private AssistDataRequester mDataRequester;
     private Callbacks mCallbacks;
@@ -148,9 +149,9 @@ public class AssistDataRequesterTest {
             boolean assistScreenshotAllowed) throws Exception {
         doReturn(currentActivityAssistAllowed).when(mAtm).isAssistDataAllowedOnCurrentActivity();
         doReturn(assistStructureAllowed ? MODE_ALLOWED : MODE_ERRORED).when(mAppOpsManager)
-                .checkOpNoThrow(eq(OP_ASSIST_STRUCTURE), anyInt(), anyString());
+                .noteOpNoThrow(eq(OP_ASSIST_STRUCTURE), anyInt(), anyString(), any(), any());
         doReturn(assistScreenshotAllowed ? MODE_ALLOWED : MODE_ERRORED).when(mAppOpsManager)
-                .checkOpNoThrow(eq(OP_ASSIST_SCREENSHOT), anyInt(), anyString());
+                .noteOpNoThrow(eq(OP_ASSIST_SCREENSHOT), anyInt(), anyString(), any(), any());
     }
 
     @Test
@@ -160,7 +161,8 @@ public class AssistDataRequesterTest {
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE,
+                TEST_ATTRIBUTION_TAG);
         assertReceivedDataCount(5, 5, 1, 1);
     }
 
@@ -170,7 +172,8 @@ public class AssistDataRequesterTest {
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(0), FETCH_DATA, FETCH_SCREENSHOTS,
-                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE,
+                TEST_ATTRIBUTION_TAG);
         assertReceivedDataCount(0, 0, 0, 0);
     }
 
@@ -180,7 +183,8 @@ public class AssistDataRequesterTest {
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE,
+                TEST_ATTRIBUTION_TAG);
         assertReceivedDataCount(0, 1, 0, 1);
     }
 
@@ -191,7 +195,8 @@ public class AssistDataRequesterTest {
 
         mCallbacks.mCanHandleReceivedData = false;
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE,
+                TEST_ATTRIBUTION_TAG);
         assertEquals(5, mDataRequester.getPendingDataCount());
         assertEquals(1, mDataRequester.getPendingScreenshotCount());
         mGate.countDown();
@@ -226,7 +231,8 @@ public class AssistDataRequesterTest {
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(5), !FETCH_DATA, FETCH_SCREENSHOTS,
-                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE,
+                TEST_ATTRIBUTION_TAG);
         assertReceivedDataCount(0, 0, 0, 1);
     }
 
@@ -236,7 +242,8 @@ public class AssistDataRequesterTest {
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE,
+                TEST_ATTRIBUTION_TAG);
         // Expect a single null data when the appops is denied
         assertReceivedDataCount(0, 1, 0, 1);
     }
@@ -249,7 +256,8 @@ public class AssistDataRequesterTest {
                 anyBoolean(), anyBoolean());
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE,
+                TEST_ATTRIBUTION_TAG);
         // Expect a single null data when requestAssistContextExtras() fails
         assertReceivedDataCount(0, 1, 0, 1);
     }
@@ -261,7 +269,8 @@ public class AssistDataRequesterTest {
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, !FETCH_SCREENSHOTS,
-                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE,
+                TEST_ATTRIBUTION_TAG);
         assertReceivedDataCount(5, 5, 0, 0);
     }
 
@@ -272,7 +281,8 @@ public class AssistDataRequesterTest {
                 !CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE,
+                TEST_ATTRIBUTION_TAG);
         // Expect a single null screenshot when the appops is denied
         assertReceivedDataCount(5, 5, 0, 1);
     }
@@ -284,7 +294,8 @@ public class AssistDataRequesterTest {
 
         mCallbacks.mCanHandleReceivedData = false;
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+                ALLOW_FETCH_DATA, ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE,
+                TEST_ATTRIBUTION_TAG);
         mGate.countDown();
         waitForIdle(mHandler);
         assertThat(mCallbacks.mReceivedData).isEmpty();
@@ -297,7 +308,8 @@ public class AssistDataRequesterTest {
                 CALLER_ASSIST_SCREENSHOT_ALLOWED);
 
         mDataRequester.requestAssistData(createActivityList(5), FETCH_DATA, FETCH_SCREENSHOTS,
-                !ALLOW_FETCH_DATA, !ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE);
+                !ALLOW_FETCH_DATA, !ALLOW_FETCH_SCREENSHOTS, TEST_UID, TEST_PACKAGE,
+                TEST_ATTRIBUTION_TAG);
         assertReceivedDataCount(0, 1, 0, 1);
     }
 

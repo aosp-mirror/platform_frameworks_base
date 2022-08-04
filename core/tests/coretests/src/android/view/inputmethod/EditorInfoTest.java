@@ -42,6 +42,7 @@ import android.text.TextUtils;
 import android.text.style.MaskFilterSpan;
 import android.text.style.UnderlineSpan;
 import android.util.StringBuilderPrinter;
+import android.view.MotionEvent;
 import android.view.autofill.AutofillId;
 
 import androidx.test.filters.SmallTest;
@@ -490,7 +491,8 @@ public class EditorInfoTest {
         assertThat(sb.toString()).isEqualTo(
                 "prefix: inputType=0x0 imeOptions=0x0 privateImeOptions=null\n"
                 + "prefix: actionLabel=null actionId=0\n"
-                + "prefix: initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0\n"
+                + "prefix: initialSelStart=-1 initialSelEnd=-1 initialToolType=0"
+                        + " initialCapsMode=0x0\n"
                 + "prefix: hintText=null label=null\n"
                 + "prefix: packageName=null autofillId=null fieldId=0 fieldName=null\n"
                 + "prefix: extras=null\n"
@@ -509,6 +511,7 @@ public class EditorInfoTest {
         info.initialCapsMode = TextUtils.CAP_MODE_CHARACTERS; // 0x1000
         info.hintText = "testHintText";
         info.label = "testLabel";
+        info.setInitialToolType(MotionEvent.TOOL_TYPE_STYLUS);
         info.packageName = "android.view.inputmethod";
         info.autofillId = new AutofillId(123);
         info.fieldId = 456;
@@ -523,7 +526,8 @@ public class EditorInfoTest {
         assertThat(sb.toString()).isEqualTo(
                 "prefix2: inputType=0x1 imeOptions=0x2 privateImeOptions=testOptions\n"
                         + "prefix2: actionLabel=null actionId=0\n"
-                        + "prefix2: initialSelStart=0 initialSelEnd=1 initialCapsMode=0x1000\n"
+                        + "prefix2: initialSelStart=0 initialSelEnd=1 initialToolType=2"
+                                + " initialCapsMode=0x1000\n"
                         + "prefix2: hintText=testHintText label=testLabel\n"
                         + "prefix2: packageName=android.view.inputmethod autofillId=123"
                         + " fieldId=456 fieldName=testField\n"
@@ -543,7 +547,8 @@ public class EditorInfoTest {
         assertThat(sb.toString()).isEqualTo(
                 "prefix: inputType=0x0 imeOptions=0x0 privateImeOptions=null\n"
                         + "prefix: actionLabel=null actionId=0\n"
-                        + "prefix: initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0\n"
+                        + "prefix: initialSelStart=-1 initialSelEnd=-1 initialToolType=0"
+                                + " initialCapsMode=0x0\n"
                         + "prefix: hintText=null label=null\n"
                         + "prefix: packageName=null autofillId=null fieldId=0 fieldName=null\n"
                         + "prefix: hintLocales=null\n"

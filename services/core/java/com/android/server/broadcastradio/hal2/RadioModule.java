@@ -142,8 +142,12 @@ class RadioModule {
     public static @Nullable RadioModule tryLoadingModule(int idx, @NonNull String fqName,
             Object lock) {
         try {
+            Slog.i(TAG, "Try loading module for idx " + idx + ", fqName " + fqName);
             IBroadcastRadio service = IBroadcastRadio.getService(fqName);
-            if (service == null) return null;
+            if (service == null) {
+                Slog.w(TAG, "No service found for fqName " + fqName);
+                return null;
+            }
 
             Mutable<AmFmRegionConfig> amfmConfig = new Mutable<>();
             service.getAmFmRegionConfig(false, (result, config) -> {
@@ -160,7 +164,7 @@ class RadioModule {
 
             return new RadioModule(service, prop, lock);
         } catch (RemoteException ex) {
-            Slog.e(TAG, "failed to load module " + fqName, ex);
+            Slog.e(TAG, "Failed to load module " + fqName, ex);
             return null;
         }
     }
@@ -171,6 +175,7 @@ class RadioModule {
 
     public @NonNull TunerSession openSession(@NonNull android.hardware.radio.ITunerCallback userCb)
             throws RemoteException {
+        Slog.i(TAG, "Open TunerSession");
         synchronized (mLock) {
             if (mHalTunerSession == null) {
                 Mutable<ITunerSession> hwSession = new Mutable<>();
@@ -201,6 +206,7 @@ class RadioModule {
         // Copy the contents of mAidlTunerSessions into a local array because TunerSession.close()
         // must be called without mAidlTunerSessions locked because it can call
         // onTunerSessionClosed().
+        Slog.i(TAG, "Close TunerSessions");
         TunerSession[] tunerSessions;
         synchronized (mLock) {
             tunerSessions = new TunerSession[mAidlTunerSessions.size()];
@@ -313,7 +319,7 @@ class RadioModule {
         }
         onTunerSessionProgramListFilterChanged(null);
         if (mAidlTunerSessions.isEmpty() && mHalTunerSession != null) {
-            Slog.v(TAG, "closing HAL tuner session");
+            Slog.i(TAG, "Closing HAL tuner session");
             try {
                 mHalTunerSession.close();
             } catch (RemoteException ex) {
@@ -365,6 +371,7 @@ class RadioModule {
 
     public android.hardware.radio.ICloseHandle addAnnouncementListener(@NonNull int[] enabledTypes,
             @NonNull android.hardware.radio.IAnnouncementListener listener) throws RemoteException {
+        Slog.i(TAG, "Add AnnouncementListener");
         ArrayList<Byte> enabledList = new ArrayList<>();
         for (int type : enabledTypes) {
             enabledList.add((byte)type);
@@ -401,6 +408,7 @@ class RadioModule {
     }
 
     Bitmap getImage(int id) {
+        Slog.i(TAG, "Get image for id " + id);
         if (id == 0) throw new IllegalArgumentException("Image ID is missing");
 
         byte[] rawImage;

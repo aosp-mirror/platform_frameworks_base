@@ -80,6 +80,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_START_STYLUS_HANDWRITING = 110;
     private static final int DO_INIT_INK_WINDOW = 120;
     private static final int DO_FINISH_STYLUS_HANDWRITING = 130;
+    private static final int DO_UPDATE_TOOL_TYPE = 140;
 
     final WeakReference<InputMethodServiceInternal> mTarget;
     final Context mContext;
@@ -232,6 +233,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
             }
             case DO_CAN_START_STYLUS_HANDWRITING: {
                 inputMethod.canStartStylusHandwriting(msg.arg1);
+                return;
+            }
+            case DO_UPDATE_TOOL_TYPE: {
+                inputMethod.updateEditorToolType(msg.arg1);
                 return;
             }
             case DO_START_STYLUS_HANDWRITING: {
@@ -398,6 +403,14 @@ class IInputMethodWrapper extends IInputMethod.Stub
             throws RemoteException {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageI(DO_CAN_START_STYLUS_HANDWRITING, requestId));
+    }
+
+    @BinderThread
+    @Override
+    public void updateEditorToolType(int toolType)
+            throws RemoteException {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageI(DO_UPDATE_TOOL_TYPE, toolType));
     }
 
     @BinderThread
