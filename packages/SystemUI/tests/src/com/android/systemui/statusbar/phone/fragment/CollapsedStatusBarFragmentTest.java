@@ -329,9 +329,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
-    public void disable_isDozing_clockAndSystemInfoVisible() {
+    public void disable_isDozingButNoCustomClock_clockAndSystemInfoVisible() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         when(mStatusBarStateController.isDozing()).thenReturn(true);
+        when(mNotificationPanelViewController.hasCustomClock()).thenReturn(false);
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
@@ -340,14 +341,49 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
-    public void disable_NotDozing_clockAndSystemInfoVisible() {
+    public void disable_customClockButNotDozing_clockAndSystemInfoVisible() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         when(mStatusBarStateController.isDozing()).thenReturn(false);
+        when(mNotificationPanelViewController.hasCustomClock()).thenReturn(true);
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
         assertEquals(View.VISIBLE, getClockView().getVisibility());
+    }
+
+    @Test
+    public void disable_dozingAndCustomClock_clockAndSystemInfoHidden() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+        when(mStatusBarStateController.isDozing()).thenReturn(true);
+        when(mNotificationPanelViewController.hasCustomClock()).thenReturn(true);
+
+        // Make sure they start out as visible
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+        assertEquals(View.VISIBLE, getClockView().getVisibility());
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
+        assertEquals(View.GONE, getClockView().getVisibility());
+    }
+
+    @Test
+    public void onDozingChanged_clockAndSystemInfoVisibilitiesUpdated() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+        when(mStatusBarStateController.isDozing()).thenReturn(true);
+        when(mNotificationPanelViewController.hasCustomClock()).thenReturn(true);
+
+        // Make sure they start out as visible
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+        assertEquals(View.VISIBLE, getClockView().getVisibility());
+
+        fragment.onDozingChanged(true);
+
+        // When this callback is triggered, we want to make sure the clock and system info
+        // visibilities are recalculated. Since dozing=true, they shouldn't be visible.
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
+        assertEquals(View.GONE, getClockView().getVisibility());
     }
 
     @Test
