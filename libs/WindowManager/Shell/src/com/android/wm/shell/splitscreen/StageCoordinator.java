@@ -26,6 +26,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -118,6 +119,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.splitscreen.SplitScreenController.ExitReason;
+import com.android.wm.shell.transition.LegacyTransitions;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.util.SplitBounds;
 
@@ -195,7 +197,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private boolean mExitSplitScreenOnHide;
     private boolean mIsDividerRemoteAnimating;
     private boolean mIsExiting;
-    private boolean mResizingSplits;
 
     /** The target stage to dismiss to when unlock after folded. */
     @StageType
@@ -210,7 +211,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
                 @Override
                 public void onLeashReady(SurfaceControl leash) {
-                    mSyncQueue.runInSync(t -> applyDividerVisibility(t));
+                    // This is for avoiding divider invisible due to delay of creating so only need
+                    // to do when divider should visible case.
+                    if (mDividerVisible) {
+                        mSyncQueue.runInSync(t -> applyDividerVisibility(t));
+                    }
                 }
             };
 
@@ -431,6 +436,63 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         }
                     }
                 });
+    }
+
+    /** Launches an activity into split by legacy transition. */
+    void startIntentLegacy(PendingIntent intent, Intent fillInIntent,
+            @SplitPosition int position, @androidx.annotation.Nullable Bundle options) {
+        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
+        prepareEvictChildTasks(position, evictWct);
+
+        LegacyTransitions.ILegacyTransition transition = new LegacyTransitions.ILegacyTransition() {
+            @Override
+            public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
+                    RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
+                    IRemoteAnimationFinishedCallback finishedCallback,
+                    SurfaceControl.Transaction t) {
+                if (apps == null || apps.length == 0) {
+                    // Switch the split position if launching as MULTIPLE_TASK failed.
+                    if ((fillInIntent.getFlags() & FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
+                        setSideStagePosition(SplitLayout.reversePosition(
+                                getSideStagePosition()), null);
+                    }
+
+                    // Do nothing when the animation was cancelled.
+                    t.apply();
+                    return;
+                }
+
+                for (int i = 0; i < apps.length; ++i) {
+                    if (apps[i].mode == MODE_OPENING) {
+                        t.show(apps[i].leash);
+                    }
+                }
+                t.apply();
+
+                if (finishedCallback != null) {
+                    try {
+                        finishedCallback.onAnimationFinished();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error finishing legacy transition: ", e);
+                    }
+                }
+
+                mSyncQueue.queue(evictWct);
+            }
+        };
+
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        options = resolveStartStage(STAGE_TYPE_UNDEFINED, position, options, wct);
+
+        // If split still not active, apply windows bounds first to avoid surface reset to
+        // wrong pos by SurfaceAnimator from wms.
+        // TODO(b/223325631): check  is it still necessary after improve enter transition done.
+        if (!mMainStage.isActive()) {
+            updateWindowBounds(mSplitLayout, wct);
+        }
+
+        wct.sendPendingIntent(intent, fillInIntent, options);
+        mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
 
     /** Starts 2 tasks in one transition. */
@@ -849,6 +911,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     .setWindowCrop(mSideStage.mRootLeash, null);
             t.setPosition(mMainStage.mRootLeash, 0, 0)
                     .setPosition(mSideStage.mRootLeash, 0, 0);
+            t.hide(mMainStage.mDimLayer).hide(mSideStage.mDimLayer);
             setDividerVisibility(false, t);
 
             // In this case, exit still under progress, fade out the split decor after first WCT
@@ -858,7 +921,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     WindowContainerTransaction finishedWCT = new WindowContainerTransaction();
                     mIsExiting = false;
                     childrenToTop.dismiss(finishedWCT, true /* toTop */);
-                    wct.reorder(mRootTaskInfo.token, false /* toTop */);
+                    finishedWCT.reorder(mRootTaskInfo.token, false /* toTop */);
                     mTaskOrganizer.applyTransaction(finishedWCT);
                     onTransitionAnimationComplete();
                 });

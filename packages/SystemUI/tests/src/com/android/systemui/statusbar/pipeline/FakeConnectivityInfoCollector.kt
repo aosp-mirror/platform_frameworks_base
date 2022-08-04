@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.taptotransfer.receiver
+package com.android.systemui.statusbar.pipeline
 
-import android.content.Context
-import android.util.AttributeSet
-import com.android.systemui.ripple.RippleView
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * An expanding ripple effect for the media tap-to-transfer receiver chip.
+ * A test-friendly implementation of [ConnectivityInfoCollector] that just emits whatever value it
+ * receives in [emitValue].
  */
-class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleView(context, attrs) {
-    init {
-        // TODO: use RippleShape#ELLIPSE when calling setupShader.
-        setupShader()
-        setRippleFill(true)
-        duration = 3000L
+class FakeConnectivityInfoCollector : ConnectivityInfoCollector {
+    private val _rawConnectivityInfoFlow = MutableStateFlow(RawConnectivityInfo())
+    override val rawConnectivityInfoFlow = _rawConnectivityInfoFlow.asStateFlow()
+
+    suspend fun emitValue(value: RawConnectivityInfo) {
+        _rawConnectivityInfoFlow.emit(value)
     }
 }

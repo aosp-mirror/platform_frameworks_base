@@ -423,6 +423,21 @@ public class NotificationIconContainer extends ViewGroup {
                 + getActualPaddingEnd();
     }
 
+    @VisibleForTesting
+    boolean shouldForceOverflow(int i, int speedBumpIndex, float iconAppearAmount,
+            int maxVisibleIcons) {
+        return speedBumpIndex != -1 && i >= speedBumpIndex
+                && iconAppearAmount > 0.0f || i >= maxVisibleIcons;
+    }
+
+    @VisibleForTesting
+    boolean isOverflowing(boolean isLastChild, float translationX, float layoutEnd,
+            float iconSize) {
+        // Layout end, as used here, does not include padding end.
+        final float overflowX = isLastChild ? layoutEnd : layoutEnd - iconSize;
+        return translationX >= overflowX;
+    }
+
     /**
      * Calculate the horizontal translations for each notification based on how much the icons
      * are inserted into the notification container.
@@ -448,26 +463,26 @@ public class NotificationIconContainer extends ViewGroup {
             if (mFirstVisibleIconState == null) {
                 mFirstVisibleIconState = iconState;
             }
-            boolean forceOverflow = mSpeedBumpIndex != -1 && i >= mSpeedBumpIndex
-                    && iconState.iconAppearAmount > 0.0f || i >= maxVisibleIcons;
-            boolean isLastChild = i == childCount - 1;
-            float drawingScale = mOnLockScreen && view instanceof StatusBarIconView
-                    ? ((StatusBarIconView) view).getIconScaleIncreased()
-                    : 1f;
             iconState.visibleState = iconState.hidden
                     ? StatusBarIconView.STATE_HIDDEN
                     : StatusBarIconView.STATE_ICON;
 
-            final float overflowDotX = layoutEnd - mIconSize;
-            boolean isOverflowing = translationX > overflowDotX;
+            final boolean forceOverflow = shouldForceOverflow(i, mSpeedBumpIndex,
+                    iconState.iconAppearAmount, maxVisibleIcons);
+            final boolean isOverflowing = forceOverflow || isOverflowing(
+                    /* isLastChild= */ i == childCount - 1, translationX, layoutEnd, mIconSize);
 
-            if (firstOverflowIndex == -1 && (forceOverflow || isOverflowing)) {
-                firstOverflowIndex = isLastChild && !forceOverflow ? i - 1 : i;
+            // First icon to overflow.
+            if (firstOverflowIndex == -1 && isOverflowing) {
+                firstOverflowIndex = i;
                 mVisualOverflowStart = layoutEnd - mIconSize;
                 if (forceOverflow || mIsStaticLayout) {
                     mVisualOverflowStart = Math.min(translationX, mVisualOverflowStart);
                 }
             }
+            final float drawingScale = mOnLockScreen && view instanceof StatusBarIconView
+                    ? ((StatusBarIconView) view).getIconScaleIncreased()
+                    : 1f;
             translationX += iconState.iconAppearAmount * view.getWidth() * drawingScale;
         }
         mNumDots = 0;
