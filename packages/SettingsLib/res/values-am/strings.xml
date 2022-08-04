@@ -651,7 +651,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ነባሪ"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ማያ ገጽን ያብሩ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ማያ ገጹን ማብራት ይፍቀዱ"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"አንድ መተግበሪያ ማያ ገጹን እንዲያበራ ይፍቀዱለት። ከተሰጠ፣ መተግበሪያው ያለእርስዎ ግልጽ ሐሳብ በማንኛውም ጊዜ ማያ ገጹን ሊያበራ ይችላል።"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"አንድ መተግበሪያ ማያ ገጹን እንዲያበራ ይፍቀዱለት። ከተሰጠ፣ መተግበሪያው ያለእርስዎ ግልፅ ሐሳብ በማንኛውም ጊዜ ማያ ገጹን ሊያበራ ይችላል።"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g>ን ማሰራጨት ይቁም?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g>ን ካሰራጩ ወይም ውፅዓትን ከቀየሩ የአሁኑ ስርጭትዎ ይቆማል"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ያሰራጩ"</string>
