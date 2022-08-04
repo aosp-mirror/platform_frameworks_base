@@ -578,6 +578,22 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testContainerTranslucentChanges() {
+        removeGlobalMinSizeRestriction();
+        final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(rootTask).build();
+        WindowContainerTransaction t = new WindowContainerTransaction();
+        assertFalse(rootTask.isTranslucent(activity));
+        t.setForceTranslucent(rootTask.mRemoteToken.toWindowContainerToken(), true);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
+        assertTrue(rootTask.isTranslucent(activity));
+        t.setForceTranslucent(rootTask.mRemoteToken.toWindowContainerToken(), false);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
+        assertFalse(rootTask.isTranslucent(activity));
+    }
+
+    @Test
     public void testSetIgnoreOrientationRequest_taskDisplayArea() {
         removeGlobalMinSizeRestriction();
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
