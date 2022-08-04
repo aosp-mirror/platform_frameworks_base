@@ -316,8 +316,6 @@ public class UserLifecycleTests {
                 mIam.startUserInBackground(userId);
             }, Intent.ACTION_USER_STARTED, Intent.ACTION_MEDIA_MOUNTED);
 
-            waitForBroadcastIdle();
-
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
@@ -680,8 +678,6 @@ public class UserLifecycleTests {
     }
 
     private void stopUser(int userId, boolean force) throws RemoteException {
-        waitForBroadcastIdle();
-
         final CountDownLatch latch = new CountDownLatch(1);
         mIam.stopUser(userId, force /* force */, new IStopUserCallback.Stub() {
             @Override
@@ -885,9 +881,5 @@ public class UserLifecycleTests {
         final String oldValue = ShellHelper.runShellCommand("getprop " + name);
         assertEquals("", ShellHelper.runShellCommand("setprop " + name + " " + value));
         return oldValue;
-    }
-
-    private void waitForBroadcastIdle() {
-        ShellHelper.runShellCommand("am wait-for-broadcast-idle");
     }
 }
