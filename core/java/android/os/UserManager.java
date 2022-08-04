@@ -5220,23 +5220,13 @@ public class UserManager {
     })
     @UserHandleAware
     public boolean isUserSwitcherEnabled(boolean showEvenIfNotActionable) {
-        if (!supportsMultipleUsers()) {
-            return false;
-        }
-        if (hasUserRestrictionForUser(DISALLOW_USER_SWITCH, mUserId)) {
-            return false;
-        }
-        // If Demo Mode is on, don't show user switcher
-        if (isDeviceInDemoMode(mContext)) {
-            return false;
-        }
-        // Check the Settings.Global.USER_SWITCHER_ENABLED that the user can toggle on/off.
-        final boolean userSwitcherSettingOn = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.USER_SWITCHER_ENABLED,
-                Resources.getSystem().getBoolean(R.bool.config_showUserSwitcherByDefault) ? 1 : 0)
-                != 0;
-        if (!userSwitcherSettingOn) {
-            return false;
+
+        try {
+            if (!mService.isUserSwitcherEnabled(mUserId)) {
+                return false;
+            }
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
 
         // The feature is enabled. But is it worth showing?
