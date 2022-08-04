@@ -20,92 +20,83 @@ import android.graphics.RuntimeShader
 import android.util.MathUtils
 
 /**
- * Shader class that renders an expanding charging ripple effect. A charging ripple contains
- * three elements:
- * 1. an expanding filled circle that appears in the beginning and quickly fades away
+ * Shader class that renders an expanding ripple effect. The ripple contains three elements:
+ *
+ * 1. an expanding filled [RippleShape] that appears in the beginning and quickly fades away
  * 2. an expanding ring that appears throughout the effect
  * 3. an expanding ring-shaped area that reveals noise over #2.
  *
+ * The ripple shader will be default to the circle shape if not specified.
+ *
  * Modeled after frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java.
  */
-class RippleShader internal constructor() : RuntimeShader(SHADER) {
+class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.CIRCLE) :
+        RuntimeShader(buildShader(rippleShape)) {
+
+    /** Shapes that the [RippleShader] supports. */
+    enum class RippleShape {
+        CIRCLE,
+        ROUNDED_BOX
+    }
+
     companion object {
-        private const val SHADER_UNIFORMS = """uniform vec2 in_origin;
+        private const val SHADER_UNIFORMS = """uniform vec2 in_center;
+                uniform vec2 in_size;
                 uniform float in_progress;
-                uniform float in_maxRadius;
+                uniform float in_cornerRadius;
+                uniform float in_thickness;
                 uniform float in_time;
                 uniform float in_distort_radial;
                 uniform float in_distort_xy;
-                uniform float in_radius;
                 uniform float in_fadeSparkle;
-                uniform float in_fadeCircle;
+                uniform float in_fadeFill;
                 uniform float in_fadeRing;
                 uniform float in_blur;
                 uniform float in_pixelDensity;
                 layout(color) uniform vec4 in_color;
                 uniform float in_sparkle_strength;"""
-        private const val SHADER_LIB = """float triangleNoise(vec2 n) {
-                    n  = fract(n * vec2(5.3987, 5.4421));
-                    n += dot(n.yx, n.xy + vec2(21.5351, 14.3137));
-                    float xy = n.x * n.y;
-                    return fract(xy * 95.4307) + fract(xy * 75.04961) - 1.0;
-                }
-                const float PI = 3.1415926535897932384626;
 
-                float threshold(float v, float l, float h) {
-                  return step(l, v) * (1.0 - step(h, v));
-                }
+        private const val SHADER_CIRCLE_MAIN = """vec4 main(vec2 p) {
+                // distortion only applies to circle
+                vec2 p_distorted = distort(p, in_time, in_distort_radial, in_distort_xy);
+                float radius = in_size.x * 0.5;
 
-                float sparkles(vec2 uv, float t) {
-                  float n = triangleNoise(uv);
-                  float s = 0.0;
-                  for (float i = 0; i < 4; i += 1) {
-                    float l = i * 0.01;
-                    float h = l + 0.1;
-                    float o = smoothstep(n - l, h, n);
-                    o *= abs(sin(PI * o * (t + 0.55 * i)));
-                    s += o;
-                  }
-                  return s;
-                }
+                float sparkleRing = softRing(p_distorted, in_center, radius, in_blur);
+                float inside = softCircle(p_distorted, in_center, radius * 1.2, in_blur);
+                float sparkle = sparkles(p - mod(p, in_pixelDensity * 0.8), in_time * 0.00175)
+                    * (1.-sparkleRing) * in_fadeSparkle;
 
-                float softCircle(vec2 uv, vec2 xy, float radius, float blur) {
-                  float blurHalf = blur * 0.5;
-                  float d = distance(uv, xy);
-                  return 1. - smoothstep(1. - blurHalf, 1. + blurHalf, d / radius);
-                }
+                float rippleInsideAlpha = (1.-inside) * in_fadeFill;
+                float rippleRingAlpha = (1.-sparkleRing) * in_fadeRing;
+                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * 0.45;
+                vec4 ripple = in_color * rippleAlpha;
+                return mix(ripple, vec4(sparkle), sparkle * in_sparkle_strength);
+            }
+        """
 
-                float softRing(vec2 uv, vec2 xy, float radius, float blur) {
-                  float thickness_half = radius * 0.25;
-                  float circle_outer = softCircle(uv, xy, radius + thickness_half, blur);
-                  float circle_inner = softCircle(uv, xy, radius - thickness_half, blur);
-                  return circle_outer - circle_inner;
-                }
+        private const val SHADER_ROUNDED_BOX_MAIN = """vec4 main(vec2 p) {
+                float sparkleRing = softRoundedBoxRing(p, in_center, in_size, in_cornerRadius,
+                    in_thickness, in_blur);
+                float inside = softRoundedBox(p, in_center, in_size * 1.2, in_cornerRadius, in_blur);
+                float sparkle = sparkles(p - mod(p, in_pixelDensity * 0.8), in_time * 0.00175)
+                    * (1.-sparkleRing) * in_fadeSparkle;
 
-                vec2 distort(vec2 p, vec2 origin, float time,
-                    float distort_amount_radial, float distort_amount_xy) {
-                    float2 distance = origin - p;
-                    float angle = atan(distance.y, distance.x);
-                    return p + vec2(sin(angle * 8 + time * 0.003 + 1.641),
-                                    cos(angle * 5 + 2.14 + time * 0.00412)) * distort_amount_radial
-                             + vec2(sin(p.x * 0.01 + time * 0.00215 + 0.8123),
-                                    cos(p.y * 0.01 + time * 0.005931)) * distort_amount_xy;
-                }"""
-        private const val SHADER_MAIN = """vec4 main(vec2 p) {
-                    vec2 p_distorted = distort(p, in_origin, in_time, in_distort_radial,
-                        in_distort_xy);
+                float rippleInsideAlpha = (1.-inside) * in_fadeFill;
+                float rippleRingAlpha = (1.-sparkleRing) * in_fadeRing;
+                float rippleAlpha = max(rippleInsideAlpha, rippleRingAlpha) * 0.45;
+                vec4 ripple = in_color * rippleAlpha;
+                return mix(ripple, vec4(sparkle), sparkle * in_sparkle_strength);
+            }
+        """
 
-                    // Draw shapes
-                    float sparkleRing = softRing(p_distorted, in_origin, in_radius, in_blur);
-                    float sparkle = sparkles(p - mod(p, in_pixelDensity * 0.8), in_time * 0.00175)
-                        * sparkleRing * in_fadeSparkle;
-                    float circle = softCircle(p_distorted, in_origin, in_radius * 1.2, in_blur);
-                    float rippleAlpha = max(circle * in_fadeCircle,
-                        softRing(p_distorted, in_origin, in_radius, in_blur) * in_fadeRing) * 0.45;
-                    vec4 ripple = in_color * rippleAlpha;
-                    return mix(ripple, vec4(sparkle), sparkle * in_sparkle_strength);
-                }"""
-        private const val SHADER = SHADER_UNIFORMS + SHADER_LIB + SHADER_MAIN
+        private const val CIRCLE_SHADER = SHADER_UNIFORMS + RippleShaderUtilLibrary.SHADER_LIB +
+                SdfShaderLibrary.CIRCLE_SDF + SHADER_CIRCLE_MAIN
+        private const val ROUNDED_BOX_SHADER = SHADER_UNIFORMS +
+                RippleShaderUtilLibrary.SHADER_LIB + SdfShaderLibrary.ROUNDED_BOX_SDF +
+                SHADER_ROUNDED_BOX_MAIN
+
+        private fun buildShader(rippleShape: RippleShape): String =
+                if (rippleShape == RippleShape.CIRCLE) CIRCLE_SHADER else ROUNDED_BOX_SHADER
 
         private fun subProgress(start: Float, end: Float, progress: Float): Float {
             val min = Math.min(start, end)
@@ -116,22 +107,18 @@ class RippleShader internal constructor() : RuntimeShader(SHADER) {
     }
 
     /**
-     * Maximum radius of the ripple.
+     * Sets the center position of the ripple.
      */
-    var radius: Float = 0.0f
-        set(value) {
-            field = value
-            setFloatUniform("in_maxRadius", value)
-        }
+    fun setCenter(x: Float, y: Float) {
+        setFloatUniform("in_center", x, y)
+    }
 
-    /**
-     * Origin coordinate of the ripple.
-     */
-    var origin: PointF = PointF()
-        set(value) {
-            field = value
-            setFloatUniform("in_origin", value.x, value.y)
-        }
+    /** Max width of the ripple. */
+    private var maxSize: PointF = PointF()
+    fun setMaxSize(width: Float, height: Float) {
+        maxSize.x = width
+        maxSize.y = height
+    }
 
     /**
      * Progress of the ripple. Float value between [0, 1].
@@ -140,20 +127,27 @@ class RippleShader internal constructor() : RuntimeShader(SHADER) {
         set(value) {
             field = value
             setFloatUniform("in_progress", value)
-            setFloatUniform("in_radius",
-                    (1 - (1 - value) * (1 - value) * (1 - value))* radius)
+            val curvedProg = 1 - (1 - value) * (1 - value) * (1 - value)
+
+            setFloatUniform("in_size", /* width= */ maxSize.x * curvedProg,
+                    /* height= */ maxSize.y * curvedProg)
+            setFloatUniform("in_thickness", maxSize.y * curvedProg * 0.5f)
+            // radius should not exceed width and height values.
+            setFloatUniform("in_cornerRadius",
+                    Math.min(maxSize.x, maxSize.y) * curvedProg)
+
             setFloatUniform("in_blur", MathUtils.lerp(1.25f, 0.5f, value))
 
             val fadeIn = subProgress(0f, 0.1f, value)
             val fadeOutNoise = subProgress(0.4f, 1f, value)
             var fadeOutRipple = 0f
-            var fadeCircle = 0f
+            var fadeFill = 0f
             if (!rippleFill) {
-                fadeCircle = subProgress(0f, 0.2f, value)
+                fadeFill = subProgress(0f, 0.6f, value)
                 fadeOutRipple = subProgress(0.3f, 1f, value)
             }
             setFloatUniform("in_fadeSparkle", Math.min(fadeIn, 1 - fadeOutNoise))
-            setFloatUniform("in_fadeCircle", 1 - fadeCircle)
+            setFloatUniform("in_fadeFill", 1 - fadeFill)
             setFloatUniform("in_fadeRing", Math.min(fadeIn, 1 - fadeOutRipple))
         }
 
@@ -169,7 +163,7 @@ class RippleShader internal constructor() : RuntimeShader(SHADER) {
     /**
      * A hex value representing the ripple color, in the format of ARGB
      */
-    var color: Int = 0xffffff.toInt()
+    var color: Int = 0xffffff
         set(value) {
             field = value
             setColorUniform("in_color", value)
