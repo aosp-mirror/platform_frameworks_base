@@ -330,16 +330,28 @@ namespace PaintGlue {
         return result;
     }
 
-    static jint getTextRunCursor__String(JNIEnv* env, jobject clazz, jlong paintHandle,
-            jstring text, jint contextStart, jint contextEnd, jint dir, jint offset,
-            jint cursorOpt) {
+    // Required for API O and O_MR1
+    static jint getTextRunCursor___JJStringIIIII(JNIEnv* env, jobject clazz, jlong paintHandle,
+                                                 jlong typefaceHandle, jstring text,
+                                                 jint contextStart, jint contextEnd, jint dir,
+                                                 jint offset, jint cursorOpt) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        const Typeface* typeface = paint->getAndroidTypeface();
+        const Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         const jchar* textArray = env->GetStringChars(text, nullptr);
         jint result = doTextRunCursor(env, paint, typeface, textArray,
                 contextStart, contextEnd - contextStart, dir, offset, cursorOpt);
         env->ReleaseStringChars(text, textArray);
         return result;
+    }
+
+    static jint getTextRunCursor___String(JNIEnv* env, jobject clazz, jlong paintHandle,
+                                          jstring text, jint contextStart, jint contextEnd,
+                                          jint dir, jint offset, jint cursorOpt) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        const Typeface* typeface = paint->getAndroidTypeface();
+
+        return getTextRunCursor___JJStringIIIII(env, clazz, paintHandle, (jlong)typeface, text,
+                                                contextStart, contextEnd, dir, offset, cursorOpt);
     }
 
     class GetTextFunctor {
@@ -513,10 +525,11 @@ namespace PaintGlue {
         return count;
     }
 
-    static jboolean hasGlyph(JNIEnv *env, jclass, jlong paintHandle, jint bidiFlags,
-            jstring string) {
+    // Required for API O
+    static jboolean hasGlyph___JJIString(JNIEnv* env, jclass, jlong paintHandle,
+                                         jlong typefaceHandle, jint bidiFlags, jstring string) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        const Typeface* typeface = paint->getAndroidTypeface();
+        const Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         ScopedStringChars str(env, string);
 
         /* Start by rejecting unsupported base code point and variation selector pairs. */
@@ -594,6 +607,13 @@ namespace PaintGlue {
             return zzLayout.getGlyphId(0) != layout.getGlyphId(0);
         }
         return true;
+    }
+
+    static jboolean hasGlyph(JNIEnv* env, jclass cls, jlong paintHandle, jint bidiFlags,
+                             jstring string) {
+        const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        return hasGlyph___JJIString(env, cls, paintHandle, (jlong)paint->getAndroidTypeface(),
+                                    bidiFlags, string);
     }
 
     static jfloat doRunAdvance(const Paint* paint, const Typeface* typeface, const jchar buf[],
@@ -1175,9 +1195,11 @@ static const JNINativeMethod methods[] = {
         {"nGetTextAdvances", "(JJLjava/lang/String;IIIII[FI)F",
          (void*)PaintGlue::getTextAdvances__JStringIIIII_FI},
 
+        {"nGetTextRunCursor", "(JJLjava/lang/String;IIIII)I",
+         (void*)PaintGlue::getTextRunCursor___JJStringIIIII},
         {"nGetTextRunCursor", "(J[CIIIII)I", (void*)PaintGlue::getTextRunCursor___C},
         {"nGetTextRunCursor", "(JLjava/lang/String;IIIII)I",
-         (void*)PaintGlue::getTextRunCursor__String},
+         (void*)PaintGlue::getTextRunCursor___String},
         {"nGetTextPath", "(JI[CIIFFJ)V", (void*)PaintGlue::getTextPath___C},
         {"nGetTextPath", "(JILjava/lang/String;IIFFJ)V", (void*)PaintGlue::getTextPath__String},
         {"nGetStringBounds", "(JLjava/lang/String;IIILandroid/graphics/Rect;)V",
@@ -1189,6 +1211,7 @@ static const JNINativeMethod methods[] = {
         {"nGetCharArrayBounds", "(JJ[CIIILandroid/graphics/Rect;)V",
          (void*)PaintGlue::getCharArrayBoundsTypeface},
         {"nHasGlyph", "(JILjava/lang/String;)Z", (void*)PaintGlue::hasGlyph},
+        {"nHasGlyph", "(JJILjava/lang/String;)Z", (void*)PaintGlue::hasGlyph___JJIString},
         {"nGetRunAdvance", "(J[CIIIIZI)F", (void*)PaintGlue::getRunAdvance___CIIIIZI_F},
         {"nGetRunAdvance", "(JJ[CIIIIZI)F", (void*)PaintGlue::getRunAdvance___JCIIIIZI_F},
         {"nGetOffsetForAdvance", "(J[CIIIIZF)I", (void*)PaintGlue::getOffsetForAdvance___CIIIIZF_I},
