@@ -168,7 +168,8 @@ public class KeyguardSimPinViewController
                             mRemainingAttempts = -1;
                             mShowDefaultMessage = true;
                             getKeyguardSecurityCallback().dismiss(
-                                    true, KeyguardUpdateMonitor.getCurrentUser());
+                                    true, KeyguardUpdateMonitor.getCurrentUser(),
+                                    SecurityMode.SimPin);
                         } else {
                             mShowDefaultMessage = false;
                             if (result.getResult() == PinResult.PIN_RESULT_TYPE_INCORRECT) {
