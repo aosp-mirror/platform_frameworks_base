@@ -462,6 +462,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(
+                        mDumpManager,
                         mock(HeadsUpManagerPhone.class),
                         new StatusBarStateControllerImpl(new UiEventLoggerFake(), mDumpManager,
                                 mInteractionJankMonitor),
