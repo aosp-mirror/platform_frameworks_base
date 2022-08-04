@@ -451,10 +451,16 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     IRemoteAnimationFinishedCallback finishedCallback,
                     SurfaceControl.Transaction t) {
                 if (apps == null || apps.length == 0) {
-                    // Switch the split position if launching as MULTIPLE_TASK failed.
-                    if ((fillInIntent.getFlags() & FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
-                        setSideStagePosition(SplitLayout.reversePosition(
-                                getSideStagePosition()), null);
+                    if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0) {
+                        mMainExecutor.execute(() ->
+                                exitSplitScreen(mMainStage.getChildCount() == 0
+                                        ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
+                    } else {
+                        // Switch the split position if launching as MULTIPLE_TASK failed.
+                        if ((fillInIntent.getFlags() & FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
+                            setSideStagePosition(SplitLayout.reversePosition(
+                                    getSideStagePosition()), null);
+                        }
                     }
 
                     // Do nothing when the animation was cancelled.
@@ -650,7 +656,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mShouldUpdateRecents = true;
         // If any stage has no child after animation finished, it means that split will display
         // nothing, such status will happen if task and intent is same app but not support
-        // multi-instagce, we should exit split and expand that app as full screen.
+        // multi-instance, we should exit split and expand that app as full screen.
         if (!cancel && (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0)) {
             mMainExecutor.execute(() ->
                     exitSplitScreen(mMainStage.getChildCount() == 0
