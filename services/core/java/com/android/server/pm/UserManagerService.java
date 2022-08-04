@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.os.UserManager.DISALLOW_USER_SWITCH;
 
 import android.Manifest;
 import android.accounts.Account;
@@ -1760,6 +1761,19 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public boolean isUserSwitcherEnabled(@UserIdInt int mUserId) {
+        boolean multiUserSettingOn = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.USER_SWITCHER_ENABLED,
+                Resources.getSystem().getBoolean(com.android.internal
+                        .R.bool.config_showUserSwitcherByDefault) ? 1 : 0) != 0;
+
+        return UserManager.supportsMultipleUsers()
+                && !hasUserRestriction(DISALLOW_USER_SWITCH, mUserId)
+                && !UserManager.isDeviceInDemoMode(mContext)
+                && multiUserSettingOn;
+    }
+
+    @Override
     public boolean isRestricted(@UserIdInt int userId) {
         if (userId != UserHandle.getCallingUserId()) {
             checkCreateUsersPermission("query isRestricted for user " + userId);
@@ -2049,7 +2063,6 @@ public class UserManagerService extends IUserManager.Stub {
                     originatingUserId, local);
             localChanged = updateLocalRestrictionsForTargetUsersLR(originatingUserId, local,
                     updatedLocalTargetUserIds);
-
             if (isDeviceOwner) {
                 // Remember the global restriction owner userId to be able to make a distinction
                 // in getUserRestrictionSource on who set local policies.
@@ -4432,44 +4445,59 @@ public class UserManagerService extends IUserManager.Stub {
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
                 this::onPullAtom);
+        statsManager.setPullAtomCallback(
+                FrameworkStatsLog.MULTI_USER_INFO,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                this::onPullAtom);
     }
 
     /** Writes a UserInfo pulled atom for each user on the device. */
     private int onPullAtom(int atomTag, List<StatsEvent> data) {
-        if (atomTag != FrameworkStatsLog.USER_INFO) {
+        if (atomTag == FrameworkStatsLog.USER_INFO) {
+            final List<UserInfo> users = getUsersInternal(true, true, true);
+            final int size = users.size();
+            if (size > 1) {
+                for (int idx = 0; idx < size; idx++) {
+                    final UserInfo user = users.get(idx);
+                    final int userTypeStandard = UserManager.getUserTypeForStatsd(user.userType);
+                    final String userTypeCustom = (userTypeStandard == FrameworkStatsLog
+                            .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN)
+                            ?
+                            user.userType : null;
+
+                    boolean isUserRunningUnlocked;
+                    synchronized (mUserStates) {
+                        isUserRunningUnlocked =
+                                mUserStates.get(user.id, -1) == UserState.STATE_RUNNING_UNLOCKED;
+                    }
+
+                    data.add(FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.USER_INFO,
+                            user.id,
+                            userTypeStandard,
+                            userTypeCustom,
+                            user.flags,
+                            user.creationTime,
+                            user.lastLoggedInTime,
+                            isUserRunningUnlocked
+                    ));
+                }
+            }
+        } else if (atomTag == FrameworkStatsLog.MULTI_USER_INFO) {
+            if (UserManager.getMaxSupportedUsers() > 1) {
+                int deviceOwnerUserId = UserHandle.USER_NULL;
+
+                synchronized (mRestrictionsLock) {
+                    deviceOwnerUserId = mDeviceOwnerUserId;
+                }
+
+                data.add(FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.MULTI_USER_INFO,
+                        UserManager.getMaxSupportedUsers(),
+                        isUserSwitcherEnabled(deviceOwnerUserId)));
+            }
+        } else {
             Slogf.e(LOG_TAG, "Unexpected atom tag: %d", atomTag);
             return android.app.StatsManager.PULL_SKIP;
-        }
-        final List<UserInfo> users = getUsersInternal(true, true, true);
-        final int size = users.size();
-        for (int idx = 0; idx < size; idx++) {
-            final UserInfo user = users.get(idx);
-            if (user.id == UserHandle.USER_SYSTEM) {
-                // Skip user 0. It's not interesting. We already know it exists, is running, and (if
-                // we know the device configuration) its userType.
-                continue;
-            }
-
-            final int userTypeStandard = UserManager.getUserTypeForStatsd(user.userType);
-            final String userTypeCustom = (userTypeStandard ==
-                    FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN) ?
-                    user.userType : null;
-
-            boolean isUserRunningUnlocked;
-            synchronized (mUserStates) {
-                isUserRunningUnlocked =
-                        mUserStates.get(user.id, -1) == UserState.STATE_RUNNING_UNLOCKED;
-            }
-
-            data.add(FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.USER_INFO,
-                    user.id,
-                    userTypeStandard,
-                    userTypeCustom,
-                    user.flags,
-                    user.creationTime,
-                    user.lastLoggedInTime,
-                    isUserRunningUnlocked
-            ));
         }
         return android.app.StatsManager.PULL_SUCCESS;
     }
