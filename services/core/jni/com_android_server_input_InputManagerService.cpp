@@ -462,10 +462,10 @@ void NativeInputManager::dump(std::string& dump) {
     mInputManager->getReader().dump(dump);
     dump += "\n";
 
-    mInputManager->getUnwantedInteractionBlocker().dump(dump);
+    mInputManager->getBlocker().dump(dump);
     dump += "\n";
 
-    mInputManager->getClassifier().dump(dump);
+    mInputManager->getProcessor().dump(dump);
     dump += "\n";
 
     mInputManager->getDispatcher().dump(dump);
@@ -702,7 +702,7 @@ void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
 
 void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) {
     ATRACE_CALL();
-    mInputManager->getUnwantedInteractionBlocker().notifyInputDevicesChanged(inputDevices);
+    mInputManager->getBlocker().notifyInputDevicesChanged(inputDevices);
     JNIEnv* env = jniEnv();
 
     size_t count = inputDevices.size();
@@ -1483,7 +1483,7 @@ PointerIconStyle NativeInputManager::getCustomPointerIconId() {
 }
 
 void NativeInputManager::setMotionClassifierEnabled(bool enabled) {
-    mInputManager->getClassifier().setMotionClassifierEnabled(enabled);
+    mInputManager->getProcessor().setMotionClassifierEnabled(enabled);
 }
 
 bool NativeInputManager::isPerDisplayTouchModeEnabled() {
