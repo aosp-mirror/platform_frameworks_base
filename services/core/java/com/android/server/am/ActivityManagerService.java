@@ -13849,6 +13849,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw new SecurityException(msg);
                 }
             }
+            if (!Build.IS_DEBUGGABLE && callingUid != ROOT_UID && callingUid != SHELL_UID
+                    && callingUid != SYSTEM_UID && !hasActiveInstrumentationLocked(callingPid)) {
+                // If it's not debug build and not called from root/shell/system uid, reject it.
+                final String msg = "Permission Denial: instrumentation test "
+                        + className + " from pid=" + callingPid + ", uid=" + callingUid
+                        + ", pkgName=" + getPackageNameByPid(callingPid)
+                        + " not allowed because it's not started from SHELL";
+                Slog.wtfQuiet(TAG, msg);
+                reportStartInstrumentationFailureLocked(watcher, className, msg);
+                throw new SecurityException(msg);
+            }
 
             ActiveInstrumentation activeInstr = new ActiveInstrumentation(this);
             activeInstr.mClass = className;
@@ -13944,6 +13955,29 @@ public class ActivityManagerService extends IActivityManager.Stub
                     targetInfo);
         } catch (RemoteException e) {
             Slog.i(TAG, "RemoteException from instrumentWithoutRestart", e);
+        }
+    }
+
+    @GuardedBy("this")
+    private boolean hasActiveInstrumentationLocked(int pid) {
+        if (pid == 0) {
+            return false;
+        }
+        synchronized (mPidsSelfLocked) {
+            ProcessRecord process = mPidsSelfLocked.get(pid);
+            return process != null && process.getActiveInstrumentation() != null;
+        }
+    }
+
+    private String getPackageNameByPid(int pid) {
+        synchronized (mPidsSelfLocked) {
+            final ProcessRecord app = mPidsSelfLocked.get(pid);
+
+            if (app != null && app.info != null) {
+                return app.info.packageName;
+            }
+
+            return null;
         }
     }
 
