@@ -4666,9 +4666,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mPendingRemoteAnimation = options.getRemoteAnimationAdapter();
         }
         mPendingRemoteTransition = options.getRemoteTransition();
-        // Since options gets sent to client apps, remove transition information from it.
-        options.setRemoteTransition(null);
-        options.setRemoteAnimationAdapter(null);
     }
 
     void applyOptionsAnimation() {
