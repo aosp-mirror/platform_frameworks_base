@@ -513,6 +513,9 @@ public final class JobStatus {
         if (latestRunTimeElapsedMillis != NO_LATEST_RUNTIME) {
             requiredConstraints |= CONSTRAINT_DEADLINE;
         }
+        if (job.isPrefetch()) {
+            requiredConstraints |= CONSTRAINT_PREFETCH;
+        }
         boolean exemptedMediaUrisOnly = false;
         if (job.getTriggerContentUris() != null) {
             requiredConstraints |= CONSTRAINT_CONTENT_TRIGGER;
