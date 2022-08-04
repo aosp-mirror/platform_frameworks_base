@@ -38,6 +38,7 @@ import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.IndentingPrintWriter;
 import android.util.MutableInt;
 import android.util.Slog;
 
@@ -423,5 +424,31 @@ class RadioModule {
         if (rawImage == null || rawImage.length == 0) return null;
 
         return BitmapFactory.decodeByteArray(rawImage, 0, rawImage.length);
+    }
+
+    void dumpInfo(IndentingPrintWriter pw) {
+        pw.printf("RadioModule\n");
+        pw.increaseIndent();
+        synchronized (mLock) {
+            pw.printf("BroadcastRadioService: %s\n", mService);
+            pw.printf("Properties: %s\n", mProperties);
+            pw.printf("HIDL2.0 HAL TunerSession: %s\n", mHalTunerSession);
+            pw.printf("Is antenna connected? ");
+            if (mAntennaConnected == null) {
+                pw.printf("null\n");
+            } else {
+                pw.printf("%s\n", mAntennaConnected ? "Yes" : "No");
+            }
+            pw.printf("current ProgramInfo: %s\n", mCurrentProgramInfo);
+            pw.printf("ProgramInfoCache: %s\n", mProgramInfoCache);
+            pw.printf("Union of AIDL ProgramFilters: %s\n", mUnionOfAidlProgramFilters);
+            pw.printf("AIDL TunerSessions:\n");
+            pw.increaseIndent();
+            for (TunerSession aidlTunerSession : mAidlTunerSessions) {
+                aidlTunerSession.dumpInfo(pw);
+            }
+            pw.decreaseIndent();
+        }
+        pw.decreaseIndent();
     }
 }
