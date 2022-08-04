@@ -117,10 +117,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"انتقال فایل"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"دستگاه ورودی"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"دسترسی به اینترنت"</string>
-    <!-- no translation found for bluetooth_profile_pbap (4262303387989406171) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_pbap_summary (6466456791354759132) -->
-    <skip />
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"هم‌رسانی مخاطبین و سابقه تماس"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"استفاده برای هم‌رسانی مخاطبین و سابقه تماس"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"اشتراک‌گذاری اتصال اینترنت"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"پیام‌های نوشتاری"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"دسترسی سیم‌کارت"</string>
@@ -662,6 +660,8 @@
     <string name="dream_complication_title_weather" msgid="598609151677172783">"آب‌وهوا"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"کیفیت هوا"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"اطلاعات پخش محتوا"</string>
+    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
+    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"انتخاب عکس نمایه"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"نماد کاربر پیش‌فرض"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"صفحه‌کلید فیزیکی"</string>
