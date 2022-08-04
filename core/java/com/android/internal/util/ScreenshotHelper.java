@@ -219,8 +219,9 @@ public class ScreenshotHelper {
                 throw new IllegalArgumentException("Bundle does not contain a hardware bitmap");
             }
 
-            HardwareBuffer buffer = bundle.getParcelable(KEY_BUFFER, android.hardware.HardwareBuffer.class);
-            ParcelableColorSpace colorSpace = bundle.getParcelable(KEY_COLOR_SPACE, android.graphics.ParcelableColorSpace.class);
+            HardwareBuffer buffer = bundle.getParcelable(KEY_BUFFER, HardwareBuffer.class);
+            ParcelableColorSpace colorSpace = bundle.getParcelable(KEY_COLOR_SPACE,
+                    ParcelableColorSpace.class);
 
             return Bitmap.wrapHardwareBuffer(Objects.requireNonNull(buffer),
                     colorSpace.getColorSpace());
