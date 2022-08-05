@@ -21,6 +21,7 @@ import static android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS;
 
 import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_PROCESS_COMPLETE;
 import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_URI;
+import static com.android.systemui.flags.Flags.SCREENSHOT_REQUEST_PROCESSOR;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_SERVICE;
@@ -57,6 +58,8 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FlagListenable.FlagEvent;
 
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -75,6 +78,8 @@ public class TakeScreenshotService extends Service {
     private final Handler mHandler;
     private final Context mContext;
     private final @Background Executor mBgExecutor;
+    private final RequestProcessor mProcessor;
+    private final FeatureFlags mFeatureFlags;
 
     private final BroadcastReceiver mCloseSystemDialogs = new BroadcastReceiver() {
         @Override
@@ -104,7 +109,8 @@ public class TakeScreenshotService extends Service {
     public TakeScreenshotService(ScreenshotController screenshotController, UserManager userManager,
             DevicePolicyManager devicePolicyManager, UiEventLogger uiEventLogger,
             ScreenshotNotificationsController notificationsController, Context context,
-            @Background Executor bgExecutor) {
+            @Background Executor bgExecutor, FeatureFlags featureFlags,
+            RequestProcessor processor) {
         if (DEBUG_SERVICE) {
             Log.d(TAG, "new " + this);
         }
@@ -116,6 +122,9 @@ public class TakeScreenshotService extends Service {
         mNotificationsController = notificationsController;
         mContext = context;
         mBgExecutor = bgExecutor;
+        mFeatureFlags = featureFlags;
+        mFeatureFlags.addListener(SCREENSHOT_REQUEST_PROCESSOR, FlagEvent::requestNoRestart);
+        mProcessor = processor;
     }
 
     @Override
@@ -217,6 +226,12 @@ public class TakeScreenshotService extends Service {
         ComponentName topComponent = screenshotRequest.getTopComponent();
         mUiEventLogger.log(ScreenshotEvent.getScreenshotSource(screenshotRequest.getSource()), 0,
                 topComponent == null ? "" : topComponent.getPackageName());
+
+        if (mFeatureFlags.isEnabled(SCREENSHOT_REQUEST_PROCESSOR)) {
+            Log.d(TAG, "handleMessage: Using request processor");
+            mProcessor.processRequest(msg.what, uriConsumer, screenshotRequest, requestCallback);
+            return true;
+        }
 
         switch (msg.what) {
             case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:

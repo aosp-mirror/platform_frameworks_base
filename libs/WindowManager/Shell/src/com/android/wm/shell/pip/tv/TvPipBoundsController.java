@@ -122,9 +122,9 @@ public class TvPipBoundsController {
             cancelScheduledPlacement();
             applyPlacementBounds(placement.getUnstashedBounds(), animationDuration);
         } else if (immediate) {
+            boolean shouldStash = mUnstashRunnable != null || placement.getTriggerStash();
             cancelScheduledPlacement();
-            applyPlacementBounds(placement.getBounds(), animationDuration);
-            scheduleUnstashIfNeeded(placement);
+            applyPlacement(placement, shouldStash, animationDuration);
         } else {
             applyPlacementBounds(mCurrentPlacementBounds, animationDuration);
             schedulePinnedStackPlacement(placement, animationDuration);
@@ -176,22 +176,21 @@ public class TvPipBoundsController {
                     "%s: applyPendingPlacement()", TAG);
         }
         if (mPendingPlacement != null) {
-            if (mPendingStash) {
-                mPendingStash = false;
-                scheduleUnstashIfNeeded(mPendingPlacement);
-            }
+            applyPlacement(mPendingPlacement, mPendingStash, mPendingPlacementAnimationDuration);
+            mPendingStash = false;
+            mPendingPlacement = null;
+        }
+    }
 
-            if (mUnstashRunnable != null) {
-                // currently stashed, use stashed pos
-                applyPlacementBounds(mPendingPlacement.getBounds(),
-                        mPendingPlacementAnimationDuration);
-            } else {
-                applyPlacementBounds(mPendingPlacement.getUnstashedBounds(),
-                        mPendingPlacementAnimationDuration);
-            }
+    private void applyPlacement(@NonNull final Placement placement, boolean shouldStash,
+            int animationDuration) {
+        if (placement.getStashType() != STASH_TYPE_NONE && shouldStash) {
+            scheduleUnstashIfNeeded(placement);
         }
 
-        mPendingPlacement = null;
+        Rect bounds =
+                mUnstashRunnable != null ? placement.getBounds() : placement.getUnstashedBounds();
+        applyPlacementBounds(bounds, animationDuration);
     }
 
     void onPipDismissed() {

@@ -363,11 +363,11 @@ public class RemoteAnimationTarget implements Parcelable {
         pw.print(prefix); pw.print("leash="); pw.println(leash);
         pw.print(prefix); pw.print("taskInfo="); pw.println(taskInfo);
         pw.print(prefix); pw.print("allowEnterPip="); pw.println(allowEnterPip);
-        pw.print(prefix); pw.print("windowType="); pw.print(windowType);
-        pw.print(prefix); pw.print("hasAnimatingParent="); pw.print(hasAnimatingParent);
-        pw.print(prefix); pw.print("backgroundColor="); pw.print(backgroundColor);
-        pw.print(prefix); pw.print("showBackdrop="); pw.print(showBackdrop);
-        pw.print(prefix); pw.print("willShowImeOnTarget="); pw.print(willShowImeOnTarget);
+        pw.print(prefix); pw.print("windowType="); pw.println(windowType);
+        pw.print(prefix); pw.print("hasAnimatingParent="); pw.println(hasAnimatingParent);
+        pw.print(prefix); pw.print("backgroundColor="); pw.println(backgroundColor);
+        pw.print(prefix); pw.print("showBackdrop="); pw.println(showBackdrop);
+        pw.print(prefix); pw.print("willShowImeOnTarget="); pw.println(willShowImeOnTarget);
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {

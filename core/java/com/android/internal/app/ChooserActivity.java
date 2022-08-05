@@ -254,7 +254,7 @@ public class ChooserActivity extends ResolverActivity implements
                     SystemUiDeviceConfigFlags.IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP,
                     DEFAULT_IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP);
 
-    private static final int DEFAULT_LIST_VIEW_UPDATE_DELAY_MS = 125;
+    private static final int DEFAULT_LIST_VIEW_UPDATE_DELAY_MS = 0;
 
     private static final int URI_PERMISSION_INTENT_FLAGS = Intent.FLAG_GRANT_READ_URI_PERMISSION
             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION

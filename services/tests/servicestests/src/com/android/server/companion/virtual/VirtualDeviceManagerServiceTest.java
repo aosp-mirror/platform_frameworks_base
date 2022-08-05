@@ -124,6 +124,8 @@ public class VirtualDeviceManagerServiceTest {
     private VirtualDeviceImpl mDeviceImpl;
     private InputController mInputController;
     private AssociationInfo mAssociationInfo;
+    private VirtualDeviceManagerService mVdms;
+    private VirtualDeviceManagerInternal mLocalService;
     @Mock
     private InputController.NativeWrapper mNativeWrapperMock;
     @Mock
@@ -138,6 +140,8 @@ public class VirtualDeviceManagerServiceTest {
     private IVirtualDeviceActivityListener mActivityListener;
     @Mock
     private Consumer<ArraySet<Integer>> mRunningAppsChangedCallback;
+    @Mock
+    private VirtualDeviceManagerInternal.VirtualDisplayListener mDisplayListener;
     @Mock
     IPowerManager mIPowerManagerMock;
     @Mock
@@ -215,6 +219,9 @@ public class VirtualDeviceManagerServiceTest {
         mAssociationInfo = new AssociationInfo(1, 0, null,
                 MacAddress.BROADCAST_ADDRESS, "", null, true, false, false, 0, 0);
 
+        mVdms = new VirtualDeviceManagerService(mContext);
+        mLocalService = mVdms.getLocalServiceInstance();
+
         VirtualDeviceParams params = new VirtualDeviceParams
                 .Builder()
                 .setBlockedActivities(getBlockedActivities())
@@ -232,6 +239,28 @@ public class VirtualDeviceManagerServiceTest {
                 mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
         // This call should not throw any exceptions.
         mDeviceImpl.onVirtualDisplayRemovedLocked(DISPLAY_ID);
+    }
+
+    @Test
+    public void onVirtualDisplayCreatedLocked_listenersNotified() throws RemoteException {
+        mLocalService.registerVirtualDisplayListener(mDisplayListener);
+
+        mLocalService.onVirtualDisplayCreated(DISPLAY_ID);
+        TestableLooper.get(this).processAllMessages();
+
+        verify(mDisplayListener).onVirtualDisplayCreated(DISPLAY_ID);
+    }
+
+    @Test
+    public void onVirtualDisplayRemovedLocked_listenersNotified() throws RemoteException {
+        mLocalService.registerVirtualDisplayListener(mDisplayListener);
+        mDeviceImpl.onVirtualDisplayCreatedLocked(
+                mDeviceImpl.createWindowPolicyController(), DISPLAY_ID);
+
+        mLocalService.onVirtualDisplayRemoved(mDeviceImpl, DISPLAY_ID);
+        TestableLooper.get(this).processAllMessages();
+
+        verify(mDisplayListener).onVirtualDisplayRemoved(DISPLAY_ID);
     }
 
     @Test

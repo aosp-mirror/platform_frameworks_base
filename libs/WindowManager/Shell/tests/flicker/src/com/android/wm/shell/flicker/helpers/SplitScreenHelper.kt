@@ -21,6 +21,7 @@ import android.graphics.Point
 import android.os.SystemClock
 import android.view.InputDevice
 import android.view.MotionEvent
+import android.view.ViewConfiguration
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
@@ -228,7 +229,16 @@ class SplitScreenHelper(
                 ?.layerStackSpace
                 ?: error("Display not found")
             val dividerBar = device.wait(Until.findObject(dividerBarSelector), TIMEOUT_MS)
-            dividerBar.drag(Point(displayBounds.width, displayBounds.width))
+            dividerBar.drag(Point(displayBounds.width * 4 / 5, displayBounds.height * 4 / 5))
+        }
+
+        fun doubleTapDividerToSwitch(device: UiDevice) {
+            val dividerBar = device.wait(Until.findObject(dividerBarSelector), TIMEOUT_MS)
+            val interval = (ViewConfiguration.getDoubleTapTimeout() +
+                ViewConfiguration.getDoubleTapMinTime()) / 2
+            dividerBar.click()
+            SystemClock.sleep(interval.toLong())
+            dividerBar.click()
         }
     }
 }

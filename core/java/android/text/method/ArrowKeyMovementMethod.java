@@ -16,6 +16,7 @@
 
 package android.text.method;
 
+import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.text.Layout;
 import android.text.Selection;
@@ -219,6 +220,26 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
     @Override
     protected boolean end(TextView widget, Spannable buffer) {
         return lineEnd(widget, buffer);
+    }
+
+    @Override
+    public boolean previousParagraph(@NonNull TextView widget, @NonNull Spannable buffer) {
+        final Layout layout = widget.getLayout();
+        if (isSelecting(buffer)) {
+            return Selection.extendToParagraphStart(buffer);
+        } else {
+            return Selection.moveToParagraphStart(buffer, layout);
+        }
+    }
+
+    @Override
+    public boolean nextParagraph(@NonNull TextView widget, @NonNull  Spannable buffer) {
+        final Layout layout = widget.getLayout();
+        if (isSelecting(buffer)) {
+            return Selection.extendToParagraphEnd(buffer);
+        } else {
+            return Selection.moveToParagraphEnd(buffer, layout);
+        }
     }
 
     @Override

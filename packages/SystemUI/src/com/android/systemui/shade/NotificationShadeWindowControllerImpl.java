@@ -89,7 +89,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         Dumpable, ConfigurationListener {
 
     private static final String TAG = "NotificationShadeWindowController";
-    private static final boolean DEBUG = false;
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -190,7 +189,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 return;
             }
         }
-        mCallbacks.add(new WeakReference<StatusBarWindowCallback>(callback));
+        mCallbacks.add(new WeakReference<>(callback));
     }
 
     @Override

@@ -49,10 +49,6 @@ public abstract class PanelView extends FrameLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    public PanelView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-
     public void setOnTouchListener(PanelViewController.TouchHandler touchHandler) {
         super.setOnTouchListener(touchHandler);
         mTouchHandler = touchHandler;
