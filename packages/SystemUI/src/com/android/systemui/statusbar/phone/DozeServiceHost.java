@@ -226,7 +226,6 @@ public final class DozeServiceHost implements DozeHost {
         }
 
         mStatusBarStateController.setIsDozing(dozing);
-        mNotificationShadeWindowViewController.setDozing(dozing);
         if (mFoldAodAnimationController != null) {
             mFoldAodAnimationController.setIsDozing(dozing);
         }
@@ -310,7 +309,6 @@ public final class DozeServiceHost implements DozeHost {
     public void dozeTimeTick() {
         mNotificationPanel.dozeTimeTick();
         mAuthController.dozeTimeTick();
-        mNotificationShadeWindowViewController.dozeTimeTick();
         if (mAmbientIndicationContainer instanceof DozeReceiver) {
             ((DozeReceiver) mAmbientIndicationContainer).dozeTimeTick();
         }
