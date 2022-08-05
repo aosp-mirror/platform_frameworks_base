@@ -2629,6 +2629,10 @@
          will be locked. -->
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
+    <!-- Whether the device allows users to start in background on secondary displays.
+         Should be false for most devices, except automotive vehicle with passenger displays. -->
+    <bool name="config_multiuserUsersOnSecondaryDisplays">false</bool>
+
     <!-- Whether to automatically switch a non-primary user back to the primary user after a
          timeout when the device is docked.  -->
     <bool name="config_enableTimeoutToUserZeroWhenDocked">false</bool>
