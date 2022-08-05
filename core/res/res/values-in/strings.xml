@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Tanpa judul&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Tidak ada nomor telepon)"</string>
@@ -727,7 +722,7 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Mengizinkan aplikasi membaca dan menulis konfigurasi status Jangan Ganggu."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"mulai melihat penggunaan izin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Memungkinkan pemegang memulai penggunaan izin untuk aplikasi. Tidak diperlukan untuk aplikasi normal."</string>
-    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"mengakses data sensor pada frekuensi pengambilan sampel yang tinggi"</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"mengakses data sensor pada frekuensi sampling yang tinggi"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Mengizinkan aplikasi mengambil sampel data sensor pada frekuensi yang lebih besar dari 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Mengontrol panjang dan karakter yang diizinkan dalam sandi dan PIN kunci layar."</string>
@@ -1582,7 +1577,7 @@
     <string name="content_description_sliding_handle" msgid="982510275422590757">"Gagang geser. Sentuh lama."</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Geser untuk membuka kunci."</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Navigasi ke beranda"</string>
-    <string name="action_bar_up_description" msgid="6611579697195026932">"Navigasi naik"</string>
+    <string name="action_bar_up_description" msgid="6611579697195026932">"Navigasi ke atas"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Opsi lainnya"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
