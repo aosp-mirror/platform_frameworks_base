@@ -32,6 +32,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -361,7 +362,13 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             SurfaceControl leash, boolean firstAppeared) {
         final Point taskPositionInParent = taskInfo.positionInParent;
         mSyncQueue.runInSync(t -> {
-            t.setWindowCrop(leash, null);
+            // The task surface might be released before running in the sync queue for the case like
+            // trampoline launch, so check if the surface is valid before processing it.
+            if (!leash.isValid()) {
+                Slog.w(TAG, "Skip updating invalid child task surface of task#" + taskInfo.taskId);
+                return;
+            }
+            t.setCrop(leash, null);
             t.setPosition(leash, taskPositionInParent.x, taskPositionInParent.y);
             if (firstAppeared && !ENABLE_SHELL_TRANSITIONS) {
                 t.setAlpha(leash, 1f);
