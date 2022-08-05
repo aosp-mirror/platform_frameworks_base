@@ -198,6 +198,15 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
                 { "Retrying face after HW unavailable, attempt $int1" })
     }
 
+    fun logRetryAfterFpError(msgId: Int, errString: String?) {
+        logBuffer.log(TAG, DEBUG, {
+            int1 = msgId
+            str1 = "$errString"
+        }, {
+            "Fingerprint retrying auth due to($int1) -> $str1"
+        })
+    }
+
     fun logRetryAfterFpHwUnavailable(retryCount: Int) {
         logBuffer.log(TAG, WARNING,
                 { int1 = retryCount },
@@ -270,12 +279,12 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
                 { str1 = newTimeFormat },
                 { "handleTimeFormatUpdate timeFormat=$str1" })
     }
-
     fun logUdfpsPointerDown(sensorId: Int) {
         logBuffer.log(TAG, DEBUG,
                 { int1 = sensorId },
                 { "onUdfpsPointerDown, sensorId: $int1" })
     }
+
     fun logUdfpsPointerUp(sensorId: Int) {
         logBuffer.log(TAG, DEBUG,
                 { int1 = sensorId },
