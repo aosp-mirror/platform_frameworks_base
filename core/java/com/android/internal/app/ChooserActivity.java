@@ -1619,6 +1619,8 @@ public class ChooserActivity extends ResolverActivity implements
         if (mChooserMultiProfilePagerAdapter.getInactiveListAdapter() != null) {
             mChooserMultiProfilePagerAdapter.getInactiveListAdapter().destroyAppPredictor();
         }
+        mPersonalAppPredictor = null;
+        mWorkAppPredictor = null;
     }
 
     @Override // ResolverListCommunicator
