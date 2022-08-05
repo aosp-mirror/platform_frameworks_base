@@ -31,6 +31,7 @@ import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.fragments.FragmentService
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.qs.QSContainerController
@@ -54,6 +55,7 @@ class NotificationsQSContainerController @Inject constructor(
     private val largeScreenShadeHeaderController: LargeScreenShadeHeaderController,
     private val shadeExpansionStateManager: ShadeExpansionStateManager,
     private val featureFlags: FeatureFlags,
+    private val fragmentService: FragmentService,
     @Main private val delayableExecutor: DelayableExecutor
 ) : ViewController<NotificationsQuickSettingsContainer>(view), QSContainerController {
 
@@ -128,6 +130,7 @@ class NotificationsQSContainerController @Inject constructor(
         mView.setInsetsChangedListener(delayedInsetSetter)
         mView.setQSFragmentAttachedListener { qs: QS -> qs.setContainerController(this) }
         mView.setConfigurationChangedListener { updateResources() }
+        fragmentService.getFragmentHostManager(mView).addTagListener(QS.TAG, mView)
     }
 
     override fun onViewDetached() {
@@ -136,6 +139,7 @@ class NotificationsQSContainerController @Inject constructor(
         mView.removeOnInsetsChangedListener()
         mView.removeQSFragmentAttachedListener()
         mView.setConfigurationChangedListener(null)
+        fragmentService.getFragmentHostManager(mView).removeTagListener(QS.TAG, mView)
     }
 
     fun updateResources() {

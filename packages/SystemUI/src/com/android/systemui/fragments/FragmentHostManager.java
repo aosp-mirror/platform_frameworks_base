@@ -36,7 +36,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
-import com.android.systemui.Dependency;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.util.leak.LeakDetector;
 
@@ -46,12 +45,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
+
 public class FragmentHostManager {
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;
     private final HashMap<String, ArrayList<FragmentListener>> mListeners = new HashMap<>();
     private final View mRootView;
+    private final LeakDetector mLeakDetector;
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
             ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_LOCALE
                     | ActivityInfo.CONFIG_ASSETS_PATHS);
@@ -61,12 +65,22 @@ public class FragmentHostManager {
     private FragmentController mFragments;
     private FragmentLifecycleCallbacks mLifecycleCallbacks;
 
-    FragmentHostManager(FragmentService manager, View rootView) {
+    @AssistedInject
+    FragmentHostManager(
+            @Assisted View rootView,
+            FragmentService manager,
+            LeakDetector leakDetector) {
         mContext = rootView.getContext();
         mManager = manager;
         mRootView = rootView;
+        mLeakDetector = leakDetector;
         mConfigChanges.applyNewConfig(mContext.getResources());
         createFragmentHost(null);
+    }
+
+    @AssistedFactory
+    public interface Factory {
+        FragmentHostManager create(View rootView);
     }
 
     private void createFragmentHost(Parcelable savedState) {
@@ -86,7 +100,7 @@ public class FragmentHostManager {
 
             @Override
             public void onFragmentDestroyed(FragmentManager fm, Fragment f) {
-                Dependency.get(LeakDetector.class).trackGarbage(f);
+                mLeakDetector.trackGarbage(f);
             }
         };
         mFragments.getFragmentManager().registerFragmentLifecycleCallbacks(mLifecycleCallbacks,
@@ -209,19 +223,6 @@ public class FragmentHostManager {
         // When a fragment is destroyed, you should not talk to it any longer.
         default void onFragmentViewDestroyed(String tag, Fragment fragment) {
         }
-    }
-
-    public static FragmentHostManager get(View view) {
-        try {
-            return Dependency.get(FragmentService.class).getFragmentHostManager(view);
-        } catch (ClassCastException e) {
-            // TODO: Some auto handling here?
-            throw e;
-        }
-    }
-
-    public static void removeAndDestroy(View view) {
-        Dependency.get(FragmentService.class).removeAndDestroy(view);
     }
 
     public void reloadFragments() {

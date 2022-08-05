@@ -14,6 +14,7 @@ import org.junit.Test
 @SmallTest
 class FragmentServiceTest : SysuiTestCase() {
     private val fragmentCreator = TestFragmentCreator()
+    private val fragmenetHostManagerFactory: FragmentHostManager.Factory = mock()
     private val fragmentCreatorFactory = FragmentService.FragmentCreator.Factory { fragmentCreator }
 
     private lateinit var fragmentService: FragmentService
@@ -24,7 +25,13 @@ class FragmentServiceTest : SysuiTestCase() {
             Looper.prepare()
         }
 
-        fragmentService = FragmentService(fragmentCreatorFactory, mock(), DumpManager())
+        fragmentService =
+            FragmentService(
+                fragmentCreatorFactory,
+                fragmenetHostManagerFactory,
+                mock(),
+                DumpManager()
+            )
     }
 
     @Test
