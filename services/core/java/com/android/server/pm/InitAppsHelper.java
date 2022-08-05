@@ -46,6 +46,7 @@ import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.om.OverlayConfig;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
@@ -400,5 +401,10 @@ final class InitAppsHelper {
 
     public List<ScanPartition> getDirsToScanAsSystem() {
         return mDirsToScanAsSystem;
+    }
+
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    public int getSystemScanFlags() {
+        return mSystemScanFlags;
     }
 }
