@@ -21,7 +21,6 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
@@ -34,6 +33,7 @@ import android.widget.TextView;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.ripple.RippleShader;
 import com.android.systemui.ripple.RippleView;
 
 import java.text.NumberFormat;
@@ -138,6 +138,8 @@ public class WirelessChargingLayout extends FrameLayout {
         animatorSetScrim.start();
 
         mRippleView = findViewById(R.id.wireless_charging_ripple);
+        // TODO: Make rounded box shape if the device is tablet.
+        mRippleView.setupShader(RippleShader.RippleShape.CIRCLE);
         OnAttachStateChangeListener listener = new OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View view) {
@@ -230,11 +232,11 @@ public class WirelessChargingLayout extends FrameLayout {
         if (mRippleView != null) {
             int width = getMeasuredWidth();
             int height = getMeasuredHeight();
-            mRippleView.setColor(
-                    Utils.getColorAttr(mRippleView.getContext(),
-                            android.R.attr.colorAccent).getDefaultColor());
-            mRippleView.setOrigin(new PointF(width / 2, height / 2));
-            mRippleView.setRadius(Math.max(width, height) * 0.5f);
+            mRippleView.setCenter(width * 0.5f, height * 0.5f);
+            float maxSize = Math.max(width, height);
+            mRippleView.setMaxSize(maxSize, maxSize);
+            mRippleView.setColor(Utils.getColorAttr(mRippleView.getContext(),
+                    android.R.attr.colorAccent).getDefaultColor());
         }
 
         super.onLayout(changed, left, top, right, bottom);

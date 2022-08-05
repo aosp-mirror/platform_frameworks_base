@@ -18,6 +18,8 @@ package com.android.systemui.screenshot.dagger;
 
 import android.app.Service;
 
+import com.android.systemui.screenshot.ImageCapture;
+import com.android.systemui.screenshot.ImageCaptureImpl;
 import com.android.systemui.screenshot.TakeScreenshotService;
 
 import dagger.Binds;
@@ -37,4 +39,6 @@ public abstract class ScreenshotModule {
     @ClassKey(TakeScreenshotService.class)
     public abstract Service bindTakeScreenshotService(TakeScreenshotService service);
 
+    @Binds
+    public abstract ImageCapture bindImageCapture(ImageCaptureImpl capture);
 }

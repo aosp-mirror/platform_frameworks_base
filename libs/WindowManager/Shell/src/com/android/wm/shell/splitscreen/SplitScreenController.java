@@ -21,7 +21,6 @@ import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -86,7 +85,6 @@ import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.transition.LegacyTransitions;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
@@ -411,60 +409,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         if (!ENABLE_SHELL_TRANSITIONS) {
-            startIntentLegacy(intent, fillInIntent, position, options);
+            mStageCoordinator.startIntentLegacy(intent, fillInIntent, position, options);
             return;
         }
 
         mStageCoordinator.startIntent(intent, fillInIntent, position, options);
-    }
-
-    private void startIntentLegacy(PendingIntent intent, Intent fillInIntent,
-            @SplitPosition int position, @Nullable Bundle options) {
-        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
-        mStageCoordinator.prepareEvictChildTasks(position, evictWct);
-
-        LegacyTransitions.ILegacyTransition transition = new LegacyTransitions.ILegacyTransition() {
-            @Override
-            public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
-                    RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
-                    IRemoteAnimationFinishedCallback finishedCallback,
-                    SurfaceControl.Transaction t) {
-                if (apps == null || apps.length == 0) {
-                    // Switch the split position if launching as MULTIPLE_TASK failed.
-                    if ((fillInIntent.getFlags() & FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
-                        setSideStagePosition(SplitLayout.reversePosition(
-                                mStageCoordinator.getSideStagePosition()));
-                    }
-
-                    // Do nothing when the animation was cancelled.
-                    t.apply();
-                    return;
-                }
-
-                for (int i = 0; i < apps.length; ++i) {
-                    if (apps[i].mode == MODE_OPENING) {
-                        t.show(apps[i].leash);
-                    }
-                }
-                t.apply();
-
-                if (finishedCallback != null) {
-                    try {
-                        finishedCallback.onAnimationFinished();
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Error finishing legacy transition: ", e);
-                    }
-                }
-
-                mSyncQueue.queue(evictWct);
-            }
-        };
-
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-        options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options, wct);
-
-        wct.sendPendingIntent(intent, fillInIntent, options);
-        mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
 
     /** Returns {@code true} if it's launching the same component on both sides of the split. */
