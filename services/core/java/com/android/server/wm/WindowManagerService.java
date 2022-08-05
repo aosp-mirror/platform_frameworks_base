@@ -89,6 +89,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
+import static android.view.WindowManager.fixScale;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
@@ -1325,10 +1326,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // Get persisted window scale setting
         mWindowAnimationScaleSetting = Settings.Global.getFloat(resolver,
                 Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScaleSetting);
-        mTransitionAnimationScaleSetting = Settings.Global.getFloat(resolver,
-                Settings.Global.TRANSITION_ANIMATION_SCALE,
-                context.getResources().getFloat(
-                        R.dimen.config_appTransitionAnimationDurationScaleDefault));
+        mTransitionAnimationScaleSetting = getTransitionAnimationScaleSetting();
 
         setAnimatorDurationScale(Settings.Global.getFloat(resolver,
                 Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScaleSetting));
@@ -1403,6 +1401,12 @@ public class WindowManagerService extends IWindowManager.Stub
         float[] spotColor = {0.f, 0.f, 0.f, spotShadowAlpha};
         SurfaceControl.setGlobalShadowSettings(ambientColor, spotColor, lightY, lightZ,
                 lightRadius);
+    }
+
+    private float getTransitionAnimationScaleSetting() {
+        return fixScale(Settings.Global.getFloat(mContext.getContentResolver(),
+                Settings.Global.TRANSITION_ANIMATION_SCALE, mContext.getResources().getFloat(
+                                R.dimen.config_appTransitionAnimationDurationScaleDefault)));
     }
 
     /**
@@ -3397,11 +3401,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    static float fixScale(float scale) {
-        if (scale < 0) scale = 0;
-        else if (scale > 20) scale = 20;
-        return Math.abs(scale);
-    }
 
     @Override
     public void setAnimationScale(int which, float scale) {
@@ -5331,10 +5330,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             break;
                         }
                         case TRANSITION_ANIMATION_SCALE: {
-                            mTransitionAnimationScaleSetting = Settings.Global.getFloat(
-                                    mContext.getContentResolver(),
-                                    Settings.Global.TRANSITION_ANIMATION_SCALE,
-                                    mTransitionAnimationScaleSetting);
+                            mTransitionAnimationScaleSetting =
+                                    getTransitionAnimationScaleSetting();
                             break;
                         }
                         case ANIMATION_DURATION_SCALE: {
