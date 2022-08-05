@@ -66,6 +66,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     final DisplayController mDisplayController;
     final ShellTaskOrganizer mTaskOrganizer;
     final Supplier<SurfaceControl.Builder> mSurfaceControlBuilderSupplier;
+    final Supplier<WindowContainerTransaction> mWindowContainerTransactionSupplier;
     final SurfaceControlViewHostFactory mSurfaceControlViewHostFactory;
     private final DisplayController.OnDisplaysChangedListener mOnDisplaysChangedListener =
             new DisplayController.OnDisplaysChangedListener() {
@@ -102,7 +103,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface) {
         this(context, displayController, taskOrganizer, taskInfo, taskSurface,
-                SurfaceControl.Builder::new, new SurfaceControlViewHostFactory() {});
+                SurfaceControl.Builder::new, WindowContainerTransaction::new,
+                new SurfaceControlViewHostFactory() {});
     }
 
     WindowDecoration(
@@ -112,6 +114,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
+            Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
         mContext = context;
         mDisplayController = displayController;
@@ -119,6 +122,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mTaskInfo = taskInfo;
         mTaskSurface = taskSurface;
         mSurfaceControlBuilderSupplier = surfaceControlBuilderSupplier;
+        mWindowContainerTransactionSupplier = windowContainerTransactionSupplier;
         mSurfaceControlViewHostFactory = surfaceControlViewHostFactory;
 
         mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
@@ -301,6 +305,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mTaskBackgroundSurface.release();
             mTaskBackgroundSurface = null;
         }
+
+        final WindowContainerTransaction wct = mWindowContainerTransactionSupplier.get();
+        wct.removeInsetsProvider(mTaskInfo.token, CAPTION_INSETS_TYPES);
+        mTaskOrganizer.applyTransaction(wct);
     }
 
     @Override
