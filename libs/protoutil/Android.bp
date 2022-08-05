@@ -55,6 +55,7 @@ cc_library {
 
     export_include_dirs: ["include"],
 
+    min_sdk_version: "30",
     apex_available: [
         "//apex_available:platform",
         "com.android.os.statsd",
@@ -81,5 +82,5 @@ cc_test {
 
     proto: {
         type: "full",
-    }
+    },
 }
