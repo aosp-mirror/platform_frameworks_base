@@ -30,6 +30,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
+import java.util.TimeZone;
+
 import javax.inject.Inject;
 
 /**
@@ -94,6 +96,13 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
+     * The amount we're in doze.
+     */
+    public void setDarkAmount(float darkAmount) {
+        mView.setDarkAmount(darkAmount);
+    }
+
+    /**
      * Set which clock should be displayed on the keyguard. The other one will be automatically
      * hidden.
      */
@@ -105,10 +114,16 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      * Performs fold to aod animation of the clocks (changes font weight from bold to thin).
      * This animation is played when AOD is enabled and foldable device is fully folded, it is
      * displayed on the outer screen
-     * @param foldFraction current fraction of fold animation complete
      */
-    public void animateFoldToAod(float foldFraction) {
-        mKeyguardClockSwitchController.animateFoldToAod(foldFraction);
+    public void animateFoldToAod() {
+        mKeyguardClockSwitchController.animateFoldToAod();
+    }
+
+    /**
+     * If we're presenting a custom clock of just the default one.
+     */
+    public boolean hasCustomClock() {
+        return mKeyguardClockSwitchController.hasCustomClock();
     }
 
     /**
@@ -128,11 +143,24 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
-     * Update the pivot position based on the parent view
+     * Set pivot x.
      */
-    public void updatePivot(float parentWidth, float parentHeight) {
-        mView.setPivotX(parentWidth / 2f);
-        mView.setPivotY(mKeyguardClockSwitchController.getClockHeight() / 2f);
+    public void setPivotX(float pivot) {
+        mView.setPivotX(pivot);
+    }
+
+    /**
+     * Set pivot y.
+     */
+    public void setPivotY(float pivot) {
+        mView.setPivotY(pivot);
+    }
+
+    /**
+     * Get the clock text size.
+     */
+    public float getClockTextSize() {
+        return mKeyguardClockSwitchController.getClockTextSize();
     }
 
     /**
@@ -209,6 +237,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         @Override
         public void onTimeChanged() {
             refreshTime();
+        }
+
+        @Override
+        public void onTimeZoneChanged(TimeZone timeZone) {
+            mKeyguardClockSwitchController.updateTimeZone(timeZone);
         }
 
         @Override

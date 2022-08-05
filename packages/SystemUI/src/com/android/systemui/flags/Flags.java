@@ -145,9 +145,6 @@ public class Flags {
 
     /***************************************/
     // 600- status bar
-    public static final BooleanFlag COMBINED_STATUS_BAR_SIGNAL_ICONS =
-            new BooleanFlag(601, false);
-
     public static final ResourceBooleanFlag STATUS_BAR_USER_SWITCHER =
             new ResourceBooleanFlag(602, R.bool.flag_user_switcher_chip);
 
@@ -218,7 +215,11 @@ public class Flags {
             new SysPropBooleanFlag(1202, "persist.wm.debug.predictive_back_always_enforce", false);
 
     public static final BooleanFlag NEW_BACK_AFFORDANCE =
-            new BooleanFlag(1203, false /* default */, true /* teamfood */);
+            new BooleanFlag(1203, false /* default */, false /* teamfood */);
+
+    // 1300 - screenshots
+
+    public static final BooleanFlag SCREENSHOT_REQUEST_PROCESSOR = new BooleanFlag(1300, false);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

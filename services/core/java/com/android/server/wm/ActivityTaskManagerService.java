@@ -2311,16 +2311,25 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * @return a list of {@link ActivityManager.RunningTaskInfo} with up to {@code maxNum} items
      */
     public List<ActivityManager.RunningTaskInfo> getTasks(int maxNum) {
-        return getTasks(maxNum, false /* filterForVisibleRecents */, false /* keepIntentExtra */);
+        return getTasks(maxNum, false /* filterForVisibleRecents */, false /* keepIntentExtra */,
+                INVALID_DISPLAY);
     }
 
     /**
      * @param filterOnlyVisibleRecents whether to filter the tasks based on whether they would ever
      *                                 be visible in the recent task list in systemui
      */
-    @Override
     public List<ActivityManager.RunningTaskInfo> getTasks(int maxNum,
             boolean filterOnlyVisibleRecents, boolean keepIntentExtra) {
+        return getTasks(maxNum, filterOnlyVisibleRecents, keepIntentExtra, INVALID_DISPLAY);
+    }
+
+    /**
+     * @param displayId the target display id, or {@link INVALID_DISPLAY} not to filter by displayId
+     */
+    @Override
+    public List<ActivityManager.RunningTaskInfo> getTasks(int maxNum,
+            boolean filterOnlyVisibleRecents, boolean keepIntentExtra, int displayId) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
 
@@ -2342,7 +2351,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final boolean allowed = isGetTasksAllowed("getTasks", callingPid, callingUid);
             flags |= (allowed ? RunningTasks.FLAG_ALLOWED : 0);
             mRootWindowContainer.getRunningTasks(
-                    maxNum, list, flags, callingUid, callingProfileIds);
+                    maxNum, list, flags, callingUid, callingProfileIds, displayId);
         }
 
         return list;

@@ -292,6 +292,11 @@ public final class NotificationPanelViewController extends PanelViewController {
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     private final NotificationIconAreaController mNotificationIconAreaController;
 
+    // Cap and total height of Roboto font. Needs to be adjusted when font for the big clock is
+    // changed.
+    private static final int CAP_HEIGHT = 1456;
+    private static final int FONT_HEIGHT = 2163;
+
     /**
      * Maximum time before which we will expand the panel even for slow motions when getting a
      * touch passed over from launcher.
@@ -1117,6 +1122,13 @@ public final class NotificationPanelViewController extends PanelViewController {
         }
     }
 
+    /**
+     * Returns if there's a custom clock being presented.
+     */
+    public boolean hasCustomClock() {
+        return mKeyguardStatusViewController.hasCustomClock();
+    }
+
     private void setCentralSurfaces(CentralSurfaces centralSurfaces) {
         // TODO: this can be injected.
         mCentralSurfaces = centralSurfaces;
@@ -1499,10 +1511,7 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     private void updateKeyguardStatusViewAlignment(boolean animate) {
-        boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
-                .getVisibleNotificationCount() != 0
-                || mMediaDataManager.hasActiveMediaOrRecommendation();
-        boolean shouldBeCentered = !mSplitShadeEnabled || !hasVisibleNotifications || mDozing;
+        boolean shouldBeCentered = shouldKeyguardStatusViewBeCentered();
         if (mStatusViewCentered != shouldBeCentered) {
             mStatusViewCentered = shouldBeCentered;
             ConstraintSet constraintSet = new ConstraintSet();
@@ -1524,6 +1533,15 @@ public final class NotificationPanelViewController extends PanelViewController {
             constraintSet.applyTo(mNotificationContainerParent);
         }
         mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(mStatusViewCentered));
+    }
+
+    private boolean shouldKeyguardStatusViewBeCentered() {
+        boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
+                .getVisibleNotificationCount() != 0
+                || mMediaDataManager.hasActiveMediaOrRecommendation();
+        boolean isOnAod = mDozing && mDozeParameters.getAlwaysOn();
+        return !mSplitShadeEnabled || !hasVisibleNotifications || isOnAod
+                || hasPulsingNotifications();
     }
 
     /**
@@ -3904,9 +3922,9 @@ public final class NotificationPanelViewController extends PanelViewController {
                 public void onAnimationEnd(Animator animation) {
                     endAction.run();
                 }
-            }).setUpdateListener(anim -> {
-                mKeyguardStatusViewController.animateFoldToAod(anim.getAnimatedFraction());
             }).start();
+
+        mKeyguardStatusViewController.animateFoldToAod();
     }
 
     /**
@@ -4619,6 +4637,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         public void onDozeAmountChanged(float linearAmount, float amount) {
             mInterpolatedDarkAmount = amount;
             mLinearDarkAmount = linearAmount;
+            mKeyguardStatusViewController.setDarkAmount(mInterpolatedDarkAmount);
             mKeyguardBottomArea.setDarkAmount(mInterpolatedDarkAmount);
             positionClockAndNotifications();
         }
@@ -4728,8 +4747,11 @@ public final class NotificationPanelViewController extends PanelViewController {
             updateMaxDisplayedNotifications(!shouldAvoidChangingNotificationsCount());
             setIsFullWidth(mNotificationStackScrollLayoutController.getWidth() == mView.getWidth());
 
-            // Update Clock Pivot (used by anti-burnin transformations)
-            mKeyguardStatusViewController.updatePivot(mView.getWidth(), mView.getHeight());
+            // Update Clock Pivot
+            mKeyguardStatusViewController.setPivotX(((float) mView.getWidth()) / 2f);
+            mKeyguardStatusViewController.setPivotY(
+                    (FONT_HEIGHT - CAP_HEIGHT) / 2048f
+                            * mKeyguardStatusViewController.getClockTextSize());
 
             // Calculate quick setting heights.
             int oldMaxHeight = mQsMaxExpansionHeight;
