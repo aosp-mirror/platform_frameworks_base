@@ -23,39 +23,42 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.View
+import com.android.systemui.ripple.RippleShader.RippleShape
 
 private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.3f
+private const val RIPPLE_DEFAULT_COLOR: Int = 0xffffffff.toInt()
 
 /**
- * A generic expanding ripple effect. To trigger the ripple expansion, set [radius] and [origin],
- * then call [startRipple].
+ * A generic expanding ripple effect.
+ *
+ * Set up the shader with a desired [RippleShape] using [setupShader], [setMaxSize] and [setCenter],
+ * then call [startRipple] to trigger the ripple expansion.
  */
 open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
-    private val rippleShader = RippleShader()
-    private val defaultColor: Int = 0xffffffff.toInt()
+
+    private lateinit var rippleShader: RippleShader
+    private lateinit var rippleShape: RippleShape
     private val ripplePaint = Paint()
 
     var rippleInProgress: Boolean = false
-    var radius: Float = 0.0f
-        set(value) {
-            rippleShader.radius = value
-            field = value
-        }
-    var origin: PointF = PointF()
-        set(value) {
-            rippleShader.origin = value
-            field = value
-        }
     var duration: Long = 1750
 
-    init {
-        rippleShader.color = defaultColor
-        rippleShader.progress = 0f
-        rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
-        ripplePaint.shader = rippleShader
+    private var maxWidth: Float = 0.0f
+    private var maxHeight: Float = 0.0f
+    fun setMaxSize(maxWidth: Float, maxHeight: Float) {
+        this.maxWidth = maxWidth
+        this.maxHeight = maxHeight
+        rippleShader.setMaxSize(maxWidth, maxHeight)
+    }
+
+    private var centerX: Float = 0.0f
+    private var centerY: Float = 0.0f
+    fun setCenter(x: Float, y: Float) {
+        this.centerX = x
+        this.centerY = y
+        rippleShader.setCenter(x, y)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -66,6 +69,18 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
     override fun onAttachedToWindow() {
         rippleShader.pixelDensity = resources.displayMetrics.density
         super.onAttachedToWindow()
+    }
+
+    /** Initializes the shader. Must be called before [startRipple]. */
+    fun setupShader(rippleShape: RippleShape = RippleShape.CIRCLE) {
+        this.rippleShape = rippleShape
+        rippleShader = RippleShader(rippleShape)
+
+        rippleShader.color = RIPPLE_DEFAULT_COLOR
+        rippleShader.progress = 0f
+        rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
+
+        ripplePaint.shader = rippleShader
     }
 
     @JvmOverloads
@@ -113,11 +128,24 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
             // if it's unsupported.
             return
         }
-        // To reduce overdraw, we mask the effect to a circle whose radius is big enough to cover
-        // the active effect area. Values here should be kept in sync with the
-        // animation implementation in the ripple shader.
-        val maskRadius = (1 - (1 - rippleShader.progress) * (1 - rippleShader.progress) *
-                (1 - rippleShader.progress)) * radius * 2
-        canvas.drawCircle(origin.x, origin.y, maskRadius, ripplePaint)
+        // To reduce overdraw, we mask the effect to a circle or a rectangle that's bigger than the
+        // active effect area. Values here should be kept in sync with the animation implementation
+        // in the ripple shader.
+        if (rippleShape == RippleShape.CIRCLE) {
+            val maskRadius = (1 - (1 - rippleShader.progress) * (1 - rippleShader.progress) *
+                    (1 - rippleShader.progress)) * maxWidth
+            canvas.drawCircle(centerX, centerY, maskRadius, ripplePaint)
+        } else {
+            val maskWidth = (1 - (1 - rippleShader.progress) * (1 - rippleShader.progress) *
+                    (1 - rippleShader.progress)) * maxWidth * 2
+            val maskHeight = (1 - (1 - rippleShader.progress) * (1 - rippleShader.progress) *
+                    (1 - rippleShader.progress)) * maxHeight * 2
+            canvas.drawRect(
+                    /* left= */ centerX - maskWidth,
+                    /* top= */ centerY - maskHeight,
+                    /* right= */ centerX + maskWidth,
+                    /* bottom= */ centerY + maskHeight,
+                    ripplePaint)
+        }
     }
 }

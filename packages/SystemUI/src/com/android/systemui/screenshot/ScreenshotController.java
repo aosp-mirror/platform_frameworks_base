@@ -57,14 +57,12 @@ import android.media.AudioSystem;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
-import android.view.DisplayAddress;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.KeyEvent;
@@ -72,7 +70,6 @@ import android.view.LayoutInflater;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.ScrollCaptureResponse;
-import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
@@ -249,6 +246,7 @@ public class ScreenshotController {
     private final ScreenshotSmartActions mScreenshotSmartActions;
     private final UiEventLogger mUiEventLogger;
     private final ImageExporter mImageExporter;
+    private final ImageCapture mImageCapture;
     private final Executor mMainExecutor;
     private final ExecutorService mBgExecutor;
     private final BroadcastSender mBroadcastSender;
@@ -295,6 +293,7 @@ public class ScreenshotController {
             ScrollCaptureClient scrollCaptureClient,
             UiEventLogger uiEventLogger,
             ImageExporter imageExporter,
+            ImageCapture imageCapture,
             @Main Executor mainExecutor,
             ScrollCaptureController scrollCaptureController,
             LongScreenshotData longScreenshotHolder,
@@ -308,6 +307,7 @@ public class ScreenshotController {
         mScrollCaptureClient = scrollCaptureClient;
         mUiEventLogger = uiEventLogger;
         mImageExporter = imageExporter;
+        mImageCapture = imageCapture;
         mMainExecutor = mainExecutor;
         mScrollCaptureController = scrollCaptureController;
         mLongScreenshotHolder = longScreenshotHolder;
@@ -531,7 +531,7 @@ public class ScreenshotController {
 
         // copy the input Rect, since SurfaceControl.screenshot can mutate it
         Rect screenRect = new Rect(crop);
-        Bitmap screenshot = captureScreenshot(crop);
+        Bitmap screenshot = mImageCapture.captureDisplay(DEFAULT_DISPLAY, crop);
 
         if (screenshot == null) {
             Log.e(TAG, "takeScreenshotInternal: Screenshot bitmap was null");
@@ -547,32 +547,6 @@ public class ScreenshotController {
 
         mBroadcastSender.sendBroadcast(new Intent(ClipboardOverlayController.SCREENSHOT_ACTION),
                 ClipboardOverlayController.SELF_PERMISSION);
-    }
-
-    private Bitmap captureScreenshot(Rect crop) {
-        int width = crop.width();
-        int height = crop.height();
-        Bitmap screenshot = null;
-        final Display display = getDefaultDisplay();
-        final DisplayAddress address = display.getAddress();
-        if (!(address instanceof DisplayAddress.Physical)) {
-            Log.e(TAG, "Skipping Screenshot - Default display does not have a physical address: "
-                    + display);
-        } else {
-            final DisplayAddress.Physical physicalAddress = (DisplayAddress.Physical) address;
-
-            final IBinder displayToken = SurfaceControl.getPhysicalDisplayToken(
-                    physicalAddress.getPhysicalDisplayId());
-            final SurfaceControl.DisplayCaptureArgs captureArgs =
-                    new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
-                            .setSourceCrop(crop)
-                            .setSize(width, height)
-                            .build();
-            final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                    SurfaceControl.captureDisplay(captureArgs);
-            screenshot = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
-        }
-        return screenshot;
     }
 
     private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
@@ -720,7 +694,7 @@ public class ScreenshotController {
             mScreenshotView.showScrollChip(response.getPackageName(), /* onClick */ () -> {
                 DisplayMetrics displayMetrics = new DisplayMetrics();
                 getDefaultDisplay().getRealMetrics(displayMetrics);
-                Bitmap newScreenshot = captureScreenshot(
+                Bitmap newScreenshot = mImageCapture.captureDisplay(DEFAULT_DISPLAY,
                         new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels));
 
                 mScreenshotView.prepareScrollingTransition(response, mScreenBitmap, newScreenshot,

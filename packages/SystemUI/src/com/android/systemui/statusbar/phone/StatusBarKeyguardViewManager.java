@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_DISMISS_BOUNCER;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_UNLOCK_COLLAPSING;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
@@ -387,6 +388,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
         } else if (mShowing && !hideBouncerOverDream) {
             if (!isWakeAndUnlocking()
+                    && !(mBiometricUnlockController.getMode() == MODE_DISMISS_BOUNCER)
                     && !mCentralSurfaces.isInLaunchTransition()
                     && !isUnlockCollapsing()) {
                 mBouncer.setExpansion(fraction);
@@ -398,9 +400,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
         } else if (!mShowing && mBouncer.inTransit()) {
             // Keyguard is not visible anymore, but expansion animation was still running.
-            // We need to keep propagating the expansion state to the bouncer, otherwise it will be
-            // stuck in transit.
-            mBouncer.setExpansion(fraction);
+            // We need to hide the bouncer, otherwise it will be stuck in transit.
+            mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
         } else if (mPulsing && fraction == KeyguardBouncer.EXPANSION_VISIBLE) {
             // Panel expanded while pulsing but didn't translate the bouncer (because we are
             // unlocked.) Let's simply wake-up to dismiss the lock screen.
@@ -739,8 +740,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
         mNotificationShadeWindowController.setKeyguardOccluded(mOccluded);
 
-        // setDozing(false) will call reset once we stop dozing.
-        if (!mDozing) {
+        // setDozing(false) will call reset once we stop dozing. Also, if we're going away, there's
+        // no need to reset the keyguard views as we'll be gone shortly. Resetting now could cause
+        // unexpected visible behavior if the keyguard is still visible as we're animating unlocked.
+        if (!mDozing && !mKeyguardStateController.isKeyguardGoingAway()) {
             // If Keyguard is reshown, don't hide the bouncer as it might just have been requested
             // by a FLAG_DISMISS_KEYGUARD_ACTIVITY.
             reset(isOccluding /* hideBouncerWhenShowing*/);

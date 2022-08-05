@@ -199,9 +199,11 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final Task parent = mock(Task.class);
         final Configuration parentConfig = new Configuration();
         parentConfig.smallestScreenWidthDp = 10;
-        doReturn(parent).when(mTaskFragment).getParent();
+        doReturn(parent).when(mTaskFragment).getTask();
         doReturn(parentConfig).when(parent).getConfiguration();
-        doReturn(parent).when(parent).asTask();
+        // Task needs to be visible
+        parent.lastActiveTime = 100;
+        doReturn(true).when(parent).shouldBeVisible(any());
 
         mTaskFragment.mTaskFragmentAppearedSent = true;
         mController.onTaskFragmentParentInfoChanged(

@@ -510,7 +510,6 @@ class BackPanelController private constructor(
     private fun playCommitBackAnimation() {
         // Check if we should vibrate again
         if (previousState != GestureState.FLUNG) {
-            backCallback.triggerBack()
             velocityTracker!!.computeCurrentVelocity(1000)
             val isSlow = abs(velocityTracker!!.xVelocity) < 500
             val hasNotVibratedRecently =
@@ -519,6 +518,10 @@ class BackPanelController private constructor(
                 vibratorHelper.vibrate(VibrationEffect.EFFECT_CLICK)
             }
         }
+        // Dispatch the actual back trigger
+        if (DEBUG) Log.d(TAG, "playCommitBackAnimation() invoked triggerBack() on backCallback")
+        backCallback.triggerBack()
+
         playAnimation(setGoneEndListener)
     }
 
