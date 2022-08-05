@@ -403,7 +403,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
         // Flag with MULTIPLE_TASK if this is launching the same activity into both sides of the
         // split.
-        if (isLaunchingAdjacently(intent.getIntent(), position)) {
+        if (shouldAddMultipleTaskFlag(intent.getIntent(), position)) {
             fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
         }
@@ -418,8 +418,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     /** Returns {@code true} if it's launching the same component on both sides of the split. */
     @VisibleForTesting
-    boolean isLaunchingAdjacently(@Nullable Intent startIntent,
-            @SplitPosition int position) {
+    boolean shouldAddMultipleTaskFlag(@Nullable Intent startIntent, @SplitPosition int position) {
         if (startIntent == null) {
             return false;
         }
@@ -430,6 +429,16 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         if (isSplitScreenVisible()) {
+            // To prevent users from constantly dropping the same app to the same side resulting in
+            // a large number of instances in the background.
+            final ActivityManager.RunningTaskInfo targetTaskInfo = getTaskInfo(position);
+            final ComponentName targetActivity = targetTaskInfo != null
+                    ? targetTaskInfo.baseIntent.getComponent() : null;
+            if (Objects.equals(launchingActivity, targetActivity)) {
+                return false;
+            }
+
+            // Allow users to start a new instance the same to adjacent side.
             final ActivityManager.RunningTaskInfo pairedTaskInfo =
                     getTaskInfo(SplitLayout.reversePosition(position));
             final ComponentName pairedActivity = pairedTaskInfo != null
