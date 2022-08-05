@@ -19,6 +19,7 @@ package com.android.keyguard;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -40,19 +41,24 @@ import android.widget.RelativeLayout;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.colorextraction.ColorExtractor;
+import com.android.keyguard.clock.ClockManager;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.plugins.Clock;
+import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.AnimatableClockView;
-import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -74,11 +80,21 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
-    private ClockRegistry mClockRegistry;
+    private SysuiColorExtractor mColorExtractor;
+    @Mock
+    private ClockManager mClockManager;
     @Mock
     KeyguardSliceViewController mKeyguardSliceViewController;
     @Mock
     NotificationIconAreaController mNotificationIconAreaController;
+    @Mock
+    BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
+    BatteryController mBatteryController;
+    @Mock
+    KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock
+    KeyguardBypassController mBypassController;
     @Mock
     LockscreenSmartspaceController mSmartspaceController;
 
@@ -87,11 +103,11 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     @Mock
     KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock
-    private Clock mClock;
+    private ClockPlugin mClockPlugin;
+    @Mock
+    ColorExtractor.GradientColors mGradientColors;
     @Mock
     DumpManager mDumpManager;
-    @Mock
-    ClockEventController mClockEventController;
 
     @Mock
     private NotificationIconContainer mNotificationIcons;
@@ -123,6 +139,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mView.getContext()).thenReturn(getContext());
         when(mView.getResources()).thenReturn(mResources);
 
+        when(mView.findViewById(R.id.animatable_clock_view)).thenReturn(mClockView);
+        when(mView.findViewById(R.id.animatable_clock_view_large)).thenReturn(mLargeClockView);
         when(mView.findViewById(R.id.lockscreen_clock_view_large)).thenReturn(mLargeClockFrame);
         when(mClockView.getContext()).thenReturn(getContext());
         when(mLargeClockView.getContext()).thenReturn(getContext());
@@ -133,20 +151,23 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         mController = new KeyguardClockSwitchController(
                 mView,
                 mStatusBarStateController,
-                mClockRegistry,
+                mColorExtractor,
+                mClockManager,
                 mKeyguardSliceViewController,
                 mNotificationIconAreaController,
+                mBroadcastDispatcher,
+                mBatteryController,
+                mKeyguardUpdateMonitor,
                 mSmartspaceController,
                 mKeyguardUnlockAnimationController,
                 mSecureSettings,
                 mExecutor,
-                mDumpManager,
-                mClockEventController,
-                mFeatureFlags
+                mResources,
+                mDumpManager
         );
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
-        when(mClockRegistry.createCurrentClock()).thenReturn(mClock);
+        when(mColorExtractor.getColors(anyInt())).thenReturn(mGradientColors);
 
         mSliceView = new View(getContext());
         when(mView.findViewById(R.id.keyguard_slice_view)).thenReturn(mSliceView);
@@ -193,20 +214,20 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         verifyAttachment(times(1));
 
         listenerArgumentCaptor.getValue().onViewDetachedFromWindow(mView);
-        verify(mClockEventController).unregisterListeners();
+        verify(mColorExtractor).removeOnColorsChangedListener(
+                any(ColorExtractor.OnColorsChangedListener.class));
     }
 
     @Test
     public void testPluginPassesStatusBarState() {
-        ArgumentCaptor<ClockRegistry.ClockChangeListener> listenerArgumentCaptor =
-                ArgumentCaptor.forClass(ClockRegistry.ClockChangeListener.class);
+        ArgumentCaptor<ClockManager.ClockChangedListener> listenerArgumentCaptor =
+                ArgumentCaptor.forClass(ClockManager.ClockChangedListener.class);
 
         mController.init();
-        verify(mClockRegistry).registerClockChangeListener(listenerArgumentCaptor.capture());
+        verify(mClockManager).addOnClockChangedListener(listenerArgumentCaptor.capture());
 
-        listenerArgumentCaptor.getValue().onClockChanged();
-        verify(mView, times(2)).setClock(mClock, StatusBarState.SHADE);
-        verify(mClockEventController, times(2)).setClock(mClock);
+        listenerArgumentCaptor.getValue().onClockChanged(mClockPlugin);
+        verify(mView).setClockPlugin(mClockPlugin, StatusBarState.SHADE);
     }
 
     @Test
@@ -263,8 +284,10 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     }
 
     private void verifyAttachment(VerificationMode times) {
-        verify(mClockRegistry, times).registerClockChangeListener(
-                any(ClockRegistry.ClockChangeListener.class));
-        verify(mClockEventController, times).registerListeners();
+        verify(mClockManager, times).addOnClockChangedListener(
+                any(ClockManager.ClockChangedListener.class));
+        verify(mColorExtractor, times).addOnColorsChangedListener(
+                any(ColorExtractor.OnColorsChangedListener.class));
+        verify(mView, times).updateColors(mGradientColors);
     }
 }

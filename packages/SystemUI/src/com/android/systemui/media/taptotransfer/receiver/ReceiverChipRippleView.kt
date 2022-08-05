@@ -23,10 +23,10 @@ import com.android.systemui.ripple.RippleView
 /**
  * An expanding ripple effect for the media tap-to-transfer receiver chip.
  */
-class ReceiverChipRippleView(
-        context: Context?, attrs: AttributeSet?
-) : RippleView(context, attrs) {
+class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleView(context, attrs) {
     init {
+        // TODO: use RippleShape#ELLIPSE when calling setupShader.
+        setupShader()
         setRippleFill(true)
         duration = 3000L
     }

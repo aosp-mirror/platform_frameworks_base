@@ -17,6 +17,7 @@
 package android.service.voice;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -63,6 +64,13 @@ public abstract class VoiceInteractionManagerInternal {
      */
     @Nullable
     public abstract HotwordDetectionServiceIdentity getHotwordDetectionServiceIdentity();
+
+    /**
+     * Called by {@code UMS.convertPreCreatedUserIfPossible()} when a new user is not created from
+     * scratched, but converted from the pool of existing pre-created users.
+     */
+    // TODO(b/226201975): remove method once RoleService supports pre-created users
+    public abstract void onPreCreatedUserConversion(@UserIdInt int userId);
 
     /**
      * Provides the uids of the currently active

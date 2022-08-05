@@ -19,9 +19,10 @@ import android.graphics.drawable.Drawable
 import android.icu.text.NumberFormat
 import android.util.TypedValue
 import android.view.LayoutInflater
+import com.android.internal.colorextraction.ColorExtractor
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.Clock
-import com.android.systemui.plugins.ClockAnimations
+import com.android.systemui.plugins.ClockAnimation
 import com.android.systemui.plugins.ClockEvents
 import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
@@ -101,13 +102,10 @@ class DefaultClock(
                 TypedValue.COMPLEX_UNIT_PX,
                 resources.getDimensionPixelSize(R.dimen.large_clock_text_size).toFloat()
             )
-            recomputePadding()
         }
 
-        override fun onColorPaletteChanged(resources: Resources) {
-            val color = resources.getColor(android.R.color.system_accent1_100)
-            clocks.forEach { it.setColors(DOZE_COLOR, color) }
-        }
+        override fun onColorPaletteChanged(palette: ColorExtractor.GradientColors) =
+            clocks.forEach { it.setColors(DOZE_COLOR, palette.mainColor) }
 
         override fun onLocaleChanged(locale: Locale) {
             val nf = NumberFormat.getInstance(locale)
@@ -121,17 +119,8 @@ class DefaultClock(
         }
     }
 
-    override var animations = DefaultClockAnimations(0f, 0f)
-        private set
-
-    inner class DefaultClockAnimations(
-        dozeFraction: Float,
-        foldFraction: Float
-    ) : ClockAnimations {
-        private var foldState = AnimationState(0f)
-        private var dozeState = AnimationState(0f)
-
-        init {
+    override val animation = object : ClockAnimation {
+        override fun initialize(dozeFraction: Float, foldFraction: Float) {
             dozeState = AnimationState(dozeFraction)
             foldState = AnimationState(foldFraction)
 
@@ -143,13 +132,14 @@ class DefaultClock(
         }
 
         override fun enter() {
-            if (!dozeState.isActive) {
+            if (dozeState.isActive) {
                 clocks.forEach { it.animateAppearOnLockscreen() }
             }
         }
 
         override fun charge() = clocks.forEach { it.animateCharge { dozeState.isActive } }
 
+        private var foldState = AnimationState(0f)
         override fun fold(fraction: Float) {
             val (hasChanged, hasJumped) = foldState.update(fraction)
             if (hasChanged) {
@@ -157,6 +147,7 @@ class DefaultClock(
             }
         }
 
+        private var dozeState = AnimationState(0f)
         override fun doze(fraction: Float) {
             val (hasChanged, hasJumped) = dozeState.update(fraction)
             if (hasChanged) {
@@ -181,19 +172,6 @@ class DefaultClock(
 
     init {
         events.onLocaleChanged(Locale.getDefault())
-        clocks.forEach { it.setColors(DOZE_COLOR, DOZE_COLOR) }
-    }
-
-    override fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float) {
-        recomputePadding()
-        animations = DefaultClockAnimations(dozeFraction, foldFraction)
-        events.onColorPaletteChanged(resources)
-        events.onTimeTick()
-    }
-
-    private fun recomputePadding() {
-        val topPadding = -1 * (largeClock.bottom.toInt() - 180)
-        largeClock.setPadding(0, topPadding, 0, 0)
     }
 
     override fun dump(pw: PrintWriter) = clocks.forEach { it.dump(pw) }

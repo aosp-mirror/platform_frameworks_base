@@ -26,8 +26,6 @@ import android.util.Log;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
 import com.android.systemui.statusbar.connectivity.NetworkController;
@@ -66,7 +64,6 @@ public class StatusBarSignalPolicy implements SignalCallback,
     private final Handler mHandler = Handler.getMain();
     private final CarrierConfigTracker mCarrierConfigTracker;
     private final TunerService mTunerService;
-    private final FeatureFlags mFeatureFlags;
 
     private boolean mHideAirplane;
     private boolean mHideMobile;
@@ -90,8 +87,7 @@ public class StatusBarSignalPolicy implements SignalCallback,
             CarrierConfigTracker carrierConfigTracker,
             NetworkController networkController,
             SecurityController securityController,
-            TunerService tunerService,
-            FeatureFlags featureFlags
+            TunerService tunerService
     ) {
         mContext = context;
 
@@ -100,7 +96,6 @@ public class StatusBarSignalPolicy implements SignalCallback,
         mNetworkController = networkController;
         mSecurityController = securityController;
         mTunerService = tunerService;
-        mFeatureFlags = featureFlags;
 
         mSlotAirplane = mContext.getString(com.android.internal.R.string.status_bar_airplane);
         mSlotMobile   = mContext.getString(com.android.internal.R.string.status_bar_mobile);
@@ -376,40 +371,6 @@ public class StatusBarSignalPolicy implements SignalCallback,
     public void setNoSims(boolean show, boolean simDetected) {
         // Noop yay!
     }
-
-    @Override
-    public void setConnectivityStatus(boolean noDefaultNetwork, boolean noValidatedNetwork,
-            boolean noNetworksAvailable) {
-        if (!mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)) {
-            return;
-        }
-        if (DEBUG) {
-            Log.d(TAG, "setConnectivityStatus: "
-                    + "noDefaultNetwork = " + noDefaultNetwork + ","
-                    + "noValidatedNetwork = " + noValidatedNetwork + ","
-                    + "noNetworksAvailable = " + noNetworksAvailable);
-        }
-        WifiIconState newState = mWifiIconState.copy();
-        newState.noDefaultNetwork = noDefaultNetwork;
-        newState.noValidatedNetwork = noValidatedNetwork;
-        newState.noNetworksAvailable = noNetworksAvailable;
-        newState.slot = mSlotWifi;
-        newState.airplaneSpacerVisible = mIsAirplaneMode;
-        if (noDefaultNetwork && noNetworksAvailable && !mIsAirplaneMode) {
-            newState.visible = true;
-            newState.resId = R.drawable.ic_qs_no_internet_unavailable;
-        } else if (noDefaultNetwork && !noNetworksAvailable
-                && (!mIsAirplaneMode || (mIsAirplaneMode && mIsWifiEnabled))) {
-            newState.visible = true;
-            newState.resId = R.drawable.ic_qs_no_internet_available;
-        } else {
-            newState.visible = false;
-            newState.resId = 0;
-        }
-        updateWifiIconWithState(newState);
-        mWifiIconState = newState;
-    }
-
 
     @Override
     public void setEthernetIndicators(IconState state) {

@@ -4746,9 +4746,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mPendingRemoteAnimation = options.getRemoteAnimationAdapter();
         }
         mPendingRemoteTransition = options.getRemoteTransition();
-        // Since options gets sent to client apps, remove transition information from it.
-        options.setRemoteTransition(null);
-        options.setRemoteAnimationAdapter(null);
     }
 
     void applyOptionsAnimation() {
@@ -4969,8 +4966,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     ActivityOptions takeOptions() {
         if (DEBUG_TRANSITION) Slog.i(TAG, "Taking options for " + this + " callers="
                 + Debug.getCallers(6));
+        if (mPendingOptions == null) return null;
         final ActivityOptions opts = mPendingOptions;
         mPendingOptions = null;
+        // Strip sensitive information from options before sending it to app.
+        opts.setRemoteTransition(null);
+        opts.setRemoteAnimationAdapter(null);
         return opts;
     }
 
