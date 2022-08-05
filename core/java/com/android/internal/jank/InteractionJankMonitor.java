@@ -149,6 +149,10 @@ public class InteractionJankMonitor {
     private static final int DEFAULT_TRACE_THRESHOLD_MISSED_FRAMES = 3;
     private static final int DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS = 64;
 
+    @VisibleForTesting
+    public static final int MAX_LENGTH_OF_CUJ_NAME = 80;
+    private static final int MAX_LENGTH_SESSION_NAME = 100;
+
     public static final String ACTION_SESSION_END = ACTION_PREFIX + ".ACTION_SESSION_END";
     public static final String ACTION_SESSION_CANCEL = ACTION_PREFIX + ".ACTION_SESSION_CANCEL";
 
@@ -732,6 +736,9 @@ public class InteractionJankMonitor {
      * @return the name of the cuj type
      */
     public static String getNameOfCuj(int cujType) {
+        // Please note:
+        // 1. The length of the returned string shouldn't exceed MAX_LENGTH_OF_CUJ_NAME.
+        // 2. The returned string should be the same with the name defined in atoms.proto.
         switch (cujType) {
             case CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE:
                 return "SHADE_EXPAND_COLLAPSE";
@@ -1106,9 +1113,27 @@ public class InteractionJankMonitor {
         public Session(@CujType int cujType, @NonNull String postfix) {
             mCujType = cujType;
             mTimeStamp = System.nanoTime();
-            mName = TextUtils.isEmpty(postfix)
-                    ? String.format("J<%s>", getNameOfCuj(mCujType))
-                    : String.format("J<%s::%s>", getNameOfCuj(mCujType), postfix);
+            mName = generateSessionName(getNameOfCuj(cujType), postfix);
+        }
+
+        private String generateSessionName(@NonNull String cujName, @NonNull String cujPostfix) {
+            final boolean hasPostfix = !TextUtils.isEmpty(cujPostfix);
+            // We assert that the cujName shouldn't exceed MAX_LENGTH_OF_CUJ_NAME.
+            if (cujName.length() > MAX_LENGTH_OF_CUJ_NAME) {
+                throw new IllegalArgumentException(TextUtils.formatSimple(
+                        "The length of cuj name <%s> exceeds %d", cujName, MAX_LENGTH_OF_CUJ_NAME));
+            }
+            if (hasPostfix) {
+                final int remaining = MAX_LENGTH_SESSION_NAME - cujName.length();
+                if (cujPostfix.length() > remaining) {
+                    cujPostfix = cujPostfix.substring(0, remaining - 3).concat("...");
+                }
+            }
+            // The max length of the whole string should be:
+            // 105 with postfix, 83 without postfix
+            return hasPostfix
+                    ? TextUtils.formatSimple("J<%s::%s>", cujName, cujPostfix)
+                    : TextUtils.formatSimple("J<%s>", cujName);
         }
 
         @CujType
