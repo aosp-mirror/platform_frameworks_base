@@ -733,7 +733,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
         for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
             // Only update the server side insets here.
-            if (type == ITYPE_CAPTION_BAR) continue;
+            if (!CAPTION_ON_SHELL && type == ITYPE_CAPTION_BAR) continue;
             InsetsSource source = mState.peekSource(type);
             if (source == null) continue;
             if (newState.peekSource(type) == null) {
