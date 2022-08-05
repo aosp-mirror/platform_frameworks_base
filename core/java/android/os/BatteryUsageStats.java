@@ -276,7 +276,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     /**
      * Returns a battery consumer for the specified battery consumer type.
      */
-    public BatteryConsumer getAggregateBatteryConsumer(
+    public AggregateBatteryConsumer getAggregateBatteryConsumer(
             @AggregateBatteryConsumerScope int scope) {
         return mAggregateBatteryConsumers[scope];
     }
@@ -450,7 +450,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
 
     @NonNull
     private void writeStatsProto(ProtoOutputStream proto, int maxRawSize) {
-        final BatteryConsumer deviceBatteryConsumer = getAggregateBatteryConsumer(
+        final AggregateBatteryConsumer deviceBatteryConsumer = getAggregateBatteryConsumer(
                 AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
 
         proto.write(BatteryUsageStatsAtomsProto.SESSION_START_MILLIS, getStatsStartTimestamp());
@@ -462,6 +462,9 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                 getDischargeDurationMs());
         deviceBatteryConsumer.writeStatsProto(proto,
                 BatteryUsageStatsAtomsProto.DEVICE_BATTERY_CONSUMER);
+        if (mIncludesPowerModels) {
+            deviceBatteryConsumer.writePowerComponentModelProto(proto);
+        }
         writeUidBatteryConsumersProto(proto, maxRawSize);
     }
 
