@@ -158,9 +158,9 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     private void onInit() {
         // The very last handler (0 in the list) should be the default one.
-        mHandlers.add(mDefaultTransitionHandler);
+        mHandlers.add(0, mDefaultTransitionHandler);
         // Next lowest priority is remote transitions.
-        mHandlers.add(mRemoteTransitionHandler);
+        mHandlers.add(1, mRemoteTransitionHandler);
 
         ContentResolver resolver = mContext.getContentResolver();
         mTransitionAnimationScaleSetting = Settings.Global.getFloat(resolver,
