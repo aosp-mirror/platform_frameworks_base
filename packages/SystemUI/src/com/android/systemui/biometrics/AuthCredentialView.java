@@ -87,7 +87,7 @@ public abstract class AuthCredentialView extends LinearLayout {
     private boolean mShouldAnimateContents;
 
     private TextView mTitleView;
-    private TextView mSubtitleView;
+    protected TextView mSubtitleView;
     private TextView mDescriptionView;
     private ImageView mIconView;
     protected TextView mErrorView;

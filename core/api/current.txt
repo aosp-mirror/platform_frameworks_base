@@ -45247,6 +45247,8 @@ package android.text {
     method public static boolean extendRight(android.text.Spannable, android.text.Layout);
     method public static final void extendSelection(android.text.Spannable, int);
     method public static boolean extendToLeftEdge(android.text.Spannable, android.text.Layout);
+    method public static boolean extendToParagraphEnd(@NonNull android.text.Spannable);
+    method public static boolean extendToParagraphStart(@NonNull android.text.Spannable);
     method public static boolean extendToRightEdge(android.text.Spannable, android.text.Layout);
     method public static boolean extendUp(android.text.Spannable, android.text.Layout);
     method public static final int getSelectionEnd(CharSequence);
@@ -45255,6 +45257,8 @@ package android.text {
     method public static boolean moveLeft(android.text.Spannable, android.text.Layout);
     method public static boolean moveRight(android.text.Spannable, android.text.Layout);
     method public static boolean moveToLeftEdge(android.text.Spannable, android.text.Layout);
+    method public static boolean moveToParagraphEnd(@NonNull android.text.Spannable, @NonNull android.text.Layout);
+    method public static boolean moveToParagraphStart(@NonNull android.text.Spannable, @NonNull android.text.Layout);
     method public static boolean moveToRightEdge(android.text.Spannable, android.text.Layout);
     method public static boolean moveUp(android.text.Spannable, android.text.Layout);
     method public static final void removeSelection(android.text.Spannable);
@@ -45703,6 +45707,7 @@ package android.text.method {
     method protected boolean left(android.widget.TextView, android.text.Spannable);
     method protected boolean lineEnd(android.widget.TextView, android.text.Spannable);
     method protected boolean lineStart(android.widget.TextView, android.text.Spannable);
+    method public boolean nextParagraph(@NonNull android.widget.TextView, @NonNull android.text.Spannable);
     method public boolean onGenericMotionEvent(android.widget.TextView, android.text.Spannable, android.view.MotionEvent);
     method public boolean onKeyDown(android.widget.TextView, android.text.Spannable, int, android.view.KeyEvent);
     method public boolean onKeyOther(android.widget.TextView, android.text.Spannable, android.view.KeyEvent);
@@ -45712,6 +45717,7 @@ package android.text.method {
     method public boolean onTrackballEvent(android.widget.TextView, android.text.Spannable, android.view.MotionEvent);
     method protected boolean pageDown(android.widget.TextView, android.text.Spannable);
     method protected boolean pageUp(android.widget.TextView, android.text.Spannable);
+    method public boolean previousParagraph(@NonNull android.widget.TextView, @NonNull android.text.Spannable);
     method protected boolean right(android.widget.TextView, android.text.Spannable);
     method protected boolean top(android.widget.TextView, android.text.Spannable);
     method protected boolean up(android.widget.TextView, android.text.Spannable);

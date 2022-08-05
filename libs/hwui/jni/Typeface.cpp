@@ -140,15 +140,13 @@ static void Typeface_setDefault(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
 
 static jobject Typeface_getSupportedAxes(JNIEnv *env, jobject, jlong faceHandle) {
     Typeface* face = toTypeface(faceHandle);
-    const std::unordered_set<minikin::AxisTag>& tagSet = face->fFontCollection->getSupportedTags();
-    const size_t length = tagSet.size();
+    const size_t length = face->fFontCollection->getSupportedAxesCount();
     if (length == 0) {
         return nullptr;
     }
     std::vector<jint> tagVec(length);
-    int index = 0;
-    for (const auto& tag : tagSet) {
-        tagVec[index++] = tag;
+    for (size_t i = 0; i < length; i++) {
+        tagVec[i] = face->fFontCollection->getSupportedAxisAt(i);
     }
     std::sort(tagVec.begin(), tagVec.end());
     const jintArray result = env->NewIntArray(length);

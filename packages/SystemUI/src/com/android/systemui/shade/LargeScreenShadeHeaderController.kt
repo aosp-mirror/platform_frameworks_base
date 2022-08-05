@@ -264,14 +264,8 @@ class LargeScreenShadeHeaderController @Inject constructor(
             Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimary)
         )
 
-        carrierIconSlots = if (featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)) {
-            listOf(
-                header.context.getString(com.android.internal.R.string.status_bar_no_calling),
-                header.context.getString(com.android.internal.R.string.status_bar_call_strength)
-            )
-        } else {
+        carrierIconSlots =
             listOf(header.context.getString(com.android.internal.R.string.status_bar_mobile))
-        }
         qsCarrierGroupController = qsCarrierGroupControllerBuilder
             .setQSCarrierGroup(qsCarrierGroup)
             .build()

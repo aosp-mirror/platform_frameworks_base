@@ -48,13 +48,12 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     private View mStackScroller;
     private View mKeyguardStatusBar;
 
-    private ArrayList<View> mDrawingOrderedChildren = new ArrayList<>();
-    private ArrayList<View> mLayoutDrawingOrder = new ArrayList<>();
+    private final ArrayList<View> mDrawingOrderedChildren = new ArrayList<>();
+    private final ArrayList<View> mLayoutDrawingOrder = new ArrayList<>();
     private final Comparator<View> mIndexComparator = Comparator.comparingInt(this::indexOfChild);
     private Consumer<WindowInsets> mInsetsChangedListener = insets -> {};
     private Consumer<QS> mQSFragmentAttachedListener = qs -> {};
     private QS mQs;
-    private View mQSScrollView;
     private View mQSContainer;
 
     @Nullable
@@ -76,7 +75,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     public void onFragmentViewCreated(String tag, Fragment fragment) {
         mQs = (QS) fragment;
         mQSFragmentAttachedListener.accept(mQs);
-        mQSScrollView = mQs.getView().findViewById(R.id.expanded_qs_scroll_view);
         mQSContainer = mQs.getView().findViewById(R.id.quick_settings_container);
     }
 

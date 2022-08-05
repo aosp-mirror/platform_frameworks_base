@@ -47,6 +47,7 @@ import android.content.ContentResolver;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -461,6 +462,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(
+                        mDumpManager,
                         mock(HeadsUpManagerPhone.class),
                         new StatusBarStateControllerImpl(new UiEventLoggerFake(), mDumpManager,
                                 mInteractionJankMonitor),
@@ -527,7 +529,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mNotificationShadeWindowController,
                 mDozeLog, mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
-                mMetricsLogger, mActivityManager, mConfigurationController,
+                mMetricsLogger, mConfigurationController,
                 () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mStatusBarKeyguardViewManager,
@@ -899,6 +901,76 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mNotificationPanelViewController.updateResources();
         assertThat(getConstraintSetLayout(R.id.keyguard_status_view).endToEnd)
                 .isEqualTo(ConstraintSet.PARENT_ID);
+    }
+
+    @Test
+    public void keyguardStatusView_splitShade_dozing_alwaysDozingOn_isCentered() {
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+
+        setDozing(/* dozing= */ true, /* dozingAlwaysOn= */ true);
+
+        assertThat(isKeyguardStatusViewCentered()).isTrue();
+    }
+
+    @Test
+    public void keyguardStatusView_splitShade_dozing_alwaysDozingOff_isNotCentered() {
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+
+        setDozing(/* dozing= */ true, /* dozingAlwaysOn= */ false);
+
+        assertThat(isKeyguardStatusViewCentered()).isFalse();
+    }
+
+    @Test
+    public void keyguardStatusView_splitShade_notDozing_alwaysDozingOn_isNotCentered() {
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+
+        setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ true);
+
+        assertThat(isKeyguardStatusViewCentered()).isFalse();
+    }
+
+    @Test
+    public void keyguardStatusView_splitShade_pulsing_isCentered() {
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mNotificationListContainer.hasPulsingNotifications()).thenReturn(true);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+
+        setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ true);
+
+        assertThat(isKeyguardStatusViewCentered()).isFalse();
+    }
+
+    @Test
+    public void keyguardStatusView_splitShade_notPulsing_isNotCentered() {
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mNotificationListContainer.hasPulsingNotifications()).thenReturn(false);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+
+        setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ true);
+
+        assertThat(isKeyguardStatusViewCentered()).isFalse();
+    }
+
+    @Test
+    public void keyguardStatusView_singleShade_isCentered() {
+        enableSplitShade(/* enabled= */ false);
+        // The conditions below would make the clock NOT be centered on split shade.
+        // On single shade it should always be centered though.
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mNotificationListContainer.hasPulsingNotifications()).thenReturn(false);
+        mStatusBarStateController.setState(KEYGUARD);
+        setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ false);
+
+        assertThat(isKeyguardStatusViewCentered()).isFalse();
     }
 
     @Test
@@ -1472,5 +1544,20 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mResources.getDimensionPixelSize(R.dimen.split_shade_full_transition_distance))
                 .thenReturn(splitShadeFullTransitionDistance);
         mNotificationPanelViewController.updateResources();
+    }
+
+    private void setDozing(boolean dozing, boolean dozingAlwaysOn) {
+        when(mDozeParameters.getAlwaysOn()).thenReturn(dozingAlwaysOn);
+        mNotificationPanelViewController.setDozing(
+                /* dozing= */ dozing,
+                /* animate= */ false,
+                /* wakeUpTouchLocation= */ new PointF()
+        );
+    }
+
+    private boolean isKeyguardStatusViewCentered() {
+        mNotificationPanelViewController.updateResources();
+        return getConstraintSetLayout(R.id.keyguard_status_view).endToEnd
+                == ConstraintSet.PARENT_ID;
     }
 }

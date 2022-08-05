@@ -751,33 +751,29 @@ public class SpatializerHelper {
                 if (enabled) {
                     throw (new IllegalStateException("Can't enable when uninitialized"));
                 }
-                return;
+                break;
             case STATE_NOT_SUPPORTED:
                 if (enabled) {
                     Log.e(TAG, "Can't enable when unsupported");
                 }
-                return;
+                break;
             case STATE_DISABLED_UNAVAILABLE:
             case STATE_DISABLED_AVAILABLE:
                 if (enabled) {
                     createSpat();
                     onRoutingUpdated();
-                    break;
-                } else {
-                    // already in disabled state
-                    return;
-                }
+                    // onRoutingUpdated() can update the "enabled" state based on context
+                    // and will call setDispatchFeatureEnabledState().
+                } // else { nothing to do as already disabled }
+                break;
             case STATE_ENABLED_UNAVAILABLE:
             case STATE_ENABLED_AVAILABLE:
                 if (!enabled) {
                     releaseSpat();
-                    break;
-                } else {
-                    // already in enabled state
-                    return;
-                }
+                    setDispatchFeatureEnabledState(false, "setSpatializerEnabledInt");
+                } // else { nothing to do as already enabled }
+                break;
         }
-        setDispatchFeatureEnabledState(enabled, "setSpatializerEnabledInt");
     }
 
     synchronized int getCapableImmersiveAudioLevel() {

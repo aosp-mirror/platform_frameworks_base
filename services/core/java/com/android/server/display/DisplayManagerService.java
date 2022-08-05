@@ -2583,8 +2583,8 @@ public final class DisplayManagerService extends SystemService {
         final BrightnessSetting brightnessSetting = new BrightnessSetting(mPersistentDataStore,
                 display, mSyncRoot);
         final DisplayPowerController displayPowerController = new DisplayPowerController(
-                mContext, mDisplayPowerCallbacks, mPowerHandler, mSensorManager,
-                mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,
+                mContext, /* injector= */ null, mDisplayPowerCallbacks, mPowerHandler,
+                mSensorManager, mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,
                 () -> handleBrightnessChange(display));
         mDisplayPowerControllers.append(display.getDisplayIdLocked(), displayPowerController);
     }

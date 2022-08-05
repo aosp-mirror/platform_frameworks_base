@@ -53,7 +53,6 @@
             android:paddingTop="16dp"
             android:paddingBottom="8dp"
             android:textColor="?android:attr/textColorSecondary"
-            android:hyphenationFrequency="normalFast"
             android:ellipsize="marquee" />
 
         <com.android.settingslib.widget.LinkTextView

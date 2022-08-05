@@ -18,6 +18,8 @@ package com.android.systemui.shade;
 
 import static android.view.WindowInsets.Type.systemBars;
 
+import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
@@ -52,14 +54,12 @@ import android.widget.FrameLayout;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 /**
  * Combined keyguard and notification panel view. Also holding backdrop and scrims.
  */
 public class NotificationShadeWindowView extends FrameLayout {
     public static final String TAG = "NotificationShadeWindowView";
-    public static final boolean DEBUG = CentralSurfaces.DEBUG;
 
     private int mRightInset = 0;
     private int mLeftInset = 0;
@@ -221,7 +221,7 @@ public class NotificationShadeWindowView extends FrameLayout {
         }
     }
 
-    class LayoutParams extends FrameLayout.LayoutParams {
+    private static class LayoutParams extends FrameLayout.LayoutParams {
 
         public boolean ignoreRightInset;
 
@@ -243,7 +243,7 @@ public class NotificationShadeWindowView extends FrameLayout {
     public ActionMode startActionModeForChild(View originalView, ActionMode.Callback callback,
             int type) {
         if (type == ActionMode.TYPE_FLOATING) {
-            return startActionMode(originalView, callback, type);
+            return startActionMode(originalView, callback);
         }
         return super.startActionModeForChild(originalView, callback, type);
     }
@@ -258,14 +258,10 @@ public class NotificationShadeWindowView extends FrameLayout {
         final FloatingActionMode mode =
                 new FloatingActionMode(mContext, callback, originatingView, mFloatingToolbar);
         mFloatingActionModeOriginatingView = originatingView;
-        mFloatingToolbarPreDrawListener =
-                new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        mode.updateViewLocationInWindow();
-                        return true;
-                    }
-                };
+        mFloatingToolbarPreDrawListener = () -> {
+            mode.updateViewLocationInWindow();
+            return true;
+        };
         return mode;
     }
 
@@ -292,10 +288,10 @@ public class NotificationShadeWindowView extends FrameLayout {
     }
 
     private ActionMode startActionMode(
-            View originatingView, ActionMode.Callback callback, int type) {
+            View originatingView, ActionMode.Callback callback) {
         ActionMode.Callback2 wrappedCallback = new ActionModeCallback2Wrapper(callback);
         ActionMode mode = createFloatingActionMode(originatingView, wrappedCallback);
-        if (mode != null && wrappedCallback.onCreateActionMode(mode, mode.getMenu())) {
+        if (wrappedCallback.onCreateActionMode(mode, mode.getMenu())) {
             setHandledFloatingActionMode(mode);
         } else {
             mode = null;
@@ -382,7 +378,7 @@ public class NotificationShadeWindowView extends FrameLayout {
     /**
      * Minimal window to satisfy FloatingToolbar.
      */
-    private Window mFakeWindow = new Window(mContext) {
+    private final Window mFakeWindow = new Window(mContext) {
         @Override
         public void takeSurface(SurfaceHolder.Callback2 callback) {
         }

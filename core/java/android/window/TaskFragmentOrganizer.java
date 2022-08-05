@@ -16,6 +16,13 @@
 
 package android.window;
 
+import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENT_TO_TASK;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHANGED;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED;
+
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,6 +34,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.RemoteAnimationDefinition;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -186,6 +194,67 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     public void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
             @NonNull IBinder activityToken) {}
 
+    /**
+     * Called when the transaction is ready so that the organizer can update the TaskFragments based
+     * on the changes in transaction.
+     * @hide
+     */
+    public void onTransactionReady(@NonNull TaskFragmentTransaction transaction) {
+        final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
+        for (TaskFragmentTransaction.Change change : changes) {
+            // TODO(b/240519866): apply all changes in one WCT.
+            switch (change.getType()) {
+                case TYPE_TASK_FRAGMENT_APPEARED:
+                    onTaskFragmentAppeared(change.getTaskFragmentInfo());
+                    if (change.getTaskConfiguration() != null) {
+                        // TODO(b/240519866): convert to pass TaskConfiguration for all TFs in the
+                        // same Task
+                        onTaskFragmentParentInfoChanged(
+                                change.getTaskFragmentToken(),
+                                change.getTaskConfiguration());
+                    }
+                    break;
+                case TYPE_TASK_FRAGMENT_INFO_CHANGED:
+                    if (change.getTaskConfiguration() != null) {
+                        // TODO(b/240519866): convert to pass TaskConfiguration for all TFs in the
+                        // same Task
+                        onTaskFragmentParentInfoChanged(
+                                change.getTaskFragmentToken(),
+                                change.getTaskConfiguration());
+                    }
+                    onTaskFragmentInfoChanged(change.getTaskFragmentInfo());
+                    break;
+                case TYPE_TASK_FRAGMENT_VANISHED:
+                    onTaskFragmentVanished(change.getTaskFragmentInfo());
+                    break;
+                case TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED:
+                    onTaskFragmentParentInfoChanged(
+                            change.getTaskFragmentToken(),
+                            change.getTaskConfiguration());
+                    break;
+                case TYPE_TASK_FRAGMENT_ERROR:
+                    final Bundle errorBundle = change.getErrorBundle();
+                    onTaskFragmentError(
+                            change.getErrorCallbackToken(),
+                            errorBundle.getParcelable(
+                                    KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO, TaskFragmentInfo.class),
+                            errorBundle.getInt(KEY_ERROR_CALLBACK_OP_TYPE),
+                            errorBundle.getSerializable(KEY_ERROR_CALLBACK_EXCEPTION,
+                                    java.lang.Throwable.class));
+                    break;
+                case TYPE_ACTIVITY_REPARENT_TO_TASK:
+                    onActivityReparentToTask(
+                            change.getTaskId(),
+                            change.getActivityIntent(),
+                            change.getActivityToken());
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Unknown TaskFragmentEvent=" + change.getType());
+            }
+        }
+    }
+
     @Override
     public void applyTransaction(@NonNull WindowContainerTransaction t) {
         t.setTaskFragmentOrganizer(mInterface);
@@ -203,51 +272,8 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
 
     private final ITaskFragmentOrganizer mInterface = new ITaskFragmentOrganizer.Stub() {
         @Override
-        public void onTaskFragmentAppeared(@NonNull TaskFragmentInfo taskFragmentInfo) {
-            mExecutor.execute(
-                    () -> TaskFragmentOrganizer.this.onTaskFragmentAppeared(taskFragmentInfo));
-        }
-
-        @Override
-        public void onTaskFragmentInfoChanged(@NonNull TaskFragmentInfo taskFragmentInfo) {
-            mExecutor.execute(
-                    () -> TaskFragmentOrganizer.this.onTaskFragmentInfoChanged(taskFragmentInfo));
-        }
-
-        @Override
-        public void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo) {
-            mExecutor.execute(
-                    () -> TaskFragmentOrganizer.this.onTaskFragmentVanished(taskFragmentInfo));
-        }
-
-        @Override
-        public void onTaskFragmentParentInfoChanged(
-                @NonNull IBinder fragmentToken, @NonNull Configuration parentConfig) {
-            mExecutor.execute(
-                    () -> TaskFragmentOrganizer.this.onTaskFragmentParentInfoChanged(
-                            fragmentToken, parentConfig));
-        }
-
-        @Override
-        public void onTaskFragmentError(
-                @NonNull IBinder errorCallbackToken, @NonNull Bundle errorBundle) {
-            mExecutor.execute(() -> {
-                final TaskFragmentInfo info = errorBundle.getParcelable(
-                        KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO, TaskFragmentInfo.class);
-                TaskFragmentOrganizer.this.onTaskFragmentError(
-                        errorCallbackToken, info,
-                        errorBundle.getInt(KEY_ERROR_CALLBACK_OP_TYPE),
-                        (Throwable) errorBundle.getSerializable(KEY_ERROR_CALLBACK_EXCEPTION,
-                                java.lang.Throwable.class));
-            });
-        }
-
-        @Override
-        public void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
-                @NonNull IBinder activityToken) {
-            mExecutor.execute(
-                    () -> TaskFragmentOrganizer.this.onActivityReparentToTask(
-                            taskId, activityIntent, activityToken));
+        public void onTransactionReady(@NonNull TaskFragmentTransaction transaction) {
+            mExecutor.execute(() -> TaskFragmentOrganizer.this.onTransactionReady(transaction));
         }
     };
 
