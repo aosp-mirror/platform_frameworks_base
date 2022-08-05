@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import src.com.android.commands.uinput.InputAbsInfo;
 
@@ -338,7 +339,7 @@ public class Event {
                 mReader.beginArray();
                 while (mReader.hasNext()) {
                     int type = 0;
-                    int[] data = null;
+                    IntStream data = null;
                     mReader.beginObject();
                     while (mReader.hasNext()) {
                         String name = mReader.nextName();
@@ -347,8 +348,7 @@ public class Event {
                                 type = readInt();
                                 break;
                             case "data":
-                                data = readIntList().stream()
-                                            .mapToInt(Integer::intValue).toArray();
+                                data = readIntList().stream().mapToInt(Integer::intValue);
                                 break;
                             default:
                                 consumeRemainingElements();
@@ -359,7 +359,9 @@ public class Event {
                     }
                     mReader.endObject();
                     if (data != null) {
-                        configuration.put(type, data);
+                        final int[] existing = configuration.get(type);
+                        configuration.put(type, existing == null ? data.toArray()
+                                : IntStream.concat(IntStream.of(existing), data).toArray());
                     }
                 }
                 mReader.endArray();
