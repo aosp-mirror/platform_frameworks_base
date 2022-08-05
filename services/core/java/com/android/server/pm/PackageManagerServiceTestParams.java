@@ -80,7 +80,7 @@ public final class PackageManagerServiceTestParams {
     public @NonNull String requiredInstallerPackage;
     public @NonNull String requiredPermissionControllerPackage;
     public @NonNull String requiredUninstallerPackage;
-    public @Nullable String requiredVerifierPackage;
+    public @NonNull String[] requiredVerifierPackages;
     public String[] separateProcesses;
     public @NonNull String servicesExtensionPackageName;
     public @Nullable String setupWizardPackage;
