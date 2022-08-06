@@ -118,6 +118,33 @@ public final class WMShell extends CoreStartable
     private final UserInfoController mUserInfoController;
     private final Executor mSysUiMainExecutor;
 
+    // Listeners and callbacks. Note that we prefer member variable over anonymous class here to
+    // avoid the situation that some implementations, like KeyguardUpdateMonitor, use WeakReference
+    // internally and anonymous class could be released after registration.
+    private final ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+                @Override
+                public void onConfigChanged(Configuration newConfig) {
+                    mShell.onConfigurationChanged(newConfig);
+                }
+            };
+    private final KeyguardStateController.Callback mKeyguardStateCallback =
+            new KeyguardStateController.Callback() {
+                @Override
+                public void onKeyguardShowingChanged() {
+                    mShell.onKeyguardVisibilityChanged(mKeyguardStateController.isShowing(),
+                            mKeyguardStateController.isOccluded(),
+                            mKeyguardStateController.isAnimatingBetweenKeyguardAndSurfaceBehind());
+                }
+            };
+    private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onKeyguardDismissAnimationFinished() {
+                    mShell.onKeyguardDismissAnimationFinished();
+                }
+            };
+
     private boolean mIsSysUiStateValid;
     private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
@@ -159,28 +186,11 @@ public final class WMShell extends CoreStartable
     public void start() {
         // Notify with the initial configuration and subscribe for new config changes
         mShell.onConfigurationChanged(mContext.getResources().getConfiguration());
-        mConfigurationController.addCallback(new ConfigurationController.ConfigurationListener() {
-            @Override
-            public void onConfigChanged(Configuration newConfig) {
-                mShell.onConfigurationChanged(newConfig);
-            }
-        });
+        mConfigurationController.addCallback(mConfigurationListener);
 
         // Subscribe to keyguard changes
-        mKeyguardStateController.addCallback(new KeyguardStateController.Callback() {
-            @Override
-            public void onKeyguardShowingChanged() {
-                mShell.onKeyguardVisibilityChanged(mKeyguardStateController.isShowing(),
-                        mKeyguardStateController.isOccluded(),
-                        mKeyguardStateController.isAnimatingBetweenKeyguardAndSurfaceBehind());
-            }
-        });
-        mKeyguardUpdateMonitor.registerCallback(new KeyguardUpdateMonitorCallback() {
-            @Override
-            public void onKeyguardDismissAnimationFinished() {
-                mShell.onKeyguardDismissAnimationFinished();
-            }
-        });
+        mKeyguardStateController.addCallback(mKeyguardStateCallback);
+        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
 
         // TODO: Consider piping config change and other common calls to a shell component to
         //  delegate internally

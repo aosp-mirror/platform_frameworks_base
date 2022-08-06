@@ -2474,8 +2474,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         final boolean statusBarShadeLocked = mStatusBarState == StatusBarState.SHADE_LOCKED;
-        final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep
-                && !statusBarShadeLocked;
+        // mKeyguardIsVisible is true even when the bouncer is shown, we don't want to run face auth
+        // on bouncer if both fp and fingerprint are enrolled.
+        final boolean awakeKeyguardExcludingBouncerShowing = mKeyguardIsVisible
+                && mDeviceInteractive && !mGoingToSleep
+                && !statusBarShadeLocked && !mBouncerFullyShown;
         final int user = getCurrentUser();
         final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(user);
         final boolean isLockDown =
@@ -2515,14 +2518,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean faceDisabledForUser = isFaceDisabled(user);
         final boolean biometricEnabledForUser = mBiometricEnabledForUser.get(user);
         final boolean shouldListenForFaceAssistant = shouldListenForFaceAssistant();
+        final boolean onlyFaceEnrolled = isOnlyFaceEnrolled();
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         final boolean shouldListen =
-                (mBouncerFullyShown && !mGoingToSleep
+                ((mBouncerFullyShown && !mGoingToSleep && onlyFaceEnrolled)
                         || mAuthInterruptActive
                         || mOccludingAppRequestingFace
-                        || awakeKeyguard
+                        || awakeKeyguardExcludingBouncerShowing
                         || shouldListenForFaceAssistant
                         || mAuthController.isUdfpsFingerDown()
                         || mUdfpsBouncerShowing)
@@ -2546,10 +2550,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     faceAuthenticated,
                     faceDisabledForUser,
                     mGoingToSleep,
-                    awakeKeyguard,
+                    awakeKeyguardExcludingBouncerShowing,
                     mKeyguardGoingAway,
                     shouldListenForFaceAssistant,
                     mOccludingAppRequestingFace,
+                    onlyFaceEnrolled,
                     mIsPrimaryUser,
                     strongAuthAllowsScanning,
                     mSecureCameraLaunched,
@@ -2557,6 +2562,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mUdfpsBouncerShowing));
 
         return shouldListen;
+    }
+
+    private boolean isOnlyFaceEnrolled() {
+        return isFaceAuthEnabledForUser(getCurrentUser())
+                && !isUnlockWithFingerprintPossible(getCurrentUser());
     }
 
     private void maybeLogListenerModelData(KeyguardListenModel model) {
