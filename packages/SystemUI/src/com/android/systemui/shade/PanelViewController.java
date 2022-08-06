@@ -171,6 +171,7 @@ public abstract class PanelViewController {
     private float mInitialTouchY;
     private float mInitialTouchX;
     private boolean mTouchDisabled;
+    private boolean mInitialTouchFromKeyguard;
 
     /**
      * Whether or not the PanelView can be expanded or collapsed with a drag.
@@ -395,6 +396,7 @@ public abstract class PanelViewController {
         mInitialOffsetOnTouch = expandedHeight;
         mInitialTouchY = newY;
         mInitialTouchX = newX;
+        mInitialTouchFromKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
         if (startTracking) {
             mTouchSlopExceeded = true;
             setExpandedHeight(mInitialOffsetOnTouch);
@@ -417,20 +419,14 @@ public abstract class PanelViewController {
                     mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
 
             final boolean expand;
-            if (event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel) {
-                // If the keyguard is fading away, don't expand it again. This can happen if you're
-                // swiping to unlock, the app below the keyguard is in landscape, and the screen
-                // rotates while your finger is still down after the swipe to unlock.
-                if (mKeyguardStateController.isKeyguardFadingAway()) {
-                    expand = false;
-                } else if (onKeyguard) {
+            if (mKeyguardStateController.isKeyguardFadingAway()
+                    || (mInitialTouchFromKeyguard && !onKeyguard)) {
+                // Don't expand for any touches that started from the keyguard and ended after the
+                // keyguard is gone.
+                expand = false;
+            } else if (event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel) {
+                if (onKeyguard) {
                     expand = true;
-                } else if (mKeyguardStateController.isKeyguardFadingAway()) {
-                    // If we're in the middle of dismissing the keyguard, don't expand due to the
-                    // cancelled gesture. Gesture cancellation during an unlock is expected in some
-                    // situations, such keeping your finger down while swiping to unlock to an app
-                    // that is locked in landscape (the rotation will cancel the touch event).
-                    expand = false;
                 } else if (mCentralSurfaces.isBouncerShowingOverDream()) {
                     expand = false;
                 } else {
