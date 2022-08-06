@@ -409,15 +409,15 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static PipTransitionController providePipTransitionController(Context context,
-            Transitions transitions, ShellTaskOrganizer shellTaskOrganizer,
+            ShellInit shellInit, ShellTaskOrganizer shellTaskOrganizer, Transitions transitions,
             PipAnimationController pipAnimationController, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState, PipTransitionState pipTransitionState,
             PhonePipMenuController pipMenuController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreenController> splitScreenOptional) {
-        return new PipTransition(context, pipBoundsState, pipTransitionState, pipMenuController,
-                pipBoundsAlgorithm, pipAnimationController, transitions, shellTaskOrganizer,
-                pipSurfaceTransactionHelper, splitScreenOptional);
+        return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
+                pipBoundsState, pipTransitionState, pipMenuController, pipBoundsAlgorithm,
+                pipAnimationController, pipSurfaceTransactionHelper, splitScreenOptional);
     }
 
     @WMSingleton

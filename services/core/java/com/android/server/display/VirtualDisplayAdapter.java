@@ -35,6 +35,7 @@ import static com.android.server.display.DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROU
 import static com.android.server.display.DisplayDeviceInfo.FLAG_TOUCH_FEEDBACK_DISABLED;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_TRUSTED;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Point;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -110,15 +111,20 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         } else {
             uniqueId = UNIQUE_ID_PREFIX + ownerPackageName + ":" + uniqueId;
         }
+        MediaProjectionCallback mediaProjectionCallback =  null;
+        if (projection != null) {
+            mediaProjectionCallback = new MediaProjectionCallback(appToken);
+        }
         VirtualDisplayDevice device = new VirtualDisplayDevice(displayToken, appToken,
-                ownerUid, ownerPackageName, surface, flags, new Callback(callback, mHandler),
+                ownerUid, ownerPackageName, surface, flags,
+                new Callback(callback, mHandler), projection, mediaProjectionCallback,
                 uniqueId, uniqueIndex, virtualDisplayConfig);
 
         mVirtualDisplayDevices.put(appToken, device);
 
         try {
             if (projection != null) {
-                projection.registerCallback(new MediaProjectionCallback(appToken));
+                projection.registerCallback(mediaProjectionCallback);
             }
             appToken.linkToDeath(device, 0);
         } catch (RemoteException ex) {
@@ -203,7 +209,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
     }
 
     private void handleMediaProjectionStoppedLocked(IBinder appToken) {
-        VirtualDisplayDevice device = mVirtualDisplayDevices.remove(appToken);
+        VirtualDisplayDevice device = mVirtualDisplayDevices.get(appToken);
         if (device != null) {
             Slog.i(TAG, "Virtual display device released because media projection stopped: "
                     + device.mName);
@@ -223,6 +229,8 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         final String mName;
         private final int mFlags;
         private final Callback mCallback;
+        @Nullable private final IMediaProjection mProjection;
+        @Nullable private final IMediaProjectionCallback mMediaProjectionCallback;
 
         private int mWidth;
         private int mHeight;
@@ -240,7 +248,8 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
 
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName, Surface surface, int flags,
-                Callback callback, String uniqueId, int uniqueIndex,
+                Callback callback, IMediaProjection projection,
+                IMediaProjectionCallback mediaProjectionCallback, String uniqueId, int uniqueIndex,
                 VirtualDisplayConfig virtualDisplayConfig) {
             super(VirtualDisplayAdapter.this, displayToken, uniqueId, getContext());
             mAppToken = appToken;
@@ -254,6 +263,8 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mSurface = surface;
             mFlags = flags;
             mCallback = callback;
+            mProjection = projection;
+            mMediaProjectionCallback = mediaProjectionCallback;
             mDisplayState = Display.STATE_UNKNOWN;
             mPendingChanges |= PENDING_SURFACE_CHANGE;
             mUniqueIndex = uniqueIndex;
@@ -269,6 +280,13 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 Slog.i(TAG, "Virtual display device released because application token died: "
                     + mOwnerPackageName);
                 destroyLocked(false);
+                if (mProjection != null && mMediaProjectionCallback != null) {
+                    try {
+                        mProjection.unregisterCallback(mMediaProjectionCallback);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failed to unregister callback in binderDied", e);
+                    }
+                }
                 sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_REMOVED);
             }
         }
@@ -279,6 +297,13 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 mSurface = null;
             }
             SurfaceControl.destroyDisplay(getDisplayTokenLocked());
+            if (mProjection != null && mMediaProjectionCallback != null) {
+                try {
+                    mProjection.unregisterCallback(mMediaProjectionCallback);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to unregister callback in destroy", e);
+                }
+            }
             if (binderAlive) {
                 mCallback.dispatchDisplayStopped();
             }
