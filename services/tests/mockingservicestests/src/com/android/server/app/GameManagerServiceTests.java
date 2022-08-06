@@ -450,13 +450,13 @@ public class GameManagerServiceTests {
 
 
         startUser(gameManagerService, USER_ID_1);
-        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
         mockModifyGameModeGranted();
         assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
         // We need to make sure the mode is supported before setting it.
         mockDeviceConfigAll();
-        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD, USER_ID_1);
         assertEquals(GameManager.GAME_MODE_STANDARD,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
@@ -534,8 +534,8 @@ public class GameManagerServiceTests {
 
         startUser(gameManagerService, USER_ID_1);
         startUser(gameManagerService, USER_ID_2);
-        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
-        gameManagerService.updateConfigsForUser(USER_ID_2, mPackageName);
+        gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
+        gameManagerService.updateConfigsForUser(USER_ID_2, true, mPackageName);
 
         // Set User 1 to Standard
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD, USER_ID_1);
@@ -563,7 +563,7 @@ public class GameManagerServiceTests {
         if (gameManagerService == null) {
             gameManagerService = new GameManagerService(mMockContext, mTestLooper.getLooper());
             startUser(gameManagerService, USER_ID_1);
-            gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+            gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
         }
         ArraySet<Integer> reportedModes = new ArraySet<>();
         int[] modes = gameManagerService.getAvailableGameModes(mPackageName);
@@ -582,7 +582,7 @@ public class GameManagerServiceTests {
         if (gameManagerService == null) {
             gameManagerService = new GameManagerService(mMockContext, mTestLooper.getLooper());
             startUser(gameManagerService, USER_ID_1);
-            gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+            gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
         }
         GameManagerService.GamePackageConfiguration config =
                 gameManagerService.getConfig(mPackageName);
@@ -591,7 +591,7 @@ public class GameManagerServiceTests {
 
     private void checkAngleEnabled(GameManagerService gameManagerService, int gameMode,
             boolean angleEnabled) {
-        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
 
         // Validate GamePackageConfiguration returns the correct value.
         GameManagerService.GamePackageConfiguration config =
@@ -604,7 +604,7 @@ public class GameManagerServiceTests {
 
     private void checkLoadingBoost(GameManagerService gameManagerService, int gameMode,
             int loadingBoost) {
-        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
 
         // Validate GamePackageConfiguration returns the correct value.
         GameManagerService.GamePackageConfiguration config =
@@ -621,7 +621,7 @@ public class GameManagerServiceTests {
         if (gameManagerService == null) {
             gameManagerService = new GameManagerService(mMockContext, mTestLooper.getLooper());
             startUser(gameManagerService, USER_ID_1);
-            gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+            gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
         }
         GameManagerService.GamePackageConfiguration config =
                 gameManagerService.getConfig(mPackageName);
@@ -1091,7 +1091,7 @@ public class GameManagerServiceTests {
         GameManagerService gameManagerService =
                 new GameManagerService(mMockContext, mTestLooper.getLooper());
         startUser(gameManagerService, USER_ID_1);
-        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
         GameManagerService.GamePackageConfiguration config =
                 gameManagerService.getConfig(mPackageName);
         assertNull(config.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
@@ -1109,7 +1109,7 @@ public class GameManagerServiceTests {
                 new GameManagerService(mMockContext, mTestLooper.getLooper());
         startUser(gameManagerService, USER_ID_1);
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
-        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
         assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
     }
@@ -1126,7 +1126,7 @@ public class GameManagerServiceTests {
                 new GameManagerService(mMockContext, mTestLooper.getLooper());
         startUser(gameManagerService, USER_ID_1);
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY, USER_ID_1);
-        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
         assertEquals(GameManager.GAME_MODE_STANDARD,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
     }
@@ -1143,7 +1143,7 @@ public class GameManagerServiceTests {
                 new GameManagerService(mMockContext, mTestLooper.getLooper());
         startUser(gameManagerService, USER_ID_1);
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_UNSUPPORTED, USER_ID_1);
-        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
         assertEquals(GameManager.GAME_MODE_STANDARD,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
     }
