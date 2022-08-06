@@ -20,8 +20,6 @@ import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
-import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -47,18 +45,6 @@ public class Path {
     public final long mNativePath;
 
     /**
-     * @hide
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public boolean isSimplePath = true;
-    /**
-     * @hide
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public Region rects;
-    private Direction mLastDirection = null;
-
-    /**
      * Create an empty path
      */
     public Path() {
@@ -72,15 +58,7 @@ public class Path {
      * @param src The path to copy from when initializing the new path
      */
     public Path(@Nullable Path src) {
-        long valNative = 0;
-        if (src != null) {
-            valNative = src.mNativePath;
-            isSimplePath = src.isSimplePath;
-            if (src.rects != null) {
-                rects = new Region(src.rects);
-            }
-        }
-        mNativePath = nInit(valNative);
+        mNativePath = nInit(src != null ? src.mNativePath : 0);
         sRegistry.registerNativeAllocation(this, mNativePath);
     }
 
@@ -89,9 +67,6 @@ public class Path {
      * This does NOT change the fill-type setting.
      */
     public void reset() {
-        isSimplePath = true;
-        mLastDirection = null;
-        if (rects != null) rects.setEmpty();
         // We promised not to change this, so preserve it around the native
         // call, which does now reset fill type.
         final FillType fillType = getFillType();
@@ -104,9 +79,6 @@ public class Path {
      * keeps the internal data structure for faster reuse.
      */
     public void rewind() {
-        isSimplePath = true;
-        mLastDirection = null;
-        if (rects != null) rects.setEmpty();
         nRewind(mNativePath);
     }
 
@@ -116,19 +88,7 @@ public class Path {
         if (this == src) {
             return;
         }
-        isSimplePath = src.isSimplePath;
         nSet(mNativePath, src.mNativePath);
-        if (!isSimplePath) {
-            return;
-        }
-
-        if (rects != null && src.rects != null) {
-            rects.set(src.rects);
-        } else if (rects != null && src.rects == null) {
-            rects.setEmpty();
-        } else if (src.rects != null) {
-            rects = new Region(src.rects);
-        }
     }
 
     /**
@@ -192,12 +152,7 @@ public class Path {
      * @see #op(Path, android.graphics.Path.Op)
      */
     public boolean op(@NonNull Path path1, @NonNull Path path2, @NonNull Op op) {
-        if (nOp(path1.mNativePath, path2.mNativePath, op.ordinal(), this.mNativePath)) {
-            isSimplePath = false;
-            rects = null;
-            return true;
-        }
-        return false;
+        return nOp(path1.mNativePath, path2.mNativePath, op.ordinal(), this.mNativePath);
     }
 
     /**
@@ -378,7 +333,6 @@ public class Path {
      * @param y The y-coordinate of the end of a line
      */
     public void lineTo(float x, float y) {
-        isSimplePath = false;
         nLineTo(mNativePath, x, y);
     }
 
@@ -393,7 +347,6 @@ public class Path {
      *           this contour, to specify a line
      */
     public void rLineTo(float dx, float dy) {
-        isSimplePath = false;
         nRLineTo(mNativePath, dx, dy);
     }
 
@@ -408,7 +361,6 @@ public class Path {
      * @param y2 The y-coordinate of the end point on a quadratic curve
      */
     public void quadTo(float x1, float y1, float x2, float y2) {
-        isSimplePath = false;
         nQuadTo(mNativePath, x1, y1, x2, y2);
     }
 
@@ -427,7 +379,6 @@ public class Path {
      *            this contour, for the end point of a quadratic curve
      */
     public void rQuadTo(float dx1, float dy1, float dx2, float dy2) {
-        isSimplePath = false;
         nRQuadTo(mNativePath, dx1, dy1, dx2, dy2);
     }
 
@@ -445,7 +396,6 @@ public class Path {
      */
     public void cubicTo(float x1, float y1, float x2, float y2,
                         float x3, float y3) {
-        isSimplePath = false;
         nCubicTo(mNativePath, x1, y1, x2, y2, x3, y3);
     }
 
@@ -456,7 +406,6 @@ public class Path {
      */
     public void rCubicTo(float x1, float y1, float x2, float y2,
                          float x3, float y3) {
-        isSimplePath = false;
         nRCubicTo(mNativePath, x1, y1, x2, y2, x3, y3);
     }
 
@@ -507,7 +456,6 @@ public class Path {
      */
     public void arcTo(float left, float top, float right, float bottom, float startAngle,
             float sweepAngle, boolean forceMoveTo) {
-        isSimplePath = false;
         nArcTo(mNativePath, left, top, right, bottom, startAngle, sweepAngle, forceMoveTo);
     }
 
@@ -516,7 +464,6 @@ public class Path {
      * first point of the contour, a line segment is automatically added.
      */
     public void close() {
-        isSimplePath = false;
         nClose(mNativePath);
     }
 
@@ -534,18 +481,6 @@ public class Path {
             nativeInt = ni;
         }
         final int nativeInt;
-    }
-
-    private void detectSimplePath(float left, float top, float right, float bottom, Direction dir) {
-        if (mLastDirection == null) {
-            mLastDirection = dir;
-        }
-        if (mLastDirection != dir) {
-            isSimplePath = false;
-        } else {
-            if (rects == null) rects = new Region();
-            rects.op((int) left, (int) top, (int) right, (int) bottom, Region.Op.UNION);
-        }
     }
 
     /**
@@ -568,7 +503,6 @@ public class Path {
      * @param dir    The direction to wind the rectangle's contour
      */
     public void addRect(float left, float top, float right, float bottom, @NonNull Direction dir) {
-        detectSimplePath(left, top, right, bottom, dir);
         nAddRect(mNativePath, left, top, right, bottom, dir.nativeInt);
     }
 
@@ -588,7 +522,6 @@ public class Path {
      * @param dir The direction to wind the oval's contour
      */
     public void addOval(float left, float top, float right, float bottom, @NonNull Direction dir) {
-        isSimplePath = false;
         nAddOval(mNativePath, left, top, right, bottom, dir.nativeInt);
     }
 
@@ -601,7 +534,6 @@ public class Path {
      * @param dir    The direction to wind the circle's contour
      */
     public void addCircle(float x, float y, float radius, @NonNull Direction dir) {
-        isSimplePath = false;
         nAddCircle(mNativePath, x, y, radius, dir.nativeInt);
     }
 
@@ -624,7 +556,6 @@ public class Path {
      */
     public void addArc(float left, float top, float right, float bottom, float startAngle,
             float sweepAngle) {
-        isSimplePath = false;
         nAddArc(mNativePath, left, top, right, bottom, startAngle, sweepAngle);
     }
 
@@ -649,7 +580,6 @@ public class Path {
      */
     public void addRoundRect(float left, float top, float right, float bottom, float rx, float ry,
             @NonNull Direction dir) {
-        isSimplePath = false;
         nAddRoundRect(mNativePath, left, top, right, bottom, rx, ry, dir.nativeInt);
     }
 
@@ -682,7 +612,6 @@ public class Path {
         if (radii.length < 8) {
             throw new ArrayIndexOutOfBoundsException("radii[] needs 8 values");
         }
-        isSimplePath = false;
         nAddRoundRect(mNativePath, left, top, right, bottom, radii, dir.nativeInt);
     }
 
@@ -693,7 +622,6 @@ public class Path {
      * @param dx  The amount to translate the path in X as it is added
      */
     public void addPath(@NonNull Path src, float dx, float dy) {
-        isSimplePath = false;
         nAddPath(mNativePath, src.mNativePath, dx, dy);
     }
 
@@ -703,7 +631,6 @@ public class Path {
      * @param src The path that is appended to the current path
      */
     public void addPath(@NonNull Path src) {
-        isSimplePath = false;
         nAddPath(mNativePath, src.mNativePath);
     }
 
@@ -713,7 +640,6 @@ public class Path {
      * @param src The path to add as a new contour
      */
     public void addPath(@NonNull Path src, @NonNull Matrix matrix) {
-        if (!src.isSimplePath) isSimplePath = false;
         nAddPath(mNativePath, src.mNativePath, matrix.ni());
     }
 
@@ -741,15 +667,6 @@ public class Path {
      * @param dy The amount in the Y direction to offset the entire path
      */
     public void offset(float dx, float dy) {
-        if (isSimplePath && rects == null) {
-            // nothing to offset
-            return;
-        }
-        if (isSimplePath && dx == Math.rint(dx) && dy == Math.rint(dy)) {
-            rects.translate((int) dx, (int) dy);
-        } else {
-            isSimplePath = false;
-        }
         nOffset(mNativePath, dx, dy);
     }
 
@@ -760,7 +677,6 @@ public class Path {
      * @param dy The new Y coordinate for the last point
      */
     public void setLastPoint(float dx, float dy) {
-        isSimplePath = false;
         nSetLastPoint(mNativePath, dx, dy);
     }
 
@@ -773,12 +689,7 @@ public class Path {
      *               then the the original path is modified
      */
     public void transform(@NonNull Matrix matrix, @Nullable Path dst) {
-        long dstNative = 0;
-        if (dst != null) {
-            dst.isSimplePath = false;
-            dstNative = dst.mNativePath;
-        }
-        nTransform(mNativePath, matrix.ni(), dstNative);
+        nTransform(mNativePath, matrix.ni(), dst != null ? dst.mNativePath : 0);
     }
 
     /**
@@ -787,7 +698,6 @@ public class Path {
      * @param matrix The matrix to apply to the path
      */
     public void transform(@NonNull Matrix matrix) {
-        isSimplePath = false;
         nTransform(mNativePath, matrix.ni());
     }
 
@@ -797,7 +707,6 @@ public class Path {
     }
 
     final long mutateNI() {
-        isSimplePath = false;
         return mNativePath;
     }
 

@@ -14257,7 +14257,7 @@ public final class Settings {
          *
          * @hide
          */
-        public static final int DEFAULT_ENABLE_TARE = 1;
+        public static final int DEFAULT_ENABLE_TARE = 0;
 
         /**
          * Whether to enable the TARE AlarmManager economic policy or not.

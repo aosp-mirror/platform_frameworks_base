@@ -330,11 +330,7 @@ public abstract class BaseCanvas {
 
     public void drawPath(@NonNull Path path, @NonNull Paint paint) {
         throwIfHasHwFeaturesInSwMode(paint);
-        if (path.isSimplePath && path.rects != null) {
-            nDrawRegion(mNativeCanvasWrapper, path.rects.mNativeRegion, paint.getNativeInstance());
-        } else {
-            nDrawPath(mNativeCanvasWrapper, path.readOnlyNI(), paint.getNativeInstance());
-        }
+        nDrawPath(mNativeCanvasWrapper, path.readOnlyNI(), paint.getNativeInstance());
     }
 
     public void drawPoint(float x, float y, @NonNull Paint paint) {

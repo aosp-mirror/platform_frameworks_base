@@ -233,6 +233,57 @@ public class WindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    public void testLayoutResultCalculation_visibleFocusedTaskToInvisible() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController)
+                .getDisplay(Display.DEFAULT_DISPLAY);
+
+        final SurfaceControl decorContainerSurface = mock(SurfaceControl.class);
+        final SurfaceControl.Builder decorContainerSurfaceBuilder =
+                createMockSurfaceControlBuilder(decorContainerSurface);
+        mMockSurfaceControlBuilders.add(decorContainerSurfaceBuilder);
+        final SurfaceControl taskBackgroundSurface = mock(SurfaceControl.class);
+        final SurfaceControl.Builder taskBackgroundSurfaceBuilder =
+                createMockSurfaceControlBuilder(taskBackgroundSurface);
+        mMockSurfaceControlBuilders.add(taskBackgroundSurfaceBuilder);
+
+        final ActivityManager.TaskDescription.Builder taskDescriptionBuilder =
+                new ActivityManager.TaskDescription.Builder()
+                        .setBackgroundColor(Color.YELLOW);
+        final ActivityManager.RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setTaskDescriptionBuilder(taskDescriptionBuilder)
+                .setBounds(TASK_BOUNDS)
+                .setPositionInParent(TASK_POSITION_IN_PARENT.x, TASK_POSITION_IN_PARENT.y)
+                .setVisible(true)
+                .build();
+        taskInfo.isFocused = true;
+        // Density is 2. Outsets are (20, 40, 60, 80) px. Shadow radius is 10px. Caption height is
+        // 64px.
+        taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
+        mOutsetsDp.set(10, 20, 30, 40);
+
+        final SurfaceControl taskSurface = mock(SurfaceControl.class);
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo, taskSurface);
+
+        windowDecor.relayout(taskInfo);
+
+        verify(mMockSurfaceControlViewHost, never()).release();
+        verify(decorContainerSurface, never()).release();
+        verify(taskBackgroundSurface, never()).release();
+        verify(mMockWindowContainerTransaction, never())
+                .removeInsetsProvider(eq(taskInfo.token), any());
+
+        taskInfo.isVisible = false;
+        windowDecor.relayout(taskInfo);
+
+        verify(mMockSurfaceControlViewHost).release();
+        verify(decorContainerSurface).release();
+        verify(taskBackgroundSurface).release();
+        verify(mMockWindowContainerTransaction).removeInsetsProvider(eq(taskInfo.token), any());
+    }
+
+    @Test
     public void testNotCrashWhenDisplayAppearsAfterTask() {
         doReturn(mock(Display.class)).when(mMockDisplayController)
                 .getDisplay(Display.DEFAULT_DISPLAY);
@@ -282,7 +333,7 @@ public class WindowDecorationTests extends ShellTestCase {
             ActivityManager.RunningTaskInfo taskInfo, SurfaceControl testSurface) {
         return new TestWindowDecoration(mContext, mMockDisplayController, mMockShellTaskOrganizer,
                 taskInfo, testSurface, new MockSurfaceControlBuilderSupplier(),
-                mMockSurfaceControlViewHostFactory);
+                () -> mMockWindowContainerTransaction, mMockSurfaceControlViewHostFactory);
     }
 
     private class MockSurfaceControlBuilderSupplier implements Supplier<SurfaceControl.Builder> {
@@ -313,9 +364,11 @@ public class WindowDecorationTests extends ShellTestCase {
                 ShellTaskOrganizer taskOrganizer, ActivityManager.RunningTaskInfo taskInfo,
                 SurfaceControl taskSurface,
                 Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
+                Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
                 SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
             super(context, displayController, taskOrganizer, taskInfo, taskSurface,
-                    surfaceControlBuilderSupplier, surfaceControlViewHostFactory);
+                    surfaceControlBuilderSupplier, windowContainerTransactionSupplier,
+                    surfaceControlViewHostFactory);
         }
 
         @Override

@@ -64,6 +64,12 @@
 # Referenced via CarServiceHelperService in car-frameworks-service (avoid removing)
 -keep public class com.android.server.utils.Slogf { *; }
 
+# Referenced in wear-service
+# HIDL interfaces
+-keep public class android.hidl.base.** { *; }
+-keep public class android.hidl.manager.** { *; }
+-keep public class com.android.server.wm.WindowManagerInternal { *; }
+
 # Notification extractors
 # TODO(b/210510433): Revisit and consider generating from frameworks/base/core/res/res/values/config.xml.
 -keep,allowoptimization,allowaccessmodification public class com.android.server.notification.** implements com.android.server.notification.NotificationSignalExtractor

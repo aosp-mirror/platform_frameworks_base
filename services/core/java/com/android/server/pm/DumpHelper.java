@@ -54,7 +54,7 @@ final class DumpHelper {
     private final StorageEventHelper mStorageEventHelper;
     private final DomainVerificationManagerInternal mDomainVerificationManager;
     private final PackageInstallerService mInstallerService;
-    private final String mRequiredVerifierPackage;
+    private final String[] mRequiredVerifierPackages;
     private final KnownPackages mKnownPackages;
     private final ChangedPackagesTracker mChangedPackagesTracker;
     private final ArrayMap<String, FeatureInfo> mAvailableFeatures;
@@ -65,7 +65,7 @@ final class DumpHelper {
             PermissionManagerServiceInternal permissionManager,
             StorageEventHelper storageEventHelper,
             DomainVerificationManagerInternal domainVerificationManager,
-            PackageInstallerService installerService, String requiredVerifierPackage,
+            PackageInstallerService installerService, String[] requiredVerifierPackages,
             KnownPackages knownPackages,
             ChangedPackagesTracker changedPackagesTracker,
             ArrayMap<String, FeatureInfo> availableFeatures,
@@ -75,7 +75,7 @@ final class DumpHelper {
         mStorageEventHelper = storageEventHelper;
         mDomainVerificationManager = domainVerificationManager;
         mInstallerService = installerService;
-        mRequiredVerifierPackage = requiredVerifierPackage;
+        mRequiredVerifierPackages = requiredVerifierPackages;
         mKnownPackages = knownPackages;
         mChangedPackagesTracker = changedPackagesTracker;
         mAvailableFeatures = availableFeatures;
@@ -313,26 +313,28 @@ final class DumpHelper {
             ipw.decreaseIndent();
         }
 
-        if (dumpState.isDumping(DumpState.DUMP_VERIFIERS)
-                && packageName == null) {
-            final String requiredVerifierPackage = mRequiredVerifierPackage;
-            if (!checkin) {
+        if (dumpState.isDumping(DumpState.DUMP_VERIFIERS) && packageName == null) {
+            if (!checkin && mRequiredVerifierPackages.length > 0) {
                 if (dumpState.onTitlePrinted()) {
                     pw.println();
                 }
                 pw.println("Verifiers:");
-                pw.print("  Required: ");
-                pw.print(requiredVerifierPackage);
-                pw.print(" (uid=");
-                pw.print(snapshot.getPackageUid(requiredVerifierPackage,
-                        MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
-                pw.println(")");
-            } else if (requiredVerifierPackage != null) {
-                pw.print("vrfy,");
-                pw.print(requiredVerifierPackage);
-                pw.print(",");
-                pw.println(snapshot.getPackageUid(requiredVerifierPackage,
-                        MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
+            }
+            for (String requiredVerifierPackage : mRequiredVerifierPackages) {
+                if (!checkin) {
+                    pw.print("  Required: ");
+                    pw.print(requiredVerifierPackage);
+                    pw.print(" (uid=");
+                    pw.print(snapshot.getPackageUid(requiredVerifierPackage,
+                            MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
+                    pw.println(")");
+                } else {
+                    pw.print("vrfy,");
+                    pw.print(requiredVerifierPackage);
+                    pw.print(",");
+                    pw.println(snapshot.getPackageUid(requiredVerifierPackage,
+                            MATCH_DEBUG_TRIAGED_MISSING, UserHandle.USER_SYSTEM));
+                }
             }
         }
 
@@ -642,17 +644,19 @@ final class DumpHelper {
     private void dumpProto(Computer snapshot, FileDescriptor fd) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
 
-        final long requiredVerifierPackageToken =
-                proto.start(PackageServiceDumpProto.REQUIRED_VERIFIER_PACKAGE);
-        proto.write(PackageServiceDumpProto.PackageShortProto.NAME,
-                mRequiredVerifierPackage);
-        proto.write(
-                PackageServiceDumpProto.PackageShortProto.UID,
-                snapshot.getPackageUid(
-                        mRequiredVerifierPackage,
-                        MATCH_DEBUG_TRIAGED_MISSING,
-                        UserHandle.USER_SYSTEM));
-        proto.end(requiredVerifierPackageToken);
+        for (String requiredVerifierPackage : mRequiredVerifierPackages) {
+            final long requiredVerifierPackageToken =
+                    proto.start(PackageServiceDumpProto.REQUIRED_VERIFIER_PACKAGE);
+            proto.write(PackageServiceDumpProto.PackageShortProto.NAME,
+                    requiredVerifierPackage);
+            proto.write(
+                    PackageServiceDumpProto.PackageShortProto.UID,
+                    snapshot.getPackageUid(
+                            requiredVerifierPackage,
+                            MATCH_DEBUG_TRIAGED_MISSING,
+                            UserHandle.USER_SYSTEM));
+            proto.end(requiredVerifierPackageToken);
+        }
 
         DomainVerificationProxy proxy = mDomainVerificationManager.getProxy();
         ComponentName verifierComponent = proxy.getComponentName();
