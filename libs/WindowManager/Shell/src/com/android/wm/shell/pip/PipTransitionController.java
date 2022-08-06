@@ -38,6 +38,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
@@ -131,10 +132,13 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     public void onFixedRotationStarted() {
     }
 
-    public PipTransitionController(PipBoundsState pipBoundsState,
+    public PipTransitionController(
+            @NonNull ShellInit shellInit,
+            @NonNull ShellTaskOrganizer shellTaskOrganizer,
+            @NonNull Transitions transitions,
+            PipBoundsState pipBoundsState,
             PipMenuController pipMenuController, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipAnimationController pipAnimationController, Transitions transitions,
-            @android.annotation.NonNull ShellTaskOrganizer shellTaskOrganizer) {
+            PipAnimationController pipAnimationController) {
         mPipBoundsState = pipBoundsState;
         mPipMenuController = pipMenuController;
         mShellTaskOrganizer = shellTaskOrganizer;
@@ -142,8 +146,12 @@ public abstract class PipTransitionController implements Transitions.TransitionH
         mPipAnimationController = pipAnimationController;
         mTransitions = transitions;
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            transitions.addHandler(this);
+            shellInit.addInitCallback(this::onInit, this);
         }
+    }
+
+    private void onInit() {
+        mTransitions.addHandler(this);
     }
 
     void setPipOrganizer(PipTaskOrganizer pto) {
