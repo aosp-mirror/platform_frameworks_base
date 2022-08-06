@@ -286,11 +286,7 @@ public class BaseRecordingCanvas extends Canvas {
 
     @Override
     public final void drawPath(@NonNull Path path, @NonNull Paint paint) {
-        if (path.isSimplePath && path.rects != null) {
-            nDrawRegion(mNativeCanvasWrapper, path.rects.mNativeRegion, paint.getNativeInstance());
-        } else {
-            nDrawPath(mNativeCanvasWrapper, path.readOnlyNI(), paint.getNativeInstance());
-        }
+        nDrawPath(mNativeCanvasWrapper, path.readOnlyNI(), paint.getNativeInstance());
     }
 
     @Override

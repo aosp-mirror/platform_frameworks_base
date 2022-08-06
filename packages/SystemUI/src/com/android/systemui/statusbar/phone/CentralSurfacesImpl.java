@@ -1089,7 +1089,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
                     isFolded, willGoToSleep, isShadeOpen, leaveOpen));
         }
         if (leaveOpen) {
-            mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
             if (mKeyguardStateController.isShowing()) {
                 // When device state changes on keyguard we don't want to keep the state of
                 // the shade and instead we open clean state of keyguard with shade closed.
@@ -1098,6 +1097,9 @@ public class CentralSurfacesImpl extends CoreStartable implements
                 // expanded. To prevent that we can close QS which resets QS and some parts of
                 // the shade to its default state. Read more in b/201537421
                 mCloseQsBeforeScreenOff = true;
+            } else {
+                // below makes shade stay open when going from folded to unfolded
+                mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
             }
         }
     }
