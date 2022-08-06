@@ -32,9 +32,9 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
- * {@link SmartspaceTargetFilter} for smartspace targets that show above the lockscreen.
+ * {@link SmartspaceTargetFilter} for smartspace targets that show above the lockscreen and dreams.
  */
-class LockscreenTargetFilter @Inject constructor(
+class LockscreenAndDreamTargetFilter @Inject constructor(
     private val secureSettings: SecureSettings,
     private val userTracker: UserTracker,
     private val execution: Execution,
