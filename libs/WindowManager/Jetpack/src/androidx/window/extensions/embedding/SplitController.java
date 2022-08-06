@@ -155,6 +155,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             container.setInfo(taskFragmentInfo);
             if (container.isFinished()) {
                 mPresenter.cleanupContainer(container, false /* shouldFinishDependent */);
+            } else {
+                // Update with the latest Task configuration.
+                mPresenter.updateContainer(container);
             }
             updateCallbackIfNecessary();
         }
@@ -233,19 +236,30 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @Override
-    public void onTaskFragmentParentInfoChanged(@NonNull IBinder fragmentToken,
-            @NonNull Configuration parentConfig) {
+    public void onTaskFragmentParentInfoChanged(int taskId, @NonNull Configuration parentConfig) {
         synchronized (mLock) {
-            final TaskFragmentContainer container = getContainer(fragmentToken);
-            if (container != null) {
-                onTaskConfigurationChanged(container.getTaskId(), parentConfig);
-                if (isInPictureInPicture(parentConfig)) {
-                    // No need to update presentation in PIP until the Task exit PIP.
-                    return;
-                }
-                mPresenter.updateContainer(container);
-                updateCallbackIfNecessary();
+            onTaskConfigurationChanged(taskId, parentConfig);
+            if (isInPictureInPicture(parentConfig)) {
+                // No need to update presentation in PIP until the Task exit PIP.
+                return;
             }
+            final TaskContainer taskContainer = getTaskContainer(taskId);
+            if (taskContainer == null || taskContainer.isEmpty()) {
+                Log.e(TAG, "onTaskFragmentParentInfoChanged on empty Task id=" + taskId);
+                return;
+            }
+            // Update all TaskFragments in the Task. Make a copy of the list since some may be
+            // removed on updating.
+            final List<TaskFragmentContainer> containers =
+                    new ArrayList<>(taskContainer.mContainers);
+            for (int i = containers.size() - 1; i >= 0; i--) {
+                final TaskFragmentContainer container = containers.get(i);
+                // Wait until onTaskFragmentAppeared to update new container.
+                if (!container.isFinished() && !container.isWaitingActivityAppear()) {
+                    mPresenter.updateContainer(container);
+                }
+            }
+            updateCallbackIfNecessary();
         }
     }
 
