@@ -49,6 +49,7 @@ import com.android.wm.shell.pip.tv.TvPipTaskOrganizer;
 import com.android.wm.shell.pip.tv.TvPipTransition;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -138,12 +139,14 @@ public abstract class TvPipModule {
     @WMSingleton
     @Provides
     static PipTransitionController provideTvPipTransition(
-            Transitions transitions, ShellTaskOrganizer shellTaskOrganizer,
+            ShellInit shellInit,
+            ShellTaskOrganizer shellTaskOrganizer,
+            Transitions transitions,
             PipAnimationController pipAnimationController,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsState tvPipBoundsState, TvPipMenuController pipMenuController) {
-        return new TvPipTransition(tvPipBoundsState, pipMenuController,
-                tvPipBoundsAlgorithm, pipAnimationController, transitions, shellTaskOrganizer);
+        return new TvPipTransition(shellInit, shellTaskOrganizer, transitions, tvPipBoundsState,
+                pipMenuController, tvPipBoundsAlgorithm, pipAnimationController);
     }
 
     @WMSingleton

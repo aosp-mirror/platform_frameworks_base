@@ -159,8 +159,10 @@ public class Transitions implements RemoteCallable<Transitions> {
     private void onInit() {
         // The very last handler (0 in the list) should be the default one.
         mHandlers.add(mDefaultTransitionHandler);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Default");
         // Next lowest priority is remote transitions.
         mHandlers.add(mRemoteTransitionHandler);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Remote");
 
         ContentResolver resolver = mContext.getContentResolver();
         mTransitionAnimationScaleSetting = Settings.Global.getFloat(resolver,
@@ -206,7 +208,13 @@ public class Transitions implements RemoteCallable<Transitions> {
      * @see TransitionHandler
      */
     public void addHandler(@NonNull TransitionHandler handler) {
+        if (mHandlers.isEmpty()) {
+            throw new RuntimeException("Unexpected handler added prior to initialization, please "
+                    + "use ShellInit callbacks to ensure proper ordering");
+        }
         mHandlers.add(handler);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: %s",
+                handler.getClass().getSimpleName());
     }
 
     public ShellExecutor getMainExecutor() {

@@ -51,12 +51,6 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     @VisibleForTesting
     final Map<IBinder, TaskFragmentInfo> mFragmentInfos = new ArrayMap<>();
 
-    /**
-     * Mapping from the client assigned unique token to the TaskFragment parent
-     * {@link Configuration}.
-     */
-    final Map<IBinder, Configuration> mFragmentParentConfigs = new ArrayMap<>();
-
     private final TaskFragmentCallback mCallback;
     @VisibleForTesting
     TaskFragmentAnimationController mAnimationController;
@@ -68,8 +62,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         void onTaskFragmentAppeared(@NonNull TaskFragmentInfo taskFragmentInfo);
         void onTaskFragmentInfoChanged(@NonNull TaskFragmentInfo taskFragmentInfo);
         void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo);
-        void onTaskFragmentParentInfoChanged(@NonNull IBinder fragmentToken,
-                @NonNull Configuration parentConfig);
+        void onTaskFragmentParentInfoChanged(int taskId, @NonNull Configuration parentConfig);
         void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
                 @NonNull IBinder activityToken);
         void onTaskFragmentError(@Nullable TaskFragmentInfo taskFragmentInfo, int opType);
@@ -300,7 +293,6 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     @Override
     public void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo) {
         mFragmentInfos.remove(taskFragmentInfo.getFragmentToken());
-        mFragmentParentConfigs.remove(taskFragmentInfo.getFragmentToken());
 
         if (mCallback != null) {
             mCallback.onTaskFragmentVanished(taskFragmentInfo);
@@ -308,12 +300,9 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     }
 
     @Override
-    public void onTaskFragmentParentInfoChanged(
-            @NonNull IBinder fragmentToken, @NonNull Configuration parentConfig) {
-        mFragmentParentConfigs.put(fragmentToken, parentConfig);
-
+    public void onTaskFragmentParentInfoChanged(int taskId, @NonNull Configuration parentConfig) {
         if (mCallback != null) {
-            mCallback.onTaskFragmentParentInfoChanged(fragmentToken, parentConfig);
+            mCallback.onTaskFragmentParentInfoChanged(taskId, parentConfig);
         }
     }
 

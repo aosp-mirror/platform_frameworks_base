@@ -887,11 +887,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
                 logIfTransactionTooLarge(r.intent, r.getSavedState());
 
-                if (r.isEmbedded()) {
+                final TaskFragment organizedTaskFragment = r.getOrganizedTaskFragment();
+                if (organizedTaskFragment != null) {
                     // Sending TaskFragmentInfo to client to ensure the info is updated before
                     // the activity creation.
                     mService.mTaskFragmentOrganizerController.dispatchPendingInfoChangedEvent(
-                            r.getOrganizedTaskFragment());
+                            organizedTaskFragment);
                 }
 
                 // Create activity launch transaction.
