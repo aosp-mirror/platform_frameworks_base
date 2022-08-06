@@ -53,6 +53,7 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.location.ClientBrokerProto;
 
 import java.util.Collections;
@@ -162,7 +163,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * The remote callback interface for this client. This will be set to null whenever the
      * client connection is closed (either explicitly or via binder death).
      */
-    private IContextHubClientCallback mCallbackInterface;
+    private IContextHubClientCallback mContextHubClientCallback;
 
     /*
      * True if the client is still registered with the Context Hub Service, false otherwise.
@@ -184,12 +185,13 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * unregistered.
      */
     @GuardedBy("mWakeLock")
-    private boolean mIsWakeLockActive = true;
+    private boolean mIsWakelockUsable = true;
 
     /*
      * Internal interface used to invoke client callbacks.
      */
-    private interface CallbackConsumer {
+    @VisibleForTesting
+    interface CallbackConsumer {
         void accept(IContextHubClientCallback callback) throws RemoteException;
     }
 
@@ -325,17 +327,24 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         }
     }
 
-    private ContextHubClientBroker(Context context, IContextHubWrapper contextHubProxy,
-            ContextHubClientManager clientManager, ContextHubInfo contextHubInfo,
-            short hostEndPointId, IContextHubClientCallback callback, String attributionTag,
-            ContextHubTransactionManager transactionManager, PendingIntent pendingIntent,
-            long nanoAppId, String packageName) {
+    private ContextHubClientBroker(
+            Context context,
+            IContextHubWrapper contextHubProxy,
+            ContextHubClientManager clientManager,
+            ContextHubInfo contextHubInfo,
+            short hostEndPointId,
+            IContextHubClientCallback callback,
+            String attributionTag,
+            ContextHubTransactionManager transactionManager,
+            PendingIntent pendingIntent,
+            long nanoAppId,
+            String packageName) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
         mClientManager = clientManager;
         mAttachedContextHubInfo = contextHubInfo;
         mHostEndPointId = hostEndPointId;
-        mCallbackInterface = callback;
+        mContextHubClientCallback = callback;
         if (pendingIntent == null) {
             mPendingIntentRequest = new PendingIntentRequest();
         } else {
@@ -369,7 +378,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         sendHostEndpointConnectedEvent();
     }
 
-    /* package */ ContextHubClientBroker(
+    ContextHubClientBroker(
             Context context,
             IContextHubWrapper contextHubProxy,
             ContextHubClientManager clientManager,
@@ -393,7 +402,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                 packageName);
     }
 
-    /* package */ ContextHubClientBroker(
+    ContextHubClientBroker(
             Context context,
             IContextHubWrapper contextHubProxy,
             ContextHubClientManager clientManager,
@@ -504,36 +513,50 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         }
     }
 
-    /* package */ String getPackageName() {
+    String getPackageName() {
         return mPackage;
+    }
+
+    @VisibleForTesting
+    boolean isWakelockUsable() {
+        synchronized (mWakeLock) {
+            return mIsWakelockUsable;
+        }
+    }
+
+    @VisibleForTesting
+    WakeLock getWakeLock() {
+        synchronized (mWakeLock) {
+            return mWakeLock;
+        }
     }
 
     /**
      * Used to override the attribution tag with a newer value if a PendingIntent broker is
      * retrieved.
      */
-    /* package */ void setAttributionTag(String attributionTag) {
+    void setAttributionTag(String attributionTag) {
         mAttributionTag = attributionTag;
     }
 
     /**
      * @return the attribution tag associated with this broker.
      */
-    /* package */ String getAttributionTag() {
+    String getAttributionTag() {
         return mAttributionTag;
     }
 
     /**
      * @return the ID of the context hub this client is attached to
      */
-    /* package */ int getAttachedContextHubId() {
+    int getAttachedContextHubId() {
         return mAttachedContextHubInfo.getId();
     }
 
     /**
      * @return the host endpoint ID of this client
      */
-    /* package */ short getHostEndPointId() {
+    short getHostEndPointId() {
         return mHostEndPointId;
     }
 
@@ -542,17 +565,19 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      *
      * @param message the message that came from a nanoapp
      * @param nanoappPermissions permissions required to communicate with the nanoapp sending this
-     * message
+     *     message
      * @param messagePermissions permissions required to consume the message being delivered. These
-     * permissions are what will be attributed to the client through noteOp.
+     *     permissions are what will be attributed to the client through noteOp.
      */
-    /* package */ void sendMessageToClient(
-            NanoAppMessage message, List<String> nanoappPermissions,
+    void sendMessageToClient(
+            NanoAppMessage message,
+            List<String> nanoappPermissions,
             List<String> messagePermissions) {
         long nanoAppId = message.getNanoAppId();
 
-        int authState = updateNanoAppAuthState(nanoAppId, nanoappPermissions,
-                false /* gracePeriodExpired */);
+        int authState =
+                updateNanoAppAuthState(
+                        nanoAppId, nanoappPermissions, false /* gracePeriodExpired */);
 
         // If in the grace period, the host may not receive any messages containing permissions
         // covered data.
@@ -584,7 +609,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      *
      * @param nanoAppId the ID of the nanoapp that was loaded.
      */
-    /* package */ void onNanoAppLoaded(long nanoAppId) {
+    void onNanoAppLoaded(long nanoAppId) {
         // Check the latest state to see if the loaded nanoapp's permissions changed such that the
         // host app can communicate with it again.
         checkNanoappPermsAsync();
@@ -599,16 +624,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      *
      * @param nanoAppId the ID of the nanoapp that was unloaded.
      */
-    /* package */ void onNanoAppUnloaded(long nanoAppId) {
+    void onNanoAppUnloaded(long nanoAppId) {
         invokeCallback(callback -> callback.onNanoAppUnloaded(nanoAppId));
         sendPendingIntent(
                 () -> createIntent(ContextHubManager.EVENT_NANOAPP_UNLOADED, nanoAppId), nanoAppId);
     }
 
-    /**
-     * Notifies the client of a hub reset event if the connection is open.
-     */
-    /* package */ void onHubReset() {
+    /** Notifies the client of a hub reset event if the connection is open. */
+    void onHubReset() {
         invokeCallback(IContextHubClientCallback::onHubReset);
         sendPendingIntent(() -> createIntent(ContextHubManager.EVENT_HUB_RESET));
 
@@ -622,7 +645,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param nanoAppId the ID of the nanoapp that aborted
      * @param abortCode the nanoapp specific abort code
      */
-    /* package */ void onNanoAppAborted(long nanoAppId, int abortCode) {
+    void onNanoAppAborted(long nanoAppId, int abortCode) {
         invokeCallback(callback -> callback.onNanoAppAborted(nanoAppId, abortCode));
 
         Supplier<Intent> supplier =
@@ -632,18 +655,19 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     /**
-     * @param intent    the PendingIntent to compare to
+     * @param intent the PendingIntent to compare to
      * @param nanoAppId the ID of the nanoapp of the PendingIntent to compare to
      * @return true if the given PendingIntent is currently registered, false otherwise
      */
-    /* package */ boolean hasPendingIntent(PendingIntent intent, long nanoAppId) {
+    boolean hasPendingIntent(PendingIntent intent, long nanoAppId) {
         PendingIntent pendingIntent;
         long intentNanoAppId;
         synchronized (this) {
             pendingIntent = mPendingIntentRequest.getPendingIntent();
             intentNanoAppId = mPendingIntentRequest.getNanoAppId();
         }
-        return (pendingIntent != null) && pendingIntent.equals(intent)
+        return (pendingIntent != null)
+                && pendingIntent.equals(intent)
                 && intentNanoAppId == nanoAppId;
     }
 
@@ -652,9 +676,9 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      *
      * @throws RemoteException if the client process already died
      */
-    /* package */ void attachDeathRecipient() throws RemoteException {
-        if (mCallbackInterface != null) {
-            mCallbackInterface.asBinder().linkToDeath(this, 0 /* flags */);
+    void attachDeathRecipient() throws RemoteException {
+        if (mContextHubClientCallback != null) {
+            mContextHubClientCallback.asBinder().linkToDeath(this, 0 /* flags */);
         }
     }
 
@@ -664,7 +688,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param permissions list of permissions to check
      * @return true if the client has all of the permissions granted
      */
-    /* package */ boolean hasPermissions(List<String> permissions) {
+    boolean hasPermissions(List<String> permissions) {
         for (String permission : permissions) {
             if (mContext.checkPermission(permission, mPid, mUid) != PERMISSION_GRANTED) {
                 return false;
@@ -678,10 +702,10 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      *
      * @param permissions list of permissions covering data the client is about to receive
      * @param noteMessage message that should be noted alongside permissions attribution to
-     * facilitate debugging
+     *     facilitate debugging
      * @return true if client has ability to use all of the provided permissions
      */
-    /* package */ boolean notePermissions(List<String> permissions, String noteMessage) {
+    boolean notePermissions(List<String> permissions, String noteMessage) {
         for (String permission : permissions) {
             int opCode = AppOpsManager.permissionToOpCode(permission);
             if (opCode != AppOpsManager.OP_NONE) {
@@ -691,8 +715,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                         return false;
                     }
                 } catch (SecurityException e) {
-                    Log.e(TAG, "SecurityException: noteOp for pkg " + mPackage + " opcode "
-                            + opCode + ": " + e.getMessage());
+                    Log.e(
+                            TAG,
+                            "SecurityException: noteOp for pkg "
+                                    + mPackage
+                                    + " opcode "
+                                    + opCode
+                                    + ": "
+                                    + e.getMessage());
                     return false;
                 }
             }
@@ -704,7 +734,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     /**
      * @return true if the client is a PendingIntent client that has been cancelled.
      */
-    /* package */ boolean isPendingIntentCancelled() {
+    boolean isPendingIntentCancelled() {
         return mIsPendingIntentCancelled.get();
     }
 
@@ -712,7 +742,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * Handles timer expiry for a client whose auth state with a nanoapp was previously in the grace
      * period.
      */
-    /* package */ void handleAuthStateTimerExpiry(long nanoAppId) {
+    void handleAuthStateTimerExpiry(long nanoAppId) {
         AuthStateDenialTimer timer;
         synchronized (mMessageChannelNanoappIdMap) {
             timer = mNappToAuthTimerMap.remove(nanoAppId);
@@ -720,7 +750,8 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
 
         if (timer != null) {
             updateNanoAppAuthState(
-                    nanoAppId, Collections.emptyList() /* nanoappPermissions */,
+                    nanoAppId,
+                    Collections.emptyList() /* nanoappPermissions */,
                     true /* gracePeriodExpired */);
         }
     }
@@ -755,8 +786,10 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      *         it should transition to denied
      * @return the latest auth state as of the completion of this method.
      */
-    /* package */ int updateNanoAppAuthState(
-            long nanoAppId, List<String> nanoappPermissions, boolean gracePeriodExpired,
+    int updateNanoAppAuthState(
+            long nanoAppId,
+            List<String> nanoappPermissions,
+            boolean gracePeriodExpired,
             boolean forceDenied) {
         int curAuthState;
         int newAuthState;
@@ -834,13 +867,17 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param consumer the consumer specifying the callback to invoke
      */
     private synchronized void invokeCallback(CallbackConsumer consumer) {
-        if (mCallbackInterface != null) {
+        if (mContextHubClientCallback != null) {
             try {
                 acquireWakeLock();
-                consumer.accept(mCallbackInterface);
+                consumer.accept(mContextHubClientCallback);
             } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while invoking client callback (host endpoint ID = "
-                        + mHostEndPointId + ")", e);
+                Log.e(
+                        TAG,
+                        "RemoteException while invoking client callback (host endpoint ID = "
+                                + mHostEndPointId
+                                + ")",
+                        e);
             }
         }
     }
@@ -879,20 +916,20 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     private synchronized void sendPendingIntent(Supplier<Intent> supplier) {
         if (mPendingIntentRequest.hasPendingIntent()) {
-            doSendPendingIntent(mPendingIntentRequest.getPendingIntent(), supplier.get());
+            doSendPendingIntent(mPendingIntentRequest.getPendingIntent(), supplier.get(), this);
         }
     }
 
     /**
      * Sends an intent to any existing PendingIntent
      *
-     * @param supplier  method to create the extra Intent
+     * @param supplier method to create the extra Intent
      * @param nanoAppId the ID of the nanoapp which this event is for
      */
     private synchronized void sendPendingIntent(Supplier<Intent> supplier, long nanoAppId) {
         if (mPendingIntentRequest.hasPendingIntent()
                 && mPendingIntentRequest.getNanoAppId() == nanoAppId) {
-            doSendPendingIntent(mPendingIntentRequest.getPendingIntent(), supplier.get());
+            doSendPendingIntent(mPendingIntentRequest.getPendingIntent(), supplier.get(), this);
         }
     }
 
@@ -902,7 +939,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param pendingIntent the PendingIntent
      * @param intent the extra Intent data
      */
-    private void doSendPendingIntent(PendingIntent pendingIntent, Intent intent) {
+    @VisibleForTesting
+    void doSendPendingIntent(
+            PendingIntent pendingIntent,
+            Intent intent,
+            PendingIntent.OnFinished onFinishedCallback) {
         try {
             String requiredPermission = Manifest.permission.ACCESS_CONTEXT_HUB;
             acquireWakeLock();
@@ -910,7 +951,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                     mContext,
                     /* code= */ 0,
                     intent,
-                    /* onFinished= */ this,
+                    /* onFinished= */ onFinishedCallback,
                     /* handler= */ null,
                     requiredPermission,
                     /* options= */ null);
@@ -934,13 +975,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         return mRegistered;
     }
 
-    /**
-     * Invoked when a client exits either explicitly or by binder death.
-     */
+    /** Invoked when a client exits either explicitly or by binder death. */
     private synchronized void onClientExit() {
-        if (mCallbackInterface != null) {
-            mCallbackInterface.asBinder().unlinkToDeath(this, 0 /* flags */);
-            mCallbackInterface = null;
+        if (mContextHubClientCallback != null) {
+            mContextHubClientCallback.asBinder().unlinkToDeath(this, 0 /* flags */);
+            mContextHubClientCallback = null;
         }
         // The client is only unregistered and cleared when there is NOT any PendingIntent
         if (!mPendingIntentRequest.hasPendingIntent() && mRegistered) {
@@ -1056,7 +1095,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         Binder.withCleanCallingIdentity(
                 () -> {
                     synchronized (mWakeLock) {
-                        if (mIsWakeLockActive) {
+                        if (mIsWakelockUsable) {
                             mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
                         }
                     }
@@ -1092,7 +1131,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         Binder.withCleanCallingIdentity(
                 () -> {
                     synchronized (mWakeLock) {
-                        mIsWakeLockActive = false;
+                        mIsWakelockUsable = false;
                         while (mWakeLock.isHeld()) {
                             try {
                                 mWakeLock.release();
