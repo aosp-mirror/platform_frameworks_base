@@ -293,6 +293,10 @@ public class PackageInfoWithoutStateUtils {
                         pi.requestedPermissionsFlags[i] |=
                                 PackageInfo.REQUESTED_PERMISSION_NEVER_FOR_LOCATION;
                     }
+                    if (pkg.getImplicitPermissions().contains(pi.requestedPermissions[i])) {
+                        pi.requestedPermissionsFlags[i] |=
+                                PackageInfo.REQUESTED_PERMISSION_IMPLICIT;
+                    }
                 }
             }
         }
