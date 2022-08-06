@@ -122,7 +122,6 @@ public class FreeformTaskTransitionHandler
                     break;
                 case WindowManager.TRANSIT_TO_BACK:
                 case WindowManager.TRANSIT_TO_FRONT:
-                    transitionHandled = true;
                     break;
             }
         }
@@ -147,7 +146,9 @@ public class FreeformTaskTransitionHandler
             return false;
         }
         mFreeformTaskListener.createWindowDecoration(change, startT, finishT);
-        return true;
+
+        // Intercepted transition to manage the window decorations. Let other handlers animate.
+        return false;
     }
 
     private boolean startCloseTransition(
@@ -164,7 +165,8 @@ public class FreeformTaskTransitionHandler
             windowDecors.add(windowDecor);
         }
 
-        return true;
+        // Intercepted transition to manage the window decorations. Let other handlers animate.
+        return false;
     }
 
     private boolean startChangeTransition(
