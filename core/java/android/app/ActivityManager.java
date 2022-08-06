@@ -5124,7 +5124,7 @@ public class ActivityManager {
         Preconditions.checkNotNull(listener);
         Preconditions.checkNotNull(executor);
         try {
-            listener.init(mContext, executor, this);
+            listener.init(mContext, executor);
             getService().registerProcessObserver(listener.mObserver);
             // Notify upon first registration.
             executor.execute(() ->
