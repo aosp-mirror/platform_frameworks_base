@@ -53,6 +53,16 @@ fun FlickerTestParameter.taskBarWindowIsAlwaysVisible() {
 }
 
 /**
+ * Checks that [ComponentMatcher.TASK_BAR] window is visible and above the app windows in
+ * all WM trace entries
+ */
+fun FlickerTestParameter.taskBarWindowIsVisibleAtEnd() {
+    assertWmEnd {
+        this.isAboveAppWindowVisible(ComponentMatcher.TASK_BAR)
+    }
+}
+
+/**
  * If [allStates] is true, checks if the stack space of all displays is fully covered
  * by any visible layer, during the whole transitions
  *
@@ -103,9 +113,25 @@ fun FlickerTestParameter.navBarLayerIsVisibleAtStartAndEnd() {
  * trace
  */
 fun FlickerTestParameter.taskBarLayerIsVisibleAtStartAndEnd() {
+    this.taskBarLayerIsVisibleAtStart()
+    this.taskBarLayerIsVisibleAtEnd()
+}
+
+/**
+ * Checks that [ComponentMatcher.TASK_BAR] layer is visible at the start of the SF
+ * trace
+ */
+fun FlickerTestParameter.taskBarLayerIsVisibleAtStart() {
     assertLayersStart {
         this.isVisible(ComponentMatcher.TASK_BAR)
     }
+}
+
+/**
+ * Checks that [ComponentMatcher.TASK_BAR] layer is visible at the end of the SF
+ * trace
+ */
+fun FlickerTestParameter.taskBarLayerIsVisibleAtEnd() {
     assertLayersEnd {
         this.isVisible(ComponentMatcher.TASK_BAR)
     }

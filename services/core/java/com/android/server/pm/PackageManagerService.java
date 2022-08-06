@@ -238,6 +238,7 @@ import com.android.server.utils.Watcher;
 
 import dalvik.system.VMRuntime;
 
+import libcore.util.EmptyArray;
 import libcore.util.HexEncoding;
 
 import java.io.ByteArrayInputStream;
@@ -520,6 +521,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final String PACKAGE_SCHEME = "package";
 
     private static final String COMPANION_PACKAGE_NAME = "com.android.companiondevicemanager";
+
+    // How many required verifiers can be on the system.
+    private static final int REQUIRED_VERIFIERS_MAX_COUNT = 2;
 
     // Compilation reasons.
     public static final int REASON_FIRST_BOOT = 0;
@@ -906,7 +910,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     final SparseArray<PostInstallData> mRunningInstalls = new SparseArray<>();
     int mNextInstallToken = 1;  // nonzero; will be wrapped back to 1 when ++ overflows
 
-    final @Nullable String mRequiredVerifierPackage;
+    final @NonNull String[] mRequiredVerifierPackages;
     final @NonNull String mRequiredInstallerPackage;
     final @NonNull String mRequiredUninstallerPackage;
     final @NonNull String mRequiredPermissionControllerPackage;
@@ -1642,7 +1646,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mProtectedPackages = testParams.protectedPackages;
         mSeparateProcesses = testParams.separateProcesses;
         mViewCompiler = testParams.viewCompiler;
-        mRequiredVerifierPackage = testParams.requiredVerifierPackage;
+        mRequiredVerifierPackages = testParams.requiredVerifierPackages;
         mRequiredInstallerPackage = testParams.requiredInstallerPackage;
         mRequiredUninstallerPackage = testParams.requiredUninstallerPackage;
         mRequiredPermissionControllerPackage = testParams.requiredPermissionControllerPackage;
@@ -2126,7 +2130,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY,
                     SystemClock.uptimeMillis());
 
-            mRequiredVerifierPackage = getRequiredButNotReallyRequiredVerifierLPr(computer);
+            mRequiredVerifierPackages = getRequiredButNotReallyRequiredVerifiersLPr(computer);
             mRequiredInstallerPackage = getRequiredInstallerLPr(computer);
             mRequiredUninstallerPackage = getRequiredUninstallerLPr(computer);
             ComponentName intentFilterVerifierComponent =
@@ -2265,8 +2269,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 "persist.pm.mock-upgrade", false /* default */);
     }
 
-    @Nullable
-    private String getRequiredButNotReallyRequiredVerifierLPr(@NonNull Computer computer) {
+    @NonNull
+    private String[] getRequiredButNotReallyRequiredVerifiersLPr(@NonNull Computer computer) {
         final Intent intent = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
 
         final List<ResolveInfo> matches =
@@ -2274,13 +2278,23 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         PACKAGE_MIME_TYPE,
                         MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
                         UserHandle.USER_SYSTEM, Binder.getCallingUid());
-        if (matches.size() == 1) {
-            return matches.get(0).getComponentInfo().packageName;
-        } else if (matches.size() == 0) {
+        final int size = matches.size();
+        if (size == 0) {
             Log.w(TAG, "There should probably be a verifier, but, none were found");
-            return null;
+            return EmptyArray.STRING;
+        } else if (size <= REQUIRED_VERIFIERS_MAX_COUNT) {
+            String[] verifiers = new String[size];
+            for (int i = 0; i < size; ++i) {
+                verifiers[i] = matches.get(i).getComponentInfo().packageName;
+                if (TextUtils.isEmpty(verifiers[i])) {
+                    throw new RuntimeException("Invalid verifier: " + matches);
+                }
+            }
+            return verifiers;
         }
-        throw new RuntimeException("There must be exactly one verifier; found " + matches);
+        throw new RuntimeException(
+                "There must be no more than " + REQUIRED_VERIFIERS_MAX_COUNT + " verifiers; found "
+                        + matches);
     }
 
     @NonNull
@@ -3153,8 +3167,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     boolean isCallerVerifier(@NonNull Computer snapshot, int callingUid) {
         final int callingUserId = UserHandle.getUserId(callingUid);
-        return mRequiredVerifierPackage != null && callingUid == snapshot.getPackageUid(
-                mRequiredVerifierPackage, 0, callingUserId);
+        for (String requiredVerifierPackage : mRequiredVerifierPackages) {
+            if (callingUid == snapshot.getPackageUid(requiredVerifierPackage, 0, callingUserId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isPackageDeviceAdminOnAnyUser(@NonNull Computer snapshot, String packageName) {
@@ -4665,15 +4683,28 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public void extendVerificationTimeout(int id, int verificationCodeAtTimeout,
+        public void extendVerificationTimeout(int verificationId, int verificationCodeAtTimeout,
                 long millisecondsToDelay) {
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.PACKAGE_VERIFICATION_AGENT,
-                    "Only package verification agents can extend verification timeouts");
+            // Negative ids correspond to testing verifiers and will be silently enforced in
+            // the handler thread.
+            if (verificationId >= 0) {
+                mContext.enforceCallingOrSelfPermission(
+                        Manifest.permission.PACKAGE_VERIFICATION_AGENT,
+                        "Only package verification agents can extend verification timeouts");
+            }
             final int callingUid = Binder.getCallingUid();
 
             mHandler.post(() -> {
+                final int id = verificationId >= 0 ? verificationId : -verificationId;
                 final PackageVerificationState state = mPendingVerification.get(id);
+                if (state == null || state.timeoutExtended() || !state.checkRequiredVerifierUid(
+                        callingUid)) {
+                    // Only allow calls from required verifiers.
+                    return;
+                }
+
+                state.extendTimeout();
+
                 final PackageVerificationResponse response = new PackageVerificationResponse(
                         verificationCodeAtTimeout, callingUid);
 
@@ -4685,14 +4716,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     delay = 0;
                 }
 
-                if ((state != null) && !state.timeoutExtended()) {
-                    state.extendTimeout();
-
-                    final Message msg = mHandler.obtainMessage(PackageManagerService.PACKAGE_VERIFIED);
-                    msg.arg1 = id;
-                    msg.obj = response;
-                    mHandler.sendMessageDelayed(msg, delay);
-                }
+                final Message msg = mHandler.obtainMessage(PackageManagerService.PACKAGE_VERIFIED);
+                msg.arg1 = id;
+                msg.obj = response;
+                mHandler.sendMessageDelayed(msg, delay);
             });
         }
 
@@ -5862,18 +5889,32 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public void verifyPendingInstall(int id, int verificationCode) throws RemoteException {
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.PACKAGE_VERIFICATION_AGENT,
-                    "Only package verification agents can verify applications");
+        public void verifyPendingInstall(int verificationId, int verificationCode)
+                throws RemoteException {
+            // Negative ids correspond to testing verifiers and will be silently enforced in
+            // the handler thread.
+            if (verificationId >= 0) {
+                mContext.enforceCallingOrSelfPermission(
+                        Manifest.permission.PACKAGE_VERIFICATION_AGENT,
+                        "Only package verification agents can verify applications");
+            }
             final int callingUid = Binder.getCallingUid();
 
-            final Message msg = mHandler.obtainMessage(PackageManagerService.PACKAGE_VERIFIED);
-            final PackageVerificationResponse response = new PackageVerificationResponse(
-                    verificationCode, callingUid);
-            msg.arg1 = id;
-            msg.obj = response;
-            mHandler.sendMessage(msg);
+            mHandler.post(() -> {
+                final int id = verificationId >= 0 ? verificationId : -verificationId;
+                final PackageVerificationState state = mPendingVerification.get(id);
+                if (state == null || !state.checkRequiredVerifierUid(callingUid)) {
+                    // Only allow calls from required verifiers.
+                    return;
+                }
+
+                final Message msg = mHandler.obtainMessage(PackageManagerService.PACKAGE_VERIFIED);
+                final PackageVerificationResponse response = new PackageVerificationResponse(
+                        verificationCode, callingUid);
+                msg.arg1 = id;
+                msg.obj = response;
+                mHandler.sendMessage(msg);
+            });
         }
 
         @Override
@@ -5928,7 +5969,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     mRequiredInstallerPackage,
                     mRequiredUninstallerPackage,
                     mSetupWizardPackage,
-                    mRequiredVerifierPackage,
+                    mRequiredVerifierPackages,
                     mDefaultTextClassifierPackage,
                     mSystemTextClassifierPackageName,
                     mRequiredPermissionControllerPackage,
@@ -5949,7 +5990,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 protectedBroadcasts = new ArraySet<>(mProtectedBroadcasts);
             }
             new DumpHelper(mPermissionManager, mStorageEventHelper,
-                    mDomainVerificationManager, mInstallerService, mRequiredVerifierPackage,
+                    mDomainVerificationManager, mInstallerService, mRequiredVerifierPackages,
                     knownPackages, mChangedPackagesTracker, availableFeatures, protectedBroadcasts,
                     getPerUidReadTimeouts(snapshot)
             ).doDump(snapshot, fd, pw, args);
@@ -6956,7 +6997,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mRequiredInstallerPackage,
                 mRequiredUninstallerPackage,
                 mSetupWizardPackage,
-                mRequiredVerifierPackage,
+                mRequiredVerifierPackages,
                 mDefaultTextClassifierPackage,
                 mSystemTextClassifierPackageName,
                 mRequiredPermissionControllerPackage,

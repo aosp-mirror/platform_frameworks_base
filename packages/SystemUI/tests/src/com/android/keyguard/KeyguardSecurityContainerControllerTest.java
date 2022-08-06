@@ -21,7 +21,10 @@ import static android.view.WindowInsets.Type.ime;
 import static com.android.keyguard.KeyguardSecurityContainer.MODE_DEFAULT;
 import static com.android.keyguard.KeyguardSecurityContainer.MODE_ONE_HANDED;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -76,6 +79,8 @@ import java.util.Optional;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper()
 public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
+    private static final int TARGET_USER_ID = 100;
+
     @Rule
     public MockitoRule mRule = MockitoJUnit.rule();
 
@@ -379,6 +384,44 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
         verify(mSidefpsController).hide();
         verify(mSidefpsController, never()).show();
+    }
+
+    @Test
+    public void showNextSecurityScreenOrFinish_setsSecurityScreenToPinAfterSimPinUnlock() {
+        // GIVEN the current security method is SimPin
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false);
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(TARGET_USER_ID)).thenReturn(false);
+        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.SimPin);
+
+        // WHEN a request is made from the SimPin screens to show the next security method
+        when(mKeyguardSecurityModel.getSecurityMode(TARGET_USER_ID)).thenReturn(SecurityMode.PIN);
+        mKeyguardSecurityContainerController.showNextSecurityScreenOrFinish(
+                /* authenticated= */true,
+                TARGET_USER_ID,
+                /* bypassSecondaryLockScreen= */true,
+                SecurityMode.SimPin);
+
+        // THEN the next security method of PIN is set, and the keyguard is not marked as done
+        verify(mSecurityCallback, never()).finish(anyBoolean(), anyInt());
+        assertThat(mKeyguardSecurityContainerController.getCurrentSecurityMode())
+                .isEqualTo(SecurityMode.PIN);
+    }
+
+    @Test
+    public void showNextSecurityScreenOrFinish_ignoresCallWhenSecurityMethodHasChanged() {
+        //GIVEN current security mode has been set to PIN
+        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.PIN);
+
+        //WHEN a request comes from SimPin to dismiss the security screens
+        boolean keyguardDone = mKeyguardSecurityContainerController.showNextSecurityScreenOrFinish(
+                /* authenticated= */true,
+                TARGET_USER_ID,
+                /* bypassSecondaryLockScreen= */true,
+                SecurityMode.SimPin);
+
+        //THEN no action has happened, which will not dismiss the security screens
+        assertThat(keyguardDone).isEqualTo(false);
+        verify(mKeyguardUpdateMonitor, never()).getUserHasTrust(anyInt());
     }
 
     private void setupConditionsToEnableSideFpsHint() {

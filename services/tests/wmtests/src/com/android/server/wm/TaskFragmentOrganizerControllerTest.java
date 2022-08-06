@@ -75,6 +75,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Build/Install/Run:
@@ -92,7 +94,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     private TaskFragmentOrganizerToken mOrganizerToken;
     private ITaskFragmentOrganizer mIOrganizer;
     private TaskFragment mTaskFragment;
-    private TaskFragmentInfo mTaskFragmentInfo;
     private IBinder mFragmentToken;
     private WindowContainerTransaction mTransaction;
     private WindowContainerToken mFragmentWindowToken;
@@ -100,14 +101,19 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     private IBinder mErrorToken;
     private Rect mTaskFragBounds;
 
+    @Mock
+    private TaskFragmentInfo mTaskFragmentInfo;
+    @Mock
+    private Task mTask;
+
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         mWindowOrganizerController = mAtm.mWindowOrganizerController;
         mController = mWindowOrganizerController.mTaskFragmentOrganizerController;
         mOrganizer = new TaskFragmentOrganizer(Runnable::run);
         mOrganizerToken = mOrganizer.getOrganizerToken();
         mIOrganizer = ITaskFragmentOrganizer.Stub.asInterface(mOrganizerToken.asBinder());
-        mTaskFragmentInfo = mock(TaskFragmentInfo.class);
         mFragmentToken = new Binder();
         mTaskFragment =
                 new TaskFragment(mAtm, mFragmentToken, true /* createdByOrganizer */);
@@ -131,6 +137,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     @Test
     public void testCallTaskFragmentCallbackWithoutRegister_throwsException() {
+        doReturn(mTask).when(mTaskFragment).getTask();
+
         assertThrows(IllegalArgumentException.class, () -> mController
                 .onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment));
 
@@ -140,15 +148,20 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         assertThrows(IllegalArgumentException.class, () -> mController
                 .onTaskFragmentVanished(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment));
-
-        assertThrows(IllegalArgumentException.class, () -> mController
-                .onTaskFragmentParentInfoChanged(mTaskFragment.getTaskFragmentOrganizer(),
-                        mTaskFragment));
     }
 
     @Test
     public void testOnTaskFragmentAppeared() {
         mController.registerOrganizer(mIOrganizer);
+
+        // No-op when the TaskFragment is not attached.
+        mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
+
+        verify(mOrganizer, never()).onTaskFragmentAppeared(any());
+
+        // Send callback when the TaskFragment is attached.
+        setupMockParent(mTaskFragment, mTask);
 
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
@@ -159,8 +172,20 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     @Test
     public void testOnTaskFragmentInfoChanged() {
         mController.registerOrganizer(mIOrganizer);
+        setupMockParent(mTaskFragment, mTask);
+
+        // No-op if onTaskFragmentAppeared is not called yet.
+        mController.onTaskFragmentInfoChanged(mTaskFragment.getTaskFragmentOrganizer(),
+                mTaskFragment);
+        mController.dispatchPendingEvents();
+
+        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
+
+        // Call onTaskFragmentAppeared first.
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
+
+        verify(mOrganizer).onTaskFragmentAppeared(any());
 
         // No callback if the info is not changed.
         doReturn(true).when(mTaskFragmentInfo).equalsForTaskFragmentOrganizer(any());
@@ -194,49 +219,74 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testOnTaskFragmentVanished_clearUpRemaining() {
+        mController.registerOrganizer(mIOrganizer);
+        setupMockParent(mTaskFragment, mTask);
+
+        // Not trigger onTaskFragmentAppeared.
+        mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.onTaskFragmentVanished(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
+
+        verify(mOrganizer, never()).onTaskFragmentAppeared(any());
+        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
+        verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(anyInt(), any());
+        verify(mOrganizer).onTaskFragmentVanished(mTaskFragmentInfo);
+
+        // Not trigger onTaskFragmentInfoChanged.
+        // Call onTaskFragmentAppeared before calling onTaskFragmentInfoChanged.
+        mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
+        clearInvocations(mOrganizer);
+        doReturn(true).when(mTaskFragmentInfo).equalsForTaskFragmentOrganizer(any());
+        mController.onTaskFragmentInfoChanged(mTaskFragment.getTaskFragmentOrganizer(),
+                mTaskFragment);
+        mController.onTaskFragmentVanished(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
+
+        verify(mOrganizer, never()).onTaskFragmentAppeared(any());
+        verify(mOrganizer, never()).onTaskFragmentInfoChanged(any());
+        verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(anyInt(), any());
+        verify(mOrganizer).onTaskFragmentVanished(mTaskFragmentInfo);
+    }
+
+    @Test
     public void testOnTaskFragmentParentInfoChanged() {
         mController.registerOrganizer(mIOrganizer);
-        final Task parent = mock(Task.class);
-        final Configuration parentConfig = new Configuration();
-        parentConfig.smallestScreenWidthDp = 10;
-        doReturn(parent).when(mTaskFragment).getTask();
-        doReturn(parentConfig).when(parent).getConfiguration();
-        // Task needs to be visible
-        parent.lastActiveTime = 100;
-        doReturn(true).when(parent).shouldBeVisible(any());
+        setupMockParent(mTaskFragment, mTask);
+        mTask.getConfiguration().smallestScreenWidthDp = 10;
 
-        mTaskFragment.mTaskFragmentAppearedSent = true;
-        mController.onTaskFragmentParentInfoChanged(
+        mController.onTaskFragmentAppeared(
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentParentInfoChanged(eq(mFragmentToken), any());
+        verify(mOrganizer).onTaskFragmentParentInfoChanged(eq(mTask.mTaskId), any());
 
         // No extra callback if the info is not changed.
         clearInvocations(mOrganizer);
 
-        mController.onTaskFragmentParentInfoChanged(
+        mController.onTaskFragmentInfoChanged(
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(any(), any());
+        verify(mOrganizer, never()).onTaskFragmentParentInfoChanged(anyInt(), any());
 
         // Trigger callback if the size is changed.
-        parentConfig.smallestScreenWidthDp = 100;
-        mController.onTaskFragmentParentInfoChanged(
+        mTask.getConfiguration().smallestScreenWidthDp = 100;
+        mController.onTaskFragmentInfoChanged(
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentParentInfoChanged(eq(mFragmentToken), any());
+        verify(mOrganizer).onTaskFragmentParentInfoChanged(eq(mTask.mTaskId), any());
 
         // Trigger callback if the windowing mode is changed.
         clearInvocations(mOrganizer);
-        parentConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_PINNED);
-        mController.onTaskFragmentParentInfoChanged(
+        mTask.getConfiguration().windowConfiguration.setWindowingMode(WINDOWING_MODE_PINNED);
+        mController.onTaskFragmentInfoChanged(
                 mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
-        verify(mOrganizer).onTaskFragmentParentInfoChanged(eq(mFragmentToken), any());
+        verify(mOrganizer).onTaskFragmentParentInfoChanged(eq(mTask.mTaskId), any());
     }
 
     @Test
@@ -1090,5 +1140,16 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mAtm.mWindowOrganizerController.mLaunchTaskFragments
                 .put(mFragmentToken, mTaskFragment);
         mTaskFragment.getTask().setWindowingMode(WINDOWING_MODE_PINNED);
+    }
+
+    /** Setups the mock Task as the parent of the given TaskFragment. */
+    private static void setupMockParent(TaskFragment taskFragment, Task mockParent) {
+        doReturn(mockParent).when(taskFragment).getTask();
+        final Configuration taskConfig = new Configuration();
+        doReturn(taskConfig).when(mockParent).getConfiguration();
+
+        // Task needs to be visible
+        mockParent.lastActiveTime = 100;
+        doReturn(true).when(mockParent).shouldBeVisible(any());
     }
 }

@@ -108,7 +108,8 @@ abstract class BaseTest @JvmOverloads constructor(
     }
 
     /**
-     * Checks that the [ComponentMatcher.TASK_BAR] layer is visible during the whole transition
+     * Checks that the [ComponentMatcher.TASK_BAR] window is visible at the start and end of the
+     * transition
      *
      * Note: Large screen only
      */
@@ -132,7 +133,8 @@ abstract class BaseTest @JvmOverloads constructor(
     }
 
     /**
-     * Checks that the [ComponentMatcher.STATUS_BAR] layer is visible during the whole transition
+     * Checks that the [ComponentMatcher.STATUS_BAR] layer is visible at the start and end
+     * of the transition
      */
     @Presubmit
     @Test
