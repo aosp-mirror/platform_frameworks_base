@@ -32,8 +32,10 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.SparseArray;
 import android.view.RemoteAnimationDefinition;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -71,6 +73,12 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * Callbacks from WM Core are posted on this executor.
      */
     private final Executor mExecutor;
+
+    // TODO(b/240519866): doing so to keep CTS compatibility. Remove in the next release.
+    /** Map from Task id to client tokens of TaskFragments in the Task. */
+    private final SparseArray<List<IBinder>> mTaskIdToFragmentTokens = new SparseArray<>();
+    /** Map from Task id to Task configuration. */
+    private final SparseArray<Configuration> mTaskIdToConfigurations = new SparseArray<>();
 
     public TaskFragmentOrganizer(@NonNull Executor executor) {
         mExecutor = executor;
@@ -161,6 +169,27 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
             @NonNull IBinder fragmentToken, @NonNull Configuration parentConfig) {}
 
     /**
+     * Called when the parent leaf Task of organized TaskFragments is changed.
+     * When the leaf Task is changed, the organizer may want to update the TaskFragments in one
+     * transaction.
+     *
+     * For case like screen size change, it will trigger onTaskFragmentParentInfoChanged with new
+     * Task bounds, but may not trigger onTaskFragmentInfoChanged because there can be an override
+     * bounds.
+     * @hide
+     */
+    public void onTaskFragmentParentInfoChanged(int taskId, @NonNull Configuration parentConfig) {
+        // TODO(b/240519866): doing so to keep CTS compatibility. Remove in the next release.
+        final List<IBinder> tokens = mTaskIdToFragmentTokens.get(taskId);
+        if (tokens == null || tokens.isEmpty()) {
+            return;
+        }
+        for (int i = tokens.size() - 1; i >= 0; i--) {
+            onTaskFragmentParentInfoChanged(tokens.get(i), parentConfig);
+        }
+    }
+
+    /**
      * Called when the {@link WindowContainerTransaction} created with
      * {@link WindowContainerTransaction#setErrorCallbackToken(IBinder)} failed on the server side.
      *
@@ -203,34 +232,43 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
         final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
         for (TaskFragmentTransaction.Change change : changes) {
             // TODO(b/240519866): apply all changes in one WCT.
+            final int taskId = change.getTaskId();
             switch (change.getType()) {
                 case TYPE_TASK_FRAGMENT_APPEARED:
-                    onTaskFragmentAppeared(change.getTaskFragmentInfo());
-                    if (change.getTaskConfiguration() != null) {
-                        // TODO(b/240519866): convert to pass TaskConfiguration for all TFs in the
-                        // same Task
-                        onTaskFragmentParentInfoChanged(
-                                change.getTaskFragmentToken(),
-                                change.getTaskConfiguration());
+                    // TODO(b/240519866): doing so to keep CTS compatibility. Remove in the next
+                    // release.
+                    if (!mTaskIdToFragmentTokens.contains(taskId)) {
+                        mTaskIdToFragmentTokens.put(taskId, new ArrayList<>());
                     }
+                    mTaskIdToFragmentTokens.get(taskId).add(change.getTaskFragmentToken());
+                    onTaskFragmentParentInfoChanged(change.getTaskFragmentToken(),
+                            mTaskIdToConfigurations.get(taskId));
+
+                    onTaskFragmentAppeared(change.getTaskFragmentInfo());
                     break;
                 case TYPE_TASK_FRAGMENT_INFO_CHANGED:
-                    if (change.getTaskConfiguration() != null) {
-                        // TODO(b/240519866): convert to pass TaskConfiguration for all TFs in the
-                        // same Task
-                        onTaskFragmentParentInfoChanged(
-                                change.getTaskFragmentToken(),
-                                change.getTaskConfiguration());
-                    }
                     onTaskFragmentInfoChanged(change.getTaskFragmentInfo());
                     break;
                 case TYPE_TASK_FRAGMENT_VANISHED:
+                    // TODO(b/240519866): doing so to keep CTS compatibility. Remove in the next
+                    // release.
+                    if (mTaskIdToFragmentTokens.contains(taskId)) {
+                        final List<IBinder> tokens = mTaskIdToFragmentTokens.get(taskId);
+                        tokens.remove(change.getTaskFragmentToken());
+                        if (tokens.isEmpty()) {
+                            mTaskIdToFragmentTokens.remove(taskId);
+                            mTaskIdToConfigurations.remove(taskId);
+                        }
+                    }
+
                     onTaskFragmentVanished(change.getTaskFragmentInfo());
                     break;
                 case TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED:
-                    onTaskFragmentParentInfoChanged(
-                            change.getTaskFragmentToken(),
-                            change.getTaskConfiguration());
+                    // TODO(b/240519866): doing so to keep CTS compatibility. Remove in the next
+                    // release.
+                    mTaskIdToConfigurations.put(taskId, change.getTaskConfiguration());
+
+                    onTaskFragmentParentInfoChanged(taskId, change.getTaskConfiguration());
                     break;
                 case TYPE_TASK_FRAGMENT_ERROR:
                     final Bundle errorBundle = change.getErrorBundle();
