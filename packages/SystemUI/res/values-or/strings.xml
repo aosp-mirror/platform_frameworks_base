@@ -127,7 +127,7 @@
     <string name="use_ptp_button_title" msgid="7676427598943446826">"ଏକ କ୍ୟାମେରା (PTP) ଭାବରେ ଭର୍ତ୍ତି କରନ୍ତୁ"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Mac ପାଇଁ Android ଫାଇଲ୍‍ ଟ୍ରାନ୍ସଫର୍‍ ଆପ୍‍ ଇନଷ୍ଟଲ୍‍ କରନ୍ତୁ"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"ଫେରନ୍ତୁ"</string>
-    <string name="accessibility_home" msgid="5430449841237966217">"ହୋମ୍"</string>
+    <string name="accessibility_home" msgid="5430449841237966217">"ହୋମ"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"ମେନୁ"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ଆକ୍ସେସିବିଲିଟୀ"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"ସ୍କ୍ରୀନ୍‌କୁ ଘୁରାନ୍ତୁ"</string>
@@ -806,7 +806,7 @@
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"ବ୍ୟାଟେରୀ ସେଭର୍"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"କାର୍ଯ୍ୟଦକ୍ଷତା ଓ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ଡାଟା କମ୍ କରେ"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"ବଟନ୍‍ <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="keyboard_key_home" msgid="3734400625170020657">"ହୋମ୍‌"</string>
+    <string name="keyboard_key_home" msgid="3734400625170020657">"ହୋମ"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"ଫେରନ୍ତୁ"</string>
     <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"ଉପର"</string>
     <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"ତଳ"</string>
@@ -826,14 +826,14 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"ଉପର ପୃଷ୍ଠା"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"ତଳ ପୃଷ୍ଠା"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"ଡିଲିଟ୍‌ କରନ୍ତୁ"</string>
-    <string name="keyboard_key_move_home" msgid="3496502501803911971">"ହୋମ୍‌"</string>
+    <string name="keyboard_key_move_home" msgid="3496502501803911971">"ହୋମ"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"ସମାପ୍ତ"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"ଇନ୍‌ସର୍ଟ"</string>
     <string name="keyboard_key_num_lock" msgid="7209960042043090548">"ନମ୍ବର ଲକ୍‍"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"ନମ୍ବରପ୍ୟାଡ୍ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"ଆଟାଚମେଣ୍ଟ୍ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"ସିଷ୍ଟମ୍‌"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"ହୋମ୍"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"ହୋମ"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"ସମ୍ପ୍ରତି"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"ଫେରନ୍ତୁ"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"ବିଜ୍ଞପ୍ତି"</string>
