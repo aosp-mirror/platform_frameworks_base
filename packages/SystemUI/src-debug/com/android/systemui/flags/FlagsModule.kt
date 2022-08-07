@@ -27,7 +27,8 @@ import dagger.Provides
 import javax.inject.Named
 
 @Module(includes = [
-    SettingsUtilModule::class
+    ServerFlagReaderModule::class,
+    SettingsUtilModule::class,
 ])
 abstract class FlagsModule {
     @Binds

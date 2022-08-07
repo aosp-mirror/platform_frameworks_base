@@ -30,8 +30,8 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 /**
  * NOTE: This test is for the version of FeatureFlagManager in src-release, which should not allow
@@ -44,13 +44,18 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
     @Mock private lateinit var mResources: Resources
     @Mock private lateinit var mSystemProperties: SystemPropertiesHelper
     @Mock private lateinit var mDumpManager: DumpManager
+    private val serverFlagReader = ServerFlagReaderFake()
 
     private val deviceConfig = DeviceConfigProxyFake()
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        mFeatureFlagsRelease = FeatureFlagsRelease(mResources, mSystemProperties, deviceConfig,
+        mFeatureFlagsRelease = FeatureFlagsRelease(
+            mResources,
+            mSystemProperties,
+            deviceConfig,
+            serverFlagReader,
             mDumpManager)
     }
 
@@ -112,5 +117,23 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
         val flag = SysPropBooleanFlag(flagId, flagName, flagDefault)
         whenever(mSystemProperties.getBoolean(flagName, flagDefault)).thenReturn(flagDefault)
         assertThat(mFeatureFlagsRelease.isEnabled(flag)).isEqualTo(flagDefault)
+    }
+
+    @Test
+    fun serverSide_OverridesReleased_MakesFalse() {
+        val flag = ReleasedFlag(100)
+
+        serverFlagReader.setFlagValue(flag.id, false)
+
+        assertThat(mFeatureFlagsRelease.isEnabled(flag)).isFalse()
+    }
+
+    @Test
+    fun serverSide_OverridesUnreleased_Ignored() {
+        val flag = UnreleasedFlag(100)
+
+        serverFlagReader.setFlagValue(flag.id, true)
+
+        assertThat(mFeatureFlagsRelease.isEnabled(flag)).isFalse()
     }
 }

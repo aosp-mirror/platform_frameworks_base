@@ -117,10 +117,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Передавання файлів"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Пристрій введення"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Доступ до Інтернету"</string>
-    <!-- no translation found for bluetooth_profile_pbap (4262303387989406171) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_pbap_summary (6466456791354759132) -->
-    <skip />
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Надсилання контактів та історії викликів"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Використовуйте, щоб надсилати контакти й історію викликів"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Надання доступу до Інтернету"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Текстові повідомлення"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Доступ до SIM-карти"</string>
@@ -662,6 +660,8 @@
     <string name="dream_complication_title_weather" msgid="598609151677172783">"Погода"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Якість повітря"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Акторський склад"</string>
+    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
+    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"Виберіть зображення профілю"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Значок користувача за умовчанням"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Фізична клавіатура"</string>
