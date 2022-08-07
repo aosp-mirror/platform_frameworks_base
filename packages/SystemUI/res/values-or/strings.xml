@@ -785,7 +785,7 @@
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"ଆଲର୍ଟିଂ"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"ବବଲ୍ ଦେଖାନ୍ତୁ"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"ବବଲଗୁଡ଼ିକ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
-    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"ମୂଳ ସ୍କ୍ରିନରେ ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"ହୋମ ସ୍କ୍ରିନରେ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"ବିଜ୍ଞପ୍ତି ନିୟନ୍ତ୍ରଣ"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"ବିଜ୍ଞପ୍ତି ସ୍ନୁଜ୍‍ ବିକଳ୍ପ"</string>
@@ -937,7 +937,7 @@
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ଲକ୍‌ ସ୍କ୍ରୀନ୍‌"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ଗରମ ହେତୁ ଫୋନ୍‍ ଅଫ୍‍ କରିଦିଆଗଲା"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"ଆପଣଙ୍କ ଫୋନ୍ ବର୍ତ୍ତମାନ ସାମାନ୍ୟ ରୂପେ ଚାଲୁଛି।\nଅଧିକ ସୂଚନା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ଆପଣଙ୍କ ଫୋନ୍‍ ବହୁତ ଗରମ ଥିଲା, ତେଣୁ ଏହାକୁ ଥଣ୍ଡା କରାଯିବାକୁ ଅଫ୍‍ କରିଦିଆଗଲା। ଆପଣଙ୍କ ଫୋନ୍‍ ବର୍ତ୍ତମାନ ସାମାନ୍ୟ ଅବସ୍ଥାରେ ଚାଲୁଛି।\n\nଆପଣଙ୍କ ଫୋନ୍‍ ଅଧିକ ଗରମ ହୋଇଯାଇପାରେ ଯଦି ଆପଣ:\n	• ରିସୋର୍ସ-ଇଣ୍ଟେନସିଭ୍‍ ଆପ୍‍ (ଯେପରିକି ଗେମିଙ୍ଗ, ଭିଡିଓ, କିମ୍ବା ନେଭିଗେସନ୍‍ ଆପ୍‍) ବ୍ୟବହାର କରନ୍ତି\n	• ବଡ ଫାଇଲ୍‍ ଡାଉନଲୋଡ୍ କିମ୍ବା ଅପଲୋଡ୍‍ କରନ୍ତି\n	• ଅଧିକ ତାପମାତ୍ରାରେ ଆପଣଙ୍କ ଫୋନ୍‍ ବ୍ୟବହାର କରନ୍ତି"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ଆପଣଙ୍କ ଫୋନ୍‍ ବହୁତ ଗରମ ଥିଲା, ତେଣୁ ଏହାକୁ ଥଣ୍ଡା କରାଯିବାକୁ ଅଫ୍‍ କରିଦିଆଗଲା। ଆପଣଙ୍କ ଫୋନ୍‍ ବର୍ତ୍ତମାନ ସାମାନ୍ୟ ଅବସ୍ଥାରେ ଚାଲୁଛି।\n\nଆପଣଙ୍କ ଫୋନ୍‍ ଅଧିକ ଗରମ ହୋଇଯାଇପାରେ ଯଦି ଆପଣ:\n	• ରିସୋର୍ସ-ଇଣ୍ଟେନସିଭ୍‍ ଆପ୍‍ (ଯେପରିକି ଗେମିଙ୍ଗ, ଭିଡିଓ, କିମ୍ବା ନେଭିଗେସନ୍‍ ଆପ୍‍) ବ୍ୟବହାର କରନ୍ତି\n	• ବଡ ଫାଇଲ୍‍ ଡାଉନଲୋଡ କିମ୍ବା ଅପଲୋଡ୍‍ କରନ୍ତି\n	• ଅଧିକ ତାପମାତ୍ରାରେ ଆପଣଙ୍କ ଫୋନ୍‍ ବ୍ୟବହାର କରନ୍ତି"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ଯତ୍ନ ନେବା ପାଇଁ ଷ୍ଟେପଗୁଡ଼ିକ ଦେଖନ୍ତୁ"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ଫୋନ୍‍ ଗରମ ହୋଇଯାଉଛି"</string>
     <string name="high_temp_notif_message" msgid="1277346543068257549">"ଫୋନ୍ ଥଣ୍ଡା ହେବା ସମୟରେ କିଛି ଫିଚର୍ ଠିକ ଭାବେ କାମ କରିନଥାଏ।\nଅଧିକ ସୂଚନା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>

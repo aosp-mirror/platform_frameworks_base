@@ -181,7 +181,7 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Baztertu"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sakatu hatz-marken sentsorea"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Hatz-markaren ikonoa"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ez da hauteman aurpegia. Erabili hatz-marka."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ezin da hauteman aurpegia. Erabili hatz-marka."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Aurrera egiteko, erabili hatz-marka"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Ez da hauteman hatz-marka. Erabili pantailaren blokeoa."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -655,7 +655,7 @@
     <string name="output_service_bt" msgid="4315362133973911687">"Bluetooth-a"</string>
     <string name="output_service_wifi" msgid="9003667810868222134">"Wifia"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth eta Wi-Fi konexioak"</string>
-    <string name="system_ui_tuner" msgid="1471348823289954729">"Sistemako erabiltzaile-interfazearen konfiguratzailea"</string>
+    <string name="system_ui_tuner" msgid="1471348823289954729">"Sistemaren erabiltzaile-interfazearen konfiguratzailea"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"Erakutsi txertatutako bateriaren ehunekoa"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Erakutsi bateria-mailaren ehunekoa egoera-barraren ikonoan, kargatzen ari ez denean"</string>
     <string name="quick_settings" msgid="6211774484997470203">"Ezarpen bizkorrak"</string>
@@ -687,12 +687,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Wifi-gunea"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Work profila"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Dibertsioa batzuentzat, baina ez guztientzat"</string>
-    <string name="tuner_warning" msgid="1861736288458481650">"Sistemako erabiltzaile-interfazearen konfiguratzaileak Android erabiltzaile-interfazea moldatzeko eta pertsonalizatzeko modu gehiago eskaintzen dizkizu. Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
+    <string name="tuner_warning" msgid="1861736288458481650">"Sistemaren erabiltzaile-interfazearen konfiguratzaileak Android erabiltzaile-interfazea moldatzeko eta pertsonalizatzeko modu gehiago eskaintzen dizkizu. Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
     <string name="got_it" msgid="477119182261892069">"Ados"</string>
-    <string name="tuner_toast" msgid="3812684836514766951">"Zorionak! Sistemako erabiltzaile-interfazearen konfiguratzailea Ezarpenak atalean gehitu da"</string>
+    <string name="tuner_toast" msgid="3812684836514766951">"Zorionak! Sistemaren erabiltzaile-interfazearen konfiguratzailea Ezarpenak atalean gehitu da"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"Kendu Ezarpenak ataletik"</string>
-    <string name="remove_from_settings_prompt" msgid="551565437265615426">"Sistemako erabiltzaile-interfazearen konfiguratzailea ezarpenetatik kendu nahi duzu, eta haren eginbide guztiak erabiltzeari utzi nahi diozu?"</string>
+    <string name="remove_from_settings_prompt" msgid="551565437265615426">"Sistemaren erabiltzaile-interfazearen konfiguratzailea ezarpenetatik kendu nahi duzu, eta haren eginbide guztiak erabiltzeari utzi nahi diozu?"</string>
     <string name="activity_not_found" msgid="8711661533828200293">"Aplikazioa ez dago gailuan instalatuta"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"Erakutsi erlojuko segundoak"</string>
     <string name="clock_seconds_desc" msgid="2415312788902144817">"Erakutsi erlojuko segundoak egoera-barran. Baliteke bateria gehiago erabiltzea."</string>
