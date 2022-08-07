@@ -831,8 +831,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g>টি ডিভাইস বেছে নেওয়া হয়েছে"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ডিসকানেক্ট হয়ে গেছে)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"পাল্টানো যাচ্ছে না। আবার চেষ্টা করতে ট্যাপ করুন।"</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"ডিভাইস কানেক্ট করুন"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"এই সেশন কাস্ট করার জন্য, অ্যাপ খুলুন।"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"অজানা অ্যাপ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"কাস্ট করা বন্ধ করুন"</string>
@@ -944,14 +943,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"ওয়াই-ফাই উপলভ্য নেই"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"প্রায়োরিটি মোড"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"অ্যালার্ম সেট করা হয়েছে"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"ক্যামেরা বন্ধ করা আছে"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"মাইক্রোফোন বন্ধ করা আছে"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ক্যামেরা ও মাইক্রোফোন বন্ধ আছে"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{#টি বিজ্ঞপ্তি}one{#টি বিজ্ঞপ্তি}other{#টি বিজ্ঞপ্তি}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ব্রডকাস্ট করা হচ্ছে"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> সম্প্রচার বন্ধ করবেন?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"আপনি <xliff:g id="SWITCHAPP">%1$s</xliff:g> সম্প্রচার করলে বা আউটপুট পরিবর্তন করলে, আপনার বর্তমান সম্প্রচার বন্ধ হয়ে যাবে"</string>
