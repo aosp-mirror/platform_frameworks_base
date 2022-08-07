@@ -19,7 +19,6 @@ package com.android.systemui.flags;
 import static java.util.Objects.requireNonNull;
 
 import android.content.res.Resources;
-import android.provider.DeviceConfig;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
@@ -30,6 +29,8 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.DeviceConfigProxy;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
 import java.util.Map;
@@ -47,18 +48,22 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
     private final Resources mResources;
     private final SystemPropertiesHelper mSystemProperties;
     private final DeviceConfigProxy mDeviceConfigProxy;
+    private final ServerFlagReader mServerFlagReader;
     SparseBooleanArray mBooleanCache = new SparseBooleanArray();
     SparseArray<String> mStringCache = new SparseArray<>();
+    private boolean mInited;
 
     @Inject
     public FeatureFlagsRelease(
             @Main Resources resources,
             SystemPropertiesHelper systemProperties,
             DeviceConfigProxy deviceConfigProxy,
+            ServerFlagReader serverFlagReader,
             DumpManager dumpManager) {
         mResources = resources;
         mSystemProperties = systemProperties;
         mDeviceConfigProxy = deviceConfigProxy;
+        mServerFlagReader = serverFlagReader;
         dumpManager.registerDumpable("SysUIFlags", this);
     }
 
@@ -69,8 +74,13 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
     public void removeListener(@NonNull Listener listener) {}
 
     @Override
-    public boolean isEnabled(BooleanFlag flag) {
-        return flag.getDefault();
+    public boolean isEnabled(@NotNull UnreleasedFlag flag) {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled(@NotNull ReleasedFlag flag) {
+        return mServerFlagReader.readServerOverride(flag.getId(), true);
     }
 
     @Override
