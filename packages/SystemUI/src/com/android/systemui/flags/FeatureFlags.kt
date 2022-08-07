@@ -23,7 +23,10 @@ package com.android.systemui.flags
  */
 interface FeatureFlags : FlagListenable {
     /** Returns a boolean value for the given flag.  */
-    fun isEnabled(flag: BooleanFlag): Boolean
+    fun isEnabled(flag: UnreleasedFlag): Boolean
+
+    /** Returns a boolean value for the given flag.  */
+    fun isEnabled(flag: ReleasedFlag): Boolean
 
     /** Returns a boolean value for the given flag.  */
     fun isEnabled(flag: ResourceBooleanFlag): Boolean
