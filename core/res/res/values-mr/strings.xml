@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;अशीर्षकांकित&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(कोणताही फोन नंबर नाही)"</string>
@@ -48,7 +43,7 @@
     <string name="invalidPin" msgid="7542498253319440408">"4 ते 8 अंकांचा पिन टाइप करा."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"8 अंकांचा किंवा मोठा PUK टाइप करा."</string>
     <string name="needPuk" msgid="7321876090152422918">"तुमचे सिम कार्ड PUK-लॉक केलेले आहे. ते अनलॉक करण्यासाठी PUK कोड टाइप करा."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"सिम कार्ड अनावरोधित करण्यासाठी PUK2 टाइप करा."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"सिम कार्ड अनब्लॉक करण्यासाठी PUK2 टाइप करा."</string>
     <string name="enablePin" msgid="2543771964137091212">"अयशस्वी, सिम/RUIM लॉक सुरू करा."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">सिम लॉक होण्यापूर्वी आपल्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न उर्वरित आहेत.</item>
@@ -644,7 +639,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"तुमचे डोके थोडे कमी फिरवा."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"तुमचे डोके थोडे कमी तिरपे करा."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"तुमचे डोके थोडे कमी फिरवा."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"तुमचा चहेरा लपवणारे काहीही काढून टाका."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"तुमचा चेहरा लपवणारे काहीही काढून टाका."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ब्लॅक बार सह तुमच्या स्क्रीनची वरची बाजू साफ करा"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -679,7 +674,7 @@
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"ॲपला तुमच्या शेअर केलेल्या स्टोरेजचे आशय वाचण्याची अनुमती देते."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"तुमच्या शेअर केलेल्या स्टोरेजच्या आशयांमध्ये सुधारणा करा किंवा हटवा"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ॲपला तुमच्या शेअर केलेल्या स्टोरेजचे आशय लिहिण्याची अनमती देते."</string>
-    <string name="permlab_use_sip" msgid="8250774565189337477">"SIP कॉल करा/प्राप्त करा"</string>
+    <string name="permlab_use_sip" msgid="8250774565189337477">"SIP कॉल करा/मिळवा"</string>
     <string name="permdesc_use_sip" msgid="3590270893253204451">"ॲपला SIP कॉल करण्‍याची आणि प्राप्त करण्‍याची अनुमती देते."</string>
     <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"नवीन टेलिकॉम सिम कनेक्शनची नोंदणी करा"</string>
     <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"नवीन टेलिकॉम सिम कनेक्शनची नोंदणी करण्यासाठी ॲपला अनुमती देते."</string>
@@ -715,7 +710,7 @@
     <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"स्पर्श स्क्रीनची कॅलिब्रेशन प्राचले सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. सामान्य अ‍ॅप्स साठी कधीही आवश्यक नसते."</string>
     <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"DRM प्रमाणपत्रे अ‍ॅक्सेस करा"</string>
     <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"DRM प्रमाणपत्रांची तरतूद करण्यासाठी आणि वापरण्यासाठी अनुप्रयोगास अनुमती देते. सामान्य ॲप्सकरिता कधीही आवश्यकता नसते."</string>
-    <string name="permlab_handoverStatus" msgid="7620438488137057281">"Android बीम स्थानांतरण स्थिती प्राप्त करा"</string>
+    <string name="permlab_handoverStatus" msgid="7620438488137057281">"Android बीम स्थानांतरण स्थिती मिळवा"</string>
     <string name="permdesc_handoverStatus" msgid="3842269451732571070">"वर्तमान Android बीम स्थानांतरणांविषयी माहिती प्राप्त करण्यासाठी या अनुप्रयोगास अनुमती देते"</string>
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"DRM प्रमाणपत्रे काढा"</string>
     <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"DRM प्रमाणपत्रे काढण्यासाठी अनुप्रयोगास अनुमती देते. सामान्य अ‍ॅप्स साठी कधीही आवश्यकता नसते."</string>

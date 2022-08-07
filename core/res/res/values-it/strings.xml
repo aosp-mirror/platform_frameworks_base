@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Senza nome&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Nessun numero di telefono)"</string>
@@ -1978,11 +1973,11 @@
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Consentire a <xliff:g id="APP">%1$s</xliff:g> di creare un nuovo utente con l\'account <xliff:g id="ACCOUNT">%2$s</xliff:g> (esiste già un utente con questo account)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Consentire a <xliff:g id="APP">%1$s</xliff:g> di creare un nuovo utente con l\'account <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Aggiungi una lingua"</string>
-    <string name="country_selection_title" msgid="5221495687299014379">"Area geografica preferita"</string>
+    <string name="country_selection_title" msgid="5221495687299014379">"Regione preferita"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Digita nome lingua"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Suggerite"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Tutte le lingue"</string>
-    <string name="region_picker_section_all" msgid="756441309928774155">"Tutte le aree geografiche"</string>
+    <string name="region_picker_section_all" msgid="756441309928774155">"Tutte le regioni"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Cerca"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"App non disponibile"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> non è al momento disponibile. Viene gestita tramite <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
