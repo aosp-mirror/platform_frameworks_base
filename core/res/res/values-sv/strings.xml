@@ -623,7 +623,7 @@
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Det gick inte att fånga ansiktsdata. Försök igen."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Det är för ljust. Testa lägre belysning."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Det är för mörkt. Testa med bättre belysning."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Flytta mobilen längre bort."</string>
+    <string name="face_acquired_too_close" msgid="1628767882971469833">"Flytta telefonen längre bort."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"För mobilen närmare."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Höj mobilen."</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"Sänk mobilen."</string>

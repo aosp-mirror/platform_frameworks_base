@@ -638,7 +638,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"ଆପଣଙ୍କ ମୁଣ୍ଡକୁ ଟିକିଏ କମ୍ ଟିଲ୍ଟ କରନ୍ତୁ।"</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"ଆପଣଙ୍କର ମୁହଁ ଲୁଚାଉଥିବା ଜିନିଷକୁ କାଢ଼ି ଦିଅନ୍ତୁ।"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"ଆପଣଙ୍କ ମୁହଁକୁ ଲୁଚାଉଥିବା ଯେ କୌଣସି ଜିନିଷକୁ କାଢ଼ି ଦିଅନ୍ତୁ।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"କଳା ବାର୍ ସମେତ ଆପଣଙ୍କ ସ୍କ୍ରିନ୍‌ର ଶୀର୍ଷକୁ ସଫା କରନ୍ତୁ"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -754,7 +754,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"କିଛି ସ୍କ୍ରିନ ଲକ୍‍ ଫିଚରକୁ ଅକ୍ଷମ କରିବା"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"କିଛି ସ୍କ୍ରିନ ଲକ୍‍ ଫିଚର ବ୍ୟବହାର କରିବାକୁ ପ୍ରତିରୋଧ କରେ।"</string>
   <string-array name="phoneTypes">
-    <item msgid="8996339953292723951">"ହୋମ୍"</item>
+    <item msgid="8996339953292723951">"ହୋମ"</item>
     <item msgid="7740243458912727194">"ମୋବାଇଲ୍‍"</item>
     <item msgid="8526146065496663766">"ୱାର୍କ"</item>
     <item msgid="8150904584178569699">"ୱାର୍କ ଫ୍ୟାକ୍ସ"</item>
@@ -764,7 +764,7 @@
     <item msgid="6216981255272016212">"କଷ୍ଟମ୍‌"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="7786349763648997741">"ହୋମ୍"</item>
+    <item msgid="7786349763648997741">"ହୋମ"</item>
     <item msgid="435564470865989199">"ୱାର୍କ"</item>
     <item msgid="4199433197875490373">"ଅନ୍ୟାନ୍ୟ"</item>
     <item msgid="3233938986670468328">"କଷ୍ଟମ୍‌"</item>
@@ -776,7 +776,7 @@
     <item msgid="5523122236731783179">"କଷ୍ଟମ୍‌"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="588088543406993772">"ହୋମ୍"</item>
+    <item msgid="588088543406993772">"ହୋମ"</item>
     <item msgid="5503060422020476757">"ୱାର୍କ"</item>
     <item msgid="2530391194653760297">"ଅନ୍ୟାନ୍ୟ"</item>
     <item msgid="7640927178025203330">"କଷ୍ଟମ୍‌"</item>
@@ -822,16 +822,16 @@
     <string name="eventTypeAnniversary" msgid="4684702412407916888">"ଆନିଭର୍ସରୀ"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"ଅନ୍ୟାନ୍ୟ"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"କଷ୍ଟମ୍‌"</string>
-    <string name="emailTypeHome" msgid="1597116303154775999">"ହୋମ୍"</string>
+    <string name="emailTypeHome" msgid="1597116303154775999">"ହୋମ"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"ୱାର୍କ"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"ଅନ୍ୟାନ୍ୟ"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"ମୋବାଇଲ୍‍"</string>
     <string name="postalTypeCustom" msgid="5645590470242939129">"କଷ୍ଟମ୍‌"</string>
-    <string name="postalTypeHome" msgid="7562272480949727912">"ହୋମ୍"</string>
+    <string name="postalTypeHome" msgid="7562272480949727912">"ହୋମ"</string>
     <string name="postalTypeWork" msgid="8553425424652012826">"ୱାର୍କ"</string>
     <string name="postalTypeOther" msgid="7094245413678857420">"ଅନ୍ୟାନ୍ୟ"</string>
     <string name="imTypeCustom" msgid="5653384545085765570">"କଷ୍ଟମ୍‌"</string>
-    <string name="imTypeHome" msgid="6996507981044278216">"ହୋମ୍"</string>
+    <string name="imTypeHome" msgid="6996507981044278216">"ହୋମ"</string>
     <string name="imTypeWork" msgid="2099668940169903123">"ୱାର୍କ"</string>
     <string name="imTypeOther" msgid="8068447383276219810">"ଅନ୍ୟାନ୍ୟ"</string>
     <string name="imProtocolCustom" msgid="4437878287653764692">"କଷ୍ଟମ୍‌"</string>
@@ -1345,9 +1345,9 @@
     <string name="sim_added_message" msgid="6602906609509958680">"ମୋବାଇଲ୍‍ ନେଟ୍‍ୱର୍କ ଆକ୍ସେସ୍‌ କରିବା ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସ୍‍କୁ ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"ମୋବାଇଲ୍ ସେବା ସକ୍ରିୟ କରନ୍ତୁ"</string>
-    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"ଆପଣଙ୍କର ନୂତନ SIMକୁ ସକ୍ରିୟ କରିବା ପାଇଁ କ୍ୟାରିଅର୍‌ ଆପ୍‌କୁ ଡାଉନଲୋଡ୍ କରନ୍ତୁ"</string>
-    <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"ଆପଣଙ୍କର ନୂତନ SIMକୁ ସକ୍ରିୟ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g> ଆପ୍‌କୁ ଡାଉନଲୋଡ୍ କରନ୍ତୁ"</string>
-    <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"ଆପ୍‌ ଡାଉନଲୋଡ୍‌ କରନ୍ତୁ"</string>
+    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"ଆପଣଙ୍କର ନୂତନ SIMକୁ ସକ୍ରିୟ କରିବା ପାଇଁ କ୍ୟାରିଅର୍‌ ଆପ୍‌କୁ ଡାଉନଲୋଡ କରନ୍ତୁ"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"ଆପଣଙ୍କର ନୂତନ SIMକୁ ସକ୍ରିୟ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g> ଆପ୍‌କୁ ଡାଉନଲୋଡ କରନ୍ତୁ"</string>
+    <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"ଆପ୍‌ ଡାଉନଲୋଡ କରନ୍ତୁ"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"ନୂଆ SIM କାର୍ଡ ଭର୍ତ୍ତି କରାଗଲା"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"ଏହା ସେଟଅପ୍‌ କରିବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"ସମୟ ସେଟ୍ କରନ୍ତୁ"</string>
