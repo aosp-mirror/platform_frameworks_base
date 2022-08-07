@@ -5881,4 +5881,7 @@
 
     <!-- Whether the wake screen on notifications feature is available. -->
     <bool name="config_pulseOnNotificationsAvailable">true</bool>
+
+    <!-- The number of tasks to scan to get the visibility of Home -->
+    <integer name="config_maxScanTasksForHomeVisibility">10</integer>
 </resources>
