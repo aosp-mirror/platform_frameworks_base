@@ -117,10 +117,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"文件传输"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"输入设备"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"互联网连接"</string>
-    <!-- no translation found for bluetooth_profile_pbap (4262303387989406171) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_pbap_summary (6466456791354759132) -->
-    <skip />
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"联系人信息和通话记录分享"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"用于联系人信息和通话记录分享"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"共享互联网连接"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"短信"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM 卡存取权限"</string>
@@ -661,7 +659,9 @@
     <string name="dream_complication_title_date" msgid="8661176085446135789">"日期"</string>
     <string name="dream_complication_title_weather" msgid="598609151677172783">"天气"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"空气质量"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"投射信息"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"投放信息"</string>
+    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
+    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"选择个人资料照片"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"默认用户图标"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"实体键盘"</string>
