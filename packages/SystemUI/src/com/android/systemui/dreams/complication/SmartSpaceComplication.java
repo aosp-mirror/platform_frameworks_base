@@ -52,6 +52,11 @@ public class SmartSpaceComplication implements Complication {
         return mViewHolderProvider.get();
     }
 
+    @Override
+    public int getRequiredTypeAvailability() {
+        return COMPLICATION_TYPE_SMARTSPACE;
+    }
+
     /**
      * {@link CoreStartable} responsbile for registering {@link SmartSpaceComplication} with
      * SystemUI.
