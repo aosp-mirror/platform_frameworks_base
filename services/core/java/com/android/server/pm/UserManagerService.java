@@ -97,7 +97,6 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -622,6 +621,16 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mUserStates")
     private final WatchedUserStates mUserStates = new WatchedUserStates();
 
+    /**
+     * Used on devices that support background users (key) running on secondary displays (value).
+     *
+     * <p>Is {@code null} by default and instantiated on demand when the users are started on
+     * secondary displays.
+     */
+    @Nullable
+    @GuardedBy("mUsersLock")
+    private SparseIntArray mUsersOnSecondaryDisplays;
+
     private static UserManagerService sInstance;
 
     public static UserManagerService getInstance() {
@@ -691,11 +700,6 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
     }
-
-    // TODO(b/239982558): add javadoc
-    @Nullable
-    @GuardedBy("mUsersLock")
-    private SparseIntArray mUsersOnSecondaryDisplays;
 
     // TODO b/28848102 Add support for test dependencies injection
     @VisibleForTesting
@@ -1670,23 +1674,16 @@ public class UserManagerService extends IUserManager.Stub {
                     + ") is visible");
         }
 
-        // First check current foreground user (on main display)
-        int currentUserId = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
+        return isUserVisibleUnchecked(userId);
+    }
 
-        if (currentUserId == userId) {
+    private boolean isUserVisibleUnchecked(@UserIdInt int userId) {
+        // First check current foreground user and their profiles (on main display)
+        if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
             return true;
         }
 
-        // Then profiles of current user
-        // TODO(b/239824814): consider using AMInternal.isCurrentProfile() instead
-        if (isProfile(userId)) {
-            int parentId = Binder.withCleanCallingIdentity(() -> getProfileParentId(userId));
-            if (parentId == currentUserId) {
-                return isUserRunning(userId);
-            }
-        }
-
-        // TODO(b/239824814): STOPSHIP - add unit tests (requires change on testing infra)
+        // TODO(b/239824814): STOPSHIP - add CTS tests (requires change on testing infra)
         synchronized (mUsersLock) {
             if (mUsersOnSecondaryDisplays != null) {
                 // TODO(b/239824814): make sure it handles profile as well
@@ -1695,6 +1692,38 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         return false;
+    }
+
+    private boolean isCurrentUserOrRunningProfileOfCurrentUser(@UserIdInt int userId) {
+        int currentUserId = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
+
+        if (currentUserId == userId) {
+            return true;
+        }
+
+        if (isProfile(userId)) {
+            int parentId = Binder.withCleanCallingIdentity(() -> getProfileParentId(userId));
+            if (parentId == currentUserId) {
+                return isUserRunning(userId);
+            }
+        }
+
+        return false;
+    }
+
+    // TODO(b/239982558): currently used just by shell command, might need to move to
+    // UserManagerInternal if needed by other components (like WindowManagerService)
+    // TODO(b/239982558): add unit test
+    // TODO(b/239982558): try to merge with isUserVisibleUnchecked()
+    private boolean isUserVisibleOnDisplay(@UserIdInt int userId, int displayId) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            return isCurrentUserOrRunningProfileOfCurrentUser(userId);
+        }
+        synchronized (mUsersLock) {
+            // TODO(b/239824814): make sure it handles profile as well
+            return mUsersOnSecondaryDisplays != null && mUsersOnSecondaryDisplays.get(userId,
+                    Display.INVALID_DISPLAY) == displayId;
+        }
     }
 
     @Override
@@ -5790,6 +5819,11 @@ public class UserManagerService extends IUserManager.Stub {
             pw.println("          --reboot (which does a full reboot) or");
             pw.println("          --no-restart (which requires a manual restart)");
             pw.println();
+            pw.println("  is-user-visible [--display DISPLAY_ID] <USER_ID>");
+            pw.println("    Checks if the given user is visible in the given display.");
+            pw.println("    If the display option is not set, it uses the user's context to check");
+            pw.println("    (so it emulates what apps would get from UserManager.isUserVisible())");
+            pw.println();
         }
 
         @Override
@@ -5806,6 +5840,8 @@ public class UserManagerService extends IUserManager.Stub {
                         return runReportPackageAllowlistProblems();
                     case "set-system-user-mode-emulation":
                         return runSetSystemUserModeEmulation();
+                    case "is-user-visible":
+                        return runIsUserVisible();
                     default:
                         return handleDefaultCommands(cmd);
                 }
@@ -5855,9 +5891,6 @@ public class UserManagerService extends IUserManager.Stub {
                 for (int i = 0; i < size; i++) {
                     final UserInfo user = users.get(i);
                     final boolean running = am.isUserRunning(user.id, 0);
-                    final boolean current = user.id == currentUser;
-                    final boolean hasParent = user.profileGroupId != user.id
-                            && user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID;
                     if (verbose) {
                         final DevicePolicyManagerInternal dpm = getDevicePolicyManagerInternal();
                         String deviceOwner = "";
@@ -5876,7 +5909,11 @@ public class UserManagerService extends IUserManager.Stub {
                                 Binder.restoreCallingIdentity(ident);
                             }
                         }
-                        pw.printf("%d: id=%d, name=%s, type=%s, flags=%s%s%s%s%s%s%s%s%s\n",
+                        final boolean current = user.id == currentUser;
+                        final boolean hasParent = user.profileGroupId != user.id
+                                && user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID;
+                        final boolean visible = isUserVisibleUnchecked(user.id);
+                        pw.printf("%d: id=%d, name=%s, type=%s, flags=%s%s%s%s%s%s%s%s%s%s\n",
                                 i,
                                 user.id,
                                 user.name,
@@ -5888,7 +5925,9 @@ public class UserManagerService extends IUserManager.Stub {
                                 user.preCreated ? " (pre-created)" : "",
                                 user.convertedFromPreCreated ? " (converted)" : "",
                                 deviceOwner, profileOwner,
-                                current ? " (current)" : "");
+                                current ? " (current)" : "",
+                                visible ? " (visible)" : ""
+                        );
                     } else {
                         // NOTE: the standard "list users" command is used by integration tests and
                         // hence should not be changed. If you need to add more info, use the
@@ -6045,6 +6084,56 @@ public class UserManagerService extends IUserManager.Stub {
             return 0;
         }
 
+        private int runIsUserVisible() {
+            PrintWriter pw = getOutPrintWriter();
+            int displayId = Display.INVALID_DISPLAY;
+            String opt;
+            while ((opt = getNextOption()) != null) {
+                boolean invalidOption = false;
+                switch (opt) {
+                    case "--display":
+                        displayId = Integer.parseInt(getNextArgRequired());
+                        invalidOption = displayId == Display.INVALID_DISPLAY;
+                        break;
+                    default:
+                        invalidOption = true;
+                }
+                if (invalidOption) {
+                    pw.println("Invalid option: " + opt);
+                    return -1;
+                }
+            }
+            int userId = UserHandle.parseUserArg(getNextArgRequired());
+            switch (userId) {
+                case UserHandle.USER_ALL:
+                case UserHandle.USER_CURRENT_OR_SELF:
+                case UserHandle.USER_NULL:
+                    pw.printf("invalid value (%d) for --user option\n", userId);
+                    return -1;
+                case UserHandle.USER_CURRENT:
+                    userId = ActivityManager.getCurrentUser();
+                    break;
+            }
+
+            boolean isVisible;
+            if (displayId != Display.INVALID_DISPLAY) {
+                isVisible = isUserVisibleOnDisplay(userId, displayId);
+            } else {
+                isVisible = getUserManagerForUser(userId).isUserVisible();
+            }
+            pw.println(isVisible);
+            return 0;
+        }
+
+        /**
+         * Gets the {@link UserManager} associated with the context of the given user.
+         */
+        private UserManager getUserManagerForUser(int userId) {
+            UserHandle user = UserHandle.of(userId);
+            Context context = mContext.createContextAsUser(user, /* flags= */ 0);
+            return context.getSystemService(UserManager.class);
+        }
+
         /**
          * Confirms if the build is debuggable
          *
@@ -6144,18 +6233,17 @@ public class UserManagerService extends IUserManager.Stub {
                 pw.print("  Cached user IDs (including pre-created): ");
                 pw.println(Arrays.toString(mUserIdsIncludingPreCreated));
             }
-            synchronized (mUsersLock) {
-                if (mUsersOnSecondaryDisplays != null) {
-                    pw.print("  Users on secondary displays: ");
-                    pw.println(mUsersOnSecondaryDisplays);
-                }
-            }
-
         } // synchronized (mPackagesLock)
 
         // Multiple Users on Multiple Display info
         pw.println("  Supports users on secondary displays: "
                 + UserManager.isUsersOnSecondaryDisplaysEnabled());
+        synchronized (mUsersLock) {
+            if (mUsersOnSecondaryDisplays != null) {
+                pw.print("  Users on secondary displays: ");
+                pw.println(mUsersOnSecondaryDisplays);
+            }
+        }
 
         // Dump some capabilities
         pw.println();
@@ -6322,11 +6410,6 @@ public class UserManagerService extends IUserManager.Stub {
 
         pw.println("    Ignore errors preparing storage: "
                 + userData.getIgnorePrepareStorageErrors());
-
-        // TODO(b/239824814): STOPSHIP - remove once there is a CTS test for UM.isUserVisible()
-        if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
-            pw.printf("    isUserVisible(): %b\n", isUserVisible(userInfo.id));
-        }
     }
 
     private static void dumpTimeAgo(PrintWriter pw, StringBuilder sb, long nowTime, long time) {
@@ -6749,12 +6832,10 @@ public class UserManagerService extends IUserManager.Stub {
             // - displayId already assigned to another user
             synchronized (mUsersLock) {
                 if (mUsersOnSecondaryDisplays == null) {
-                    // TODO(b/240613396): get size from some config file
-                    int size = 1;
                     if (DBG) {
-                        Slogf.d(LOG_TAG, "Creating mUsersOnSecondaryDisplays with size %d", size);
+                        Slogf.d(LOG_TAG, "Creating mUsersOnSecondaryDisplays");
                     }
-                    mUsersOnSecondaryDisplays = new SparseIntArray(size);
+                    mUsersOnSecondaryDisplays = new SparseIntArray();
                 }
                 if (DBG) {
                     Slogf.d(LOG_TAG, "Adding %d->%d to mUsersOnSecondaryDisplays",

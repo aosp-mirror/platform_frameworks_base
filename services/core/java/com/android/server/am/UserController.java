@@ -16,9 +16,11 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.CREATE_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.MANAGE_USERS;
 import static android.app.ActivityManager.STOP_USER_ON_SWITCH_DEFAULT;
 import static android.app.ActivityManager.STOP_USER_ON_SWITCH_TRUE;
 import static android.app.ActivityManager.StopUserOnSwitch;
@@ -1459,10 +1461,12 @@ class UserController implements Handler.Callback {
         return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, foreground, unlockListener);
     }
 
-    // TODO(b/239982558): add javadoc
+    // TODO(b/239982558): add javadoc (need to wait until the intents / SystemService callbacks are
+    // defined
     boolean startUserOnSecondaryDisplay(@UserIdInt int userId, int displayId,
             @Nullable IProgressListener unlockListener) {
-        checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "startUserOnSecondaryDisplay");
+        checkCallingHasOneOfThosePermissions("startUserOnSecondaryDisplay",
+                MANAGE_USERS, CREATE_USERS);
 
         return startUserNoChecks(userId, displayId, /* foreground= */ false, unlockListener);
     }
@@ -1488,8 +1492,12 @@ class UserController implements Handler.Callback {
                     foreground ? " in foreground" : "");
         }
 
-        // TODO(b/240613396) also check if multi-display is supported
         if (displayId != Display.DEFAULT_DISPLAY) {
+            if (!UserManager.isUsersOnSecondaryDisplaysEnabled()) {
+                // TODO(b/239824814): add CTS test and/or unit test
+                throw new UnsupportedOperationException("Not supported by device");
+            }
+
             // TODO(b/239982558): add unit test for the exceptional cases below
             Preconditions.checkArgument(displayId > 0, "Invalid display id (%d)", displayId);
             Preconditions.checkArgument(userId != UserHandle.USER_SYSTEM, "Cannot start system user"
@@ -2608,15 +2616,24 @@ class UserController implements Handler.Callback {
     }
 
     private void checkCallingPermission(String permission, String methodName) {
-        if (mInjector.checkCallingPermission(permission)
-                != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission denial: " + methodName
-                    + "() from pid=" + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + permission;
-            Slogf.w(TAG, msg);
-            throw new SecurityException(msg);
+        checkCallingHasOneOfThosePermissions(methodName, permission);
+    }
+
+    private void checkCallingHasOneOfThosePermissions(String methodName, String...permissions) {
+        for (String permission : permissions) {
+            if (mInjector.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
         }
+        String msg = "Permission denial: " + methodName
+                + "() from pid=" + Binder.getCallingPid()
+                + ", uid=" + Binder.getCallingUid()
+                + " requires "
+                + (permissions.length == 1
+                        ? permissions[0]
+                        : "one of " + Arrays.toString(permissions));
+        Slogf.w(TAG, msg);
+        throw new SecurityException(msg);
     }
 
     private void enforceShellRestriction(String restriction, @UserIdInt int userId) {
