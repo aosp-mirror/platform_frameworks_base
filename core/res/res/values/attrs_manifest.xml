@@ -3602,4 +3602,19 @@
              false, the application cannot be profiled at all. Defaults to true. -->
         <attr name="enabled" format="boolean" />
     </declare-styleable>
+
+    <!-- <code>install-constraints</code> tag rejects installs unless one the constraints defined by
+         its child elements is true.
+         It is possible to have multiple <code>install-constraints</code> tags in a single manifest,
+         where each tag is evaluated independently.
+         @hide -->
+    <declare-styleable name="AndroidManifestInstallConstraints" parent="AndroidManifest" />
+
+    <!-- A constraint for <code>install-constraints</code>. Checks that the device fingerprint
+         starts with the given prefix.
+         @hide -->
+    <declare-styleable name="AndroidManifestInstallConstraintsFingerprintPrefix"
+                       parent="AndroidManifestInstallConstraints">
+        <attr name="value" />
+    </declare-styleable>
 </resources>
