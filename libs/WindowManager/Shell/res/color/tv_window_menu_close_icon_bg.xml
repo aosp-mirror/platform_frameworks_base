@@ -16,6 +16,6 @@
   -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true"
-          android:color="@color/tv_pip_menu_close_icon_bg_focused" />
-    <item android:color="@color/tv_pip_menu_close_icon_bg_unfocused" />
+        android:color="@color/tv_window_menu_close_icon_bg_focused" />
+    <item android:color="@color/tv_window_menu_close_icon_bg_unfocused" />
 </selector>

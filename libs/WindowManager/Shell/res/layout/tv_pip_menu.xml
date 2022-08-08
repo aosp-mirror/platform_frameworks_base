@@ -64,14 +64,14 @@
                 android:layout_width="@dimen/pip_menu_button_wrapper_margin"
                 android:layout_height="@dimen/pip_menu_button_wrapper_margin"/>
 
-            <com.android.wm.shell.pip.tv.TvPipMenuActionButton
+            <com.android.wm.shell.common.TvWindowMenuActionButton
                 android:id="@+id/tv_pip_menu_fullscreen_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/pip_ic_fullscreen_white"
                 android:text="@string/pip_fullscreen" />
 
-            <com.android.wm.shell.pip.tv.TvPipMenuActionButton
+            <com.android.wm.shell.common.TvWindowMenuActionButton
                 android:id="@+id/tv_pip_menu_close_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -80,14 +80,14 @@
 
             <!-- More TvPipMenuActionButtons may be added here at runtime. -->
 
-            <com.android.wm.shell.pip.tv.TvPipMenuActionButton
+            <com.android.wm.shell.common.TvWindowMenuActionButton
                 android:id="@+id/tv_pip_menu_move_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/pip_ic_move_white"
                 android:text="@string/pip_move" />
 
-            <com.android.wm.shell.pip.tv.TvPipMenuActionButton
+            <com.android.wm.shell.common.TvWindowMenuActionButton
                 android:id="@+id/tv_pip_menu_expand_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -145,7 +145,7 @@
         android:layout_margin="@dimen/pip_menu_outer_space_frame"
         android:background="@drawable/tv_pip_menu_border"/>
 
-    <com.android.wm.shell.pip.tv.TvPipMenuActionButton
+    <com.android.wm.shell.common.TvWindowMenuActionButton
         android:id="@+id/tv_pip_menu_done_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
