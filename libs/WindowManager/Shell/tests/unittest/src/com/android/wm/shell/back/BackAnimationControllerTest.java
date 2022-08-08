@@ -272,9 +272,14 @@ public class BackAnimationControllerTest extends ShellTestCase {
         // the previous transition is finished.
         doMotionEvent(MotionEvent.ACTION_DOWN, 0);
         verifyNoMoreInteractions(mIOnBackInvokedCallback);
+        mController.onBackToLauncherAnimationFinished();
+
+        // Verify that more events from a rejected swipe cannot start animation.
+        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+        doMotionEvent(MotionEvent.ACTION_UP, 0);
+        verifyNoMoreInteractions(mIOnBackInvokedCallback);
 
         // Verify that we start accepting gestures again once transition finishes.
-        mController.onBackToLauncherAnimationFinished();
         doMotionEvent(MotionEvent.ACTION_DOWN, 0);
         doMotionEvent(MotionEvent.ACTION_MOVE, 100);
         verify(mIOnBackInvokedCallback).onBackStarted();
