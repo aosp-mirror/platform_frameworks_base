@@ -23,7 +23,6 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.Rect
 import android.os.Looper
-import android.service.dreams.IDreamManager
 import android.util.Log
 import android.util.MathUtils
 import android.view.GhostView
@@ -54,7 +53,7 @@ private const val TAG = "DialogLaunchAnimator"
 class DialogLaunchAnimator
 @JvmOverloads
 constructor(
-    private val dreamManager: IDreamManager,
+    private val callback: Callback,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS),
     private val isForTesting: Boolean = false
@@ -126,7 +125,7 @@ constructor(
         val animatedDialog =
             AnimatedDialog(
                 launchAnimator,
-                dreamManager,
+                callback,
                 interactionJankMonitor,
                 animateFrom,
                 onDialogDismissed = { openedDialogs.remove(it) },
@@ -194,8 +193,12 @@ constructor(
 
         val dialog = animatedDialog.dialog
 
-        // Don't animate if the dialog is not showing.
-        if (!dialog.isShowing) {
+        // Don't animate if the dialog is not showing or if we are locked and going to show the
+        // bouncer.
+        if (
+            !dialog.isShowing ||
+            (!callback.isUnlocked() && !callback.isShowingAlternateAuthOnUnlock())
+        ) {
             return null
         }
 
@@ -285,6 +288,23 @@ constructor(
             ?.let { it.touchSurface = it.prepareForStackDismiss() }
         dialog.dismiss()
     }
+
+    interface Callback {
+        /** Whether the device is currently in dreaming (screensaver) mode. */
+        fun isDreaming(): Boolean
+
+        /**
+         * Whether the device is currently unlocked, i.e. if it is *not* on the keyguard or if the
+         * keyguard can be dismissed.
+         */
+        fun isUnlocked(): Boolean
+
+        /**
+         * Whether we are going to show alternate authentication (like UDFPS) instead of the
+         * traditional bouncer when unlocking the device.
+         */
+        fun isShowingAlternateAuthOnUnlock(): Boolean
+    }
 }
 
 /**
@@ -296,7 +316,7 @@ data class DialogCuj(@CujType val cujType: Int, val tag: String? = null)
 
 private class AnimatedDialog(
     private val launchAnimator: LaunchAnimator,
-    private val dreamManager: IDreamManager,
+    private val callback: DialogLaunchAnimator.Callback,
     private val interactionJankMonitor: InteractionJankMonitor,
 
     /** The view that triggered the dialog after being tapped. */
@@ -850,7 +870,7 @@ private class AnimatedDialog(
 
         // If we are dreaming, the dialog was probably closed because of that so we don't animate
         // into the touchSurface.
-        if (dreamManager.isDreaming) {
+        if (callback.isDreaming()) {
             return false
         }
 
