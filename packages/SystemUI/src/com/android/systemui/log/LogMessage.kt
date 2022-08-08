@@ -16,6 +16,10 @@
 
 package com.android.systemui.log
 
+import java.io.PrintWriter
+import java.text.SimpleDateFormat
+import java.util.Locale
+
 /**
  * Generic data class for storing messages logged to a [LogBuffer]
  *
@@ -50,6 +54,17 @@ interface LogMessage {
     var bool2: Boolean
     var bool3: Boolean
     var bool4: Boolean
+
+    /**
+     * Function that dumps the [LogMessage] to the provided [writer].
+     */
+    fun dump(writer: PrintWriter) {
+        val formattedTimestamp = DATE_FORMAT.format(timestamp)
+        val shortLevel = level.shortString
+        val messageToPrint = messagePrinter(this)
+        printLikeLogcat(writer, formattedTimestamp, shortLevel, tag, messageToPrint)
+        exception?.printStackTrace(writer)
+    }
 }
 
 /**
@@ -61,3 +76,21 @@ interface LogMessage {
  * of the printer for each call, thwarting our attempts at avoiding any sort of allocation.
  */
 typealias MessagePrinter = LogMessage.() -> String
+
+private fun printLikeLogcat(
+    pw: PrintWriter,
+    formattedTimestamp: String,
+    shortLogLevel: String,
+    tag: String,
+    message: String
+) {
+    pw.print(formattedTimestamp)
+    pw.print(" ")
+    pw.print(shortLogLevel)
+    pw.print(" ")
+    pw.print(tag)
+    pw.print(": ")
+    pw.println(message)
+}
+
+private val DATE_FORMAT = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US)
