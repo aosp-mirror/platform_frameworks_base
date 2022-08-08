@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"الكاميرا"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"الهاتف"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"المساعد الصوتي"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"المحفظة"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"محفظة"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"الماسح الضوئي لرمز الاستجابة السريعة"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"فتح القفل"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"الجهاز مُقفل."</string>
@@ -414,8 +414,8 @@
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات على جهازك."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات في ملفك الشخصي للعمل ولكن لا تتم مراقبتها في ملفك الشخصي."</string>
     <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"هذا الجهاز متّصل بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. تظهر أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، لمشرف تكنولوجيا المعلومات."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"هذا الجهاز متّصل بالإنترنت من خلال <xliff:g id="VPN_APP_0">%1$s</xliff:g> و<xliff:g id="VPN_APP_1">%2$s</xliff:g>. تظهر أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، لمشرف تكنولوجيا المعلومات."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"‏تطبيقات العمل الخاصة بك متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. تظهر أنشطة الشبكة في تطبيقات العمل، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، لمشرف تكنولوجيا المعلومات ومزوّد خدمة الشبكة الافتراضية الخاصة (VPN)."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"هذا الجهاز متّصل بالإنترنت من خلال <xliff:g id="VPN_APP_0">%1$s</xliff:g> و<xliff:g id="VPN_APP_1">%2$s</xliff:g>. يمكن لمشرف تكنولوجيا المعلومات رؤية أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"‏تطبيقات العمل الخاصة بك متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. يمكن لمشرف تكنولوجيا المعلومات ومزوّد خدمة الشبكة الافتراضية الخاصة (VPN) رؤية أنشطة الشبكة في تطبيقات العمل، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"‏تطبيقاتك الشخصية متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. تظهر أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، لمزوّد خدمة الشبكة الافتراضية الخاصة (VPN)."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"‏فتح إعدادات الشبكة الافتراضية الخاصة (VPN)"</string>
@@ -474,7 +474,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"عرض الوضع التجريبي"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"إيثرنت"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"المنبّه"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"المحفظة"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"محفظة"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"يمكنك إعداد طريقة دفع لإجراء عمليات شراء بسرعة وأمان أكبر باستخدام هاتفك."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"عرض الكل"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"انقر لفتح قفل الجهاز."</string>

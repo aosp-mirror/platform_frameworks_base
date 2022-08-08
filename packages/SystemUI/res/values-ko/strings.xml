@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"카메라"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"전화"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"음성 지원"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"지갑"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"월렛"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR 코드 스캐너"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"잠금 해제"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"기기 잠김"</string>
@@ -462,7 +462,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"데모 모드 표시"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"이더넷"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"알람"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"월렛"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"설정하여 휴대전화로 더욱 빠르고 안전하게 구매하세요."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"모두 표시"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"탭하여 열기"</string>

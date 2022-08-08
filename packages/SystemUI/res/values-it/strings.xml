@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Fotocamera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefono"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Voice Assist"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Portafoglio"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Scanner codici QR"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Sblocca"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositivo bloccato"</string>
@@ -462,7 +462,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Mostra modalità demo"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Sveglia"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Portafoglio"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Imposta un metodo di pagamento per effettuare acquisti in modo più rapido e sicuro con il telefono"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Mostra tutto"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Tocca per aprire"</string>
