@@ -522,11 +522,13 @@ public class ClipboardOverlayController {
     private void shareContent(ClipData clip) {
         mUiEventLogger.log(CLIPBOARD_OVERLAY_SHARE_TAPPED);
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.putExtra(Intent.EXTRA_TEXT, clip.getItemAt(0).getText().toString());
         shareIntent.setDataAndType(
                 clip.getItemAt(0).getUri(), clip.getDescription().getMimeType(0));
-        shareIntent.putExtra(Intent.EXTRA_STREAM, clip.getItemAt(0).getUri());
-        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, clip.getItemAt(0).getText().toString());
+        if (clip.getItemAt(0).getUri() != null) {
+            shareIntent.putExtra(Intent.EXTRA_STREAM, clip.getItemAt(0).getUri());
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
         Intent chooserIntent = Intent.createChooser(shareIntent, null)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
