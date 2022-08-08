@@ -846,6 +846,7 @@ public class TaskTests extends WindowTestsBase {
                 new ComponentName(DEFAULT_COMPONENT_PACKAGE_NAME, targetClassName);
 
         final Intent intent = new Intent();
+        intent.setPackage(DEFAULT_COMPONENT_PACKAGE_NAME);
         intent.setComponent(aliasComponent);
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
