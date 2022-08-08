@@ -97,6 +97,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -107,6 +108,7 @@ import android.util.TypedValue;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
+import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -689,6 +691,11 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
     }
+
+    // TODO(b/239982558): add javadoc
+    @Nullable
+    @GuardedBy("mUsersLock")
+    private SparseIntArray mUsersOnSecondaryDisplays;
 
     // TODO b/28848102 Add support for test dependencies injection
     @VisibleForTesting
@@ -1679,7 +1686,14 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
 
-        // TODO(b/239824814): support background users on secondary display (and their profiles)
+        // TODO(b/239824814): STOPSHIP - add unit tests (requires change on testing infra)
+        synchronized (mUsersLock) {
+            if (mUsersOnSecondaryDisplays != null) {
+                // TODO(b/239824814): make sure it handles profile as well
+                return (mUsersOnSecondaryDisplays.indexOfKey(userId) >= 0);
+            }
+        }
+
         return false;
     }
 
@@ -6130,6 +6144,12 @@ public class UserManagerService extends IUserManager.Stub {
                 pw.print("  Cached user IDs (including pre-created): ");
                 pw.println(Arrays.toString(mUserIdsIncludingPreCreated));
             }
+            synchronized (mUsersLock) {
+                if (mUsersOnSecondaryDisplays != null) {
+                    pw.print("  Users on secondary displays: ");
+                    pw.println(mUsersOnSecondaryDisplays);
+                }
+            }
 
         } // synchronized (mPackagesLock)
 
@@ -6302,6 +6322,11 @@ public class UserManagerService extends IUserManager.Stub {
 
         pw.println("    Ignore errors preparing storage: "
                 + userData.getIgnorePrepareStorageErrors());
+
+        // TODO(b/239824814): STOPSHIP - remove once there is a CTS test for UM.isUserVisible()
+        if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
+            pw.printf("    isUserVisible(): %b\n", isUserVisible(userInfo.id));
+        }
     }
 
     private static void dumpTimeAgo(PrintWriter pw, StringBuilder sb, long nowTime, long time) {
@@ -6684,6 +6709,58 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mUsersLock) {
                 UserData userData = mUsers.get(userId);
                 return userData != null && userData.getIgnorePrepareStorageErrors();
+            }
+        }
+
+        @Override
+        public void assignUserToDisplay(int userId, int displayId) {
+            if (DBG) {
+                Slogf.d(LOG_TAG, "assignUserToDisplay(%d, %d): mUsersOnSecondaryDisplays=%s",
+                        userId, displayId, mUsersOnSecondaryDisplays);
+            }
+            // TODO(b/240613396) throw exception if feature not supported
+
+            if (displayId == Display.INVALID_DISPLAY) {
+                synchronized (mUsersLock) {
+                    if (mUsersOnSecondaryDisplays == null) {
+                        if (false) {
+                            // TODO(b/240613396): remove this if once we check for support above
+                            Slogf.wtf(LOG_TAG, "assignUserToDisplay(%d, %d): no "
+                                    + "mUsersOnSecondaryDisplays", userId, displayId);
+                        }
+                        return;
+                    }
+                    if (DBG) {
+                        Slogf.d(LOG_TAG, "Removing %d from mUsersOnSecondaryDisplays", userId);
+                    }
+                    mUsersOnSecondaryDisplays.delete(userId);
+                    if (mUsersOnSecondaryDisplays.size() == 0) {
+                        if (DBG) {
+                            Slogf.d(LOG_TAG, "Removing mUsersOnSecondaryDisplays");
+                        }
+                        mUsersOnSecondaryDisplays = null;
+                    }
+                }
+                return;
+            }
+
+            // TODO(b/239982558) check for invalid cases like:
+            // - userId already assigned to another display
+            // - displayId already assigned to another user
+            synchronized (mUsersLock) {
+                if (mUsersOnSecondaryDisplays == null) {
+                    // TODO(b/240613396): get size from some config file
+                    int size = 1;
+                    if (DBG) {
+                        Slogf.d(LOG_TAG, "Creating mUsersOnSecondaryDisplays with size %d", size);
+                    }
+                    mUsersOnSecondaryDisplays = new SparseIntArray(size);
+                }
+                if (DBG) {
+                    Slogf.d(LOG_TAG, "Adding %d->%d to mUsersOnSecondaryDisplays",
+                            userId, displayId);
+                }
+                mUsersOnSecondaryDisplays.put(userId, displayId);
             }
         }
     }

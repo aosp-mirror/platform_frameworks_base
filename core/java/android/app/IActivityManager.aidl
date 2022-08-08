@@ -760,4 +760,15 @@ interface IActivityManager {
      * </p>
      */
     int getBackgroundRestrictionExemptionReason(int uid);
+
+    // Start (?) of T transactions
+    /**
+     * Similar to {@link #startUserInBackgroundWithListener(int userId, IProgressListener unlockProgressListener),
+     * but setting the user as the visible user of that display (i.e., allowing the user and its
+     * running profiles to launch activities on that display).
+     *
+     * <p>Typically used only by automotive builds when the vehicle has multiple displays.
+     */
+    boolean startUserInBackgroundOnSecondaryDisplay(int userid, int displayId, IProgressListener unlockProgressListener);
+
 }

@@ -100,6 +100,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -107,6 +108,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FactoryResetter;
 import com.android.server.FgThread;
@@ -1071,6 +1073,12 @@ class UserController implements Handler.Callback {
                         Binder.getCallingPid(), UserHandle.USER_ALL);
             });
         }
+
+        // TODO(b/239982558): for now we're just updating the user's visibility, but most likely
+        // we'll need to remove this call and handle that as part of the user state workflow
+        // instead.
+        // TODO(b/240613396) also check if multi-display is supported
+        mInjector.getUserManagerInternal().assignUserToDisplay(userId, Display.INVALID_DISPLAY);
     }
 
     private void finishUserStopping(final int userId, final UserState uss,
@@ -1363,6 +1371,7 @@ class UserController implements Handler.Callback {
         }
         final int profilesToStartSize = profilesToStart.size();
         int i = 0;
+        // TODO(b/239982558): pass displayId
         for (; i < profilesToStartSize && i < (getMaxRunningUsers() - 1); ++i) {
             startUser(profilesToStart.get(i).id, /* foreground= */ false);
         }
@@ -1371,6 +1380,7 @@ class UserController implements Handler.Callback {
         }
     }
 
+    // TODO(b/239982558): might need to infer the display id based on parent user
     /**
      * Starts a user only if it's a profile, with a more relaxed permission requirement:
      * {@link android.Manifest.permission#MANAGE_USERS} or
@@ -1399,7 +1409,8 @@ class UserController implements Handler.Callback {
             return false;
         }
 
-        return startUserNoChecks(userId, /* foreground= */ false, /* unlockListener= */ null);
+        return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, /* foreground= */ false,
+                /* unlockListener= */ null);
     }
 
     @VisibleForTesting
@@ -1445,26 +1456,54 @@ class UserController implements Handler.Callback {
             @Nullable IProgressListener unlockListener) {
         checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "startUser");
 
-        return startUserNoChecks(userId, foreground, unlockListener);
+        return startUserNoChecks(userId, Display.DEFAULT_DISPLAY, foreground, unlockListener);
     }
 
-    private boolean startUserNoChecks(final @UserIdInt int userId, final boolean foreground,
+    // TODO(b/239982558): add javadoc
+    boolean startUserOnSecondaryDisplay(@UserIdInt int userId, int displayId,
+            @Nullable IProgressListener unlockListener) {
+        checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "startUserOnSecondaryDisplay");
+
+        return startUserNoChecks(userId, displayId, /* foreground= */ false, unlockListener);
+    }
+
+    private boolean startUserNoChecks(@UserIdInt int userId, int displayId, boolean foreground,
             @Nullable IProgressListener unlockListener) {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
 
-        t.traceBegin("UserController.startUser-" + userId + "-" + (foreground ? "fg" : "bg"));
+        t.traceBegin("UserController.startUser-" + userId
+                + (displayId == Display.DEFAULT_DISPLAY ? "" : "-display-" + displayId)
+                + "-" + (foreground ? "fg" : "bg"));
         try {
-            return startUserInternal(userId, foreground, unlockListener, t);
+            return startUserInternal(userId, displayId, foreground, unlockListener, t);
         } finally {
             t.traceEnd();
         }
     }
 
-    private boolean startUserInternal(@UserIdInt int userId, boolean foreground,
+    private boolean startUserInternal(@UserIdInt int userId, int displayId, boolean foreground,
             @Nullable IProgressListener unlockListener, @NonNull TimingsTraceAndSlog t) {
         if (DEBUG_MU) {
-            Slogf.i(TAG, "Starting user %d%s", userId, foreground ? " in foreground" : "");
+            Slogf.i(TAG, "Starting user %d on display %d %s", userId, displayId,
+                    foreground ? " in foreground" : "");
         }
+
+        // TODO(b/240613396) also check if multi-display is supported
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            // TODO(b/239982558): add unit test for the exceptional cases below
+            Preconditions.checkArgument(displayId > 0, "Invalid display id (%d)", displayId);
+            Preconditions.checkArgument(userId != UserHandle.USER_SYSTEM, "Cannot start system user"
+                    + " on secondary display (%d)", displayId);
+            Preconditions.checkArgument(!foreground, "Cannot start user %d in foreground AND "
+                    + "on secondary display (%d)", userId, displayId);
+
+            // TODO(b/239982558): for now we're just updating the user's visibility, but most likely
+            // we'll need to remove this call and handle that as part of the user state workflow
+            // instead.
+            // TODO(b/239982558): check if display is valid
+            mInjector.getUserManagerInternal().assignUserToDisplay(userId, displayId);
+        }
+
         EventLog.writeEvent(EventLogTags.UC_START_USER_INTERNAL, userId);
 
         final int callingUid = Binder.getCallingUid();
@@ -1519,6 +1558,7 @@ class UserController implements Handler.Callback {
                 return false;
             }
 
+            // TODO(b/239982558): might need something similar for bg users on secondary display
             if (foreground && isUserSwitchUiEnabled()) {
                 t.traceBegin("startFreezingScreen");
                 mInjector.getWindowManager().startFreezingScreen(
