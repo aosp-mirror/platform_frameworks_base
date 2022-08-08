@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;新規&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"（電話番号なし）"</string>
@@ -1383,10 +1378,10 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"アナログのオーディオ アクセサリを検出"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"接続したデバイスはこのスマートフォンと互換性がありません。タップすると、詳細を確認できます。"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB デバッグが接続されました"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB デバッグを無効にするにはここをタップしてください"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"無効にするにはここをタップしてください"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB デバッグを無効にする場合に選択します。"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ワイヤレス デバッグが接続されました"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ワイヤレス デバッグをUSB デバッグを無効にするにはここをタップしてください"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"無効にするにはここをタップしてください"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ワイヤレス デバッグを無効にするには選択します。"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"テストハーネス モード有効"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"出荷時設定にリセットしてテストハーネス モードを無効にしてください。"</string>
@@ -1468,7 +1463,7 @@
     <string name="permdesc_route_media_output" msgid="1759683269387729675">"メディア出力を他の外部デバイスにルーティングすることをアプリに許可します。"</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"インストールセッションの読み取り"</string>
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"インストールセッションの読み取りをアプリに許可します。これにより、アプリはアクティブパッケージのインストールに関する詳細情報を参照できるようになります。"</string>
-    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"インストールパッケージのリクエスト"</string>
+    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"request install packages"</string>
     <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"パッケージのインストールをリクエストすることをアプリケーションに許可します。"</string>
     <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"パッケージの削除のリクエスト"</string>
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"パッケージの削除をリクエストすることをアプリに許可します。"</string>

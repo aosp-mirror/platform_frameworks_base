@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"Б"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"Кб"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"Мб"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"Гб"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"ТБ"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"ПБ"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Баш аты жок&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Телефон номери жок)"</string>
@@ -618,7 +613,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Жүзүнөн таанып ачуу"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Жүзүнөн таанып ачуу функциясында маселе келип чыкты"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Жүзүңүздүн үлгүсүн өчүрүү үчүн басып, жаңы үлгүнү кошуңуз"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Жүзүнөн таанып ачууну жөндөө"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Жүзүнөн таанып ачууну тууралоо"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Телефонуңузду карап туруп эле кулпусун ачып алыңыз"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Жүзүнөн таанып ачуу функциясын колдонуу үчүн Жөндөөлөр &gt; Купуялык бөлүмүнө өтүп, "<b>"Камераны колдонууну"</b>" күйгүзүңүз"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Кулпусун ачуунун көбүрөөк жолдорун жөндөңүз"</string>
@@ -628,9 +623,9 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Тейлөө кызматына кайрылыңыз."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Жүзүңүз жакшы тартылган жок. Кайталап көрүңүз."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Өтө жарык. Жарыктыкты азайтып көрүңүз."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Өтө караңгы. Жарыгыраак жерден тартып көрүңүз."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Телефонду алысыраак жылдырыңыз."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Телефонду жакыныраак жылдырыңыз."</string>
+    <string name="face_acquired_too_dark" msgid="252573548464426546">"Өтө караңгы. Жарыгыраак жерге туруңуз."</string>
+    <string name="face_acquired_too_close" msgid="1628767882971469833">"Телефонду алыстатыңыз."</string>
+    <string name="face_acquired_too_far" msgid="5098567726427173896">"Телефонду жакындатыңыз."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Телефонду өйдө жылдырыңыз."</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"Телефонду ылдый жылдырыңыз."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Телефонду солго жылдырыңыз."</string>
@@ -644,7 +639,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Башыңызды бир аз гана эңкейтиңиз."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Башыңызды бир аз гана эңкейтиңиз."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Башыңызды бир аз гана эңкейтиңиз."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Жүзүңүздү жашырып турган нерселерди алып салыңыз."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Жүзүңүз жакшы көрүнбөй жатат."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Экраныңыздын жогору жагын, анын ичинде тилкени да тазалаңыз"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1260,7 +1255,7 @@
     <string name="smv_process" msgid="1398801497130695446">"<xliff:g id="PROCESS">%1$s</xliff:g> процесси өзүнүн мажбурланган StrictMode саясатын бузуп койду."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Телефон жаңырууда…"</string>
     <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"Планшет жаңыртылууда…"</string>
-    <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"Түзмөк жаңыртылууда…"</string>
+    <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"Түзмөк жаңырууда…"</string>
     <string name="android_start_title" product="default" msgid="4036708252778757652">"Телефон күйгүзүлүүдө…"</string>
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android жүргүзүлүүдө…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Планшет күйгүзүлүүдө…"</string>
@@ -1716,7 +1711,7 @@
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Кызмат экрандагы нерселерди окуп, аларды башка колдонмолордун үстүнөн көрсөтөт."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Аракеттерди көрүп, аткаруу"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Кызмат колдонмодо жасаган аракеттериңизге же түзмөктүн сенсорлоруна көз салып, сиздин атыңыздан буйруктарды берет."</string>
-    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Уруксат берүү"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Ооба"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Жок"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Функцияны колдонуп баштоо үчүн аны таптап коюңуз:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Атайын мүмкүнчүлүктөр баскычы менен колдонгуңуз келген функцияларды тандаңыз"</string>

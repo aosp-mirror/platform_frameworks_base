@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"килобайт"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"МБ"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TБ"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"ПБ"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Гарчиггүй&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Утасны дугаар байхгүй)"</string>
@@ -294,9 +289,9 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Апп батарей ашиглаж байна"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Томруулах"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Хандалтын ашиглалт"</string>
-    <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> батерей ашиглаж байна"</string>
-    <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> апп батерей ашиглаж байна"</string>
-    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батерей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
+    <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> батарей ашиглаж байна"</string>
+    <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> апп батарей ашиглаж байна"</string>
+    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батарей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Аюулгүй горим"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Андройд систем"</string>
