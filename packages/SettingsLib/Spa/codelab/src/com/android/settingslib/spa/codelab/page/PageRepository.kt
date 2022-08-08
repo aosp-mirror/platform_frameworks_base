@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.codelab
+package com.android.settingslib.spa.codelab.page
 
-import com.android.settingslib.spa.codelab.page.codelabPageRepository
-import com.android.settingslib.spa.framework.SpaActivity
+import com.android.settingslib.spa.api.SettingsPageRepository
 
-class MainActivity : SpaActivity(codelabPageRepository)
+object Destinations {
+    const val Home = "Home"
+    const val Preference = "Preference"
+    const val Argument = "Argument"
+}
+
+val codelabPageRepository = SettingsPageRepository(
+    allPages = listOf(HomePageProvider, PreferencePageProvider, ArgumentPageProvider),
+    startDestination = Destinations.Home,
+)

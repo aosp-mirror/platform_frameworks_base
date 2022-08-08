@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.codelab
+package com.android.settingslib.spa.api
 
-import com.android.settingslib.spa.codelab.page.codelabPageRepository
-import com.android.settingslib.spa.framework.SpaActivity
-
-class MainActivity : SpaActivity(codelabPageRepository)
+data class SettingsPageRepository(
+    val allPages: List<SettingsPageProvider>,
+    val startDestination: String,
+)
