@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"بایت"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"کیلوبایت"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"مگابایت"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"گیگابایت"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"ترابایت"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"پتابایت"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> ‏<xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"‏&lt;بدون عنوان&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(بدون شماره تلفن)"</string>
@@ -620,7 +615,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"برای حذف مدل چهره‌تان ضربه بزنید، سپس چهره‌تان را دوباره اضافه کنید"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"راه‌اندازی «قفل‌گشایی با چهره»"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"برای باز کردن قفل تلفن خود به آن نگاه کنید"</string>
-    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"‏برای استفاده از «قفل‌گشایی با چهره»، "<b>"دسترسی به دوربین"</b>" را در «تنظیمات &gt; حریم‌خصوصی» روشن کنید"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"‏برای استفاده از «قفل‌گشایی با چهره»، "<b>"دسترسی به دوربین"</b>" را در «تنظیمات &gt; حریم خصوصی» روشن کنید"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"راه‌اندازی روش‌های بیشتر برای باز کردن قفل"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"برای افزودن اثر انگشت، ضربه بزنید"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"قفل‌گشایی با اثر انگشت"</string>
@@ -642,9 +637,9 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"دیگر چهره را تشخیص نمی‌دهد. دوباره امتحان کنید."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"بسیار شبیه قبلی است، لطفاً قیافه دیگری بگیرید."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"سرتان را کمی صاف بگیرید."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"سرتان را کمی کج بگیرید."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"سرتان را کمی صاف کنید."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"سرتان را کمی صاف بگیرید."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"هرچیزی را که حائل چهره‌تان است بردارید."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"هر چیزی که جلو صورت شما را می‌گیرد بردارید."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"بالای صفحه و همچنین نوار مشکی را تمیز کنید."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1028,7 +1023,7 @@
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"تغییر مجوزهای مکان جغرافیایی مرورگر"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"‏به برنامه اجازه می‎دهد تا مجوزهای جغرافیایی مرورگر را تغییر دهد. برنامه‌های مخرب می‎توانند از آن استفاده کنند تا اطلاعات موقعیت مکانی را به سایت‌های وب کتابخانه بفرستند."</string>
     <string name="save_password_message" msgid="2146409467245462965">"می‌خواهید مرورگر این گذرواژه را به خاطر داشته باشد؟"</string>
-    <string name="save_password_notnow" msgid="2878327088951240061">"اکنون نه"</string>
+    <string name="save_password_notnow" msgid="2878327088951240061">"حالا نه"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"به خاطر سپردن"</string>
     <string name="save_password_never" msgid="6776808375903410659">"هیچ‌وقت"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"شما اجازه بازکردن این صفحه را ندارید."</string>
@@ -1639,7 +1634,7 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"سیستم"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"بلوتوث‌های صوتی"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"صفحه نمایش بی‌سیم"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"ارسال محتوا"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"پخش محتوا"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"برقراری ارتباط با دستگاه"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"فرستادن محتوای صفحه به دستگاه"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"درحال جستجوی دستگاه‌ها…"</string>
@@ -2169,7 +2164,7 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"کاری"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"نمای شخصی"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"نمای کاری"</string>
-    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"سرپرست سیستم آن را مسدود کرده است"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"سرپرست فناوری اطلاعات آن را مسدود کرده است"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"نمی‌توان این محتوا را با برنامه‌های کاری هم‌رسانی کرد"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"نمی‌توان این محتوا را با برنامه‌های کاری باز کرد"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"نمی‌توان این محتوا را با برنامه‌های شخصی هم‌رسانی کرد"</string>
@@ -2302,7 +2297,7 @@
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"لغو انسداد دوربین دستگاه"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"‏برای &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; و همه برنامه‌ها و سرویس‌ها"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"لغو انسداد"</string>
-    <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"حریم‌خصوصی حسگر"</string>
+    <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"حریم خصوصی حسگر"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"نماد برنامه"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"تصویر نمانام‌سازی برنامه"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"بررسی تنظیمات دسترسی"</string>
