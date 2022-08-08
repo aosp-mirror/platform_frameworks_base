@@ -1820,6 +1820,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return getItemFromTaskDisplayAreas(TaskDisplayArea::getFocusedActivity);
     }
 
+    boolean hasResumedActivity(int uid) {
+        return forAllActivities(ar -> ar.isState(RESUMED) && ar.getUid() == uid);
+    }
+
     boolean isTopDisplayFocusedRootTask(Task task) {
         return task != null && task == getTopDisplayFocusedRootTask();
     }
