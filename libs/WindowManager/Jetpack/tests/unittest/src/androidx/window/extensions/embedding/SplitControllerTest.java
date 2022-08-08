@@ -28,7 +28,7 @@ import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_I
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
 
-import static androidx.window.extensions.embedding.EmbeddingTestUtils.SPLIT_RATIO;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.SPLIT_ATTRIBUTES;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUNDS;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createActivityInfoWithMinDimensions;
@@ -85,6 +85,8 @@ import android.window.WindowContainerTransaction;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.window.extensions.layout.WindowLayoutComponentImpl;
+import androidx.window.extensions.layout.WindowLayoutInfo;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -120,6 +122,8 @@ public class SplitControllerTest {
     private WindowContainerTransaction mTransaction;
     @Mock
     private Handler mHandler;
+    @Mock
+    private WindowLayoutComponentImpl mWindowLayoutComponent;
 
     private SplitController mSplitController;
     private SplitPresenter mSplitPresenter;
@@ -127,7 +131,9 @@ public class SplitControllerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mSplitController = new SplitController();
+        doReturn(new WindowLayoutInfo(new ArrayList<>())).when(mWindowLayoutComponent)
+                .getCurrentWindowLayoutInfo(anyInt(), any());
+        mSplitController = new SplitController(mWindowLayoutComponent);
         mSplitPresenter = mSplitController.mPresenter;
         spyOn(mSplitController);
         spyOn(mSplitPresenter);
@@ -273,6 +279,8 @@ public class SplitControllerTest {
         final SplitContainer splitContainer = mock(SplitContainer.class);
         doReturn(tf).when(splitContainer).getPrimaryContainer();
         doReturn(tf).when(splitContainer).getSecondaryContainer();
+        doReturn(createTestTaskContainer()).when(splitContainer).getTaskContainer();
+        doReturn(createSplitRule(mActivity, mActivity)).when(splitContainer).getSplitRule();
         final List<SplitContainer> splitContainers =
                 mSplitController.getTaskContainer(TASK_ID).mSplitContainers;
         splitContainers.add(splitContainer);
@@ -303,7 +311,7 @@ public class SplitControllerTest {
 
         // Verify if the top active split is updated if both of its containers are not finished.
         doReturn(false).when(mSplitController)
-                        .dismissPlaceholderIfNecessary(mTransaction, splitContainer);
+                .dismissPlaceholderIfNecessary(mTransaction, splitContainer);
 
         mSplitController.updateContainer(mTransaction, tf);
 
@@ -613,7 +621,7 @@ public class SplitControllerTest {
         assertTrue(result);
         verify(mSplitPresenter).startActivityToSide(mTransaction, mActivity, PLACEHOLDER_INTENT,
                 mSplitController.getPlaceholderOptions(mActivity, true /* isOnCreated */),
-                placeholderRule, true /* isPlaceholder */);
+                placeholderRule, SPLIT_ATTRIBUTES, true /* isPlaceholder */);
     }
 
     @Test
@@ -629,7 +637,7 @@ public class SplitControllerTest {
 
         assertFalse(result);
         verify(mSplitPresenter, never()).startActivityToSide(any(), any(), any(), any(), any(),
-                anyBoolean());
+                any(), anyBoolean());
     }
 
     @Test
@@ -646,7 +654,7 @@ public class SplitControllerTest {
         assertTrue(result);
         verify(mSplitPresenter).startActivityToSide(mTransaction, mActivity, PLACEHOLDER_INTENT,
                 mSplitController.getPlaceholderOptions(mActivity, true /* isOnCreated */),
-                placeholderRule, true /* isPlaceholder */);
+                placeholderRule, SPLIT_ATTRIBUTES, true /* isPlaceholder */);
     }
 
     @Test
@@ -661,7 +669,7 @@ public class SplitControllerTest {
 
         assertFalse(result);
         verify(mSplitPresenter, never()).startActivityToSide(any(), any(), any(), any(), any(),
-                anyBoolean());
+                any(), anyBoolean());
     }
 
     @Test
@@ -679,7 +687,7 @@ public class SplitControllerTest {
         assertTrue(result);
         verify(mSplitPresenter).startActivityToSide(mTransaction, mActivity, PLACEHOLDER_INTENT,
                 mSplitController.getPlaceholderOptions(mActivity, true /* isOnCreated */),
-                placeholderRule, true /* isPlaceholder */);
+                placeholderRule, SPLIT_ATTRIBUTES, true /* isPlaceholder */);
     }
 
     @Test
@@ -698,14 +706,15 @@ public class SplitControllerTest {
                 primaryContainer,
                 mActivity,
                 secondaryContainer,
-                splitRule);
+                splitRule,
+                SPLIT_ATTRIBUTES);
         clearInvocations(mSplitController);
         final boolean result = mSplitController.resolveActivityToContainer(mTransaction, mActivity,
                 false /* isOnReparent */);
 
         assertTrue(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt());
-        verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any());
+        verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -725,7 +734,8 @@ public class SplitControllerTest {
                 primaryContainer,
                 mActivity,
                 secondaryContainer,
-                splitRule);
+                splitRule,
+                SPLIT_ATTRIBUTES);
         final Activity launchedActivity = createMockActivity();
         primaryContainer.addPendingAppearedActivity(launchedActivity);
 
@@ -746,7 +756,7 @@ public class SplitControllerTest {
 
         assertTrue(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt());
-        verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any());
+        verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -783,7 +793,8 @@ public class SplitControllerTest {
                 primaryContainer,
                 mActivity,
                 secondaryContainer,
-                placeholderRule);
+                placeholderRule,
+                SPLIT_ATTRIBUTES);
         final boolean result = mSplitController.resolveActivityToContainer(mTransaction, mActivity,
                 false /* isOnReparent */);
 
@@ -1103,6 +1114,7 @@ public class SplitControllerTest {
         doReturn(activity).when(mSplitController).getActivity(activityToken);
         doReturn(TASK_ID).when(activity).getTaskId();
         doReturn(new ActivityInfo()).when(activity).getActivityInfo();
+        doReturn(DEFAULT_DISPLAY).when(activity).getDisplayId();
         return activity;
     }
 
@@ -1141,7 +1153,7 @@ public class SplitControllerTest {
     private void setupPlaceholderRule(@NonNull Activity primaryActivity) {
         final SplitRule placeholderRule = new SplitPlaceholderRule.Builder(PLACEHOLDER_INTENT,
                 primaryActivity::equals, i -> false, w -> true)
-                .setSplitRatio(SPLIT_RATIO)
+                .setDefaultSplitAttributes(SPLIT_ATTRIBUTES)
                 .build();
         mSplitController.setEmbeddingRules(Collections.singleton(placeholderRule));
     }
@@ -1194,7 +1206,8 @@ public class SplitControllerTest {
                 primaryContainer,
                 primaryContainer.getTopNonFinishingActivity(),
                 secondaryContainer,
-                rule);
+                rule,
+                SPLIT_ATTRIBUTES);
 
         // We need to set those in case we are not respecting clear top.
         // TODO(b/231845476) we should always respect clearTop.

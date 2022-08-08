@@ -69,6 +69,8 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     private final DataProducer<List<CommonFoldingFeature>> mFoldingFeatureProducer;
 
+    private final List<CommonFoldingFeature> mLastReportedFoldingFeatures = new ArrayList<>();
+
     private final Map<IBinder, WindowContextConfigListener> mWindowContextConfigListeners =
             new ArrayMap<>();
 
@@ -192,6 +194,8 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     }
 
     private void onDisplayFeaturesChanged(List<CommonFoldingFeature> storedFeatures) {
+        mLastReportedFoldingFeatures.clear();
+        mLastReportedFoldingFeatures.addAll(storedFeatures);
         for (Context context : getContextsListeningForLayoutChanges()) {
             // Get the WindowLayoutInfo from the activity and pass the value to the layoutConsumer.
             Consumer<WindowLayoutInfo> layoutConsumer = mWindowLayoutChangeListeners.get(context);
@@ -209,6 +213,27 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private WindowLayoutInfo getWindowLayoutInfo(@NonNull @UiContext Context context,
             List<CommonFoldingFeature> storedFeatures) {
         List<DisplayFeature> displayFeatureList = getDisplayFeatures(context, storedFeatures);
+        return new WindowLayoutInfo(displayFeatureList);
+    }
+
+    /**
+     * Gets the current {@link WindowLayoutInfo} computed with passed {@link WindowConfiguration}.
+     *
+     * @return current {@link WindowLayoutInfo} on the default display. Returns
+     *   empty {@link WindowLayoutInfo} on secondary displays.
+     */
+    @NonNull
+    public WindowLayoutInfo getCurrentWindowLayoutInfo(int displayId,
+            @NonNull WindowConfiguration windowConfiguration) {
+        return getWindowLayoutInfo(displayId, windowConfiguration, mLastReportedFoldingFeatures);
+    }
+
+    /** @see #getWindowLayoutInfo(Context, List)  */
+    private WindowLayoutInfo getWindowLayoutInfo(int displayId,
+            @NonNull WindowConfiguration windowConfiguration,
+            List<CommonFoldingFeature> storedFeatures) {
+        List<DisplayFeature> displayFeatureList = getDisplayFeatures(displayId, windowConfiguration,
+                storedFeatures);
         return new WindowLayoutInfo(displayFeatureList);
     }
 
