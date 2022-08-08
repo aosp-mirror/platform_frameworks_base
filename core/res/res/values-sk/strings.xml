@@ -2060,7 +2060,7 @@
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Zavrieť"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systém"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Nastavenia"</string>
-    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotoaparát"</string>
+    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofón"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"sa zobrazuje cez ďalšie aplikácie na obrazovke"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Poskytnúť spätnú väzbu"</string>

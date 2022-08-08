@@ -18,7 +18,6 @@ java_library_static {
     name: "services.net",
     defaults: ["platform_service_defaults"],
     srcs: [
-        ":net-module-utils-srcs",
         ":services.net-sources",
     ],
     static_libs: [
