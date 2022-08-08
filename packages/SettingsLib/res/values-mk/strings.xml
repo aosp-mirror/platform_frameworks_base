@@ -660,8 +660,7 @@
     <string name="dream_complication_title_weather" msgid="598609151677172783">"Временска прогноза"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Квалитет на воздух"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Инфо за улогите"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
+    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"Контроли за домот"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Изберете профилна слика"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Икона за стандарден корисник"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Физичка тастатура"</string>
