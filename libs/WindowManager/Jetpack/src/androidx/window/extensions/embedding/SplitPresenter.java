@@ -46,6 +46,7 @@ import androidx.window.extensions.embedding.SplitAttributes.SplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.ExpandContainersSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.HingeSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.RatioSplitType;
+import androidx.window.extensions.embedding.SplitAttributesCalculator.SplitAttributesCalculatorParams;
 import androidx.window.extensions.embedding.TaskContainer.TaskProperties;
 import androidx.window.extensions.layout.DisplayFeature;
 import androidx.window.extensions.layout.FoldingFeature;
@@ -126,7 +127,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     })
     private @interface ResultCode {}
 
-    private static final SplitAttributes EXPAND_CONTAINERS_ATTRIBUTES =
+    @VisibleForTesting
+    static final SplitAttributes EXPAND_CONTAINERS_ATTRIBUTES =
             new SplitAttributes.Builder()
             .setSplitType(new ExpandContainersSplitType())
             .build();
@@ -502,18 +504,29 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         return !(splitAttributes.getSplitType() instanceof ExpandContainersSplitType);
     }
 
-    // TODO: expand this method to apply SplitLayoutCalculator#computeSplitAttributesForState
+    @GuardedBy("mController.mLock")
     @NonNull
     SplitAttributes computeSplitAttributes(@NonNull TaskProperties taskProperties,
             @NonNull SplitRule rule, @Nullable Pair<Size, Size> minDimensionsPair) {
-        final WindowMetrics taskWindowMetrics = getTaskWindowMetrics(
-                taskProperties.getConfiguration());
-        final SplitAttributes splitAttributes;
-        if (rule.checkParentMetrics(taskWindowMetrics)) {
-            splitAttributes = rule.getDefaultSplitAttributes();
-        } else {
-            splitAttributes = EXPAND_CONTAINERS_ATTRIBUTES;
+        final Configuration taskConfiguration = taskProperties.getConfiguration();
+        final WindowMetrics taskWindowMetrics = getTaskWindowMetrics(taskConfiguration);
+        final SplitAttributesCalculator calculator = mController.getSplitAttributesCalculator();
+        final SplitAttributes defaultSplitAttributes = rule.getDefaultSplitAttributes();
+        final boolean isDefaultMinSizeSatisfied = rule.checkParentMetrics(taskWindowMetrics);
+        if (calculator == null) {
+            if (!isDefaultMinSizeSatisfied) {
+                return EXPAND_CONTAINERS_ATTRIBUTES;
+            }
+            return sanitizeSplitAttributes(taskProperties, defaultSplitAttributes,
+                    minDimensionsPair);
         }
+        final WindowLayoutInfo windowLayoutInfo = mController.mWindowLayoutComponent
+                .getCurrentWindowLayoutInfo(taskProperties.getDisplayId(),
+                        taskConfiguration.windowConfiguration);
+        final SplitAttributesCalculatorParams params = new SplitAttributesCalculatorParams(
+                taskWindowMetrics, taskConfiguration, defaultSplitAttributes,
+                isDefaultMinSizeSatisfied, windowLayoutInfo, rule.getTag());
+        final SplitAttributes splitAttributes = calculator.computeSplitAttributesForParams(params);
         return sanitizeSplitAttributes(taskProperties, splitAttributes, minDimensionsPair);
     }
 

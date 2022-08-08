@@ -28,9 +28,12 @@ import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_I
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
 
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.DEFAULT_FINISH_PRIMARY_WITH_SECONDARY;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.DEFAULT_FINISH_SECONDARY_WITH_PRIMARY;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.SPLIT_ATTRIBUTES;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUNDS;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.TEST_TAG;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createActivityInfoWithMinDimensions;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMockTaskFragmentInfo;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
@@ -76,6 +79,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
+import android.view.WindowInsets;
+import android.view.WindowMetrics;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizer;
 import android.window.TaskFragmentParentInfo;
@@ -1103,6 +1108,47 @@ public class SplitControllerTest {
                 eq(activityToken));
         verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any(),
                 anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testHasSamePresentation() {
+        SplitPairRule splitRule1 = new SplitPairRule.Builder(
+                activityPair -> true,
+                activityIntentPair -> true,
+                windowMetrics -> true)
+                .setFinishSecondaryWithPrimary(DEFAULT_FINISH_SECONDARY_WITH_PRIMARY)
+                .setFinishPrimaryWithSecondary(DEFAULT_FINISH_PRIMARY_WITH_SECONDARY)
+                .setDefaultSplitAttributes(SPLIT_ATTRIBUTES)
+                .build();
+        SplitPairRule splitRule2 = new SplitPairRule.Builder(
+                activityPair -> true,
+                activityIntentPair -> true,
+                windowMetrics -> true)
+                .setFinishSecondaryWithPrimary(DEFAULT_FINISH_SECONDARY_WITH_PRIMARY)
+                .setFinishPrimaryWithSecondary(DEFAULT_FINISH_PRIMARY_WITH_SECONDARY)
+                .setDefaultSplitAttributes(SPLIT_ATTRIBUTES)
+                .build();
+
+        assertTrue("Rules must have same presentation if tags are null and has same properties.",
+                SplitController.haveSamePresentation(splitRule1, splitRule2,
+                        new WindowMetrics(TASK_BOUNDS, WindowInsets.CONSUMED)));
+
+        splitRule2 = new SplitPairRule.Builder(
+                activityPair -> true,
+                activityIntentPair -> true,
+                windowMetrics -> true)
+                .setFinishSecondaryWithPrimary(DEFAULT_FINISH_SECONDARY_WITH_PRIMARY)
+                .setFinishPrimaryWithSecondary(DEFAULT_FINISH_PRIMARY_WITH_SECONDARY)
+                .setDefaultSplitAttributes(SPLIT_ATTRIBUTES)
+                .setTag(TEST_TAG)
+                .build();
+
+        assertFalse("Rules must have different presentations if tags are not equal regardless"
+                        + "of other properties",
+                SplitController.haveSamePresentation(splitRule1, splitRule2,
+                        new WindowMetrics(TASK_BOUNDS, WindowInsets.CONSUMED)));
+
+
     }
 
     /** Creates a mock activity in the organizer process. */

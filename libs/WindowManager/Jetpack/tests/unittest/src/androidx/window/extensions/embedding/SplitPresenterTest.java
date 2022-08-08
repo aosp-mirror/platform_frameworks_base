@@ -20,6 +20,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.DEFAULT_FINISH_PRIMARY_WITH_SECONDARY;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.DEFAULT_FINISH_SECONDARY_WITH_PRIMARY;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.SPLIT_ATTRIBUTES;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUNDS;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
@@ -28,6 +30,7 @@ import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMock
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createWindowLayoutInfo;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.getSplitBounds;
+import static androidx.window.extensions.embedding.SplitPresenter.EXPAND_CONTAINERS_ATTRIBUTES;
 import static androidx.window.extensions.embedding.SplitPresenter.POSITION_END;
 import static androidx.window.extensions.embedding.SplitPresenter.POSITION_FILL;
 import static androidx.window.extensions.embedding.SplitPresenter.POSITION_START;
@@ -60,6 +63,7 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
+import android.util.Pair;
 import android.util.Size;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
@@ -483,6 +487,49 @@ public class SplitPresenterTest {
                 secondaryActivity);
         assertNotEquals(bottomTf, secondaryTf);
         assertTrue(secondaryTf.isAbove(primaryTf));
+    }
+
+    @Test
+    public void testComputeSplitAttributes() {
+        final SplitPairRule splitPairRule = new SplitPairRule.Builder(
+                activityPair -> true,
+                activityIntentPair -> true,
+                windowMetrics -> windowMetrics.getBounds().equals(TASK_BOUNDS))
+                .setFinishSecondaryWithPrimary(DEFAULT_FINISH_SECONDARY_WITH_PRIMARY)
+                .setFinishPrimaryWithSecondary(DEFAULT_FINISH_PRIMARY_WITH_SECONDARY)
+                .setDefaultSplitAttributes(SPLIT_ATTRIBUTES)
+                .build();
+        final TaskContainer.TaskProperties taskProperties = getTaskProperty();
+
+        assertEquals(SPLIT_ATTRIBUTES, mPresenter.computeSplitAttributes(taskProperties,
+                splitPairRule, null /* minDimensionsPair */));
+
+        final Pair<Size, Size> minDimensionsPair = new Pair<>(
+                new Size(TASK_BOUNDS.width(), TASK_BOUNDS.height()), null);
+
+        assertEquals(EXPAND_CONTAINERS_ATTRIBUTES, mPresenter.computeSplitAttributes(taskProperties,
+                splitPairRule, minDimensionsPair));
+
+        taskProperties.getConfiguration().windowConfiguration.setBounds(new Rect(
+                TASK_BOUNDS.left + 1, TASK_BOUNDS.top + 1, TASK_BOUNDS.right + 1,
+                TASK_BOUNDS.bottom + 1));
+
+        assertEquals(EXPAND_CONTAINERS_ATTRIBUTES, mPresenter.computeSplitAttributes(taskProperties,
+                splitPairRule, null /* minDimensionsPair */));
+
+        final SplitAttributes splitAttributes = new SplitAttributes.Builder()
+                .setSplitType(
+                        new SplitAttributes.SplitType.HingeSplitType(
+                                SplitAttributes.SplitType.RatioSplitType.splitEqually()
+                        )
+                ).build();
+
+        mController.setSplitAttributesCalculator(params -> {
+            return splitAttributes;
+        });
+
+        assertEquals(splitAttributes, mPresenter.computeSplitAttributes(taskProperties,
+                splitPairRule, null /* minDimensionsPair */));
     }
 
     private Activity createMockActivity() {

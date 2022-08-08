@@ -104,6 +104,23 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     private final List<EmbeddingRule> mSplitRules = new ArrayList<>();
     /**
+     * A developer-defined {@link SplitAttributes} calculator to compute the current
+     * {@link SplitAttributes} with the current device and window states.
+     * It is registered via {@link #setSplitAttributesCalculator(SplitAttributesCalculator)}
+     * and unregistered via {@link #clearSplitAttributesCalculator()}.
+     * This is called when:
+     * <ul>
+     *   <li>{@link SplitPresenter#updateSplitContainer(SplitContainer, TaskFragmentContainer,
+     *     WindowContainerTransaction)}</li>
+     *   <li>There's a started Activity which matches {@link SplitPairRule} </li>
+     *   <li>Checking whether the place holder should be launched if there's a Activity matches
+     *   {@link SplitPlaceholderRule} </li>
+     * </ul>
+     */
+    @GuardedBy("mLock")
+    @Nullable
+    private SplitAttributesCalculator mSplitAttributesCalculator;
+    /**
      * Map from Task id to {@link TaskContainer} which contains all TaskFragment and split pair info
      * below it.
      * When the app is host of multiple Tasks, there can be multiple splits controlled by the same
@@ -188,12 +205,22 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @Override
     public void setSplitAttributesCalculator(@NonNull SplitAttributesCalculator calculator) {
-        // TODO: Implement this method
+        synchronized (mLock) {
+            mSplitAttributesCalculator = calculator;
+        }
     }
 
     @Override
     public void clearSplitAttributesCalculator() {
-        // TODO: Implement this method
+        synchronized (mLock) {
+            mSplitAttributesCalculator = null;
+        }
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    SplitAttributesCalculator getSplitAttributesCalculator() {
+        return mSplitAttributesCalculator;
     }
 
     @NonNull
@@ -612,6 +639,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         // No split inside PIP.
         if (taskContainer.isInPictureInPicture()) {
             return false;
+        }
+        // Always assume the TaskContainer if SplitAttributesCalculator is set
+        if (mSplitAttributesCalculator != null) {
+            return true;
         }
         // Check if the parent container bounds can support any split rule.
         for (EmbeddingRule rule : mSplitRules) {
@@ -2005,8 +2036,17 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /** Whether the two rules have the same presentation. */
-    private static boolean haveSamePresentation(@NonNull SplitPairRule rule1,
+    @VisibleForTesting
+    static boolean haveSamePresentation(@NonNull SplitPairRule rule1,
             @NonNull SplitPairRule rule2, @NonNull WindowMetrics parentWindowMetrics) {
+        if (rule1.getTag() != null || rule2.getTag() != null) {
+            // Tag must be unique if it is set. We don't want to reuse the container if the rules
+            // have different tags because they can have different SplitAttributes later through
+            // SplitAttributesCalculator.
+            return Objects.equals(rule1.getTag(), rule2.getTag());
+        }
+        // If both rules don't have tag, compare all SplitRules' properties that may affect their
+        // SplitAttributes.
         // TODO(b/231655482): add util method to do the comparison in SplitPairRule.
         return rule1.getDefaultSplitAttributes().equals(rule2.getDefaultSplitAttributes())
                 && rule1.checkParentMetrics(parentWindowMetrics)
