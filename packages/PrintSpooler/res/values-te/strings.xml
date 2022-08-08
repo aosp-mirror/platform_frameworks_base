@@ -43,7 +43,7 @@
     <string name="summary_template" msgid="8899734908625669193">"సారాంశం, కాపీలు <xliff:g id="COPIES">%1$s</xliff:g>, కాగితం పరిమాణం <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"విస్తరణ హ్యాండిల్"</string>
     <string name="collapse_handle" msgid="6886637989442507451">"కుదింపు హ్యాండిల్"</string>
-    <string name="print_button" msgid="645164566271246268">"ముద్రించు"</string>
+    <string name="print_button" msgid="645164566271246268">"ప్రింట్ చేయండి"</string>
     <string name="savetopdf_button" msgid="2976186791686924743">"PDF లాగా సేవ్ చేయి"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"ముద్రణ ఎంపికలు విస్తరించబడ్డాయి"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"ముద్రణ ఎంపికలు కుదించబడ్డాయి"</string>
