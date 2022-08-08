@@ -274,24 +274,19 @@ public class InternalResourceService extends SystemService {
     public void onBootPhase(int phase) {
         mBootPhase = phase;
 
-        if (PHASE_SYSTEM_SERVICES_READY == phase) {
-            mConfigObserver.start();
-            mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
-                    ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
-            setupEverything();
-        } else if (PHASE_BOOT_COMPLETED == phase) {
-            if (!mExemptListLoaded) {
-                synchronized (mLock) {
-                    try {
-                        mExemptedApps =
-                                new ArraySet<>(mDeviceIdleController.getFullPowerWhitelist());
-                    } catch (RemoteException e) {
-                        // Shouldn't happen.
-                        Slog.wtf(TAG, e);
-                    }
-                    mExemptListLoaded = true;
-                }
-            }
+        switch (phase) {
+            case PHASE_SYSTEM_SERVICES_READY:
+                mConfigObserver.start();
+                mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
+                        ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+                onBootPhaseSystemServicesReady();
+                break;
+            case PHASE_THIRD_PARTY_APPS_CAN_START:
+                onBootPhaseThirdPartyAppsCanStart();
+                break;
+            case PHASE_BOOT_COMPLETED:
+                onBootPhaseBootCompleted();
+                break;
         }
     }
 
@@ -403,10 +398,9 @@ public class InternalResourceService extends SystemService {
             final ArraySet<String> added = new ArraySet<>();
             try {
                 mExemptedApps = new ArraySet<>(mDeviceIdleController.getFullPowerWhitelist());
+                mExemptListLoaded = true;
             } catch (RemoteException e) {
                 // Shouldn't happen.
-                Slog.wtf(TAG, e);
-                return;
             }
 
             for (int i = mExemptedApps.size() - 1; i >= 0; --i) {
@@ -695,17 +689,11 @@ public class InternalResourceService extends SystemService {
 
     /** Perform long-running and/or heavy setup work. This should be called off the main thread. */
     private void setupHeavyWork() {
+        if (mBootPhase < PHASE_THIRD_PARTY_APPS_CAN_START || !mIsEnabled) {
+            return;
+        }
         synchronized (mLock) {
             loadInstalledPackageListLocked();
-            if (mBootPhase >= PHASE_BOOT_COMPLETED && !mExemptListLoaded) {
-                try {
-                    mExemptedApps = new ArraySet<>(mDeviceIdleController.getFullPowerWhitelist());
-                } catch (RemoteException e) {
-                    // Shouldn't happen.
-                    Slog.wtf(TAG, e);
-                }
-                mExemptListLoaded = true;
-            }
             final boolean isFirstSetup = !mScribe.recordExists();
             if (isFirstSetup) {
                 mAgent.grantBirthrightsLocked();
@@ -726,15 +714,54 @@ public class InternalResourceService extends SystemService {
         }
     }
 
-    private void setupEverything() {
+    private void onBootPhaseSystemServicesReady() {
         if (mBootPhase < PHASE_SYSTEM_SERVICES_READY || !mIsEnabled) {
             return;
         }
         synchronized (mLock) {
             registerListeners();
             mCurrentBatteryLevel = getCurrentBatteryLevel();
+        }
+    }
+
+    private void onBootPhaseThirdPartyAppsCanStart() {
+        if (mBootPhase < PHASE_THIRD_PARTY_APPS_CAN_START || !mIsEnabled) {
+            return;
+        }
+        synchronized (mLock) {
             mHandler.post(this::setupHeavyWork);
             mCompleteEconomicPolicy.setup(mConfigObserver.getAllDeviceConfigProperties());
+        }
+    }
+
+    private void onBootPhaseBootCompleted() {
+        if (mBootPhase < PHASE_BOOT_COMPLETED || !mIsEnabled) {
+            return;
+        }
+        synchronized (mLock) {
+            if (!mExemptListLoaded) {
+                try {
+                    mExemptedApps = new ArraySet<>(mDeviceIdleController.getFullPowerWhitelist());
+                    mExemptListLoaded = true;
+                } catch (RemoteException e) {
+                    // Shouldn't happen.
+                }
+            }
+        }
+    }
+
+    private void setupEverything() {
+        if (!mIsEnabled) {
+            return;
+        }
+        if (mBootPhase >= PHASE_SYSTEM_SERVICES_READY) {
+            onBootPhaseSystemServicesReady();
+        }
+        if (mBootPhase >= PHASE_THIRD_PARTY_APPS_CAN_START) {
+            onBootPhaseThirdPartyAppsCanStart();
+        }
+        if (mBootPhase >= PHASE_BOOT_COMPLETED) {
+            onBootPhaseBootCompleted();
         }
     }
 
