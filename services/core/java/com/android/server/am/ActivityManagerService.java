@@ -14692,6 +14692,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
+            if (!Build.IS_DEBUGGABLE && callingUid != ROOT_UID && callingUid != SHELL_UID
+                    && callingUid != SYSTEM_UID) {
+                // If it's not debug build and not called from root/shell/system uid, reject it.
+                String msg = "Permission Denial: instrumentation test "
+                        + className + " from pid=" + callingPid + ", uid=" + callingUid
+                        + " not allowed because target package " + ii.targetPackage
+                        + " is not debuggable.";
+                reportStartInstrumentationFailureLocked(watcher, className, msg);
+                throw new SecurityException(msg);
+            }
+
             boolean disableHiddenApiChecks = ai.usesNonSdkApi()
                     || (flags & INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
             boolean disableTestApiChecks = disableHiddenApiChecks
