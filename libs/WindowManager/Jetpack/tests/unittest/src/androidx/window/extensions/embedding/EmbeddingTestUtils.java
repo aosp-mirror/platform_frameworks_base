@@ -58,13 +58,21 @@ public class EmbeddingTestUtils {
     /** Creates a rule to always split the given activity and the given intent. */
     static SplitRule createSplitRule(@NonNull Activity primaryActivity,
             @NonNull Intent secondaryIntent) {
+        return createSplitRule(primaryActivity, secondaryIntent, true /* clearTop */);
+    }
+
+    /** Creates a rule to always split the given activity and the given intent. */
+    static SplitRule createSplitRule(@NonNull Activity primaryActivity,
+            @NonNull Intent secondaryIntent, boolean clearTop) {
         final Pair<Activity, Intent> targetPair = new Pair<>(primaryActivity, secondaryIntent);
         return new SplitPairRule.Builder(
                 activityPair -> false,
                 targetPair::equals,
                 w -> true)
                 .setSplitRatio(SPLIT_RATIO)
-                .setShouldClearTop(true)
+                .setShouldClearTop(clearTop)
+                .setFinishPrimaryWithSecondary(DEFAULT_FINISH_PRIMARY_WITH_SECONDARY)
+                .setFinishSecondaryWithPrimary(DEFAULT_FINISH_SECONDARY_WITH_PRIMARY)
                 .build();
     }
 
@@ -74,6 +82,14 @@ public class EmbeddingTestUtils {
         return createSplitRule(primaryActivity, secondaryActivity,
                 DEFAULT_FINISH_PRIMARY_WITH_SECONDARY, DEFAULT_FINISH_SECONDARY_WITH_PRIMARY,
                 true /* clearTop */);
+    }
+
+    /** Creates a rule to always split the given activities. */
+    static SplitRule createSplitRule(@NonNull Activity primaryActivity,
+            @NonNull Activity secondaryActivity, boolean clearTop) {
+        return createSplitRule(primaryActivity, secondaryActivity,
+                DEFAULT_FINISH_PRIMARY_WITH_SECONDARY, DEFAULT_FINISH_SECONDARY_WITH_PRIMARY,
+                clearTop);
     }
 
     /** Creates a rule to always split the given activities with the given finish behaviors. */

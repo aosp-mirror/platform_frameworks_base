@@ -405,7 +405,7 @@
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"ഈ ഉപകരണം <xliff:g id="VPN_APP_0">%1$s</xliff:g>, <xliff:g id="VPN_APP_1">%2$s</xliff:g> എന്നിവയിലൂടെ ഇന്റർനെറ്റിലേക്ക് കണക്‌റ്റ് ചെയ്‌തിരിക്കുന്നു. ഇമെയിലുകളും ബ്രൗസിംഗ് ഡാറ്റയും ഉൾപ്പെടെയുള്ള നിങ്ങളുടെ നെറ്റ്‌വർക്ക് ആക്‌റ്റിവിറ്റി നിങ്ങളുടെ ഐടി അഡ്‌മിന് ദൃശ്യമാകും."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"നിങ്ങളുടെ ഔദ്യോഗിക ആപ്പുകൾ <xliff:g id="VPN_APP">%1$s</xliff:g> വഴി ഇന്റർനെറ്റിലേക്ക് കണക്‌റ്റ് ചെയ്‌തിരിക്കുന്നു. ഇമെയിലുകളും ബ്രൗസിംഗ് ഡാറ്റയും ഉൾപ്പെടെയുള്ള, ഔദ്യോഗിക ആപ്പുകളിലെ നിങ്ങളുടെ നെറ്റ്‌വർക്ക് ആക്‌റ്റിവിറ്റി നിങ്ങളുടെ ഐടി അഡ്‌മിനും VPN ദാതാവിനും ദൃശ്യമാകും."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"നിങ്ങളുടെ വ്യക്തിപര ആപ്പുകൾ <xliff:g id="VPN_APP">%1$s</xliff:g> വഴി ഇന്റർനെറ്റിലേക്ക് കണക്‌റ്റ് ചെയ്‌തിരിക്കുന്നു. ഇമെയിലുകളും ബ്രൗസിംഗ് ഡാറ്റയും ഉൾപ്പെടെയുള്ള നിങ്ങളുടെ നെറ്റ്‌വർക്ക് ആക്‌റ്റിവിറ്റി നിങ്ങളുടെ VPN ദാതാവിന് ദൃശ്യമാകും."</string>
-    <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" 5"</string>
+    <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN ക്രമീകരണം തുറക്കുക"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ഈ ഉപകരണം മാനേജ് ചെയ്യുന്നത് നിങ്ങളുടെ രക്ഷിതാവാണ്. നിങ്ങൾ ഉപയോഗിക്കുന്ന ആപ്പുകൾ, സ്‌ക്രീൻ സമയം, ലൊക്കേഷൻ എന്നിവ പോലുള്ള വിവരങ്ങൾ നിങ്ങളുടെ രക്ഷിതാവിന് കാണാനും നിയന്ത്രിക്കാനുമാകും."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
