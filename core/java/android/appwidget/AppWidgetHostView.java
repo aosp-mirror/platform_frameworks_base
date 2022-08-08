@@ -103,7 +103,6 @@ public class AppWidgetHostView extends FrameLayout {
     private boolean mOnLightBackground;
     private SizeF mCurrentSize = null;
     private RemoteViews.ColorResources mColorResources = null;
-    private SparseIntArray mColorMapping = null;
     // Stores the last remote views last inflated.
     private RemoteViews mLastInflatedRemoteViews = null;
     private long mLastInflatedRemoteViewsId = -1;
@@ -900,11 +899,19 @@ public class AppWidgetHostView extends FrameLayout {
      * {@link android.R.color#system_neutral1_500}.
      */
     public void setColorResources(@NonNull SparseIntArray colorMapping) {
-        if (mColorMapping != null && isSameColorMapping(mColorMapping, colorMapping)) {
+        if (mColorResources != null
+                && isSameColorMapping(mColorResources.getColorMapping(), colorMapping)) {
             return;
         }
-        mColorMapping = colorMapping.clone();
-        mColorResources = RemoteViews.ColorResources.create(mContext, mColorMapping);
+        setColorResources(RemoteViews.ColorResources.create(mContext, colorMapping));
+    }
+
+    /** @hide **/
+    public void setColorResources(RemoteViews.ColorResources colorResources) {
+        if (colorResources == mColorResources) {
+            return;
+        }
+        mColorResources = colorResources;
         mColorMappingChanged = true;
         mViewMode = VIEW_MODE_NOINIT;
         reapplyLastRemoteViews();
@@ -934,7 +941,6 @@ public class AppWidgetHostView extends FrameLayout {
     public void resetColorResources() {
         if (mColorResources != null) {
             mColorResources = null;
-            mColorMapping = null;
             mColorMappingChanged = true;
             mViewMode = VIEW_MODE_NOINIT;
             reapplyLastRemoteViews();
