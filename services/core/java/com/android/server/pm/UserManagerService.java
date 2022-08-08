@@ -1650,14 +1650,37 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         int currentUser = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
-        // TODO(b/179163496): should return true for profile users of the current user as well
         return currentUser == userId;
     }
 
     @Override
     public boolean isUserVisible(@UserIdInt int userId) {
-        // TODO(b/239824814): implement other cases like bg user, profile, user on secondary display
-        return isUserForeground(userId);
+        int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId != userId
+                && !hasManageUsersOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)) {
+            throw new SecurityException("Caller from user " + callingUserId + " needs MANAGE_USERS "
+                    + "or INTERACT_ACROSS_USERS permission to check if another user (" + userId
+                    + ") is visible");
+        }
+
+        // First check current foreground user (on main display)
+        int currentUserId = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
+
+        if (currentUserId == userId) {
+            return true;
+        }
+
+        // Then profiles of current user
+        // TODO(b/239824814): consider using AMInternal.isCurrentProfile() instead
+        if (isProfile(userId)) {
+            int parentId = Binder.withCleanCallingIdentity(() -> getProfileParentId(userId));
+            if (parentId == currentUserId) {
+                return isUserRunning(userId);
+            }
+        }
+
+        // TODO(b/239824814): support background users on secondary display (and their profiles)
+        return false;
     }
 
     @Override
