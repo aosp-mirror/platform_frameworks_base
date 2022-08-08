@@ -1323,6 +1323,10 @@ class ProcessRecord implements WindowProcessListener {
         return mService.mAppProfiler.getCpuTimeForPid(mPid);
     }
 
+    public long getCpuDelayTime() {
+        return mService.mAppProfiler.getCpuDelayTimeForPid(mPid);
+    }
+
     @Override
     public void onStartActivity(int topProcessState, boolean setProfileProc, String packageName,
             long versionCode) {

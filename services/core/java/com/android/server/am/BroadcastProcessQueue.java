@@ -85,6 +85,12 @@ class BroadcastProcessQueue {
     @Nullable String traceTrackName;
 
     /**
+     * Snapshotted value of {@link ProcessRecord#getCpuDelayTime()}, typically
+     * used when deciding if we should extend the soft ANR timeout.
+     */
+    long lastCpuDelayTime;
+
+    /**
      * Ordered collection of broadcasts that are waiting to be dispatched to
      * this process, as a pair of {@link BroadcastRecord} and the index into
      * {@link BroadcastRecord#receivers} that represents the receiver.

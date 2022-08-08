@@ -374,6 +374,8 @@ public class BroadcastQueueTest {
                 UserHandle.getUserId(r.info.uid), receiver);
         mRegisteredReceivers.put(r.getPid(), receiverList);
 
+        doReturn(42L).when(r).getCpuDelayTime();
+
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting killLocked() for "
                     + Arrays.toString(invocation.getArguments()));
