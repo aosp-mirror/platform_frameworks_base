@@ -477,7 +477,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                         R.dimen.notification_guts_conversation_icon_size));
 
         notificationInfoView.bindNotification(
-                notificationInfoView.getSelectedAction(),
                 mShortcutManager,
                 pmUser,
                 mPeopleSpaceWidgetManager,
