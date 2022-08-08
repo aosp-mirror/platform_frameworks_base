@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.keyguard.data.quickaffordance
+package com.android.systemui.keyguard.domain.quickaffordance
 
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator

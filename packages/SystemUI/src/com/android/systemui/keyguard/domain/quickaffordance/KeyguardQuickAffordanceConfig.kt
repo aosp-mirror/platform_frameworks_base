@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.keyguard.data.quickaffordance
+package com.android.systemui.keyguard.domain.quickaffordance
 
 import android.content.Intent
 import androidx.annotation.StringRes

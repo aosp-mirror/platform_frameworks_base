@@ -43,6 +43,7 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
+import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceModule;
 import com.android.systemui.keyguard.domain.usecase.KeyguardUseCaseModule;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -70,6 +71,7 @@ import dagger.Provides;
         KeyguardUserSwitcherComponent.class},
         includes = {
             FalsingModule.class,
+            KeyguardQuickAffordanceModule.class,
             KeyguardRepositoryModule.class,
             KeyguardUseCaseModule.class,
         })

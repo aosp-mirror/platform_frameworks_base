@@ -16,26 +16,33 @@
 
 package com.android.systemui.keyguard.domain.usecase
 
-import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
-import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordanceModel
-import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePosition
+import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
+import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
+import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceRegistry
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
-/** Use-case for observing the model of a quick affordance in the keyguard. */
-class ObserveKeyguardQuickAffordanceUseCase
+/** Defines interface for use-case for observing the model of a quick affordance in the keyguard. */
+interface ObserveKeyguardQuickAffordanceUseCase {
+    operator fun invoke(
+        position: KeyguardQuickAffordancePosition
+    ): Flow<KeyguardQuickAffordanceModel>
+}
+
+class ObserveKeyguardQuickAffordanceUseCaseImpl
 @Inject
 constructor(
-    private val repository: KeyguardQuickAffordanceRepository,
+    private val registry: KeyguardQuickAffordanceRegistry,
     private val isDozingUseCase: ObserveIsDozingUseCase,
     private val isKeyguardShowingUseCase: ObserveIsKeyguardShowingUseCase,
-) {
-    operator fun invoke(
+) : ObserveKeyguardQuickAffordanceUseCase {
+    override fun invoke(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceModel> {
         return combine(
-            repository.affordance(position),
+            affordance(position),
             isDozingUseCase(),
             isKeyguardShowingUseCase(),
         ) { affordance, isDozing, isKeyguardShowing ->
@@ -44,6 +51,25 @@ constructor(
             } else {
                 KeyguardQuickAffordanceModel.Hidden
             }
+        }
+    }
+
+    private fun affordance(
+        position: KeyguardQuickAffordancePosition
+    ): Flow<KeyguardQuickAffordanceModel> {
+        val configs = registry.getAll(position)
+        return combine(configs.map { config -> config.state }) { states ->
+            val index =
+                states.indexOfFirst { state ->
+                    state is KeyguardQuickAffordanceConfig.State.Visible
+                }
+            val visibleState =
+                if (index != -1) {
+                    states[index] as KeyguardQuickAffordanceConfig.State.Visible
+                } else {
+                    null
+                }
+            KeyguardQuickAffordanceModel.from(visibleState, configs[index]::class)
         }
     }
 }

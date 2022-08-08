@@ -1,24 +1,24 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ *  Copyright (C) 2022 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  */
 
-package com.android.systemui.keyguard.data.repository
+package com.android.systemui.keyguard.domain.quickaffordance
 
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
+import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.yield
@@ -31,9 +31,6 @@ import kotlinx.coroutines.yield
  */
 abstract class FakeKeyguardQuickAffordanceConfig : KeyguardQuickAffordanceConfig {
 
-    private val _onClickedInvocations = mutableListOf<ActivityLaunchAnimator.Controller?>()
-    val onClickedInvocations: List<ActivityLaunchAnimator.Controller?> = _onClickedInvocations
-
     var onClickedResult: OnClickedResult = OnClickedResult.Handled
 
     private val _state =
@@ -45,7 +42,6 @@ abstract class FakeKeyguardQuickAffordanceConfig : KeyguardQuickAffordanceConfig
     override fun onQuickAffordanceClicked(
         animationController: ActivityLaunchAnimator.Controller?,
     ): OnClickedResult {
-        _onClickedInvocations.add(animationController)
         return onClickedResult
     }
 
