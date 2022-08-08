@@ -20,7 +20,7 @@ import android.net.NetworkCapabilities
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.pipeline.repository.NetworkCapabilityInfo
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.NetworkCapabilityInfo
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -59,6 +59,7 @@ class ConnectivityInfoProcessorTest : SysuiTestCase() {
                 context,
                 scope,
                 statusBarPipelineFlags,
+                mock(),
         )
 
         var mostRecentValue: ProcessedConnectivityInfo? = null
