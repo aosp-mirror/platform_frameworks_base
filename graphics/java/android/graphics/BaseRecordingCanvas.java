@@ -610,8 +610,9 @@ public class BaseRecordingCanvas extends Canvas {
      * @hide
      */
     @Override
-    public void punchHole(float left, float top, float right, float bottom, float rx, float ry) {
-        nPunchHole(mNativeCanvasWrapper, left, top, right, bottom, rx, ry);
+    public void punchHole(float left, float top, float right, float bottom, float rx, float ry,
+            float alpha) {
+        nPunchHole(mNativeCanvasWrapper, left, top, right, bottom, rx, ry, alpha);
     }
 
     @FastNative
@@ -742,5 +743,5 @@ public class BaseRecordingCanvas extends Canvas {
 
     @FastNative
     private static native void nPunchHole(long renderer, float left, float top, float right,
-            float bottom, float rx, float ry);
+            float bottom, float rx, float ry, float alpha);
 }
