@@ -98,6 +98,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private final TvWindowMenuActionButton mA11yDoneButton;
 
     private final View mPipBackground;
+    private final View mDimLayer;
 
     private final ScrollView mScrollView;
     private final HorizontalScrollView mHorizontalScrollView;
@@ -151,6 +152,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         mExpandButton.setOnClickListener(this);
 
         mPipBackground = findViewById(R.id.tv_pip_menu_background);
+        mDimLayer = findViewById(R.id.tv_pip_menu_dim_layer);
 
         mScrollView = findViewById(R.id.tv_pip_menu_scroll);
         mHorizontalScrollView = findViewById(R.id.tv_pip_menu_horizontal_scroll);
@@ -774,6 +776,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
             refocusPreviousButton();
         }
         animateAlphaTo(show ? 1 : 0, mActionButtonsContainer);
+        animateAlphaTo(show ? 1 : 0, mDimLayer);
     }
 
     private void setFrameHighlighted(boolean highlighted) {

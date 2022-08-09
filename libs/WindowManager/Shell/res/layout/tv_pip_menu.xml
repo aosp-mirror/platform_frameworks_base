@@ -37,6 +37,13 @@
             android:background="@color/tv_pip_menu_background"
             android:alpha="0"/>
 
+        <View
+            android:id="@+id/tv_pip_menu_dim_layer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/tv_pip_menu_dim_layer"
+            android:alpha="0"/>
+
         <ScrollView
             android:id="@+id/tv_pip_menu_scroll"
             android:layout_width="match_parent"
