@@ -337,17 +337,39 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     public void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options) {
+        final int[] result = new int[1];
+        IRemoteAnimationRunner wrapper = new IRemoteAnimationRunner.Stub() {
+            @Override
+            public void onAnimationStart(@WindowManager.TransitionOldType int transit,
+                    RemoteAnimationTarget[] apps,
+                    RemoteAnimationTarget[] wallpapers,
+                    RemoteAnimationTarget[] nonApps,
+                    final IRemoteAnimationFinishedCallback finishedCallback) {
+                try {
+                    finishedCallback.onAnimationFinished();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to invoke onAnimationFinished", e);
+                }
+                if (result[0] == START_SUCCESS || result[0] == START_TASK_TO_FRONT) {
+                    final WindowContainerTransaction evictWct = new WindowContainerTransaction();
+                    mStageCoordinator.prepareEvictNonOpeningChildTasks(position, apps, evictWct);
+                    mSyncQueue.queue(evictWct);
+                }
+            }
+            @Override
+            public void onAnimationCancelled(boolean isKeyguardOccluded) {
+            }
+        };
         options = mStageCoordinator.resolveStartStage(STAGE_TYPE_UNDEFINED, position, options,
                 null /* wct */);
+        RemoteAnimationAdapter wrappedAdapter = new RemoteAnimationAdapter(wrapper,
+                0 /* duration */, 0 /* statusBarTransitionDelay */);
+        ActivityOptions activityOptions = ActivityOptions.fromBundle(options);
+        activityOptions.update(ActivityOptions.makeRemoteAnimation(wrappedAdapter));
 
         try {
-            final WindowContainerTransaction evictWct = new WindowContainerTransaction();
-            mStageCoordinator.prepareEvictChildTasks(position, evictWct);
-            final int result =
-                    ActivityTaskManager.getService().startActivityFromRecents(taskId, options);
-            if (result == START_SUCCESS || result == START_TASK_TO_FRONT) {
-                mSyncQueue.queue(evictWct);
-            }
+            result[0] = ActivityTaskManager.getService().startActivityFromRecents(taskId,
+                    activityOptions.toBundle());
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to launch task", e);
         }
