@@ -248,12 +248,18 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * Flag used when muted by client volume.
      */
     public static final int PLAYER_MUTE_CLIENT_VOLUME = (1 << 4);
+    /**
+     * @hide
+     * Flag used when muted by volume shaper.
+     */
+    public static final int PLAYER_MUTE_VOLUME_SHAPER = (1 << 5);
 
     /** @hide */
     @IntDef(
             flag = true,
             value = {PLAYER_MUTE_MASTER, PLAYER_MUTE_STREAM_VOLUME, PLAYER_MUTE_STREAM_MUTED,
-                    PLAYER_MUTE_PLAYBACK_RESTRICTED, PLAYER_MUTE_CLIENT_VOLUME})
+                    PLAYER_MUTE_PLAYBACK_RESTRICTED, PLAYER_MUTE_CLIENT_VOLUME,
+                    PLAYER_MUTE_VOLUME_SHAPER})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlayerMuteEvent {
     }
@@ -684,7 +690,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                 + " muteFromStreamMuted=" + ((mMutedState & PLAYER_MUTE_STREAM_MUTED) != 0)
                 + " muteFromPlaybackRestricted=" + ((mMutedState & PLAYER_MUTE_PLAYBACK_RESTRICTED)
                 != 0)
-                + " muteFromClientVolume=" + ((mMutedState & PLAYER_MUTE_CLIENT_VOLUME) != 0);
+                + " muteFromClientVolume=" + ((mMutedState & PLAYER_MUTE_CLIENT_VOLUME) != 0)
+                + " muteFromVolumeShaper=" + ((mMutedState & PLAYER_MUTE_VOLUME_SHAPER) != 0);
     }
 
     //=====================================================================
