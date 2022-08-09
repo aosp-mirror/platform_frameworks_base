@@ -32263,6 +32263,7 @@ package android.os {
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public boolean isUserRunningOrStopping(android.os.UserHandle);
     method public boolean isUserUnlocked();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public boolean isUserUnlocked(android.os.UserHandle);
+    method public boolean isUserVisible();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.MODIFY_QUIET_MODE"}, conditional=true) public boolean requestQuietModeEnabled(boolean, @NonNull android.os.UserHandle);
     method public boolean requestQuietModeEnabled(boolean, @NonNull android.os.UserHandle, int);
     method @Deprecated public boolean setRestrictionsChallenge(String);

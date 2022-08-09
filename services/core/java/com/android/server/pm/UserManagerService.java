@@ -1655,6 +1655,12 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public boolean isUserVisible(@UserIdInt int userId) {
+        // TODO(b/239824814): implement other cases like bg user, profile, user on secondary display
+        return isUserForeground(userId);
+    }
+
+    @Override
     public @NonNull String getUserName() {
         final int callingUid = Binder.getCallingUid();
         if (!hasQueryOrCreateUsersPermission()
