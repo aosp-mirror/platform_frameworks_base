@@ -1587,6 +1587,10 @@ public class UserManagerService extends IUserManager.Stub {
 
     public boolean isProfile(@UserIdInt int userId) {
         checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isProfile");
+        return isProfileUnchecked(userId);
+    }
+
+    private boolean isProfileUnchecked(@UserIdInt int userId) {
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.isProfile();
@@ -6827,9 +6831,6 @@ public class UserManagerService extends IUserManager.Stub {
                 return;
             }
 
-            // TODO(b/239982558) check for invalid cases like:
-            // - userId already assigned to another display
-            // - displayId already assigned to another user
             synchronized (mUsersLock) {
                 if (mUsersOnSecondaryDisplays == null) {
                     if (DBG) {
@@ -6841,6 +6842,36 @@ public class UserManagerService extends IUserManager.Stub {
                     Slogf.d(LOG_TAG, "Adding %d->%d to mUsersOnSecondaryDisplays",
                             userId, displayId);
                 }
+
+                if (isProfileUnchecked(userId)) {
+                    // Profile can only start in the same display as parent
+                    int parentUserId = getProfileParentId(userId);
+                    int parentDisplayId = mUsersOnSecondaryDisplays.get(parentUserId);
+                    if (displayId != parentDisplayId) {
+                        throw new IllegalStateException("Cannot assign profile " + userId + " to "
+                                + "display " + displayId + " as its parent (user " + parentUserId
+                                + ") is assigned to display " + parentDisplayId);
+                    }
+                } else {
+                    // Check if display is available
+                    for (int i = 0; i < mUsersOnSecondaryDisplays.size(); i++) {
+                        // Make sure display is not used by other users...
+                        // TODO(b/240736142); currently, if a user was started in a display, it
+                        // would need to be stopped first, so "switching" a user on secondary
+                        // diplay requires 2 non-atomic operations (stop and start). Once this logic
+                        // is refactored, it should be atomic.
+                        if (mUsersOnSecondaryDisplays.valueAt(i) == displayId) {
+                            throw new IllegalStateException("Cannot assign " + userId + " to "
+                                    + "display " + displayId + " as it's  already assigned to "
+                                    + "user " + mUsersOnSecondaryDisplays.keyAt(i));
+                        }
+                        // TODO(b/239982558) also check that user is not already assigned to other
+                        // display (including 0). That would be harder to tested under CTS though
+                        // (for example, would need to add a new AM method to start user in bg on
+                        // main display), so it's better to test on unit tests
+                    }
+                }
+
                 mUsersOnSecondaryDisplays.put(userId, displayId);
             }
         }

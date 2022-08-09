@@ -1468,7 +1468,16 @@ class UserController implements Handler.Callback {
         checkCallingHasOneOfThosePermissions("startUserOnSecondaryDisplay",
                 MANAGE_USERS, CREATE_USERS);
 
-        return startUserNoChecks(userId, displayId, /* foreground= */ false, unlockListener);
+        // DEFAULT_DISPLAY is used for "regular" start user operations
+        Preconditions.checkArgument(displayId != Display.DEFAULT_DISPLAY,
+                "Cannot use DEFAULT_DISPLAY");
+
+        try {
+            return startUserNoChecks(userId, displayId, /* foreground= */ false, unlockListener);
+        } catch (RuntimeException e) {
+            Slogf.w(TAG, "startUserOnSecondaryDisplay(%d, %d) failed: %s", userId, displayId, e);
+            return false;
+        }
     }
 
     private boolean startUserNoChecks(@UserIdInt int userId, int displayId, boolean foreground,
@@ -1492,13 +1501,15 @@ class UserController implements Handler.Callback {
                     foreground ? " in foreground" : "");
         }
 
+        // TODO(b/239982558): move logic below to a different class (like DisplayAssignmentManager)
         if (displayId != Display.DEFAULT_DISPLAY) {
+            // This is called by startUserOnSecondaryDisplay()
             if (!UserManager.isUsersOnSecondaryDisplaysEnabled()) {
-                // TODO(b/239824814): add CTS test and/or unit test
+                // TODO(b/239824814): add CTS test and/or unit test for all exceptional cases
                 throw new UnsupportedOperationException("Not supported by device");
             }
 
-            // TODO(b/239982558): add unit test for the exceptional cases below
+            // TODO(b/239982558): call DisplayManagerInternal to check if display is valid instead
             Preconditions.checkArgument(displayId > 0, "Invalid display id (%d)", displayId);
             Preconditions.checkArgument(userId != UserHandle.USER_SYSTEM, "Cannot start system user"
                     + " on secondary display (%d)", displayId);
@@ -1508,7 +1519,6 @@ class UserController implements Handler.Callback {
             // TODO(b/239982558): for now we're just updating the user's visibility, but most likely
             // we'll need to remove this call and handle that as part of the user state workflow
             // instead.
-            // TODO(b/239982558): check if display is valid
             mInjector.getUserManagerInternal().assignUserToDisplay(userId, displayId);
         }
 
