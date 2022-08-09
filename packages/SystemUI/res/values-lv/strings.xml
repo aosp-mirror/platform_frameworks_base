@@ -831,8 +831,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Atlasītas vairākas ierīces (kopā <xliff:g id="COUNT">%1$d</xliff:g>)"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(savienojums pārtraukts)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nevar pārslēgt. Pieskarieties, lai mēģinātu vēlreiz."</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Savienošana ar ierīci"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Lai apraidītu šo sesiju, lūdzu, atveriet lietotni."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nezināma lietotne"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Apturēt apraidi"</string>
@@ -944,14 +943,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi nav pieejams"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritātes režīms"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Signāls ir iestatīts"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Kamera ir izslēgta"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mikrofons ir izslēgts"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera un mikrofons ir izslēgti"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# paziņojums}zero{# paziņojumu}one{# paziņojums}other{# paziņojumi}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Notiek apraidīšana"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Vai apturēt lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> apraidīšanu?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Ja sāksiet lietotnes <xliff:g id="SWITCHAPP">%1$s</xliff:g> apraidīšanu vai mainīsiet izvadi, pašreizējā apraide tiks apturēta"</string>

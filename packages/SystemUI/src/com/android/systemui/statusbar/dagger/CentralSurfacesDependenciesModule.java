@@ -19,7 +19,9 @@ package com.android.systemui.statusbar.dagger;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.service.dreams.IDreamManager;
+import android.util.Log;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
@@ -60,10 +62,12 @@ import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconList;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallFlags;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLogger;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.tracing.ProtoTracer;
@@ -274,7 +278,30 @@ public interface CentralSurfacesDependenciesModule {
     @Provides
     @SysUISingleton
     static DialogLaunchAnimator provideDialogLaunchAnimator(IDreamManager dreamManager,
+            KeyguardStateController keyguardStateController,
+            Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManager,
             InteractionJankMonitor interactionJankMonitor) {
-        return new DialogLaunchAnimator(dreamManager, interactionJankMonitor);
+        DialogLaunchAnimator.Callback callback = new DialogLaunchAnimator.Callback() {
+            @Override
+            public boolean isDreaming() {
+                try {
+                    return dreamManager.isDreaming();
+                } catch (RemoteException e) {
+                    Log.e("DialogLaunchAnimator.Callback", "dreamManager.isDreaming failed", e);
+                    return false;
+                }
+            }
+
+            @Override
+            public boolean isUnlocked() {
+                return keyguardStateController.isUnlocked();
+            }
+
+            @Override
+            public boolean isShowingAlternateAuthOnUnlock() {
+                return statusBarKeyguardViewManager.get().shouldShowAltAuth();
+            }
+        };
+        return new DialogLaunchAnimator(callback, interactionJankMonitor);
     }
 }

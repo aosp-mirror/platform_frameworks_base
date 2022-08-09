@@ -26,6 +26,7 @@ import junit.framework.Assert.assertNotNull
 import junit.framework.Assert.assertNull
 import junit.framework.Assert.assertTrue
 import junit.framework.AssertionFailedError
+import kotlin.concurrent.thread
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -34,19 +35,18 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
-import kotlin.concurrent.thread
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
 class ActivityLaunchAnimatorTest : SysuiTestCase() {
     private val launchContainer = LinearLayout(mContext)
-    private val testLaunchAnimator = LaunchAnimator(TEST_TIMINGS, TEST_INTERPOLATORS)
+    private val testLaunchAnimator = fakeLaunchAnimator()
     @Mock lateinit var callback: ActivityLaunchAnimator.Callback
     @Mock lateinit var listener: ActivityLaunchAnimator.Listener
     @Spy private val controller = TestLaunchAnimatorController(launchContainer)
@@ -77,12 +77,13 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         // We start in a new thread so that we can ensure that the callbacks are called in the main
         // thread.
         thread {
-            animator.startIntentWithAnimation(
+                animator.startIntentWithAnimation(
                     controller = controller,
                     animate = animate,
                     intentStarter = intentStarter
-            )
-        }.join()
+                )
+            }
+            .join()
     }
 
     @Test
@@ -197,14 +198,25 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         val bounds = Rect(10 /* left */, 20 /* top */, 30 /* right */, 40 /* bottom */)
         val taskInfo = ActivityManager.RunningTaskInfo()
         taskInfo.topActivity = ComponentName("com.android.systemui", "FakeActivity")
-        taskInfo.topActivityInfo = ActivityInfo().apply {
-            applicationInfo = ApplicationInfo()
-        }
+        taskInfo.topActivityInfo = ActivityInfo().apply { applicationInfo = ApplicationInfo() }
 
         return RemoteAnimationTarget(
-                0, RemoteAnimationTarget.MODE_OPENING, SurfaceControl(), false, Rect(), Rect(), 0,
-                Point(), Rect(), bounds, WindowConfiguration(), false, SurfaceControl(), Rect(),
-                taskInfo, false
+            0,
+            RemoteAnimationTarget.MODE_OPENING,
+            SurfaceControl(),
+            false,
+            Rect(),
+            Rect(),
+            0,
+            Point(),
+            Rect(),
+            bounds,
+            WindowConfiguration(),
+            false,
+            SurfaceControl(),
+            Rect(),
+            taskInfo,
+            false
         )
     }
 }
@@ -213,17 +225,17 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
  * A simple implementation of [ActivityLaunchAnimator.Controller] which throws if it is called
  * outside of the main thread.
  */
-private class TestLaunchAnimatorController(
-    override var launchContainer: ViewGroup
-) : ActivityLaunchAnimator.Controller {
-    override fun createAnimatorState() = LaunchAnimator.State(
+private class TestLaunchAnimatorController(override var launchContainer: ViewGroup) :
+    ActivityLaunchAnimator.Controller {
+    override fun createAnimatorState() =
+        LaunchAnimator.State(
             top = 100,
             bottom = 200,
             left = 300,
             right = 400,
             topCornerRadius = 10f,
             bottomCornerRadius = 20f
-    )
+        )
 
     private fun assertOnMainThread() {
         if (Looper.myLooper() != Looper.getMainLooper()) {

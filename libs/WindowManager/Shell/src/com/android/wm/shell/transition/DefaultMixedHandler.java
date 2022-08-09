@@ -274,7 +274,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
     }
 
     @Override
-    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted) {
+    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
+            @Nullable SurfaceControl.Transaction finishT) {
         MixedTransition mixed = null;
         for (int i = mActiveTransitions.size() - 1; i >= 0; --i) {
             if (mActiveTransitions.get(i).mTransition != transition) continue;
@@ -283,7 +284,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         }
         if (mixed == null) return;
         if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT) {
-            mPipHandler.onTransitionConsumed(transition, aborted);
+            mPipHandler.onTransitionConsumed(transition, aborted, finishT);
         }
     }
 }
