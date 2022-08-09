@@ -1557,16 +1557,6 @@ public class Typeface {
         return Arrays.binarySearch(mSupportedAxes, axis) >= 0;
     }
 
-    /** @hide */
-    public List<FontFamily> getFallback() {
-        ArrayList<FontFamily> families = new ArrayList<>();
-        int familySize = nativeGetFamilySize(native_instance);
-        for (int i = 0; i < familySize; ++i) {
-            families.add(new FontFamily(nativeGetFamily(native_instance, i)));
-        }
-        return families;
-    }
-
     private static native long nativeCreateFromTypeface(long native_instance, int style);
     private static native long nativeCreateFromTypefaceWithExactStyle(
             long native_instance, int weight, boolean italic);
@@ -1591,13 +1581,6 @@ public class Typeface {
 
     @CriticalNative
     private static native long nativeGetReleaseFunc();
-
-    @CriticalNative
-    private static native int nativeGetFamilySize(long naitvePtr);
-
-    @CriticalNative
-    private static native long nativeGetFamily(long nativePtr, int index);
-
 
     private static native void nativeRegisterGenericFamily(String str, long nativePtr);
 
