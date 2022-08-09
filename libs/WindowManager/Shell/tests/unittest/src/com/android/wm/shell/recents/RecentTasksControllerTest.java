@@ -23,7 +23,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -48,6 +50,7 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 import com.android.wm.shell.util.SplitBounds;
@@ -73,21 +76,35 @@ public class RecentTasksControllerTest extends ShellTestCase {
     @Mock
     private TaskStackListenerImpl mTaskStackListener;
     @Mock
-    private ShellInit mShellInit;
+    private ShellCommandHandler mShellCommandHandler;
 
     private ShellTaskOrganizer mShellTaskOrganizer;
     private RecentTasksController mRecentTasksController;
+    private ShellInit mShellInit;
     private ShellExecutor mMainExecutor;
 
     @Before
     public void setUp() {
         mMainExecutor = new TestShellExecutor();
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
+        mShellInit = spy(new ShellInit(mMainExecutor));
         mRecentTasksController = spy(new RecentTasksController(mContext, mShellInit,
-                mTaskStackListener, mMainExecutor));
-        mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit,
+                mShellCommandHandler, mTaskStackListener, mMainExecutor));
+        mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit, mShellCommandHandler,
                 null /* sizeCompatUI */, Optional.empty(), Optional.of(mRecentTasksController),
                 mMainExecutor);
+        mShellInit.init();
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), isA(RecentTasksController.class));
+    }
+
+    @Test
+    public void instantiateController_addDumpCallback() {
+        verify(mShellCommandHandler, times(1)).addDumpCallback(any(),
+                isA(RecentTasksController.class));
     }
 
     @Test
