@@ -72,8 +72,6 @@ public class PasswordSlotManager {
 
     /**
      * Notify the manager of which slots are definitively in use by the current OS image.
-     *
-     * @throws RuntimeException
      */
     public void refreshActiveSlots(Set<Integer> activeSlots) throws RuntimeException {
         if (mSlotMap == null) {
@@ -103,8 +101,6 @@ public class PasswordSlotManager {
 
     /**
      * Mark the given slot as in use by the current OS image.
-     *
-     * @throws RuntimeException
      */
     public void markSlotInUse(int slot) throws RuntimeException {
         ensureSlotMapLoaded();
@@ -117,8 +113,6 @@ public class PasswordSlotManager {
 
     /**
      * Mark the given slot as no longer in use by the current OS image.
-     *
-     * @throws RuntimeException
      */
     public void markSlotDeleted(int slot) throws RuntimeException {
         ensureSlotMapLoaded();

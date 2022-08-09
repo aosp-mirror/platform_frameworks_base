@@ -67,7 +67,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.authsecret.V1_0.IAuthSecret;
@@ -238,7 +237,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     @VisibleForTesting
     protected final SyntheticPasswordManager mSpManager;
 
-    private final KeyStore mKeyStore;
     private final java.security.KeyStore mJavaKeyStore;
     private final RecoverableKeyStoreManager mRecoverableKeyStoreManager;
     private ManagedProfilePasswordCache mManagedProfilePasswordCache;
@@ -570,7 +568,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     protected LockSettingsService(Injector injector) {
         mInjector = injector;
         mContext = injector.getContext();
-        mKeyStore = injector.getKeyStore();
         mJavaKeyStore = injector.getJavaKeyStore();
         mRecoverableKeyStoreManager = injector.getRecoverableKeyStoreManager();
         mHandler = injector.getHandler(injector.getServiceThread());
@@ -595,7 +592,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         mSpManager = injector.getSyntheticPasswordManager(mStorage);
         mManagedProfilePasswordCache = injector.getManagedProfilePasswordCache(mJavaKeyStore);
-        mBiometricDeferredQueue = new BiometricDeferredQueue(mContext, mSpManager, mHandler);
+        mBiometricDeferredQueue = new BiometricDeferredQueue(mSpManager, mHandler);
 
         mRebootEscrowManager = injector.getRebootEscrowManager(new RebootEscrowCallbacks(),
                 mStorage);
@@ -637,7 +634,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void showEncryptionNotificationForProfile(UserHandle user, String reason) {
-        Resources r = mContext.getResources();
         CharSequence title = getEncryptionNotificationTitle();
         CharSequence message = getEncryptionNotificationMessage();
         CharSequence detail = getEncryptionNotificationDetail();
@@ -657,7 +653,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         PendingIntent intent = PendingIntent.getActivity(mContext, 0, unlockIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
 
-        Slog.d(TAG, String.format("showing encryption notification, user: %d; reason: %s",
+        Slog.d(TAG, TextUtils.formatSimple("showing encryption notification, user: %d; reason: %s",
                 user.getIdentifier(), reason));
 
         showEncryptionNotification(user, title, message, detail, intent);
@@ -839,7 +835,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (mContext.checkCallingOrSelfPermission(PERMISSION) != PERMISSION_GRANTED) {
             EventLog.writeEvent(0x534e4554, "28251513", getCallingUid(), "");  // SafetyNet
         }
-        checkWritePermission(UserHandle.USER_SYSTEM);
+        checkWritePermission();
 
         mHasSecureLockScreen = mContext.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN);
@@ -979,7 +975,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private final void checkWritePermission(int userId) {
+    private final void checkWritePermission() {
         mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsWrite");
     }
 
@@ -987,7 +983,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsRead");
     }
 
-    private final void checkPasswordHavePermission(int userId) {
+    private final void checkPasswordHavePermission() {
         if (mContext.checkCallingOrSelfPermission(PERMISSION) != PERMISSION_GRANTED) {
             EventLog.writeEvent(0x534e4554, "28251513", getCallingUid(), "");  // SafetyNet
         }
@@ -1056,7 +1052,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public void setSeparateProfileChallengeEnabled(int userId, boolean enabled,
             LockscreenCredential profileUserPassword) {
-        checkWritePermission(userId);
+        checkWritePermission();
         if (!mHasSecureLockScreen
                 && profileUserPassword != null
                 && profileUserPassword.getType() != CREDENTIAL_TYPE_NONE) {
@@ -1103,19 +1099,19 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public void setBoolean(String key, boolean value, int userId) {
-        checkWritePermission(userId);
+        checkWritePermission();
         mStorage.setBoolean(key, value, userId);
     }
 
     @Override
     public void setLong(String key, long value, int userId) {
-        checkWritePermission(userId);
+        checkWritePermission();
         mStorage.setLong(key, value, userId);
     }
 
     @Override
     public void setString(String key, String value, int userId) {
-        checkWritePermission(userId);
+        checkWritePermission();
         mStorage.setString(key, value, userId);
     }
 
@@ -1154,7 +1150,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      */
     @Override
     public int getCredentialType(int userId) {
-        checkPasswordHavePermission(userId);
+        checkPasswordHavePermission();
         return getCredentialTypeInternal(userId);
     }
 
@@ -1967,7 +1963,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public void resetKeyStore(int userId) {
-        checkWritePermission(userId);
+        checkWritePermission();
         if (DEBUG) Slog.v(TAG, "Reset keystore for user: " + userId);
         List<Integer> profileUserIds = new ArrayList<>();
         List<LockscreenCredential> profileUserDecryptedPasswords = new ArrayList<>();
@@ -2275,7 +2271,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public void requireStrongAuth(int strongAuthReason, int userId) {
-        checkWritePermission(userId);
+        checkWritePermission();
         mStrongAuth.requireStrongAuth(strongAuthReason, userId);
     }
 
@@ -2293,7 +2289,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public void userPresent(int userId) {
-        checkWritePermission(userId);
+        checkWritePermission();
         mStrongAuth.reportUnlock(userId);
     }
 
@@ -2321,9 +2317,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         final int origPid = Binder.getCallingPid();
         final int origUid = Binder.getCallingUid();
 
+        Slog.e(TAG, "Caller pid " + origPid + " Caller uid " + origUid);
         // The original identity is an opaque integer.
         final long origId = Binder.clearCallingIdentity();
-        Slog.e(TAG, "Caller pid " + origPid + " Caller uid " + origUid);
         try {
             final LockSettingsShellCommand command =
                     new LockSettingsShellCommand(new LockPatternUtils(mContext), mContext, origPid,
@@ -2847,7 +2843,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         synchronized (mSpManager) {
             disableEscrowTokenOnNonManagedDevicesIfNeeded(userId);
             for (long handle : mSpManager.getPendingTokensForUser(userId)) {
-                Slog.i(TAG, String.format("activateEscrowTokens: %x %d ", handle, userId));
+                Slog.i(TAG, TextUtils.formatSimple("activateEscrowTokens: %x %d ", handle, userId));
                 mSpManager.createTokenBasedProtector(handle, sp, userId);
             }
         }
@@ -3008,14 +3004,14 @@ public class LockSettingsService extends ILockSettings.Stub {
             pw.println("User " + userId);
             pw.increaseIndent();
             synchronized (mSpManager) {
-                pw.println(String.format("LSKF-based SP protector ID: %x",
+                pw.println(TextUtils.formatSimple("LSKF-based SP protector ID: %x",
                         getCurrentLskfBasedProtectorId(userId)));
-                pw.println(String.format("LSKF last changed: %s (previous protector: %x)",
+                pw.println(TextUtils.formatSimple("LSKF last changed: %s (previous protector: %x)",
                         timestampToString(getLong(LSKF_LAST_CHANGED_TIME_KEY, 0, userId)),
                         getLong(PREV_LSKF_BASED_PROTECTOR_ID_KEY, 0, userId)));
             }
             try {
-                pw.println(String.format("SID: %x",
+                pw.println(TextUtils.formatSimple("SID: %x",
                         getGateKeeperService().getSecureUserId(userId)));
             } catch (RemoteException e) {
                 // ignore.
@@ -3026,7 +3022,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             pw.println("CredentialType: " + credentialTypeToString(
                     getCredentialTypeInternal(userId)));
             pw.println("SeparateChallenge: " + getSeparateProfileChallengeEnabledInternal(userId));
-            pw.println(String.format("Metrics: %s",
+            pw.println(TextUtils.formatSimple("Metrics: %s",
                     getUserPasswordMetrics(userId) != null ? "known" : "unknown"));
             pw.decreaseIndent();
         }

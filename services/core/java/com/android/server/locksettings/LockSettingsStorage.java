@@ -17,7 +17,6 @@
 package com.android.server.locksettings;
 
 import static android.content.Context.USER_SERVICE;
-import static android.text.TextUtils.formatSimple;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
@@ -437,7 +436,7 @@ class LockSettingsStorage {
     }
 
     private File getSyntheticPasswordStateFileForUser(int userId, long protectorId, String name) {
-        String fileName = formatSimple("%016x.%s", protectorId, name);
+        String fileName = TextUtils.formatSimple("%016x.%s", protectorId, name);
         return new File(getSyntheticPasswordDirectoryForUser(userId), fileName);
     }
 
@@ -643,13 +642,13 @@ class LockSettingsStorage {
         final UserManager um = UserManager.get(mContext);
         for (UserInfo user : um.getUsers()) {
             File userPath = getSyntheticPasswordDirectoryForUser(user.id);
-            pw.println(String.format("User %d [%s]:", user.id, userPath));
+            pw.println(TextUtils.formatSimple("User %d [%s]:", user.id, userPath));
             pw.increaseIndent();
             File[] files = userPath.listFiles();
             if (files != null) {
                 Arrays.sort(files);
                 for (File file : files) {
-                    pw.println(String.format("%6d %s %s", file.length(),
+                    pw.println(TextUtils.formatSimple("%6d %s %s", file.length(),
                             LockSettingsService.timestampToString(file.lastModified()),
                             file.getName()));
                 }
