@@ -27,6 +27,7 @@ import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
+import com.android.server.app.GameManagerService.GamePackageConfiguration;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -62,6 +63,8 @@ public class GameManagerSettings {
 
     // PackageName -> GameMode
     private final ArrayMap<String, Integer> mGameModes = new ArrayMap<>();
+    // PackageName -> GamePackageConfiguration
+    private final ArrayMap<String, GamePackageConfiguration> mConfigOverrides = new ArrayMap<>();
 
     GameManagerSettings(File dataDir) {
         mSystemDir = new File(dataDir, "system");
@@ -74,7 +77,7 @@ public class GameManagerSettings {
     }
 
     /**
-     * Return the game mode of a given package.
+     * Returns the game mode of a given package.
      * This operation must be synced with an external lock.
      */
     int getGameModeLocked(String packageName) {
@@ -85,7 +88,7 @@ public class GameManagerSettings {
     }
 
     /**
-     * Set the game mode of a given package.
+     * Sets the game mode of a given package.
      * This operation must be synced with an external lock.
      */
     void setGameModeLocked(String packageName, int gameMode) {
@@ -93,15 +96,40 @@ public class GameManagerSettings {
     }
 
     /**
-     * Remove the game mode of a given package.
+     * Removes all game settings of a given package.
      * This operation must be synced with an external lock.
      */
     void removeGame(String packageName) {
         mGameModes.remove(packageName);
+        mConfigOverrides.remove(packageName);
     }
 
     /**
-     * Write all current game service settings into disk.
+     * Returns the game config override of a given package or null if absent.
+     * This operation must be synced with an external lock.
+     */
+    GamePackageConfiguration getConfigOverride(String packageName) {
+        return mConfigOverrides.get(packageName);
+    }
+
+    /**
+     * Sets the game config override of a given package.
+     * This operation must be synced with an external lock.
+     */
+    void setConfigOverride(String packageName, GamePackageConfiguration configOverride) {
+        mConfigOverrides.put(packageName, configOverride);
+    }
+
+    /**
+     * Removes the game mode config override of a given package.
+     * This operation must be synced with an external lock.
+     */
+    void removeConfigOverride(String packageName) {
+        mConfigOverrides.remove(packageName);
+    }
+
+    /**
+     * Writes all current game service settings into disk.
      * This operation must be synced with an external lock.
      */
     void writePersistentDataLocked() {
@@ -139,7 +167,7 @@ public class GameManagerSettings {
     }
 
     /**
-     * Read game service settings from the disk.
+     * Reads game service settings from the disk.
      * This operation must be synced with an external lock.
      */
     boolean readPersistentDataLocked() {

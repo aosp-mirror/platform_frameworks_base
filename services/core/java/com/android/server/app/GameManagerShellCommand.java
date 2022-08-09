@@ -81,7 +81,8 @@ public class GameManagerShellCommand extends ShellCommand {
         final GameManagerService gameManagerService = (GameManagerService)
                 ServiceManager.getService(Context.GAME_SERVICE);
 
-        final String listStr = gameManagerService.getInterventionList(packageName);
+        final String listStr = gameManagerService.getInterventionList(packageName,
+                ActivityManager.getCurrentUser());
 
         if (listStr == null) {
             pw.println("No interventions found for " + packageName);
