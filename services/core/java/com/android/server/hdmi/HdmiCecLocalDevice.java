@@ -54,7 +54,7 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Class that models a logical CEC device hosted in this system. Handles initialization, CEC
  * commands that call for actions customized per device type.
  */
-abstract class HdmiCecLocalDevice {
+abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
     private static final String TAG = "HdmiCecLocalDevice";
 
     private static final int MAX_HDMI_ACTIVE_SOURCE_HISTORY = 10;

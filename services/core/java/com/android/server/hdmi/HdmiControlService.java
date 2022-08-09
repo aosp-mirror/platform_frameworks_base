@@ -713,8 +713,12 @@ public class HdmiControlService extends SystemService {
 
             mEarcSupported &= (mEarcController != null);
         }
-        if (isEarcSupportedAndEnabled()) {
-            initializeEarc(INITIATED_BY_BOOT_UP);
+        if (isEarcSupported()) {
+            if (isEarcEnabled()) {
+                initializeEarc(INITIATED_BY_BOOT_UP);
+            } else {
+                setEarcEnabledInHal(false);
+            }
         }
 
         mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
@@ -3386,9 +3390,15 @@ public class HdmiControlService extends SystemService {
         }
     }
 
-    private boolean isEarcSupportedAndEnabled() {
+    private boolean isEarcEnabled() {
         synchronized (mLock) {
-            return mEarcSupported && mEarcEnabled;
+            return mEarcEnabled;
+        }
+    }
+
+    private boolean isEarcSupported() {
+        synchronized (mLock) {
+            return mEarcSupported;
         }
     }
 
@@ -3485,21 +3495,24 @@ public class HdmiControlService extends SystemService {
         } else {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
         }
-        if (isEarcSupportedAndEnabled()) {
-            int startReason = -1;
-            switch (wakeUpAction) {
-                case WAKE_UP_SCREEN_ON:
-                    startReason = INITIATED_BY_SCREEN_ON;
-                    break;
-                case WAKE_UP_BOOT_UP:
-                    startReason = INITIATED_BY_BOOT_UP;
-                    break;
-                default:
-                    Slog.e(TAG, "wakeUpAction " + wakeUpAction + " not defined.");
-                    return;
-
+        if (isEarcSupported()) {
+            if (isEarcEnabled()) {
+                int startReason = -1;
+                switch (wakeUpAction) {
+                    case WAKE_UP_SCREEN_ON:
+                        startReason = INITIATED_BY_SCREEN_ON;
+                        break;
+                    case WAKE_UP_BOOT_UP:
+                        startReason = INITIATED_BY_BOOT_UP;
+                        break;
+                    default:
+                        Slog.e(TAG, "wakeUpAction " + wakeUpAction + " not defined.");
+                        return;
+                }
+                initializeEarc(startReason);
+            } else {
+                setEarcEnabledInHal(false);
             }
-            initializeEarc(startReason);
         }
         // TODO: Initialize MHL local devices.
     }
@@ -4394,6 +4407,7 @@ public class HdmiControlService extends SystemService {
 
     private void initializeEarc(int initiatedBy) {
         Slog.i(TAG, "eARC initialized, reason = " + initiatedBy);
+        setEarcEnabledInHal(true);
         initializeEarcLocalDevice(initiatedBy);
     }
 
@@ -4415,8 +4429,8 @@ public class HdmiControlService extends SystemService {
         synchronized (mLock) {
             mEarcEnabled = (enabled == EARC_FEATURE_ENABLED);
 
-            if (!mEarcSupported) {
-                Slog.i(TAG, "Enabled/disabled eARC setting, but the hardware doesn´t support eARC."
+            if (!isEarcSupported()) {
+                Slog.i(TAG, "Enabled/disabled eARC setting, but the hardware doesn´t support eARC. "
                         + "This settings change doesn´t have an effect.");
                 return;
             }
@@ -4448,6 +4462,8 @@ public class HdmiControlService extends SystemService {
 
     @ServiceThreadOnly
     private void onDisableEarc() {
+        disableEarcLocalDevice();
+        setEarcEnabledInHal(false);
         clearEarcLocalDevice();
     }
 
@@ -4471,5 +4487,17 @@ public class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
         return mEarcLocalDevice;
     }
+    private void disableEarcLocalDevice() {
+        if (mEarcLocalDevice == null) {
+            return;
+        }
+        mEarcLocalDevice.disableDevice();
+    }
 
+    @ServiceThreadOnly
+    @VisibleForTesting
+    protected void setEarcEnabledInHal(boolean enabled) {
+        assertRunOnServiceThread();
+        mEarcController.setEarcEnabled(enabled);
+    }
 }

@@ -16,20 +16,11 @@
 
 package com.android.server.hdmi;
 
-import android.util.IndentingPrintWriter;
-
 /**
- * Class that models a local eARC device hosted in this system.
- * The class contains methods that are common between eARC TX and eARC RX devices.
+ * Class that models an HDMI device hosted in this system.
+ * Can be used to share methods between CEC and eARC local devices.
+ * Currently just a placeholder.
  */
-public class HdmiEarcLocalDevice extends HdmiLocalDevice {
-    private static final String TAG = "HdmiEarcLocalDevice";
-
-    protected void disableDevice() {
-    }
-
-    /** Dump internal status of HdmiEarcLocalDevice object */
-    protected void dump(final IndentingPrintWriter pw) {
-        // Should be overridden in the more specific classes
-    }
+abstract class HdmiLocalDevice {
+    private static final String TAG = "HdmiLocalDevice";
 }
