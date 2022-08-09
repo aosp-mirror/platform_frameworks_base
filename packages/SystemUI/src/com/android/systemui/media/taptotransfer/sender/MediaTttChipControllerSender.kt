@@ -122,7 +122,7 @@ class MediaTttChipControllerSender @Inject constructor(
         val chipState = newChipInfo.state
 
         // App icon
-        val iconName = setIcon(currentChipView, newChipInfo.routeInfo.packageName)
+        val iconName = setIcon(currentChipView, newChipInfo.routeInfo.clientPackageName)
 
         // Text
         val otherDeviceName = newChipInfo.routeInfo.name.toString()

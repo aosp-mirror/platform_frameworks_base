@@ -686,5 +686,5 @@ private const val TIMEOUT = 10000
 
 private val routeInfo = MediaRoute2Info.Builder("id", OTHER_DEVICE_NAME)
     .addFeature("feature")
-    .setPackageName(PACKAGE_NAME)
+    .setClientPackageName(PACKAGE_NAME)
     .build()
