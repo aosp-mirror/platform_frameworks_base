@@ -82,7 +82,8 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     }
 
     @Override
-    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted) {
+    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
+            @Nullable SurfaceControl.Transaction finishT) {
         mRequestedRemotes.remove(transition);
     }
 

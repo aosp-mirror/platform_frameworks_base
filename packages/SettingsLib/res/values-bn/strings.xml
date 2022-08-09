@@ -660,8 +660,7 @@
     <string name="dream_complication_title_weather" msgid="598609151677172783">"আবহাওয়া"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"এয়ার কোয়ালিটি"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"কাস্ট সম্পর্কিত তথ্য"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
+    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"হোম কন্ট্রোল"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"একটি প্রোফাইল ছবি বেছে নিন"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ডিফল্ট ব্যবহারকারীর আইকন"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ফিজিক্যাল কীবোর্ড"</string>

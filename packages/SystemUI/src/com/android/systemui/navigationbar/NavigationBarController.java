@@ -302,10 +302,6 @@ public class NavigationBarController implements
      */
     @VisibleForTesting
     void createNavigationBar(Display display, Bundle savedState, RegisterStatusBarResult result) {
-        if (initializeTaskbarIfNecessary()) {
-            return;
-        }
-
         if (display == null) {
             return;
         }
@@ -315,7 +311,7 @@ public class NavigationBarController implements
 
         // We may show TaskBar on the default display for large screen device. Don't need to create
         // navigation bar for this case.
-        if (mIsTablet && isOnDefaultDisplay) {
+        if (isOnDefaultDisplay && initializeTaskbarIfNecessary()) {
             return;
         }
 

@@ -831,8 +831,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Odabrano uređaja: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(nije povezano)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nije prebačeno. Dodirnite da biste pokušali ponovo."</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Povezivanje uređaja"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Da biste emitirali ovu sesiju, otvorite aplikaciju."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nepoznata aplikacija"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zaustavi emitiranje"</string>
@@ -944,14 +943,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi nije dostupan"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritetni način rada"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarm je postavljen"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Kamera je isključena"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mikrofon je isključen"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Fotoaparat i mikrofon su isključeni"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# obavijest}one{# obavijest}few{# obavijesti}other{# obavijesti}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Emitiranje"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Zaustaviti emitiranje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Ako emitirate aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g> ili promijenite izlaz, vaše će se trenutačno emitiranje zaustaviti"</string>
