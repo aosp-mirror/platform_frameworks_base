@@ -49,7 +49,9 @@ import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentTransaction;
+import android.window.WindowContainerTransaction;
 
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 
 import java.lang.annotation.Retention;
@@ -68,6 +70,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
     private final ActivityTaskManagerService mAtmService;
     private final WindowManagerGlobalLock mGlobalLock;
+    private final WindowOrganizerController mWindowOrganizerController;
+
     /**
      * A Map which manages the relationship between
      * {@link ITaskFragmentOrganizer} and {@link TaskFragmentOrganizerState}
@@ -82,9 +86,11 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
     private final ArraySet<Task> mTmpTaskSet = new ArraySet<>();
 
-    TaskFragmentOrganizerController(ActivityTaskManagerService atm) {
-        mAtmService = atm;
+    TaskFragmentOrganizerController(@NonNull ActivityTaskManagerService atm,
+            @NonNull WindowOrganizerController windowOrganizerController) {
+        mAtmService = requireNonNull(atm);
         mGlobalLock = atm.mGlobalLock;
+        mWindowOrganizerController = requireNonNull(windowOrganizerController);
     }
 
     /**
@@ -131,6 +137,14 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         private final SparseArray<RemoteAnimationDefinition> mRemoteAnimationDefinitions =
                 new SparseArray<>();
 
+        /**
+         * List of {@link TaskFragmentTransaction#getTransactionToken()} that have been sent to the
+         * organizer. If the transaction is sent during a transition, the
+         * {@link TransitionController} will wait until the transaction is finished.
+         * @see #onTransactionFinished(IBinder)
+         */
+        private final List<IBinder> mRunningTransactions = new ArrayList<>();
+
         TaskFragmentOrganizerState(ITaskFragmentOrganizer organizer, int pid, int uid) {
             mOrganizer = organizer;
             mOrganizerPid = pid;
@@ -175,6 +189,10 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 taskFragment.onTaskFragmentOrganizerRemoved();
                 taskFragment.removeImmediately();
                 mOrganizedTaskFragments.remove(taskFragment);
+            }
+            for (int i = mRunningTransactions.size() - 1; i >= 0; i--) {
+                // Cleanup any running transaction to unblock the current transition.
+                onTransactionFinished(mRunningTransactions.get(i));
             }
             mOrganizer.asBinder().unlinkToDeath(this, 0 /*flags*/);
         }
@@ -320,6 +338,40 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                     .setActivityIntent(activity.intent)
                     .setActivityToken(activityToken);
         }
+
+        void dispatchTransaction(@NonNull TaskFragmentTransaction transaction) {
+            if (transaction.isEmpty()) {
+                return;
+            }
+            try {
+                mOrganizer.onTransactionReady(transaction);
+            } catch (RemoteException e) {
+                Slog.d(TAG, "Exception sending TaskFragmentTransaction", e);
+                return;
+            }
+            onTransactionStarted(transaction.getTransactionToken());
+        }
+
+        /** Called when the transaction is sent to the organizer. */
+        void onTransactionStarted(@NonNull IBinder transactionToken) {
+            if (!mWindowOrganizerController.getTransitionController().isCollecting()) {
+                return;
+            }
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Defer transition ready for TaskFragmentTransaction=%s", transactionToken);
+            mRunningTransactions.add(transactionToken);
+            mWindowOrganizerController.getTransitionController().deferTransitionReady();
+        }
+
+        /** Called when the transaction is finished. */
+        void onTransactionFinished(@NonNull IBinder transactionToken) {
+            if (!mRunningTransactions.remove(transactionToken)) {
+                return;
+            }
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Continue transition ready for TaskFragmentTransaction=%s", transactionToken);
+            mWindowOrganizerController.getTransitionController().continueTransitionReady();
+        }
     }
 
     @Nullable
@@ -336,7 +388,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     @Override
-    public void registerOrganizer(ITaskFragmentOrganizer organizer) {
+    public void registerOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         synchronized (mGlobalLock) {
@@ -354,7 +406,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     @Override
-    public void unregisterOrganizer(ITaskFragmentOrganizer organizer) {
+    public void unregisterOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
         validateAndGetState(organizer);
         final int pid = Binder.getCallingPid();
         final long uid = Binder.getCallingUid();
@@ -372,8 +424,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     @Override
-    public void registerRemoteAnimations(ITaskFragmentOrganizer organizer, int taskId,
-            RemoteAnimationDefinition definition) {
+    public void registerRemoteAnimations(@NonNull ITaskFragmentOrganizer organizer, int taskId,
+            @NonNull RemoteAnimationDefinition definition) {
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         synchronized (mGlobalLock) {
@@ -398,7 +450,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     @Override
-    public void unregisterRemoteAnimations(ITaskFragmentOrganizer organizer, int taskId) {
+    public void unregisterRemoteAnimations(@NonNull ITaskFragmentOrganizer organizer, int taskId) {
         final int pid = Binder.getCallingPid();
         final long uid = Binder.getCallingUid();
         synchronized (mGlobalLock) {
@@ -413,6 +465,17 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
 
             organizerState.mRemoteAnimationDefinitions.remove(taskId);
+        }
+    }
+
+    @Override
+    public void onTransactionHandled(@NonNull ITaskFragmentOrganizer organizer,
+            @NonNull IBinder transactionToken, @NonNull WindowContainerTransaction wct) {
+        synchronized (mGlobalLock) {
+            // Keep the calling identity to avoid unsecure change.
+            mWindowOrganizerController.applyTransaction(wct);
+            final TaskFragmentOrganizerState state = validateAndGetState(organizer);
+            state.onTransactionFinished(transactionToken);
         }
     }
 
@@ -775,13 +838,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
         final int organizerNum = mPendingTaskFragmentEvents.size();
         for (int i = 0; i < organizerNum; i++) {
-            final ITaskFragmentOrganizer organizer = mTaskFragmentOrganizerState.get(
-                    mPendingTaskFragmentEvents.keyAt(i)).mOrganizer;
-            dispatchPendingEvents(organizer, mPendingTaskFragmentEvents.valueAt(i));
+            final TaskFragmentOrganizerState state =
+                    mTaskFragmentOrganizerState.get(mPendingTaskFragmentEvents.keyAt(i));
+            dispatchPendingEvents(state, mPendingTaskFragmentEvents.valueAt(i));
         }
     }
 
-    void dispatchPendingEvents(@NonNull ITaskFragmentOrganizer organizer,
+    void dispatchPendingEvents(@NonNull TaskFragmentOrganizerState state,
             @NonNull List<PendingTaskFragmentEvent> pendingEvents) {
         if (pendingEvents.isEmpty()) {
             return;
@@ -817,7 +880,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 if (mTmpTaskSet.add(task)) {
                     // Make sure the organizer know about the Task config.
                     transaction.addChange(prepareChange(new PendingTaskFragmentEvent.Builder(
-                            PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED, organizer)
+                            PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED, state.mOrganizer)
                             .setTask(task)
                             .build()));
                 }
@@ -825,7 +888,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             transaction.addChange(prepareChange(event));
         }
         mTmpTaskSet.clear();
-        dispatchTransactionInfo(organizer, transaction);
+        state.dispatchTransaction(transaction);
         pendingEvents.removeAll(candidateEvents);
     }
 
@@ -855,6 +918,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
 
         final ITaskFragmentOrganizer organizer = taskFragment.getTaskFragmentOrganizer();
+        final TaskFragmentOrganizerState state = validateAndGetState(organizer);
         final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
         // Make sure the organizer know about the Task config.
         transaction.addChange(prepareChange(new PendingTaskFragmentEvent.Builder(
@@ -862,20 +926,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 .setTask(taskFragment.getTask())
                 .build()));
         transaction.addChange(prepareChange(event));
-        dispatchTransactionInfo(event.mTaskFragmentOrg, transaction);
+        state.dispatchTransaction(transaction);
         mPendingTaskFragmentEvents.get(organizer.asBinder()).remove(event);
-    }
-
-    private void dispatchTransactionInfo(@NonNull ITaskFragmentOrganizer organizer,
-            @NonNull TaskFragmentTransaction transaction) {
-        if (transaction.isEmpty()) {
-            return;
-        }
-        try {
-            organizer.onTransactionReady(transaction);
-        } catch (RemoteException e) {
-            Slog.d(TAG, "Exception sending TaskFragmentTransaction", e);
-        }
     }
 
     @Nullable

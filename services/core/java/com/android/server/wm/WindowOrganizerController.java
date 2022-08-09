@@ -147,7 +147,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         mGlobalLock = atm.mGlobalLock;
         mTaskOrganizerController = new TaskOrganizerController(mService);
         mDisplayAreaOrganizerController = new DisplayAreaOrganizerController(mService);
-        mTaskFragmentOrganizerController = new TaskFragmentOrganizerController(atm);
+        mTaskFragmentOrganizerController = new TaskFragmentOrganizerController(atm, this);
     }
 
     void setWindowManager(WindowManagerService wms) {

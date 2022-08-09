@@ -26,7 +26,6 @@ import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -143,6 +142,28 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     public void unregisterRemoteAnimations(int taskId) {
         try {
             getController().unregisterRemoteAnimations(mInterface, taskId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies the server that the organizer has finished handling the given transaction. The
+     * server should apply the given {@link WindowContainerTransaction} for the necessary changes.
+     *
+     * @param transactionToken  {@link TaskFragmentTransaction#getTransactionToken()} from
+     *                          {@link #onTransactionReady(TaskFragmentTransaction)}
+     * @param wct               {@link WindowContainerTransaction} that the server should apply for
+     *                          update of the transaction.
+     * @see com.android.server.wm.WindowOrganizerController#enforceTaskPermission for permission
+     * requirement.
+     * @hide
+     */
+    public void onTransactionHandled(@NonNull IBinder transactionToken,
+            @NonNull WindowContainerTransaction wct) {
+        wct.setTaskFragmentOrganizer(mInterface);
+        try {
+            getController().onTransactionHandled(mInterface, transactionToken, wct);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -318,12 +339,8 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     /**
      * Called when the transaction is ready so that the organizer can update the TaskFragments based
      * on the changes in transaction.
-     * Note: {@link WindowOrganizer#applyTransaction} permission requirement is conditional for
-     * {@link TaskFragmentOrganizer}.
-     * @see com.android.server.wm.WindowOrganizerController#enforceTaskPermission
      * @hide
      */
-    @SuppressLint("AndroidFrameworkRequiresPermission")
     public void onTransactionReady(@NonNull TaskFragmentTransaction transaction) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
@@ -389,8 +406,9 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
                             "Unknown TaskFragmentEvent=" + change.getType());
             }
         }
-        // TODO(b/240519866): notify TaskFragmentOrganizerController that the transition is done.
-        applyTransaction(wct);
+
+        // Notify the server, and the server should apply the WindowContainerTransaction.
+        onTransactionHandled(transaction.getTransactionToken(), wct);
     }
 
     @Override
