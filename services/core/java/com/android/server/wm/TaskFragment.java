@@ -586,7 +586,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
 
         // Cannot embed activity across TaskFragments for activity result.
-        if (a.resultTo != null && a.resultTo.getTaskFragment() != this) {
+        // If the activity that started for result is finishing, it's likely that this start mode
+        // is used to place an activity in the same task. Since the finishing activity won't be
+        // able to get the results, so it's OK to embed in a different TaskFragment.
+        if (a.resultTo != null && !a.resultTo.finishing && a.resultTo.getTaskFragment() != this) {
             return EMBEDDING_DISALLOWED_NEW_TASK_FRAGMENT;
         }
 
