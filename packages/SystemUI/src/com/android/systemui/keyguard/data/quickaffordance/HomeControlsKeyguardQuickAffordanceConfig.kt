@@ -36,6 +36,7 @@ import com.android.systemui.util.kotlin.getOrNull
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 
 /** Home controls quick affordance data source. */
@@ -50,7 +51,13 @@ constructor(
     private val appContext = context.applicationContext
 
     override val state: Flow<KeyguardQuickAffordanceConfig.State> =
-        stateInternal(component.getControlsListingController().getOrNull())
+        component.canShowWhileLockedSetting.flatMapLatest { canShowWhileLocked ->
+            if (canShowWhileLocked) {
+                stateInternal(component.getControlsListingController().getOrNull())
+            } else {
+                flowOf(KeyguardQuickAffordanceConfig.State.Hidden)
+            }
+        }
 
     override fun onQuickAffordanceClicked(
         animationController: ActivityLaunchAnimator.Controller?,
