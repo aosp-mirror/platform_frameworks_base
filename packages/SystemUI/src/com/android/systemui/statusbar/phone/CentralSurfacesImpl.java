@@ -1721,13 +1721,18 @@ public class CentralSurfacesImpl extends CoreStartable implements
                 }
 
                 @Override
-                public void onLaunchAnimationCancelled() {
+                public void onLaunchAnimationCancelled(@Nullable Boolean newKeyguardOccludedState) {
+                    if (newKeyguardOccludedState != null) {
+                        mKeyguardViewMediator.setOccluded(
+                                newKeyguardOccludedState, false /* animate */);
+                    }
+
                     // Set mIsLaunchingActivityOverLockscreen to false before actually finishing the
                     // animation so that we can assume that mIsLaunchingActivityOverLockscreen
                     // being true means that we will collapse the shade (or at least run the
                     // post collapse runnables) later on.
                     CentralSurfacesImpl.this.mIsLaunchingActivityOverLockscreen = false;
-                    getDelegate().onLaunchAnimationCancelled();
+                    getDelegate().onLaunchAnimationCancelled(newKeyguardOccludedState);
                 }
             };
         } else if (dismissShade) {
