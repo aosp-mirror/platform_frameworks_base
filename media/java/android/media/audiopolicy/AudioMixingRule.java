@@ -87,6 +87,13 @@ public class AudioMixingRule {
      * parameter is an instance of {@link java.lang.Integer}.
      */
     public static final int RULE_MATCH_USERID = 0x1 << 3;
+    /**
+     * A rule requiring the audio session id of the audio stream to match that specified.
+     * This mixing rule can be added with {@link Builder#addMixRule(int, Object)} where Object
+     * parameter is an instance of {@link java.lang.Integer}.
+     * @see android.media.AudioTrack.Builder#setSessionId
+     */
+    public static final int RULE_MATCH_AUDIO_SESSION_ID = 0x1 << 4;
 
     private final static int RULE_EXCLUSION_MASK = 0x8000;
     /**
@@ -114,6 +121,13 @@ public class AudioMixingRule {
      */
     public static final int RULE_EXCLUDE_USERID =
             RULE_EXCLUSION_MASK | RULE_MATCH_USERID;
+
+    /**
+     * @hide
+     * A rule requiring the audio session id information to differ.
+     */
+    public static final int RULE_EXCLUDE_AUDIO_SESSION_ID =
+            RULE_EXCLUSION_MASK | RULE_MATCH_AUDIO_SESSION_ID;
 
     /** @hide */
     public static final class AudioMixMatchCriterion {
@@ -166,6 +180,7 @@ public class AudioMixingRule {
                     break;
                 case RULE_MATCH_UID:
                 case RULE_MATCH_USERID:
+                case RULE_MATCH_AUDIO_SESSION_ID:
                     dest.writeInt(mIntProp);
                     break;
                 default:
@@ -315,6 +330,7 @@ public class AudioMixingRule {
             case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
             case RULE_MATCH_UID:
             case RULE_MATCH_USERID:
+            case RULE_MATCH_AUDIO_SESSION_ID:
                 return true;
             default:
                 return false;
@@ -338,6 +354,7 @@ public class AudioMixingRule {
             case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
             case RULE_MATCH_UID:
             case RULE_MATCH_USERID:
+            case RULE_MATCH_AUDIO_SESSION_ID:
                 return true;
             default:
                 return false;
@@ -445,7 +462,8 @@ public class AudioMixingRule {
          * @param rule one of {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_USAGE},
          *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET} or
          *     {@link AudioMixingRule#RULE_MATCH_UID} or
-         *     {@link AudioMixingRule#RULE_MATCH_USERID}.
+         *     {@link AudioMixingRule#RULE_MATCH_USERID} or
+         *     {@link AudioMixingRule#RULE_MATCH_AUDIO_SESSION_ID}.
          * @param property see the definition of each rule for the type to use (either an
          *     {@link AudioAttributes} or an {@link java.lang.Integer}).
          * @return the same Builder instance.
@@ -476,7 +494,8 @@ public class AudioMixingRule {
          * @param rule one of {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_USAGE},
          *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET} or
          *     {@link AudioMixingRule#RULE_MATCH_UID} or
-         *     {@link AudioMixingRule#RULE_MATCH_USERID}.
+         *     {@link AudioMixingRule#RULE_MATCH_USERID} or
+         *     {@link AudioMixingRule#RULE_MATCH_AUDIO_SESSION_ID}.
          * @param property see the definition of each rule for the type to use (either an
          *     {@link AudioAttributes} or an {@link java.lang.Integer}).
          * @return the same Builder instance.
@@ -606,9 +625,12 @@ public class AudioMixingRule {
          * @param intProp an integer property to match or exclude, null if not used.
          * @param rule one of {@link AudioMixingRule#RULE_EXCLUDE_ATTRIBUTE_USAGE},
          *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_USAGE},
-         *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET} or
+         *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET},
          *     {@link AudioMixingRule#RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET},
-         *     {@link AudioMixingRule#RULE_MATCH_UID}, {@link AudioMixingRule#RULE_EXCLUDE_UID}.
+         *     {@link AudioMixingRule#RULE_MATCH_UID},
+         *     {@link AudioMixingRule#RULE_EXCLUDE_UID},
+         *     {@link AudioMixingRule#RULE_MATCH_AUDIO_SESSION_ID},
+         *     {@link AudioMixingRule#RULE_EXCLUDE_AUDIO_SESSION_ID}
          *     {@link AudioMixingRule#RULE_MATCH_USERID},
          *     {@link AudioMixingRule#RULE_EXCLUDE_USERID}.
          * @return the same Builder instance.
@@ -645,6 +667,7 @@ public class AudioMixingRule {
                         break;
                     case RULE_MATCH_UID:
                     case RULE_MATCH_USERID:
+                    case RULE_MATCH_AUDIO_SESSION_ID:
                         mCriteria.add(new AudioMixMatchCriterion(intProp, rule));
                         break;
                     default:
@@ -666,6 +689,7 @@ public class AudioMixingRule {
                     break;
                 case RULE_MATCH_UID:
                 case RULE_MATCH_USERID:
+                case RULE_MATCH_AUDIO_SESSION_ID:
                     intProp = new Integer(in.readInt());
                     break;
                 default:

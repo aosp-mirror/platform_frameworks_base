@@ -6534,6 +6534,7 @@ package android.media.audiopolicy {
     field public static final int MIX_ROLE_PLAYERS = 0; // 0x0
     field public static final int RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET = 2; // 0x2
     field public static final int RULE_MATCH_ATTRIBUTE_USAGE = 1; // 0x1
+    field public static final int RULE_MATCH_AUDIO_SESSION_ID = 16; // 0x10
     field public static final int RULE_MATCH_UID = 4; // 0x4
     field public static final int RULE_MATCH_USERID = 8; // 0x8
   }

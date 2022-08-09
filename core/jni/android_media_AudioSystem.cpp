@@ -2160,6 +2160,11 @@ static jint convertAudioMixToNative(JNIEnv *env,
             nCriterion.mValue.mUserId =
                     env->GetIntField(jCriterion, gAudioMixMatchCriterionFields.mIntProp);
             break;
+        case RULE_MATCH_AUDIO_SESSION_ID: {
+            jint jAudioSessionId =
+                    env->GetIntField(jCriterion, gAudioMixMatchCriterionFields.mIntProp);
+            nCriterion.mValue.mAudioSessionId = static_cast<audio_session_t>(jAudioSessionId);
+        } break;
         case RULE_MATCH_ATTRIBUTE_USAGE:
         case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET: {
             jobject jAttributes = env->GetObjectField(jCriterion, gAudioMixMatchCriterionFields.mAttr);
