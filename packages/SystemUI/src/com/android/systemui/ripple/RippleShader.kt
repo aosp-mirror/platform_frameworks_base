@@ -39,7 +39,7 @@ class RippleShader internal constructor(rippleShape: RippleShape = RippleShape.C
         ROUNDED_BOX,
         ELLIPSE
     }
-
+    //language=AGSL
     companion object {
         private const val SHADER_UNIFORMS = """uniform vec2 in_center;
                 uniform vec2 in_size;
