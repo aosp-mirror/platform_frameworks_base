@@ -32,6 +32,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_NEW_TASK_FRAGMENT;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_UNTRUSTED_HOST;
@@ -468,6 +469,10 @@ public class TaskFragmentTest extends WindowTestsBase {
         newActivity.resultTo = activity;
         assertEquals(EMBEDDING_DISALLOWED_NEW_TASK_FRAGMENT,
                 newTaskFragment.isAllowedToEmbedActivity(newActivity));
+
+        // Allow embedding if the resultTo activity is finishing.
+        activity.finishing = true;
+        assertEquals(EMBEDDING_ALLOWED, newTaskFragment.isAllowedToEmbedActivity(newActivity));
     }
 
     @Test
