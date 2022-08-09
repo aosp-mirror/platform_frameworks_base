@@ -587,8 +587,21 @@ public final class ViewRootImpl implements ViewParent,
     int mContentCaptureEnabled = CONTENT_CAPTURE_ENABLED_NOT_CHECKED;
     boolean mPerformContentCapture;
 
-
     boolean mReportNextDraw;
+    /** Set only while mReportNextDraw=true, indicating the last reason that was triggered */
+    String mLastReportNextDrawReason;
+    /** The reaason the last call to performDraw() returned false */
+    String mLastPerformDrawSkippedReason;
+    /** The reason the last call to performTraversals() returned without drawing */
+    String mLastPerformTraversalsSkipDrawReason;
+    /** The state of the local sync, if one is in progress. Can be one of the states below. */
+    int mLocalSyncState;
+
+    // The possible states of the local sync, see createSyncIfNeeded()
+    private final int LOCAL_SYNC_NONE = 0;
+    private final int LOCAL_SYNC_PENDING = 1;
+    private final int LOCAL_SYNC_RETURNED = 2;
+    private final int LOCAL_SYNC_MERGED = 3;
 
     /**
      * Set whether the draw should send the buffer to system server. When set to true, VRI will
@@ -1836,7 +1849,7 @@ public final class ViewRootImpl implements ViewParent,
         mSyncSeqId = args.argi4 > mSyncSeqId ? args.argi4 : mSyncSeqId;
 
         if (msg == MSG_RESIZED_REPORT) {
-            reportNextDraw();
+            reportNextDraw("resized");
         }
 
         if (mView != null && (frameChanged || configChanged)) {
@@ -2741,6 +2754,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void performTraversals() {
+        mLastPerformTraversalsSkipDrawReason = null;
+
         // cache mView since it is used so much below...
         final View host = mView;
         if (DBG) {
@@ -2750,12 +2765,14 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (host == null || !mAdded) {
+            mLastPerformTraversalsSkipDrawReason = host == null ? "no_host" : "not_added";
             return;
         }
 
         mIsInTraversal = true;
         mWillDrawSoon = true;
         boolean cancelDraw = false;
+        String cancelReason = null;
         boolean isSyncRequest = false;
 
         boolean windowSizeMayChange = false;
@@ -3038,13 +3055,14 @@ public final class ViewRootImpl implements ViewParent,
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
                 cancelDraw = (relayoutResult & RELAYOUT_RES_CANCEL_AND_REDRAW)
                         == RELAYOUT_RES_CANCEL_AND_REDRAW;
+                cancelReason = "relayout";
                 final boolean dragResizing = mPendingDragResizing;
                 if (mSyncSeqId > mLastSyncSeqId) {
                     mLastSyncSeqId = mSyncSeqId;
                     if (DEBUG_BLAST) {
                         Log.d(mTag, "Relayout called with blastSync");
                     }
-                    reportNextDraw();
+                    reportNextDraw("relayout");
                     mSyncBuffer = true;
                     isSyncRequest = true;
                     if (!cancelDraw) {
@@ -3147,6 +3165,7 @@ public final class ViewRootImpl implements ViewParent,
                             }
                         } catch (OutOfResourcesException e) {
                             handleOutOfResourcesException(e);
+                            mLastPerformTraversalsSkipDrawReason = "oom_initialize_renderer";
                             return;
                         }
                     }
@@ -3184,6 +3203,7 @@ public final class ViewRootImpl implements ViewParent,
                         mAttachInfo.mThreadedRenderer.updateSurface(mSurface);
                     } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
+                        mLastPerformTraversalsSkipDrawReason = "oom_update_surface";
                         return;
                     }
                 }
@@ -3349,6 +3369,7 @@ public final class ViewRootImpl implements ViewParent,
             if (mCheckIfCanDraw) {
                 try {
                     cancelDraw = mWindowSession.cancelDraw(mWindow);
+                    cancelReason = "wm_sync";
                     if (DEBUG_BLAST) {
                         Log.d(mTag, "cancelDraw returned " + cancelDraw);
                     }
@@ -3571,19 +3592,21 @@ public final class ViewRootImpl implements ViewParent,
         mImeFocusController.onTraversal(hasWindowFocus, mWindowAttributes);
 
         if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
-            reportNextDraw();
+            reportNextDraw("first_relayout");
         }
 
         mCheckIfCanDraw = isSyncRequest || cancelDraw;
 
-        boolean cancelAndRedraw =
-                mAttachInfo.mTreeObserver.dispatchOnPreDraw() || (cancelDraw && mDrewOnceForSync);
+        boolean cancelDueToPreDrawListener = mAttachInfo.mTreeObserver.dispatchOnPreDraw();
+        boolean cancelAndRedraw = cancelDueToPreDrawListener
+                 || (cancelDraw && mDrewOnceForSync);
         if (!cancelAndRedraw) {
             createSyncIfNeeded();
             mDrewOnceForSync = true;
         }
 
         if (!isViewVisible) {
+            mLastPerformTraversalsSkipDrawReason = "view_not_visible";
             if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
                 for (int i = 0; i < mPendingTransitions.size(); ++i) {
                     mPendingTransitions.get(i).endChangingAnimations();
@@ -3595,6 +3618,9 @@ public final class ViewRootImpl implements ViewParent,
                 mSyncBufferCallback.onBufferReady(null);
             }
         } else if (cancelAndRedraw) {
+            mLastPerformTraversalsSkipDrawReason = cancelDueToPreDrawListener
+                ? "predraw_" + mAttachInfo.mTreeObserver.getLastDispatchOnPreDrawCanceledReason()
+                : "cancel_" + cancelReason;
             // Try again
             scheduleTraversals();
         } else {
@@ -3618,11 +3644,13 @@ public final class ViewRootImpl implements ViewParent,
 
         if (!cancelAndRedraw) {
             mReportNextDraw = false;
+            mLastReportNextDrawReason = null;
             mSyncBufferCallback = null;
             mSyncBuffer = false;
             if (isInLocalSync()) {
                 mSyncGroup.markSyncReady();
                 mSyncGroup = null;
+                mLocalSyncState = LOCAL_SYNC_NONE;
             }
         }
     }
@@ -3634,12 +3662,15 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         final int seqId = mSyncSeqId;
+        mLocalSyncState = LOCAL_SYNC_PENDING;
         mSyncGroup = new SurfaceSyncGroup(transaction -> {
+            mLocalSyncState = LOCAL_SYNC_RETURNED;
             // Callback will be invoked on executor thread so post to main thread.
             mHandler.postAtFrontOfQueue(() -> {
                 if (transaction != null) {
                     mSurfaceChangedTransaction.merge(transaction);
                 }
+                mLocalSyncState = LOCAL_SYNC_MERGED;
                 reportDrawFinished(seqId);
             });
         });
@@ -4353,9 +4384,12 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private boolean performDraw() {
+        mLastPerformDrawSkippedReason = null;
         if (mAttachInfo.mDisplayState == Display.STATE_OFF && !mReportNextDraw) {
+            mLastPerformDrawSkippedReason = "screen_off";
             return false;
         } else if (mView == null) {
+            mLastPerformDrawSkippedReason = "no_root_view";
             return false;
         }
 
@@ -8458,6 +8492,21 @@ public final class ViewRootImpl implements ViewParent,
         if (mTraversalScheduled) {
             writer.println(innerPrefix + " (barrier=" + mTraversalBarrier + ")");
         }
+        writer.println(innerPrefix + "mReportNextDraw=" + mReportNextDraw);
+        if (mReportNextDraw) {
+            writer.println(innerPrefix + " (reason=" + mLastReportNextDrawReason + ")");
+        }
+        if (mLastPerformTraversalsSkipDrawReason != null) {
+            writer.println(innerPrefix + "mLastPerformTraversalsFailedReason="
+                + mLastPerformTraversalsSkipDrawReason);
+        }
+        if (mLastPerformDrawSkippedReason != null) {
+            writer.println(innerPrefix + "mLastPerformDrawFailedReason="
+                + mLastPerformDrawSkippedReason);
+        }
+        if (mLocalSyncState != LOCAL_SYNC_NONE) {
+            writer.println(innerPrefix + "mLocalSyncState=" + mLocalSyncState);
+        }
         writer.println(innerPrefix + "mIsAmbientMode="  + mIsAmbientMode);
         writer.println(innerPrefix + "mUnbufferedInputSource="
                 + Integer.toHexString(mUnbufferedInputSource));
@@ -9958,11 +10007,12 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void reportNextDraw() {
+    private void reportNextDraw(String reason) {
         if (DEBUG_BLAST) {
             Log.d(mTag, "reportNextDraw " + Debug.getCallers(5));
         }
         mReportNextDraw = true;
+        mLastReportNextDrawReason = reason;
     }
 
     /**
@@ -9975,11 +10025,12 @@ public final class ViewRootImpl implements ViewParent,
      * @param syncBuffer If true, the transaction that contains the buffer from the draw should be
      *                   sent to system to be synced. If false, VRI will not try to sync the buffer,
      *                   but only report back that a buffer was drawn.
+     * @param reason A debug string indicating the reason for reporting the next draw
      * @hide
      */
-    public void setReportNextDraw(boolean syncBuffer) {
+    public void setReportNextDraw(boolean syncBuffer, String reason) {
         mSyncBuffer = syncBuffer;
-        reportNextDraw();
+        reportNextDraw(reason);
         invalidate();
     }
 
