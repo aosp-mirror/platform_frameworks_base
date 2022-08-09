@@ -213,7 +213,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * If no cancel signal has been received after this amount of time, set the biometric running
      * state to stopped to allow Keyguard to retry authentication.
      */
-    private static final int DEFAULT_CANCEL_SIGNAL_TIMEOUT = 3000;
+    @VisibleForTesting
+    protected static final int DEFAULT_CANCEL_SIGNAL_TIMEOUT = 3000;
 
     private static final ComponentName FALLBACK_HOME_COMPONENT = new ComponentName(
             "com.android.settings", "com.android.settings.FallbackHome");
@@ -316,10 +317,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int HAL_ERROR_RETRY_TIMEOUT = 500; // ms
     private static final int HAL_ERROR_RETRY_MAX = 20;
 
-    private final Runnable mFpCancelNotReceived = this::onFingerprintCancelNotReceived;
+    @VisibleForTesting
+    protected final Runnable mFpCancelNotReceived = this::onFingerprintCancelNotReceived;
 
     private final Runnable mFaceCancelNotReceived = this::onFaceCancelNotReceived;
 
+    @VisibleForTesting
+    protected Handler getHandler() {
+        return mHandler;
+    }
     private final Handler mHandler;
 
     private SparseBooleanArray mBiometricEnabledForUser = new SparseBooleanArray();
@@ -707,6 +713,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void handleFingerprintAuthFailed() {
         Assert.isMainThread();
+        if (mHandler.hasCallbacks(mFpCancelNotReceived)) {
+            Log.d(TAG, "handleFingerprintAuthFailed()"
+                    + " triggered while waiting for cancellation, removing watchdog");
+            mHandler.removeCallbacks(mFpCancelNotReceived);
+        }
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -737,6 +748,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void handleFingerprintAuthenticated(int authUserId, boolean isStrongBiometric) {
         Trace.beginSection("KeyGuardUpdateMonitor#handlerFingerPrintAuthenticated");
+        if (mHandler.hasCallbacks(mFpCancelNotReceived)) {
+            Log.d(TAG, "handleFingerprintAuthenticated()"
+                    + " triggered while waiting for cancellation, removing watchdog");
+            mHandler.removeCallbacks(mFpCancelNotReceived);
+        }
         try {
             final int userId;
             try {

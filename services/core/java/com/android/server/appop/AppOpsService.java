@@ -217,7 +217,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
-public class AppOpsService extends IAppOpsService.Stub {
+public class AppOpsService extends IAppOpsService.Stub implements PersistenceScheduler {
     static final String TAG = "AppOps";
     static final boolean DEBUG = false;
 
@@ -402,6 +402,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     /** Package Manager internal. Access via {@link #getPackageManagerInternal()} */
     private @Nullable PackageManagerInternal mPackageManagerInternal;
 
+    /** Interface for app-op modes.*/
+    @VisibleForTesting AppOpsServiceInterface mAppOpsServiceInterface;
+
     /**
      * An unsynchronized pool of {@link OpEventProxyInfo} objects.
      */
@@ -558,7 +561,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         public boolean pendingAppWidgetVisible;
 
         public ArrayMap<String, Ops> pkgOps;
-        public SparseIntArray opModes;
 
         // true indicates there is an interested observer, false there isn't but it has such an op
         public SparseBooleanArray foregroundOps;
@@ -569,15 +571,43 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         public void clear() {
+            mAppOpsServiceInterface.removeUid(uid);
+            if (pkgOps != null) {
+                for (String packageName : pkgOps.keySet()) {
+                    mAppOpsServiceInterface.removePackage(packageName);
+                }
+            }
             pkgOps = null;
-            opModes = null;
         }
 
         public boolean isDefault() {
+            boolean areAllPackageModesDefault = true;
+            if (pkgOps != null) {
+                for (String packageName : pkgOps.keySet()) {
+                    if (!mAppOpsServiceInterface.arePackageModesDefault(packageName)) {
+                        areAllPackageModesDefault = false;
+                        break;
+                    }
+                }
+            }
             return (pkgOps == null || pkgOps.isEmpty())
-                    && (opModes == null || opModes.size() <= 0)
                     && (state == UID_STATE_CACHED
-                    && (pendingState == UID_STATE_CACHED));
+                    && (pendingState == UID_STATE_CACHED))
+                    && (mAppOpsServiceInterface.areUidModesDefault(uid)
+                    && areAllPackageModesDefault);
+        }
+
+        // Functions for uid mode access and manipulation.
+        public SparseIntArray getNonDefaultUidModes() {
+            return mAppOpsServiceInterface.getNonDefaultUidModes(uid);
+        }
+
+        public int getUidMode(int op) {
+            return mAppOpsServiceInterface.getUidMode(uid, op);
+        }
+
+        public boolean setUidMode(int op, int mode) {
+            return mAppOpsServiceInterface.setUidMode(uid, op, mode);
         }
 
         int evalMode(int op, int mode) {
@@ -647,21 +677,20 @@ public class AppOpsService extends IAppOpsService.Stub {
         public void evalForegroundOps(SparseArray<ArraySet<ModeCallback>> watchers) {
             SparseBooleanArray which = null;
             hasForegroundWatchers = false;
-            if (opModes != null) {
-                for (int i = opModes.size() - 1; i >= 0; i--) {
-                    if (opModes.valueAt(i) == AppOpsManager.MODE_FOREGROUND) {
-                        if (which == null) {
-                            which = new SparseBooleanArray();
-                        }
-                        evalForegroundWatchers(opModes.keyAt(i), watchers, which);
+            final SparseIntArray opModes = getNonDefaultUidModes();
+            for (int i = opModes.size() - 1; i >= 0; i--) {
+                if (opModes.valueAt(i) == AppOpsManager.MODE_FOREGROUND) {
+                    if (which == null) {
+                        which = new SparseBooleanArray();
                     }
+                    evalForegroundWatchers(opModes.keyAt(i), watchers, which);
                 }
             }
             if (pkgOps != null) {
                 for (int i = pkgOps.size() - 1; i >= 0; i--) {
                     Ops ops = pkgOps.valueAt(i);
                     for (int j = ops.size() - 1; j >= 0; j--) {
-                        if (ops.valueAt(j).mode == AppOpsManager.MODE_FOREGROUND) {
+                        if (ops.valueAt(j).getMode() == AppOpsManager.MODE_FOREGROUND) {
                             if (which == null) {
                                 which = new SparseBooleanArray();
                             }
@@ -1451,8 +1480,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         final UidState uidState;
         final @NonNull String packageName;
 
-        private @Mode int mode;
-
         /** attributionTag -> AttributedOp */
         final ArrayMap<String, AttributedOp> mAttributions = new ArrayMap<>(1);
 
@@ -1461,15 +1488,17 @@ public class AppOpsService extends IAppOpsService.Stub {
             this.uid = uid;
             this.uidState = uidState;
             this.packageName = packageName;
-            this.mode = AppOpsManager.opToDefaultMode(op);
         }
 
-        int getMode() {
-            return mode;
+        @Mode int getMode() {
+            return mAppOpsServiceInterface.getPackageMode(packageName, this.op);
+        }
+        void setMode(@Mode int mode) {
+            mAppOpsServiceInterface.setPackageMode(packageName, this.op, mode);
         }
 
         int evalMode() {
-            return uidState.evalMode(op, mode);
+            return uidState.evalMode(op, getMode());
         }
 
         void removeAttributionsWithNoTime() {
@@ -1503,7 +1532,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         mAttributions.valueAt(i).createAttributedOpEntryLocked());
             }
 
-            return new OpEntry(op, mode, attributionEntries);
+            return new OpEntry(op, getMode(), attributionEntries);
         }
 
         @NonNull OpEntry createSingleAttributionEntryLocked(@Nullable String attributionTag) {
@@ -1518,7 +1547,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
 
-            return new OpEntry(op, mode, attributionEntries);
+            return new OpEntry(op, getMode(), attributionEntries);
         }
 
         boolean isRunning() {
@@ -1775,6 +1804,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     public AppOpsService(File storagePath, Handler handler, Context context) {
         mContext = context;
+        mAppOpsServiceInterface = new LegacyAppOpsServiceInterfaceImpl(this, this);
 
         LockGuard.installLock(this, LockGuard.INDEX_APP_OPS);
         mFile = new AtomicFile(storagePath, "appops");
@@ -1815,7 +1845,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (uidState == null || uidState.pkgOps == null) {
                         return;
                     }
-
+                    mAppOpsServiceInterface.removePackage(pkgName);
                     Ops removedOps = uidState.pkgOps.remove(pkgName);
                     if (removedOps != null) {
                         scheduleFastWriteLocked();
@@ -2037,25 +2067,27 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
 
-            Ops ops = null;
+            Ops removedOps = null;
 
             // Remove any package state if such.
             if (uidState.pkgOps != null) {
-                ops = uidState.pkgOps.remove(packageName);
+                removedOps = uidState.pkgOps.remove(packageName);
+                mAppOpsServiceInterface.removePackage(packageName);
             }
 
             // If we just nuked the last package state check if the UID is valid.
-            if (ops != null && uidState.pkgOps.isEmpty()
+            if (removedOps != null && uidState.pkgOps.isEmpty()
                     && getPackagesForUid(uid).length <= 0) {
+                uidState.clear();
                 mUidStates.remove(uid);
             }
 
-            if (ops != null) {
+            if (removedOps != null) {
                 scheduleFastWriteLocked();
 
-                final int numOps = ops.size();
+                final int numOps = removedOps.size();
                 for (int opNum = 0; opNum < numOps; opNum++) {
-                    final Op op = ops.valueAt(opNum);
+                    final Op op = removedOps.valueAt(opNum);
 
                     final int numAttributions = op.mAttributions.size();
                     for (int attributionNum = 0; attributionNum < numAttributions;
@@ -2080,6 +2112,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     public void uidRemoved(int uid) {
         synchronized (this) {
             if (mUidStates.indexOfKey(uid) >= 0) {
+                mUidStates.get(uid).clear();
                 mUidStates.remove(uid);
                 scheduleFastWriteLocked();
             }
@@ -2185,12 +2218,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private ArrayList<AppOpsManager.OpEntry> collectOps(Ops pkgOps, int[] ops) {
         ArrayList<AppOpsManager.OpEntry> resOps = null;
-        final long elapsedNow = SystemClock.elapsedRealtime();
         if (ops == null) {
             resOps = new ArrayList<>();
             for (int j=0; j<pkgOps.size(); j++) {
                 Op curOp = pkgOps.valueAt(j);
-                resOps.add(getOpEntryForResult(curOp, elapsedNow));
+                resOps.add(getOpEntryForResult(curOp));
             }
         } else {
             for (int j=0; j<ops.length; j++) {
@@ -2199,7 +2231,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (resOps == null) {
                         resOps = new ArrayList<>();
                     }
-                    resOps.add(getOpEntryForResult(curOp, elapsedNow));
+                    resOps.add(getOpEntryForResult(curOp));
                 }
             }
         }
@@ -2209,11 +2241,12 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Nullable
     private ArrayList<AppOpsManager.OpEntry> collectUidOps(@NonNull UidState uidState,
             @Nullable int[] ops) {
-        if (uidState.opModes == null) {
+        final SparseIntArray opModes = uidState.getNonDefaultUidModes();
+        if (opModes == null) {
             return null;
         }
 
-        int opModeCount = uidState.opModes.size();
+        int opModeCount = opModes.size();
         if (opModeCount == 0) {
             return null;
         }
@@ -2221,25 +2254,24 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (ops == null) {
             resOps = new ArrayList<>();
             for (int i = 0; i < opModeCount; i++) {
-                int code = uidState.opModes.keyAt(i);
-                resOps.add(new OpEntry(code, uidState.opModes.get(code), Collections.emptyMap()));
+                int code = opModes.keyAt(i);
+                resOps.add(new OpEntry(code, opModes.get(code), Collections.emptyMap()));
             }
         } else {
             for (int j=0; j<ops.length; j++) {
                 int code = ops[j];
-                if (uidState.opModes.indexOfKey(code) >= 0) {
+                if (opModes.indexOfKey(code) >= 0) {
                     if (resOps == null) {
                         resOps = new ArrayList<>();
                     }
-                    resOps.add(new OpEntry(code, uidState.opModes.get(code),
-                            Collections.emptyMap()));
+                    resOps.add(new OpEntry(code, opModes.get(code), Collections.emptyMap()));
                 }
             }
         }
         return resOps;
     }
 
-    private static @NonNull OpEntry getOpEntryForResult(@NonNull Op op, long elapsedNow) {
+    private static @NonNull OpEntry getOpEntryForResult(@NonNull Op op) {
         return op.createEntryLocked();
     }
 
@@ -2484,15 +2516,18 @@ public class AppOpsService extends IAppOpsService.Stub {
             Ops ops = getOpsLocked(uid, packageName, null, false, null, /* edit */ false);
             if (ops != null) {
                 ops.remove(op.op);
+                op.setMode(AppOpsManager.opToDefaultMode(op.op));
                 if (ops.size() <= 0) {
                     UidState uidState = ops.uidState;
                     ArrayMap<String, Ops> pkgOps = uidState.pkgOps;
                     if (pkgOps != null) {
                         pkgOps.remove(ops.packageName);
+                        mAppOpsServiceInterface.removePackage(ops.packageName);
                         if (pkgOps.isEmpty()) {
                             uidState.pkgOps = null;
                         }
                         if (uidState.isDefault()) {
+                            uidState.clear();
                             mUidStates.remove(uid);
                         }
                     }
@@ -2548,33 +2583,18 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (mode == defaultMode) {
                     return;
                 }
-                previousMode = MODE_DEFAULT;
                 uidState = new UidState(uid);
-                uidState.opModes = new SparseIntArray();
-                uidState.opModes.put(code, mode);
                 mUidStates.put(uid, uidState);
-                scheduleWriteLocked();
-            } else if (uidState.opModes == null) {
-                previousMode = MODE_DEFAULT;
-                if (mode != defaultMode) {
-                    uidState.opModes = new SparseIntArray();
-                    uidState.opModes.put(code, mode);
-                    scheduleWriteLocked();
-                }
+            }
+            if (uidState.getUidMode(code) != AppOpsManager.opToDefaultMode(code)) {
+                previousMode = uidState.getUidMode(code);
             } else {
-                if (uidState.opModes.indexOfKey(code) >= 0 && uidState.opModes.get(code) == mode) {
-                    return;
-                }
-                previousMode = uidState.opModes.get(code);
-                if (mode == defaultMode) {
-                    uidState.opModes.delete(code);
-                    if (uidState.opModes.size() <= 0) {
-                        uidState.opModes = null;
-                    }
-                } else {
-                    uidState.opModes.put(code, mode);
-                }
-                scheduleWriteLocked();
+                // doesn't look right but is legacy behavior.
+                previousMode = MODE_DEFAULT;
+            }
+
+            if (!uidState.setUidMode(code, mode)) {
+                return;
             }
             uidState.evalForegroundOps(mOpModeWatchers);
             if (mode != MODE_ERRORED && mode != previousMode) {
@@ -2806,9 +2826,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             UidState uidState = getUidStateLocked(uid, false);
             Op op = getOpLocked(code, uid, packageName, null, false, pvr.bypass, /* edit */ true);
             if (op != null) {
-                if (op.mode != mode) {
-                    previousMode = op.mode;
-                    op.mode = mode;
+                if (op.getMode() != mode) {
+                    previousMode = op.getMode();
+                    op.setMode(mode);
+
                     if (uidState != null) {
                         uidState.evalForegroundOps(mOpModeWatchers);
                     }
@@ -2976,17 +2997,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int i = mUidStates.size() - 1; i >= 0; i--) {
                 UidState uidState = mUidStates.valueAt(i);
 
-                SparseIntArray opModes = uidState.opModes;
+                SparseIntArray opModes = uidState.getNonDefaultUidModes();
                 if (opModes != null && (uidState.uid == reqUid || reqUid == -1)) {
                     final int uidOpCount = opModes.size();
                     for (int j = uidOpCount - 1; j >= 0; j--) {
                         final int code = opModes.keyAt(j);
                         if (AppOpsManager.opAllowsReset(code)) {
                             int previousMode = opModes.valueAt(j);
-                            opModes.removeAt(j);
-                            if (opModes.size() <= 0) {
-                                uidState.opModes = null;
-                            }
+                            uidState.setUidMode(code, AppOpsManager.opToDefaultMode(code));
                             for (String packageName : getPackagesForUid(uidState.uid)) {
                                 callbacks = addCallbacks(callbacks, code, uidState.uid, packageName,
                                         previousMode, mOpModeWatchers.get(code));
@@ -3028,9 +3046,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                             continue;
                         }
                         if (AppOpsManager.opAllowsReset(curOp.op)
-                                && curOp.mode != AppOpsManager.opToDefaultMode(curOp.op)) {
-                            int previousMode = curOp.mode;
-                            curOp.mode = AppOpsManager.opToDefaultMode(curOp.op);
+                                && curOp.getMode() != AppOpsManager.opToDefaultMode(curOp.op)) {
+                            int previousMode = curOp.getMode();
+                            curOp.setMode(AppOpsManager.opToDefaultMode(curOp.op));
                             changed = true;
                             uidChanged = true;
                             final int uid = curOp.uidState.uid;
@@ -3049,9 +3067,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                     if (pkgOps.size() == 0) {
                         it.remove();
+                        mAppOpsServiceInterface.removePackage(packageName);
                     }
                 }
                 if (uidState.isDefault()) {
+                    uidState.clear();
                     mUidStates.remove(uidState.uid);
                 }
                 if (uidChanged) {
@@ -3267,16 +3287,16 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             code = AppOpsManager.opToSwitch(code);
             UidState uidState = getUidStateLocked(uid, false);
-            if (uidState != null && uidState.opModes != null
-                    && uidState.opModes.indexOfKey(code) >= 0) {
-                final int rawMode = uidState.opModes.get(code);
+            if (uidState != null
+                    && uidState.getUidMode(code) != AppOpsManager.opToDefaultMode(code)) {
+                final int rawMode = uidState.getUidMode(code);
                 return raw ? rawMode : uidState.evalMode(code, rawMode);
             }
             Op op = getOpLocked(code, uid, packageName, null, false, pvr.bypass, /* edit */ false);
             if (op == null) {
                 return AppOpsManager.opToDefaultMode(code);
             }
-            return raw ? op.mode : op.evalMode();
+            return raw ? op.getMode() : op.evalMode();
         }
     }
 
@@ -3502,8 +3522,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             // If there is a non-default per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
-            if (uidState.opModes != null && uidState.opModes.indexOfKey(switchCode) >= 0) {
-                final int uidMode = uidState.evalMode(code, uidState.opModes.get(switchCode));
+            if (uidState.getUidMode(switchCode) != AppOpsManager.opToDefaultMode(switchCode)) {
+                final int uidMode = uidState.evalMode(code, uidState.getUidMode(switchCode));
                 if (uidMode != AppOpsManager.MODE_ALLOWED) {
                     if (DEBUG) Slog.d(TAG, "noteOperation: uid reject #" + uidMode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
@@ -4018,8 +4038,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             final int switchCode = AppOpsManager.opToSwitch(code);
             // If there is a non-default per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
-            if (uidState.opModes != null && uidState.opModes.indexOfKey(switchCode) >= 0) {
-                final int uidMode = uidState.evalMode(code, uidState.opModes.get(switchCode));
+            if (uidState.getUidMode(switchCode) != AppOpsManager.opToDefaultMode(switchCode)) {
+                final int uidMode = uidState.evalMode(code, uidState.getUidMode(switchCode));
                 if (!shouldStartForMode(uidMode, startIfModeDefault)) {
                     if (DEBUG) {
                         Slog.d(TAG, "startOperation: uid reject #" + uidMode + " for code "
@@ -4516,9 +4536,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     continue;
                 }
 
-                if (uidState.opModes != null
-                        && uidState.opModes.indexOfKey(code) >= 0
-                        && uidState.opModes.get(code) == AppOpsManager.MODE_FOREGROUND) {
+                if (uidState.getUidMode(code) != AppOpsManager.opToDefaultMode(code)
+                        && uidState.getUidMode(code) == AppOpsManager.MODE_FOREGROUND) {
                     mHandler.sendMessage(PooledLambda.obtainMessage(
                             AppOpsService::notifyOpChangedForAllPkgsInUid,
                             this, code, uidState.uid, true, null));
@@ -4536,7 +4555,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 if (op == null) {
                                     continue;
                                 }
-                                if (op.mode == AppOpsManager.MODE_FOREGROUND) {
+                                if (op.getMode() == AppOpsManager.MODE_FOREGROUND) {
                                     mHandler.sendMessage(PooledLambda.obtainMessage(
                                             AppOpsService::notifyOpChanged,
                                             this, callback, code, uidState.uid,
@@ -4811,14 +4830,16 @@ public class AppOpsService extends IAppOpsService.Stub {
         return ops;
     }
 
-    private void scheduleWriteLocked() {
+    @Override
+    public void scheduleWriteLocked() {
         if (!mWriteScheduled) {
             mWriteScheduled = true;
             mHandler.postDelayed(mWriteRunner, WRITE_DELAY);
         }
     }
 
-    private void scheduleFastWriteLocked() {
+    @Override
+    public void scheduleFastWriteLocked() {
         if (!mFastWriteScheduled) {
             mWriteScheduled = true;
             mFastWriteScheduled = true;
@@ -4929,6 +4950,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
                 boolean success = false;
                 mUidStates.clear();
+                mAppOpsServiceInterface.clearAllModes();
                 try {
                     TypedXmlPullParser parser = Xml.resolvePullParser(stream);
                     int type;
@@ -4977,6 +4999,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 } finally {
                     if (!success) {
                         mUidStates.clear();
+                        mAppOpsServiceInterface.clearAllModes();
                     }
                     try {
                         stream.close();
@@ -4996,11 +5019,12 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (uidState == null) {
                 continue;
             }
-            if (uidState.opModes != null) {
-                final int idx = uidState.opModes.indexOfKey(AppOpsManager.OP_RUN_IN_BACKGROUND);
+            SparseIntArray opModes = uidState.getNonDefaultUidModes();
+            if (opModes != null) {
+                final int idx = opModes.indexOfKey(AppOpsManager.OP_RUN_IN_BACKGROUND);
                 if (idx >= 0) {
-                    uidState.opModes.put(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND,
-                        uidState.opModes.valueAt(idx));
+                    uidState.setUidMode(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND,
+                            opModes.valueAt(idx));
                 }
             }
             if (uidState.pkgOps == null) {
@@ -5011,10 +5035,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                 Ops ops = uidState.pkgOps.valueAt(j);
                 if (ops != null) {
                     final Op op = ops.get(AppOpsManager.OP_RUN_IN_BACKGROUND);
-                    if (op != null && op.mode != AppOpsManager.opToDefaultMode(op.op)) {
+                    if (op != null && op.getMode() != AppOpsManager.opToDefaultMode(op.op)) {
                         final Op copy = new Op(op.uidState, op.packageName,
                                 AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, uidState.uid);
-                        copy.mode = op.mode;
+                        copy.setMode(op.getMode());
                         ops.put(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, copy);
                         changed = true;
                     }
@@ -5142,7 +5166,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         Op op = new Op(uidState, pkgName, opCode, uidState.uid);
 
         final int mode = parser.getAttributeInt(null, "m", AppOpsManager.opToDefaultMode(op.op));
-        op.mode = mode;
+        op.setMode(mode);
 
         int outerDepth = parser.getDepth();
         int type;
@@ -5199,16 +5223,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                         UidState uidState = mUidStates.valueAt(uidStateNum);
                         int uid = mUidStates.keyAt(uidStateNum);
 
-                        SparseIntArray opModes = uidState.opModes;
+                        SparseIntArray opModes = uidState.getNonDefaultUidModes();
                         if (opModes != null && opModes.size() > 0) {
-                            uidStatesClone.put(uid, new SparseIntArray(opModes.size()));
-
-                            final int opCount = opModes.size();
-                            for (int opCountNum = 0; opCountNum < opCount; opCountNum++) {
-                                uidStatesClone.get(uid).put(
-                                        opModes.keyAt(opCountNum),
-                                        opModes.valueAt(opCountNum));
-                            }
+                            uidStatesClone.put(uid, opModes);
                         }
                     }
                 }
@@ -6314,15 +6331,15 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             for (int i=0; i<mUidStates.size(); i++) {
                 UidState uidState = mUidStates.valueAt(i);
-                final SparseIntArray opModes = uidState.opModes;
+                final SparseIntArray opModes = uidState.getNonDefaultUidModes();
                 final ArrayMap<String, Ops> pkgOps = uidState.pkgOps;
 
                 if (dumpWatchers || dumpHistory) {
                     continue;
                 }
                 if (dumpOp >= 0 || dumpPackage != null || dumpMode >= 0) {
-                    boolean hasOp = dumpOp < 0 || (uidState.opModes != null
-                            && uidState.opModes.indexOfKey(dumpOp) >= 0);
+                    boolean hasOp = dumpOp < 0 || (opModes != null
+                            && opModes.indexOfKey(dumpOp) >= 0);
                     boolean hasPackage = dumpPackage == null || dumpUid == mUidStates.keyAt(i);
                     boolean hasMode = dumpMode < 0;
                     if (!hasMode && opModes != null) {
@@ -6342,7 +6359,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                             }
                             if (!hasMode) {
                                 for (int opi = 0; !hasMode && opi < ops.size(); opi++) {
-                                    if (ops.valueAt(opi).mode == dumpMode) {
+                                    if (ops.valueAt(opi).getMode() == dumpMode) {
                                         hasMode = true;
                                     }
                                 }
@@ -6437,7 +6454,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         if (dumpOp >= 0 && dumpOp != opCode) {
                             continue;
                         }
-                        if (dumpMode >= 0 && dumpMode != op.mode) {
+                        if (dumpMode >= 0 && dumpMode != op.getMode()) {
                             continue;
                         }
                         if (!printedPackage) {
@@ -6445,14 +6462,14 @@ public class AppOpsService extends IAppOpsService.Stub {
                             printedPackage = true;
                         }
                         pw.print("      "); pw.print(AppOpsManager.opToName(opCode));
-                        pw.print(" ("); pw.print(AppOpsManager.modeToName(op.mode));
+                        pw.print(" ("); pw.print(AppOpsManager.modeToName(op.getMode()));
                         final int switchOp = AppOpsManager.opToSwitch(opCode);
                         if (switchOp != opCode) {
                             pw.print(" / switch ");
                             pw.print(AppOpsManager.opToName(switchOp));
                             final Op switchObj = ops.get(switchOp);
-                            int mode = switchObj != null ? switchObj.mode
-                                    : AppOpsManager.opToDefaultMode(switchOp);
+                            int mode = switchObj == null
+                                    ? AppOpsManager.opToDefaultMode(switchOp) : switchObj.getMode();
                             pw.print("="); pw.print(AppOpsManager.modeToName(mode));
                         }
                         pw.println("): ");
@@ -6696,7 +6713,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         for (int pkgNum = 0; pkgNum < numPkgOps; pkgNum++) {
             Ops ops = uidState.pkgOps.valueAt(pkgNum);
             Op op = ops != null ? ops.get(code) : null;
-            if (op == null || (op.mode != MODE_ALLOWED && op.mode != MODE_FOREGROUND)) {
+            if (op == null || (op.getMode() != MODE_ALLOWED && op.getMode() != MODE_FOREGROUND)) {
                 continue;
             }
             int numAttrTags = op.mAttributions.size();
@@ -6817,6 +6834,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
             Ops removedOps = uidState.pkgOps.remove(packageName);
+            mAppOpsServiceInterface.removePackage(packageName);
             if (removedOps != null) {
                 scheduleFastWriteLocked();
             }
@@ -7136,10 +7154,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         return false;
     }
 
+    @GuardedBy("this")
     private void removeUidsForUserLocked(int userHandle) {
         for (int i = mUidStates.size() - 1; i >= 0; --i) {
             final int uid = mUidStates.keyAt(i);
             if (UserHandle.getUserId(uid) == userHandle) {
+                mUidStates.valueAt(i).clear();
                 mUidStates.removeAt(i);
             }
         }

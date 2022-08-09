@@ -71,7 +71,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
-import java.util.function.Supplier;
 
 /**
  * Container for a message (data and object references) that can
@@ -5242,20 +5241,20 @@ public final class Parcel {
      * Reads a map into {@code map}.
      *
      * @param sorted Whether the keys are sorted by their hashes, if so we use an optimized path.
-     * @param lazy   Whether to populate the map with lazy {@link Supplier} objects for
+     * @param lazy   Whether to populate the map with lazy {@link Function} objects for
      *               length-prefixed values. See {@link Parcel#readLazyValue(ClassLoader)} for more
      *               details.
-     * @return whether the parcel can be recycled or not.
+     * @return a count of the lazy values in the map
      * @hide
      */
-    boolean readArrayMap(ArrayMap<? super String, Object> map, int size, boolean sorted,
+    int readArrayMap(ArrayMap<? super String, Object> map, int size, boolean sorted,
             boolean lazy, @Nullable ClassLoader loader) {
-        boolean recycle = true;
+        int lazyValues = 0;
         while (size > 0) {
             String key = readString();
             Object value = (lazy) ? readLazyValue(loader) : readValue(loader);
             if (value instanceof LazyValue) {
-                recycle = false;
+                lazyValues++;
             }
             if (sorted) {
                 map.append(key, value);
@@ -5267,7 +5266,7 @@ public final class Parcel {
         if (sorted) {
             map.validate();
         }
-        return recycle;
+        return lazyValues;
     }
 
     /**

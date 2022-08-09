@@ -2838,6 +2838,26 @@ public class UserManager {
     }
 
     /**
+     * @hide
+     */
+    public static boolean isUsersOnSecondaryDisplaysEnabled() {
+        return SystemProperties.getBoolean("fw.users_on_secondary_displays",
+                Resources.getSystem()
+                        .getBoolean(R.bool.config_multiuserUsersOnSecondaryDisplays));
+    }
+
+    /**
+     * Returns whether the device allows users to run (and launch activities) on secondary displays.
+     *
+     * @return {@code false} for most devices, except automotive vehicles with passenger displays.
+     *
+     * @hide
+     */
+    public boolean isUsersOnSecondaryDisplaysSupported() {
+        return isUsersOnSecondaryDisplaysEnabled();
+    }
+
+    /**
      * Return whether the context user is running in an "unlocked" state.
      * <p>
      * On devices with direct boot, a user is unlocked only after they've

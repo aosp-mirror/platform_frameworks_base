@@ -6010,6 +6010,10 @@ public class UserManagerService extends IUserManager.Stub {
 
         } // synchronized (mPackagesLock)
 
+        // Multiple Users on Multiple Display info
+        pw.println("  Supports users on secondary displays: "
+                + UserManager.isUsersOnSecondaryDisplaysEnabled());
+
         // Dump some capabilities
         pw.println();
         pw.print("  Max users: " + UserManager.getMaxSupportedUsers());

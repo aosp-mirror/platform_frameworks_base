@@ -31,4 +31,6 @@ interface IGameManagerService {
     void setGameState(String packageName, in GameState gameState, int userId);
     GameModeInfo getGameModeInfo(String packageName, int userId);
     void setGameServiceProvider(String packageName);
+    void updateResolutionScalingFactor(String packageName, int gameMode, float scalingFactor, int userId);
+    float getResolutionScalingFactor(String packageName, int gameMode, int userId);
 }
