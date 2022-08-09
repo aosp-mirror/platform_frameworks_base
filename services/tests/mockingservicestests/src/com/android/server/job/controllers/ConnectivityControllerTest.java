@@ -116,8 +116,8 @@ public class ConnectivityControllerTest {
         LocalServices.addService(NetworkPolicyManagerInternal.class, mNetPolicyManagerInternal);
 
         when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
-
-        mFlexibilityController = new FlexibilityController(mService);
+        mFlexibilityController =
+                new FlexibilityController(mService, mock(PrefetchController.class));
 
         // Freeze the clocks at this moment in time
         JobSchedulerService.sSystemClock =
