@@ -39,7 +39,9 @@ private const val RIPPLE_DEFAULT_COLOR: Int = 0xffffffff.toInt()
 open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
     private lateinit var rippleShader: RippleShader
-    private lateinit var rippleShape: RippleShape
+    lateinit var rippleShape: RippleShape
+        private set
+
     private val ripplePaint = Paint()
 
     var rippleInProgress: Boolean = false
