@@ -84,7 +84,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"O administrador bloqueou o dispositivo"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"O dispositivo bloqueouse manualmente"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Non se recoñeceu"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Desbloqueo facial: acceso á cámara en Configuración"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"O Desbloqueo facial necesita acceso á cámara"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Mete o PIN da SIM. Quédache # intento antes de que teñas que contactar co operador para desbloquear o dispositivo.}other{Mete o PIN da SIM. Quédanche # intentos.}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{A SIM está desactivada. Mete o código PUK para continuar. Quédache # intento antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.}other{A SIM está desactivada. Mete o código PUK para continuar. Quédanche # intentos antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Predeterminado"</string>

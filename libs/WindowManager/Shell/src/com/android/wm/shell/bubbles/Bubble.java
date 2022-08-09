@@ -452,6 +452,7 @@ public class Bubble implements BubbleViewProvider {
      */
     void setEntry(@NonNull final BubbleEntry entry) {
         Objects.requireNonNull(entry);
+        boolean showingDotPreviously = showDot();
         mLastUpdated = entry.getStatusBarNotification().getPostTime();
         mIsBubble = entry.getStatusBarNotification().getNotification().isBubbleNotification();
         mPackageName = entry.getStatusBarNotification().getPackageName();
@@ -498,6 +499,10 @@ public class Bubble implements BubbleViewProvider {
         mShouldSuppressNotificationDot = entry.shouldSuppressNotificationDot();
         mShouldSuppressNotificationList = entry.shouldSuppressNotificationList();
         mShouldSuppressPeek = entry.shouldSuppressPeek();
+        if (showingDotPreviously != showDot()) {
+            // This will update the UI if needed
+            setShowDot(showDot());
+        }
     }
 
     @Nullable

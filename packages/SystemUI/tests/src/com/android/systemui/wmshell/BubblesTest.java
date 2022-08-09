@@ -33,6 +33,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -621,7 +622,7 @@ public class BubblesTest extends SysuiTestCase {
         assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getKey()).showDot());
 
         // Send update
-        mEntryListener.onEntryUpdated(mRow);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
 
         // Nothing should have changed
         // Notif is suppressed after expansion
@@ -789,7 +790,7 @@ public class BubblesTest extends SysuiTestCase {
     @Test
     public void testAddNotif_notBubble() {
         mEntryListener.onEntryAdded(mNonBubbleNotifRow.getEntry());
-        mEntryListener.onEntryUpdated(mNonBubbleNotifRow.getEntry());
+        mEntryListener.onEntryUpdated(mNonBubbleNotifRow.getEntry(), /* fromSystem= */ true);
 
         assertThat(mBubbleController.hasBubbles()).isFalse();
     }
@@ -827,7 +828,7 @@ public class BubblesTest extends SysuiTestCase {
         NotificationListenerService.Ranking ranking = new RankingBuilder(
                 mRow.getRanking()).setCanBubble(false).build();
         mRow.setRanking(ranking);
-        mEntryListener.onEntryUpdated(mRow);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
 
         assertFalse(mBubbleController.hasBubbles());
         verify(mDeleteIntent, never()).send();
@@ -1430,6 +1431,100 @@ public class BubblesTest extends SysuiTestCase {
 
         // Should no longer be in the stack
         assertThat(mBubbleData.hasBubbleInStackWithKey(mBubbleEntry.getKey())).isFalse();
+    }
+
+    /**
+     * Verifies that if a bubble is in the overflow and a non-interruptive notification update
+     * comes in for it, it stays in the overflow but the entry is updated.
+     */
+    @Test
+    public void testNonInterruptiveUpdate_doesntBubbleFromOverflow() {
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
+        assertBubbleNotificationNotSuppressedFromShade(mBubbleEntry);
+
+        // Dismiss the bubble so it's in the overflow
+        mBubbleController.removeBubble(
+                mRow.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(mRow.getKey())).isTrue();
+
+        // Update the entry to not show in shade
+        setMetadataFlags(mRow,
+                Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION, /* enableFlag= */ true);
+        mBubbleController.updateBubble(mBubbleEntry,
+                /* suppressFlyout= */ false, /* showInShade= */ true);
+
+        // Check that the update was applied - shouldn't be show in shade
+        assertBubbleNotificationSuppressedFromShade(mBubbleEntry);
+        // Check that it wasn't inflated (1 because it would've been inflated via onEntryAdded)
+        verify(mBubbleController, times(1)).inflateAndAdd(
+                any(Bubble.class), anyBoolean(), anyBoolean());
+    }
+
+    /**
+     * Verifies that if a bubble is active, and a non-interruptive notification update comes in for
+     * it, it doesn't trigger a new inflate and add for that bubble.
+     */
+    @Test
+    public void testNonInterruptiveUpdate_doesntTriggerInflate() {
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
+        assertBubbleNotificationNotSuppressedFromShade(mBubbleEntry);
+
+        // Update the entry to not show in shade
+        setMetadataFlags(mRow,
+                Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION, /* enableFlag= */ true);
+        mBubbleController.updateBubble(mBubbleEntry,
+                /* suppressFlyout= */ false, /* showInShade= */ true);
+
+        // Check that the update was applied - shouldn't be show in shade
+        assertBubbleNotificationSuppressedFromShade(mBubbleEntry);
+        // Check that it wasn't inflated (1 because it would've been inflated via onEntryAdded)
+        verify(mBubbleController, times(1)).inflateAndAdd(
+                any(Bubble.class), anyBoolean(), anyBoolean());
+    }
+
+    /**
+     * Verifies that if a bubble is in the overflow and a non-interruptive notification update
+     * comes in for it with FLAG_BUBBLE that the flag is removed.
+     */
+    @Test
+    public void testNonInterruptiveUpdate_doesntOverrideOverflowFlagBubble() {
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
+        assertBubbleNotificationNotSuppressedFromShade(mBubbleEntry);
+
+        // Dismiss the bubble so it's in the overflow
+        mBubbleController.removeBubble(
+                mRow.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(mRow.getKey())).isTrue();
+        // Once it's in the overflow it's not actively a bubble (doesn't have FLAG_BUBBLE)
+        Bubble b = mBubbleData.getOverflowBubbleWithKey(mBubbleEntry.getKey());
+        assertThat(b.isBubble()).isFalse();
+
+        // Send a non-notifying update that has FLAG_BUBBLE
+        mRow.getSbn().getNotification().flags = FLAG_BUBBLE;
+        assertThat(mRow.getSbn().getNotification().isBubbleNotification()).isTrue();
+        mBubbleController.updateBubble(mBubbleEntry,
+                /* suppressFlyout= */ false, /* showInShade= */ true);
+
+        // Verify that it still doesn't have FLAG_BUBBLE because it's in the overflow.
+        b = mBubbleData.getOverflowBubbleWithKey(mBubbleEntry.getKey());
+        assertThat(b.isBubble()).isFalse();
+    }
+
+    @Test
+    public void testNonSystemUpdatesIgnored() {
+        mEntryListener.onEntryAdded(mRow);
+        assertThat(mBubbleController.hasBubbles()).isTrue();
+
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ false);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ false);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ false);
+
+        // Check that it wasn't inflated (1 because it would've been inflated via onEntryAdded)
+        verify(mBubbleController, times(1)).inflateAndAdd(
+                any(Bubble.class), anyBoolean(), anyBoolean());
     }
 
     /** Creates a bubble using the userId and package. */

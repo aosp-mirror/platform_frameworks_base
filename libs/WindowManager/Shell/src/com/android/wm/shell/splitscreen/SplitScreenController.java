@@ -21,6 +21,7 @@ import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -90,7 +91,6 @@ import com.android.wm.shell.transition.Transitions;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -453,12 +453,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             mStageCoordinator.prepareEvictInvisibleChildTasks(wct);
             mSyncQueue.queue(wct);
         }
-        return reparentSplitTasksForAnimation(apps, true /*splitExpectedToBeVisible*/);
+        return reparentSplitTasksForAnimation(apps, false /* enterSplitScreen */);
     }
 
     RemoteAnimationTarget[] onStartingSplitLegacy(RemoteAnimationTarget[] apps) {
         try {
-            return reparentSplitTasksForAnimation(apps, false /*splitExpectedToBeVisible*/);
+            return reparentSplitTasksForAnimation(apps, true /* enterSplitScreen */);
         } finally {
             for (RemoteAnimationTarget appTarget : apps) {
                 if (appTarget.leash != null) {
@@ -469,14 +469,23 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     private RemoteAnimationTarget[] reparentSplitTasksForAnimation(RemoteAnimationTarget[] apps,
-            boolean splitExpectedToBeVisible) {
+            boolean enterSplitScreen) {
         if (ENABLE_SHELL_TRANSITIONS) return null;
-        // TODO(b/206487881): Integrate this with shell transition.
-        if (splitExpectedToBeVisible && !isSplitScreenVisible()) return null;
-        // Split not visible, but not enough apps to have split, also return null
-        if (!splitExpectedToBeVisible && apps.length < 2) return null;
 
-        SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+        if (enterSplitScreen) {
+            int openingApps = 0;
+            for (int i = 0; i < apps.length; ++i) {
+                if (apps[i].mode == MODE_OPENING) openingApps++;
+            }
+            if (openingApps < 2) {
+                // Not having enough apps to enter split screen
+                return null;
+            }
+        } else if (!isSplitScreenVisible()) {
+            return null;
+        }
+
+        final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
         if (mSplitTasksContainerLayer != null) {
             // Remove the previous layer before recreating
             transaction.remove(mSplitTasksContainerLayer);
@@ -489,17 +498,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mRootTDAOrganizer.attachToDisplayArea(DEFAULT_DISPLAY, builder);
         mSplitTasksContainerLayer = builder.build();
 
-        // Ensure that we order these in the parent in the right z-order as their previous order
-        Arrays.sort(apps, (a1, a2) -> a1.prefixOrderIndex - a2.prefixOrderIndex);
-        int layer = 1;
-        for (RemoteAnimationTarget appTarget : apps) {
+        for (int i = 0; i < apps.length; ++i) {
+            final RemoteAnimationTarget appTarget = apps[i];
             transaction.reparent(appTarget.leash, mSplitTasksContainerLayer);
             transaction.setPosition(appTarget.leash, appTarget.screenSpaceBounds.left,
                     appTarget.screenSpaceBounds.top);
-            transaction.setLayer(appTarget.leash, layer++);
         }
         transaction.apply();
-        transaction.close();
+        mTransactionPool.release(transaction);
         return new RemoteAnimationTarget[]{mStageCoordinator.getDividerBarLegacyTarget()};
     }
     /**

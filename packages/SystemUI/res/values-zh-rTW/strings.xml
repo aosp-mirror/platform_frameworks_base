@@ -831,8 +831,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"已選取 <xliff:g id="COUNT">%1$d</xliff:g> 部裝置"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(連線中斷)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"無法切換，輕觸即可重試。"</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"建立裝置連線"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"如要投放這個工作階段，請開啟應用程式。"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"不明的應用程式"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"停止投放"</string>
@@ -944,14 +943,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi 已關閉"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"優先模式"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"鬧鐘設定成功"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"相機已關閉"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"麥克風已關閉"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"已關閉相機和麥克風"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# 則通知}other{# 則通知}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>，<xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"廣播"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"要停止播送「<xliff:g id="APP_NAME">%1$s</xliff:g>」的內容嗎？"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"如果播送「<xliff:g id="SWITCHAPP">%1$s</xliff:g>」的內容或變更輸出來源，系統就會停止播送目前的內容"</string>

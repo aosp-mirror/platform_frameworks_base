@@ -471,7 +471,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         showBouncer(scrimmed);
     }
 
-    private boolean shouldShowAltAuth() {
+    /** Whether we should show the alternate authentication instead of the traditional bouncer. */
+    public boolean shouldShowAltAuth() {
         return mAlternateAuthInterceptor != null
                 && mKeyguardUpdateManager.isUnlockingWithBiometricAllowed(true);
     }
