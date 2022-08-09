@@ -56,7 +56,7 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
         internal val logger: MediaTttLogger,
         internal val windowManager: WindowManager,
         private val viewUtil: ViewUtil,
-        @Main private val mainExecutor: DelayableExecutor,
+        @Main internal val mainExecutor: DelayableExecutor,
         private val accessibilityManager: AccessibilityManager,
         private val configurationController: ConfigurationController,
         private val powerManager: PowerManager,
@@ -205,13 +205,15 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
      *
      * @param appPackageName the package name of the app playing the media. Will be used to fetch
      *   the app icon and app name if overrides aren't provided.
+     *
+     * @return the content description of the icon.
      */
     internal fun setIcon(
         currentChipView: ViewGroup,
         appPackageName: String?,
         appIconDrawableOverride: Drawable? = null,
         appNameOverride: CharSequence? = null,
-    ) {
+    ): CharSequence {
         val appIconView = currentChipView.requireViewById<CachingIconView>(R.id.app_icon)
         val iconInfo = getIconInfo(appPackageName)
 
@@ -224,6 +226,7 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
 
         appIconView.contentDescription = appNameOverride ?: iconInfo.iconName
         appIconView.setImageDrawable(appIconDrawableOverride ?: iconInfo.icon)
+        return appIconView.contentDescription.toString()
     }
 
     /**
