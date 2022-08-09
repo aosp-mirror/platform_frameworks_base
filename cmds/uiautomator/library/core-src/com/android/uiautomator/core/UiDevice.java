@@ -380,7 +380,7 @@ public class UiDevice {
         Tracer.trace();
         Display display = getAutomatorBridge().getDefaultDisplay();
         Point p = new Point();
-        display.getSize(p);
+        display.getRealSize(p);
         return p.x;
     }
 
@@ -394,7 +394,7 @@ public class UiDevice {
         Tracer.trace();
         Display display = getAutomatorBridge().getDefaultDisplay();
         Point p = new Point();
-        display.getSize(p);
+        display.getRealSize(p);
         return p.y;
     }
 
