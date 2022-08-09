@@ -52,6 +52,7 @@ import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualTouchEvent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -542,6 +543,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                             mParams.getDefaultActivityPolicy(),
                             createListenerAdapter(),
                             this::onActivityBlocked,
+                            this::onSecureWindowShown,
                             mAssociationInfo.getDeviceProfile());
             gwpc.registerRunningAppsChangedListener(/* listener= */ this);
             return gwpc;
@@ -589,6 +591,21 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
                 ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle(),
                 mContext.getUser());
+    }
+
+    private void onSecureWindowShown(int displayId, int uid) {
+        if (!mVirtualDisplayIds.contains(displayId)) {
+            return;
+        }
+
+        // If a virtual display isn't secure, the screen can't be captured. Show a warning toast
+        // if the secure window is shown on a non-secure virtual display.
+        DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        Display display = displayManager.getDisplay(displayId);
+        if ((display.getFlags() & FLAG_SECURE) == 0) {
+            showToastWhereUidIsRunning(uid, com.android.internal.R.string.vdm_secure_window,
+                    Toast.LENGTH_LONG, mContext.getMainLooper());
+        }
     }
 
     private ArraySet<UserHandle> getAllowedUserHandles() {
@@ -650,14 +667,16 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     /**
      * Shows a toast on virtual displays owned by this device which have a given uid running.
      */
-    void showToastWhereUidIsRunning(int uid, @StringRes int resId, @Toast.Duration int duration) {
-        showToastWhereUidIsRunning(uid, mContext.getString(resId), duration);
+    void showToastWhereUidIsRunning(int uid, @StringRes int resId, @Toast.Duration int duration,
+            Looper looper) {
+        showToastWhereUidIsRunning(uid, mContext.getString(resId), duration, looper);
     }
 
     /**
      * Shows a toast on virtual displays owned by this device which have a given uid running.
      */
-    void showToastWhereUidIsRunning(int uid, String text, @Toast.Duration int duration) {
+    void showToastWhereUidIsRunning(int uid, String text, @Toast.Duration int duration,
+            Looper looper) {
         synchronized (mVirtualDeviceLock) {
             DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
             final int size = mWindowPolicyControllers.size();
@@ -666,7 +685,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     int displayId = mWindowPolicyControllers.keyAt(i);
                     Display display = displayManager.getDisplay(displayId);
                     if (display != null && display.isValid()) {
-                        Toast.makeText(mContext.createDisplayContext(display), text,
+                        Toast.makeText(mContext.createDisplayContext(display), looper, text,
                                 duration).show();
                     }
                 }

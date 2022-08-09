@@ -202,7 +202,7 @@ public class VirtualDeviceManagerService extends SystemService {
                         getContext().getString(
                             com.android.internal.R.string.vdm_camera_access_denied,
                             deviceName),
-                        Toast.LENGTH_LONG);
+                        Toast.LENGTH_LONG, Looper.myLooper());
             }
         }
     }
