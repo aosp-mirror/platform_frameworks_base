@@ -364,12 +364,13 @@ void RenderProxy::setForceDark(bool enable) {
     mRenderThread.queue().post([this, enable]() { mContext->setForceDark(enable); });
 }
 
-int RenderProxy::copySurfaceInto(ANativeWindow* window, int left, int top, int right, int bottom,
-                                 SkBitmap* bitmap) {
+void RenderProxy::copySurfaceInto(ANativeWindow* window, std::shared_ptr<CopyRequest>&& request) {
     auto& thread = RenderThread::getInstance();
-    return static_cast<int>(thread.queue().runSync([&]() -> auto {
-        return thread.readback().copySurfaceInto(window, Rect(left, top, right, bottom), bitmap);
-    }));
+    ANativeWindow_acquire(window);
+    thread.queue().post([&thread, window, request = std::move(request)] {
+        thread.readback().copySurfaceInto(window, request);
+        ANativeWindow_release(window);
+    });
 }
 
 void RenderProxy::prepareToDraw(Bitmap& bitmap) {

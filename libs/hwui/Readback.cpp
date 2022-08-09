@@ -49,8 +49,7 @@ namespace uirenderer {
 
 #define ARECT_ARGS(r) float((r).left), float((r).top), float((r).right), float((r).bottom)
 
-CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRect,
-                                     SkBitmap* bitmap) {
+void Readback::copySurfaceInto(ANativeWindow* window, const std::shared_ptr<CopyRequest>& request) {
     ATRACE_CALL();
     // Setup the source
     AHardwareBuffer* rawSourceBuffer;
@@ -63,30 +62,33 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRec
     // Really this shouldn't ever happen, but better safe than sorry.
     if (err == UNKNOWN_TRANSACTION) {
         ALOGW("Readback failed to ANativeWindow_getLastQueuedBuffer2 - who are we talking to?");
-        return copySurfaceIntoLegacy(window, inSrcRect, bitmap);
+        return request->onCopyFinished(CopyResult::SourceInvalid);
     }
     ALOGV("Using new path, cropRect=" RECT_STRING ", transform=%x", ARECT_ARGS(cropRect),
           windowTransform);
 
     if (err != NO_ERROR) {
         ALOGW("Failed to get last queued buffer, error = %d", err);
-        return CopyResult::UnknownError;
+        return request->onCopyFinished(CopyResult::SourceInvalid);
     }
     if (rawSourceBuffer == nullptr) {
         ALOGW("Surface doesn't have any previously queued frames, nothing to readback from");
-        return CopyResult::SourceEmpty;
+        return request->onCopyFinished(CopyResult::SourceEmpty);
     }
     UniqueAHardwareBuffer sourceBuffer{rawSourceBuffer};
     AHardwareBuffer_Desc description;
     AHardwareBuffer_describe(sourceBuffer.get(), &description);
     if (description.usage & AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT) {
         ALOGW("Surface is protected, unable to copy from it");
-        return CopyResult::SourceInvalid;
+        return request->onCopyFinished(CopyResult::SourceInvalid);
     }
 
-    if (sourceFence != -1 && sync_wait(sourceFence.get(), 500 /* ms */) != NO_ERROR) {
-        ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
-        return CopyResult::Timeout;
+    {
+        ATRACE_NAME("sync_wait");
+        if (sourceFence != -1 && sync_wait(sourceFence.get(), 500 /* ms */) != NO_ERROR) {
+            ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
+            return request->onCopyFinished(CopyResult::Timeout);
+        }
     }
 
     sk_sp<SkColorSpace> colorSpace = DataSpaceToColorSpace(
@@ -95,12 +97,12 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRec
             SkImage::MakeFromAHardwareBuffer(sourceBuffer.get(), kPremul_SkAlphaType, colorSpace);
 
     if (!image.get()) {
-        return CopyResult::UnknownError;
+        return request->onCopyFinished(CopyResult::UnknownError);
     }
 
     sk_sp<GrDirectContext> grContext = mRenderThread.requireGrContext();
 
-    SkRect srcRect = inSrcRect.toSkRect();
+    SkRect srcRect = request->srcRect.toSkRect();
 
     SkRect imageSrcRect = SkRect::MakeIWH(description.width, description.height);
     SkISize imageWH = SkISize::Make(description.width, description.height);
@@ -148,10 +150,12 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRec
         ALOGV("intersecting " RECT_STRING " with " RECT_STRING, SK_RECT_ARGS(srcRect),
               SK_RECT_ARGS(textureRect));
         if (!srcRect.intersect(textureRect)) {
-            return CopyResult::UnknownError;
+            return request->onCopyFinished(CopyResult::UnknownError);
         }
     }
 
+    SkBitmap skBitmap = request->getDestinationBitmap(srcRect.width(), srcRect.height());
+    SkBitmap* bitmap = &skBitmap;
     sk_sp<SkSurface> tmpSurface =
             SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
                                         bitmap->info(), 0, kTopLeft_GrSurfaceOrigin, nullptr);
@@ -164,7 +168,7 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRec
                                                  tmpInfo, 0, kTopLeft_GrSurfaceOrigin, nullptr);
         if (!tmpSurface.get()) {
             ALOGW("Unable to generate GPU buffer in a format compatible with the provided bitmap");
-            return CopyResult::UnknownError;
+            return request->onCopyFinished(CopyResult::UnknownError);
         }
     }
 
@@ -235,52 +239,13 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRec
             !tmpBitmap.tryAllocPixels(tmpInfo) || !tmpSurface->readPixels(tmpBitmap, 0, 0) ||
             !tmpBitmap.readPixels(bitmap->info(), bitmap->getPixels(), bitmap->rowBytes(), 0, 0)) {
             ALOGW("Unable to convert content into the provided bitmap");
-            return CopyResult::UnknownError;
+            return request->onCopyFinished(CopyResult::UnknownError);
         }
     }
 
     bitmap->notifyPixelsChanged();
 
-    return CopyResult::Success;
-}
-
-CopyResult Readback::copySurfaceIntoLegacy(ANativeWindow* window, const Rect& srcRect,
-                                           SkBitmap* bitmap) {
-    // Setup the source
-    AHardwareBuffer* rawSourceBuffer;
-    int rawSourceFence;
-    Matrix4 texTransform;
-    status_t err = ANativeWindow_getLastQueuedBuffer(window, &rawSourceBuffer, &rawSourceFence,
-                                                     texTransform.data);
-    base::unique_fd sourceFence(rawSourceFence);
-    texTransform.invalidateType();
-    if (err != NO_ERROR) {
-        ALOGW("Failed to get last queued buffer, error = %d", err);
-        return CopyResult::UnknownError;
-    }
-    if (rawSourceBuffer == nullptr) {
-        ALOGW("Surface doesn't have any previously queued frames, nothing to readback from");
-        return CopyResult::SourceEmpty;
-    }
-
-    UniqueAHardwareBuffer sourceBuffer{rawSourceBuffer};
-    AHardwareBuffer_Desc description;
-    AHardwareBuffer_describe(sourceBuffer.get(), &description);
-    if (description.usage & AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT) {
-        ALOGW("Surface is protected, unable to copy from it");
-        return CopyResult::SourceInvalid;
-    }
-
-    if (sourceFence != -1 && sync_wait(sourceFence.get(), 500 /* ms */) != NO_ERROR) {
-        ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
-        return CopyResult::Timeout;
-    }
-
-    sk_sp<SkColorSpace> colorSpace = DataSpaceToColorSpace(
-            static_cast<android_dataspace>(ANativeWindow_getBuffersDataSpace(window)));
-    sk_sp<SkImage> image =
-            SkImage::MakeFromAHardwareBuffer(sourceBuffer.get(), kPremul_SkAlphaType, colorSpace);
-    return copyImageInto(image, srcRect, bitmap);
+    return request->onCopyFinished(CopyResult::Success);
 }
 
 CopyResult Readback::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
@@ -318,13 +283,13 @@ CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, SkBitmap* bitmap
 CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, const Rect& srcRect,
                                    SkBitmap* bitmap) {
     ATRACE_CALL();
+    if (!image.get()) {
+        return CopyResult::UnknownError;
+    }
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
         mRenderThread.requireGlContext();
     } else {
         mRenderThread.requireVkContext();
-    }
-    if (!image.get()) {
-        return CopyResult::UnknownError;
     }
     int imgWidth = image->width();
     int imgHeight = image->height();
