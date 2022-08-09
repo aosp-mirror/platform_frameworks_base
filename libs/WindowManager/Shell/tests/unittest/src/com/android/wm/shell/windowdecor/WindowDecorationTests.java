@@ -204,6 +204,8 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(mMockSurfaceControlStartT)
                 .setColor(taskBackgroundSurface, new float[] {1.f, 1.f, 0.f});
         verify(mMockSurfaceControlStartT).setShadowRadius(taskBackgroundSurface, 10);
+        verify(mMockSurfaceControlStartT).setLayer(taskBackgroundSurface, -1);
+        verify(mMockSurfaceControlStartT).show(taskBackgroundSurface);
 
         verify(mMockSurfaceControlViewHostFactory)
                 .create(any(), eq(defaultDisplay), any(), anyBoolean());

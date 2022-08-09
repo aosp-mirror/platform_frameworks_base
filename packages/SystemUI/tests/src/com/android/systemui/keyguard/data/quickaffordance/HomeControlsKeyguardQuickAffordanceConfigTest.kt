@@ -51,6 +51,7 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(true))
 
         underTest =
             HomeControlsKeyguardQuickAffordanceConfig(
@@ -60,7 +61,26 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `state - when listing controller is missing - returns None`() = runBlockingTest {
+    fun `state - when cannot show while locked - returns Hidden`() = runBlockingTest {
+        whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(false))
+        whenever(component.isEnabled()).thenReturn(true)
+        whenever(component.getTileImageId()).thenReturn(R.drawable.controls_icon)
+        whenever(component.getTileTitleId()).thenReturn(R.string.quick_controls_title)
+        val controlsController = mock<ControlsController>()
+        whenever(component.getControlsController()).thenReturn(Optional.of(controlsController))
+        whenever(component.getControlsListingController()).thenReturn(Optional.empty())
+        whenever(controlsController.getFavorites()).thenReturn(listOf(mock()))
+
+        val values = mutableListOf<KeyguardQuickAffordanceConfig.State>()
+        val job = underTest.state.onEach(values::add).launchIn(this)
+
+        assertThat(values.last())
+            .isInstanceOf(KeyguardQuickAffordanceConfig.State.Hidden::class.java)
+        job.cancel()
+    }
+
+    @Test
+    fun `state - when listing controller is missing - returns Hidden`() = runBlockingTest {
         whenever(component.isEnabled()).thenReturn(true)
         whenever(component.getTileImageId()).thenReturn(R.drawable.controls_icon)
         whenever(component.getTileTitleId()).thenReturn(R.string.quick_controls_title)

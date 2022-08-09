@@ -17,6 +17,7 @@ package com.android.systemui.ripple
 
 /** Library class that contains 2D signed distance functions. */
 class SdfShaderLibrary {
+    //language=AGSL
     companion object {
         const val CIRCLE_SDF = """
             float sdCircle(vec2 p, float r) {

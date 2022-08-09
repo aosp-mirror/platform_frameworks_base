@@ -185,6 +185,7 @@ public class Flags {
             new ReleasedFlag(1000);
     public static final ReleasedFlag DOCK_SETUP_ENABLED = new ReleasedFlag(1001);
 
+    public static final UnreleasedFlag ROUNDED_BOX_RIPPLE = new UnreleasedFlag(1002, false);
 
     // 1100 - windowing
     @Keep
@@ -206,6 +207,14 @@ public class Flags {
     @Keep
     public static final SysPropBooleanFlag HIDE_NAVBAR_WINDOW =
             new SysPropBooleanFlag(1103, "persist.wm.debug.hide_navbar_window", false);
+
+    @Keep
+    public static final SysPropBooleanFlag WM_DESKTOP_WINDOWING =
+            new SysPropBooleanFlag(1104, "persist.wm.debug.desktop_mode", false);
+
+    @Keep
+    public static final SysPropBooleanFlag WM_CAPTION_ON_SHELL =
+            new SysPropBooleanFlag(1105, "persist.wm.debug.caption_on_shell", false);
 
     // 1200 - predictive back
     @Keep
