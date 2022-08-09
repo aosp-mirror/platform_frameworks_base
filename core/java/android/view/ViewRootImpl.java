@@ -276,7 +276,7 @@ public final class ViewRootImpl implements ViewParent,
      * @hide
      */
     public static final boolean CAPTION_ON_SHELL =
-            SystemProperties.getBoolean("persist.debug.caption_on_shell", false);
+            SystemProperties.getBoolean("persist.wm.debug.caption_on_shell", false);
 
     /**
      * Whether the client should compute the window frame on its own.
