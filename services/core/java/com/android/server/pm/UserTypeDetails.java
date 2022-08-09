@@ -163,6 +163,14 @@ public final class UserTypeDetails {
      */
     private final boolean mIsCredentialSharableWithParent;
 
+    /**
+     * Denotes the default access control for {@link CrossProfileIntentFilter} of user profile.
+     *
+     * <p> Default value is {@link CrossProfileIntentFilter#ACCESS_LEVEL_ALL}
+     */
+    private final @CrossProfileIntentFilter.AccessControlLevel int
+            mCrossProfileIntentFilterAccessControl;
+
     private UserTypeDetails(@NonNull String name, boolean enabled, int maxAllowed,
             @UserInfoFlag int baseType, @UserInfoFlag int defaultUserInfoPropertyFlags, int label,
             int maxAllowedPerParent,
@@ -174,7 +182,8 @@ public final class UserTypeDetails {
             @Nullable Bundle defaultSecureSettings,
             @Nullable List<DefaultCrossProfileIntentFilter> defaultCrossProfileIntentFilters,
             boolean isMediaSharedWithParent,
-            boolean isCredentialSharableWithParent) {
+            boolean isCredentialSharableWithParent,
+            @CrossProfileIntentFilter.AccessControlLevel int accessControlLevel) {
         this.mName = name;
         this.mEnabled = enabled;
         this.mMaxAllowed = maxAllowed;
@@ -195,6 +204,7 @@ public final class UserTypeDetails {
         this.mDarkThemeBadgeColors = darkThemeBadgeColors;
         this.mIsMediaSharedWithParent = isMediaSharedWithParent;
         this.mIsCredentialSharableWithParent = isCredentialSharableWithParent;
+        this.mCrossProfileIntentFilterAccessControl = accessControlLevel;
     }
 
     /**
@@ -327,6 +337,16 @@ public final class UserTypeDetails {
         return mIsCredentialSharableWithParent;
     }
 
+    /**
+     * Returning user's {@link CrossProfileIntentFilter.AccessControlLevel}. If not explicitly
+     * configured, default value is {@link CrossProfileIntentFilter#ACCESS_LEVEL_ALL}
+     * @return user's {@link CrossProfileIntentFilter.AccessControlLevel}
+     */
+    public @CrossProfileIntentFilter.AccessControlLevel int
+            getCrossProfileIntentFilterAccessControl() {
+        return mCrossProfileIntentFilterAccessControl;
+    }
+
     /** Returns a {@link Bundle} representing the default user restrictions. */
     @NonNull Bundle getDefaultRestrictions() {
         return BundleUtils.clone(mDefaultRestrictions);
@@ -420,6 +440,8 @@ public final class UserTypeDetails {
         private @DrawableRes int mBadgeNoBackground = Resources.ID_NULL;
         private boolean mIsMediaSharedWithParent = false;
         private boolean mIsCredentialSharableWithParent = false;
+        private @CrossProfileIntentFilter.AccessControlLevel int
+                mCrossProfileIntentFilterAccessControl = CrossProfileIntentFilter.ACCESS_LEVEL_ALL;
 
         public Builder setName(String name) {
             mName = name;
@@ -520,6 +542,16 @@ public final class UserTypeDetails {
         }
 
         /**
+         * Sets {@link CrossProfileIntentFilter.AccessControlLevel} for the user.
+         * @param accessControlLevel default access control for user
+         */
+        public Builder setCrossProfileIntentFilterAccessControl(
+                @CrossProfileIntentFilter.AccessControlLevel int accessControlLevel) {
+            mCrossProfileIntentFilterAccessControl = accessControlLevel;
+            return this;
+        }
+
+        /**
          * Sets shared media property for the user.
          * @param isCredentialSharableWithParent  the value to be set, true or false
          */
@@ -571,7 +603,8 @@ public final class UserTypeDetails {
                     mDefaultSecureSettings,
                     mDefaultCrossProfileIntentFilters,
                     mIsMediaSharedWithParent,
-                    mIsCredentialSharableWithParent);
+                    mIsCredentialSharableWithParent,
+                    mCrossProfileIntentFilterAccessControl);
         }
 
         private boolean hasBadge() {
