@@ -23,3 +23,4 @@ const val SYSTEM_UI_PACKAGE_NAME = "com.android.systemui"
 val APP_PAIR_SPLIT_DIVIDER_COMPONENT = ComponentMatcher("", "AppPairSplitDivider#")
 val DOCKED_STACK_DIVIDER_COMPONENT = ComponentMatcher("", "DockedStackDivider#")
 val SPLIT_SCREEN_DIVIDER_COMPONENT = ComponentMatcher("", "StageCoordinatorSplitDivider#")
+val SPLIT_DECOR_MANAGER = ComponentMatcher("", "SplitDecorManager#")
