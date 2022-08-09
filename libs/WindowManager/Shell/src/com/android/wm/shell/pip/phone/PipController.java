@@ -628,7 +628,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 mPipTaskOrganizer.scheduleAnimateResizePip(
                         postChangeBounds, duration, null /* updateBoundsCallback */);
             } else {
-                mTouchHandler.getMotionHelper().movePip(postChangeBounds);
+                // Directly move PiP to its final destination bounds without animation.
+                mPipTaskOrganizer.scheduleFinishResizePip(postChangeBounds);
             }
         } else {
             updateDisplayLayout.run();
