@@ -138,6 +138,12 @@ public class VpnManagerService extends IVpnManager.Stub {
                 INetd netd, int userId) {
             return new Vpn(looper, context, nms, netd, userId, new VpnProfileStore());
         }
+
+        /** Create a LockDownVpnTracker. */
+        public LockdownVpnTracker createLockDownVpnTracker(Context context, Handler handler,
+                Vpn vpn, VpnProfile profile) {
+            return new LockdownVpnTracker(context, handler, vpn,  profile);
+        }
     }
 
     public VpnManagerService(Context context, Dependencies deps) {
@@ -502,8 +508,7 @@ public class VpnManagerService extends IVpnManager.Stub {
                 logw("VPN for user " + user + " not ready yet. Skipping lockdown");
                 return false;
             }
-            setLockdownTracker(
-                    new LockdownVpnTracker(mContext, mHandler, vpn,  profile));
+            setLockdownTracker(mDeps.createLockDownVpnTracker(mContext, mHandler, vpn,  profile));
         }
 
         return true;

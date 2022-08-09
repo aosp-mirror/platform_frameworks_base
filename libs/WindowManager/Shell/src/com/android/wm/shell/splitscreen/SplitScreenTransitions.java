@@ -94,6 +94,7 @@ class SplitScreenTransitions {
             @NonNull WindowContainerToken topRoot) {
         mFinishCallback = finishCallback;
         mAnimatingTransition = transition;
+        mFinishTransaction = finishTransaction;
         if (mPendingRemoteHandler != null) {
             mPendingRemoteHandler.startAnimation(transition, info, startTransaction,
                     finishTransaction, mRemoteFinishCB);
@@ -107,8 +108,6 @@ class SplitScreenTransitions {
     private void playInternalAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull WindowContainerToken mainRoot,
             @NonNull WindowContainerToken sideRoot, @NonNull WindowContainerToken topRoot) {
-        mFinishTransaction = mTransactionPool.acquire();
-
         // Play some place-holder fade animations
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
@@ -287,16 +286,14 @@ class SplitScreenTransitions {
         return true;
     }
 
-    void onTransitionConsumed(@NonNull IBinder transition, boolean aborted) {
+    void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
+            @Nullable SurfaceControl.Transaction finishT) {
         if (isPendingEnter(transition)) {
             if (!aborted) {
                 // An enter transition got merged, appends the rest operations to finish entering
                 // split screen.
-                // TODO (b/238856352): Passed-in the proper finish transition to merge instead.
-                if (mFinishTransaction == null) {
-                    mFinishTransaction = mTransactionPool.acquire();
-                }
-                mStageCoordinator.finishEnterSplitScreen(mFinishTransaction);
+                mStageCoordinator.finishEnterSplitScreen(finishT);
+                mPendingRemoteHandler = null;
             }
 
             mPendingEnter.mCallback.onTransitionConsumed(aborted);
@@ -339,11 +336,6 @@ class SplitScreenTransitions {
         mAnimatingTransition = null;
 
         mOnFinish.run();
-        if (mFinishTransaction != null) {
-            mFinishTransaction.apply();
-            mTransactionPool.release(mFinishTransaction);
-            mFinishTransaction = null;
-        }
         if (mFinishCallback != null) {
             mFinishCallback.onTransitionFinished(wct /* wct */, wctCB /* wctCB */);
             mFinishCallback = null;

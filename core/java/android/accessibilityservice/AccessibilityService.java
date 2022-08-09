@@ -43,9 +43,9 @@ import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -72,10 +72,7 @@ import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.RemoteAccessibilityInputConnection;
-import com.android.internal.os.HandlerCaller;
-import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -2634,7 +2631,7 @@ public abstract class AccessibilityService extends Service {
      */
     @Override
     public final IBinder onBind(Intent intent) {
-        return new IAccessibilityServiceClientWrapper(this, getMainLooper(), new Callbacks() {
+        return new IAccessibilityServiceClientWrapper(this, getMainExecutor(), new Callbacks() {
             @Override
             public void onServiceConnected() {
                 AccessibilityService.this.dispatchServiceConnected();
@@ -2751,30 +2748,12 @@ public abstract class AccessibilityService extends Service {
      *
      * @hide
      */
-    public static class IAccessibilityServiceClientWrapper extends IAccessibilityServiceClient.Stub
-            implements HandlerCaller.Callback {
-        private static final int DO_INIT = 1;
-        private static final int DO_ON_INTERRUPT = 2;
-        private static final int DO_ON_ACCESSIBILITY_EVENT = 3;
-        private static final int DO_ON_GESTURE = 4;
-        private static final int DO_CLEAR_ACCESSIBILITY_CACHE = 5;
-        private static final int DO_ON_KEY_EVENT = 6;
-        private static final int DO_ON_MAGNIFICATION_CHANGED = 7;
-        private static final int DO_ON_SOFT_KEYBOARD_SHOW_MODE_CHANGED = 8;
-        private static final int DO_GESTURE_COMPLETE = 9;
-        private static final int DO_ON_FINGERPRINT_ACTIVE_CHANGED = 10;
-        private static final int DO_ON_FINGERPRINT_GESTURE = 11;
-        private static final int DO_ACCESSIBILITY_BUTTON_CLICKED = 12;
-        private static final int DO_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED = 13;
-        private static final int DO_ON_SYSTEM_ACTIONS_CHANGED = 14;
-        private static final int DO_CREATE_IME_SESSION = 15;
-        private static final int DO_SET_IME_SESSION_ENABLED = 16;
-        private static final int DO_START_INPUT = 19;
-
-        private final HandlerCaller mCaller;
+    public static class IAccessibilityServiceClientWrapper extends
+            IAccessibilityServiceClient.Stub {
 
         private final Callbacks mCallback;
         private final Context mContext;
+        private final Executor mExecutor;
 
         private int mConnectionId = AccessibilityInteractionClient.NO_ID;
 
@@ -2793,103 +2772,199 @@ public abstract class AccessibilityService extends Service {
         @Nullable
         CancellationGroup mCancellationGroup = null;
 
+        public IAccessibilityServiceClientWrapper(Context context, Executor executor,
+                Callbacks callback) {
+            mCallback = callback;
+            mContext = context;
+            mExecutor = executor;
+        }
+
         public IAccessibilityServiceClientWrapper(Context context, Looper looper,
                 Callbacks callback) {
             mCallback = callback;
             mContext = context;
-            mCaller = new HandlerCaller(context, looper, this, true /*asyncHandler*/);
+            mExecutor = new HandlerExecutor(new Handler(looper));
         }
 
         public void init(IAccessibilityServiceConnection connection, int connectionId,
                 IBinder windowToken) {
-            Message message = mCaller.obtainMessageIOO(DO_INIT, connectionId,
-                    connection, windowToken);
-            mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                mConnectionId = connectionId;
+                if (connection != null) {
+                    AccessibilityInteractionClient.getInstance(mContext).addConnection(
+                            mConnectionId, connection, /*initializeCache=*/true);
+                    if (mContext != null) {
+                        try {
+                            connection.setAttributionTag(mContext.getAttributionTag());
+                        } catch (RemoteException re) {
+                            Log.w(LOG_TAG, "Error while setting attributionTag", re);
+                            re.rethrowFromSystemServer();
+                        }
+                    }
+                    mCallback.init(mConnectionId, windowToken);
+                    mCallback.onServiceConnected();
+                } else {
+                    AccessibilityInteractionClient.getInstance(mContext)
+                            .clearCache(mConnectionId);
+                    AccessibilityInteractionClient.getInstance(mContext).removeConnection(
+                            mConnectionId);
+                    mConnectionId = AccessibilityInteractionClient.NO_ID;
+                    mCallback.init(AccessibilityInteractionClient.NO_ID, null);
+                }
+                return;
+            });
         }
 
         public void onInterrupt() {
-            Message message = mCaller.obtainMessage(DO_ON_INTERRUPT);
-            mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                    mCallback.onInterrupt();
+                }
+            });
         }
 
         public void onAccessibilityEvent(AccessibilityEvent event, boolean serviceWantsEvent) {
-            Message message = mCaller.obtainMessageBO(
-                    DO_ON_ACCESSIBILITY_EVENT, serviceWantsEvent, event);
-            mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                if (event != null) {
+                    // Send the event to AccessibilityCache via AccessibilityInteractionClient
+                    AccessibilityInteractionClient.getInstance(mContext).onAccessibilityEvent(
+                            event, mConnectionId);
+                    if (serviceWantsEvent
+                            && (mConnectionId != AccessibilityInteractionClient.NO_ID)) {
+                        // Send the event to AccessibilityService
+                        mCallback.onAccessibilityEvent(event);
+                    }
+                }
+                return;
+            });
         }
 
         @Override
         public void onGesture(AccessibilityGestureEvent gestureInfo) {
-            Message message = mCaller.obtainMessageO(DO_ON_GESTURE, gestureInfo);
-            mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                    mCallback.onGesture(gestureInfo);
+                }
+                return;
+            });
         }
 
         public void clearAccessibilityCache() {
-            Message message = mCaller.obtainMessage(DO_CLEAR_ACCESSIBILITY_CACHE);
-            mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                AccessibilityInteractionClient.getInstance(mContext).clearCache(mConnectionId);
+                return;
+            });
         }
 
         @Override
         public void onKeyEvent(KeyEvent event, int sequence) {
-            Message message = mCaller.obtainMessageIO(DO_ON_KEY_EVENT, sequence, event);
-            mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                try {
+                    IAccessibilityServiceConnection connection = AccessibilityInteractionClient
+                            .getInstance(mContext).getConnection(mConnectionId);
+                    if (connection != null) {
+                        final boolean result = mCallback.onKeyEvent(event);
+                        try {
+                            connection.setOnKeyEventResult(result, sequence);
+                        } catch (RemoteException re) {
+                            /* ignore */
+                        }
+                    }
+                } finally {
+                    // Make sure the event is recycled.
+                    try {
+                        event.recycle();
+                    } catch (IllegalStateException ise) {
+                        /* ignore - best effort */
+                    }
+                }
+                return;
+            });
         }
 
         /** Magnification changed callbacks for different displays */
         public void onMagnificationChanged(int displayId, @NonNull Region region,
                 MagnificationConfig config) {
-            final SomeArgs args = SomeArgs.obtain();
-            args.arg1 = region;
-            args.arg2 = config;
-            args.argi1 = displayId;
-
-            final Message message = mCaller.obtainMessageO(DO_ON_MAGNIFICATION_CHANGED, args);
-            mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                    mCallback.onMagnificationChanged(displayId, region, config);
+                }
+                return;
+            });
         }
 
         public void onSoftKeyboardShowModeChanged(int showMode) {
-          final Message message =
-                  mCaller.obtainMessageI(DO_ON_SOFT_KEYBOARD_SHOW_MODE_CHANGED, showMode);
-          mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                    mCallback.onSoftKeyboardShowModeChanged(showMode);
+                }
+                return;
+            });
         }
 
         public void onPerformGestureResult(int sequence, boolean successfully) {
-            Message message = mCaller.obtainMessageII(DO_GESTURE_COMPLETE, sequence,
-                    successfully ? 1 : 0);
-            mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                    mCallback.onPerformGestureResult(sequence, successfully);
+                }
+                return;
+            });
         }
 
         public void onFingerprintCapturingGesturesChanged(boolean active) {
-            mCaller.sendMessage(mCaller.obtainMessageI(
-                    DO_ON_FINGERPRINT_ACTIVE_CHANGED, active ? 1 : 0));
+            mExecutor.execute(() -> {
+                if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                    mCallback.onFingerprintCapturingGesturesChanged(active);
+                }
+                return;
+            });
         }
 
         public void onFingerprintGesture(int gesture) {
-            mCaller.sendMessage(mCaller.obtainMessageI(DO_ON_FINGERPRINT_GESTURE, gesture));
+            mExecutor.execute(() -> {
+                if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                    mCallback.onFingerprintGesture(gesture);
+                }
+                return;
+            });
         }
 
         /** Accessibility button clicked callbacks for different displays */
         public void onAccessibilityButtonClicked(int displayId) {
-            final Message message = mCaller.obtainMessageI(DO_ACCESSIBILITY_BUTTON_CLICKED,
-                    displayId);
-            mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                    mCallback.onAccessibilityButtonClicked(displayId);
+                }
+                return;
+            });
         }
 
         public void onAccessibilityButtonAvailabilityChanged(boolean available) {
-            final Message message = mCaller.obtainMessageI(
-                    DO_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED, (available ? 1 : 0));
-            mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                    mCallback.onAccessibilityButtonAvailabilityChanged(available);
+                }
+                return;
+            });
         }
 
         /** This is called when the system action list is changed. */
         public void onSystemActionsChanged() {
-            mCaller.sendMessage(mCaller.obtainMessage(DO_ON_SYSTEM_ACTIONS_CHANGED));
+            mExecutor.execute(() -> {
+                if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                    mCallback.onSystemActionsChanged();
+                }
+                return;
+            });
         }
 
         /** This is called when an app requests ime sessions or when the service is enabled. */
         public void createImeSession(IAccessibilityInputMethodSessionCallback callback) {
-            final Message message = mCaller.obtainMessageO(DO_CREATE_IME_SESSION, callback);
-            mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                    mCallback.createImeSession(callback);
+                }
+            });
         }
 
         /**
@@ -2905,8 +2980,12 @@ public abstract class AccessibilityService extends Service {
                     Log.w(LOG_TAG, "Session is already finished: " + session);
                     return;
                 }
-                mCaller.sendMessage(mCaller.obtainMessageIO(
-                        DO_SET_IME_SESSION_ENABLED, enabled ? 1 : 0, ls));
+                mExecutor.execute(() -> {
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        ls.setEnabled(enabled);
+                    }
+                    return;
+                });
             } catch (ClassCastException e) {
                 Log.w(LOG_TAG, "Incoming session not of correct type: " + session, e);
             }
@@ -2938,213 +3017,29 @@ public abstract class AccessibilityService extends Service {
                 Log.e(LOG_TAG, "startInput must be called after bindInput.");
                 mCancellationGroup = new CancellationGroup();
             }
-            final Message message = mCaller.obtainMessageOOOOII(DO_START_INPUT, null /* unused */,
-                    connection, editorInfo, mCancellationGroup, restarting ? 1 : 0,
-                    0 /* unused */);
-            mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                    final RemoteAccessibilityInputConnection ic = connection == null ? null
+                            : new RemoteAccessibilityInputConnection(
+                                    connection, mCancellationGroup);
+                    editorInfo.makeCompatible(mContext.getApplicationInfo().targetSdkVersion);
+                    mCallback.startInput(ic, editorInfo, restarting);
+                }
+            });
         }
 
         @Override
         public void onMotionEvent(MotionEvent event) {
-            final Message message = PooledLambda.obtainMessage(
-                            Callbacks::onMotionEvent, mCallback, event);
-            mCaller.sendMessage(message);
+            mExecutor.execute(() -> {
+                mCallback.onMotionEvent(event);
+            });
         }
 
         @Override
         public void onTouchStateChanged(int displayId, int state) {
-            final Message message = PooledLambda.obtainMessage(Callbacks::onTouchStateChanged,
-                    mCallback,
-                    displayId, state);
-            mCaller.sendMessage(message);
-        }
-
-        @Override
-        public void executeMessage(Message message) {
-            switch (message.what) {
-                case DO_ON_ACCESSIBILITY_EVENT: {
-                    AccessibilityEvent event = (AccessibilityEvent) message.obj;
-                    boolean serviceWantsEvent = message.arg1 != 0;
-                    if (event != null) {
-                        // Send the event to AccessibilityCache via AccessibilityInteractionClient
-                        AccessibilityInteractionClient.getInstance(mContext).onAccessibilityEvent(
-                                event, mConnectionId);
-                        if (serviceWantsEvent
-                                && (mConnectionId != AccessibilityInteractionClient.NO_ID)) {
-                            // Send the event to AccessibilityService
-                            mCallback.onAccessibilityEvent(event);
-                        }
-                        // Make sure the event is recycled.
-                        try {
-                            event.recycle();
-                        } catch (IllegalStateException ise) {
-                            /* ignore - best effort */
-                        }
-                    }
-                    return;
-                }
-                case DO_ON_INTERRUPT: {
-                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        mCallback.onInterrupt();
-                    }
-                    return;
-                }
-                case DO_INIT: {
-                    mConnectionId = message.arg1;
-                    SomeArgs args = (SomeArgs) message.obj;
-                    IAccessibilityServiceConnection connection =
-                            (IAccessibilityServiceConnection) args.arg1;
-                    IBinder windowToken = (IBinder) args.arg2;
-                    args.recycle();
-                    if (connection != null) {
-                        AccessibilityInteractionClient.getInstance(mContext).addConnection(
-                                mConnectionId, connection, /*initializeCache=*/true);
-                        if (mContext != null) {
-                            try {
-                                connection.setAttributionTag(mContext.getAttributionTag());
-                            } catch (RemoteException re) {
-                                Log.w(LOG_TAG, "Error while setting attributionTag", re);
-                                re.rethrowFromSystemServer();
-                            }
-                        }
-                        mCallback.init(mConnectionId, windowToken);
-                        mCallback.onServiceConnected();
-                    } else {
-                        AccessibilityInteractionClient.getInstance(mContext)
-                                .clearCache(mConnectionId);
-                        AccessibilityInteractionClient.getInstance(mContext).removeConnection(
-                                mConnectionId);
-                        mConnectionId = AccessibilityInteractionClient.NO_ID;
-                        mCallback.init(AccessibilityInteractionClient.NO_ID, null);
-                    }
-                    return;
-                }
-                case DO_ON_GESTURE: {
-                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        mCallback.onGesture((AccessibilityGestureEvent) message.obj);
-                    }
-                    return;
-                }
-                case DO_CLEAR_ACCESSIBILITY_CACHE: {
-                    AccessibilityInteractionClient.getInstance(mContext).clearCache(mConnectionId);
-                    return;
-                }
-                case DO_ON_KEY_EVENT: {
-                    KeyEvent event = (KeyEvent) message.obj;
-                    try {
-                        IAccessibilityServiceConnection connection = AccessibilityInteractionClient
-                                .getInstance(mContext).getConnection(mConnectionId);
-                        if (connection != null) {
-                            final boolean result = mCallback.onKeyEvent(event);
-                            final int sequence = message.arg1;
-                            try {
-                                connection.setOnKeyEventResult(result, sequence);
-                            } catch (RemoteException re) {
-                                /* ignore */
-                            }
-                        }
-                    } finally {
-                        // Make sure the event is recycled.
-                        try {
-                            event.recycle();
-                        } catch (IllegalStateException ise) {
-                            /* ignore - best effort */
-                        }
-                    }
-                    return;
-                }
-                case DO_ON_MAGNIFICATION_CHANGED: {
-                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        final SomeArgs args = (SomeArgs) message.obj;
-                        final Region region = (Region) args.arg1;
-                        final MagnificationConfig config = (MagnificationConfig) args.arg2;
-                        final int displayId = args.argi1;
-                        args.recycle();
-                        mCallback.onMagnificationChanged(displayId, region, config);
-                    }
-                    return;
-                }
-                case DO_ON_SOFT_KEYBOARD_SHOW_MODE_CHANGED: {
-                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        final int showMode = (int) message.arg1;
-                        mCallback.onSoftKeyboardShowModeChanged(showMode);
-                    }
-                    return;
-                }
-                case DO_GESTURE_COMPLETE: {
-                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        final boolean successfully = message.arg2 == 1;
-                        mCallback.onPerformGestureResult(message.arg1, successfully);
-                    }
-                    return;
-                }
-                case DO_ON_FINGERPRINT_ACTIVE_CHANGED: {
-                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        mCallback.onFingerprintCapturingGesturesChanged(message.arg1 == 1);
-                    }
-                    return;
-                }
-                case DO_ON_FINGERPRINT_GESTURE: {
-                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        mCallback.onFingerprintGesture(message.arg1);
-                    }
-                    return;
-                }
-                case DO_ACCESSIBILITY_BUTTON_CLICKED: {
-                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        mCallback.onAccessibilityButtonClicked(message.arg1);
-                    }
-                    return;
-                }
-                case DO_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED: {
-                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        final boolean available = (message.arg1 != 0);
-                        mCallback.onAccessibilityButtonAvailabilityChanged(available);
-                    }
-                    return;
-                }
-                case DO_ON_SYSTEM_ACTIONS_CHANGED: {
-                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        mCallback.onSystemActionsChanged();
-                    }
-                    return;
-                }
-                case DO_CREATE_IME_SESSION: {
-                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        IAccessibilityInputMethodSessionCallback callback =
-                                (IAccessibilityInputMethodSessionCallback) message.obj;
-                        mCallback.createImeSession(callback);
-                    }
-                    return;
-                }
-                case DO_SET_IME_SESSION_ENABLED: {
-                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        AccessibilityInputMethodSession session =
-                                (AccessibilityInputMethodSession) message.obj;
-                        session.setEnabled(message.arg1 != 0);
-                    }
-                    return;
-                }
-                case DO_START_INPUT: {
-                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
-                        final SomeArgs args = (SomeArgs) message.obj;
-                        final IRemoteAccessibilityInputConnection connection =
-                                (IRemoteAccessibilityInputConnection) args.arg2;
-                        final EditorInfo info = (EditorInfo) args.arg3;
-                        final CancellationGroup cancellationGroup = (CancellationGroup) args.arg4;
-                        final boolean restarting = args.argi5 == 1;
-                        final RemoteAccessibilityInputConnection ic = connection == null ? null
-                                : new RemoteAccessibilityInputConnection(
-                                        connection, cancellationGroup);
-                        info.makeCompatible(mContext.getApplicationInfo().targetSdkVersion);
-                        mCallback.startInput(ic, info, restarting);
-                        args.recycle();
-                    }
-                    return;
-                }
-                default:
-                    Log.w(LOG_TAG, "Unknown message type " + message.what);
-            }
+            mExecutor.execute(() -> {
+                mCallback.onTouchStateChanged(displayId, state);
+            });
         }
     }
 

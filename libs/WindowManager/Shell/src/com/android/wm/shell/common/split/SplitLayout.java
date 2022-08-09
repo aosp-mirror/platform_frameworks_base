@@ -1130,16 +1130,16 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             boolean adjusted = false;
             if (mYOffsetForIme != 0) {
                 if (dividerLeash != null) {
-                    mTempRect.set(mDividerBounds);
+                    getRefDividerBounds(mTempRect);
                     mTempRect.offset(0, mYOffsetForIme);
                     t.setPosition(dividerLeash, mTempRect.left, mTempRect.top);
                 }
 
-                mTempRect.set(mBounds1);
+                getRefBounds1(mTempRect);
                 mTempRect.offset(0, mYOffsetForIme);
                 t.setPosition(leash1, mTempRect.left, mTempRect.top);
 
-                mTempRect.set(mBounds2);
+                getRefBounds2(mTempRect);
                 mTempRect.offset(0, mYOffsetForIme);
                 t.setPosition(leash2, mTempRect.left, mTempRect.top);
                 adjusted = true;

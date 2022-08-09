@@ -660,8 +660,7 @@
     <string name="dream_complication_title_weather" msgid="598609151677172783">"Vreme"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Kakovost zraka"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"O zasedbi"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
+    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"Nadzor doma"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Izbira profilne slike"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Privzeta ikona uporabnika"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fizična tipkovnica"</string>

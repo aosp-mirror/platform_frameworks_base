@@ -29,6 +29,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
@@ -113,17 +114,21 @@ public class BaseBundle {
      */
     private boolean mParcelledByNative;
 
-    /*
+    /**
      * Flag indicating if mParcelledData is only referenced in this bundle.
-     * mParcelledData could be referenced by other bundles if mMap contains lazy values,
+     * mParcelledData could be referenced elsewhere if mMap contains lazy values,
      * and bundle data is copied to another bundle using putAll or the copy constructors.
      */
     boolean mOwnsLazyValues = true;
 
-    /*
+    /** Tracks how many lazy values are referenced in mMap */
+    private int mLazyValues = 0;
+
+    /**
      * As mParcelledData is set to null when it is unparcelled, we keep a weak reference to
      * it to aid in recycling it. Do not use this reference otherwise.
-     */
+     * Is non-null iff mMap contains lazy values.
+    */
     private WeakReference<Parcel> mWeakParcelledData = null;
 
     /**
@@ -310,7 +315,8 @@ public class BaseBundle {
         synchronized (this) {
             final Parcel source = mParcelledData;
             if (source != null) {
-                initializeFromParcelLocked(source, /*recycleParcel=*/ true, mParcelledByNative);
+                Preconditions.checkState(mOwnsLazyValues);
+                initializeFromParcelLocked(source, /*ownsParcel*/ true, mParcelledByNative);
             } else {
                 if (DEBUG) {
                     Log.d(TAG, "unparcel "
@@ -401,11 +407,23 @@ public class BaseBundle {
                 }
             }
             mMap.setValueAt(i, object);
+            mLazyValues--;
+            if (mOwnsLazyValues) {
+                Preconditions.checkState(mLazyValues >= 0, "Lazy values ref count below 0");
+                // No more lazy values in mMap, so we can recycle the parcel early rather than
+                // waiting for the next GC run
+                if (mLazyValues == 0) {
+                    Preconditions.checkState(mWeakParcelledData.get() != null,
+                            "Parcel recycled earlier than expected");
+                    recycleParcel(mWeakParcelledData.get());
+                    mWeakParcelledData = null;
+                }
+            }
         }
         return (clazz != null) ? clazz.cast(object) : (T) object;
     }
 
-    private void initializeFromParcelLocked(@NonNull Parcel parcelledData, boolean recycleParcel,
+    private void initializeFromParcelLocked(@NonNull Parcel parcelledData, boolean ownsParcel,
             boolean parcelledByNative) {
         if (isEmptyParcel(parcelledData)) {
             if (DEBUG) {
@@ -437,9 +455,10 @@ public class BaseBundle {
             map.erase();
             map.ensureCapacity(count);
         }
+        int numLazyValues = 0;
         try {
-            recycleParcel &= parcelledData.readArrayMap(map, count, !parcelledByNative,
-                    /* lazy */ true, mClassLoader);
+            numLazyValues = parcelledData.readArrayMap(map, count, !parcelledByNative,
+                    /* lazy */ ownsParcel, mClassLoader);
         } catch (BadParcelableException e) {
             if (sShouldDefuse) {
                 Log.w(TAG, "Failed to parse Bundle, but defusing quietly", e);
@@ -448,14 +467,19 @@ public class BaseBundle {
                 throw e;
             }
         } finally {
-            mMap = map;
-            if (recycleParcel) {
-                recycleParcel(parcelledData);
-                mWeakParcelledData = null;
-            } else {
-                mWeakParcelledData = new WeakReference<>(parcelledData);
+            mWeakParcelledData = null;
+            if (ownsParcel) {
+                if (numLazyValues == 0) {
+                    recycleParcel(parcelledData);
+                } else {
+                    mWeakParcelledData = new WeakReference<>(parcelledData);
+                }
             }
+
+            mLazyValues = numLazyValues;
             mParcelledByNative = false;
+            mMap = map;
+            // Set field last as it is volatile
             mParcelledData = null;
         }
         if (DEBUG) {
@@ -592,13 +616,17 @@ public class BaseBundle {
 
     /**
      * Removes all elements from the mapping of this Bundle.
+     * Recycles the underlying parcel if it is still present.
      */
     public void clear() {
         unparcel();
         if (mOwnsLazyValues && mWeakParcelledData != null) {
             recycleParcel(mWeakParcelledData.get());
-            mWeakParcelledData = null;
         }
+
+        mWeakParcelledData = null;
+        mLazyValues = 0;
+        mOwnsLazyValues = true;
         mMap.clear();
     }
 
@@ -1844,8 +1872,8 @@ public class BaseBundle {
             // had been constructed with parcel or to make sure they trigger deserialization of the
             // bundle immediately; neither of which is obvious.
             synchronized (this) {
-                initializeFromParcelLocked(parcel, /*recycleParcel=*/ false, isNativeBundle);
-                unparcel(/* itemwise */ true);
+                mOwnsLazyValues = false;
+                initializeFromParcelLocked(parcel, /*ownsParcel*/ false, isNativeBundle);
             }
             return;
         }
@@ -1862,6 +1890,7 @@ public class BaseBundle {
                 + ": " + length + " bundle bytes starting at " + offset);
         p.setDataPosition(0);
 
+        mOwnsLazyValues = true;
         mParcelledByNative = isNativeBundle;
         mParcelledData = p;
     }
