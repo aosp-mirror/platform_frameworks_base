@@ -4653,34 +4653,31 @@ public class UserManagerService extends IUserManager.Stub {
         }
         final List<UserInfo> users = getUsersInternal(true, true, true);
         final int size = users.size();
-        for (int idx = 0; idx < size; idx++) {
-            final UserInfo user = users.get(idx);
-            if (user.id == UserHandle.USER_SYSTEM) {
-                // Skip user 0. It's not interesting. We already know it exists, is running, and (if
-                // we know the device configuration) its userType.
-                continue;
+        if (size > 1) {
+            for (int idx = 0; idx < size; idx++) {
+                final UserInfo user = users.get(idx);
+                final int userTypeStandard = UserManager.getUserTypeForStatsd(user.userType);
+                final String userTypeCustom = (userTypeStandard == FrameworkStatsLog
+                        .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN)
+                        ?
+                        user.userType : null;
+
+                boolean isUserRunningUnlocked;
+                synchronized (mUserStates) {
+                    isUserRunningUnlocked =
+                            mUserStates.get(user.id, -1) == UserState.STATE_RUNNING_UNLOCKED;
+                }
+
+                data.add(FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.USER_INFO,
+                        user.id,
+                        userTypeStandard,
+                        userTypeCustom,
+                        user.flags,
+                        user.creationTime,
+                        user.lastLoggedInTime,
+                        isUserRunningUnlocked
+                ));
             }
-
-            final int userTypeStandard = UserManager.getUserTypeForStatsd(user.userType);
-            final String userTypeCustom = (userTypeStandard ==
-                    FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN) ?
-                    user.userType : null;
-
-            boolean isUserRunningUnlocked;
-            synchronized (mUserStates) {
-                isUserRunningUnlocked =
-                        mUserStates.get(user.id, -1) == UserState.STATE_RUNNING_UNLOCKED;
-            }
-
-            data.add(FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.USER_INFO,
-                    user.id,
-                    userTypeStandard,
-                    userTypeCustom,
-                    user.flags,
-                    user.creationTime,
-                    user.lastLoggedInTime,
-                    isUserRunningUnlocked
-            ));
         }
         return android.app.StatsManager.PULL_SUCCESS;
     }
