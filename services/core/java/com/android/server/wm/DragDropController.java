@@ -101,7 +101,8 @@ class DragDropController {
             float thumbCenterX, float thumbCenterY, ClipData data) {
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "perform drag: win=" + window + " surface=" + surface + " flags=" +
-                            Integer.toHexString(flags) + " data=" + data);
+                    Integer.toHexString(flags) + " data=" + data + " touch(" + touchX + ","
+                    + touchY + ") thumb center(" + thumbCenterX + "," + thumbCenterY + ")");
         }
 
         final IBinder dragToken = new Binder();
@@ -156,6 +157,7 @@ class DragDropController {
                     mDragState.mPid = callerPid;
                     mDragState.mUid = callerUid;
                     mDragState.mOriginalAlpha = alpha;
+                    mDragState.mAnimatedScale = callingWin.mGlobalScale;
                     mDragState.mToken = dragToken;
                     mDragState.mDisplayContent = displayContent;
                     mDragState.mData = data;
