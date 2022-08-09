@@ -43,6 +43,7 @@ import android.content.pm.PackageChangeEvent;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
+import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.net.Uri;
 import android.os.Binder;
@@ -161,6 +162,18 @@ final class DeletePackageHelper {
                 Slog.w(TAG, "Not removing package " + packageName + " with versionCode "
                         + uninstalledPs.getVersionCode() + " != " + versionCode);
                 return PackageManager.DELETE_FAILED_INTERNAL_ERROR;
+            }
+
+            if (PackageManagerServiceUtils.isSystemApp(uninstalledPs)
+                    && ((deleteFlags & PackageManager.DELETE_SYSTEM_APP) == 0)) {
+                UserInfo userInfo = mUserManagerInternal.getUserInfo(userId);
+                if (userInfo == null || (!userInfo.isAdmin() && !mUserManagerInternal.getUserInfo(
+                        mUserManagerInternal.getProfileParentId(userId)).isAdmin())) {
+                    Slog.w(TAG, "Not removing package " + packageName
+                            + " as only admin user (or their profile) may downgrade system apps");
+                    EventLog.writeEvent(0x534e4554, "170646036", -1, packageName);
+                    return PackageManager.DELETE_FAILED_USER_RESTRICTED;
+                }
             }
 
             disabledSystemPs = mPm.mSettings.getDisabledSystemPkgLPr(packageName);
