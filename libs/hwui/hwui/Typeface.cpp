@@ -127,7 +127,7 @@ Typeface* Typeface::createWithDifferentBaseWeight(Typeface* src, int weight) {
 Typeface* Typeface::createFromFamilies(std::vector<std::shared_ptr<minikin::FontFamily>>&& families,
                                        int weight, int italic) {
     Typeface* result = new Typeface;
-    result->fFontCollection.reset(new minikin::FontCollection(families));
+    result->fFontCollection = minikin::FontCollection::create(families);
 
     if (weight == RESOLVE_BY_FONT_TABLE || italic == RESOLVE_BY_FONT_TABLE) {
         int weightFromFont;
@@ -191,8 +191,8 @@ void Typeface::setRobotoTypefaceForTest() {
     std::vector<std::shared_ptr<minikin::Font>> fonts;
     fonts.push_back(minikin::Font::Builder(font).build());
 
-    std::shared_ptr<minikin::FontCollection> collection = std::make_shared<minikin::FontCollection>(
-            std::make_shared<minikin::FontFamily>(std::move(fonts)));
+    std::shared_ptr<minikin::FontCollection> collection =
+            minikin::FontCollection::create(minikin::FontFamily::create(std::move(fonts)));
 
     Typeface* hwTypeface = new Typeface();
     hwTypeface->fFontCollection = collection;
