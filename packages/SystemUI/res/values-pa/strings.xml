@@ -831,8 +831,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> ਡੀਵਾਈਸਾਂ ਨੂੰ ਚੁਣਿਆ ਗਿਆ"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ਡਿਸਕਨੈਕਟ ਹੈ)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"ਬਦਲਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <!-- no translation found for media_output_dialog_pairing_new (5098212763195577270) -->
-    <skip />
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"ਡੀਵਾਈਸ ਕਨੈਕਟ ਕਰੋ"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ਇਸ ਸੈਸ਼ਨ ਨੂੰ ਕਾਸਟ ਕਰਨ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ ਐਪ ਖੋਲ੍ਹੋ।"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"ਅਗਿਆਤ ਐਪ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ਕਾਸਟ ਕਰਨਾ ਬੰਦ ਕਰੋ"</string>
@@ -944,14 +943,11 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"ਵਾਈ-ਫਾਈ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"ਤਰਜੀਹੀ ਮੋਡ"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ਅਲਾਰਮ ਸੈੱਟ ਹੈ"</string>
-    <!-- no translation found for dream_overlay_status_bar_camera_off (5273073778969890823) -->
-    <skip />
-    <!-- no translation found for dream_overlay_status_bar_mic_off (8366534415013819396) -->
-    <skip />
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"ਕੈਮਰਾ ਬੰਦ ਹੈ"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"ਮਾਈਕ ਬੰਦ ਹੈ"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ਕੈਮਰਾ ਅਤੇ ਮਾਈਕ ਬੰਦ ਹਨ"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ਸੂਚਨਾ}one{# ਸੂਚਨਾ}other{# ਸੂਚਨਾਵਾਂ}}"</string>
-    <!-- no translation found for dream_overlay_weather_complication_desc (824503662089783824) -->
-    <skip />
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ਪ੍ਰਸਾਰਨ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਦੇ ਪ੍ਰਸਾਰਨ ਨੂੰ ਰੋਕਣਾ ਹੈ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"ਜੇ ਤੁਸੀਂ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ਦਾ ਪ੍ਰਸਾਰਨ ਕਰਦੇ ਹੋ ਜਾਂ ਆਊਟਪੁੱਟ ਬਦਲਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡਾ ਮੌਜੂਦਾ ਪ੍ਰਸਾਰਨ ਰੁਕ ਜਾਵੇਗਾ"</string>

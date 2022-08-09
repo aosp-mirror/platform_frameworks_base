@@ -1055,18 +1055,28 @@ public class BubbleController implements ConfigurationChangeListener {
     public void updateBubble(BubbleEntry notif, boolean suppressFlyout, boolean showInShade) {
         // If this is an interruptive notif, mark that it's interrupted
         mSysuiProxy.setNotificationInterruption(notif.getKey());
-        if (!notif.getRanking().isTextChanged()
+        boolean isNonInterruptiveNotExpanding = !notif.getRanking().isTextChanged()
                 && (notif.getBubbleMetadata() != null
-                && !notif.getBubbleMetadata().getAutoExpandBubble())
+                && !notif.getBubbleMetadata().getAutoExpandBubble());
+        if (isNonInterruptiveNotExpanding
                 && mBubbleData.hasOverflowBubbleWithKey(notif.getKey())) {
             // Update the bubble but don't promote it out of overflow
             Bubble b = mBubbleData.getOverflowBubbleWithKey(notif.getKey());
-            b.setEntry(notif);
+            if (notif.isBubble()) {
+                notif.setFlagBubble(false);
+            }
+            updateNotNotifyingEntry(b, notif, showInShade);
+        } else if (mBubbleData.hasAnyBubbleWithKey(notif.getKey())
+                && isNonInterruptiveNotExpanding) {
+            Bubble b = mBubbleData.getAnyBubbleWithkey(notif.getKey());
+            if (b != null) {
+                updateNotNotifyingEntry(b, notif, showInShade);
+            }
         } else if (mBubbleData.isSuppressedWithLocusId(notif.getLocusId())) {
             // Update the bubble but don't promote it out of overflow
             Bubble b = mBubbleData.getSuppressedBubbleWithKey(notif.getKey());
             if (b != null) {
-                b.setEntry(notif);
+                updateNotNotifyingEntry(b, notif, showInShade);
             }
         } else {
             Bubble bubble = mBubbleData.getOrCreateBubble(notif, null /* persistedBubble */);
@@ -1076,13 +1086,25 @@ public class BubbleController implements ConfigurationChangeListener {
                 if (bubble.shouldAutoExpand()) {
                     bubble.setShouldAutoExpand(false);
                 }
+                mImpl.mCachedState.updateBubbleSuppressedState(bubble);
             } else {
                 inflateAndAdd(bubble, suppressFlyout, showInShade);
             }
         }
     }
 
-    void inflateAndAdd(Bubble bubble, boolean suppressFlyout, boolean showInShade) {
+    void updateNotNotifyingEntry(Bubble b, BubbleEntry entry, boolean showInShade) {
+        boolean isBubbleSelected = Objects.equals(b, mBubbleData.getSelectedBubble());
+        boolean isBubbleExpandedAndSelected = isStackExpanded() && isBubbleSelected;
+        b.setEntry(entry);
+        boolean suppress = isBubbleExpandedAndSelected || !showInShade || !b.showInShade();
+        b.setSuppressNotification(suppress);
+        b.setShowDot(!isBubbleExpandedAndSelected);
+        mImpl.mCachedState.updateBubbleSuppressedState(b);
+    }
+
+    @VisibleForTesting
+    public void inflateAndAdd(Bubble bubble, boolean suppressFlyout, boolean showInShade) {
         // Lazy init stack view when a bubble is created
         ensureStackViewCreated();
         bubble.setInflateSynchronously(mInflateSynchronously);
@@ -1111,7 +1133,10 @@ public class BubbleController implements ConfigurationChangeListener {
     }
 
     @VisibleForTesting
-    public void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp) {
+    public void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp, boolean fromSystem) {
+        if (!fromSystem) {
+            return;
+        }
         // shouldBubbleUp checks canBubble & for bubble metadata
         boolean shouldBubble = shouldBubbleUp && canLaunchInTaskView(mContext, entry);
         if (!shouldBubble && mBubbleData.hasAnyBubbleWithKey(entry.getKey())) {
@@ -1172,9 +1197,9 @@ public class BubbleController implements ConfigurationChangeListener {
                 // notification, so that the bubble will be re-created if shouldBubbleUp returns
                 // true.
                 mBubbleData.dismissBubbleWithKey(key, DISMISS_NO_BUBBLE_UP);
-            } else if (entry != null && mTmpRanking.isBubble() && !isActive) {
+            } else if (entry != null && mTmpRanking.isBubble() && !isActiveOrInOverflow) {
                 entry.setFlagBubble(true);
-                onEntryUpdated(entry, shouldBubbleUp);
+                onEntryUpdated(entry, shouldBubbleUp, /* fromSystem= */ true);
             }
         }
     }
@@ -1773,9 +1798,9 @@ public class BubbleController implements ConfigurationChangeListener {
         }
 
         @Override
-        public void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp) {
+        public void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp, boolean fromSystem) {
             mMainExecutor.execute(() -> {
-                BubbleController.this.onEntryUpdated(entry, shouldBubbleUp);
+                BubbleController.this.onEntryUpdated(entry, shouldBubbleUp, fromSystem);
             });
         }
 

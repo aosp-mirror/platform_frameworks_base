@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.listbuilder
 
+import com.android.systemui.statusbar.notification.collection.PipelineDumpable
+import com.android.systemui.statusbar.notification.collection.PipelineDumper
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.render.NodeController
@@ -24,10 +26,18 @@ import com.android.systemui.statusbar.notification.stack.PriorityBucket
 data class NotifSection(
     val sectioner: NotifSectioner,
     val index: Int
-) {
+) : PipelineDumpable {
     @PriorityBucket
     val bucket: Int = sectioner.bucket
     val label: String = "$index:$bucket:${sectioner.name}"
     val headerController: NodeController? = sectioner.headerNodeController
     val comparator: NotifComparator? = sectioner.comparator
+
+    override fun dumpPipeline(d: PipelineDumper) = with(d) {
+        dump("index", index)
+        dump("bucket", bucket)
+        dump("sectioner", sectioner)
+        dump("headerController", headerController)
+        dump("comparator", comparator)
+    }
 }

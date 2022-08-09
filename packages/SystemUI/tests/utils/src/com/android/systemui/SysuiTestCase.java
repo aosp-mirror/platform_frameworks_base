@@ -15,6 +15,8 @@
  */
 package com.android.systemui;
 
+import static com.android.systemui.animation.FakeDialogLaunchAnimatorKt.fakeDialogLaunchAnimator;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -34,6 +36,7 @@ import androidx.test.uiautomator.UiDevice;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.FakeBroadcastDispatcher;
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger;
@@ -119,6 +122,7 @@ public abstract class SysuiTestCase {
         // is missing (constructing the actual one would throw).
         // TODO(b/219008720): Remove this.
         mDependency.injectMockDependency(SystemUIDialogManager.class);
+        mDependency.injectTestDependency(DialogLaunchAnimator.class, fakeDialogLaunchAnimator());
     }
 
     @After
