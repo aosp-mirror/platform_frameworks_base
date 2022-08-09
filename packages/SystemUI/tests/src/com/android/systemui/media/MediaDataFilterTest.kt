@@ -17,9 +17,9 @@
 package com.android.systemui.media
 
 import android.app.smartspace.SmartspaceAction
-import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -29,18 +29,18 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.Executor
 
 private const val KEY = "TEST_KEY"
 private const val KEY_ALT = "TEST_KEY_2"
@@ -433,7 +433,7 @@ class MediaDataFilterTest : SysuiTestCase() {
         val dataCurrentAndActive = dataCurrent.copy(active = true)
         verify(listener).onMediaDataLoaded(eq(KEY), eq(KEY), eq(dataCurrentAndActive), eq(true),
                 eq(100), eq(true))
-        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
+        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isTrue()
         // Smartspace update shouldn't be propagated for the empty rec list.
         verify(listener, never()).onSmartspaceMediaDataLoaded(any(), any(), anyBoolean())
         verify(logger, never()).logRecommendationAdded(any(), any())

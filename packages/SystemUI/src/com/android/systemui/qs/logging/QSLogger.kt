@@ -69,36 +69,63 @@ class QSLogger @Inject constructor(
         })
     }
 
-    fun logTileClick(tileSpec: String, statusBarState: Int, state: Int) {
+    fun logTileClick(tileSpec: String, statusBarState: Int, state: Int, eventId: Int) {
         log(DEBUG, {
             str1 = tileSpec
-            int1 = statusBarState
+            int1 = eventId
             str2 = StatusBarState.toString(statusBarState)
             str3 = toStateString(state)
         }, {
-            "[$str1] Tile clicked. StatusBarState=$str2. TileState=$str3"
+            "[$str1][$int1] Tile clicked. StatusBarState=$str2. TileState=$str3"
         })
     }
 
-    fun logTileSecondaryClick(tileSpec: String, statusBarState: Int, state: Int) {
+    fun logHandleClick(tileSpec: String, eventId: Int) {
         log(DEBUG, {
             str1 = tileSpec
-            int1 = statusBarState
-            str2 = StatusBarState.toString(statusBarState)
-            str3 = toStateString(state)
+            int1 = eventId
         }, {
-            "[$str1] Tile long clicked. StatusBarState=$str2. TileState=$str3"
+            "[$str1][$int1] Tile handling click."
         })
     }
 
-    fun logTileLongClick(tileSpec: String, statusBarState: Int, state: Int) {
+    fun logTileSecondaryClick(tileSpec: String, statusBarState: Int, state: Int, eventId: Int) {
         log(DEBUG, {
             str1 = tileSpec
-            int1 = statusBarState
+            int1 = eventId
             str2 = StatusBarState.toString(statusBarState)
             str3 = toStateString(state)
         }, {
-            "[$str1] Tile long clicked. StatusBarState=$str2. TileState=$str3"
+            "[$str1][$int1] Tile secondary clicked. StatusBarState=$str2. TileState=$str3"
+        })
+    }
+
+    fun logHandleSecondaryClick(tileSpec: String, eventId: Int) {
+        log(DEBUG, {
+            str1 = tileSpec
+            int1 = eventId
+        }, {
+            "[$str1][$int1] Tile handling secondary click."
+        })
+    }
+
+    fun logTileLongClick(tileSpec: String, statusBarState: Int, state: Int, eventId: Int) {
+        log(DEBUG, {
+            str1 = tileSpec
+            int1 = eventId
+            str2 = StatusBarState.toString(statusBarState)
+            str3 = toStateString(state)
+        }, {
+            "[$str1][$int1] Tile long clicked. StatusBarState=$str2. TileState=$str3"
+        })
+    }
+
+    fun logHandleLongClick(tileSpec: String, eventId: Int) {
+        log(DEBUG, {
+            str1 = tileSpec
+            int1 = eventId
+        }, {
+            "[$str1][$int1] Tile handling long click."
         })
     }
 

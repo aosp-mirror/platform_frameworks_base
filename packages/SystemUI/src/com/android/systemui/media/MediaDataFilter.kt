@@ -266,11 +266,11 @@ class MediaDataFilter @Inject constructor(
     }
 
     /**
-     * Are there any media notifications active, including the recommendation?
+     * Are there any active media entries, including the recommendation?
      */
-    fun hasActiveMediaOrRecommendation() =
-            userEntries.any { it.value.active } ||
-                    (smartspaceMediaData.isActive && smartspaceMediaData.isValid())
+    fun hasActiveMediaOrRecommendation() = userEntries.any { it.value.active } ||
+            (smartspaceMediaData.isActive &&
+                (smartspaceMediaData.isValid() || reactivatedKey != null))
 
     /**
      * Are there any media entries we should display?
