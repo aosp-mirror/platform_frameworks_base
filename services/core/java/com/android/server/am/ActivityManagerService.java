@@ -8893,9 +8893,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     InputStreamReader input = null;
                     try {
                         java.lang.Process logcat = new ProcessBuilder(
-                                // Time out after 10s, but kill logcat with SEGV
+                                // Time out after 10s of inactivity, but kill logcat with SEGV
                                 // so we can investigate why it didn't finish.
-                                "/system/bin/timeout", "-s", "SEGV", "10s",
+                                "/system/bin/timeout", "-i", "-s", "SEGV", "10s",
                                 // Merge several logcat streams, and take the last N lines.
                                 "/system/bin/logcat", "-v", "threadtime", "-b", "events", "-b", "system",
                                 "-b", "main", "-b", "crash", "-t", String.valueOf(lines))
