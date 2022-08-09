@@ -148,6 +148,29 @@ public final class BugreportManager {
     }
 
     /**
+     * Speculatively pre-dumps UI data for a bugreport request that might come later.
+     *
+     * <p>Triggers the dump of certain critical UI data, e.g. traces stored in short
+     * ring buffers that might get lost by the time the actual bugreport is requested.
+     *
+     * <p>{@link #startBugreport} will then pick the pre-dumped data if both of the following
+     * conditions are met:
+     * - {@link android.os.BugreportParams#BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA} is specified.
+     * - {@link #preDumpUiData} and {@link #startBugreport} were called by the same UID.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    @WorkerThread
+    public void preDumpUiData() {
+        try {
+            mBinder.preDumpUiData(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Starts a bugreport.
      *
      * <p>This starts a bugreport in the background. However the call itself can take several
@@ -198,6 +221,7 @@ public final class BugreportManager {
                     bugreportFd.getFileDescriptor(),
                     screenshotFd.getFileDescriptor(),
                     params.getMode(),
+                    params.getFlags(),
                     dsListener,
                     isScreenshotRequested);
         } catch (RemoteException e) {

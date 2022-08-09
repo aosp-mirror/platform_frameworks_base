@@ -43,6 +43,7 @@ import com.android.server.SystemConfig;
 
 import java.io.FileDescriptor;
 import java.util.Objects;
+import java.util.OptionalInt;
 
 /**
  * Implementation of the service that provides a privileged API to capture and consume bugreports.
@@ -60,6 +61,9 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private final TelephonyManager mTelephonyManager;
     private final ArraySet<String> mBugreportWhitelistedPackages;
 
+    @GuardedBy("mLock")
+    private OptionalInt mPreDumpedDataUid = OptionalInt.empty();
+
     BugreportManagerServiceImpl(Context context) {
         mContext = context;
         mAppOps = context.getSystemService(AppOpsManager.class);
@@ -70,13 +74,25 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
     @Override
     @RequiresPermission(android.Manifest.permission.DUMP)
+    public void preDumpUiData(String callingPackage) {
+        enforcePermission(callingPackage, Binder.getCallingUid(), true);
+
+        synchronized (mLock) {
+            preDumpUiDataLocked(callingPackage);
+        }
+    }
+
+    @Override
+    @RequiresPermission(android.Manifest.permission.DUMP)
     public void startBugreport(int callingUidUnused, String callingPackage,
             FileDescriptor bugreportFd, FileDescriptor screenshotFd,
-            int bugreportMode, IDumpstateListener listener, boolean isScreenshotRequested) {
+            int bugreportMode, int bugreportFlags, IDumpstateListener listener,
+            boolean isScreenshotRequested) {
         Objects.requireNonNull(callingPackage);
         Objects.requireNonNull(bugreportFd);
         Objects.requireNonNull(listener);
         validateBugreportMode(bugreportMode);
+        validateBugreportFlags(bugreportFlags);
 
         int callingUid = Binder.getCallingUid();
         enforcePermission(callingPackage, callingUid, bugreportMode
@@ -90,7 +106,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
         synchronized (mLock) {
             startBugreportLocked(callingUid, callingPackage, bugreportFd, screenshotFd,
-                    bugreportMode, listener, isScreenshotRequested);
+                    bugreportMode, bugreportFlags, listener, isScreenshotRequested);
         }
     }
 
@@ -108,17 +124,14 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             }
             try {
                 // Note: this may throw SecurityException back out to the caller if they aren't
-                // allowed to cancel the report, in which case we should NOT be setting ctl.stop,
-                // since that would unintentionally kill some other app's bugreport, which we
-                // specifically disallow.
+                // allowed to cancel the report, in which case we should NOT stop the dumpstate
+                // service, since that would unintentionally kill some other app's bugreport, which
+                // we specifically disallow.
                 ds.cancelBugreport(callingUid, callingPackage);
             } catch (RemoteException e) {
                 Slog.e(TAG, "RemoteException in cancelBugreport", e);
             }
-            // This tells init to cancel bugreportd service. Note that this is achieved through
-            // setting a system property which is not thread-safe. So the lock here offers
-            // thread-safety only among callers of the API.
-            SystemProperties.set("ctl.stop", BUGREPORT_SERVICE);
+            stopDumpstateBinderServiceLocked();
         }
     }
 
@@ -131,6 +144,14 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                 && mode != BugreportParams.BUGREPORT_MODE_WIFI) {
             Slog.w(TAG, "Unknown bugreport mode: " + mode);
             throw new IllegalArgumentException("Unknown bugreport mode: " + mode);
+        }
+    }
+
+    private void validateBugreportFlags(int flags) {
+        flags = clearBugreportFlag(flags, BugreportParams.BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA);
+        if (flags != 0) {
+            Slog.w(TAG, "Unknown bugreport flags: " + flags);
+            throw new IllegalArgumentException("Unknown bugreport flags: " + flags);
         }
     }
 
@@ -224,15 +245,60 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     }
 
     @GuardedBy("mLock")
+    private void preDumpUiDataLocked(String callingPackage) {
+        mPreDumpedDataUid = OptionalInt.empty();
+
+        if (isDumpstateBinderServiceRunningLocked()) {
+            Slog.e(TAG, "'dumpstate' is already running. "
+                    + "Cannot pre-dump data while another operation is currently in progress.");
+            return;
+        }
+
+        IDumpstate ds = startAndGetDumpstateBinderServiceLocked();
+        if (ds == null) {
+            Slog.e(TAG, "Unable to get bugreport service");
+            return;
+        }
+
+        try {
+            ds.preDumpUiData(callingPackage);
+        } catch (RemoteException e) {
+            return;
+        } finally {
+            // dumpstate service is already started now. We need to kill it to manage the
+            // lifecycle correctly. If we don't subsequent callers will get
+            // BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS error.
+            stopDumpstateBinderServiceLocked();
+        }
+
+
+        mPreDumpedDataUid = OptionalInt.of(Binder.getCallingUid());
+    }
+
+    @GuardedBy("mLock")
     private void startBugreportLocked(int callingUid, String callingPackage,
             FileDescriptor bugreportFd, FileDescriptor screenshotFd,
-            int bugreportMode, IDumpstateListener listener, boolean isScreenshotRequested) {
+            int bugreportMode, int bugreportFlags, IDumpstateListener listener,
+            boolean isScreenshotRequested) {
         if (isDumpstateBinderServiceRunningLocked()) {
             Slog.w(TAG, "'dumpstate' is already running. Cannot start a new bugreport"
-                    + " while another one is currently in progress.");
-            reportError(listener,
-                    IDumpstateListener.BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS);
+                    + " while another operation is currently in progress.");
+            reportError(listener, IDumpstateListener.BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS);
             return;
+        }
+
+        if ((bugreportFlags & BugreportParams.BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA) != 0) {
+            if (mPreDumpedDataUid.isEmpty()) {
+                bugreportFlags = clearBugreportFlag(bugreportFlags,
+                        BugreportParams.BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA);
+                Slog.w(TAG, "Ignoring BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA."
+                        + " No pre-dumped data is available.");
+            } else if (mPreDumpedDataUid.getAsInt() != callingUid) {
+                bugreportFlags = clearBugreportFlag(bugreportFlags,
+                        BugreportParams.BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA);
+                Slog.w(TAG, "Ignoring BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA."
+                        + " Data was pre-dumped by a different UID.");
+            }
         }
 
         IDumpstate ds = startAndGetDumpstateBinderServiceLocked();
@@ -245,10 +311,10 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         // Wrap the listener so we can intercept binder events directly.
         IDumpstateListener myListener = new DumpstateListener(listener, ds);
         try {
-            ds.startBugreport(callingUid, callingPackage,
-                    bugreportFd, screenshotFd, bugreportMode, myListener, isScreenshotRequested);
+            ds.startBugreport(callingUid, callingPackage, bugreportFd, screenshotFd, bugreportMode,
+                    bugreportFlags, myListener, isScreenshotRequested);
         } catch (RemoteException e) {
-            // bugreportd service is already started now. We need to kill it to manage the
+            // dumpstate service is already started now. We need to kill it to manage the
             // lifecycle correctly. If we don't subsequent callers will get
             // BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS error.
             // Note that listener will be notified by the death recipient below.
@@ -307,6 +373,19 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                     + totalTimeWaitedMillis + "ms)");
         }
         return ds;
+    }
+
+    @GuardedBy("mLock")
+    private void stopDumpstateBinderServiceLocked() {
+        // This tells init to cancel bugreportd service. Note that this is achieved through
+        // setting a system property which is not thread-safe. So the lock here offers
+        // thread-safety only among callers of the API.
+        SystemProperties.set("ctl.stop", BUGREPORT_SERVICE);
+    }
+
+    private int clearBugreportFlag(int flags, @BugreportParams.BugreportFlag int flag) {
+        flags &= ~flag;
+        return flags;
     }
 
     private void reportError(IDumpstateListener listener, int errorCode) {
