@@ -449,6 +449,8 @@ public final class NotificationPanelViewController extends PanelViewController {
     private boolean mQsTouchAboveFalsingThreshold;
     private int mQsFalsingThreshold;
 
+    /** Indicates drag starting height when swiping down or up on heads-up notifications */
+    private int mHeadsUpStartHeight;
     private HeadsUpTouchHelper mHeadsUpTouchHelper;
     private boolean mListenForHeadsUp;
     private int mNavigationBarBottomHeight;
@@ -651,6 +653,8 @@ public final class NotificationPanelViewController extends PanelViewController {
 
     /** The drag distance required to fully expand the split shade. */
     private int mSplitShadeFullTransitionDistance;
+    /** The drag distance required to fully transition scrims. */
+    private int mSplitShadeScrimTransitionDistance;
 
     private final NotificationListContainer mNotificationListContainer;
     private final NotificationStackSizeCalculator mNotificationStackSizeCalculator;
@@ -1064,6 +1068,8 @@ public final class NotificationPanelViewController extends PanelViewController {
         mLockscreenNotificationQSPadding = mResources.getDimensionPixelSize(
                 R.dimen.notification_side_paddings);
         mUdfpsMaxYBurnInOffset = mResources.getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
+        mSplitShadeScrimTransitionDistance = mResources.getDimensionPixelSize(
+                R.dimen.split_shade_scrim_transition_distance);
     }
 
     private void updateViewControllers(KeyguardStatusView keyguardStatusView,
@@ -1354,7 +1360,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         mQsSizeChangeAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         mQsSizeChangeAnimator.addUpdateListener(animation -> {
             requestScrollerTopPaddingUpdate(false /* animate */);
-            requestPanelHeightUpdate();
+            updateExpandedHeightToMaxHeight();
             int height = (int) mQsSizeChangeAnimator.getAnimatedValue();
             mQs.setHeightOverride(height);
         });
@@ -2134,7 +2140,7 @@ public final class NotificationPanelViewController extends PanelViewController {
             mMetricsLogger.count(COUNTER_PANEL_OPEN_QS, 1);
             setQsExpandImmediate(true);
             setShowShelfOnly(true);
-            requestPanelHeightUpdate();
+            updateExpandedHeightToMaxHeight();
 
             // Normally, we start listening when the panel is expanded, but here we need to start
             // earlier so the state is already up to date when dragging down.
@@ -2346,7 +2352,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         // Reset scroll position and apply that position to the expanded height.
         float height = mQsExpansionHeight;
         setQsExpansion(height);
-        requestPanelHeightUpdate();
+        updateExpandedHeightToMaxHeight();
         mNotificationStackScrollLayoutController.checkSnoozeLeavebehind();
 
         // When expanding QS, let's authenticate the user if possible,
@@ -2362,7 +2368,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         if (changed) {
             mQsExpanded = expanded;
             updateQsState();
-            requestPanelHeightUpdate();
+            updateExpandedHeightToMaxHeight();
             mFalsingCollector.setQsExpanded(expanded);
             mCentralSurfaces.setQsExpanded(expanded);
             mNotificationsQSContainerController.setQsExpanded(expanded);
@@ -3086,16 +3092,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         int maxHeight;
         if (mQsExpandImmediate || mQsExpanded || mIsExpanding && mQsExpandedWhenExpandingStarted
                 || mPulsing || mSplitShadeEnabled) {
-            if (mSplitShadeEnabled && mBarState == SHADE) {
-                // Max panel height is used to calculate the fraction of the shade expansion.
-                // Traditionally the value is based on the number of notifications.
-                // On split-shade, we want the required distance to be a specific and constant
-                // value, to make sure the expansion motion has the expected speed.
-                // We also only want this on non-lockscreen for now.
-                maxHeight = mSplitShadeFullTransitionDistance;
-            } else {
-                maxHeight = calculatePanelHeightQsExpanded();
-            }
+            maxHeight = calculatePanelHeightQsExpanded();
         } else {
             maxHeight = calculatePanelHeightShade();
         }
@@ -3455,6 +3452,31 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
+    public int getMaxPanelTransitionDistance() {
+        // Traditionally the value is based on the number of notifications. On split-shade, we want
+        // the required distance to be a specific and constant value, to make sure the expansion
+        // motion has the expected speed. We also only want this on non-lockscreen for now.
+        if (mSplitShadeEnabled && mBarState == SHADE) {
+            boolean transitionFromHeadsUp =
+                    mHeadsUpManager.isTrackingHeadsUp() || mExpandingFromHeadsUp;
+            // heads-up starting height is too close to mSplitShadeFullTransitionDistance and
+            // when dragging HUN transition is already 90% complete. It makes shade become
+            // immediately visible when starting to drag. We want to set distance so that
+            // nothing is immediately visible when dragging (important for HUN swipe up motion) -
+            // 0.4 expansion fraction is a good starting point.
+            if (transitionFromHeadsUp) {
+                double maxDistance = Math.max(mSplitShadeFullTransitionDistance,
+                        mHeadsUpStartHeight * 2.5);
+                return (int) Math.min(getMaxPanelHeight(), maxDistance);
+            } else {
+                return mSplitShadeFullTransitionDistance;
+            }
+        } else {
+            return getMaxPanelHeight();
+        }
+    }
+
+    @Override
     protected boolean isTrackingBlocked() {
         return mConflictingQsExpansionGesture && mQsExpanded || mBlockingExpansionForCurrentTouch;
     }
@@ -3654,10 +3676,35 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     /**
+     * Called when heads-up notification is being dragged up or down to indicate what's the starting
+     * height for shade motion
+     */
+    public void setHeadsUpDraggingStartingHeight(int startHeight) {
+        mHeadsUpStartHeight = startHeight;
+        float scrimMinFraction;
+        if (mSplitShadeEnabled) {
+            boolean highHun = mHeadsUpStartHeight * 2.5 > mSplitShadeScrimTransitionDistance;
+            // if HUN height is higher than 40% of predefined transition distance, it means HUN
+            // is too high for regular transition. In that case we need to calculate transition
+            // distance - here we take scrim transition distance as equal to shade transition
+            // distance. It doesn't result in perfect motion - usually scrim transition distance
+            // should be longer - but it's good enough for HUN case.
+            float transitionDistance =
+                    highHun ? getMaxPanelTransitionDistance() : mSplitShadeFullTransitionDistance;
+            scrimMinFraction = mHeadsUpStartHeight / transitionDistance;
+        } else {
+            int transitionDistance = getMaxPanelHeight();
+            scrimMinFraction = transitionDistance > 0f
+                    ? (float) mHeadsUpStartHeight / transitionDistance : 0f;
+        }
+        setPanelScrimMinFraction(scrimMinFraction);
+    }
+
+    /**
      * Sets the minimum fraction for the panel expansion offset. This may be non-zero in certain
      * cases, such as if there's a heads-up notification.
      */
-    public void setPanelScrimMinFraction(float minFraction) {
+    private void setPanelScrimMinFraction(float minFraction) {
         mMinFraction = minFraction;
         mDepthController.setPanelPullDownMinFraction(mMinFraction);
         mScrimController.setPanelScrimMinFraction(mMinFraction);
@@ -4391,7 +4438,7 @@ public final class NotificationPanelViewController extends PanelViewController {
             if (mKeyguardShowing) {
                 updateMaxDisplayedNotifications(true);
             }
-            requestPanelHeightUpdate();
+            updateExpandedHeightToMaxHeight();
         }
 
         @Override
@@ -4524,7 +4571,7 @@ public final class NotificationPanelViewController extends PanelViewController {
             if (mQsExpanded && mQsFullyExpanded) {
                 mQsExpansionHeight = mQsMaxExpansionHeight;
                 requestScrollerTopPaddingUpdate(false /* animate */);
-                requestPanelHeightUpdate();
+                updateExpandedHeightToMaxHeight();
             }
             if (mAccessibilityManager.isEnabled()) {
                 mView.setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
@@ -4794,7 +4841,7 @@ public final class NotificationPanelViewController extends PanelViewController {
             if (mQsExpanded && mQsFullyExpanded) {
                 mQsExpansionHeight = mQsMaxExpansionHeight;
                 requestScrollerTopPaddingUpdate(false /* animate */);
-                requestPanelHeightUpdate();
+                updateExpandedHeightToMaxHeight();
 
                 // Size has changed, start an animation.
                 if (mQsMaxExpansionHeight != oldMaxHeight) {
