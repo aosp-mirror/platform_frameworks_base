@@ -16,12 +16,27 @@
 
 package com.android.server.am;
 
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_ACTIVITY;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_ADDED_APPLICATION;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_BACKUP;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_BROADCAST;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_CONTENT_PROVIDER;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_EMPTY;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_LINK_FAIL;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_NEXT_ACTIVITY;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_NEXT_TOP_ACTIVITY;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_ON_HOLD;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_RESTART;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_SERVICE;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_SYSTEM;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_TOP_ACTIVITY;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_ALARM;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.PROCESS_START_TIME__TYPE__UNKNOWN;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
-import android.os.ProcessStartTime;
-
-import com.android.internal.util.FrameworkStatsLog;
 
 /**
  * This class describes various information required to start a process.
@@ -252,35 +267,35 @@ public final class HostingRecord {
     public static int getHostingTypeIdStatsd(@NonNull String hostingType) {
         switch(hostingType) {
             case HOSTING_TYPE_ACTIVITY:
-                return ProcessStartTime.HOSTING_TYPE_ACTIVITY;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_ACTIVITY;
             case HOSTING_TYPE_ADDED_APPLICATION:
-                return ProcessStartTime.HOSTING_TYPE_ADDED_APPLICATION;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_ADDED_APPLICATION;
             case HOSTING_TYPE_BACKUP:
-                return ProcessStartTime.HOSTING_TYPE_BACKUP;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_BACKUP;
             case HOSTING_TYPE_BROADCAST:
-                return ProcessStartTime.HOSTING_TYPE_BROADCAST;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_BROADCAST;
             case HOSTING_TYPE_CONTENT_PROVIDER:
-                return ProcessStartTime.HOSTING_TYPE_CONTENT_PROVIDER;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_CONTENT_PROVIDER;
             case HOSTING_TYPE_LINK_FAIL:
-                return ProcessStartTime.HOSTING_TYPE_LINK_FAIL;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_LINK_FAIL;
             case HOSTING_TYPE_ON_HOLD:
-                return ProcessStartTime.HOSTING_TYPE_ON_HOLD;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_ON_HOLD;
             case HOSTING_TYPE_NEXT_ACTIVITY:
-                return ProcessStartTime.HOSTING_TYPE_NEXT_ACTIVITY;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_NEXT_ACTIVITY;
             case HOSTING_TYPE_NEXT_TOP_ACTIVITY:
-                return ProcessStartTime.HOSTING_TYPE_NEXT_TOP_ACTIVITY;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_NEXT_TOP_ACTIVITY;
             case HOSTING_TYPE_RESTART:
-                return ProcessStartTime.HOSTING_TYPE_RESTART;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_RESTART;
             case HOSTING_TYPE_SERVICE:
-                return ProcessStartTime.HOSTING_TYPE_SERVICE;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_SERVICE;
             case HOSTING_TYPE_SYSTEM:
-                return ProcessStartTime.HOSTING_TYPE_SYSTEM;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_SYSTEM;
             case HOSTING_TYPE_TOP_ACTIVITY:
-                return ProcessStartTime.HOSTING_TYPE_TOP_ACTIVITY;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_TOP_ACTIVITY;
             case HOSTING_TYPE_EMPTY:
-                return ProcessStartTime.HOSTING_TYPE_EMPTY;
+                return PROCESS_START_TIME__HOSTING_TYPE_ID__HOSTING_TYPE_EMPTY;
             default:
-                return ProcessStartTime.HOSTING_TYPE_UNKNOWN;
+                return PROCESS_START_TIME__TYPE__UNKNOWN;
         }
     }
 
@@ -292,9 +307,9 @@ public final class HostingRecord {
     public static int getTriggerTypeForStatsd(@NonNull String triggerType) {
         switch(triggerType) {
             case TRIGGER_TYPE_ALARM:
-                return FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_ALARM;
+                return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_ALARM;
             default:
-                return FrameworkStatsLog.PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_UNKNOWN;
+                return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_UNKNOWN;
         }
     }
 }
