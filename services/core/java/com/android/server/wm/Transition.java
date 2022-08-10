@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -817,6 +818,19 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 transaction);
         if (mOverrideOptions != null) {
             info.setAnimationOptions(mOverrideOptions);
+            if (mOverrideOptions.getType() == ANIM_OPEN_CROSS_PROFILE_APPS) {
+                for (int i = 0; i < mTargets.size(); ++i) {
+                    final TransitionInfo.Change c = info.getChanges().get(i);
+                    final ActivityRecord ar = mTargets.get(i).asActivityRecord();
+                    if (ar == null || c.getMode() != TRANSIT_OPEN) continue;
+                    int flags = c.getFlags();
+                    flags |= ar.mUserId == ar.mWmService.mCurrentUserId
+                            ? TransitionInfo.FLAG_CROSS_PROFILE_OWNER_THUMBNAIL
+                            : TransitionInfo.FLAG_CROSS_PROFILE_WORK_THUMBNAIL;
+                    c.setFlags(flags);
+                    break;
+                }
+            }
         }
 
         // TODO(b/188669821): Move to animation impl in shell.
