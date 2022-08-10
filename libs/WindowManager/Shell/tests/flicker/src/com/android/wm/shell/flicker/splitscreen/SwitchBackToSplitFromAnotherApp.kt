@@ -39,16 +39,17 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test quick switch to split pair from home.
+ * Test quick switch to split pair from another app.
  *
- * To run this test: `atest WMShellFlickerTests:SwitchBackToSplitFromHome`
+ * To run this test: `atest WMShellFlickerTests:SwitchBackToSplitFromAnotherApp`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class SwitchBackToSplitFromHome(testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
+class SwitchBackToSplitFromAnotherApp(testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
+    val thirdApp = SplitScreenHelper.getNonResizeable(instrumentation)
 
     // TODO(b/231399940): Remove this once we can use recent shortcut to enter split.
     @Before
@@ -69,15 +70,15 @@ class SwitchBackToSplitFromHome(testSpec: FlickerTestParameter) : SplitScreenBas
                         .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
                     SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
 
-                    tapl.goHome()
+                    thirdApp.launchViaIntent(wmHelper)
                     wmHelper.StateSyncBuilder()
                         .withAppTransitionIdle()
-                        .withHomeActivityVisible()
+                        .withWindowSurfaceAppeared(thirdApp)
                         .waitForAndVerify()
                 }
             }
             transitions {
-                tapl.workspace.quickSwitchToPreviousApp()
+                tapl.launchedAppState.quickSwitchToPreviousApp()
                 SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
             }
         }
