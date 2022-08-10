@@ -504,6 +504,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
+        mTransitionController.collectForDisplayAreaChange(this);
         mTmpConfiguration.setTo(getConfiguration());
         super.onConfigurationChanged(newParentConfig);
 
