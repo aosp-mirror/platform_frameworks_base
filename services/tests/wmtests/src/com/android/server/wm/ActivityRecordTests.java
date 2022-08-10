@@ -2464,6 +2464,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.addWindow(appWindow);
         spyOn(appWindow);
         doNothing().when(appWindow).onStartFreezingScreen();
+        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
 
         // Set initial orientation and update.
         performRotation(displayRotation, Surface.ROTATION_90);
@@ -2472,8 +2473,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Update the rotation to perform 180 degree rotation and check that resize was reported.
         performRotation(displayRotation, Surface.ROTATION_270);
         assertTrue(appWindow.mResizeReported);
-
-        appWindow.removeImmediately();
     }
 
     private void performRotation(DisplayRotation spiedRotation, int rotationToReport) {
