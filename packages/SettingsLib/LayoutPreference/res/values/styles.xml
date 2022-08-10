@@ -22,20 +22,6 @@
         <item name="android:paddingEnd">16dp</item>
     </style>
 
-    <style name="TextAppearance.EntityHeaderTitle"
-           parent="@android:style/TextAppearance.DeviceDefault.WindowTitle">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textSize">20sp</item>
-    </style>
-
-    <style name="TextAppearance.EntityHeaderSummary"
-           parent="@android:style/TextAppearance.DeviceDefault">
-        <item name="android:textAlignment">viewStart</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:ellipsize">marquee</item>
-    </style>
-
     <style name="CrossProfileEntityHeaderIcon">
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">48dp</item>
