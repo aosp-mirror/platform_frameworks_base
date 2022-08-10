@@ -985,10 +985,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     screenBrighteningThresholds, screenDarkeningThresholds, screenThresholdLevels,
                     screenDarkeningMinThreshold, screenBrighteningMinThreshold);
 
-            long brighteningLightDebounce = resources.getInteger(
-                    com.android.internal.R.integer.config_autoBrightnessBrighteningLightDebounce);
-            long darkeningLightDebounce = resources.getInteger(
-                    com.android.internal.R.integer.config_autoBrightnessDarkeningLightDebounce);
+            long brighteningLightDebounce = mDisplayDeviceConfig
+                    .getAutoBrightnessBrighteningLightDebounce();
+            long darkeningLightDebounce = mDisplayDeviceConfig
+                    .getAutoBrightnessDarkeningLightDebounce();
             boolean autoBrightnessResetAmbientLuxAfterWarmUp = resources.getBoolean(
                     com.android.internal.R.bool.config_autoBrightnessResetAmbientLuxAfterWarmUp);
 

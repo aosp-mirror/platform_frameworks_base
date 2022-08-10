@@ -45,6 +45,8 @@
                 <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0"
                             maxOccurs="1"/>
                 <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1" />
+                <xs:element type="autoBrightness" name="autoBrightness" minOccurs="0"
+                            maxOccurs="1" />
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessRampFastDecrease">
                     <xs:annotation name="final"/>
                 </xs:element>
@@ -100,6 +102,21 @@
     </xs:element>
 
     <!-- Type definitions -->
+
+    <xs:complexType name="autoBrightness">
+        <xs:sequence>
+            <!-- Sets the debounce for autoBrightness brightening in millis-->
+            <xs:element name="brighteningLightDebounceMillis" type="xs:nonNegativeInteger"
+                        minOccurs="0" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- Sets the debounce for autoBrightness darkening in millis-->
+            <xs:element name="darkeningLightDebounceMillis" type="xs:nonNegativeInteger"
+                        minOccurs="0" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
 
     <xs:complexType name="displayQuirks">
         <xs:sequence>
@@ -341,5 +358,4 @@
             <xs:annotation name="final"/>
         </xs:element>
     </xs:complexType>
-
 </xs:schema>
