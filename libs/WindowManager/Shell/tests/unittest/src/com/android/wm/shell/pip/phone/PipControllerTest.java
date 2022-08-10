@@ -234,7 +234,7 @@ public class PipControllerTest extends ShellTestCase {
         mPipController.mDisplaysChangedListener.onDisplayConfigurationChanged(
                 displayId, new Configuration());
 
-        verify(mMockPipMotionHelper).movePip(any(Rect.class));
+        verify(mMockPipTaskOrganizer).scheduleFinishResizePip(any(Rect.class));
     }
 
     @Test
@@ -250,7 +250,7 @@ public class PipControllerTest extends ShellTestCase {
         mPipController.mDisplaysChangedListener.onDisplayConfigurationChanged(
                 displayId, new Configuration());
 
-        verify(mMockPipMotionHelper, never()).movePip(any(Rect.class));
+        verify(mMockPipTaskOrganizer, never()).scheduleFinishResizePip(any(Rect.class));
     }
 
     @Test
