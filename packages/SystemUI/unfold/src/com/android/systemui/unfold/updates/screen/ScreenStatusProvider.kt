@@ -25,5 +25,15 @@ interface ScreenStatusProvider : CallbackController<ScreenListener> {
          * Called when the screen is on and ready (windows are drawn and screen blocker is removed)
          */
         fun onScreenTurnedOn()
+
+        /**
+         * Called when the screen is starting to be turned off.
+         */
+        fun onScreenTurningOff()
+
+        /**
+         * Called when the screen is starting to be turned on.
+         */
+        fun onScreenTurningOn()
     }
 }

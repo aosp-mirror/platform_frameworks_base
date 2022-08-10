@@ -59,9 +59,9 @@ WMShell SysUI service:
 adb shell dumpsys activity service SystemUIService WMShell
 ```
 
-If information should be added to the dump, make updates to:
-- `WMShell` if you are dumping SysUI state
-- `ShellCommandHandler` if you are dumping Shell state
+If information should be added to the dump, either:
+- Update `WMShell` if you are dumping SysUI state
+- Inject `ShellCommandHandler` into your Shell class, and add a dump callback
 
 ## Debugging in Android Studio
 

@@ -38,6 +38,7 @@ import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dreams.DreamOverlayStatusBarItemsProvider.StatusBarItem;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
@@ -47,10 +48,13 @@ import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.time.DateFormatUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -69,7 +73,10 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     private final Optional<DreamOverlayNotificationCountProvider>
             mDreamOverlayNotificationCountProvider;
     private final ZenModeController mZenModeController;
+    private final DreamOverlayStatusBarItemsProvider mStatusBarItemsProvider;
     private final Executor mMainExecutor;
+    private final List<DreamOverlayStatusBarItemsProvider.StatusBarItem> mExtraStatusBarItems =
+            new ArrayList<>();
 
     private boolean mIsAttached;
 
@@ -116,6 +123,9 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
                             ? buildNotificationsContentDescription(notificationCount)
                             : null);
 
+    private final DreamOverlayStatusBarItemsProvider.Callback mStatusBarItemsProviderCallback =
+            this::onStatusBarItemsChanged;
+
     @Inject
     public DreamOverlayStatusBarViewController(
             DreamOverlayStatusBarView view,
@@ -129,7 +139,8 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
             IndividualSensorPrivacyController sensorPrivacyController,
             Optional<DreamOverlayNotificationCountProvider> dreamOverlayNotificationCountProvider,
             ZenModeController zenModeController,
-            StatusBarWindowStateController statusBarWindowStateController) {
+            StatusBarWindowStateController statusBarWindowStateController,
+            DreamOverlayStatusBarItemsProvider statusBarItemsProvider) {
         super(view);
         mResources = resources;
         mMainExecutor = mainExecutor;
@@ -140,6 +151,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mDateFormatUtil = dateFormatUtil;
         mSensorPrivacyController = sensorPrivacyController;
         mDreamOverlayNotificationCountProvider = dreamOverlayNotificationCountProvider;
+        mStatusBarItemsProvider = statusBarItemsProvider;
         mZenModeController = zenModeController;
 
         // Register to receive show/hide updates for the system status bar. Our custom status bar
@@ -166,6 +178,8 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mDreamOverlayNotificationCountProvider.ifPresent(
                 provider -> provider.addCallback(mNotificationCountCallback));
 
+        mStatusBarItemsProvider.addCallback(mStatusBarItemsProviderCallback);
+
         mTouchInsetSession.addViewToTracking(mView);
     }
 
@@ -177,6 +191,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
         mDreamOverlayNotificationCountProvider.ifPresent(
                 provider -> provider.removeCallback(mNotificationCountCallback));
+        mStatusBarItemsProvider.removeCallback(mStatusBarItemsProviderCallback);
         mTouchInsetSession.clear();
 
         mIsAttached = false;
@@ -269,6 +284,18 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
                     mView.setVisibility(View.VISIBLE);
                     break;
             }
+        });
+    }
+
+    private void onStatusBarItemsChanged(List<StatusBarItem> newItems) {
+        mMainExecutor.execute(() -> {
+            mExtraStatusBarItems.clear();
+            mExtraStatusBarItems.addAll(newItems);
+            mView.setExtraStatusBarItemViews(
+                    newItems
+                            .stream()
+                            .map(StatusBarItem::getView)
+                            .collect(Collectors.toList()));
         });
     }
 }
