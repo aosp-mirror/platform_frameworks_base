@@ -1192,7 +1192,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             return false;
         }
 
-        final @TransitionInfo.TransitionMode int mode = changes.get(target).getTransitMode(target);
+        final ChangeInfo change = changes.get(target);
+        if (change.mStartParent != null && target.getParent() != change.mStartParent) {
+            // When a window is reparented, the state change won't fit into any of the parents.
+            // Don't promote such change so that we can animate the reparent if needed.
+            return false;
+        }
+
+        final @TransitionInfo.TransitionMode int mode = change.getTransitMode(target);
         for (int i = parent.getChildCount() - 1; i >= 0; --i) {
             final WindowContainer<?> sibling = parent.getChildAt(i);
             if (target == sibling) continue;
@@ -1332,14 +1339,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     // Intermediate parents must be those that has window to be managed by Shell.
                     continue;
                 }
-                if (parentChange.mParent != null && !skipIntermediateReports) {
-                    changes.get(wc).mParent = p;
+                if (parentChange.mEndParent != null && !skipIntermediateReports) {
+                    changes.get(wc).mEndParent = p;
                     // The chain above the parent was processed.
                     break;
                 }
                 if (targetList.contains(p)) {
                     if (skipIntermediateReports) {
-                        changes.get(wc).mParent = p;
+                        changes.get(wc).mEndParent = p;
                     } else {
                         intermediates.add(p);
                     }
@@ -1351,10 +1358,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
             if (!foundParentInTargets || intermediates.isEmpty()) continue;
             // Add any always-report parents along the way.
-            changes.get(wc).mParent = intermediates.get(0);
+            changes.get(wc).mEndParent = intermediates.get(0);
             for (int j = 0; j < intermediates.size() - 1; j++) {
                 final WindowContainer<?> intermediate = intermediates.get(j);
-                changes.get(intermediate).mParent = intermediates.get(j + 1);
+                changes.get(intermediate).mEndParent = intermediates.get(j + 1);
                 targets.add(intermediate);
             }
         }
@@ -1467,8 +1474,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     target.mRemoteToken != null ? target.mRemoteToken.toWindowContainerToken()
                             : null, getLeashSurface(target, startT));
             // TODO(shell-transitions): Use leash for non-organized windows.
-            if (info.mParent != null) {
-                change.setParent(info.mParent.mRemoteToken.toWindowContainerToken());
+            if (info.mEndParent != null) {
+                change.setParent(info.mEndParent.mRemoteToken.toWindowContainerToken());
             }
             change.setMode(info.getTransitMode(target));
             change.setStartAbsBounds(info.mAbsoluteBounds);
@@ -1651,7 +1658,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         @interface Flag {}
 
         // Usually "post" change state.
-        WindowContainer mParent;
+        WindowContainer mEndParent;
+        // Parent before change state.
+        WindowContainer mStartParent;
 
         // State tracking
         boolean mExistenceChanged = false;
@@ -1672,6 +1681,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             mAbsoluteBounds.set(origState.getBounds());
             mShowWallpaper = origState.showWallpaper();
             mRotation = origState.getWindowConfiguration().getRotation();
+            mStartParent = origState.getParent();
         }
 
         @VisibleForTesting
