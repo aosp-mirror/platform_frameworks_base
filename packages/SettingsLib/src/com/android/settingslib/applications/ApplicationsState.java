@@ -792,10 +792,8 @@ public class ApplicationsState {
         // Rebuilding of app list.  Synchronized on mRebuildSync.
         final Object mRebuildSync = new Object();
         boolean mRebuildRequested;
-        boolean mRebuildAsync;
         AppFilter mRebuildFilter;
         Comparator<AppEntry> mRebuildComparator;
-        ArrayList<AppEntry> mRebuildResult;
         ArrayList<AppEntry> mLastAppList;
         boolean mRebuildForeground;
 
@@ -901,11 +899,9 @@ public class ApplicationsState {
                 synchronized (mRebuildingSessions) {
                     mRebuildingSessions.add(this);
                     mRebuildRequested = true;
-                    mRebuildAsync = true;
                     mRebuildFilter = filter;
                     mRebuildComparator = comparator;
                     mRebuildForeground = foreground;
-                    mRebuildResult = null;
                     if (!mBackgroundHandler.hasMessages(BackgroundHandler.MSG_REBUILD_LIST)) {
                         Message msg = mBackgroundHandler.obtainMessage(
                                 BackgroundHandler.MSG_REBUILD_LIST);
@@ -985,15 +981,10 @@ public class ApplicationsState {
             synchronized (mRebuildSync) {
                 if (!mRebuildRequested) {
                     mLastAppList = filteredApps;
-                    if (!mRebuildAsync) {
-                        mRebuildResult = filteredApps;
-                        mRebuildSync.notifyAll();
-                    } else {
-                        if (!mMainHandler.hasMessages(MainHandler.MSG_REBUILD_COMPLETE, this)) {
-                            Message msg = mMainHandler.obtainMessage(
-                                    MainHandler.MSG_REBUILD_COMPLETE, this);
-                            mMainHandler.sendMessage(msg);
-                        }
+                    if (!mMainHandler.hasMessages(MainHandler.MSG_REBUILD_COMPLETE, this)) {
+                        Message msg = mMainHandler.obtainMessage(
+                                MainHandler.MSG_REBUILD_COMPLETE, this);
+                        mMainHandler.sendMessage(msg);
                     }
                 }
             }
