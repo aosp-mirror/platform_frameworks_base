@@ -26,6 +26,7 @@ import android.os.PowerManager;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
@@ -63,6 +64,7 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryControllerImpl;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -173,7 +175,9 @@ public abstract class TvSystemUIModule {
             GroupMembershipManager groupManager,
             VisualStabilityProvider visualStabilityProvider,
             ConfigurationController configurationController,
-            @Main Handler handler) {
+            @Main Handler handler,
+            AccessibilityManagerWrapper accessibilityManagerWrapper,
+            UiEventLogger uiEventLogger) {
         return new HeadsUpManagerPhone(
                 context,
                 headsUpManagerLogger,
@@ -182,7 +186,9 @@ public abstract class TvSystemUIModule {
                 groupManager,
                 visualStabilityProvider,
                 configurationController,
-                handler
+                handler,
+                accessibilityManagerWrapper,
+                uiEventLogger
         );
     }
 

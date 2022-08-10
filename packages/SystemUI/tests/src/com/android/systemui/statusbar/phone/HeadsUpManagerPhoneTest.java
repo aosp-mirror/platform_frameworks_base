@@ -29,6 +29,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
@@ -65,6 +66,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private KeyguardBypassController mBypassController;
     @Mock private ConfigurationControllerImpl mConfigurationController;
+    @Mock private AccessibilityManagerWrapper mAccessibilityManagerWrapper;
+    @Mock private UiEventLogger mUiEventLogger;
     private boolean mLivesPastNormalTime;
 
     private static final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
@@ -76,7 +79,9 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 StatusBarStateController statusBarStateController,
                 KeyguardBypassController keyguardBypassController,
                 ConfigurationController configurationController,
-                Handler handler
+                Handler handler,
+                AccessibilityManagerWrapper accessibilityManagerWrapper,
+                UiEventLogger uiEventLogger
         ) {
             super(
                     context,
@@ -86,7 +91,9 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                     groupManager,
                     visualStabilityProvider,
                     configurationController,
-                    handler
+                    handler,
+                    accessibilityManagerWrapper,
+                    uiEventLogger
             );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
@@ -116,7 +123,9 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mStatusBarStateController,
                 mBypassController,
                 mConfigurationController,
-                mTestHandler
+                mTestHandler,
+                mAccessibilityManagerWrapper,
+                mUiEventLogger
         );
     }
 

@@ -32,7 +32,6 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -81,12 +80,15 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         }
     }
 
-    public HeadsUpManager(@NonNull final Context context, HeadsUpManagerLogger logger,
-            @Main Handler handler) {
+    public HeadsUpManager(@NonNull final Context context,
+            HeadsUpManagerLogger logger,
+            @Main Handler handler,
+            AccessibilityManagerWrapper accessibilityManagerWrapper,
+            UiEventLogger uiEventLogger) {
         super(logger, handler);
         mContext = context;
-        mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
-        mUiEventLogger = Dependency.get(UiEventLogger.class);
+        mAccessibilityMgr = accessibilityManagerWrapper;
+        mUiEventLogger = uiEventLogger;
         Resources resources = context.getResources();
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
         mAutoDismissNotificationDecay = resources.getInteger(R.integer.heads_up_notification_decay);
