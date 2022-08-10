@@ -887,7 +887,8 @@
     <!-- Accessibility label for the button that opens the user switcher. -->
     <string name="accessibility_multi_user_switch_switcher">Switch user</string>
 
-    <!-- Accessibility label for the button that opens the user switcher and announces the current user. -->
+    <!-- Accessibility role description for the element that opens the user switcher list. -->
+    <string name="accessibility_multi_user_list_switcher">pulldown menu</string>
 
     <!-- Accessibility label for the user icon on the lock screen. -->
 
