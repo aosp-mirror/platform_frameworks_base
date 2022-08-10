@@ -280,6 +280,15 @@ public final class ContentCaptureManager {
             "service_explicitly_enabled";
 
     /**
+     * Device config property used by {@code android.widget.AbsListView} to determine whether or
+     * not it should report the positions of its children to Content Capture.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_REPORT_LIST_VIEW_CHILDREN =
+            "report_list_view_children";
+
+    /**
      * Maximum number of events that are buffered before sent to the app.
      *
      * @hide

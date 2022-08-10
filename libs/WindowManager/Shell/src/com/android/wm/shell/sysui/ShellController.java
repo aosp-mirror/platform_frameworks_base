@@ -45,10 +45,9 @@ public class ShellController {
     private static final String TAG = ShellController.class.getSimpleName();
 
     private final ShellInit mShellInit;
+    private final ShellCommandHandler mShellCommandHandler;
     private final ShellExecutor mMainExecutor;
     private final ShellInterfaceImpl mImpl = new ShellInterfaceImpl();
-
-    private ShellCommandHandler mShellCommandHandler;
 
     private final CopyOnWriteArrayList<ConfigurationChangeListener> mConfigChangeListeners =
             new CopyOnWriteArrayList<>();
@@ -57,8 +56,10 @@ public class ShellController {
     private Configuration mLastConfiguration;
 
 
-    public ShellController(ShellInit shellInit, ShellExecutor mainExecutor) {
+    public ShellController(ShellInit shellInit, ShellCommandHandler shellCommandHandler,
+            ShellExecutor mainExecutor) {
         mShellInit = shellInit;
+        mShellCommandHandler = shellCommandHandler;
         mMainExecutor = mainExecutor;
     }
 
@@ -67,15 +68,6 @@ public class ShellController {
      */
     public ShellInterface asShell() {
         return mImpl;
-    }
-
-    /**
-     * Sets the command handler to call back to.
-     * TODO(238217847): This is only exposed this way until we can remove the dependencies from the
-     *                  command handler to other classes.
-     */
-    public void setShellCommandHandler(ShellCommandHandler shellCommandHandler) {
-        mShellCommandHandler = shellCommandHandler;
     }
 
     /**
