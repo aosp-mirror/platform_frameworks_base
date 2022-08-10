@@ -122,13 +122,12 @@ class MediaTttChipControllerSender @Inject constructor(
         val chipState = newChipInfo.state
 
         // App icon
-        setIcon(currentChipView, newChipInfo.routeInfo.packageName)
+        val iconName = setIcon(currentChipView, newChipInfo.routeInfo.packageName)
 
         // Text
         val otherDeviceName = newChipInfo.routeInfo.name.toString()
-        currentChipView.requireViewById<TextView>(R.id.text).apply {
-            text = chipState.getChipTextString(context, otherDeviceName)
-        }
+        val chipText = chipState.getChipTextString(context, otherDeviceName)
+        currentChipView.requireViewById<TextView>(R.id.text).text = chipText
 
         // Loading
         currentChipView.requireViewById<View>(R.id.loading).visibility =
@@ -145,16 +144,28 @@ class MediaTttChipControllerSender @Inject constructor(
         // Failure
         currentChipView.requireViewById<View>(R.id.failure_icon).visibility =
             chipState.isTransferFailure.visibleIfTrue()
+
+        // For accessibility
+        currentChipView.requireViewById<ViewGroup>(
+                R.id.media_ttt_sender_chip_inner
+        ).contentDescription = "$iconName $chipText"
     }
 
     override fun animateChipIn(chipView: ViewGroup) {
+        val chipInnerView = chipView.requireViewById<ViewGroup>(R.id.media_ttt_sender_chip_inner)
         ViewHierarchyAnimator.animateAddition(
-            chipView.requireViewById<ViewGroup>(R.id.media_ttt_sender_chip_inner),
+            chipInnerView,
             ViewHierarchyAnimator.Hotspot.TOP,
             Interpolators.EMPHASIZED_DECELERATE,
-            duration = 500L,
+            duration = ANIMATION_DURATION,
             includeMargins = true,
             includeFadeIn = true,
+        )
+
+        // We can only request focus once the animation finishes.
+        mainExecutor.executeDelayed(
+                { chipInnerView.requestAccessibilityFocus() },
+                ANIMATION_DURATION
         )
     }
 
@@ -186,3 +197,4 @@ data class ChipSenderInfo(
 }
 
 const val SENDER_TAG = "MediaTapToTransferSender"
+private const val ANIMATION_DURATION = 500L

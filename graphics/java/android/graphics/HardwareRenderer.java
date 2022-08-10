@@ -1046,14 +1046,39 @@ public class HardwareRenderer {
     }
 
     /** @hide */
-    public static int copySurfaceInto(Surface surface, Rect srcRect, Bitmap bitmap) {
-        if (srcRect == null) {
-            // Empty rect means entire surface
-            return nCopySurfaceInto(surface, 0, 0, 0, 0, bitmap.getNativeInstance());
-        } else {
-            return nCopySurfaceInto(surface, srcRect.left, srcRect.top,
-                    srcRect.right, srcRect.bottom, bitmap.getNativeInstance());
+    public abstract static class CopyRequest {
+        protected Bitmap mDestinationBitmap;
+        final Rect mSrcRect;
+
+        protected CopyRequest(Rect srcRect, Bitmap destinationBitmap) {
+            mDestinationBitmap = destinationBitmap;
+            if (srcRect != null) {
+                mSrcRect = srcRect;
+            } else {
+                mSrcRect = new Rect();
+            }
         }
+
+        /**
+         * Retrieve the bitmap in which to store the result of the copy request
+         */
+        public long getDestinationBitmap(int srcWidth, int srcHeight) {
+            if (mDestinationBitmap == null) {
+                mDestinationBitmap =
+                        Bitmap.createBitmap(srcWidth, srcHeight, Bitmap.Config.ARGB_8888);
+            }
+            return mDestinationBitmap.getNativeInstance();
+        }
+
+        /** Called when the copy is completed */
+        public abstract void onCopyFinished(int result);
+    }
+
+    /** @hide */
+    public static void copySurfaceInto(Surface surface, CopyRequest copyRequest) {
+        final Rect srcRect = copyRequest.mSrcRect;
+        nCopySurfaceInto(surface, srcRect.left, srcRect.top, srcRect.right, srcRect.bottom,
+                copyRequest);
     }
 
     /**
@@ -1464,8 +1489,8 @@ public class HardwareRenderer {
 
     private static native void nRemoveObserver(long nativeProxy, long nativeObserver);
 
-    private static native int nCopySurfaceInto(Surface surface,
-            int srcLeft, int srcTop, int srcRight, int srcBottom, long bitmapHandle);
+    private static native void nCopySurfaceInto(Surface surface,
+            int srcLeft, int srcTop, int srcRight, int srcBottom, CopyRequest request);
 
     private static native Bitmap nCreateHardwareBitmap(long renderNode, int width, int height);
 

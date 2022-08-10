@@ -398,16 +398,18 @@ class InsetsPolicy {
 
         if (WindowConfiguration.isFloating(windowingMode)
                 || (windowingMode == WINDOWING_MODE_MULTI_WINDOW && isAlwaysOnTop)) {
-            if (!stateCopied) {
-                state = new InsetsState(state);
-                stateCopied = true;
+            InsetsState newState = new InsetsState();
+
+            // Only caption and IME are needed.
+            if (state.peekSource(ITYPE_CAPTION_BAR) != null) {
+                newState.addSource(state.peekSource(ITYPE_CAPTION_BAR));
             }
-            state.removeSource(ITYPE_STATUS_BAR);
-            state.removeSource(ITYPE_NAVIGATION_BAR);
-            state.removeSource(ITYPE_EXTRA_NAVIGATION_BAR);
-            if (windowingMode == WINDOWING_MODE_PINNED) {
-                state.removeSource(ITYPE_IME);
+            if (windowingMode != WINDOWING_MODE_PINNED && state.peekSource(ITYPE_IME) != null) {
+                newState.addSource(state.peekSource(ITYPE_IME));
             }
+
+            state = newState;
+            stateCopied = true;
         }
 
         return state;

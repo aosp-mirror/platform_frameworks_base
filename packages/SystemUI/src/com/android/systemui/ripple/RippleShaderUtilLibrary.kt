@@ -17,6 +17,7 @@ package com.android.systemui.ripple
 
 /** A common utility functions that are used for computing [RippleShader]. */
 class RippleShaderUtilLibrary {
+    //language=AGSL
     companion object {
         const val SHADER_LIB = """
             float triangleNoise(vec2 n) {

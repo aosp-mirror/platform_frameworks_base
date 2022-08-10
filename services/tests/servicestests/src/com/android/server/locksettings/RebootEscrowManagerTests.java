@@ -125,7 +125,6 @@ public class RebootEscrowManagerTests {
 
     static class MockInjector extends RebootEscrowManager.Injector {
         private final IRebootEscrow mRebootEscrow;
-        private final ResumeOnRebootServiceConnection mServiceConnection;
         private final RebootEscrowProviderInterface mDefaultRebootEscrowProvider;
         private final UserManager mUserManager;
         private final MockableRebootEscrowInjected mInjected;
@@ -140,7 +139,6 @@ public class RebootEscrowManagerTests {
                 MockableRebootEscrowInjected injected) {
             super(context, storage);
             mRebootEscrow = rebootEscrow;
-            mServiceConnection = null;
             mServerBased = false;
             RebootEscrowProviderHalImpl.Injector halInjector =
                     new RebootEscrowProviderHalImpl.Injector() {
@@ -161,7 +159,6 @@ public class RebootEscrowManagerTests {
                 LockSettingsStorageTestable storage,
                 MockableRebootEscrowInjected injected) {
             super(context, storage);
-            mServiceConnection = serviceConnection;
             mRebootEscrow = null;
             mServerBased = true;
             RebootEscrowProviderServerBasedImpl.Injector injector =

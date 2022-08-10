@@ -412,13 +412,7 @@ public class PipTouchHandler {
                 mPipBoundsState.getExpandedBounds(), insetBounds, expandedMovementBounds,
                 bottomOffset);
 
-        if (mPipResizeGestureHandler.isUsingPinchToZoom()) {
-            updatePinchResizeSizeConstraints(insetBounds, normalBounds, aspectRatio);
-        } else {
-            mPipResizeGestureHandler.updateMinSize(normalBounds.width(), normalBounds.height());
-            mPipResizeGestureHandler.updateMaxSize(mPipBoundsState.getExpandedBounds().width(),
-                    mPipBoundsState.getExpandedBounds().height());
-        }
+        updatePipSizeConstraints(insetBounds, normalBounds, aspectRatio);
 
         // The extra offset does not really affect the movement bounds, but are applied based on the
         // current state (ime showing, or shelf offset) when we need to actually shift
@@ -484,6 +478,27 @@ public class PipTouchHandler {
                     true /* immediate */);
             mSavedSnapFraction = -1f;
             mDeferResizeToNormalBoundsUntilRotation = -1;
+        }
+    }
+
+    /**
+     * Update the values for min/max allowed size of picture in picture window based on the aspect
+     * ratio.
+     * @param aspectRatio aspect ratio to use for the calculation of min/max size
+     */
+    public void updateMinMaxSize(float aspectRatio) {
+        updatePipSizeConstraints(mInsetBounds, mPipBoundsState.getNormalBounds(),
+                aspectRatio);
+    }
+
+    private void updatePipSizeConstraints(Rect insetBounds, Rect normalBounds,
+            float aspectRatio) {
+        if (mPipResizeGestureHandler.isUsingPinchToZoom()) {
+            updatePinchResizeSizeConstraints(insetBounds, normalBounds, aspectRatio);
+        } else {
+            mPipResizeGestureHandler.updateMinSize(normalBounds.width(), normalBounds.height());
+            mPipResizeGestureHandler.updateMaxSize(mPipBoundsState.getExpandedBounds().width(),
+                    mPipBoundsState.getExpandedBounds().height());
         }
     }
 

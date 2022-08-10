@@ -22,16 +22,10 @@ import com.android.systemui.log.dagger.LogModule
 import com.android.systemui.util.collection.RingBuffer
 import com.google.errorprone.annotations.CompileTimeConstant
 import java.io.PrintWriter
-import java.text.SimpleDateFormat
-import java.util.Arrays.stream
-import java.util.Locale
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import kotlin.concurrent.thread
 import kotlin.math.max
-
-const val UNBOUNDED_STACK_TRACE = -1
-const val NESTED_TRACE_DEPTH = 10
 
 /**
  * A simple ring buffer of recyclable log messages
@@ -74,18 +68,12 @@ const val NESTED_TRACE_DEPTH = 10
  * @param maxSize The maximum number of messages to keep in memory at any one time. Buffers start
  * out empty and grow up to [maxSize] as new messages are logged. Once the buffer's size reaches
  * the maximum, it behaves like a ring buffer.
- * @param rootStackTraceDepth The number of stack trace elements to be logged for an exception when
- * the logBuffer is dumped. Defaulted to -1 [UNBOUNDED_STACK_TRACE] to print the entire stack trace.
- * @param nestedStackTraceDepth The number of stack trace elements to be logged for any nested
- * exceptions present in [Throwable.cause] or [Throwable.suppressedExceptions].
  */
 class LogBuffer @JvmOverloads constructor(
     private val name: String,
     private val maxSize: Int,
     private val logcatEchoTracker: LogcatEchoTracker,
     private val systrace: Boolean = true,
-    private val rootStackTraceDepth: Int = UNBOUNDED_STACK_TRACE,
-    private val nestedStackTraceDepth: Int = NESTED_TRACE_DEPTH,
 ) {
     private val buffer = RingBuffer(maxSize) { LogMessageImpl.create() }
 
@@ -236,7 +224,7 @@ class LogBuffer @JvmOverloads constructor(
         val iterationStart = if (tailLength <= 0) { 0 } else { max(0, buffer.size - tailLength) }
 
         for (i in iterationStart until buffer.size) {
-            dumpMessage(buffer[i], pw)
+            buffer[i].dump(pw)
         }
     }
 
@@ -262,76 +250,6 @@ class LogBuffer @JvmOverloads constructor(
             log(TAG, LogLevel.DEBUG, { str1 = name }, { "$str1 unfrozen" })
             frozen = false
         }
-    }
-
-    private fun dumpMessage(
-        message: LogMessage,
-        pw: PrintWriter
-    ) {
-        val formattedTimestamp = DATE_FORMAT.format(message.timestamp)
-        val shortLevel = message.level.shortString
-        val messageToPrint = message.messagePrinter(message)
-        val tag = message.tag
-        printLikeLogcat(pw, formattedTimestamp, shortLevel, tag, messageToPrint)
-        message.exception?.let { ex ->
-            printException(
-                pw,
-                formattedTimestamp,
-                shortLevel,
-                ex,
-                tag,
-                stackTraceDepth = rootStackTraceDepth)
-        }
-    }
-
-    private fun printException(
-            pw: PrintWriter,
-            timestamp: String,
-            level: String,
-            exception: Throwable,
-            tag: String,
-            exceptionMessagePrefix: String = "",
-            stackTraceDepth: Int = UNBOUNDED_STACK_TRACE
-    ) {
-        val message = "$exceptionMessagePrefix$exception"
-        printLikeLogcat(pw, timestamp, level, tag, message)
-        var stacktraceStream = stream(exception.stackTrace)
-        if (stackTraceDepth != UNBOUNDED_STACK_TRACE) {
-            stacktraceStream = stacktraceStream.limit(stackTraceDepth.toLong())
-        }
-        stacktraceStream.forEach { line ->
-            printLikeLogcat(pw, timestamp, level, tag, "\tat $line")
-        }
-        exception.cause?.let { cause ->
-            printException(pw, timestamp, level, cause, tag, "Caused by: ", nestedStackTraceDepth)
-        }
-        exception.suppressedExceptions.forEach { suppressed ->
-            printException(
-                pw,
-                timestamp,
-                level,
-                suppressed,
-                tag,
-                "Suppressed: ",
-                nestedStackTraceDepth
-            )
-        }
-    }
-
-    private fun printLikeLogcat(
-        pw: PrintWriter,
-        formattedTimestamp: String,
-        shortLogLevel: String,
-        tag: String,
-        message: String
-    ) {
-        pw.print(formattedTimestamp)
-        pw.print(" ")
-        pw.print(shortLogLevel)
-        pw.print(" ")
-        pw.print(tag)
-        pw.print(": ")
-        pw.println(message)
     }
 
     private fun echo(message: LogMessage, toLogcat: Boolean, toSystrace: Boolean) {
@@ -370,5 +288,4 @@ class LogBuffer @JvmOverloads constructor(
 typealias MessageInitializer = LogMessage.() -> Unit
 
 private const val TAG = "LogBuffer"
-private val DATE_FORMAT = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US)
 private val FROZEN_MESSAGE = LogMessageImpl.create()

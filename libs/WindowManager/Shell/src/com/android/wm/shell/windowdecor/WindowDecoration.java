@@ -233,7 +233,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mTmpColor[2] = (float) Color.blue(backgroundColorInt) / 255.f;
         startT.setWindowCrop(mTaskBackgroundSurface, taskBounds.width(), taskBounds.height())
                 .setShadowRadius(mTaskBackgroundSurface, shadowRadius)
-                .setColor(mTaskBackgroundSurface, mTmpColor);
+                .setColor(mTaskBackgroundSurface, mTmpColor)
+                .setLayer(mTaskBackgroundSurface, -1)
+                .show(mTaskBackgroundSurface);
 
         // Caption view
         mCaptionWindowManager.setConfiguration(taskConfig);

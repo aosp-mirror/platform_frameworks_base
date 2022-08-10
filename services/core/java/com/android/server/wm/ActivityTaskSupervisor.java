@@ -1875,6 +1875,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // End power mode launch before going sleep
         mService.endLaunchPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_ALL);
 
+        // Rank task layers to make sure the {@link Task#mLayerRank} is updated.
+        mRootWindowContainer.rankTaskLayers();
+
         removeSleepTimeouts();
 
         if (mGoingToSleepWakeLock.isHeld()) {

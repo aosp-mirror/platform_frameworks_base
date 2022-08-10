@@ -24,6 +24,7 @@ import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.app.GameManagerInternal;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
@@ -48,6 +49,7 @@ import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -64,6 +66,7 @@ public final class CompatModePackages {
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
     private final ActivityTaskManagerService mService;
+    private GameManagerInternal mGameManager;
     private final AtomicFile mFile;
 
     // Compatibility state: no longer ask user to select the mode.
@@ -375,6 +378,18 @@ public final class CompatModePackages {
 
     float getCompatScale(String packageName, int uid) {
         final UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+        if (mGameManager == null) {
+            mGameManager = LocalServices.getService(GameManagerInternal.class);
+        }
+        if (mGameManager != null) {
+            final int userId = userHandle.getIdentifier();
+            final float scalingFactor = mGameManager.getResolutionScalingFactor(packageName,
+                    userId);
+            if (scalingFactor > 0) {
+                return 1f / scalingFactor;
+            }
+        }
+
         if (CompatChanges.isChangeEnabled(DOWNSCALED, packageName, userHandle)) {
             if (CompatChanges.isChangeEnabled(DOWNSCALE_90, packageName, userHandle)) {
                 return 1f / 0.9f;

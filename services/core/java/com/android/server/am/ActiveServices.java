@@ -3595,11 +3595,12 @@ public final class ActiveServices {
 
     /**
      * Bump the given service record into executing state.
-     * @param oomAdjReason The caller requests it to perform the oomAdjUpdate if it's not null.
+     * @param oomAdjReason The caller requests it to perform the oomAdjUpdate not {@link
+     *         OomAdjuster#OOM_ADJ_REASON_NONE}.
      * @return {@code true} if it performed oomAdjUpdate.
      */
-    private boolean bumpServiceExecutingLocked(ServiceRecord r, boolean fg, String why,
-            @Nullable String oomAdjReason) {
+    private boolean bumpServiceExecutingLocked(
+            ServiceRecord r, boolean fg, String why, @OomAdjuster.OomAdjReason int oomAdjReason) {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, ">>> EXECUTING "
                 + why + " of " + r + " in app " + r.app);
         else if (DEBUG_SERVICE_EXECUTING) Slog.v(TAG_SERVICE_EXECUTING, ">>> EXECUTING "
@@ -3651,7 +3652,7 @@ public final class ActiveServices {
             }
         }
         boolean oomAdjusted = false;
-        if (oomAdjReason != null && r.app != null
+        if (oomAdjReason != OomAdjuster.OOM_ADJ_REASON_NONE && r.app != null
                 && r.app.mState.getCurProcState() > ActivityManager.PROCESS_STATE_SERVICE) {
             // Force an immediate oomAdjUpdate, so the client app could be in the correct process
             // state before doing any service related transactions
@@ -4385,7 +4386,7 @@ public final class ActiveServices {
 
         final ProcessServiceRecord psr = app.mServices;
         final boolean newService = psr.startService(r);
-        bumpServiceExecutingLocked(r, execInFg, "create", null /* oomAdjReason */);
+        bumpServiceExecutingLocked(r, execInFg, "create", OomAdjuster.OOM_ADJ_REASON_NONE);
         mAm.updateLruProcessLocked(app, false, null);
         updateServiceForegroundLocked(psr, /* oomAdj= */ false);
         // Force an immediate oomAdjUpdate, so the client app could be in the correct process state
@@ -4511,7 +4512,7 @@ public final class ActiveServices {
             mAm.grantImplicitAccess(r.userId, si.intent, si.callingId,
                     UserHandle.getAppId(r.appInfo.uid)
             );
-            bumpServiceExecutingLocked(r, execInFg, "start", null /* oomAdjReason */);
+            bumpServiceExecutingLocked(r, execInFg, "start", OomAdjuster.OOM_ADJ_REASON_NONE);
             if (r.fgRequired && !r.fgWaiting) {
                 if (!r.isForeground) {
                     if (DEBUG_BACKGROUND_CHECK) {
@@ -4780,7 +4781,7 @@ public final class ActiveServices {
                 updateServiceForegroundLocked(r.app.mServices, false);
                 try {
                     oomAdjusted |= bumpServiceExecutingLocked(r, false, "destroy",
-                            oomAdjusted ? null : OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
+                            oomAdjusted ? 0 : OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
                     mDestroyingServices.add(r);
                     r.destroying = true;
                     r.app.getThread().scheduleStopService(r);

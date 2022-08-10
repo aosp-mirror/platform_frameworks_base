@@ -503,6 +503,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                             updateMovementBounds(null /* toBounds */, false /* fromRotation */,
                                     false /* fromImeAdjustment */, false /* fromShelfAdjustment */,
                                     null /* windowContainerTransaction */);
+                        } else {
+                            // when we enter pip for the first time, the destination bounds and pip
+                            // bounds will already match, since they are calculated prior to
+                            // starting the animation, so we only need to update the min/max size
+                            // that is used for e.g. double tap to maximized state
+                            mTouchHandler.updateMinMaxSize(ratio);
                         }
                     }
 

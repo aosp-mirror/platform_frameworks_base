@@ -44,7 +44,6 @@ import java.util.Set;
 public class BiometricDeferredQueue {
     private static final String TAG = "BiometricDeferredQueue";
 
-    @NonNull private final Context mContext;
     @NonNull private final SyntheticPasswordManager mSpManager;
     @NonNull private final Handler mHandler;
     @Nullable private FingerprintManager mFingerprintManager;
@@ -131,9 +130,7 @@ public class BiometricDeferredQueue {
         mFaceResetLockoutTask = null;
     };
 
-    BiometricDeferredQueue(@NonNull Context context, @NonNull SyntheticPasswordManager spManager,
-            @NonNull Handler handler) {
-        mContext = context;
+    BiometricDeferredQueue(@NonNull SyntheticPasswordManager spManager, @NonNull Handler handler) {
         mSpManager = spManager;
         mHandler = handler;
         mPendingResetLockoutsForFingerprint = new ArrayList<>();

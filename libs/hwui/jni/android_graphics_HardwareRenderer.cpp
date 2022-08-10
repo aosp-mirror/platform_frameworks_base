@@ -88,6 +88,11 @@ struct {
     jmethodID onFrameComplete;
 } gFrameCompleteCallback;
 
+struct {
+    jmethodID onCopyFinished;
+    jmethodID getDestinationBitmap;
+} gCopyRequest;
+
 static JNIEnv* getenv(JavaVM* vm) {
     JNIEnv* env;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
@@ -672,15 +677,41 @@ static void android_view_ThreadedRenderer_setFrameCompleteCallback(JNIEnv* env,
     }
 }
 
-static jint android_view_ThreadedRenderer_copySurfaceInto(JNIEnv* env,
-        jobject clazz, jobject jsurface, jint left, jint top,
-        jint right, jint bottom, jlong bitmapPtr) {
-    SkBitmap bitmap;
-    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
+class CopyRequestAdapter : public CopyRequest {
+public:
+    CopyRequestAdapter(JavaVM* vm, jobject jCopyRequest, Rect srcRect)
+            : CopyRequest(srcRect), mRefHolder(vm, jCopyRequest) {}
+
+    virtual SkBitmap getDestinationBitmap(int srcWidth, int srcHeight) override {
+        JNIEnv* env = getenv(mRefHolder.vm());
+        jlong bitmapPtr = env->CallLongMethod(
+                mRefHolder.object(), gCopyRequest.getDestinationBitmap, srcWidth, srcHeight);
+        SkBitmap bitmap;
+        bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
+        return bitmap;
+    }
+
+    virtual void onCopyFinished(CopyResult result) override {
+        JNIEnv* env = getenv(mRefHolder.vm());
+        env->CallVoidMethod(mRefHolder.object(), gCopyRequest.onCopyFinished,
+                            static_cast<jint>(result));
+    }
+
+private:
+    JGlobalRefHolder mRefHolder;
+};
+
+static void android_view_ThreadedRenderer_copySurfaceInto(JNIEnv* env, jobject clazz,
+                                                          jobject jsurface, jint left, jint top,
+                                                          jint right, jint bottom,
+                                                          jobject jCopyRequest) {
+    JavaVM* vm = nullptr;
+    LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
+    auto copyRequest = std::make_shared<CopyRequestAdapter>(vm, env->NewGlobalRef(jCopyRequest),
+                                                            Rect(left, top, right, bottom));
     ANativeWindow* window = fromSurface(env, jsurface);
-    jint result = RenderProxy::copySurfaceInto(window, left, top, right, bottom, &bitmap);
+    RenderProxy::copySurfaceInto(window, std::move(copyRequest));
     ANativeWindow_release(window);
-    return result;
 }
 
 class ContextFactory : public IContextFactory {
@@ -969,7 +1000,8 @@ static const JNINativeMethod gMethods[] = {
          (void*)android_view_ThreadedRenderer_setFrameCompleteCallback},
         {"nAddObserver", "(JJ)V", (void*)android_view_ThreadedRenderer_addObserver},
         {"nRemoveObserver", "(JJ)V", (void*)android_view_ThreadedRenderer_removeObserver},
-        {"nCopySurfaceInto", "(Landroid/view/Surface;IIIIJ)I",
+        {"nCopySurfaceInto",
+         "(Landroid/view/Surface;IIIILandroid/graphics/HardwareRenderer$CopyRequest;)V",
          (void*)android_view_ThreadedRenderer_copySurfaceInto},
         {"nCreateHardwareBitmap", "(JII)Landroid/graphics/Bitmap;",
          (void*)android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode},
@@ -1041,6 +1073,11 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
             "android/graphics/HardwareRenderer$FrameCompleteCallback");
     gFrameCompleteCallback.onFrameComplete =
             GetMethodIDOrDie(env, frameCompleteClass, "onFrameComplete", "()V");
+
+    jclass copyRequest = FindClassOrDie(env, "android/graphics/HardwareRenderer$CopyRequest");
+    gCopyRequest.onCopyFinished = GetMethodIDOrDie(env, copyRequest, "onCopyFinished", "(I)V");
+    gCopyRequest.getDestinationBitmap =
+            GetMethodIDOrDie(env, copyRequest, "getDestinationBitmap", "(II)J");
 
     void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
     fromSurface = (ANW_fromSurface)dlsym(handle_, "ANativeWindow_fromSurface");

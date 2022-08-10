@@ -72,6 +72,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
@@ -169,7 +170,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
     public void testTaskLayerRank() {
         final Task rootTask = new TaskBuilder(mSupervisor).build();
         final Task task1 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
-        new ActivityBuilder(mAtm).setTask(task1).build().mVisibleRequested = true;
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task1).build();
+        activity1.mVisibleRequested = true;
         mWm.mRoot.rankTaskLayers();
 
         assertEquals(1, task1.mLayerRank);
@@ -177,7 +179,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertEquals(Task.LAYER_RANK_INVISIBLE, rootTask.mLayerRank);
 
         final Task task2 = new TaskBuilder(mSupervisor).build();
-        new ActivityBuilder(mAtm).setTask(task2).build().mVisibleRequested = true;
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(task2).build();
+        activity2.mVisibleRequested = true;
         mWm.mRoot.rankTaskLayers();
 
         // Note that ensureActivitiesVisible is disabled in SystemServicesTestRule, so both the
@@ -192,6 +195,17 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         assertEquals(1, task1.mLayerRank);
         assertEquals(2, task2.mLayerRank);
+
+        // The rank should be updated to invisible when device went to sleep.
+        activity1.mVisibleRequested = false;
+        activity2.mVisibleRequested = false;
+        doReturn(true).when(mAtm).isSleepingOrShuttingDownLocked();
+        doReturn(true).when(mRootWindowContainer).putTasksToSleep(anyBoolean(), anyBoolean());
+        mSupervisor.mGoingToSleepWakeLock = mock(PowerManager.WakeLock.class);
+        doReturn(false).when(mSupervisor.mGoingToSleepWakeLock).isHeld();
+        mAtm.mTaskSupervisor.checkReadyForSleepLocked(false /* allowDelay */);
+        assertEquals(Task.LAYER_RANK_INVISIBLE, task1.mLayerRank);
+        assertEquals(Task.LAYER_RANK_INVISIBLE, task2.mLayerRank);
     }
 
     @Test

@@ -16,8 +16,9 @@
 
 package com.android.server.locksettings;
 
+import static org.junit.Assert.assertEquals;
+
 import android.platform.test.annotations.Presubmit;
-import android.test.AndroidTestCase;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -37,7 +38,7 @@ import java.util.Set;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class PasswordSlotManagerTests extends AndroidTestCase {
+public class PasswordSlotManagerTests {
 
     PasswordSlotManagerTestable mManager;
 

@@ -2838,6 +2838,50 @@ public class UserManager {
     }
 
     /**
+     * @hide
+     */
+    public static boolean isUsersOnSecondaryDisplaysEnabled() {
+        return SystemProperties.getBoolean("fw.users_on_secondary_displays",
+                Resources.getSystem()
+                        .getBoolean(R.bool.config_multiuserUsersOnSecondaryDisplays));
+    }
+
+    /**
+     * Returns whether the device allows users to run (and launch activities) on secondary displays.
+     *
+     * @return {@code false} for most devices, except automotive vehicles with passenger displays.
+     *
+     * @hide
+     */
+    public boolean isUsersOnSecondaryDisplaysSupported() {
+        return isUsersOnSecondaryDisplaysEnabled();
+    }
+
+    /**
+     * Checks if the user is visible at the moment.
+     *
+     * <p>Roughly speaking, a "visible user" is a user that can present UI on at least one display.
+     * It includes:
+     *
+     * <ol>
+     *   <li>The current foreground user in the main display.
+     *   <li>Current background users in secondary displays (for example, passenger users on
+     *   automotive, using the display associated with their seats).
+     *   <li>Profile users (in the running / started state) of other visible users.
+     * </ol>
+     *
+     * @return whether the user is visible at the moment, as defined above.
+     */
+    @UserHandleAware
+    public boolean isUserVisible() {
+        try {
+            return mService.isUserVisible(mUserId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return whether the context user is running in an "unlocked" state.
      * <p>
      * On devices with direct boot, a user is unlocked only after they've

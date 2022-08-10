@@ -16,43 +16,7 @@
 
 package com.android.settingslib.spa.codelab
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.android.settingslib.spa.framework.localNavController
-import com.android.settingslib.spa.theme.SettingsTheme
+import com.android.settingslib.spa.codelab.page.codelabPageRepository
+import com.android.settingslib.spa.framework.SpaActivity
 
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            MainContent()
-        }
-    }
-}
-
-object Destinations {
-    const val Home = "Home"
-    const val Preference = "Preference"
-}
-
-@Composable
-private fun MainContent() {
-    SettingsTheme {
-        val navController = rememberNavController()
-        CompositionLocalProvider(navController.localNavController()) {
-            NavHost(
-                navController = navController,
-                startDestination = Destinations.Home,
-            ) {
-                composable(Destinations.Home) { HomeScreen() }
-                composable(Destinations.Preference) { PreferenceCodelab() }
-            }
-        }
-    }
-}
+class MainActivity : SpaActivity(codelabPageRepository)
