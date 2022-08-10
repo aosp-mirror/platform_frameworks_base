@@ -44,6 +44,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 import com.android.wm.shell.util.SplitBounds;
@@ -62,6 +63,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private static final String TAG = RecentTasksController.class.getSimpleName();
 
     private final Context mContext;
+    private final ShellCommandHandler mShellCommandHandler;
     private final ShellExecutor mMainExecutor;
     private final TaskStackListenerImpl mTaskStackListener;
     private final RecentTasks mImpl = new RecentTasksImpl();
@@ -87,20 +89,24 @@ public class RecentTasksController implements TaskStackListenerCallback,
     public static RecentTasksController create(
             Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         if (!context.getResources().getBoolean(com.android.internal.R.bool.config_hasRecents)) {
             return null;
         }
-        return new RecentTasksController(context, shellInit, taskStackListener, mainExecutor);
+        return new RecentTasksController(context, shellInit, shellCommandHandler, taskStackListener,
+                mainExecutor);
     }
 
     RecentTasksController(Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
             ShellExecutor mainExecutor) {
         mContext = context;
+        mShellCommandHandler = shellCommandHandler;
         mIsDesktopMode = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
         mTaskStackListener = taskStackListener;
         mMainExecutor = mainExecutor;
@@ -112,6 +118,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     }
 
     private void onInit() {
+        mShellCommandHandler.addDumpCallback(this::dump, this);
         mTaskStackListener.addListener(this);
     }
 
