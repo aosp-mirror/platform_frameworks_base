@@ -28,10 +28,6 @@ namespace android {
 extern AHardwareBuffer* android_hardware_HardwareBuffer_getNativeHardwareBuffer(
         JNIEnv* env, jobject hardwareBufferObj);
 
-/* Gets the underlying GraphicBuffer for a HardwareBuffer. */
-extern GraphicBuffer* android_hardware_HardwareBuffer_getNativeGraphicBuffer(
-        JNIEnv* env, jobject hardwareBufferObj);
-
 /* Returns a HardwareBuffer wrapper for the underlying AHardwareBuffer. */
 extern jobject android_hardware_HardwareBuffer_createFromAHardwareBuffer(
         JNIEnv* env, AHardwareBuffer* hardwareBuffer);
