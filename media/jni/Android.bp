@@ -160,7 +160,7 @@ cc_library_shared {
 
 cc_library_shared {
     name: "libmedia_tv_tuner",
-
+    min_sdk_version: "",
     srcs: [
         "android_media_tv_Tuner.cpp",
         "tuner/DemuxClient.cpp",

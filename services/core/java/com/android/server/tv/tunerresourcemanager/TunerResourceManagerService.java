@@ -39,6 +39,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
@@ -140,6 +141,15 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         mActivityManager =
                 (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
         mPriorityCongfig.parse();
+
+        // Call SystemProperties.set() in mock app will throw exception because of permission.
+        if (!isForTesting) {
+            final boolean lazyHal = SystemProperties.getBoolean("ro.tuner.lazyhal", false);
+            if (!lazyHal) {
+                // The HAL is not a lazy HAL, enable the tuner server.
+                SystemProperties.set("tuner.server.enable", "true");
+            }
+        }
 
         if (mMediaResourceManager == null) {
             IBinder mediaResourceManagerBinder = getBinderService("media.resource_manager");
