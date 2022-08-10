@@ -1156,7 +1156,7 @@
     <string name="no" msgid="5122037903299899715">"रद्द करें"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"ध्यान दें"</string>
     <string name="loading" msgid="3138021523725055037">"लोड हो रहे हैं..."</string>
-    <string name="capital_on" msgid="2770685323900821829">"ऑन"</string>
+    <string name="capital_on" msgid="2770685323900821829">"चालू"</string>
     <string name="capital_off" msgid="7443704171014626777">"बंद"</string>
     <string name="checked" msgid="9179896827054513119">"चालू है"</string>
     <string name="not_checked" msgid="7972320087569023342">"बंद है"</string>
