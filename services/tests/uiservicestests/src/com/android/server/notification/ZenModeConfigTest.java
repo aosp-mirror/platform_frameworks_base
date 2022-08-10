@@ -158,7 +158,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
         ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
         rule.configurationActivity = new ComponentName("a", "a");
-        rule.component = new ComponentName("a", "b");
+        rule.component = new ComponentName("b", "b");
         rule.conditionId = new Uri.Builder().scheme("hello").build();
         rule.condition = new Condition(rule.conditionId, "", Condition.STATE_TRUE);
         rule.enabled = true;
@@ -168,6 +168,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.modified = true;
         rule.name = "name";
         rule.snoozing = true;
+        rule.pkg = "b";
 
         XmlSerializer out = new FastXmlSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -183,8 +184,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
         ZenModeConfig.ZenRule fromXml = ZenModeConfig.readRuleXml(parser);
-        // read from backing component
-        assertEquals("a", fromXml.pkg);
+        assertEquals("b", fromXml.pkg);
         // always resets on reboot
         assertFalse(fromXml.snoozing);
         //should all match original
@@ -198,6 +198,55 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(rule.conditionId, fromXml.conditionId);
         assertEquals(rule.name, fromXml.name);
         assertEquals(rule.zenMode, fromXml.zenMode);
+    }
+
+    @Test
+    public void testRuleXml_pkg_component() throws Exception {
+        String tag = "tag";
+
+        ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
+        rule.configurationActivity = new ComponentName("a", "a");
+        rule.component = new ComponentName("b", "b");
+
+        XmlSerializer out = new FastXmlSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        out.setOutput(new BufferedOutputStream(baos), "utf-8");
+        out.startDocument(null, true);
+        out.startTag(null, tag);
+        ZenModeConfig.writeRuleXml(rule, out);
+        out.endTag(null, tag);
+        out.endDocument();
+
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        parser.nextTag();
+        ZenModeConfig.ZenRule fromXml = ZenModeConfig.readRuleXml(parser);
+        assertEquals("b", fromXml.pkg);
+    }
+
+    @Test
+    public void testRuleXml_pkg_configActivity() throws Exception {
+        String tag = "tag";
+
+        ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
+        rule.configurationActivity = new ComponentName("a", "a");
+
+        XmlSerializer out = new FastXmlSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        out.setOutput(new BufferedOutputStream(baos), "utf-8");
+        out.startDocument(null, true);
+        out.startTag(null, tag);
+        ZenModeConfig.writeRuleXml(rule, out);
+        out.endTag(null, tag);
+        out.endDocument();
+
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        parser.nextTag();
+        ZenModeConfig.ZenRule fromXml = ZenModeConfig.readRuleXml(parser);
+        assertNull(fromXml.pkg);
     }
 
     private ZenModeConfig getMutedNotificationsConfig() {
