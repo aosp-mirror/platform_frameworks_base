@@ -43,6 +43,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
+import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -151,6 +152,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_ENABLED = "enabled";
     private static final String RULE_ATT_SNOOZING = "snoozing";
     private static final String RULE_ATT_NAME = "name";
+    private static final String RULE_ATT_PKG = "pkg";
     private static final String RULE_ATT_COMPONENT = "component";
     private static final String RULE_ATT_CONFIG_ACTIVITY = "configActivity";
     private static final String RULE_ATT_ZEN = "zen";
@@ -644,11 +646,11 @@ public class ZenModeConfig implements Parcelable {
         rt.conditionId = safeUri(parser, RULE_ATT_CONDITION_ID);
         rt.component = safeComponentName(parser, RULE_ATT_COMPONENT);
         rt.configurationActivity = safeComponentName(parser, RULE_ATT_CONFIG_ACTIVITY);
-        rt.pkg = (rt.component != null)
-                ? rt.component.getPackageName()
-                : (rt.configurationActivity != null)
-                        ? rt.configurationActivity.getPackageName()
-                        : null;
+        rt.pkg = XmlUtils.readStringAttribute(parser, RULE_ATT_PKG);
+        if (rt.pkg == null) {
+            // backfill from component, if present. configActivity is not safe to backfill from
+            rt.pkg = rt.component != null ? rt.component.getPackageName() : null;
+        }
         rt.creationTime = safeLong(parser, RULE_ATT_CREATION_TIME, 0);
         rt.enabler = parser.getAttributeValue(null, RULE_ATT_ENABLER);
         rt.condition = readConditionXml(parser);
@@ -670,6 +672,9 @@ public class ZenModeConfig implements Parcelable {
             out.attribute(null, RULE_ATT_NAME, rule.name);
         }
         out.attribute(null, RULE_ATT_ZEN, Integer.toString(rule.zenMode));
+        if (rule.pkg != null) {
+            out.attribute(null, RULE_ATT_PKG, rule.pkg);
+        }
         if (rule.component != null) {
             out.attribute(null, RULE_ATT_COMPONENT, rule.component.flattenToString());
         }
