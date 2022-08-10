@@ -75,24 +75,11 @@ public interface WMComponent {
      * Initializes all the WMShell components before starting any of the SystemUI components.
      */
     default void init() {
-        // TODO(238217847): To be removed once the dependencies are inverted and ShellController can
-        // inject these classes directly, otherwise, it's currently needed to ensure that these
-        // classes are created and set on the controller before onInit() is called
-        getShellInit();
-        getShellCommandHandler();
         getShell().onInit();
     }
 
     @WMSingleton
     ShellInterface getShell();
-
-    // TODO(238217847): To be removed once ShellController can inject ShellInit directly
-    @WMSingleton
-    ShellInit getShellInit();
-
-    // TODO(238217847): To be removed once ShellController can inject ShellCommandHandler directly
-    @WMSingleton
-    ShellCommandHandler getShellCommandHandler();
 
     @WMSingleton
     Optional<OneHanded> getOneHanded();
