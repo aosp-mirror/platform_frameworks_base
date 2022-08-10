@@ -266,6 +266,8 @@ public final class UserManagerTest {
         }
 
         assertThat(createUser("User beyond", userType, 0)).isNull();
+
+        assertThat(mUserManager.canAddMoreUsers(mUserManager.USER_TYPE_FULL_GUEST)).isTrue();
     }
 
     @MediumTest
@@ -467,8 +469,10 @@ public final class UserManagerTest {
     @MediumTest
     @Test
     public void testThereCanBeOnlyOneGuest() throws Exception {
+        assertThat(mUserManager.canAddMoreUsers(mUserManager.USER_TYPE_FULL_GUEST)).isTrue();
         UserInfo userInfo1 = createUser("Guest 1", UserInfo.FLAG_GUEST);
         assertThat(userInfo1).isNotNull();
+        assertThat(mUserManager.canAddMoreUsers(mUserManager.USER_TYPE_FULL_GUEST)).isFalse();
         UserInfo userInfo2 = createUser("Guest 2", UserInfo.FLAG_GUEST);
         assertThat(userInfo2).isNull();
     }

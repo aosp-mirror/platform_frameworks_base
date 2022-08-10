@@ -4190,7 +4190,11 @@ public class UserManager {
     })
     public boolean canAddMoreUsers(@NonNull String userType) {
         try {
-            return canAddMoreUsers() && mService.canAddMoreUsersOfType(userType);
+            if (userType.equals(USER_TYPE_FULL_GUEST)) {
+                return mService.canAddMoreUsersOfType(userType);
+            } else {
+                return canAddMoreUsers() && mService.canAddMoreUsersOfType(userType);
+            }
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
