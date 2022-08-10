@@ -14,9 +14,29 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.codelab
+#pragma once
 
-import com.android.settingslib.spa.codelab.page.codelabPageRepository
-import com.android.settingslib.spa.framework.SpaActivity
+#include "Rect.h"
+#include "hwui/Bitmap.h"
 
-class MainActivity : SpaActivity(codelabPageRepository)
+namespace android::uirenderer {
+
+// Keep in sync with PixelCopy.java codes
+enum class CopyResult {
+    Success = 0,
+    UnknownError = 1,
+    Timeout = 2,
+    SourceEmpty = 3,
+    SourceInvalid = 4,
+    DestinationInvalid = 5,
+};
+
+struct CopyRequest {
+    Rect srcRect;
+    CopyRequest(Rect srcRect) : srcRect(srcRect) {}
+    virtual ~CopyRequest() {}
+    virtual SkBitmap getDestinationBitmap(int srcWidth, int srcHeight) = 0;
+    virtual void onCopyFinished(CopyResult result) = 0;
+};
+
+}  // namespace android::uirenderer

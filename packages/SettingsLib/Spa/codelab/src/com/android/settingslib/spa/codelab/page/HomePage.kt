@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.codelab
+package com.android.settingslib.spa.codelab.page
 
+import android.os.Bundle
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -24,14 +25,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.android.settingslib.spa.framework.onClickNavigateTo
+import com.android.settingslib.spa.api.SettingsPageProvider
+import com.android.settingslib.spa.codelab.R
 import com.android.settingslib.spa.theme.SettingsDimension
 import com.android.settingslib.spa.theme.SettingsTheme
-import com.android.settingslib.spa.widget.preference.Preference
-import com.android.settingslib.spa.widget.preference.PreferenceModel
+
+object HomePageProvider : SettingsPageProvider {
+    override val name = Destinations.Home
+
+    @Composable
+    override fun Page(arguments: Bundle?) {
+        HomePage()
+    }
+}
 
 @Composable
-fun HomeScreen() {
+private fun HomePage() {
     Column {
         Text(
             text = stringResource(R.string.app_name),
@@ -40,10 +49,9 @@ fun HomeScreen() {
             style = MaterialTheme.typography.headlineMedium,
         )
 
-        Preference(object : PreferenceModel {
-            override val title = "Preference"
-            override val onClick: (() -> Unit) = onClickNavigateTo(Destinations.Preference)
-        })
+        PreferencePageProvider.EntryItem()
+
+        ArgumentPageProvider.EntryItem(stringParam = "foo", intParam = 0)
     }
 }
 
@@ -51,6 +59,6 @@ fun HomeScreen() {
 @Composable
 private fun HomeScreenPreview() {
     SettingsTheme {
-        HomeScreen()
+        HomePage()
     }
 }

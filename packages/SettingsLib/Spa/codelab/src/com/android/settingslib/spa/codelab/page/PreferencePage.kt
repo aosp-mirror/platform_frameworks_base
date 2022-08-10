@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.codelab
+package com.android.settingslib.spa.codelab.page
 
+import android.os.Bundle
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -29,14 +30,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.settingslib.spa.api.SettingsPageProvider
+import com.android.settingslib.spa.framework.navigator
 import com.android.settingslib.spa.framework.toState
 import com.android.settingslib.spa.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import kotlinx.coroutines.delay
 
+object PreferencePageProvider : SettingsPageProvider {
+    override val name = Destinations.Preference
+
+    @Composable
+    override fun Page(arguments: Bundle?) {
+        PreferencePage()
+    }
+
+    @Composable
+    fun EntryItem() {
+        Preference(object : PreferenceModel {
+            override val title = "Sample Preference"
+            override val onClick = navigator(Destinations.Preference)
+        })
+    }
+}
+
 @Composable
-fun PreferenceCodelab() {
+private fun PreferencePage() {
     Column(Modifier.verticalScroll(rememberScrollState())) {
         Preference(object : PreferenceModel {
             override val title = "Preference"
@@ -82,8 +102,8 @@ fun PreferenceCodelab() {
 
 @Preview(showBackground = true)
 @Composable
-private fun PreferenceCodelabPreview() {
+private fun PreferencePagePreview() {
     SettingsTheme {
-        PreferenceCodelab()
+        PreferencePage()
     }
 }

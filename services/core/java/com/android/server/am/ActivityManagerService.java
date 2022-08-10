@@ -15609,7 +15609,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * {@link #enqueueOomAdjTargetLocked}.
      */
     @GuardedBy("this")
-    void updateOomAdjPendingTargetsLocked(String oomAdjReason) {
+    void updateOomAdjPendingTargetsLocked(@OomAdjuster.OomAdjReason int oomAdjReason) {
         mOomAdjuster.updateOomAdjPendingTargetsLocked(oomAdjReason);
     }
 
@@ -15628,7 +15628,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    final void updateOomAdjLocked(String oomAdjReason) {
+    final void updateOomAdjLocked(@OomAdjuster.OomAdjReason int oomAdjReason) {
         mOomAdjuster.updateOomAdjLocked(oomAdjReason);
     }
 
@@ -15640,7 +15640,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @return whether updateOomAdjLocked(app) was successful.
      */
     @GuardedBy("this")
-    final boolean updateOomAdjLocked(ProcessRecord app, String oomAdjReason) {
+    final boolean updateOomAdjLocked(
+            ProcessRecord app, @OomAdjuster.OomAdjReason int oomAdjReason) {
         return mOomAdjuster.updateOomAdjLocked(app, oomAdjReason);
     }
 
@@ -15873,14 +15874,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         mOomAdjuster.setUidTempAllowlistStateLSP(uid, onAllowlist);
     }
 
-    private void trimApplications(boolean forceFullOomAdj, String oomAdjReason) {
+    private void trimApplications(
+            boolean forceFullOomAdj, @OomAdjuster.OomAdjReason int oomAdjReason) {
         synchronized (this) {
             trimApplicationsLocked(forceFullOomAdj, oomAdjReason);
         }
     }
 
     @GuardedBy("this")
-    private void trimApplicationsLocked(boolean forceFullOomAdj, String oomAdjReason) {
+    private void trimApplicationsLocked(
+            boolean forceFullOomAdj, @OomAdjuster.OomAdjReason int oomAdjReason) {
         // First remove any unused application processes whose package
         // has been removed.
         boolean didSomething = false;

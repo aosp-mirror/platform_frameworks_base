@@ -122,6 +122,8 @@ public final class UserTypeFactory {
                 .setLabel(0)
                 .setDefaultRestrictions(null)
                 .setIsMediaSharedWithParent(true)
+                .setCrossProfileIntentFilterAccessControl(
+                        CrossProfileIntentFilter.ACCESS_LEVEL_SYSTEM)
                 .setIsCredentialSharableWithParent(true);
     }
 

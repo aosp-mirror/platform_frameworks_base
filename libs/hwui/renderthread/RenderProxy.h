@@ -19,13 +19,14 @@
 
 #include <SkRefCnt.h>
 #include <android/native_window.h>
-#include <cutils/compiler.h>
 #include <android/surface_control.h>
+#include <cutils/compiler.h>
 #include <utils/Functor.h>
 
 #include "../FrameMetricsObserver.h"
 #include "../IContextFactory.h"
 #include "ColorMode.h"
+#include "CopyRequest.h"
 #include "DrawFrameTask.h"
 #include "SwapBehavior.h"
 #include "hwui/Bitmap.h"
@@ -137,8 +138,7 @@ public:
     void removeFrameMetricsObserver(FrameMetricsObserver* observer);
     void setForceDark(bool enable);
 
-    static int copySurfaceInto(ANativeWindow* window, int left, int top, int right,
-                                           int bottom, SkBitmap* bitmap);
+    static void copySurfaceInto(ANativeWindow* window, std::shared_ptr<CopyRequest>&& request);
     static void prepareToDraw(Bitmap& bitmap);
 
     static int copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap);

@@ -1650,8 +1650,37 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         int currentUser = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
-        // TODO(b/179163496): should return true for profile users of the current user as well
         return currentUser == userId;
+    }
+
+    @Override
+    public boolean isUserVisible(@UserIdInt int userId) {
+        int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId != userId
+                && !hasManageUsersOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)) {
+            throw new SecurityException("Caller from user " + callingUserId + " needs MANAGE_USERS "
+                    + "or INTERACT_ACROSS_USERS permission to check if another user (" + userId
+                    + ") is visible");
+        }
+
+        // First check current foreground user (on main display)
+        int currentUserId = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
+
+        if (currentUserId == userId) {
+            return true;
+        }
+
+        // Then profiles of current user
+        // TODO(b/239824814): consider using AMInternal.isCurrentProfile() instead
+        if (isProfile(userId)) {
+            int parentId = Binder.withCleanCallingIdentity(() -> getProfileParentId(userId));
+            if (parentId == currentUserId) {
+                return isUserRunning(userId);
+            }
+        }
+
+        // TODO(b/239824814): support background users on secondary display (and their profiles)
+        return false;
     }
 
     @Override
@@ -1864,6 +1893,103 @@ public class UserManagerService extends IUserManager.Stub {
     /** Called by PackageManagerService */
     public boolean exists(@UserIdInt int userId) {
         return mLocalService.exists(userId);
+    }
+
+    /**
+     * Returns user's {@link  CrossProfileIntentFilter.AccessControlLevel}, which is derived from
+     * {@link UserTypeDetails}. If user does not have defined their access control level,
+     * returns default {@link CrossProfileIntentFilter#ACCESS_LEVEL_ALL}
+     */
+    private @CrossProfileIntentFilter.AccessControlLevel int
+                getCrossProfileIntentFilterAccessControl(@UserIdInt int userId) {
+        final UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
+        return userTypeDetails != null ? userTypeDetails.getCrossProfileIntentFilterAccessControl()
+                : CrossProfileIntentFilter.ACCESS_LEVEL_ALL;
+    }
+
+    /**
+     * Verifies if calling user is allowed to access {@link CrossProfileIntentFilter} between given
+     * source and target user.
+     * @param sourceUserId userId for which CrossProfileIntentFilter would be configured
+     * @param targetUserId target user where we can resolve given intent filter
+     * @param callingUid user accessing api
+     * @param addCrossProfileIntentFilter if the operation is addition or not.
+     * @throws SecurityException is calling user is not allowed to access.
+     */
+    public void enforceCrossProfileIntentFilterAccess(
+            int sourceUserId, int targetUserId,
+            int callingUid, boolean addCrossProfileIntentFilter) {
+        if (!isCrossProfileIntentFilterAccessible(sourceUserId, targetUserId,
+                addCrossProfileIntentFilter)) {
+            throw new SecurityException("CrossProfileIntentFilter cannot be accessed by user "
+                    + callingUid);
+        }
+    }
+
+    /**
+     * Checks if {@link CrossProfileIntentFilter} can be accessed by calling user for given source
+     * and target user. There are following rules of access
+     * 1. For {@link CrossProfileIntentFilter#ACCESS_LEVEL_ALL},
+     *  irrespective of user we would allow access(addition/modification/removal)
+     * 2. For {@link CrossProfileIntentFilter#ACCESS_LEVEL_SYSTEM},
+     *  only system/root user would be able to access(addition/modification/removal)
+     * 3. For {@link CrossProfileIntentFilter#ACCESS_LEVEL_SYSTEM_ADD_ONLY},
+     *  only system/root user would be able to add but not modify/remove. Once added, it cannot be
+     *  modified or removed
+     * @param sourceUserId userId for which CrossProfileIntentFilter would be configured
+     * @param targetUserId target user where we can resolve given intent filter
+     * @param addCrossProfileIntentFilter if the operation is addition or not.
+     * @return true if {@link CrossProfileIntentFilter} can be accessed by calling user
+     */
+    public boolean isCrossProfileIntentFilterAccessible(int sourceUserId, int targetUserId,
+            boolean addCrossProfileIntentFilter) {
+        int effectiveAccessControl =
+                getCrossProfileIntentFilterAccessControl(sourceUserId, targetUserId);
+
+        /*
+        For {@link CrossProfileIntentFilter#ACCESS_LEVEL_SYSTEM}, if accessing user is not
+        system or root disallowing access to {@link CrossProfileIntentFilter}
+         */
+        if (CrossProfileIntentFilter.ACCESS_LEVEL_SYSTEM == effectiveAccessControl
+                && !PackageManagerServiceUtils.isSystemOrRoot()) {
+            return false;
+        }
+
+        /*
+        For {@link CrossProfileIntentFilter#ACCESS_LEVEL_SYSTEM_ADD_ONLY}, allowing only
+        system user to add {@link CrossProfileIntentFilter}. All users(including system) are
+        disallowed to modify/remove.
+         */
+        if (CrossProfileIntentFilter.ACCESS_LEVEL_SYSTEM_ADD_ONLY == effectiveAccessControl
+                && (!addCrossProfileIntentFilter || !PackageManagerServiceUtils.isSystemOrRoot())) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Returns {@link CrossProfileIntentFilter.AccessControlLevel}
+     * that should be assigned to {@link CrossProfileIntentFilter}
+     * computed from source user's and target user's
+     * {@link CrossProfileIntentFilter.AccessControlLevel}.
+     * The Access Level is configured per {@link CrossProfileIntentFilter} and its property of edge
+     * between source and target user e.g. for all {@link CrossProfileIntentFilter}s configured
+     * between Primary user and Clone profile should have access level of
+     * {@link CrossProfileIntentFilter#ACCESS_LEVEL_SYSTEM} which is driven by highest
+     * access value from source or target. The higher value means higher restrictions.
+     * @param sourceUserId userId of source user for whom CrossProfileIntentFilter will be stored
+     * @param targetUserId userId of target user for whom Cross Profile access would be allowed
+     * @return least privileged {@link CrossProfileIntentFilter.AccessControlLevel} from source or
+     * target user.
+     */
+    public @CrossProfileIntentFilter.AccessControlLevel int
+                getCrossProfileIntentFilterAccessControl(int sourceUserId, int targetUserId) {
+        int sourceAccessControlLevel,
+                targetAccessControlLevel, effectiveAccessControl;
+        sourceAccessControlLevel = getCrossProfileIntentFilterAccessControl(sourceUserId);
+        targetAccessControlLevel = getCrossProfileIntentFilterAccessControl(targetUserId);
+        effectiveAccessControl = Math.max(sourceAccessControlLevel, targetAccessControlLevel);
+        return effectiveAccessControl;
     }
 
     @Override
@@ -4556,34 +4682,31 @@ public class UserManagerService extends IUserManager.Stub {
         }
         final List<UserInfo> users = getUsersInternal(true, true, true);
         final int size = users.size();
-        for (int idx = 0; idx < size; idx++) {
-            final UserInfo user = users.get(idx);
-            if (user.id == UserHandle.USER_SYSTEM) {
-                // Skip user 0. It's not interesting. We already know it exists, is running, and (if
-                // we know the device configuration) its userType.
-                continue;
+        if (size > 1) {
+            for (int idx = 0; idx < size; idx++) {
+                final UserInfo user = users.get(idx);
+                final int userTypeStandard = UserManager.getUserTypeForStatsd(user.userType);
+                final String userTypeCustom = (userTypeStandard == FrameworkStatsLog
+                        .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN)
+                        ?
+                        user.userType : null;
+
+                boolean isUserRunningUnlocked;
+                synchronized (mUserStates) {
+                    isUserRunningUnlocked =
+                            mUserStates.get(user.id, -1) == UserState.STATE_RUNNING_UNLOCKED;
+                }
+
+                data.add(FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.USER_INFO,
+                        user.id,
+                        userTypeStandard,
+                        userTypeCustom,
+                        user.flags,
+                        user.creationTime,
+                        user.lastLoggedInTime,
+                        isUserRunningUnlocked
+                ));
             }
-
-            final int userTypeStandard = UserManager.getUserTypeForStatsd(user.userType);
-            final String userTypeCustom = (userTypeStandard ==
-                    FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN) ?
-                    user.userType : null;
-
-            boolean isUserRunningUnlocked;
-            synchronized (mUserStates) {
-                isUserRunningUnlocked =
-                        mUserStates.get(user.id, -1) == UserState.STATE_RUNNING_UNLOCKED;
-            }
-
-            data.add(FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.USER_INFO,
-                    user.id,
-                    userTypeStandard,
-                    userTypeCustom,
-                    user.flags,
-                    user.creationTime,
-                    user.lastLoggedInTime,
-                    isUserRunningUnlocked
-            ));
         }
         return android.app.StatsManager.PULL_SUCCESS;
     }

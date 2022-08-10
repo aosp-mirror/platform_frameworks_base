@@ -989,26 +989,40 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     @NeverCompile
     int runCompact(PrintWriter pw) {
-        String processName = getNextArgRequired();
-        String uid = getNextArgRequired();
-        String op = getNextArgRequired();
         ProcessRecord app;
-        synchronized (mInternal.mProcLock) {
-            app = mInternal.getProcessRecordLocked(processName, Integer.parseInt(uid));
-        }
-        pw.println("Process record found pid: " + app.mPid);
-        if (op.equals("full")) {
-            pw.println("Executing full compaction for " + app.mPid);
+        String op = getNextArgRequired();
+        boolean isFullCompact = op.equals("full");
+        boolean isSomeCompact = op.equals("some");
+        if (isFullCompact || isSomeCompact) {
+            String processName = getNextArgRequired();
+            String uid = getNextArgRequired();
             synchronized (mInternal.mProcLock) {
-                mInternal.mOomAdjuster.mCachedAppOptimizer.compactAppFull(app, true);
+                app = mInternal.getProcessRecordLocked(processName, Integer.parseInt(uid));
             }
-            pw.println("Finished full compaction for " + app.mPid);
-        } else if (op.equals("some")) {
-            pw.println("Executing some compaction for " + app.mPid);
+            pw.println("Process record found pid: " + app.mPid);
+            if (isFullCompact) {
+                pw.println("Executing full compaction for " + app.mPid);
+                synchronized (mInternal.mProcLock) {
+                    mInternal.mOomAdjuster.mCachedAppOptimizer.compactApp(app,
+                            CachedAppOptimizer.CompactProfile.FULL,
+                            CachedAppOptimizer.CompactSource.APP, true);
+                }
+                pw.println("Finished full compaction for " + app.mPid);
+            } else if (isSomeCompact) {
+                pw.println("Executing some compaction for " + app.mPid);
+                synchronized (mInternal.mProcLock) {
+                    mInternal.mOomAdjuster.mCachedAppOptimizer.compactApp(app,
+                            CachedAppOptimizer.CompactProfile.SOME,
+                            CachedAppOptimizer.CompactSource.APP, true);
+                }
+                pw.println("Finished some compaction for " + app.mPid);
+            }
+        } else if (op.equals("system")) {
+            pw.println("Executing system compaction");
             synchronized (mInternal.mProcLock) {
-                mInternal.mOomAdjuster.mCachedAppOptimizer.compactAppSome(app, true);
+                mInternal.mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
             }
-            pw.println("Finished some compaction for " + app.mPid);
+            pw.println("Finished system compaction");
         } else {
             getErrPrintWriter().println("Error: unknown compact command '" + op + "'");
             return -1;
@@ -3570,10 +3584,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --allow-background-activity-starts: The receiver may start activities");
             pw.println("          even if in the background.");
             pw.println("      --async: Send without waiting for the completion of the receiver.");
-            pw.println("  compact <process_name> <Package UID> [some|full]");
+            pw.println("  compact [some|full|system] <process_name> <Package UID>");
             pw.println("      Force process compaction.");
             pw.println("      some: execute file compaction.");
             pw.println("      full: execute anon + file compaction.");
+            pw.println("      system: system compaction.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current]");
             pw.println("          [--no-hidden-api-checks [--no-test-api-access]]");

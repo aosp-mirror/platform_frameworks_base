@@ -380,18 +380,6 @@ static void Typeface_forceSetStaticFinalField(JNIEnv *env, jclass cls, jstring f
     env->SetStaticObjectField(cls, fid, typeface);
 }
 
-// Critical Native
-static jint Typeface_getFamilySize(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
-    return toTypeface(faceHandle)->fFontCollection->getFamilyCount();
-}
-
-// Critical Native
-static jlong Typeface_getFamily(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle, jint index) {
-    std::shared_ptr<minikin::FontFamily> family =
-            toTypeface(faceHandle)->fFontCollection->getFamilyAt(index);
-    return reinterpret_cast<jlong>(new FontFamilyWrapper(std::move(family)));
-}
-
 // Regular JNI
 static void Typeface_warmUpCache(JNIEnv* env, jobject, jstring jFilePath) {
     ScopedUtfChars filePath(env, jFilePath);
@@ -431,8 +419,6 @@ static const JNINativeMethod gTypefaceMethods[] = {
         {"nativeReadTypefaces", "(Ljava/nio/ByteBuffer;I)[J", (void*)Typeface_readTypefaces},
         {"nativeForceSetStaticFinalField", "(Ljava/lang/String;Landroid/graphics/Typeface;)V",
          (void*)Typeface_forceSetStaticFinalField},
-        {"nativeGetFamilySize", "(J)I", (void*)Typeface_getFamilySize},
-        {"nativeGetFamily", "(JI)J", (void*)Typeface_getFamily},
         {"nativeWarmUpCache", "(Ljava/lang/String;)V", (void*)Typeface_warmUpCache},
         {"nativeAddFontCollections", "(J)V", (void*)Typeface_addFontCollection},
         {"nativeRegisterLocaleList", "(Ljava/lang/String;)V", (void*)Typeface_registerLocaleList},

@@ -17,10 +17,12 @@
 package com.android.server.audio;
 
 import static android.media.AudioPlaybackConfiguration.EXTRA_PLAYER_EVENT_MUTE;
+import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_CLIENT_VOLUME;
 import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_MASTER;
 import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_PLAYBACK_RESTRICTED;
 import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_STREAM_MUTED;
 import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_STREAM_VOLUME;
+import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_VOLUME_SHAPER;
 import static android.media.AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
 import static android.media.AudioPlaybackConfiguration.PLAYER_UPDATE_MUTED;
 
@@ -1145,6 +1147,10 @@ public final class PlaybackActivityMonitor
                             (mEventValue & PLAYER_MUTE_STREAM_MUTED) != 0);
                     builder.append(" muteFromPlaybackRestricted:").append(
                             (mEventValue & PLAYER_MUTE_PLAYBACK_RESTRICTED) != 0);
+                    builder.append(" muteFromClientVolume:").append(
+                            (mEventValue & PLAYER_MUTE_CLIENT_VOLUME) != 0);
+                    builder.append(" muteFromVolumeShaper:").append(
+                            (mEventValue & PLAYER_MUTE_VOLUME_SHAPER) != 0);
                     return builder.toString();
                 default:
                     return builder.toString();

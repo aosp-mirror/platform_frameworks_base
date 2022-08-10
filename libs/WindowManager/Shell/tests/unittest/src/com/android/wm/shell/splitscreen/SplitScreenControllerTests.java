@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 
 import static org.junit.Assert.assertFalse;
@@ -111,7 +112,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     }
 
     @Test
-    public void testIsLaunchingAdjacently_notInSplitScreen() {
+    public void testShouldAddMultipleTaskFlag_notInSplitScreen() {
         doReturn(false).when(mSplitScreenController).isSplitScreenVisible();
         doReturn(true).when(mSplitScreenController).isValidToEnterSplitScreen(any());
 
@@ -120,7 +121,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
         ActivityManager.RunningTaskInfo focusTaskInfo =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, startIntent);
         doReturn(focusTaskInfo).when(mSplitScreenController).getFocusingTaskInfo();
-        assertTrue(mSplitScreenController.isLaunchingAdjacently(
+        assertTrue(mSplitScreenController.shouldAddMultipleTaskFlag(
                 startIntent, SPLIT_POSITION_TOP_OR_LEFT));
 
         // Verify launching different activity returns false.
@@ -128,28 +129,40 @@ public class SplitScreenControllerTests extends ShellTestCase {
         focusTaskInfo =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, diffIntent);
         doReturn(focusTaskInfo).when(mSplitScreenController).getFocusingTaskInfo();
-        assertFalse(mSplitScreenController.isLaunchingAdjacently(
+        assertFalse(mSplitScreenController.shouldAddMultipleTaskFlag(
                 startIntent, SPLIT_POSITION_TOP_OR_LEFT));
     }
 
     @Test
-    public void testIsLaunchingAdjacently_inSplitScreen() {
+    public void testShouldAddMultipleTaskFlag_inSplitScreen() {
         doReturn(true).when(mSplitScreenController).isSplitScreenVisible();
-
-        // Verify launching the same activity returns true.
         Intent startIntent = createStartIntent("startActivity");
-        ActivityManager.RunningTaskInfo pairingTaskInfo =
+        ActivityManager.RunningTaskInfo sameTaskInfo =
                 createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, startIntent);
-        doReturn(pairingTaskInfo).when(mSplitScreenController).getTaskInfo(anyInt());
-        assertTrue(mSplitScreenController.isLaunchingAdjacently(
+        Intent diffIntent = createStartIntent("diffActivity");
+        ActivityManager.RunningTaskInfo differentTaskInfo =
+                createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, diffIntent);
+
+        // Verify launching the same activity return false.
+        doReturn(sameTaskInfo).when(mSplitScreenController)
+                .getTaskInfo(SPLIT_POSITION_TOP_OR_LEFT);
+        assertFalse(mSplitScreenController.shouldAddMultipleTaskFlag(
                 startIntent, SPLIT_POSITION_TOP_OR_LEFT));
 
-        // Verify launching different activity returns false.
-        Intent diffIntent = createStartIntent("diffActivity");
-        pairingTaskInfo =
-                createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, diffIntent);
-        doReturn(pairingTaskInfo).when(mSplitScreenController).getTaskInfo(anyInt());
-        assertFalse(mSplitScreenController.isLaunchingAdjacently(
+        // Verify launching the same activity as adjacent returns true.
+        doReturn(differentTaskInfo).when(mSplitScreenController)
+                .getTaskInfo(SPLIT_POSITION_TOP_OR_LEFT);
+        doReturn(sameTaskInfo).when(mSplitScreenController)
+                .getTaskInfo(SPLIT_POSITION_BOTTOM_OR_RIGHT);
+        assertTrue(mSplitScreenController.shouldAddMultipleTaskFlag(
+                startIntent, SPLIT_POSITION_TOP_OR_LEFT));
+
+        // Verify launching different activity from adjacent returns false.
+        doReturn(differentTaskInfo).when(mSplitScreenController)
+                .getTaskInfo(SPLIT_POSITION_TOP_OR_LEFT);
+        doReturn(differentTaskInfo).when(mSplitScreenController)
+                .getTaskInfo(SPLIT_POSITION_BOTTOM_OR_RIGHT);
+        assertFalse(mSplitScreenController.shouldAddMultipleTaskFlag(
                 startIntent, SPLIT_POSITION_TOP_OR_LEFT));
     }
 
