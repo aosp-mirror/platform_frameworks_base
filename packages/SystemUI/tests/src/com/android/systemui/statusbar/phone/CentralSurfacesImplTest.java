@@ -88,6 +88,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.charging.WiredChargingRippleController;
+import com.android.systemui.charging.WirelessChargingRippleController;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -283,6 +284,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private InteractionJankMonitor mJankMonitor;
     @Mock private DeviceStateManager mDeviceStateManager;
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
+    @Mock private WirelessChargingRippleController mWirelessChargingRippleController;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
@@ -465,7 +467,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mActivityLaunchAnimator,
                 mJankMonitor,
                 mDeviceStateManager,
-                mWiredChargingRippleController, mDreamManager);
+                mWiredChargingRippleController,
+                mWirelessChargingRippleController,
+                mDreamManager);
         when(mKeyguardViewMediator.registerCentralSurfaces(
                 any(CentralSurfacesImpl.class),
                 any(NotificationPanelViewController.class),

@@ -316,4 +316,14 @@ public class LogModule {
     public static LogBuffer provideKeyguardViewMediatorLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyguardViewMediatorLog", 100);
     }
+
+    /**
+     * Provides a {@link LogBuffer} for use by {@link com.android.systemui.charging}.
+     */
+    @Provides
+    @SysUISingleton
+    @ChargingLog
+    public static LogBuffer provideChargingLogBuffer(LogBufferFactory factory) {
+        return factory.create("ChargingLog", 20);
+    }
 }
