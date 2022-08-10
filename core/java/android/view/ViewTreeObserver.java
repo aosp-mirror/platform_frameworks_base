@@ -74,6 +74,9 @@ public final class ViewTreeObserver {
      * that the listener will be immediately called. */
     private boolean mWindowShown;
 
+    // The reason that the last call to dispatchOnPreDraw() returned true to cancel and redraw
+    private String mLastDispatchOnPreDrawCanceledReason;
+
     private boolean mAlive = true;
 
     /**
@@ -1167,6 +1170,7 @@ public final class ViewTreeObserver {
      */
     @SuppressWarnings("unchecked")
     public final boolean dispatchOnPreDraw() {
+        mLastDispatchOnPreDrawCanceledReason = null;
         boolean cancelDraw = false;
         final CopyOnWriteArray<OnPreDrawListener> listeners = mOnPreDrawListeners;
         if (listeners != null && listeners.size() > 0) {
@@ -1174,13 +1178,26 @@ public final class ViewTreeObserver {
             try {
                 int count = access.size();
                 for (int i = 0; i < count; i++) {
-                    cancelDraw |= !(access.get(i).onPreDraw());
+                    final OnPreDrawListener preDrawListener = access.get(i);
+                    cancelDraw |= !(preDrawListener.onPreDraw());
+                    if (cancelDraw) {
+                        mLastDispatchOnPreDrawCanceledReason = preDrawListener.getClass().getName();
+                    }
                 }
             } finally {
                 listeners.end();
             }
         }
         return cancelDraw;
+    }
+
+    /**
+     * @return the reason that the last call to dispatchOnPreDraw() returned true to cancel the
+     *         current draw, or null if the last call did not cancel.
+     * @hide
+     */
+    final String getLastDispatchOnPreDrawCanceledReason() {
+        return mLastDispatchOnPreDrawCanceledReason;
     }
 
     /**
