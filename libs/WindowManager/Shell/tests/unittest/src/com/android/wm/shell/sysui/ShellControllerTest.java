@@ -45,6 +45,8 @@ public class ShellControllerTest extends ShellTestCase {
     @Mock
     private ShellInit mShellInit;
     @Mock
+    private ShellCommandHandler mShellCommandHandler;
+    @Mock
     private ShellExecutor mExecutor;
 
     private ShellController mController;
@@ -56,7 +58,7 @@ public class ShellControllerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mKeyguardChangeListener = new TestKeyguardChangeListener();
         mConfigChangeListener = new TestConfigurationChangeListener();
-        mController = new ShellController(mShellInit, mExecutor);
+        mController = new ShellController(mShellInit, mShellCommandHandler, mExecutor);
         mController.onConfigurationChanged(getConfigurationCopy());
     }
 

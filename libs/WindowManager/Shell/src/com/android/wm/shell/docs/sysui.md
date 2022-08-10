@@ -32,7 +32,7 @@ interfaces provided by the Shell and the rest of SystemUI.
 
 More detail can be found in [go/wm-sysui-dagger](http://go/wm-sysui-dagger).
 
-## Interfaces to Shell components
+## Interfaces from SysUI to Shell components
 
 Within the same process, the WM Shell components can be running on a different thread than the main
 SysUI thread (disabled on certain products).  This introduces challenges where we have to be
@@ -54,12 +54,30 @@ For example, you might have:
 Adding an interface to a Shell component may seem like a lot of boiler plate, but is currently
 necessary to maintain proper threading and logic isolation.
 
-## Configuration changes & other SysUI events
+## Listening for Configuration changes & other SysUI events
 
-Aside from direct calls into Shell controllers for exposed features, the Shell also receives 
+Aside from direct calls into Shell controllers for exposed features, the Shell also receives
 common event callbacks from SysUI via the `ShellController`.  This includes things like:
 
 - Configuration changes
-- TODO: Shell init
-- TODO: Shell command
-- TODO: Keyguard events
+- Keyguard events
+- Shell init
+- Shell dumps & commands
+
+For other events which are specific to the Shell feature, then you can add callback methods on
+the Shell feature interface.  Any such calls should <u>**never**</u> be synchronous calls as
+they will need to post to the Shell main thread to run.
+
+## Shell commands & Dumps
+
+Since the Shell library is a part of the SysUI process, it relies on SysUI to trigger commands
+on individual Shell components, or to dump individual shell components.
+
+```shell
+# Dump everything
+adb shell dumpsys activity service SystemUIService WMShell
+
+# Run a specific command
+adb shell dumpsys activity service SystemUIService WMShell help
+adb shell dumpsys activity service SystemUIService WMShell <cmd> <args> ...
+```
