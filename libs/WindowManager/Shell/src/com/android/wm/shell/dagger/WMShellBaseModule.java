@@ -128,15 +128,9 @@ public abstract class WMShellBaseModule {
                 mainExecutor);
     }
 
-    // Workaround for dynamic overriding with a default implementation, see {@link DynamicOverride}
-    @BindsOptionalOf
-    @DynamicOverride
-    abstract DisplayImeController optionalDisplayImeController();
-
     @WMSingleton
     @Provides
     static DisplayImeController provideDisplayImeController(
-            @DynamicOverride Optional<DisplayImeController> overrideDisplayImeController,
             IWindowManager wmService,
             ShellInit shellInit,
             DisplayController displayController,
@@ -144,9 +138,6 @@ public abstract class WMShellBaseModule {
             TransactionPool transactionPool,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
-        if (overrideDisplayImeController.isPresent()) {
-            return overrideDisplayImeController.get();
-        }
         return new DisplayImeController(wmService, shellInit, displayController,
                 displayInsetsController, transactionPool, mainExecutor);
     }
