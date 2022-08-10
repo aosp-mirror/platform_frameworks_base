@@ -374,6 +374,15 @@ public abstract class DisplayManagerInternal {
     public abstract Point getDisplaySurfaceDefaultSize(int displayId);
 
     /**
+     * Get a new displayId which represents the display you want to mirror. If mirroring is not
+     * enabled on the display, {@link Display#INVALID_DISPLAY} will be returned.
+     *
+     * @param displayId The id of the display.
+     * @return The displayId that should be mirrored or INVALID_DISPLAY if mirroring is not enabled.
+     */
+    public abstract int getDisplayIdToMirror(int displayId);
+
+    /**
      * Receives early interactivity changes from power manager.
      *
      * @param interactive The interactive state that the device is moving into.

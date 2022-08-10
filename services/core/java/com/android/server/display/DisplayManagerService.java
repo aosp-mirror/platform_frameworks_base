@@ -2214,24 +2214,10 @@ public final class DisplayManagerService extends SystemService {
 
     private void configureDisplayLocked(SurfaceControl.Transaction t, DisplayDevice device) {
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
-        final boolean ownContent = (info.flags & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY) != 0;
 
         // Find the logical display that the display device is showing.
         // Certain displays only ever show their own content.
         LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(device);
-        // Proceed with display-managed mirroring only if window manager will not be handling it.
-        if (!ownContent && !device.isWindowManagerMirroringLocked()) {
-            // Only mirror the display if content recording is not taking place in WM.
-            if (display != null && !display.hasContentLocked()) {
-                // If the display does not have any content of its own, then
-                // automatically mirror the requested logical display contents if possible.
-                display = mLogicalDisplayMapper.getDisplayLocked(
-                        device.getDisplayIdToMirrorLocked());
-            }
-            if (display == null) {
-                display = mLogicalDisplayMapper.getDisplayLocked(Display.DEFAULT_DISPLAY);
-            }
-        }
 
         // Apply the logical display configuration to the display device.
         if (display == null) {
@@ -2542,18 +2528,6 @@ public final class DisplayManagerService extends SystemService {
                 return displayDevice.getDisplayDeviceInfoLocked();
             }
             return null;
-        }
-    }
-
-    @VisibleForTesting
-    int getDisplayIdToMirrorInternal(int displayId) {
-        synchronized (mSyncRoot) {
-            final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(displayId);
-            if (display != null) {
-                final DisplayDevice displayDevice = display.getPrimaryDisplayDeviceLocked();
-                return displayDevice.getDisplayIdToMirrorLocked();
-            }
-            return Display.INVALID_DISPLAY;
         }
     }
 
@@ -3851,6 +3825,37 @@ public final class DisplayManagerService extends SystemService {
                     return mDisplayWindowPolicyControllers.get(displayId).second;
                 }
                 return null;
+            }
+        }
+
+        @Override
+        public int getDisplayIdToMirror(int displayId) {
+            synchronized (mSyncRoot) {
+                final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(displayId);
+                if (display == null) {
+                    return Display.INVALID_DISPLAY;
+                }
+
+                final DisplayDevice displayDevice = display.getPrimaryDisplayDeviceLocked();
+                final boolean ownContent = (displayDevice.getDisplayDeviceInfoLocked().flags
+                        & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY) != 0;
+                // If the display has enabled mirroring, but specified that it will be managed by
+                // WindowManager, return an invalid display id. This is to ensure we don't
+                // accidentally select the display id to mirror based on DM logic and instead allow
+                // the caller to specify what area to mirror.
+                if (ownContent || displayDevice.isWindowManagerMirroringLocked()) {
+                    return Display.INVALID_DISPLAY;
+                }
+
+                int displayIdToMirror = displayDevice.getDisplayIdToMirrorLocked();
+                LogicalDisplay displayToMirror = mLogicalDisplayMapper.getDisplayLocked(
+                        displayIdToMirror);
+                // If the displayId for the requested mirror doesn't exist, fallback to mirroring
+                // default display.
+                if (displayToMirror == null) {
+                    displayIdToMirror = Display.DEFAULT_DISPLAY;
+                }
+                return displayIdToMirror;
             }
         }
     }
