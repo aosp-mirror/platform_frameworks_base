@@ -25,6 +25,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PER
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
@@ -317,13 +318,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Returns true if the callingUid has any non-toast window currently visible to the user.
-     * Also ignores TYPE_APPLICATION_STARTING, since those windows don't belong to apps.
+     * Returns {@code true} if the callingUid has any non-toast window currently visible to the
+     * user. Also ignores {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_STARTING},
+     * and{@link android.view.WindowManager.LayoutParams#TYPE_PRIVATE_PRESENTATION}, as they
+     * should not count towards the apps visibility
+     * @see WindowState#isNonToastOrStartingOrPrivatePresentation()
      */
     boolean isAnyNonToastWindowVisibleForUid(int callingUid) {
         return forAllWindows(w ->
                         w.getOwningUid() == callingUid && w.mAttrs.type != TYPE_TOAST
-                        && w.mAttrs.type != TYPE_APPLICATION_STARTING && w.isVisibleNow(),
+                        && w.mAttrs.type != TYPE_APPLICATION_STARTING
+                        && w.mAttrs.type != TYPE_PRIVATE_PRESENTATION && w.isVisibleNow(),
                 true /* traverseTopToBottom */);
     }
 
