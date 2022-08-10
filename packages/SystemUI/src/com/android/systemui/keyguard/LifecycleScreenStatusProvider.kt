@@ -41,4 +41,12 @@ class LifecycleScreenStatusProvider @Inject constructor(screenLifecycle: ScreenL
     override fun onScreenTurnedOn() {
         listeners.forEach(ScreenListener::onScreenTurnedOn)
     }
+
+    override fun onScreenTurningOff() {
+        listeners.forEach(ScreenListener::onScreenTurningOff)
+    }
+
+    override fun onScreenTurningOn(ignored: Runnable) {
+        listeners.forEach(ScreenListener::onScreenTurningOn)
+    }
 }

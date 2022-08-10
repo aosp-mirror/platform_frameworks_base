@@ -638,12 +638,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         // Listen for user setup
         startTracking();
 
-        screenLifecycle.addObserver(new ScreenLifecycle.Observer() {
-            @Override
-            public void onScreenTurnedOn() {
-                notifyScreenTurnedOn();
-            }
-        });
+        screenLifecycle.addObserver(mLifecycleObserver);
 
         // Connect to the service
         updateEnabledState();
@@ -951,20 +946,55 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
-    /**
-     * Notifies the Launcher that screen turned on and ready to use
-     */
-    public void notifyScreenTurnedOn() {
-        try {
-            if (mOverviewProxy != null) {
-                mOverviewProxy.onScreenTurnedOn();
-            } else {
-                Log.e(TAG_OPS, "Failed to get overview proxy for screen turned on event.");
+    private final ScreenLifecycle.Observer mLifecycleObserver = new ScreenLifecycle.Observer() {
+        /**
+         * Notifies the Launcher that screen turned on and ready to use
+         */
+        @Override
+        public void onScreenTurnedOn() {
+            try {
+                if (mOverviewProxy != null) {
+                    mOverviewProxy.onScreenTurnedOn();
+                } else {
+                    Log.e(TAG_OPS, "Failed to get overview proxy for screen turned on event.");
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG_OPS, "Failed to call onScreenTurnedOn()", e);
             }
-        } catch (RemoteException e) {
-            Log.e(TAG_OPS, "Failed to call notifyScreenTurnedOn()", e);
         }
-    }
+
+        /**
+         * Notifies the Launcher that screen is starting to turn on.
+         */
+        @Override
+        public void onScreenTurningOff() {
+            try {
+                if (mOverviewProxy != null) {
+                    mOverviewProxy.onScreenTurningOff();
+                } else {
+                    Log.e(TAG_OPS, "Failed to get overview proxy for screen turning off event.");
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG_OPS, "Failed to call onScreenTurningOff()", e);
+            }
+        }
+
+        /**
+         * Notifies the Launcher that screen is starting to turn on.
+         */
+        @Override
+        public void onScreenTurningOn(@NonNull Runnable ignored) {
+            try {
+                if (mOverviewProxy != null) {
+                    mOverviewProxy.onScreenTurningOn();
+                } else {
+                    Log.e(TAG_OPS, "Failed to get overview proxy for screen turning on event.");
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG_OPS, "Failed to call onScreenTurningOn()", e);
+            }
+        }
+    };
 
     void notifyToggleRecentApps() {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
