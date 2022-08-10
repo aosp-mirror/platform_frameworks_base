@@ -926,7 +926,7 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Lägg inte till ruta"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Välj användare"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> apps är aktiva</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> appar är aktiva</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> app är aktiv</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Ny information"</string>

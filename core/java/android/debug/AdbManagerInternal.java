@@ -55,6 +55,12 @@ public abstract class AdbManagerInternal {
     public abstract File getAdbTempKeysFile();
 
     /**
+     * Notify the AdbManager that the key files have changed and any in-memory state should be
+     * reloaded.
+     */
+    public abstract void notifyKeyFilesUpdated();
+
+    /**
      * Starts adbd for a transport.
      */
     public abstract void startAdbdForTransport(byte transportType);

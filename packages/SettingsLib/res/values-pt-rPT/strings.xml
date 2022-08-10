@@ -184,7 +184,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Algumas predefinições definidas"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Nenhuma predefinição definida"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Definições de texto para voz"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Saída de síntese de voz"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Saída de conversão de texto em voz"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Taxa de voz"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Velocidade a que o texto é falado"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Tonalidade"</string>
@@ -194,12 +194,12 @@
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Idioma não selecionado"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Define a voz do idioma específico para o texto lido"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Ouvir um exemplo"</string>
-    <string name="tts_play_example_summary" msgid="634044730710636383">"Reproduzir uma breve demonstração de síntese de voz"</string>
+    <string name="tts_play_example_summary" msgid="634044730710636383">"Reproduzir uma breve demonstração de conversão de texto em voz"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instalar dados de voz"</string>
-    <string name="tts_install_data_summary" msgid="3608874324992243851">"Instalar os dados de voz necessários para a síntese de voz"</string>
+    <string name="tts_install_data_summary" msgid="3608874324992243851">"Instalar os dados de voz necessários para a conversão de texto em voz"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Este motor de síntese de discurso pode permitir a recolha de todo o texto que será falado, incluindo dados pessoais, como palavras-passe e números de cartão de crédito. O serviço é fornecido com o motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Permitir a utilização deste motor de síntese de discurso?"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"Este idioma requer uma ligação de rede ativa para uma saída de síntese de voz."</string>
-    <string name="tts_default_sample_string" msgid="6388016028292967973">"Exemplo de síntese de voz."</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"Este idioma requer uma ligação de rede ativa para uma saída de conversão de texto em voz."</string>
+    <string name="tts_default_sample_string" msgid="6388016028292967973">"Exemplo de conversão de texto em voz."</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Estado do idioma predefinido"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> é totalmente suportado"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> necessita de ligação de rede"</string>
