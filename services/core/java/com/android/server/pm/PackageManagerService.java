@@ -6412,6 +6412,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public void setVisibilityLogging(String packageName, boolean enable) {
+            PackageManagerServiceUtils.enforceSystemOrRootOrShell(
+                    "Only the system or shell can set visibility logging.");
             final PackageStateInternal packageState =
                     snapshot().getPackageStateInternal(packageName);
             if (packageState == null) {
