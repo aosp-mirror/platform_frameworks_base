@@ -57,6 +57,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -94,6 +95,12 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     DreamOverlayNotificationCountProvider mDreamOverlayNotificationCountProvider;
     @Mock
     StatusBarWindowStateController mStatusBarWindowStateController;
+    @Mock
+    DreamOverlayStatusBarItemsProvider mDreamOverlayStatusBarItemsProvider;
+    @Mock
+    DreamOverlayStatusBarItemsProvider.StatusBarItem mStatusBarItem;
+    @Mock
+    View mStatusBarItemView;
 
     private final Executor mMainExecutor = Runnable::run;
 
@@ -118,7 +125,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mSensorPrivacyController,
                 Optional.of(mDreamOverlayNotificationCountProvider),
                 mZenModeController,
-                mStatusBarWindowStateController);
+                mStatusBarWindowStateController,
+                mDreamOverlayStatusBarItemsProvider);
     }
 
     @Test
@@ -128,6 +136,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         verify(mSensorPrivacyController).addCallback(any());
         verify(mZenModeController).addCallback(any());
         verify(mDreamOverlayNotificationCountProvider).addCallback(any());
+        verify(mDreamOverlayStatusBarItemsProvider).addCallback(any());
     }
 
     @Test
@@ -256,7 +265,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mSensorPrivacyController,
                 Optional.empty(),
                 mZenModeController,
-                mStatusBarWindowStateController);
+                mStatusBarWindowStateController,
+                mDreamOverlayStatusBarItemsProvider);
         controller.onViewAttached();
         verify(mView, never()).showIcon(
                 eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(true), any());
@@ -294,6 +304,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         verify(mSensorPrivacyController).removeCallback(any());
         verify(mZenModeController).removeCallback(any());
         verify(mDreamOverlayNotificationCountProvider).removeCallback(any());
+        verify(mDreamOverlayStatusBarItemsProvider).removeCallback(any());
     }
 
     @Test
@@ -461,5 +472,19 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         callbackCapture.getValue().onStatusBarWindowStateChanged(WINDOW_STATE_SHOWING);
 
         verify(mView, never()).setVisibility(anyInt());
+    }
+
+    @Test
+    public void testExtraStatusBarItemSetWhenItemsChange() {
+        mController.onViewAttached();
+        when(mStatusBarItem.getView()).thenReturn(mStatusBarItemView);
+
+        final ArgumentCaptor<DreamOverlayStatusBarItemsProvider.Callback>
+                callbackCapture = ArgumentCaptor.forClass(
+                        DreamOverlayStatusBarItemsProvider.Callback.class);
+        verify(mDreamOverlayStatusBarItemsProvider).addCallback(callbackCapture.capture());
+        callbackCapture.getValue().onStatusBarItemsChanged(List.of(mStatusBarItem));
+
+        verify(mView).setExtraStatusBarItemViews(List.of(mStatusBarItemView));
     }
 }

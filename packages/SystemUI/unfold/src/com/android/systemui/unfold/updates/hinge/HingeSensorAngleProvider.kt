@@ -30,8 +30,10 @@ internal class HingeSensorAngleProvider(
 
     private val sensorListener = HingeAngleSensorListener()
     private val listeners: MutableList<Consumer<Float>> = arrayListOf()
+    var started = false
 
     override fun start() = executor.execute {
+        if (started) return@execute
         Trace.beginSection("HingeSensorAngleProvider#start")
         val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_HINGE_ANGLE)
         sensorManager.registerListener(
@@ -40,10 +42,13 @@ internal class HingeSensorAngleProvider(
             SensorManager.SENSOR_DELAY_FASTEST
         )
         Trace.endSection()
+        started = true
     }
 
     override fun stop() = executor.execute {
+        if (!started) return@execute
         sensorManager.unregisterListener(sensorListener)
+        started = false
     }
 
     override fun removeCallback(listener: Consumer<Float>) {

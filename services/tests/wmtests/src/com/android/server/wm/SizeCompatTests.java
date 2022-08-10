@@ -102,7 +102,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 /**
  * Tests for Size Compatibility mode.
@@ -2165,6 +2164,40 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testLetterboxDetailsForStatusBar_letterboxNotOverlappingStatusBar() {
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2800)
+                .setNotch(100)
+                .build();
+        setUpApp(display);
+        TestWindowState statusBar = addStatusBar(mActivity.mDisplayContent);
+        spyOn(statusBar);
+        doReturn(new Rect(0, 0, statusBar.mRequestedWidth, statusBar.mRequestedHeight))
+                .when(statusBar).getFrame();
+        addWindowToActivity(mActivity); // Add a window to the activity so that we can get an
+        // appearance inside letterboxDetails
+        // Prepare unresizable activity with max aspect ratio
+        prepareUnresizable(mActivity, /* maxAspect */ 1.1f, SCREEN_ORIENTATION_UNSPECIFIED);
+        // Refresh the letterbox
+        mActivity.mRootWindowContainer.performSurfacePlacement();
+
+        Rect mBounds = new Rect(mActivity.getWindowConfiguration().getBounds());
+        assertEquals(mBounds, new Rect(0, 750, 1000, 1950));
+
+        DisplayPolicy displayPolicy = mActivity.getDisplayContent().getDisplayPolicy();
+        LetterboxDetails[] expectedLetterboxDetails = {new LetterboxDetails(
+                mBounds,
+                mActivity.getDisplayContent().getBounds(),
+                mActivity.findMainWindow().mAttrs.insetsFlags.appearance
+        )};
+
+        // Check that letterboxDetails actually gets passed to SysUI
+        StatusBarManagerInternal statusBarManager = displayPolicy.getStatusBarManagerInternal();
+        verify(statusBarManager).onSystemBarAttributesChanged(anyInt(), anyInt(),
+                any(), anyBoolean(), anyInt(),
+                any(InsetsVisibilities.class), isNull(), eq(expectedLetterboxDetails));
+    }
+
+    @Test
     public void testSplitScreenLetterboxDetailsForStatusBar_twoLetterboxedApps() {
         mAtm.mDevEnableNonResizableMultiWindow = true;
         setUpDisplaySizeWithApp(2800, 1000);
@@ -2785,7 +2818,7 @@ public class SizeCompatTests extends WindowTestsBase {
         return w;
     }
 
-    private static void addStatusBar(DisplayContent displayContent) {
+    private static TestWindowState addStatusBar(DisplayContent displayContent) {
         final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
         doReturn(true).when(displayPolicy).hasStatusBar();
         displayPolicy.onConfigurationChanged();
@@ -2806,6 +2839,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         displayPolicy.addWindowLw(statusBar, attrs);
         displayPolicy.layoutWindowLw(statusBar, null, displayContent.mDisplayFrames);
+        return statusBar;
     }
 
     /**
