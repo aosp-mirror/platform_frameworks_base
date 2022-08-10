@@ -6,6 +6,8 @@
 
 #include "graphics_jni_helpers.h"
 
+#include <csetjmp>
+
 YuvToJpegEncoder* YuvToJpegEncoder::create(int format, int* strides) {
     // Only ImageFormat.NV21 and ImageFormat.YUY2 are supported
     // for now.
