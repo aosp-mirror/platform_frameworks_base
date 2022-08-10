@@ -1792,7 +1792,6 @@ class PackageManagerShellCommand extends ShellCommand {
         String checkProfilesRaw = null;
         boolean secondaryDex = false;
         String split = null;
-        boolean compileLayouts = false;
 
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -1811,9 +1810,6 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "-r":
                     compilationReason = getNextArgRequired();
-                    break;
-                case "--compile-layouts":
-                    compileLayouts = true;
                     break;
                 case "--check-prof":
                     checkProfilesRaw = getNextArgRequired();
@@ -1848,14 +1844,15 @@ class PackageManagerShellCommand extends ShellCommand {
 
         final boolean compilerFilterGiven = compilerFilter != null;
         final boolean compilationReasonGiven = compilationReason != null;
-        // Make sure exactly one of -m, -r, or --compile-layouts is given.
-        if ((!compilerFilterGiven && !compilationReasonGiven && !compileLayouts)
-            || (!compilerFilterGiven && compilationReasonGiven && compileLayouts)
-            || (compilerFilterGiven && !compilationReasonGiven && compileLayouts)
-            || (compilerFilterGiven && compilationReasonGiven && !compileLayouts)
-            || (compilerFilterGiven && compilationReasonGiven && compileLayouts)) {
-            pw.println("Must specify exactly one of compilation filter (\"-m\"), compilation " +
-                    "reason (\"-r\"), or compile layouts (\"--compile-layouts\")");
+        // Make sure exactly one of -m, or -r is given.
+        if (compilerFilterGiven && compilationReasonGiven) {
+            pw.println("Cannot use compilation filter (\"-m\") and compilation reason (\"-r\") "
+                    + "at the same time");
+            return 1;
+        }
+        if (!compilerFilterGiven && !compilationReasonGiven) {
+            pw.println("Cannot run without any of compilation filter (\"-m\") and compilation "
+                    + "reason (\"-r\")");
             return 1;
         }
 
@@ -1920,19 +1917,12 @@ class PackageManagerShellCommand extends ShellCommand {
                 pw.flush();
             }
 
-            boolean result = true;
-            if (compileLayouts) {
-                PackageManagerInternal internal = LocalServices.getService(
-                        PackageManagerInternal.class);
-                result = internal.compileLayouts(packageName);
-            } else {
-                result = secondaryDex
+            final boolean result = secondaryDex
                     ? mInterface.performDexOptSecondary(packageName,
                             targetCompilerFilter, forceCompilation)
                     : mInterface.performDexOptMode(packageName,
                             checkProfiles, targetCompilerFilter, forceCompilation,
                             true /* bootComplete */, split);
-            }
             if (!result) {
                 failedPackages.add(packageName);
             }
