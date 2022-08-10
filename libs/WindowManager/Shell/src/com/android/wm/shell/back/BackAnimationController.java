@@ -57,6 +57,7 @@ import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -90,7 +91,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      * Raw delta between {@link #mInitTouchLocation} and the last touch location.
      */
     private final Point mTouchEventDelta = new Point();
-    private final ShellExecutor mShellExecutor;
 
     /** True when a back gesture is ongoing */
     private boolean mBackGestureStarted = false;
@@ -105,6 +105,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private final SurfaceControl.Transaction mTransaction;
     private final IActivityTaskManager mActivityTaskManager;
     private final Context mContext;
+    private final ContentResolver mContentResolver;
+    private final ShellExecutor mShellExecutor;
+    private final Handler mBgHandler;
     @Nullable
     private IOnBackInvokedCallback mBackToLauncherCallback;
     private float mTriggerThreshold;
@@ -133,16 +136,19 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     };
 
     public BackAnimationController(
+            @NonNull ShellInit shellInit,
             @NonNull @ShellMainThread ShellExecutor shellExecutor,
             @NonNull @ShellBackgroundThread Handler backgroundHandler,
             Context context) {
-        this(shellExecutor, backgroundHandler, new SurfaceControl.Transaction(),
+        this(shellInit, shellExecutor, backgroundHandler, new SurfaceControl.Transaction(),
                 ActivityTaskManager.getService(), context, context.getContentResolver());
     }
 
     @VisibleForTesting
-    BackAnimationController(@NonNull @ShellMainThread ShellExecutor shellExecutor,
-            @NonNull @ShellBackgroundThread Handler handler,
+    BackAnimationController(
+            @NonNull ShellInit shellInit,
+            @NonNull @ShellMainThread ShellExecutor shellExecutor,
+            @NonNull @ShellBackgroundThread Handler bgHandler,
             @NonNull SurfaceControl.Transaction transaction,
             @NonNull IActivityTaskManager activityTaskManager,
             Context context, ContentResolver contentResolver) {
@@ -150,7 +156,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mTransaction = transaction;
         mActivityTaskManager = activityTaskManager;
         mContext = context;
-        setupAnimationDeveloperSettingsObserver(contentResolver, handler);
+        mContentResolver = contentResolver;
+        mBgHandler = bgHandler;
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    private void onInit() {
+        setupAnimationDeveloperSettingsObserver(mContentResolver, mBgHandler);
     }
 
     private void setupAnimationDeveloperSettingsObserver(

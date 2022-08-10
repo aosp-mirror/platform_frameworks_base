@@ -56,7 +56,9 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
 
@@ -85,6 +87,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
 
     private Context mContext;
 
+    private final ShellCommandHandler mShellCommandHandler;
     private final ShellController mShellController;
     private final AccessibilityManager mAccessibilityManager;
     private final DisplayController mDisplayController;
@@ -192,8 +195,9 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
     /**
      * Creates {@link OneHandedController}, returns {@code null} if the feature is not supported.
      */
-    public static OneHandedController create(
-            Context context, ShellController shellController, WindowManager windowManager,
+    public static OneHandedController create(Context context,
+            ShellInit shellInit, ShellCommandHandler shellCommandHandler,
+            ShellController shellController, WindowManager windowManager,
             DisplayController displayController, DisplayLayout displayLayout,
             TaskStackListenerImpl taskStackListener,
             InteractionJankMonitor jankMonitor, UiEventLogger uiEventLogger,
@@ -213,14 +217,16 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
                 context, displayLayout, settingsUtil, animationController, tutorialHandler,
                 jankMonitor, mainExecutor);
         OneHandedUiEventLogger oneHandedUiEventsLogger = new OneHandedUiEventLogger(uiEventLogger);
-        return new OneHandedController(context, shellController, displayController, organizer,
-                touchHandler, tutorialHandler, settingsUtil, accessibilityUtil, timeoutHandler,
-                oneHandedState, oneHandedUiEventsLogger, taskStackListener,
-                mainExecutor, mainHandler);
+        return new OneHandedController(context, shellInit, shellCommandHandler, shellController,
+                displayController, organizer, touchHandler, tutorialHandler, settingsUtil,
+                accessibilityUtil, timeoutHandler, oneHandedState, oneHandedUiEventsLogger,
+                taskStackListener, mainExecutor, mainHandler);
     }
 
     @VisibleForTesting
     OneHandedController(Context context,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             DisplayController displayController,
             OneHandedDisplayAreaOrganizer displayAreaOrganizer,
@@ -235,6 +241,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
             ShellExecutor mainExecutor,
             Handler mainHandler) {
         mContext = context;
+        mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
         mOneHandedSettingsUtil = settingsUtil;
         mOneHandedAccessibilityUtil = oneHandedAccessibilityUtil;
@@ -247,8 +254,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         mMainHandler = mainHandler;
         mOneHandedUiEventLogger = uiEventsLogger;
         mTaskStackListener = taskStackListener;
+        mAccessibilityManager = AccessibilityManager.getInstance(mContext);
 
-        mDisplayController.addDisplayWindowListener(mDisplaysChangedListener);
         final float offsetPercentageConfig = context.getResources().getFraction(
                 R.fraction.config_one_handed_offset, 1, 1);
         final int sysPropPercentageConfig = SystemProperties.getInt(
@@ -268,6 +275,12 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
                 getObserver(this::onSwipeToNotificationEnabledChanged);
         mShortcutEnabledObserver = getObserver(this::onShortcutEnabledChanged);
 
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    private void onInit() {
+        mShellCommandHandler.addDumpCallback(this::dump, this);
+        mDisplayController.addDisplayWindowListener(mDisplaysChangedListener);
         mDisplayController.addDisplayChangingController(this);
         setupCallback();
         registerSettingObservers(mUserId);
@@ -275,7 +288,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         updateSettings();
         updateDisplayLayout(mContext.getDisplayId());
 
-        mAccessibilityManager = AccessibilityManager.getInstance(context);
         mAccessibilityManager.addAccessibilityStateChangeListener(
                 mAccessibilityStateChangeListener);
 
@@ -623,7 +635,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         updateOneHandedEnabled();
     }
 
-    public void dump(@NonNull PrintWriter pw) {
+    public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = "  ";
         pw.println();
         pw.println(TAG);
