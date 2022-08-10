@@ -55,6 +55,15 @@ public final class ContentCaptureEvent implements Parcelable {
     /**
      * Called when a node has been added to the screen and is visible to the user.
      *
+     * On API level 33, this event may be re-sent with additional information if a view's children
+     * have changed, e.g. scrolling Views inside of a ListView. This information will be stored in
+     * the extras Bundle associated with the event's ViewNode. Within the Bundle, the
+     * "android.view.ViewStructure.extra.ACTIVE_CHILDREN_IDS" key may be used to get a list of
+     * Autofill IDs of active child views, and the
+     * "android.view.ViewStructure.extra.FIRST_ACTIVE_POSITION" key may be used to get the 0-based
+     * position of the first active child view in the list relative to the positions of child views
+     * in the container View's dataset.
+     *
      * <p>The metadata of the node is available through {@link #getViewNode()}.
      */
     public static final int TYPE_VIEW_APPEARED = 1;
