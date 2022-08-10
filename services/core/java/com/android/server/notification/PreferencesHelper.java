@@ -86,6 +86,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -1327,16 +1328,17 @@ public class PreferencesHelper implements RankingConfig {
                 return null;
             }
             NotificationChannelGroup group = r.groups.get(groupId).clone();
-            group.setChannels(new ArrayList<>());
+            ArrayList channels = new ArrayList();
             int N = r.channels.size();
             for (int i = 0; i < N; i++) {
                 final NotificationChannel nc = r.channels.valueAt(i);
                 if (includeDeleted || !nc.isDeleted()) {
                     if (groupId.equals(nc.getGroup())) {
-                        group.addChannel(nc);
+                        channels.add(nc);
                     }
                 }
             }
+            group.setChannels(channels);
             return group;
         }
     }
@@ -1349,7 +1351,10 @@ public class PreferencesHelper implements RankingConfig {
             if (r == null) {
                 return null;
             }
-            return r.groups.get(groupId);
+            if (r.groups.get(groupId) != null) {
+                 return r.groups.get(groupId).clone();
+            }
+            return null;
         }
     }
 
@@ -1357,44 +1362,48 @@ public class PreferencesHelper implements RankingConfig {
     public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid, boolean includeDeleted, boolean includeNonGrouped, boolean includeEmpty) {
         Objects.requireNonNull(pkg);
-        Map<String, NotificationChannelGroup> groups = new ArrayMap<>();
+        List<NotificationChannelGroup> groups = new ArrayList<>();
         synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return ParceledListSlice.emptyList();
             }
-            NotificationChannelGroup nonGrouped = new NotificationChannelGroup(null, null);
+            Map<String, ArrayList<NotificationChannel>> groupedChannels = new HashMap();
             int N = r.channels.size();
             for (int i = 0; i < N; i++) {
                 final NotificationChannel nc = r.channels.valueAt(i);
                 if (includeDeleted || !nc.isDeleted()) {
                     if (nc.getGroup() != null) {
                         if (r.groups.get(nc.getGroup()) != null) {
-                            NotificationChannelGroup ncg = groups.get(nc.getGroup());
-                            if (ncg == null) {
-                                ncg = r.groups.get(nc.getGroup()).clone();
-                                ncg.setChannels(new ArrayList<>());
-                                groups.put(nc.getGroup(), ncg);
-
-                            }
-                            ncg.addChannel(nc);
+                            ArrayList<NotificationChannel> channels = groupedChannels.getOrDefault(
+                                    nc.getGroup(), new ArrayList<>());
+                            channels.add(nc);
+                            groupedChannels.put(nc.getGroup(), channels);
                         }
                     } else {
-                        nonGrouped.addChannel(nc);
+                        ArrayList<NotificationChannel> channels = groupedChannels.getOrDefault(
+                            null, new ArrayList<>());
+                        channels.add(nc);
+                        groupedChannels.put(null, channels);
                     }
                 }
             }
-            if (includeNonGrouped && nonGrouped.getChannels().size() > 0) {
-                groups.put(null, nonGrouped);
-            }
-            if (includeEmpty) {
-                for (NotificationChannelGroup group : r.groups.values()) {
-                    if (!groups.containsKey(group.getId())) {
-                        groups.put(group.getId(), group);
-                    }
+            for (NotificationChannelGroup group : r.groups.values()) {
+                ArrayList<NotificationChannel> channels =
+                        groupedChannels.getOrDefault(group.getId(), new ArrayList<>());
+                if (includeEmpty || !channels.isEmpty()) {
+                    NotificationChannelGroup clone = group.clone();
+                    clone.setChannels(channels);
+                    groups.add(clone);
                 }
             }
-            return new ParceledListSlice<>(new ArrayList<>(groups.values()));
+
+            if (includeNonGrouped && groupedChannels.containsKey(null)) {
+                NotificationChannelGroup nonGrouped = new NotificationChannelGroup(null, null);
+                nonGrouped.setChannels(groupedChannels.get(null));
+                groups.add(nonGrouped);
+            }
+            return new ParceledListSlice<>(groups);
         }
     }
 
