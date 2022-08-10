@@ -775,6 +775,14 @@ public final class DeviceConfig {
      */
     public static final String NAMESPACE_WEAR = "wear";
 
+    /**
+     * Namespace for the input method manager platform features.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String NAMESPACE_INPUT_METHOD_MANAGER = "input_method_manager";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =

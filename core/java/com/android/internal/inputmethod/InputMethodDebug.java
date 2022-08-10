@@ -254,6 +254,8 @@ public final class InputMethodDebug {
                 return "HIDE_SOFT_INPUT_EXTRACT_INPUT_CHANGED";
             case SoftInputShowHideReason.HIDE_SOFT_INPUT_IMM_DEPRECATION:
                 return "HIDE_SOFT_INPUT_IMM_DEPRECATION";
+            case SoftInputShowHideReason.HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR:
+                return "HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR";
             default:
                 return "Unknown=" + reason;
         }
