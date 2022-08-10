@@ -41,7 +41,9 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +62,10 @@ public class OneHandedStateTest extends OneHandedTestCase {
     OneHandedTimeoutHandler mSpiedTimeoutHandler;
     OneHandedState mSpiedState;
 
+    @Mock
+    ShellInit mMockShellInit;
+    @Mock
+    ShellCommandHandler mMockShellCommandHandler;
     @Mock
     ShellController mMockShellController;
     @Mock
@@ -111,6 +117,8 @@ public class OneHandedStateTest extends OneHandedTestCase {
         mOneHandedAccessibilityUtil = new OneHandedAccessibilityUtil(mContext);
         mSpiedOneHandedController = spy(new OneHandedController(
                 mContext,
+                mMockShellInit,
+                mMockShellCommandHandler,
                 mMockShellController,
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,

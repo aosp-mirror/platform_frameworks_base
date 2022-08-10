@@ -43,7 +43,7 @@
         android:id="@+id/date">
         <Layout
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="@dimen/qs_header_non_clickable_element_height"
             app:layout_constrainedWidth="true"
             app:layout_constraintStart_toEndOf="@id/clock"
             app:layout_constraintEnd_toStartOf="@id/barrier"
@@ -61,7 +61,7 @@
             app:layout_constraintHeight_min="@dimen/qs_header_non_clickable_element_height"
             app:layout_constraintStart_toEndOf="@id/date"
             app:layout_constraintEnd_toStartOf="@id/batteryRemainingIcon"
-            app:layout_constraintTop_toTopOf="@id/date"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="1"
             />
@@ -76,7 +76,7 @@
             app:layout_constraintHeight_min="@dimen/qs_header_non_clickable_element_height"
             app:layout_constraintStart_toEndOf="@id/statusIcons"
             app:layout_constraintEnd_toEndOf="@id/end_guide"
-            app:layout_constraintTop_toTopOf="@id/date"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="1"
             />
@@ -100,8 +100,8 @@
             android:layout_height="0dp"
             app:layout_constraintStart_toEndOf="@id/date"
             app:layout_constraintEnd_toEndOf="@id/end_guide"
-            app:layout_constraintTop_toTopOf="@id/date"
-            app:layout_constraintBottom_toBottomOf="@id/date"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="1"
         />
     </Constraint>

@@ -100,4 +100,14 @@ oneway interface IOverviewProxy {
      * Sent when the desired dark intensity of the nav buttons has changed
      */
     void onNavButtonsDarkIntensityChanged(float darkIntensity) = 22;
+
+     /**
+      * Sent when screen started turning on.
+      */
+     void onScreenTurningOn() = 23;
+
+     /**
+      * Sent when screen started turning off.
+      */
+     void onScreenTurningOff() = 24;
 }
