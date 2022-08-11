@@ -220,16 +220,40 @@ public class GameManagerShellCommand extends ShellCommand {
         final GameManagerService gameManagerService = (GameManagerService)
                 ServiceManager.getService(Context.GAME_SERVICE);
 
+        boolean batteryModeSupported = false;
+        boolean perfModeSupported = false;
+        int [] modes = gameManagerService.getAvailableGameModes(packageName);
+
+        for (int mode : modes) {
+            if (mode == GameManager.GAME_MODE_PERFORMANCE) {
+                perfModeSupported = true;
+            } else if (mode == GameManager.GAME_MODE_BATTERY) {
+                batteryModeSupported = true;
+            }
+        }
+
         switch (gameMode.toLowerCase(Locale.getDefault())) {
             case "2":
             case "performance":
-                gameManagerService.setGameModeConfigOverride(packageName, userId,
-                        GameManager.GAME_MODE_PERFORMANCE, fpsStr, downscaleRatio);
+                if (perfModeSupported) {
+                    gameManagerService.setGameModeConfigOverride(packageName, userId,
+                            GameManager.GAME_MODE_PERFORMANCE, fpsStr, downscaleRatio);
+                } else {
+                    pw.println("Game mode: " + gameMode + " not supported by "
+                            + packageName);
+                    return -1;
+                }
                 break;
             case "3":
             case "battery":
-                gameManagerService.setGameModeConfigOverride(packageName, userId,
-                        GameManager.GAME_MODE_BATTERY, fpsStr, downscaleRatio);
+                if (batteryModeSupported) {
+                    gameManagerService.setGameModeConfigOverride(packageName, userId,
+                            GameManager.GAME_MODE_BATTERY, fpsStr, downscaleRatio);
+                } else {
+                    pw.println("Game mode: " + gameMode + " not supported by "
+                            + packageName);
+                    return -1;
+                }
                 break;
             default:
                 pw.println("Invalid game mode: " + gameMode);
