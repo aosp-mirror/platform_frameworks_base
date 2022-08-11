@@ -298,7 +298,7 @@ public final class StorageEventHelper extends StorageEventListener {
             packageNames[i] = pkg.getPackageName();
             packageUids[i] = pkg.getUid();
         }
-        mBroadcastHelper.sendResourcesChangedBroadcast(mPm.snapshotComputer(), mediaStatus,
+        mBroadcastHelper.sendResourcesChangedBroadcast(mPm::snapshotComputer, mediaStatus,
                 replacing, packageNames, packageUids);
     }
 
