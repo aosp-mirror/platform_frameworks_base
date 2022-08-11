@@ -894,6 +894,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         });
         mShouldUpdateRecents = false;
+        mIsDividerRemoteAnimating = false;
 
         if (childrenToTop == null) {
             mSideStage.removeAllTasks(wct, false /* toTop */);
