@@ -269,6 +269,20 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Sets whether a task should be translucent. When {@code false}, the existing translucent of
+     * the task applies, but when {@code true} the task will be forced to be translucent.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setForceTranslucent(
+            @NonNull WindowContainerToken container, boolean forceTranslucent) {
+        Change chg = getOrCreateChange(container.asBinder());
+        chg.mForceTranslucent = forceTranslucent;
+        chg.mChangeMask |= Change.CHANGE_FORCE_TRANSLUCENT;
+        return this;
+    }
+
+    /**
      * Used in conjunction with a shell-transition call (usually finishTransition). This is
      * basically a message to the transition system that a particular task should NOT go into
      * PIP even though it normally would. This is to deal with some edge-case situations where
@@ -834,11 +848,13 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int CHANGE_BOUNDS_TRANSACTION_RECT = 1 << 4;
         public static final int CHANGE_IGNORE_ORIENTATION_REQUEST = 1 << 5;
         public static final int CHANGE_FORCE_NO_PIP = 1 << 6;
+        public static final int CHANGE_FORCE_TRANSLUCENT = 1 << 7;
 
         private final Configuration mConfiguration = new Configuration();
         private boolean mFocusable = true;
         private boolean mHidden = false;
         private boolean mIgnoreOrientationRequest = false;
+        private boolean mForceTranslucent = false;
 
         private int mChangeMask = 0;
         private @ActivityInfo.Config int mConfigSetMask = 0;
@@ -858,6 +874,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mFocusable = in.readBoolean();
             mHidden = in.readBoolean();
             mIgnoreOrientationRequest = in.readBoolean();
+            mForceTranslucent = in.readBoolean();
             mChangeMask = in.readInt();
             mConfigSetMask = in.readInt();
             mWindowSetMask = in.readInt();
@@ -902,6 +919,9 @@ public final class WindowContainerTransaction implements Parcelable {
             }
             if ((other.mChangeMask & CHANGE_IGNORE_ORIENTATION_REQUEST) != 0) {
                 mIgnoreOrientationRequest = other.mIgnoreOrientationRequest;
+            }
+            if ((other.mChangeMask & CHANGE_FORCE_TRANSLUCENT) != 0) {
+                mForceTranslucent = other.mForceTranslucent;
             }
             mChangeMask |= other.mChangeMask;
             if (other.mActivityWindowingMode >= 0) {
@@ -951,6 +971,15 @@ public final class WindowContainerTransaction implements Parcelable {
                         + "Check CHANGE_IGNORE_ORIENTATION_REQUEST first");
             }
             return mIgnoreOrientationRequest;
+        }
+
+        /** Gets the requested force translucent state. */
+        public boolean getForceTranslucent() {
+            if ((mChangeMask & CHANGE_FORCE_TRANSLUCENT) == 0) {
+                throw new RuntimeException("Force translucent not set. "
+                        + "Check CHANGE_FORCE_TRANSLUCENT first");
+            }
+            return mForceTranslucent;
         }
 
         public int getChangeMask() {
@@ -1030,6 +1059,7 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeBoolean(mFocusable);
             dest.writeBoolean(mHidden);
             dest.writeBoolean(mIgnoreOrientationRequest);
+            dest.writeBoolean(mForceTranslucent);
             dest.writeInt(mChangeMask);
             dest.writeInt(mConfigSetMask);
             dest.writeInt(mWindowSetMask);
