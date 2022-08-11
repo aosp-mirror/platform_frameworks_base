@@ -22,6 +22,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.os.Bundle;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -30,9 +31,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.os.Trace;
 import android.view.Window;
 import android.view.WindowManager;
+
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
@@ -280,6 +281,17 @@ public class TouchLatencyActivity extends Activity {
         WindowManager.LayoutParams params = w.getAttributes();
 
         int modeIndex = (mCurrentModeIndex + 1) % mDisplayModes.length;
+        while (modeIndex != mCurrentModeIndex) {
+            // skip modes with different resolutions
+            Mode currentMode = mDisplayModes[mCurrentModeIndex];
+            Mode nextMode = mDisplayModes[modeIndex];
+            if (currentMode.getPhysicalHeight() == nextMode.getPhysicalHeight()
+                    && currentMode.getPhysicalWidth() == nextMode.getPhysicalWidth()) {
+                break;
+            }
+            modeIndex = (modeIndex + 1) % mDisplayModes.length;
+        }
+
         params.preferredDisplayModeId = mDisplayModes[modeIndex].getModeId();
         w.setAttributes(params);
 
