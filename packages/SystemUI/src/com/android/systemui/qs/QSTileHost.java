@@ -110,6 +110,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private Context mUserContext;
     private UserTracker mUserTracker;
     private SecureSettings mSecureSettings;
+    // Keep track of whether mTilesList contains the same information as the Settings value.
+    // This is a performance optimization to reduce the number of blocking calls to Settings from
+    // main thread.
+    // This is enforced by only cleaning the flag at the end of a successful run of #onTuningChanged
+    private boolean mTilesListDirty = true;
 
     private final TileServiceRequestController mTileServiceRequestController;
     private TileLifecycleManager.Factory mTileLifeCycleManagerFactory;
@@ -374,6 +379,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                 // the ones that are in the setting, update the Setting.
                 saveTilesToSettings(mTileSpecs);
             }
+            mTilesListDirty = false;
             for (int i = 0; i < mCallbacks.size(); i++) {
                 mCallbacks.get(i).onTilesChanged();
             }
@@ -437,6 +443,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
 
+    // When calling this, you may want to modify mTilesListDirty accordingly.
     @MainThread
     private void saveTilesToSettings(List<String> tileSpecs) {
         mSecureSettings.putStringForUser(TILES_SETTING, TextUtils.join(",", tileSpecs),
@@ -446,9 +453,15 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
 
     @MainThread
     private void changeTileSpecs(Predicate<List<String>> changeFunction) {
-        final String setting = mSecureSettings.getStringForUser(TILES_SETTING, mCurrentUser);
-        final List<String> tileSpecs = loadTileSpecs(mContext, setting);
+        final List<String> tileSpecs;
+        if (!mTilesListDirty) {
+            tileSpecs = new ArrayList<>(mTileSpecs);
+        } else {
+            tileSpecs = loadTileSpecs(mContext,
+                    mSecureSettings.getStringForUser(TILES_SETTING, mCurrentUser));
+        }
         if (changeFunction.test(tileSpecs)) {
+            mTilesListDirty = true;
             saveTilesToSettings(tileSpecs);
         }
     }
@@ -508,6 +521,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             }
         }
         if (DEBUG) Log.d(TAG, "saveCurrentTiles " + newTiles);
+        mTilesListDirty = true;
         saveTilesToSettings(newTiles);
     }
 
