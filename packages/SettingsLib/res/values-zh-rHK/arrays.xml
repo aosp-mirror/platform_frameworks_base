@@ -85,10 +85,26 @@
     <item msgid="7073042887003102964">"map13"</item>
     <item msgid="8147982633566548515">"map14"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_titles:6 (328951785723550863) -->
-    <!-- no translation found for bluetooth_a2dp_codec_titles:7 (506175145534048710) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:6 (3940992993241040716) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:7 (7940970833006181407) -->
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="2494959071796102843">"使用系統選擇 (預設)"</item>
+    <item msgid="4055460186095649420">"SBC"</item>
+    <item msgid="720249083677397051">"AAC"</item>
+    <item msgid="1049450003868150455">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> 音訊"</item>
+    <item msgid="2908219194098827570">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> 音訊"</item>
+    <item msgid="3825367753087348007">"LDAC"</item>
+    <item msgid="328951785723550863">"LC3"</item>
+    <item msgid="506175145534048710">"Opus"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="8868109554557331312">"使用系統選擇 (預設)"</item>
+    <item msgid="9024885861221697796">"SBC"</item>
+    <item msgid="4688890470703790013">"AAC"</item>
+    <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> 音訊"</item>
+    <item msgid="3517061573669307965">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> 音訊"</item>
+    <item msgid="2553206901068987657">"LDAC"</item>
+    <item msgid="3940992993241040716">"LC3"</item>
+    <item msgid="7940970833006181407">"Opus"</item>
+  </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="926809261293414607">"使用系統選擇 (預設)"</item>
     <item msgid="8003118270854840095">"44.1 kHz"</item>
