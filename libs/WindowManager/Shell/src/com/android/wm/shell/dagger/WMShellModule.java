@@ -52,6 +52,7 @@ import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler;
+import com.android.wm.shell.fullscreen.FullscreenTaskListener;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -228,6 +229,7 @@ public abstract class WMShellModule {
             ShellInit shellInit,
             Transitions transitions,
             WindowDecorViewModel<?> windowDecorViewModel,
+            FullscreenTaskListener<?> fullscreenTaskListener,
             FreeformTaskListener<?> freeformTaskListener) {
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
         //                    override for this controller from the base module
@@ -235,7 +237,7 @@ public abstract class WMShellModule {
                 ? shellInit
                 : null;
         return new FreeformTaskTransitionHandler(init, transitions,
-                windowDecorViewModel, freeformTaskListener);
+                windowDecorViewModel, fullscreenTaskListener, freeformTaskListener);
     }
 
     //
