@@ -25,7 +25,6 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
-import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
@@ -284,6 +283,7 @@ public class BackupManagerService extends IBackupManager.Stub {
      */
     @Override
     public boolean isUserReadyForBackup(int userId) {
+        enforceCallingPermissionOnUserId(userId, "isUserReadyForBackup()");
         return mUserServices.get(UserHandle.USER_SYSTEM) != null
                 && mUserServices.get(userId) != null;
     }
