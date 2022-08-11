@@ -22,6 +22,7 @@ import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN;
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_OCCLUSION;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_UNLOCK_ANIMATION;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED;
@@ -845,6 +846,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                     if (launchIsFullScreen) {
                         mCentralSurfaces.instantCollapseNotificationPanel();
                     }
+
+                    mInteractionJankMonitor.end(CUJ_LOCKSCREEN_OCCLUSION);
                 }
 
                 @NonNull
@@ -991,6 +994,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                     setOccluded(isKeyguardOccluded /* isOccluded */, false /* animate */);
                     Log.d(TAG, "Unocclude animation cancelled. Occluded state is now: "
                             + mOccluded);
+
+                    mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_OCCLUSION);
                 }
 
                 @Override
@@ -999,6 +1004,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                         RemoteAnimationTarget[] nonApps,
                         IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
                     Log.d(TAG, "UnoccludeAnimator#onAnimationStart. Set occluded = false.");
+                    mInteractionJankMonitor.begin(
+                            createInteractionJankMonitorConf(CUJ_LOCKSCREEN_OCCLUSION)
+                                    .setTag("UNOCCLUDE"));
                     setOccluded(false /* isOccluded */, true /* animate */);
 
                     if (apps == null || apps.length == 0 || apps[0] == null) {
@@ -1057,6 +1065,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                                 try {
                                     finishedCallback.onAnimationFinished();
                                     mUnoccludeAnimator = null;
+
+                                    mInteractionJankMonitor.end(CUJ_LOCKSCREEN_OCCLUSION);
                                 } catch (RemoteException e) {
                                     e.printStackTrace();
                                 }
@@ -2573,7 +2583,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                         };
                 try {
                     mInteractionJankMonitor.begin(
-                            createInteractionJankMonitorConf("RunRemoteAnimation"));
+                            createInteractionJankMonitorConf(
+                                    CUJ_LOCKSCREEN_UNLOCK_ANIMATION, "RunRemoteAnimation"));
                     runner.onAnimationStart(WindowManager.TRANSIT_KEYGUARD_GOING_AWAY, apps,
                             wallpapers, nonApps, callback);
                 } catch (RemoteException e) {
@@ -2589,7 +2600,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 mSurfaceBehindRemoteAnimationRunning = true;
 
                 mInteractionJankMonitor.begin(
-                        createInteractionJankMonitorConf("DismissPanel"));
+                        createInteractionJankMonitorConf(
+                                CUJ_LOCKSCREEN_UNLOCK_ANIMATION, "DismissPanel"));
 
                 // Pass the surface and metadata to the unlock animation controller.
                 mKeyguardUnlockAnimationControllerLazy.get()
@@ -2597,7 +2609,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                                 apps, startTime, mSurfaceBehindRemoteAnimationRequested);
             } else {
                 mInteractionJankMonitor.begin(
-                        createInteractionJankMonitorConf("RemoteAnimationDisabled"));
+                        createInteractionJankMonitorConf(
+                                CUJ_LOCKSCREEN_UNLOCK_ANIMATION, "RemoteAnimationDisabled"));
 
                 mKeyguardViewControllerLazy.get().hide(startTime, fadeoutDuration);
 
@@ -2677,10 +2690,15 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         sendUserPresentBroadcast();
     }
 
-    private Configuration.Builder createInteractionJankMonitorConf(String tag) {
-        return Configuration.Builder.withView(CUJ_LOCKSCREEN_UNLOCK_ANIMATION,
-                mKeyguardViewControllerLazy.get().getViewRootImpl().getView())
-                .setTag(tag);
+    private Configuration.Builder createInteractionJankMonitorConf(int cuj) {
+        return createInteractionJankMonitorConf(cuj, null /* tag */);
+    }
+
+    private Configuration.Builder createInteractionJankMonitorConf(int cuj, @Nullable String tag) {
+        final Configuration.Builder builder = Configuration.Builder.withView(
+                cuj, mKeyguardViewControllerLazy.get().getViewRootImpl().getView());
+
+        return tag != null ? builder.setTag(tag) : builder;
     }
 
     /**
@@ -3291,6 +3309,10 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
             super.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback);
 
+            mInteractionJankMonitor.begin(
+                    createInteractionJankMonitorConf(CUJ_LOCKSCREEN_OCCLUSION)
+                            .setTag("OCCLUDE"));
+
             // This is the first signal we have from WM that we're going to be occluded. Set our
             // internal state to reflect that immediately, vs. waiting for the launch animator to
             // begin. Otherwise, calls to setShowingLocked, etc. will not know that we're about to
@@ -3307,6 +3329,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                     + "Setting occluded state to: " + isKeyguardOccluded);
             setOccluded(isKeyguardOccluded /* occluded */, false /* animate */);
 
+            mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_OCCLUSION);
         }
     }
 }
