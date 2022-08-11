@@ -5343,7 +5343,7 @@ class Task extends TaskFragment {
                     abort = true;
                 }
                 if (abort) {
-                    Slog.e(TAG, "Cannot navigateUpTo, intent =" + destIntent);
+                    android.util.EventLog.writeEvent(0x534e4554, "238605611", callingUid, "");
                     foundParentInTask = false;
                 } else {
                     parent.deliverNewIntentLocked(callingUid, destIntent, destGrants,
