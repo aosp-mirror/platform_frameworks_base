@@ -18,7 +18,7 @@
 
     <application android:label="SurfaceFlingerPerfTests">
         <uses-library android:name="android.test.runner" />
-        <activity android:name="android.perftests.utils.SurfaceFlingerTestActivity"
+        <activity android:name="android.surfaceflinger.SurfaceFlingerTestActivity"
                   android:exported="true">
 
             <intent-filter>
