@@ -35,10 +35,20 @@
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <LinearLayout
+        android:id="@+id/dream_overlay_extra_items"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginEnd="@dimen/dream_overlay_status_bar_extra_margin"
+        app:layout_constraintEnd_toStartOf="@+id/dream_overlay_system_status" />
+
+    <LinearLayout
         android:id="@+id/dream_overlay_system_status"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="horizontal"
+        android:layout_marginStart="@dimen/dream_overlay_status_bar_extra_margin"
         app:layout_constraintEnd_toEndOf="parent">
 
         <com.android.systemui.statusbar.AlphaOptimizedImageView

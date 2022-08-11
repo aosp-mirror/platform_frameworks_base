@@ -1392,17 +1392,25 @@ public final class CachedAppOptimizer {
 
     void cancelAllCompactions(CancelCompactReason reason) {
         synchronized (mProcLock) {
-            while(!mPendingCompactionProcesses.isEmpty()) {
-                cancelCompactionForProcess(mPendingCompactionProcesses.get(0), reason);
+            int size = mPendingCompactionProcesses.size();
+            ProcessRecord record;
+            for (int i=0; i < size; ++i) {
+                record = mPendingCompactionProcesses.get(i);
+                cancelCompactionForProcess(record, reason);
+                // The process record is kept alive after compactions are cleared,
+                // so make sure to reset the compaction state to avoid skipping any future
+                // compactions due to a stale value here.
+                record.mOptRecord.setHasPendingCompact(false);
             }
             mPendingCompactionProcesses.clear();
         }
+        cancelCompaction();
     }
 
     @GuardedBy("mProcLock")
     void cancelCompactionForProcess(ProcessRecord app, CancelCompactReason cancelReason) {
         boolean cancelled = false;
-        if (mPendingCompactionProcesses.contains(app)) {
+        if (!mPendingCompactionProcesses.isEmpty() && mPendingCompactionProcesses.contains(app)) {
             app.mOptRecord.setHasPendingCompact(false);
             mPendingCompactionProcesses.remove(app);
             cancelled = true;

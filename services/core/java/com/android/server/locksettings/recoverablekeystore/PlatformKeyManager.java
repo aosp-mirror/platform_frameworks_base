@@ -75,7 +75,6 @@ public class PlatformKeyManager {
             "com.android.server.locksettings.recoverablekeystore/platform/";
     private static final String ENCRYPT_KEY_ALIAS_SUFFIX = "encrypt";
     private static final String DECRYPT_KEY_ALIAS_SUFFIX = "decrypt";
-    private static final int USER_AUTHENTICATION_VALIDITY_DURATION_SECONDS = 15;
     private static final String KEY_WRAP_CIPHER_ALGORITHM = "AES/GCM/NoPadding";
     private static final int GCM_TAG_LENGTH_BITS = 128;
     // Only used for checking if a key is usable
@@ -184,7 +183,6 @@ public class PlatformKeyManager {
             invalidatePlatformKey(userId, generationId);
             nextId = generationId + 1;
         }
-        generationId = Math.max(generationId, MIN_GENERATION_ID_FOR_UNLOCKED_DEVICE_REQUIRED);
         generateAndLoadKey(userId, nextId);
     }
 

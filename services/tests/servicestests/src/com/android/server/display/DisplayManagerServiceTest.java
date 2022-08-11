@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 
 import static com.android.server.display.VirtualDisplayAdapter.UNIQUE_ID_PREFIX;
 
@@ -577,6 +578,7 @@ public class DisplayManagerServiceTest {
 
         // This is effectively the DisplayManager service published to ServiceManager.
         DisplayManagerService.BinderService binderService = displayManager.new BinderService();
+        DisplayManagerService.LocalService localDisplayManager = displayManager.new LocalService();
 
         final String uniqueId = "uniqueId --- displayIdToMirrorTest";
         final int width = 600;
@@ -606,10 +608,56 @@ public class DisplayManagerServiceTest {
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
 
         // The displayId to mirror should be a default display if there is none initially.
-        assertEquals(displayManager.getDisplayIdToMirrorInternal(firstDisplayId),
+        assertEquals(localDisplayManager.getDisplayIdToMirror(firstDisplayId),
                 Display.DEFAULT_DISPLAY);
-        assertEquals(displayManager.getDisplayIdToMirrorInternal(secondDisplayId),
+        assertEquals(localDisplayManager.getDisplayIdToMirror(secondDisplayId),
                 firstDisplayId);
+    }
+
+    @Test
+    public void testGetDisplayIdToMirror() throws Exception {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+
+        // This is effectively the DisplayManager service published to ServiceManager.
+        DisplayManagerService.BinderService binderService = displayManager.new BinderService();
+        DisplayManagerService.LocalService localDisplayManager = displayManager.new LocalService();
+
+        final String uniqueId = "uniqueId --- displayIdToMirrorTest";
+        final int width = 600;
+        final int height = 800;
+        final int dpi = 320;
+
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, width, height, dpi)
+                .setUniqueId(uniqueId)
+                .setFlags(VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
+        final int firstDisplayId = binderService.createVirtualDisplay(builder.build(),
+                mMockAppToken /* callback */, null /* projection */, PACKAGE_NAME);
+
+        // The second virtual display requests to mirror the first virtual display.
+        final String uniqueId2 = "uniqueId --- displayIdToMirrorTest #2";
+        when(mMockAppToken2.asBinder()).thenReturn(mMockAppToken2);
+        final VirtualDisplayConfig.Builder builder2 = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, width, height, dpi)
+                .setUniqueId(uniqueId2)
+                .setWindowManagerMirroring(true);
+        final int secondDisplayId = binderService.createVirtualDisplay(builder2.build(),
+                mMockAppToken2 /* callback */, null /* projection */,
+                PACKAGE_NAME);
+        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+
+        // flush the handler
+        displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
+
+        // The displayId to mirror should be a invalid since the display had flag OWN_CONTENT_ONLY
+        assertEquals(localDisplayManager.getDisplayIdToMirror(firstDisplayId),
+                Display.INVALID_DISPLAY);
+        // The second display has mirroring managed by WindowManager so the mirror displayId should
+        // be invalid.
+        assertEquals(localDisplayManager.getDisplayIdToMirror(secondDisplayId),
+                Display.INVALID_DISPLAY);
     }
 
     /**

@@ -19,6 +19,7 @@ package com.android.server.wm;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -84,6 +85,8 @@ public class ContentRecorderTests extends WindowTestsBase {
                 mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
                 mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().height());
         mRecordedSurface = surfaceControlMirrors(sSurfaceSize);
+
+        doReturn(INVALID_DISPLAY).when(mWm.mDisplayManagerInternal).getDisplayIdToMirror(anyInt());
 
         // GIVEN the VirtualDisplay associated with the session (so the display has state ON).
         VirtualDisplay virtualDisplay = mWm.mDisplayManager.createVirtualDisplay("VirtualDisplay",

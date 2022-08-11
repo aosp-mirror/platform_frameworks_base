@@ -325,7 +325,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         public boolean checkApplicationCallbackRegistration(int priority,
                 OnBackInvokedCallback callback) {
             if (!mApplicationCallBackEnabled
-                    && !(callback instanceof CompatOnBackInvokedCallback)) {
+                    && !(callback instanceof CompatOnBackInvokedCallback)
+                    && !ALWAYS_ENFORCE_PREDICTIVE_BACK) {
                 Log.w("OnBackInvokedCallback",
                         "OnBackInvokedCallback is not enabled for the application."
                                 + "\nSet 'android:enableOnBackInvokedCallback=\"true\"' in the"

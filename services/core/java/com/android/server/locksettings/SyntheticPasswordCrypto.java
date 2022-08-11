@@ -23,6 +23,7 @@ import android.security.keystore.KeyProtection;
 import android.security.keystore2.AndroidKeyStoreLoadStoreParameter;
 import android.system.keystore2.Domain;
 import android.system.keystore2.KeyDescriptor;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
@@ -301,7 +302,7 @@ public class SyntheticPasswordCrypto {
             // Treat this as a success so we don't migrate again.
             return true;
         } else {
-            Slog.e(TAG, String.format("Failed to migrate key: %d", err));
+            Slog.e(TAG, TextUtils.formatSimple("Failed to migrate key: %d", err));
             return false;
         }
     }

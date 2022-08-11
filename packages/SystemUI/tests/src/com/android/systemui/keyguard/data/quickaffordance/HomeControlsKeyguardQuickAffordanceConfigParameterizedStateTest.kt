@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.data.repository
+package com.android.systemui.keyguard.data.quickaffordance
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -22,11 +22,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
-import com.android.systemui.keyguard.data.quickaffordance.HomeControlsKeyguardQuickAffordanceConfig
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runBlockingTest
@@ -50,18 +49,19 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
     companion object {
         @Parameters(
             name =
-                "feature enabled = {0}, has favorites = {1}, has service infos = {2} - expected" +
-                    " visible = {3}"
+                "feature enabled = {0}, has favorites = {1}, has service infos = {2}, can show" +
+                    " while locked = {3} - expected visible = {4}"
         )
         @JvmStatic
         fun data() =
-            (0 until 8)
+            (0 until 16)
                 .map { combination ->
                     arrayOf(
-                        /* isFeatureEnabled= */ combination and 0b100 != 0,
-                        /* hasFavorites= */ combination and 0b010 != 0,
-                        /* hasServiceInfos= */ combination and 0b001 != 0,
-                        /* isVisible= */ combination == 0b111,
+                        /* isFeatureEnabled= */ combination and 0b1000 != 0,
+                        /* hasFavorites= */ combination and 0b0100 != 0,
+                        /* hasServiceInfos= */ combination and 0b0010 != 0,
+                        /* canShowWhileLocked= */ combination and 0b0001 != 0,
+                        /* isVisible= */ combination == 0b1111,
                     )
                 }
                 .toList()
@@ -79,7 +79,8 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
     @JvmField @Parameter(0) var isFeatureEnabled: Boolean = false
     @JvmField @Parameter(1) var hasFavorites: Boolean = false
     @JvmField @Parameter(2) var hasServiceInfos: Boolean = false
-    @JvmField @Parameter(3) var isVisible: Boolean = false
+    @JvmField @Parameter(3) var canShowWhileLocked: Boolean = false
+    @JvmField @Parameter(4) var isVisible: Boolean = false
 
     @Before
     fun setUp() {
@@ -89,6 +90,8 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
         whenever(component.getControlsController()).thenReturn(Optional.of(controlsController))
         whenever(component.getControlsListingController())
             .thenReturn(Optional.of(controlsListingController))
+        whenever(component.canShowWhileLockedSetting)
+            .thenReturn(MutableStateFlow(canShowWhileLocked))
 
         underTest =
             HomeControlsKeyguardQuickAffordanceConfig(
@@ -111,14 +114,16 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
         val values = mutableListOf<KeyguardQuickAffordanceConfig.State>()
         val job = underTest.state.onEach(values::add).launchIn(this)
 
-        verify(controlsListingController).addCallback(callbackCaptor.capture())
-        callbackCaptor.value.onServicesUpdated(
-            if (hasServiceInfos) {
-                listOf(mock())
-            } else {
-                emptyList()
-            }
-        )
+        if (canShowWhileLocked) {
+            verify(controlsListingController).addCallback(callbackCaptor.capture())
+            callbackCaptor.value.onServicesUpdated(
+                if (hasServiceInfos) {
+                    listOf(mock())
+                } else {
+                    emptyList()
+                }
+            )
+        }
 
         assertThat(values.last())
             .isInstanceOf(

@@ -134,7 +134,6 @@ public class RecoverableKeyStoreManagerTest {
             "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
     private static final String TEST_ALIAS = "nick";
     private static final String TEST_ALIAS2 = "bob";
-    private static final int RECOVERABLE_KEY_SIZE_BYTES = 32;
     private static final int APPLICATION_KEY_SIZE_BYTES = 32;
     private static final int GENERATION_ID = 1;
     private static final byte[] NONCE = getUtf8Bytes("nonce");
@@ -503,8 +502,6 @@ public class RecoverableKeyStoreManagerTest {
 
     @Test
     public void initRecoveryService_throwsExceptionOnSmallerSerial() throws Exception {
-        int uid = Binder.getCallingUid();
-        int userId = UserHandle.getCallingUserId();
         long certSerial = 1000L;
 
         mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
@@ -636,7 +633,6 @@ public class RecoverableKeyStoreManagerTest {
             throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
-        long certSerial = 1000L;
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
 
         mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(

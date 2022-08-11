@@ -587,7 +587,7 @@ public class PlatformKeyManagerTest {
         return keyGenerator.generateKey();
     }
 
-    class PlatformKeyManagerTestable extends PlatformKeyManager {
+    static class PlatformKeyManagerTestable extends PlatformKeyManager {
         private IGateKeeperService mGateKeeperService;
 
         PlatformKeyManagerTestable(

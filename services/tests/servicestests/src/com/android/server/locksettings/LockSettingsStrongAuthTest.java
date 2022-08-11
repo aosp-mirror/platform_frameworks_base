@@ -250,8 +250,8 @@ public class LockSettingsStrongAuthTest {
         // schedule (a) an alarm for non-strong biometric fallback timeout and (b) an alarm for
         // non-strong biometric idle timeout, so later we can verify that unlocking with
         // strong biometric or primary auth will cancel those alarms
-        mStrongAuth.reportSuccessfulBiometricUnlock(false /* isStrongBiometric */, PRIMARY_USER_ID);
-        mStrongAuth.scheduleNonStrongBiometricIdleTimeout(PRIMARY_USER_ID);
+        mStrongAuth.reportSuccessfulBiometricUnlock(false /* isStrongBiometric */, userId);
+        mStrongAuth.scheduleNonStrongBiometricIdleTimeout(userId);
     }
 
     private void verifyAlarmsCancelledAndNonStrongBiometricAllowed(int userId) {
