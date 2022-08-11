@@ -557,9 +557,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void setQsExpansion(float expansion, float panelExpansionFraction,
             float proposedTranslation, float squishinessFraction) {
         float headerTranslation = mTransitioningToFullShade ? 0 : proposedTranslation;
-        float progress = mTransitioningToFullShade || mState == StatusBarState.KEYGUARD
+        float alphaProgress = mTransitioningToFullShade || mState == StatusBarState.KEYGUARD
                 ? mFullShadeProgress : panelExpansionFraction;
-        setAlphaAnimationProgress(mInSplitShade ? progress : 1);
+        setAlphaAnimationProgress(mInSplitShade ? alphaProgress : 1);
         mContainer.setExpansion(expansion);
         final float translationScaleY = (mInSplitShade
                 ? 1 : QSAnimator.SHORT_PARALLAX_AMOUNT) * (expansion - 1);
@@ -600,7 +600,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
         mQSPanelController.setIsOnKeyguard(onKeyguard);
         mFooter.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
-        mQSFooterActionController.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
+        float footerActionsExpansion =
+                onKeyguardAndExpanded ? 1 : mInSplitShade ? alphaProgress : expansion;
+        mQSFooterActionController.setExpansion(footerActionsExpansion);
         mQSPanelController.setRevealExpansion(expansion);
         mQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
         mQuickQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
