@@ -1070,8 +1070,9 @@ public interface InputConnection {
      * </p>
      * <p>
      * Note by default all of {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
-     * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS} and
-     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} are included but specifying them can
+     * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS} and
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER}, are included but specifying them can
      * filter-out others.
      * It can be CPU intensive to include all, filtering specific info is recommended.
      * </p>
@@ -1085,6 +1086,7 @@ public interface InputConnection {
      * monitoring, call {@link InputConnection#requestCursorUpdates(int)} again with this flag off.
      * <p>
      * This flag can be used together with filters: {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS},
      * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} and update flags
      * {@link #CURSOR_UPDATE_IMMEDIATE} and {@link #CURSOR_UPDATE_MONITOR}.
      * </p>
@@ -1099,6 +1101,7 @@ public interface InputConnection {
      * monitoring, call {@link InputConnection#requestCursorUpdates(int)} again with this flag off.
      * <p>
      * This flag can be combined with other filters: {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS},
      * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} and update flags
      * {@link #CURSOR_UPDATE_IMMEDIATE} and {@link #CURSOR_UPDATE_MONITOR}.
      * </p>
@@ -1114,11 +1117,28 @@ public interface InputConnection {
      * with this flag off.
      * <p>
      * This flag can be combined with other filters: {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS},
      * {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS} and update flags {@link #CURSOR_UPDATE_IMMEDIATE}
      * and {@link #CURSOR_UPDATE_MONITOR}.
      * </p>
      */
     int CURSOR_UPDATE_FILTER_INSERTION_MARKER = 1 << 4;
+
+    /**
+     * The editor is requested to call
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}
+     * with new visible line bounds {@link CursorAnchorInfo#getVisibleLineBounds()} whenever
+     * cursor/anchor position is changed, the editor or its parent is scrolled or the line bounds
+     * changed due to text updates. To disable monitoring, call
+     * {@link InputConnection#requestCursorUpdates(int)} again with this flag off.
+     * <p>
+     * This flag can be combined with other filters: {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS}, {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER}
+     * and update flags {@link #CURSOR_UPDATE_IMMEDIATE}
+     * and {@link #CURSOR_UPDATE_MONITOR}.
+     * </p>
+     */
+    int CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS = 1 << 5;
 
     /**
      * @hide
@@ -1133,8 +1153,8 @@ public interface InputConnection {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {CURSOR_UPDATE_FILTER_EDITOR_BOUNDS, CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS,
-            CURSOR_UPDATE_FILTER_INSERTION_MARKER}, flag = true,
-            prefix = { "CURSOR_UPDATE_FILTER_" })
+            CURSOR_UPDATE_FILTER_INSERTION_MARKER, CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS},
+            flag = true, prefix = { "CURSOR_UPDATE_FILTER_" })
     @interface CursorUpdateFilter{}
 
     /**

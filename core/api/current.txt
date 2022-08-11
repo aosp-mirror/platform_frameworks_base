@@ -52976,6 +52976,7 @@ package android.view.inputmethod {
     method public android.graphics.Matrix getMatrix();
     method public int getSelectionEnd();
     method public int getSelectionStart();
+    method @NonNull public java.util.List<android.graphics.RectF> getVisibleLineBounds();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.CursorAnchorInfo> CREATOR;
     field public static final int FLAG_HAS_INVISIBLE_REGION = 2; // 0x2
@@ -52986,7 +52987,9 @@ package android.view.inputmethod {
   public static final class CursorAnchorInfo.Builder {
     ctor public CursorAnchorInfo.Builder();
     method public android.view.inputmethod.CursorAnchorInfo.Builder addCharacterBounds(int, float, float, float, float, int);
+    method @NonNull public android.view.inputmethod.CursorAnchorInfo.Builder addVisibleLineBounds(float, float, float, float);
     method public android.view.inputmethod.CursorAnchorInfo build();
+    method @NonNull public android.view.inputmethod.CursorAnchorInfo.Builder clearVisibleLineBounds();
     method public void reset();
     method public android.view.inputmethod.CursorAnchorInfo.Builder setComposingText(int, CharSequence);
     method @NonNull public android.view.inputmethod.CursorAnchorInfo.Builder setEditorBoundsInfo(@Nullable android.view.inputmethod.EditorBoundsInfo);
@@ -53224,6 +53227,7 @@ package android.view.inputmethod {
     field public static final int CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS = 8; // 0x8
     field public static final int CURSOR_UPDATE_FILTER_EDITOR_BOUNDS = 4; // 0x4
     field public static final int CURSOR_UPDATE_FILTER_INSERTION_MARKER = 16; // 0x10
+    field public static final int CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS = 32; // 0x20
     field public static final int CURSOR_UPDATE_IMMEDIATE = 1; // 0x1
     field public static final int CURSOR_UPDATE_MONITOR = 2; // 0x2
     field public static final int GET_EXTRACTED_TEXT_MONITOR = 1; // 0x1
