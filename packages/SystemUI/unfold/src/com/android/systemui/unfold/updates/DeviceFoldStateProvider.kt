@@ -65,6 +65,7 @@ constructor(
     private val halfOpenedTimeoutMillis: Int = config.halfFoldedTimeoutMillis
 
     private var isFolded = false
+    private var isScreenOn = false
     private var isUnfoldHandled = true
 
     override fun start() {
@@ -197,6 +198,25 @@ constructor(
                 outputListeners.forEach { it.onFoldUpdate(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE) }
                 isUnfoldHandled = true
             }
+        }
+
+        override fun onScreenTurningOn() {
+            isScreenOn = true
+            updateHingeAngleProviderState()
+        }
+
+        override fun onScreenTurningOff() {
+            isScreenOn = false
+            updateHingeAngleProviderState()
+        }
+    }
+
+    /** While the screen is off or the device is folded, hinge angle updates are not needed. */
+    private fun updateHingeAngleProviderState() {
+        if (isScreenOn && !isFolded) {
+            hingeAngleProvider.start()
+        } else {
+            hingeAngleProvider.stop()
         }
     }
 

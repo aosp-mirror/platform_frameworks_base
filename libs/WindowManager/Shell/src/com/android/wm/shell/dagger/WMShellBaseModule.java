@@ -174,13 +174,14 @@ public abstract class WMShellBaseModule {
     @Provides
     static ShellTaskOrganizer provideShellTaskOrganizer(
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             CompatUIController compatUI,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasksOptional,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
-        return new ShellTaskOrganizer(shellInit, compatUI, unfoldAnimationController,
-                recentTasksOptional, mainExecutor);
+        return new ShellTaskOrganizer(shellInit, shellCommandHandler, compatUI,
+                unfoldAnimationController, recentTasksOptional, mainExecutor);
     }
 
     @WMSingleton
@@ -188,6 +189,7 @@ public abstract class WMShellBaseModule {
     static KidsModeTaskOrganizer provideKidsModeTaskOrganizer(
             Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             SyncTransactionQueue syncTransactionQueue,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
@@ -196,19 +198,20 @@ public abstract class WMShellBaseModule {
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler
     ) {
-        return new KidsModeTaskOrganizer(context, shellInit, syncTransactionQueue,
-                displayController, displayInsetsController, unfoldAnimationController,
-                recentTasksOptional, mainExecutor, mainHandler);
+        return new KidsModeTaskOrganizer(context, shellInit, shellCommandHandler,
+                syncTransactionQueue, displayController, displayInsetsController,
+                unfoldAnimationController, recentTasksOptional, mainExecutor, mainHandler);
     }
 
     @WMSingleton
     @Provides
     static CompatUIController provideCompatUIController(Context context,
+            ShellInit shellInit,
             ShellController shellController,
             DisplayController displayController, DisplayInsetsController displayInsetsController,
             DisplayImeController imeController, SyncTransactionQueue syncQueue,
             @ShellMainThread ShellExecutor mainExecutor, Lazy<Transitions> transitionsLazy) {
-        return new CompatUIController(context, shellController, displayController,
+        return new CompatUIController(context, shellInit, shellController, displayController,
                 displayInsetsController, imeController, syncQueue, mainExecutor, transitionsLazy);
     }
 
@@ -268,12 +271,14 @@ public abstract class WMShellBaseModule {
     @Provides
     static Optional<BackAnimationController> provideBackAnimationController(
             Context context,
+            ShellInit shellInit,
             @ShellMainThread ShellExecutor shellExecutor,
             @ShellBackgroundThread Handler backgroundHandler
     ) {
         if (BackAnimationController.IS_ENABLED) {
             return Optional.of(
-                    new BackAnimationController(shellExecutor, backgroundHandler, context));
+                    new BackAnimationController(shellInit, shellExecutor, backgroundHandler,
+                            context));
         }
         return Optional.empty();
     }
@@ -384,11 +389,14 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Optional<HideDisplayCutoutController> provideHideDisplayCutoutController(Context context,
-            ShellController shellController, DisplayController displayController,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
+            ShellController shellController,
+            DisplayController displayController,
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(
-                HideDisplayCutoutController.create(context, shellController, displayController,
-                        mainExecutor));
+                HideDisplayCutoutController.create(context, shellInit, shellCommandHandler,
+                        shellController, displayController, mainExecutor));
     }
 
     //
@@ -466,12 +474,13 @@ public abstract class WMShellBaseModule {
     static Optional<RecentTasksController> provideRecentTasksController(
             Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return Optional.ofNullable(
-                RecentTasksController.create(context, shellInit, taskStackListener,
-                        mainExecutor));
+                RecentTasksController.create(context, shellInit, shellCommandHandler,
+                        taskStackListener, mainExecutor));
     }
 
     //
@@ -649,8 +658,9 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static ShellController provideShellController(ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new ShellController(shellInit, mainExecutor);
+        return new ShellController(shellInit, shellCommandHandler, mainExecutor);
     }
 
     //
@@ -676,12 +686,15 @@ public abstract class WMShellBaseModule {
             KidsModeTaskOrganizer kidsModeTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
             Optional<SplitScreenController> splitScreenOptional,
+            Optional<Pip> pipOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformComponents> freeformComponents,
             Optional<RecentTasksController> recentTasksOptional,
+            Optional<OneHandedController> oneHandedControllerOptional,
+            Optional<HideDisplayCutoutController> hideDisplayCutoutControllerOptional,
             ActivityEmbeddingController activityEmbeddingOptional,
             Transitions transitions,
             StartingWindowController startingWindow,
@@ -697,18 +710,7 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static ShellCommandHandler provideShellCommandHandlerImpl(
-            ShellController shellController,
-            ShellTaskOrganizer shellTaskOrganizer,
-            KidsModeTaskOrganizer kidsModeTaskOrganizer,
-            Optional<SplitScreenController> splitScreenOptional,
-            Optional<Pip> pipOptional,
-            Optional<OneHandedController> oneHandedOptional,
-            Optional<HideDisplayCutoutController> hideDisplayCutout,
-            Optional<RecentTasksController> recentTasksOptional,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new ShellCommandHandler(shellController, shellTaskOrganizer,
-                kidsModeTaskOrganizer, splitScreenOptional, pipOptional, oneHandedOptional,
-                hideDisplayCutout, recentTasksOptional, mainExecutor);
+    static ShellCommandHandler provideShellCommandHandler() {
+        return new ShellCommandHandler();
     }
 }

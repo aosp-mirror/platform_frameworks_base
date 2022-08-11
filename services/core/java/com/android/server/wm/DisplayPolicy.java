@@ -1725,16 +1725,6 @@ public class DisplayPolicy {
                             win.mAttrs.insetsFlags.appearance & APPEARANCE_LIGHT_STATUS_BARS,
                             new Rect(win.getFrame())));
                     mStatusBarColorCheckedBounds.union(sTmpRect);
-                    // Check if current activity is letterboxed in order create a LetterboxDetails
-                    // component to be passed to SysUI for status bar treatment
-                    final ActivityRecord currentActivity = win.getActivityRecord();
-                    if (currentActivity != null) {
-                        final LetterboxDetails currentLetterboxDetails = currentActivity
-                                .mLetterboxUiController.getLetterboxDetails();
-                        if (currentLetterboxDetails != null) {
-                            mLetterboxDetails.add(currentLetterboxDetails);
-                        }
-                    }
                 }
             }
 
@@ -1750,6 +1740,17 @@ public class DisplayPolicy {
                 }
                 if (mNavBarBackgroundWindow == null) {
                     mNavBarBackgroundWindow = win;
+                }
+            }
+
+            // Check if current activity is letterboxed in order create a LetterboxDetails
+            // component to be passed to SysUI for status bar treatment
+            final ActivityRecord currentActivity = win.getActivityRecord();
+            if (currentActivity != null) {
+                final LetterboxDetails currentLetterboxDetails = currentActivity
+                        .mLetterboxUiController.getLetterboxDetails();
+                if (currentLetterboxDetails != null) {
+                    mLetterboxDetails.add(currentLetterboxDetails);
                 }
             }
         } else if (win.isDimming()) {

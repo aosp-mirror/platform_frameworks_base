@@ -29,6 +29,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -61,6 +62,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -81,6 +83,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
     private static final String ANIMATION_ENABLED = "1";
     private final TestShellExecutor mShellExecutor = new TestShellExecutor();
+    private ShellInit mShellInit;
 
     @Rule
     public TestableContext mContext =
@@ -110,10 +113,12 @@ public class BackAnimationControllerTest extends ShellTestCase {
         Settings.Global.putString(mContentResolver, Settings.Global.ENABLE_BACK_ANIMATION,
                 ANIMATION_ENABLED);
         mTestableLooper = TestableLooper.get(this);
-        mController = new BackAnimationController(
+        mShellInit = spy(new ShellInit(mShellExecutor));
+        mController = new BackAnimationController(mShellInit,
                 mShellExecutor, new Handler(mTestableLooper.getLooper()), mTransaction,
                 mActivityTaskManager, mContext,
                 mContentResolver);
+        mShellInit.init();
         mEventTime = 0;
         mShellExecutor.flushAll();
     }
@@ -157,6 +162,11 @@ public class BackAnimationControllerTest extends ShellTestCase {
         doMotionEvent(MotionEvent.ACTION_MOVE, 0);
         mController.setTriggerBack(true);
         doMotionEvent(MotionEvent.ACTION_UP, 0);
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
     }
 
     @Test
@@ -233,10 +243,12 @@ public class BackAnimationControllerTest extends ShellTestCase {
     public void animationDisabledFromSettings() throws RemoteException {
         // Toggle the setting off
         Settings.Global.putString(mContentResolver, Settings.Global.ENABLE_BACK_ANIMATION, "0");
-        mController = new BackAnimationController(
+        ShellInit shellInit = new ShellInit(mShellExecutor);
+        mController = new BackAnimationController(shellInit,
                 mShellExecutor, new Handler(mTestableLooper.getLooper()), mTransaction,
                 mActivityTaskManager, mContext,
                 mContentResolver);
+        shellInit.init();
         mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
 
         RemoteAnimationTarget animationTarget = createAnimationTarget();

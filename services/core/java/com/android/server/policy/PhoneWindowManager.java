@@ -185,6 +185,7 @@ import android.view.autofill.AutofillManagerInternal;
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
 import com.android.internal.accessibility.util.AccessibilityUtils;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.logging.MetricsLogger;
@@ -1544,9 +1545,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void showGlobalActionsInternal() {
-        if (mGlobalActions == null) {
-            mGlobalActions = new GlobalActions(mContext, mWindowManagerFuncs);
-        }
         final boolean keyguardShowing = isKeyguardShowingAndNotOccluded();
         mGlobalActions.showDialog(keyguardShowing, isDeviceProvisioned());
         // since it took two seconds of long press to bring this up,
@@ -1869,11 +1867,45 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDefaultDisplayPolicy = mDefaultDisplayRotation.getDisplayPolicy();
     }
 
+    /** Point of injection for test dependencies. */
+    @VisibleForTesting
+    static class Injector {
+        private final Context mContext;
+        private final WindowManagerFuncs mWindowManagerFuncs;
+
+        Injector(Context context, WindowManagerFuncs funcs) {
+            mContext = context;
+            mWindowManagerFuncs = funcs;
+        }
+
+        Context getContext() {
+            return mContext;
+        }
+
+        WindowManagerFuncs getWindowManagerFuncs() {
+            return mWindowManagerFuncs;
+        }
+
+        AccessibilityShortcutController getAccessibilityShortcutController(
+                Context context, Handler handler, int initialUserId) {
+            return new AccessibilityShortcutController(context, handler, initialUserId);
+        }
+
+        GlobalActions getGlobalActions() {
+            return new GlobalActions(mContext, mWindowManagerFuncs);
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
-    public void init(Context context, WindowManagerFuncs windowManagerFuncs) {
-        mContext = context;
-        mWindowManagerFuncs = windowManagerFuncs;
+    public void init(Context context, WindowManagerFuncs funcs) {
+        init(new Injector(context, funcs));
+    }
+
+    @VisibleForTesting
+    void init(Injector injector) {
+        mContext = injector.getContext();
+        mWindowManagerFuncs = injector.getWindowManagerFuncs();
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
@@ -1888,8 +1920,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHasFeatureLeanback = mPackageManager.hasSystemFeature(FEATURE_LEANBACK);
         mHasFeatureAuto = mPackageManager.hasSystemFeature(FEATURE_AUTOMOTIVE);
         mHasFeatureHdmiCec = mPackageManager.hasSystemFeature(FEATURE_HDMI_CEC);
-        mAccessibilityShortcutController =
-                new AccessibilityShortcutController(mContext, new Handler(), mCurrentUserId);
+        mAccessibilityShortcutController = injector.getAccessibilityShortcutController(
+                mContext, new Handler(), mCurrentUserId);
+        mGlobalActions = injector.getGlobalActions();
         mLogger = new MetricsLogger();
 
         mScreenOffSleepTokenAcquirer = mActivityTaskManagerInternal
@@ -1904,7 +1937,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 res.getBoolean(com.android.internal.R.bool.config_wakeOnBackKeyPress);
 
         // Init display burn-in protection
-        boolean burnInProtectionEnabled = context.getResources().getBoolean(
+        boolean burnInProtectionEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableBurnInProtection);
         // Allow a system property to override this. Used by developer settings.
         boolean burnInProtectionDevMode =
@@ -1922,7 +1955,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 maxVertical = -4;
                 maxRadius = (isRoundWindow()) ? 6 : -1;
             } else {
-                Resources resources = context.getResources();
+                Resources resources = mContext.getResources();
                 minHorizontal = resources.getInteger(
                         com.android.internal.R.integer.config_burnInProtectionMinHorizontalOffset);
                 maxHorizontal = resources.getInteger(
@@ -1935,21 +1968,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         com.android.internal.R.integer.config_burnInProtectionMaxRadius);
             }
             mBurnInProtectionHelper = new BurnInProtectionHelper(
-                    context, minHorizontal, maxHorizontal, minVertical, maxVertical, maxRadius);
+                    mContext, minHorizontal, maxHorizontal, minVertical, maxVertical, maxRadius);
         }
 
         mHandler = new PolicyHandler();
         mWakeGestureListener = new MyWakeGestureListener(mContext, mHandler);
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
-        mModifierShortcutManager = new ModifierShortcutManager(context);
-        mUiMode = context.getResources().getInteger(
+        mModifierShortcutManager = new ModifierShortcutManager(mContext);
+        mUiMode = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_defaultUiModeType);
         mHomeIntent =  new Intent(Intent.ACTION_MAIN, null);
         mHomeIntent.addCategory(Intent.CATEGORY_HOME);
         mHomeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-        mEnableCarDockHomeCapture = context.getResources().getBoolean(
+        mEnableCarDockHomeCapture = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableCarDockHomeLaunch);
         mCarDockIntent =  new Intent(Intent.ACTION_MAIN, null);
         mCarDockIntent.addCategory(Intent.CATEGORY_CAR_DOCK);
@@ -1964,7 +1997,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mVrHeadsetHomeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
 
-        mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBroadcastWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mBroadcastWakeLock");
         mPowerKeyWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -2036,9 +2069,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         readConfigurationDependentBehaviors();
 
-        mDisplayFoldController = DisplayFoldController.create(context, DEFAULT_DISPLAY);
+        mDisplayFoldController = DisplayFoldController.create(mContext, DEFAULT_DISPLAY);
 
-        mAccessibilityManager = (AccessibilityManager) context.getSystemService(
+        mAccessibilityManager = (AccessibilityManager) mContext.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
 
         // register for dock events
@@ -2048,7 +2081,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         filter.addAction(UiModeManager.ACTION_ENTER_DESK_MODE);
         filter.addAction(UiModeManager.ACTION_EXIT_DESK_MODE);
         filter.addAction(Intent.ACTION_DOCK_EVENT);
-        Intent intent = context.registerReceiver(mDockReceiver, filter);
+        Intent intent = mContext.registerReceiver(mDockReceiver, filter);
         if (intent != null) {
             // Retrieve current sticky dock event broadcast.
             mDefaultDisplayPolicy.setDockMode(intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
@@ -2059,13 +2092,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         filter = new IntentFilter();
         filter.addAction(Intent.ACTION_DREAMING_STARTED);
         filter.addAction(Intent.ACTION_DREAMING_STOPPED);
-        context.registerReceiver(mDreamReceiver, filter);
+        mContext.registerReceiver(mDreamReceiver, filter);
 
         // register for multiuser-relevant broadcasts
         filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-        context.registerReceiver(mMultiuserReceiver, filter);
+        mContext.registerReceiver(mMultiuserReceiver, filter);
 
-        mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
+        mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mSafeModeEnabledVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_safeModeEnabledVibePattern);
 
