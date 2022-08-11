@@ -22,7 +22,6 @@ import android.view.View
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FlingAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
-import androidx.dynamicanimation.animation.FrameCallbackScheduler
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 
@@ -123,12 +122,6 @@ class PhysicsAnimator<T> private constructor (target: T) {
 
     /** FlingConfig to use by default for properties whose fling configs were not provided. */
     private var defaultFling: FlingConfig = globalDefaultFling
-
-    /**
-     * FrameCallbackScheduler to use if it need custom FrameCallbackScheduler, if this is null,
-     * it will use the default FrameCallbackScheduler in the DynamicAnimation.
-     */
-    private var customScheduler: FrameCallbackScheduler? = null
 
     /**
      * Internal listeners that respond to DynamicAnimations updating and ending, and dispatch to
@@ -454,14 +447,6 @@ class PhysicsAnimator<T> private constructor (target: T) {
         this.defaultFling = defaultFling
     }
 
-    /**
-     * Set the custom FrameCallbackScheduler for all aniatmion in this animator. Set this with null for
-     * restoring to default FrameCallbackScheduler.
-     */
-    fun setCustomScheduler(scheduler: FrameCallbackScheduler) {
-        this.customScheduler = scheduler
-    }
-
     /** Starts the animations! */
     fun start() {
         startAction()
@@ -511,12 +496,9 @@ class PhysicsAnimator<T> private constructor (target: T) {
                     // springs) on this property before flinging.
                     cancel(animatedProperty)
 
-                    // Apply the custom animation scheduler if it not null
-                    val flingAnim = getFlingAnimation(animatedProperty, target)
-                    flingAnim.scheduler = customScheduler ?: flingAnim.scheduler
-
                     // Apply the configuration and start the animation.
-                    flingAnim.also { flingConfig.applyToAnimation(it) }.start()
+                    getFlingAnimation(animatedProperty, target)
+                        .also { flingConfig.applyToAnimation(it) }.start()
                 }
             }
 
@@ -528,18 +510,6 @@ class PhysicsAnimator<T> private constructor (target: T) {
                 if (flingConfig == null) {
                     // Apply the configuration and start the animation.
                     val springAnim = getSpringAnimation(animatedProperty, target)
-
-                    // If customScheduler is exist and has not been set to the animation,
-                    // it should set here.
-                    if (customScheduler != null &&
-                            springAnim.scheduler != customScheduler) {
-                        // Cancel the animation before set animation handler
-                        if (springAnim.isRunning) {
-                            cancel(animatedProperty)
-                        }
-                        // Apply the custom scheduler handler if it not null
-                        springAnim.scheduler = customScheduler ?: springAnim.scheduler
-                    }
 
                     // Apply the configuration and start the animation.
                     springConfig.applyToAnimation(springAnim)
@@ -596,12 +566,9 @@ class PhysicsAnimator<T> private constructor (target: T) {
                                     }
                                 }
 
-                                // Apply the custom animation scheduler if it not null
-                                val springAnim = getSpringAnimation(animatedProperty, target)
-                                springAnim.scheduler = customScheduler ?: springAnim.scheduler
-
                                 // Apply the configuration and start the spring animation.
-                                springAnim.also { springConfig.applyToAnimation(it) }.start()
+                                getSpringAnimation(animatedProperty, target)
+                                    .also { springConfig.applyToAnimation(it) }.start()
                             }
                         }
                     })
