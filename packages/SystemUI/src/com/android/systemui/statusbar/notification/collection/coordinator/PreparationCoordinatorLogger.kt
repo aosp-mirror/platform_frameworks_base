@@ -31,7 +31,7 @@ class PreparationCoordinatorLogger @Inject constructor(
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = entry.logKey
         }, {
-            "NOTIF INFLATED $str1"
+            "Inflation completed for notif $str1"
         })
     }
 
@@ -40,7 +40,16 @@ class PreparationCoordinatorLogger @Inject constructor(
             str1 = entry.logKey
             str2 = reason
         }, {
-            "NOTIF INFLATION ABORTED $str1 reason=$str2"
+            "Infation aborted for notif $str1 reason=$str2"
+        })
+    }
+
+    fun logFreeNotifViews(entry: NotificationEntry, reason: String) {
+        buffer.log(TAG, LogLevel.DEBUG, {
+            str1 = entry.logKey
+            str2 = reason
+        }, {
+            "Freeing content views for notif $str1 reason=$str2"
         })
     }
 

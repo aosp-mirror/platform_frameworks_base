@@ -27,6 +27,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.annotation.Keep
 import com.android.settingslib.Utils
 import com.android.settingslib.drawable.UserIconDrawable
 import com.android.systemui.R
@@ -44,6 +45,19 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
 
     private var qsDisabled = false
     private var expansionAmount = 0f
+
+    /**
+     * Sets the alpha of the background of this view.
+     *
+     * Used from a [TouchAnimator] in the controller.
+     */
+    var backgroundAlpha: Float = 1f
+        @Keep
+        set(value) {
+            field = value
+            background?.alpha = (value * 255).toInt()
+        }
+        @Keep get
 
     override fun onFinishInflate() {
         super.onFinishInflate()

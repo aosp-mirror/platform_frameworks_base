@@ -128,6 +128,8 @@ public class QSPanel extends LinearLayout implements Tunable {
         if (mUsingMediaPlayer) {
             mHorizontalLinearLayout = new RemeasuringLinearLayout(mContext);
             mHorizontalLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
+            mHorizontalLinearLayout.setVisibility(
+                    mUsingHorizontalLayout ? View.VISIBLE : View.GONE);
             mHorizontalLinearLayout.setClipChildren(false);
             mHorizontalLinearLayout.setClipToPadding(false);
 
@@ -445,6 +447,8 @@ public class QSPanel extends LinearLayout implements Tunable {
         mMediaHostView = hostView;
         ViewGroup newParent = horizontal ? mHorizontalLinearLayout : this;
         ViewGroup currentParent = (ViewGroup) hostView.getParent();
+        Log.d(getDumpableTag(), "Reattaching media host: " + horizontal
+                + ", current " + currentParent + ", new " + newParent);
         if (currentParent != newParent) {
             if (currentParent != null) {
                 currentParent.removeView(hostView);
@@ -589,6 +593,7 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     void setUsingHorizontalLayout(boolean horizontal, ViewGroup mediaHostView, boolean force) {
         if (horizontal != mUsingHorizontalLayout || force) {
+            Log.d(getDumpableTag(), "setUsingHorizontalLayout: " + horizontal + ", " + force);
             mUsingHorizontalLayout = horizontal;
             ViewGroup newParent = horizontal ? mHorizontalContentContainer : this;
             switchAllContentToParent(newParent, mTileLayout);

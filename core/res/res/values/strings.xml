@@ -3568,21 +3568,17 @@
     <!-- [CHAR LIMIT=NONE] Message to show in upgrading dialog when the bulk of the upgrade work is done. -->
     <string name="android_upgrading_complete">Finishing boot.</string>
 
-    <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
-    is pressed during fingerprint enrollment. -->
-    <string name="fp_power_button_enrollment_title">Continue setup?</string>
-
     <!-- [CHAR LIMIT=NONE] Message of dialog shown to confirm device going to sleep if the power
     button is pressed during fingerprint enrollment. -->
     <string name="fp_power_button_enrollment_message">You pressed the power button — this usually turns off the screen.\n\nTry tapping lightly while setting up your fingerprint.</string>
 
+    <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
+    is pressed during fingerprint enrollment. -->
+    <string name="fp_power_button_enrollment_title">Tap to turn off screen</string>
+
     <!-- [CHAR LIMIT=20] Positive button of dialog shown to confirm device going to sleep if the
     power button is pressed during fingerprint enrollment. -->
-    <string name="fp_power_button_enrollment_positive_button">Turn off screen</string>
-
-    <!-- [CHAR LIMIT=20] Negative button of dialog shown to confirm device going to sleep if the
-    power button is pressed during fingerprint enrollment. -->
-    <string name="fp_power_button_enrollment_negative_button">Continue setup</string>
+    <string name="fp_power_button_enrollment_button_text">Turn off screen</string>
 
     <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
     is pressed during biometric prompt when a side fingerprint sensor is present. -->
