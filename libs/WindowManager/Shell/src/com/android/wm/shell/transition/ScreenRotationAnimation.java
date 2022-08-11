@@ -162,13 +162,12 @@ class ScreenRotationAnimation {
                     .setParent(mAnimLeash)
                     .setBLASTLayer()
                     .setSecure(screenshotBuffer.containsSecureLayers())
+                    .setOpaque(true)
                     .setCallsite("ShellRotationAnimation")
                     .setName("RotationLayer")
                     .build();
 
             t.setLayer(mAnimLeash, SCREEN_FREEZE_LAYER_BASE);
-            t.setPosition(mAnimLeash, 0, 0);
-            t.setAlpha(mAnimLeash, 1);
             t.show(mAnimLeash);
 
             final ColorSpace colorSpace = screenshotBuffer.getColorSpace();
@@ -181,6 +180,7 @@ class ScreenRotationAnimation {
                 mBackColorSurface = new SurfaceControl.Builder(session)
                         .setParent(rootLeash)
                         .setColorLayer()
+                        .setOpaque(true)
                         .setCallsite("ShellRotationAnimation")
                         .setName("BackColorSurface")
                         .build();
@@ -189,7 +189,6 @@ class ScreenRotationAnimation {
 
                 t.setLayer(mBackColorSurface, -1);
                 t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
-                t.setAlpha(mBackColorSurface, 1);
                 t.show(mBackColorSurface);
             }
 
@@ -242,7 +241,6 @@ class ScreenRotationAnimation {
         t.setMatrix(mScreenshotLayer,
                 mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
                 mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-        t.setAlpha(mScreenshotLayer, (float) 1.0);
     }
 
     /**
