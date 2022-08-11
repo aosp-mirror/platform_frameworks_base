@@ -4042,9 +4042,11 @@ public class Vpn {
         // To stop the VPN profile, the caller must be the current prepared package and must be
         // running an Ikev2VpnProfile.
         if (isCurrentIkev2VpnLocked(packageName)) {
-            notifyVpnManagerVpnStopped(packageName, mOwnerUID);
+            // Cache ownerUid to prevent the value being changed after performing VpnRunner.exit().
+            final int ownerUid = mOwnerUID;
 
             mVpnRunner.exit();
+            notifyVpnManagerVpnStopped(packageName, ownerUid);
         }
     }
 
