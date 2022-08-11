@@ -192,7 +192,14 @@ final class HotwordDetectionConnection {
     final AttentionManagerInternal mAttentionManagerInternal;
 
     final AttentionManagerInternal.ProximityUpdateCallbackInternal mProximityCallbackInternal =
-            this::setProximityMeters;
+            new AttentionManagerInternal.ProximityUpdateCallbackInternal() {
+        @Override
+        public void onProximityUpdate(double distance) {
+            synchronized (mLock) {
+                mProximityMeters = distance;
+            }
+        }
+    };
 
 
     volatile HotwordDetectionServiceIdentity mIdentity;
@@ -1180,12 +1187,6 @@ final class HotwordDetectionConnection {
             if (result != null && mProximityMeters != PROXIMITY_UNKNOWN) {
                 result.getExtras().putDouble(EXTRA_PROXIMITY_METERS, mProximityMeters);
             }
-        }
-    }
-
-    private void setProximityMeters(double proximityMeters) {
-        synchronized (mLock) {
-            mProximityMeters = proximityMeters;
         }
     }
 
