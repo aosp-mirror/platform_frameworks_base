@@ -51,6 +51,7 @@ import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.IStopUserCallback;
 import android.app.IUidObserver;
+import android.app.IUserSwitchObserver;
 import android.app.KeyguardManager;
 import android.app.ProfilerInfo;
 import android.app.RemoteServiceException.CrashedByAdbException;
@@ -1937,31 +1938,36 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         // Register switch observer.
         final CountDownLatch switchLatch = new CountDownLatch(1);
-        mInterface.registerUserSwitchObserver(
-                new UserSwitchObserver() {
-                    @Override
-                    public void onUserSwitchComplete(int newUserId) {
-                        if (userId == newUserId) {
-                            switchLatch.countDown();
-                        }
-                    }
-                }, ActivityManagerShellCommand.class.getName());
-
-        // Switch.
-        boolean switched = mInterface.switchUser(userId);
-        if (!switched) {
-            // Switching failed, don't wait for the user switch observer.
-            return false;
-        }
-
-        // Wait.
+        final IUserSwitchObserver userSwitchObserver = new UserSwitchObserver() {
+            @Override
+            public void onUserSwitchComplete(int newUserId) {
+                if (userId == newUserId) {
+                    switchLatch.countDown();
+                }
+            }
+        };
         try {
-            switched = switchLatch.await(USER_OPERATION_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            getErrPrintWriter().println("Error: Thread interrupted unexpectedly.");
-        }
+            mInterface.registerUserSwitchObserver(userSwitchObserver,
+                    ActivityManagerShellCommand.class.getName());
 
-        return switched;
+            // Switch.
+            boolean switched = mInterface.switchUser(userId);
+            if (!switched) {
+                // Switching failed, don't wait for the user switch observer.
+                return false;
+            }
+
+            // Wait.
+            try {
+                switched = switchLatch.await(USER_OPERATION_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                getErrPrintWriter().println("Error: Thread interrupted unexpectedly.");
+            }
+
+            return switched;
+        } finally {
+            mInterface.unregisterUserSwitchObserver(userSwitchObserver);
+        }
     }
 
     int runSwitchUser(PrintWriter pw) throws RemoteException {
