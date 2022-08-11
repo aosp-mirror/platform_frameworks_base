@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
@@ -708,8 +709,8 @@ public class DisplayDeviceConfig {
     private static DisplayDeviceConfig getConfigFromSuffix(Context context, File baseDirectory,
             String suffixFormat, long idNumber) {
 
-        final String suffix = String.format(suffixFormat, idNumber);
-        final String filename = String.format(CONFIG_FILE_FORMAT, suffix);
+        final String suffix = String.format(Locale.ROOT, suffixFormat, idNumber);
+        final String filename = String.format(Locale.ROOT, CONFIG_FILE_FORMAT, suffix);
         final File filePath = Environment.buildPath(
                 baseDirectory, ETC_DIR, DISPLAY_CONFIG_DIR, filename);
         final DisplayDeviceConfig config = new DisplayDeviceConfig(context);
