@@ -90,6 +90,7 @@ import java.util.Set;
 public class UserManager {
 
     private static final String TAG = "UserManager";
+    private static final boolean VERBOSE = false;
 
     @UnsupportedAppUsage
     private final IUserManager mService;
@@ -2056,10 +2057,10 @@ public class UserManager {
         final String emulatedMode = SystemProperties.get(SYSTEM_USER_MODE_EMULATION_PROPERTY);
         switch (emulatedMode) {
             case SYSTEM_USER_MODE_EMULATION_FULL:
-                Log.d(TAG, "isHeadlessSystemUserMode(): emulating as false");
+                if (VERBOSE) Log.v(TAG, "isHeadlessSystemUserMode(): emulating as false");
                 return false;
             case SYSTEM_USER_MODE_EMULATION_HEADLESS:
-                Log.d(TAG, "isHeadlessSystemUserMode(): emulating as true");
+                if (VERBOSE) Log.v(TAG, "isHeadlessSystemUserMode(): emulating as true");
                 return true;
             case SYSTEM_USER_MODE_EMULATION_DEFAULT:
             case "": // property not set
