@@ -646,6 +646,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
 
+        if ((c.getChangeMask()
+                & WindowContainerTransaction.Change.CHANGE_FORCE_TRANSLUCENT) != 0) {
+            tr.setForceTranslucent(c.getForceTranslucent());
+            effects = TRANSACT_EFFECTS_LIFECYCLE;
+        }
+
         final int childWindowingMode = c.getActivityWindowingMode();
         if (childWindowingMode > -1) {
             tr.setActivityWindowingMode(childWindowingMode);

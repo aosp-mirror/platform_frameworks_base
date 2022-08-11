@@ -489,6 +489,7 @@ class Task extends TaskFragment {
     static final int FLAG_FORCE_HIDDEN_FOR_PINNED_TASK = 1;
     static final int FLAG_FORCE_HIDDEN_FOR_TASK_ORG = 1 << 1;
     private int mForceHiddenFlags = 0;
+    private boolean mForceTranslucent = false;
 
     // TODO(b/160201781): Revisit double invocation issue in Task#removeChild.
     /**
@@ -4342,6 +4343,10 @@ class Task extends TaskFragment {
         return true;
     }
 
+    void setForceTranslucent(boolean set) {
+        mForceTranslucent = set;
+    }
+
     @Override
     public boolean isAlwaysOnTop() {
         return !isForceHidden() && super.isAlwaysOnTop();
@@ -4357,6 +4362,11 @@ class Task extends TaskFragment {
     @Override
     protected boolean isForceHidden() {
         return mForceHiddenFlags != 0;
+    }
+
+    @Override
+    protected boolean isForceTranslucent() {
+        return mForceTranslucent;
     }
 
     @Override
