@@ -619,6 +619,16 @@ void ASurfaceTransaction_setFrameRateWithChangeStrategy(ASurfaceTransaction* aSu
     transaction->setFrameRate(surfaceControl, frameRate, compatibility, changeFrameRateStrategy);
 }
 
+void ASurfaceTransaction_clearFrameRate(ASurfaceTransaction* aSurfaceTransaction,
+                                        ASurfaceControl* aSurfaceControl) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    transaction->setFrameRate(surfaceControl, 0, ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_DEFAULT,
+                              ANATIVEWINDOW_CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS);
+}
+
 void ASurfaceTransaction_setEnableBackPressure(ASurfaceTransaction* aSurfaceTransaction,
                                                ASurfaceControl* aSurfaceControl,
                                                bool enableBackpressure) {
