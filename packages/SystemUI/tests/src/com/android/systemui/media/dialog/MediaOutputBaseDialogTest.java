@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -296,7 +295,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         }
 
         @Override
-        Drawable getAppSourceIcon() {
+        IconCompat getAppSourceIcon() {
             return null;
         }
 
