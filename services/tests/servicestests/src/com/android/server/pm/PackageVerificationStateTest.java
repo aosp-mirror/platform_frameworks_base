@@ -329,6 +329,27 @@ public class PackageVerificationStateTest extends AndroidTestCase {
                 state.isInstallAllowed());
     }
 
+    public void testAreAllVerificationsComplete_timeoutSuccessWithSufficient() {
+        PackageVerificationState state = new PackageVerificationState(null);
+
+        state.addRequiredVerifierUid(REQUIRED_UID_1);
+        state.addSufficientVerifier(SUFFICIENT_UID_1);
+
+        assertFalse(state.areAllVerificationsComplete());
+        assertFalse(state.isVerificationComplete());
+        assertFalse(state.isInstallAllowed());
+
+        // Required verifier responded, but still waiting for sufficient.
+        state.setVerifierResponse(REQUIRED_UID_1, PackageManager.VERIFICATION_ALLOW);
+        assertFalse(state.isVerificationComplete());
+
+        // Timeout, verification complete and installation allowed.
+        state.setVerifierResponse(REQUIRED_UID_1,
+                PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
+        assertTrue(state.isVerificationComplete());
+        assertTrue(state.isInstallAllowed());
+    }
+
     public void testAreAllVerificationsComplete_onlyVerificationPasses() {
         PackageVerificationState state = new PackageVerificationState(null);
         state.addRequiredVerifierUid(REQUIRED_UID_1);
