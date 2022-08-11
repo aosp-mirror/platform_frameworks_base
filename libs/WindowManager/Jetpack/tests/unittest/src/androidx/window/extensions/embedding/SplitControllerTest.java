@@ -322,8 +322,8 @@ public class SplitControllerTest {
     }
 
     @Test
-    public void testOnActivityReparentToTask_sameProcess() {
-        mSplitController.onActivityReparentToTask(TASK_ID, new Intent(),
+    public void testOnActivityReparentedToTask_sameProcess() {
+        mSplitController.onActivityReparentedToTask(TASK_ID, new Intent(),
                 mActivity.getActivityToken());
 
         // Treated as on activity created, but allow to split as primary.
@@ -333,13 +333,13 @@ public class SplitControllerTest {
     }
 
     @Test
-    public void testOnActivityReparentToTask_diffProcess() {
+    public void testOnActivityReparentedToTask_diffProcess() {
         // Create an empty TaskFragment to initialize for the Task.
         mSplitController.newContainer(new Intent(), mActivity, TASK_ID);
         final IBinder activityToken = new Binder();
         final Intent intent = new Intent();
 
-        mSplitController.onActivityReparentToTask(TASK_ID, intent, activityToken);
+        mSplitController.onActivityReparentedToTask(TASK_ID, intent, activityToken);
 
         // Treated as starting new intent
         verify(mSplitController, never()).resolveActivityToContainer(any(), anyBoolean());

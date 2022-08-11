@@ -18,8 +18,6 @@ package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Intent;
@@ -29,6 +27,9 @@ import android.os.IBinder;
 import android.util.Size;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -175,6 +176,7 @@ class TaskFragmentContainer {
                 && mInfo.getActivities().size() == collectNonFinishingActivities().size();
     }
 
+    @NonNull
     ActivityStack toActivityStack() {
         return new ActivityStack(collectNonFinishingActivities(), isEmpty());
     }

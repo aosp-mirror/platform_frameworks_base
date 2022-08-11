@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.window.TaskFragmentOrganizer.putErrorInfoInBundle;
-import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENT_TO_TASK;
+import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHANGED;
@@ -277,7 +277,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
 
         @Nullable
-        TaskFragmentTransaction.Change prepareActivityReparentToTask(
+        TaskFragmentTransaction.Change prepareActivityReparentedToTask(
                 @NonNull ActivityRecord activity) {
             if (activity.finishing) {
                 Slog.d(TAG, "Reparent activity=" + activity.token + " is finishing");
@@ -315,7 +315,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Activity=%s reparent to taskId=%d",
                     activity.token, task.mTaskId);
-            return new TaskFragmentTransaction.Change(TYPE_ACTIVITY_REPARENT_TO_TASK)
+            return new TaskFragmentTransaction.Change(TYPE_ACTIVITY_REPARENTED_TO_TASK)
                     .setTaskId(task.mTaskId)
                     .setActivityIntent(activity.intent)
                     .setActivityToken(activityToken);
@@ -521,7 +521,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         mAtmService.mWindowManager.mWindowPlacerLocked.requestTraversal();
     }
 
-    void onActivityReparentToTask(@NonNull ActivityRecord activity) {
+    void onActivityReparentedToTask(@NonNull ActivityRecord activity) {
         final ITaskFragmentOrganizer organizer;
         if (activity.mLastTaskFragmentOrganizerBeforePip != null) {
             // If the activity is previously embedded in an organized TaskFragment.
@@ -547,7 +547,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             return;
         }
         addPendingEvent(new PendingTaskFragmentEvent.Builder(
-                PendingTaskFragmentEvent.EVENT_ACTIVITY_REPARENT_TO_TASK, organizer)
+                PendingTaskFragmentEvent.EVENT_ACTIVITY_REPARENTED_TO_TASK, organizer)
                 .setActivity(activity)
                 .build());
     }
@@ -601,7 +601,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         static final int EVENT_INFO_CHANGED = 2;
         static final int EVENT_PARENT_INFO_CHANGED = 3;
         static final int EVENT_ERROR = 4;
-        static final int EVENT_ACTIVITY_REPARENT_TO_TASK = 5;
+        static final int EVENT_ACTIVITY_REPARENTED_TO_TASK = 5;
 
         @IntDef(prefix = "EVENT_", value = {
                 EVENT_APPEARED,
@@ -609,7 +609,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 EVENT_INFO_CHANGED,
                 EVENT_PARENT_INFO_CHANGED,
                 EVENT_ERROR,
-                EVENT_ACTIVITY_REPARENT_TO_TASK
+                EVENT_ACTIVITY_REPARENTED_TO_TASK
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface EventType {}
@@ -900,8 +900,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             case PendingTaskFragmentEvent.EVENT_ERROR:
                 return state.prepareTaskFragmentError(event.mErrorCallbackToken, taskFragment,
                         event.mOpType, event.mException);
-            case PendingTaskFragmentEvent.EVENT_ACTIVITY_REPARENT_TO_TASK:
-                return state.prepareActivityReparentToTask(event.mActivity);
+            case PendingTaskFragmentEvent.EVENT_ACTIVITY_REPARENTED_TO_TASK:
+                return state.prepareActivityReparentedToTask(event.mActivity);
             default:
                 throw new IllegalArgumentException("Unknown TaskFragmentEvent=" + event.mEventType);
         }

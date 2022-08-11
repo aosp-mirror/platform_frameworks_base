@@ -122,7 +122,7 @@ public final class TaskFragmentTransaction implements Parcelable {
      * then exits Picture-in-picture, it will be reparented back to its original Task. In this case,
      * we need to notify the organizer so that it can check if the Activity matches any split rule.
      */
-    public static final int TYPE_ACTIVITY_REPARENT_TO_TASK = 6;
+    public static final int TYPE_ACTIVITY_REPARENTED_TO_TASK = 6;
 
     @IntDef(prefix = { "TYPE_" }, value = {
             TYPE_TASK_FRAGMENT_APPEARED,
@@ -130,7 +130,7 @@ public final class TaskFragmentTransaction implements Parcelable {
             TYPE_TASK_FRAGMENT_VANISHED,
             TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED,
             TYPE_TASK_FRAGMENT_ERROR,
-            TYPE_ACTIVITY_REPARENT_TO_TASK
+            TYPE_ACTIVITY_REPARENTED_TO_TASK
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ChangeType {}
@@ -247,7 +247,7 @@ public final class TaskFragmentTransaction implements Parcelable {
 
         /**
          * Intent of the activity that is reparented to the Task for
-         * {@link #TYPE_ACTIVITY_REPARENT_TO_TASK}.
+         * {@link #TYPE_ACTIVITY_REPARENTED_TO_TASK}.
          */
         public Change setActivityIntent(@NonNull Intent intent) {
             mActivityIntent = requireNonNull(intent);
@@ -255,7 +255,7 @@ public final class TaskFragmentTransaction implements Parcelable {
         }
 
         /**
-         * Token of the reparent activity for {@link #TYPE_ACTIVITY_REPARENT_TO_TASK}.
+         * Token of the reparent activity for {@link #TYPE_ACTIVITY_REPARENTED_TO_TASK}.
          * If the activity belongs to the same process as the organizer, this will be the actual
          * activity token; if the activity belongs to a different process, the server will generate
          * a temporary token that the organizer can use to reparent the activity through

@@ -16,17 +16,21 @@
 
 package androidx.window.extensions.embedding;
 
-import android.annotation.NonNull;
 import android.app.Activity;
 import android.util.Pair;
 import android.util.Size;
+
+import androidx.annotation.NonNull;
 
 /**
  * Client-side descriptor of a split that holds two containers.
  */
 class SplitContainer {
+    @NonNull
     private final TaskFragmentContainer mPrimaryContainer;
+    @NonNull
     private final TaskFragmentContainer mSecondaryContainer;
+    @NonNull
     private final SplitRule mSplitRule;
 
     SplitContainer(@NonNull TaskFragmentContainer primaryContainer,

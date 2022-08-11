@@ -51,8 +51,11 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     @VisibleForTesting
     final Map<IBinder, TaskFragmentInfo> mFragmentInfos = new ArrayMap<>();
 
+    @NonNull
     private final TaskFragmentCallback mCallback;
+
     @VisibleForTesting
+    @Nullable
     TaskFragmentAnimationController mAnimationController;
 
     /**
@@ -63,7 +66,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         void onTaskFragmentInfoChanged(@NonNull TaskFragmentInfo taskFragmentInfo);
         void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo);
         void onTaskFragmentParentInfoChanged(int taskId, @NonNull Configuration parentConfig);
-        void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
+        void onActivityReparentedToTask(int taskId, @NonNull Intent activityIntent,
                 @NonNull IBinder activityToken);
         void onTaskFragmentError(@Nullable TaskFragmentInfo taskFragmentInfo, int opType);
     }
@@ -72,7 +75,8 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * @param executor  callbacks from WM Core are posted on this executor. It should be tied to the
      *                  UI thread that all other calls into methods of this class are also on.
      */
-    JetpackTaskFragmentOrganizer(@NonNull Executor executor, TaskFragmentCallback callback) {
+    JetpackTaskFragmentOrganizer(@NonNull Executor executor,
+            @NonNull TaskFragmentCallback callback) {
         super(executor);
         mCallback = callback;
     }
@@ -147,7 +151,8 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * @param wct WindowContainerTransaction in which the task fragment should be resized.
      * @param fragmentToken token of an existing TaskFragment.
      */
-    void expandTaskFragment(WindowContainerTransaction wct, IBinder fragmentToken) {
+    void expandTaskFragment(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken) {
         resizeTaskFragment(wct, fragmentToken, new Rect());
         setAdjacentTaskFragments(wct, fragmentToken, null /* secondary */, null /* splitRule */);
         updateWindowingMode(wct, fragmentToken, WINDOWING_MODE_UNDEFINED);
@@ -157,7 +162,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * Expands an existing TaskFragment to fill parent.
      * @param fragmentToken token of an existing TaskFragment.
      */
-    void expandTaskFragment(IBinder fragmentToken) {
+    void expandTaskFragment(@NonNull IBinder fragmentToken) {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         expandTaskFragment(wct, fragmentToken);
         applyTransaction(wct);
@@ -168,7 +173,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * @param fragmentToken token to create new TaskFragment with.
      * @param activity      activity to move to the fill-parent TaskFragment.
      */
-    void expandActivity(IBinder fragmentToken, Activity activity) {
+    void expandActivity(@NonNull IBinder fragmentToken, @NonNull Activity activity) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         createTaskFragmentAndReparentActivity(
                 wct, fragmentToken, activity.getActivityToken(), new Rect(),
@@ -180,8 +185,8 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * @param ownerToken The token of the activity that creates this task fragment. It does not
      *                   have to be a child of this task fragment, but must belong to the same task.
      */
-    void createTaskFragment(WindowContainerTransaction wct, IBinder fragmentToken,
-            IBinder ownerToken, @NonNull Rect bounds, @WindowingMode int windowingMode) {
+    void createTaskFragment(@NonNull WindowContainerTransaction wct, @NonNull IBinder fragmentToken,
+            @NonNull IBinder ownerToken, @NonNull Rect bounds, @WindowingMode int windowingMode) {
         final TaskFragmentCreationParams fragmentOptions =
                 createFragmentOptions(fragmentToken, ownerToken, bounds, windowingMode);
         wct.createTaskFragment(fragmentOptions);
@@ -191,9 +196,9 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * @param ownerToken The token of the activity that creates this task fragment. It does not
      *                   have to be a child of this task fragment, but must belong to the same task.
      */
-    private void createTaskFragmentAndReparentActivity(
-            WindowContainerTransaction wct, IBinder fragmentToken, IBinder ownerToken,
-            @NonNull Rect bounds, @WindowingMode int windowingMode, Activity activity) {
+    private void createTaskFragmentAndReparentActivity(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken, @NonNull IBinder ownerToken, @NonNull Rect bounds,
+            @WindowingMode int windowingMode, @NonNull Activity activity) {
         createTaskFragment(wct, fragmentToken, ownerToken, bounds, windowingMode);
         wct.reparentActivityToTaskFragment(fragmentToken, activity.getActivityToken());
     }
@@ -202,9 +207,9 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * @param ownerToken The token of the activity that creates this task fragment. It does not
      *                   have to be a child of this task fragment, but must belong to the same task.
      */
-    private void createTaskFragmentAndStartActivity(
-            WindowContainerTransaction wct, IBinder fragmentToken, IBinder ownerToken,
-            @NonNull Rect bounds, @WindowingMode int windowingMode, Intent activityIntent,
+    private void createTaskFragmentAndStartActivity(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken, @NonNull IBinder ownerToken, @NonNull Rect bounds,
+            @WindowingMode int windowingMode, @NonNull Intent activityIntent,
             @Nullable Bundle activityOptions) {
         createTaskFragment(wct, fragmentToken, ownerToken, bounds, windowingMode);
         wct.startActivityInTaskFragment(fragmentToken, ownerToken, activityIntent, activityOptions);
@@ -225,8 +230,8 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         wct.setAdjacentTaskFragments(primary, secondary, adjacentParams);
     }
 
-    TaskFragmentCreationParams createFragmentOptions(IBinder fragmentToken, IBinder ownerToken,
-            Rect bounds, @WindowingMode int windowingMode) {
+    TaskFragmentCreationParams createFragmentOptions(@NonNull IBinder fragmentToken,
+            @NonNull IBinder ownerToken, @NonNull Rect bounds, @WindowingMode int windowingMode) {
         if (mFragmentInfos.containsKey(fragmentToken)) {
             throw new IllegalArgumentException(
                     "There is an existing TaskFragment with fragmentToken=" + fragmentToken);
@@ -241,7 +246,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
                 .build();
     }
 
-    void resizeTaskFragment(WindowContainerTransaction wct, IBinder fragmentToken,
+    void resizeTaskFragment(@NonNull WindowContainerTransaction wct, @NonNull IBinder fragmentToken,
             @Nullable Rect bounds) {
         if (!mFragmentInfos.containsKey(fragmentToken)) {
             throw new IllegalArgumentException(
@@ -253,8 +258,8 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         wct.setBounds(mFragmentInfos.get(fragmentToken).getToken(), bounds);
     }
 
-    void updateWindowingMode(WindowContainerTransaction wct, IBinder fragmentToken,
-            @WindowingMode int windowingMode) {
+    void updateWindowingMode(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken, @WindowingMode int windowingMode) {
         if (!mFragmentInfos.containsKey(fragmentToken)) {
             throw new IllegalArgumentException(
                     "Can't find an existing TaskFragment with fragmentToken=" + fragmentToken);
@@ -262,7 +267,8 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         wct.setWindowingMode(mFragmentInfos.get(fragmentToken).getToken(), windowingMode);
     }
 
-    void deleteTaskFragment(WindowContainerTransaction wct, IBinder fragmentToken) {
+    void deleteTaskFragment(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken) {
         if (!mFragmentInfos.containsKey(fragmentToken)) {
             throw new IllegalArgumentException(
                     "Can't find an existing TaskFragment with fragmentToken=" + fragmentToken);
@@ -274,44 +280,31 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     public void onTaskFragmentAppeared(@NonNull TaskFragmentInfo taskFragmentInfo) {
         final IBinder fragmentToken = taskFragmentInfo.getFragmentToken();
         mFragmentInfos.put(fragmentToken, taskFragmentInfo);
-
-        if (mCallback != null) {
-            mCallback.onTaskFragmentAppeared(taskFragmentInfo);
-        }
+        mCallback.onTaskFragmentAppeared(taskFragmentInfo);
     }
 
     @Override
     public void onTaskFragmentInfoChanged(@NonNull TaskFragmentInfo taskFragmentInfo) {
         final IBinder fragmentToken = taskFragmentInfo.getFragmentToken();
         mFragmentInfos.put(fragmentToken, taskFragmentInfo);
-
-        if (mCallback != null) {
-            mCallback.onTaskFragmentInfoChanged(taskFragmentInfo);
-        }
+        mCallback.onTaskFragmentInfoChanged(taskFragmentInfo);
     }
 
     @Override
     public void onTaskFragmentVanished(@NonNull TaskFragmentInfo taskFragmentInfo) {
         mFragmentInfos.remove(taskFragmentInfo.getFragmentToken());
-
-        if (mCallback != null) {
-            mCallback.onTaskFragmentVanished(taskFragmentInfo);
-        }
+        mCallback.onTaskFragmentVanished(taskFragmentInfo);
     }
 
     @Override
     public void onTaskFragmentParentInfoChanged(int taskId, @NonNull Configuration parentConfig) {
-        if (mCallback != null) {
-            mCallback.onTaskFragmentParentInfoChanged(taskId, parentConfig);
-        }
+        mCallback.onTaskFragmentParentInfoChanged(taskId, parentConfig);
     }
 
     @Override
-    public void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
+    public void onActivityReparentedToTask(int taskId, @NonNull Intent activityIntent,
             @NonNull IBinder activityToken) {
-        if (mCallback != null) {
-            mCallback.onActivityReparentToTask(taskId, activityIntent, activityToken);
-        }
+        mCallback.onActivityReparentedToTask(taskId, activityIntent, activityToken);
     }
 
     @Override
@@ -322,9 +315,6 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
             final IBinder fragmentToken = taskFragmentInfo.getFragmentToken();
             mFragmentInfos.put(fragmentToken, taskFragmentInfo);
         }
-
-        if (mCallback != null) {
-            mCallback.onTaskFragmentError(taskFragmentInfo, opType);
-        }
+        mCallback.onTaskFragmentError(taskFragmentInfo, opType);
     }
 }

@@ -78,6 +78,7 @@ class TaskFragmentAnimationSpec {
     }
 
     /** For target that doesn't need to be animated. */
+    @NonNull
     static Animation createNoopAnimation(@NonNull RemoteAnimationTarget target) {
         // Noop but just keep the target showing/hiding.
         final float alpha = target.mode == MODE_CLOSING ? 0f : 1f;
@@ -85,6 +86,7 @@ class TaskFragmentAnimationSpec {
     }
 
     /** Animation for target that is opening in a change transition. */
+    @NonNull
     Animation createChangeBoundsOpenAnimation(@NonNull RemoteAnimationTarget target) {
         final Rect bounds = target.localBounds;
         // The target will be animated in from left or right depends on its position.
@@ -101,6 +103,7 @@ class TaskFragmentAnimationSpec {
     }
 
     /** Animation for target that is closing in a change transition. */
+    @NonNull
     Animation createChangeBoundsCloseAnimation(@NonNull RemoteAnimationTarget target) {
         final Rect bounds = target.localBounds;
         // The target will be animated out to left or right depends on its position.
@@ -121,6 +124,7 @@ class TaskFragmentAnimationSpec {
      * @return the return array always has two elements. The first one is for the start leash, and
      *         the second one is for the end leash.
      */
+    @NonNull
     Animation[] createChangeBoundsChangeAnimations(@NonNull RemoteAnimationTarget target) {
         // Both start bounds and end bounds are in screen coordinates. We will post translate
         // to the local coordinates in TaskFragmentAnimationAdapter#onAnimationUpdate
@@ -177,6 +181,7 @@ class TaskFragmentAnimationSpec {
         return new Animation[]{startSet, endSet};
     }
 
+    @NonNull
     Animation loadOpenAnimation(@NonNull RemoteAnimationTarget target,
             @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = target.mode != MODE_CLOSING;
@@ -198,6 +203,7 @@ class TaskFragmentAnimationSpec {
         return animation;
     }
 
+    @NonNull
     Animation loadCloseAnimation(@NonNull RemoteAnimationTarget target,
             @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = target.mode != MODE_CLOSING;
