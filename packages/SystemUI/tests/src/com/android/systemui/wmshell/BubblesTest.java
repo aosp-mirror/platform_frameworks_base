@@ -63,6 +63,7 @@ import android.graphics.drawable.Icon;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.dreams.IDreamManager;
@@ -204,6 +205,8 @@ public class BubblesTest extends SysuiTestCase {
     private ArgumentCaptor<IntentFilter> mFilterArgumentCaptor;
     @Captor
     private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiverArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<KeyguardStateController.Callback> mKeyguardStateControllerCallbackCaptor;
 
     private BubblesManager mBubblesManager;
     private TestableBubbleController mBubbleController;
@@ -239,6 +242,8 @@ public class BubblesTest extends SysuiTestCase {
     private DumpManager mDumpManager;
     @Mock
     private IStatusBarService mStatusBarService;
+    @Mock
+    private IDreamManager mIDreamManager;
     @Mock
     private NotificationVisibilityProvider mVisibilityProvider;
     @Mock
@@ -371,10 +376,11 @@ public class BubblesTest extends SysuiTestCase {
                 mContext,
                 mBubbleController.asBubbles(),
                 mNotificationShadeWindowController,
-                mock(KeyguardStateController.class),
+                mKeyguardStateController,
                 mShadeController,
                 mStatusBarService,
                 mock(INotificationManager.class),
+                mIDreamManager,
                 mVisibilityProvider,
                 interruptionStateProvider,
                 mZenModeController,
@@ -391,6 +397,25 @@ public class BubblesTest extends SysuiTestCase {
         verify(mNotifPipeline, atLeastOnce())
                 .addCollectionListener(mNotifListenerCaptor.capture());
         mEntryListener = mNotifListenerCaptor.getValue();
+
+        // Get a reference to KeyguardStateController.Callback
+        verify(mKeyguardStateController, atLeastOnce())
+                .addCallback(mKeyguardStateControllerCallbackCaptor.capture());
+    }
+
+    @Test
+    public void dreamingHidesBubbles() throws RemoteException {
+        mBubbleController.updateBubble(mBubbleEntry);
+        assertTrue(mBubbleController.hasBubbles());
+        assertThat(mBubbleController.getStackView().getVisibility()).isEqualTo(View.VISIBLE);
+
+        when(mIDreamManager.isDreamingOrInPreview()).thenReturn(true); // dreaming is happening
+        when(mKeyguardStateController.isShowing()).thenReturn(false); // device is unlocked
+        KeyguardStateController.Callback callback =
+                mKeyguardStateControllerCallbackCaptor.getValue();
+        callback.onKeyguardShowingChanged();
+
+        assertThat(mBubbleController.getStackView().getVisibility()).isEqualTo(View.INVISIBLE);
     }
 
     @Test
