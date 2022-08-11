@@ -3519,9 +3519,9 @@
          (for side fingerprint) -->
     <integer name="config_sidefpsPostAuthDowntime">400</integer>
 
-    <!-- The time (in millis) that a finger tap will wait for a power button
-         before dismissing the power dialog during enrollment(for side fingerprint) -->
-    <integer name="config_sidefpsEnrollPowerPressWindow">300</integer>
+    <!-- The time (in millis) the clickable toast dialog will last until
+         automatically dismissing. This is currently used in SideFpsEventHandler -->
+    <integer name="config_sideFpsToastTimeout">3000</integer>
 
     <!-- This config is used to force VoiceInteractionService to start on certain low ram devices.
          It declares the package name of VoiceInteractionService that should be started. -->

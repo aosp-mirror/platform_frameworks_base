@@ -1853,8 +1853,7 @@
   <java-symbol type="string" name="fp_power_button_bp_negative_button" />
   <java-symbol type="string" name="fp_power_button_enrollment_title" />
   <java-symbol type="string" name="fp_power_button_enrollment_message" />
-  <java-symbol type="string" name="fp_power_button_enrollment_positive_button" />
-  <java-symbol type="string" name="fp_power_button_enrollment_negative_button" />
+  <java-symbol type="string" name="fp_power_button_enrollment_button_text" />
   <java-symbol type="string" name="global_actions" />
   <java-symbol type="string" name="global_action_power_off" />
   <java-symbol type="string" name="global_action_power_options" />
@@ -2631,7 +2630,11 @@
   <java-symbol type="integer" name="config_sidefpsBpPowerPressWindow"/>
   <java-symbol type="integer" name="config_sidefpsKeyguardPowerPressWindow"/>
   <java-symbol type="integer" name="config_sidefpsPostAuthDowntime"/>
-  <java-symbol type="integer" name="config_sidefpsEnrollPowerPressWindow"/>
+  <java-symbol type="integer" name="config_sideFpsToastTimeout"/>
+
+  <!-- Clickable toast used during sidefps enrollment -->
+  <java-symbol type="layout" name="side_fps_toast" />
+  <java-symbol type="id" name="turn_off_screen" />
 
   <!-- Face authentication messages -->
   <java-symbol type="string" name="face_recalibrate_notification_name" />
