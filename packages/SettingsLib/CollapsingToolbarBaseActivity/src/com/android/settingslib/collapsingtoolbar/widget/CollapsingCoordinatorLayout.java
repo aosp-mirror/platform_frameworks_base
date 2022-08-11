@@ -21,6 +21,7 @@ import static android.text.Layout.HYPHENATION_FREQUENCY_NORMAL_FAST;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.text.LineBreakConfig;
 import android.os.Build;
@@ -122,7 +123,7 @@ public class CollapsingCoordinatorLayout extends CoordinatorLayout {
                 mCollapsingToolbarLayout.setTitle(mToolbarTitle);
             }
         }
-        disableCollapsingToolbarLayoutScrollingBehavior();
+        autoSetCollapsingToolbarLayoutScrolling();
     }
 
     /**
@@ -243,7 +244,7 @@ public class CollapsingCoordinatorLayout extends CoordinatorLayout {
             mCollapsingToolbarLayout.findViewById(R.id.support_action_bar);
     }
 
-    private void disableCollapsingToolbarLayoutScrollingBehavior() {
+    private void autoSetCollapsingToolbarLayoutScrolling() {
         if (mAppBarLayout == null) {
             return;
         }
@@ -254,7 +255,9 @@ public class CollapsingCoordinatorLayout extends CoordinatorLayout {
                 new AppBarLayout.Behavior.DragCallback() {
                     @Override
                     public boolean canDrag(@NonNull AppBarLayout appBarLayout) {
-                        return false;
+                        // Header can be scrolling while device in landscape mode.
+                        return appBarLayout.getResources().getConfiguration().orientation
+                                == Configuration.ORIENTATION_LANDSCAPE;
                     }
                 });
         params.setBehavior(behavior);
