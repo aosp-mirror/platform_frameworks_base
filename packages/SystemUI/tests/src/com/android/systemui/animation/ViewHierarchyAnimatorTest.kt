@@ -664,6 +664,60 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun animateAddition_runnableRunsWhenAnimationEnds() {
+        var runnableRun = false
+        val onAnimationEndRunnable = { runnableRun = true }
+
+        ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.CENTER,
+                includeMargins = true,
+                onAnimationEnd = onAnimationEndRunnable
+        )
+        rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
+
+        endAnimation(rootView)
+
+        assertEquals(true, runnableRun)
+    }
+
+    @Test
+    fun animateAddition_runnableDoesNotRunWhenAnimationCancelled() {
+        var runnableRun = false
+        val onAnimationEndRunnable = { runnableRun = true }
+
+        ViewHierarchyAnimator.animateAddition(
+            rootView,
+            origin = ViewHierarchyAnimator.Hotspot.CENTER,
+            includeMargins = true,
+            onAnimationEnd = onAnimationEndRunnable
+        )
+        rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
+
+        cancelAnimation(rootView)
+
+        assertEquals(false, runnableRun)
+    }
+
+    @Test
+    fun animationAddition_runnableDoesNotRunWhenOnlyPartwayThroughAnimation() {
+        var runnableRun = false
+        val onAnimationEndRunnable = { runnableRun = true }
+
+        ViewHierarchyAnimator.animateAddition(
+            rootView,
+            origin = ViewHierarchyAnimator.Hotspot.CENTER,
+            includeMargins = true,
+            onAnimationEnd = onAnimationEndRunnable
+        )
+        rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
+
+        advanceAnimation(rootView, 0.5f)
+
+        assertEquals(false, runnableRun)
+    }
+
+    @Test
     fun animatesViewRemovalFromStartToEnd() {
         setUpRootWithChildren()
 
@@ -1154,6 +1208,16 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         if (rootView is ViewGroup) {
             for (i in 0 until rootView.childCount) {
                 endAnimation(rootView.getChildAt(i))
+            }
+        }
+    }
+
+    private fun cancelAnimation(rootView: View) {
+        (rootView.getTag(R.id.tag_animator) as? ObjectAnimator)?.cancel()
+
+        if (rootView is ViewGroup) {
+            for (i in 0 until rootView.childCount) {
+                cancelAnimation(rootView.getChildAt(i))
             }
         }
     }

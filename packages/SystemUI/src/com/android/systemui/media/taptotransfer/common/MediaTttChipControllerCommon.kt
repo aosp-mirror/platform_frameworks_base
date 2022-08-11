@@ -56,7 +56,7 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
         internal val logger: MediaTttLogger,
         internal val windowManager: WindowManager,
         private val viewUtil: ViewUtil,
-        @Main internal val mainExecutor: DelayableExecutor,
+        @Main private val mainExecutor: DelayableExecutor,
         private val accessibilityManager: AccessibilityManager,
         private val configurationController: ConfigurationController,
         private val powerManager: PowerManager,
