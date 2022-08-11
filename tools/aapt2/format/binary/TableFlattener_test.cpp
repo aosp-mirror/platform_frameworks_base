@@ -878,4 +878,52 @@ TEST_F(TableFlattenerTest, FlattenCustomResourceTypes) {
                      Res_value::TYPE_STRING, (uint32_t)*idx, 0u));
 }
 
+TEST_F(TableFlattenerTest, FlattenTypeEntryWithNameCollapseNotInExemption) {
+  OverlayableItem overlayable_item(std::make_shared<Overlayable>("TestName", "overlay://theme"));
+  overlayable_item.policies |= PolicyFlags::PUBLIC;
+
+  std::string name = "com.app.test:color/overlayable_color";
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddValue("com.app.test:color/overlayable_color", ResourceId(0x7f010000),
+                    util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_COLOR_ARGB8),
+                                                       0xffaabbcc))
+          .SetOverlayable(name, overlayable_item)
+          .Build();
+
+  TableFlattenerOptions options;
+  options.collapse_key_stringpool = true;
+
+  ResTable res_table;
+  EXPECT_THAT(Flatten(context_.get(), options, table.get(), &res_table), testing::IsTrue());
+  EXPECT_THAT(Exists(&res_table, "com.app.test:color/overlayable_color", ResourceId(0x7f010000), {},
+                     Res_value::TYPE_INT_COLOR_ARGB8, 0xffaabbcc, 0u),
+              testing::IsTrue());
+}
+
+TEST_F(TableFlattenerTest, FlattenTypeEntryWithNameCollapseInExemption) {
+  OverlayableItem overlayable_item(std::make_shared<Overlayable>("TestName", "overlay://theme"));
+  overlayable_item.policies |= PolicyFlags::PUBLIC;
+
+  std::string name = "com.app.test:color/overlayable_color";
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddValue("com.app.test:color/overlayable_color", ResourceId(0x7f010000),
+                    util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_COLOR_ARGB8),
+                                                       0xffaabbcc))
+          .SetOverlayable(name, overlayable_item)
+          .Build();
+
+  TableFlattenerOptions options;
+  options.collapse_key_stringpool = true;
+  options.name_collapse_exemptions.insert(
+      ResourceName({}, ResourceType::kColor, "overlayable_color"));
+
+  ResTable res_table;
+  EXPECT_THAT(Flatten(context_.get(), options, table.get(), &res_table), testing::IsTrue());
+  EXPECT_THAT(Exists(&res_table, "com.app.test:color/overlayable_color", ResourceId(0x7f010000), {},
+                     Res_value::TYPE_INT_COLOR_ARGB8, 0xffaabbcc, 0u),
+              testing::IsTrue());
+}
+
 }  // namespace aapt

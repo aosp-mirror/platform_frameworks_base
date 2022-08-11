@@ -641,7 +641,23 @@ class PackageFlattener {
           local_key_index = (uint32_t)key_pool_.MakeRef(entry.name).index();
         } else {
           // resource isn't exempt from collapse, add it as obfuscated value
-          local_key_index = (uint32_t)key_pool_.MakeRef(obfuscated_resource_name).index();
+          if (entry.overlayable_item) {
+            // if the resource name of the specific entry is obfuscated and this
+            // entry is in the overlayable list, the overlay can't work on this
+            // overlayable at runtime because the name has been obfuscated in
+            // resources.arsc during flatten operation.
+            const OverlayableItem& item = entry.overlayable_item.value();
+            context_->GetDiagnostics()->Warn(android::DiagMessage(item.overlayable->source)
+                                             << "The resource name of overlayable entry "
+                                             << resource_name.to_string() << "'"
+                                             << " shouldn't be obfuscated in resources.arsc");
+
+            local_key_index = (uint32_t)key_pool_.MakeRef(entry.name).index();
+          } else {
+            // TODO(b/228192695): output the entry.name and Resource id to make
+            //  de-obfuscated possible.
+            local_key_index = (uint32_t)key_pool_.MakeRef(obfuscated_resource_name).index();
+          }
         }
         // Group values by configuration.
         for (auto& config_value : entry.values) {
