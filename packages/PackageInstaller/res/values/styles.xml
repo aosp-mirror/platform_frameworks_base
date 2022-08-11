@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<resources>
+    <style name="AlertDialog">
+        <item name="fullDark">@empty</item>
+        <item name="topDark">@empty</item>
+        <item name="centerDark">@empty</item>
+        <item name="bottomDark">@empty</item>
+        <item name="fullBright">@empty</item>
+        <item name="topBright">@empty</item>
+        <item name="centerBright">@empty</item>
+        <item name="bottomBright">@empty</item>
+        <item name="bottomMedium">@empty</item>
+        <item name="centerMedium">@empty</item>
+        <item name="layout">@layout/alert_dialog_material</item>
+        <item name="listLayout">@layout/select_dialog_material</item>
+        <item name="progressLayout">@layout/progress_dialog_material</item>
+        <item name="horizontalProgressLayout">@layout/alert_dialog_progress_material</item>
+        <item name="listItemLayout">@layout/select_dialog_item_material</item>
+        <item name="multiChoiceItemLayout">@layout/select_dialog_multichoice_material</item>
+        <item name="singleChoiceItemLayout">@layout/select_dialog_singlechoice_material</item>
+        <item name="controllerType">@integer/config_alertDialogController</item>
+        <item name="selectionScrollOffset">@dimen/config_alertDialogSelectionScrollOffset</item>
+        <item name="needsDefaultBackgrounds">false</item>
+    </style>
+    <style name="TextAppearance">
+        <item name="textSize">16sp</item>
+    </style>
+</resources>
