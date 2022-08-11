@@ -37,4 +37,10 @@
     <color name="user_icon_6">#ff4ecde6</color><!-- cyan -->
     <color name="user_icon_7">#fffbbc04</color><!-- yellow -->
     <color name="user_icon_8">#fffa903e</color><!-- orange -->
+
+    <!-- Color for side fps toast dark theme-->
+    <color name="side_fps_toast_background">#2E3132</color>
+    <color name="side_fps_text_color">#EFF1F2</color>
+    <color name="side_fps_button_color">#33B9DB</color>
+
 </resources>
