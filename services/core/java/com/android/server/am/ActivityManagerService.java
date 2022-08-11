@@ -5014,7 +5014,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 hostingRecord.getType(),
                 hostingRecord.getName(),
                 shortAction,
-                HostingRecord.getHostingTypeIdStatsd(hostingRecord.getType()));
+                HostingRecord.getHostingTypeIdStatsd(hostingRecord.getType()),
+                HostingRecord.getTriggerTypeForStatsd(hostingRecord.getTriggerType()));
         return true;
     }
 
