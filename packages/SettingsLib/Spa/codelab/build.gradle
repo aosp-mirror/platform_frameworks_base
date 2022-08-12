@@ -25,7 +25,7 @@ android {
 
     defaultConfig {
         applicationId "com.android.settingslib.spa.codelab"
-        minSdk minSdk_version
+        minSdk spa_min_sdk
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -52,7 +52,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion compose_version
+        kotlinCompilerExtensionVersion jetpack_compose_version
     }
     packagingOptions {
         resources {
