@@ -369,13 +369,13 @@ android_media_MediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsu
     setVideoSurface(env, thiz, jsurface, true /* mediaPlayerMustBeAlive */);
 }
 
-static void
-android_media_MediaPlayer_prepare(JNIEnv *env, jobject thiz)
+static jint
+android_media_MediaPlayer_prepare(JNIEnv *env, jobject thiz, jobject piidParcel)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
+    if (mp == nullptr) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return;
+        return UNKNOWN_ERROR;
     }
 
     // Handle the case where the display surface was set before the mp was
@@ -384,15 +384,20 @@ android_media_MediaPlayer_prepare(JNIEnv *env, jobject thiz)
     mp->setVideoSurfaceTexture(st);
 
     process_media_player_call( env, thiz, mp->prepare(), "java/io/IOException", "Prepare failed." );
+
+    // update the piid
+    Parcel *request = parcelForJavaObject(env, piidParcel);
+    auto reply = std::make_unique<Parcel>();
+    return static_cast<jint>(mp->invoke(*request, reply.get()));
 }
 
-static void
-android_media_MediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
+static jint
+android_media_MediaPlayer_prepareAsync(JNIEnv *env, jobject thiz, jobject piidParcel)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
+    if (mp == nullptr) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return;
+        return UNKNOWN_ERROR;
     }
 
     // Handle the case where the display surface was set before the mp was
@@ -401,6 +406,11 @@ android_media_MediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
     mp->setVideoSurfaceTexture(st);
 
     process_media_player_call( env, thiz, mp->prepareAsync(), "java/io/IOException", "Prepare Async failed." );
+
+    // update the piid
+    Parcel *request = parcelForJavaObject(env, piidParcel);
+    auto reply = std::make_unique<Parcel>();
+    return static_cast<jint>(mp->invoke(*request, reply.get()));
 }
 
 static void
@@ -1380,8 +1390,8 @@ static const JNINativeMethod gMethods[] = {
     {"_setDataSource",      "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
     {"_setDataSource",      "(Landroid/media/MediaDataSource;)V",(void *)android_media_MediaPlayer_setDataSourceCallback },
     {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer_setVideoSurface},
-    {"_prepare",            "()V",                              (void *)android_media_MediaPlayer_prepare},
-    {"prepareAsync",        "()V",                              (void *)android_media_MediaPlayer_prepareAsync},
+    {"_prepare",            "(Landroid/os/Parcel;)I",           (void *)android_media_MediaPlayer_prepare},
+    {"_prepareAsync",       "(Landroid/os/Parcel;)I",           (void *)android_media_MediaPlayer_prepareAsync},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer_start},
     {"_stop",               "()V",                              (void *)android_media_MediaPlayer_stop},
     {"getVideoWidth",       "()I",                              (void *)android_media_MediaPlayer_getVideoWidth},

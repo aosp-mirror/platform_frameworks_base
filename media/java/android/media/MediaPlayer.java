@@ -696,6 +696,13 @@ public class MediaPlayer extends PlayerBase
         baseRegisterPlayer(sessionId);
     }
 
+    private Parcel createPlayerIIdParcel() {
+        Parcel parcel = newRequest();
+        parcel.writeInt(INVOKE_ID_SET_PLAYER_IID);
+        parcel.writeInt(mPlayerIId);
+        return parcel;
+    }
+
     /*
      * Update the MediaPlayer SurfaceTexture.
      * Call after setting a new display surface.
@@ -712,6 +719,7 @@ public class MediaPlayer extends PlayerBase
     private static final int INVOKE_ID_DESELECT_TRACK = 5;
     private static final int INVOKE_ID_SET_VIDEO_SCALE_MODE = 6;
     private static final int INVOKE_ID_GET_SELECTED_TRACK = 7;
+    private static final int INVOKE_ID_SET_PLAYER_IID = 8;
 
     /**
      * Create a request parcel which can be routed to the native media
@@ -1309,16 +1317,26 @@ public class MediaPlayer extends PlayerBase
      * @throws IllegalStateException if it is called in an invalid state
      */
     public void prepare() throws IOException, IllegalStateException {
-        _prepare();
+        Parcel piidParcel = createPlayerIIdParcel();
+        try {
+            int retCode = _prepare(piidParcel);
+            if (retCode != 0) {
+                Log.w(TAG, "prepare(): could not set piid " + mPlayerIId);
+            }
+        } finally {
+            piidParcel.recycle();
+        }
         scanInternalSubtitleTracks();
 
         // DrmInfo, if any, has been resolved by now.
         synchronized (mDrmLock) {
             mDrmInfoResolved = true;
         }
+
     }
 
-    private native void _prepare() throws IOException, IllegalStateException;
+    /** Returns the result of sending the {@code piidParcel} to the MediaPlayerService. */
+    private native int _prepare(Parcel piidParcel) throws IOException, IllegalStateException;
 
     /**
      * Prepares the player for playback, asynchronously.
@@ -1330,7 +1348,20 @@ public class MediaPlayer extends PlayerBase
      *
      * @throws IllegalStateException if it is called in an invalid state
      */
-    public native void prepareAsync() throws IllegalStateException;
+    public void prepareAsync() throws IllegalStateException {
+        Parcel piidParcel = createPlayerIIdParcel();
+        try {
+            int retCode = _prepareAsync(piidParcel);
+            if (retCode != 0) {
+                Log.w(TAG, "prepareAsync(): could not set piid " + mPlayerIId);
+            }
+        } finally {
+            piidParcel.recycle();
+        }
+    }
+
+    /** Returns the result of sending the {@code piidParcel} to the MediaPlayerService. */
+    private native int _prepareAsync(Parcel piidParcel) throws IllegalStateException;
 
     /**
      * Starts or resumes playback. If playback had previously been paused,
