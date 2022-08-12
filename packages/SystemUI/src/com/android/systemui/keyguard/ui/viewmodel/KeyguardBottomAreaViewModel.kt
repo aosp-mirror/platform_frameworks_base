@@ -17,15 +17,11 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.doze.util.BurnInHelperWrapper
+import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
-import com.android.systemui.keyguard.domain.usecase.ObserveAnimateBottomAreaTransitionsUseCase
-import com.android.systemui.keyguard.domain.usecase.ObserveBottomAreaAlphaUseCase
-import com.android.systemui.keyguard.domain.usecase.ObserveClockPositionUseCase
-import com.android.systemui.keyguard.domain.usecase.ObserveDozeAmountUseCase
-import com.android.systemui.keyguard.domain.usecase.ObserveIsDozingUseCase
-import com.android.systemui.keyguard.domain.usecase.ObserveKeyguardQuickAffordanceUseCase
-import com.android.systemui.keyguard.domain.usecase.OnKeyguardQuickAffordanceClickedUseCase
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -36,13 +32,9 @@ import kotlinx.coroutines.flow.map
 class KeyguardBottomAreaViewModel
 @Inject
 constructor(
-    private val observeQuickAffordanceUseCase: ObserveKeyguardQuickAffordanceUseCase,
-    private val onQuickAffordanceClickedUseCase: OnKeyguardQuickAffordanceClickedUseCase,
-    observeBottomAreaAlphaUseCase: ObserveBottomAreaAlphaUseCase,
-    observeIsDozingUseCase: ObserveIsDozingUseCase,
-    observeAnimateBottomAreaTransitionsUseCase: ObserveAnimateBottomAreaTransitionsUseCase,
-    private val observeDozeAmountUseCase: ObserveDozeAmountUseCase,
-    observeClockPositionUseCase: ObserveClockPositionUseCase,
+    private val keyguardInteractor: KeyguardInteractor,
+    private val quickAffordanceInteractor: KeyguardQuickAffordanceInteractor,
+    bottomAreaInteractor: KeyguardBottomAreaInteractor,
     private val burnInHelperWrapper: BurnInHelperWrapper,
 ) {
     /** An observable for the view-model of the "start button" quick affordance. */
@@ -56,12 +48,12 @@ constructor(
      * animate.
      */
     val animateButtonReveal: Flow<Boolean> =
-        observeAnimateBottomAreaTransitionsUseCase().distinctUntilChanged()
+        bottomAreaInteractor.animateDozingTransitions.distinctUntilChanged()
     /** An observable for whether the overlay container should be visible. */
     val isOverlayContainerVisible: Flow<Boolean> =
-        observeIsDozingUseCase().map { !it }.distinctUntilChanged()
+        keyguardInteractor.isDozing.map { !it }.distinctUntilChanged()
     /** An observable for the alpha level for the entire bottom area. */
-    val alpha: Flow<Float> = observeBottomAreaAlphaUseCase().distinctUntilChanged()
+    val alpha: Flow<Float> = bottomAreaInteractor.alpha.distinctUntilChanged()
     /** An observable for whether the indication area should be padded. */
     val isIndicationAreaPadded: Flow<Boolean> =
         combine(startButton, endButton) { startButtonModel, endButtonModel ->
@@ -70,11 +62,11 @@ constructor(
             .distinctUntilChanged()
     /** An observable for the x-offset by which the indication area should be translated. */
     val indicationAreaTranslationX: Flow<Float> =
-        observeClockPositionUseCase().map { it.x.toFloat() }.distinctUntilChanged()
+        bottomAreaInteractor.clockPosition.map { it.x.toFloat() }.distinctUntilChanged()
 
     /** Returns an observable for the y-offset by which the indication area should be translated. */
     fun indicationAreaTranslationY(defaultBurnInOffset: Int): Flow<Float> {
-        return observeDozeAmountUseCase()
+        return keyguardInteractor.dozeAmount
             .map { dozeAmount ->
                 dozeAmount *
                     (burnInHelperWrapper.burnInOffset(
@@ -88,7 +80,8 @@ constructor(
     private fun button(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceViewModel> {
-        return observeQuickAffordanceUseCase(position)
+        return quickAffordanceInteractor
+            .quickAffordance(position)
             .map { model -> model.toViewModel() }
             .distinctUntilChanged()
     }
@@ -102,7 +95,7 @@ constructor(
                     icon = icon,
                     contentDescriptionResourceId = contentDescriptionResourceId,
                     onClicked = { parameters ->
-                        onQuickAffordanceClickedUseCase(
+                        quickAffordanceInteractor.onQuickAffordanceClicked(
                             configKey = parameters.configKey,
                             animationController = parameters.animationController,
                         )

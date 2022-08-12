@@ -16,11 +16,10 @@
 
 package com.android.systemui.keyguard.data.repository
 
-import com.android.systemui.common.data.model.Position
+import com.android.systemui.common.shared.model.Position
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.yield
 
 /** Fake implementation of [KeyguardRepository] */
 class FakeKeyguardRepository : KeyguardRepository {
@@ -56,30 +55,15 @@ class FakeKeyguardRepository : KeyguardRepository {
         _clockPosition.value = Position(x, y)
     }
 
-    suspend fun setKeyguardShowing(isShowing: Boolean) {
+    fun setKeyguardShowing(isShowing: Boolean) {
         _isKeyguardShowing.value = isShowing
-        // Yield to allow the test's collection coroutine to "catch up" and collect this value
-        // before the test continues to the next line.
-        // TODO(b/239834928): once coroutines.test is updated, switch to the approach described in
-        // https://developer.android.com/kotlin/flow/test#continuous-collection and remove this.
-        yield()
     }
 
-    suspend fun setDozing(isDozing: Boolean) {
+    fun setDozing(isDozing: Boolean) {
         _isDozing.value = isDozing
-        // Yield to allow the test's collection coroutine to "catch up" and collect this value
-        // before the test continues to the next line.
-        // TODO(b/239834928): once coroutines.test is updated, switch to the approach described in
-        // https://developer.android.com/kotlin/flow/test#continuous-collection and remove this.
-        yield()
     }
 
-    suspend fun setDozeAmount(dozeAmount: Float) {
+    fun setDozeAmount(dozeAmount: Float) {
         _dozeAmount.value = dozeAmount
-        // Yield to allow the test's collection coroutine to "catch up" and collect this value
-        // before the test continues to the next line.
-        // TODO(b/239834928): once coroutines.test is updated, switch to the approach described in
-        // https://developer.android.com/kotlin/flow/test#continuous-collection and remove this.
-        yield()
     }
 }

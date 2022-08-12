@@ -15,25 +15,29 @@
  *
  */
 
-package com.android.systemui.keyguard.domain.usecase
+package com.android.systemui.keyguard.domain.interactor
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Use-case for observing whether the keyguard is currently being shown.
- *
- * Note: this is also `true` when the lock-screen is occluded with an `Activity` "above" it in the
- * z-order (which is not really above the system UI window, but rather - the lock-screen becomes
- * invisible to reveal the "occluding activity").
+ * Encapsulates business-logic related to the keyguard but not to a more specific part within it.
  */
-class ObserveIsKeyguardShowingUseCase
+@SysUISingleton
+class KeyguardInteractor
 @Inject
 constructor(
-    private val repository: KeyguardRepository,
+    repository: KeyguardRepository,
 ) {
-    operator fun invoke(): Flow<Boolean> {
-        return repository.isKeyguardShowing
-    }
+    /**
+     * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
+     * all.
+     */
+    val dozeAmount: Flow<Float> = repository.dozeAmount
+    /** Whether the system is in doze mode. */
+    val isDozing: Flow<Boolean> = repository.isDozing
+    /** Whether the keyguard is showing ot not. */
+    val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
 }
