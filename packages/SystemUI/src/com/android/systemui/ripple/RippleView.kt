@@ -81,6 +81,7 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         rippleShader.color = RIPPLE_DEFAULT_COLOR
         rippleShader.progress = 0f
         rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
+        rippleShader.pixelDensity = resources.displayMetrics.density
 
         ripplePaint.shader = rippleShader
     }
@@ -122,6 +123,13 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
      */
     fun setRippleFill(rippleFill: Boolean) {
         rippleShader.rippleFill = rippleFill
+    }
+
+    /**
+     * Set the intensity of the sparkles.
+     */
+    fun setSparkleStrength(strength: Float) {
+        rippleShader.sparkleStrength = strength
     }
 
     override fun onDraw(canvas: Canvas?) {
