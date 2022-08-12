@@ -274,4 +274,30 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
         verify(mMediaOutputController).connectDevice(mMediaDevice2);
     }
+
+    @Test
+    public void onItemClick_onGroupActionTriggered_verifySeekbarDisabled() {
+        when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(mMediaDevices);
+        List<MediaDevice> selectableDevices = new ArrayList<>();
+        selectableDevices.add(mMediaDevice1);
+        when(mMediaOutputController.getSelectableMediaDevice()).thenReturn(selectableDevices);
+        when(mMediaOutputController.hasAdjustVolumeUserRestriction()).thenReturn(true);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        mViewHolder.mContainerLayout.performClick();
+
+        assertThat(mViewHolder.mSeekBar.isEnabled()).isFalse();
+    }
+
+    @Test
+    public void onBindViewHolder_volumeControlChangeToEnabled_enableSeekbarAgain() {
+        when(mMediaOutputController.isVolumeControlEnabled(mMediaDevice1)).thenReturn(false);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+        assertThat(mViewHolder.mSeekBar.isEnabled()).isFalse();
+
+        when(mMediaOutputController.isVolumeControlEnabled(mMediaDevice1)).thenReturn(true);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.mSeekBar.isEnabled()).isTrue();
+    }
 }
