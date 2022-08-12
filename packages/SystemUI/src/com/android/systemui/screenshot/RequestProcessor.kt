@@ -18,7 +18,6 @@ package com.android.systemui.screenshot
 
 import android.net.Uri
 import android.util.Log
-import android.view.WindowManager.ScreenshotType
 import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION
@@ -37,13 +36,12 @@ internal class RequestProcessor @Inject constructor(
     private val controller: ScreenshotController,
 ) {
     fun processRequest(
-        @ScreenshotType type: Int,
-        onSavedListener: Consumer<Uri>,
         request: ScreenshotRequest,
+        onSavedListener: Consumer<Uri>,
         callback: RequestCallback
     ) {
 
-        if (type == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
+        if (request.type == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
             val image = HardwareBitmapBundler.bundleToHardwareBitmap(request.bitmapBundle)
 
             controller.handleImageAsScreenshot(
@@ -53,12 +51,12 @@ internal class RequestProcessor @Inject constructor(
             return
         }
 
-        when (type) {
+        when (request.type) {
             TAKE_SCREENSHOT_FULLSCREEN ->
                 controller.takeScreenshotFullscreen(null, onSavedListener, callback)
             TAKE_SCREENSHOT_SELECTED_REGION ->
                 controller.takeScreenshotPartial(null, onSavedListener, callback)
-            else -> Log.w(TAG, "Invalid screenshot option: $type")
+            else -> Log.w(TAG, "Invalid screenshot option: ${request.type}")
         }
     }
 
