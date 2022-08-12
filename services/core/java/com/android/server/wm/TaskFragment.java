@@ -740,6 +740,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return false;
     }
 
+    protected boolean isForceTranslucent() {
+        return false;
+    }
+
     boolean isLeafTaskFragment() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             if (mChildren.get(i).asTaskFragment() != null) {
@@ -865,7 +869,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     @VisibleForTesting
     boolean isTranslucent(ActivityRecord starting) {
-        if (!isAttached() || isForceHidden()) {
+        if (!isAttached() || isForceHidden() || isForceTranslucent()) {
             return true;
         }
         final PooledPredicate p = PooledLambda.obtainPredicate(TaskFragment::isOpaqueActivity,

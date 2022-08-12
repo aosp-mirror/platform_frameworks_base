@@ -5014,7 +5014,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 hostingRecord.getType(),
                 hostingRecord.getName(),
                 shortAction,
-                HostingRecord.getHostingTypeIdStatsd(hostingRecord.getType()));
+                HostingRecord.getHostingTypeIdStatsd(hostingRecord.getType()),
+                HostingRecord.getTriggerTypeForStatsd(hostingRecord.getTriggerType()));
         return true;
     }
 
@@ -14339,10 +14340,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (oldRecord.resultTo != null) {
                     final BroadcastQueue oldQueue = broadcastQueueForIntent(oldRecord.intent);
                     try {
+                        oldRecord.mIsReceiverAppRunning = true;
                         oldQueue.performReceiveLocked(oldRecord.callerApp, oldRecord.resultTo,
                                 oldRecord.intent,
                                 Activity.RESULT_CANCELED, null, null,
-                                false, false, oldRecord.userId, oldRecord.callingUid, callingUid);
+                                false, false, oldRecord.userId, oldRecord.callingUid, callingUid,
+                                SystemClock.uptimeMillis() - oldRecord.enqueueTime, 0);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failure ["
                                 + queue.mQueueName + "] sending broadcast result of "

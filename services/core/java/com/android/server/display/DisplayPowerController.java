@@ -1328,9 +1328,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
 
         final boolean autoBrightnessAdjustmentChanged = updateAutoBrightnessAdjustment();
-        if (autoBrightnessAdjustmentChanged) {
-            mTemporaryAutoBrightnessAdjustment = Float.NaN;
-        }
 
         // Use the autobrightness adjustment override if set.
         final float autoBrightnessAdjustment;
@@ -2309,14 +2306,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private void handleSettingsChange(boolean userSwitch) {
         mPendingScreenBrightnessSetting = getScreenBrightnessSetting();
+        mPendingAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
         if (userSwitch) {
             // Don't treat user switches as user initiated change.
             setCurrentScreenBrightness(mPendingScreenBrightnessSetting);
+            updateAutoBrightnessAdjustment();
             if (mAutomaticBrightnessController != null) {
                 mAutomaticBrightnessController.resetShortTermModel();
             }
         }
-        mPendingAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
         // We don't bother with a pending variable for VR screen brightness since we just
         // immediately adapt to it.
         mScreenBrightnessForVr = getScreenBrightnessForVrSetting();
@@ -2385,6 +2383,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
         mAutoBrightnessAdjustment = mPendingAutoBrightnessAdjustment;
         mPendingAutoBrightnessAdjustment = Float.NaN;
+        mTemporaryAutoBrightnessAdjustment = Float.NaN;
         return true;
     }
 

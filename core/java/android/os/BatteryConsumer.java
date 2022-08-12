@@ -479,6 +479,21 @@ public abstract class BatteryConsumer {
     }
 
     /**
+     * Returns the equivalent PowerModel enum for the specified power model.
+     * {@see BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsage.PowerModel}
+     */
+    public static int powerModelToProtoEnum(@BatteryConsumer.PowerModel int powerModel) {
+        switch (powerModel) {
+            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
+                return BatteryUsageStatsAtomsProto.PowerComponentModel.MEASURED_ENERGY;
+            case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
+                return BatteryUsageStatsAtomsProto.PowerComponentModel.POWER_PROFILE;
+            default:
+                return BatteryUsageStatsAtomsProto.PowerComponentModel.UNDEFINED;
+        }
+    }
+
+    /**
      * Returns the name of the specified process state.  Intended for logging and debugging.
      */
     public static String processStateToString(@BatteryConsumer.ProcessState int processState) {

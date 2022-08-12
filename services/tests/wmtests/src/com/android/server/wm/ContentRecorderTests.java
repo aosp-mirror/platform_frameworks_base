@@ -79,6 +79,8 @@ public class ContentRecorderTests extends WindowTestsBase {
     private ConfigListener mConfigListener;
     private CountDownLatch mLatch;
 
+    private VirtualDisplay mVirtualDisplay;
+
     @Before public void setUp() {
         // GIVEN SurfaceControl can successfully mirror the provided surface.
         sSurfaceSize = new Point(
@@ -89,10 +91,10 @@ public class ContentRecorderTests extends WindowTestsBase {
         doReturn(INVALID_DISPLAY).when(mWm.mDisplayManagerInternal).getDisplayIdToMirror(anyInt());
 
         // GIVEN the VirtualDisplay associated with the session (so the display has state ON).
-        VirtualDisplay virtualDisplay = mWm.mDisplayManager.createVirtualDisplay("VirtualDisplay",
+        mVirtualDisplay = mWm.mDisplayManager.createVirtualDisplay("VirtualDisplay",
                 sSurfaceSize.x, sSurfaceSize.y,
                 DisplayMetrics.DENSITY_140, new Surface(), VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR);
-        final int displayId = virtualDisplay.getDisplay().getDisplayId();
+        final int displayId = mVirtualDisplay.getDisplay().getDisplayId();
         mWm.mRoot.onDisplayAdded(displayId);
         final DisplayContent virtualDisplayContent = mWm.mRoot.getDisplayContent(displayId);
         mContentRecorder = new ContentRecorder(virtualDisplayContent);
@@ -119,6 +121,8 @@ public class ContentRecorderTests extends WindowTestsBase {
     @After
     public void teardown() {
         DeviceConfig.removeOnPropertiesChangedListener(mConfigListener);
+        mVirtualDisplay.release();
+        mWm.mRoot.onDisplayRemoved(mVirtualDisplay.getDisplay().getDisplayId());
     }
 
     @Test

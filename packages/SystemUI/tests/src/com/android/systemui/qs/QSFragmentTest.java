@@ -205,6 +205,40 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    public void setQsExpansion_inSplitShade_setsFooterActionsExpansion_basedOnPanelExpFraction() {
+        // Random test values without any meaning. They just have to be different from each other.
+        float expansion = 0.123f;
+        float panelExpansionFraction = 0.321f;
+        float proposedTranslation = 456f;
+        float squishinessFraction = 0.987f;
+
+        QSFragment fragment = resumeAndGetFragment();
+        enableSplitShade();
+
+        fragment.setQsExpansion(expansion, panelExpansionFraction, proposedTranslation,
+                squishinessFraction);
+
+        verify(mQSFooterActionController).setExpansion(panelExpansionFraction);
+    }
+
+    @Test
+    public void setQsExpansion_notInSplitShade_setsFooterActionsExpansion_basedOnExpansion() {
+        // Random test values without any meaning. They just have to be different from each other.
+        float expansion = 0.123f;
+        float panelExpansionFraction = 0.321f;
+        float proposedTranslation = 456f;
+        float squishinessFraction = 0.987f;
+
+        QSFragment fragment = resumeAndGetFragment();
+        disableSplitShade();
+
+        fragment.setQsExpansion(expansion, panelExpansionFraction, proposedTranslation,
+                squishinessFraction);
+
+        verify(mQSFooterActionController).setExpansion(expansion);
+    }
+
+    @Test
     public void getQsMinExpansionHeight_notInSplitShade_returnsHeaderHeight() {
         QSFragment fragment = resumeAndGetFragment();
         disableSplitShade();
