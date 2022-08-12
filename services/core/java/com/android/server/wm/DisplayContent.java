@@ -6366,11 +6366,73 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
+     * This is to enable mirroring on virtual displays that specify the
+     * {@link android.hardware.display.DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR} but don't
+     * mirror using MediaProjection. When done through MediaProjection API, the
+     * ContentRecordingSession will be created automatically.
+     *
+     * This should only be called when there's no ContentRecordingSession already set for this
+     * display. The code will ask DMS if this display should enable display mirroring and which
+     * displayId to mirror from.
+     *
+     * @return true if the {@link ContentRecordingSession} was set for display mirroring using data
+     * from DMS, false if there was no ContentRecordingSession created.
+     */
+    boolean setDisplayMirroring() {
+        int mirrorDisplayId = mWmService.mDisplayManagerInternal.getDisplayIdToMirror(mDisplayId);
+        if (mirrorDisplayId == INVALID_DISPLAY) {
+            return false;
+        }
+
+        if (mirrorDisplayId == mDisplayId) {
+            if (mDisplayId != DEFAULT_DISPLAY) {
+                ProtoLog.w(WM_DEBUG_CONTENT_RECORDING,
+                        "Attempting to mirror self on %d", mirrorDisplayId);
+            }
+            return false;
+        }
+
+        // This is very unlikely, and probably impossible, but if the current display is
+        // DEFAULT_DISPLAY and the displayId to mirror results in an invalid display, we don't want
+        // to mirror the DEFAULT_DISPLAY so instead we just return
+        DisplayContent mirrorDc = mRootWindowContainer.getDisplayContentOrCreate(mirrorDisplayId);
+        if (mirrorDc == null && mDisplayId == DEFAULT_DISPLAY) {
+            ProtoLog.w(WM_DEBUG_CONTENT_RECORDING, "Found no matching mirror display for id=%d for"
+                    + " DEFAULT_DISPLAY. Nothing to mirror.", mirrorDisplayId);
+            return false;
+        }
+
+        if (mirrorDc == null) {
+            mirrorDc = mRootWindowContainer.getDefaultDisplay();
+            ProtoLog.w(WM_DEBUG_CONTENT_RECORDING,
+                    "Attempting to mirror %d from %d but no DisplayContent associated. Changing "
+                            + "to mirror default display.",
+                    mirrorDisplayId, mDisplayId);
+        }
+
+        ContentRecordingSession session = ContentRecordingSession
+                .createDisplaySession(mirrorDc.getDisplayUiContext().getWindowContextToken())
+                .setDisplayId(mDisplayId);
+        setContentRecordingSession(session);
+        ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                "Successfully created a ContentRecordingSession for displayId=%d to mirror "
+                        + "content from displayId=%d",
+                mDisplayId, mirrorDisplayId);
+        return true;
+    }
+
+    /**
      * Start recording if this DisplayContent no longer has content. Stop recording if it now
      * has content or the display is not on.
      */
     @VisibleForTesting void updateRecording() {
-        getContentRecorder().updateRecording();
+        if (mContentRecorder == null || !mContentRecorder.isContentRecordingSessionSet()) {
+            if (!setDisplayMirroring()) {
+                return;
+            }
+        }
+
+        mContentRecorder.updateRecording();
     }
 
     /**

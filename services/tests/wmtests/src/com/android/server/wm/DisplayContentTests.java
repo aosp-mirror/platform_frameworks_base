@@ -31,6 +31,7 @@ import static android.os.Build.VERSION_CODES.P;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
 import static android.view.InsetsState.ITYPE_IME;
@@ -2585,6 +2586,43 @@ public class DisplayContentTests extends WindowTestsBase {
         // THEN mirroring is initiated for the default display's DisplayArea.
         assertThat(actualDC.isCurrentlyRecording()).isTrue();
 
+        display.release();
+    }
+
+    @Test
+    public void testVirtualDisplayContent_displayMirroring() {
+        // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
+        // mirror.
+        final IBinder tokenToMirror = setUpDefaultTaskDisplayAreaWindowToken();
+
+        // GIVEN SurfaceControl can successfully mirror the provided surface.
+        Point surfaceSize = new Point(
+                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
+                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().height());
+        surfaceControlMirrors(surfaceSize);
+        // Initially disable getDisplayIdToMirror since the DMS may create the DC outside the direct
+        // call in the test. We need to spy on the DC before updateRecording is called or we can't
+        // verify setDisplayMirroring is called
+        doReturn(INVALID_DISPLAY).when(mWm.mDisplayManagerInternal).getDisplayIdToMirror(anyInt());
+
+        // GIVEN a new VirtualDisplay with an associated surface.
+        final VirtualDisplay display = createVirtualDisplay(surfaceSize, new Surface());
+        final int displayId = display.getDisplay().getDisplayId();
+
+        // GIVEN a session for this display.
+        mWm.mRoot.onDisplayAdded(displayId);
+
+        // WHEN getting the DisplayContent for the new virtual display.
+        DisplayContent actualDC = mWm.mRoot.getDisplayContent(displayId);
+        spyOn(actualDC);
+        // Return the default display as the value to mirror to ensure the VD with flag mirroring
+        // creates a ContentRecordingSession automatically.
+        doReturn(DEFAULT_DISPLAY).when(mWm.mDisplayManagerInternal).getDisplayIdToMirror(anyInt());
+        actualDC.updateRecording();
+
+        // THEN mirroring is initiated for the default display's DisplayArea.
+        verify(actualDC).setDisplayMirroring();
+        assertThat(actualDC.isCurrentlyRecording()).isTrue();
         display.release();
     }
 

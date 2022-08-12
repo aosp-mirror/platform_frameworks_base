@@ -30,6 +30,7 @@ import static com.android.server.accessibility.AccessibilityTraceFileProto.ENTRY
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER_H;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER_L;
+import static com.android.server.accessibility.AccessibilityTraceFileProto.REAL_TO_ELAPSED_TIME_OFFSET_NANOS;
 import static com.android.server.accessibility.AccessibilityTraceProto.ACCESSIBILITY_SERVICE;
 import static com.android.server.accessibility.AccessibilityTraceProto.CALENDAR_TIME;
 import static com.android.server.accessibility.AccessibilityTraceProto.CALLING_PARAMS;
@@ -116,6 +117,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class contains the accessibility related logic of the window manager.
@@ -2215,6 +2217,11 @@ final class AccessibilityController {
             try {
                 ProtoOutputStream proto = new ProtoOutputStream();
                 proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
+                long timeOffsetNs =
+                        TimeUnit.NANOSECONDS.convert(System.currentTimeMillis(),
+                                                     TimeUnit.NANOSECONDS)
+                        - SystemClock.elapsedRealtimeNanos();
+                proto.write(REAL_TO_ELAPSED_TIME_OFFSET_NANOS, timeOffsetNs);
                 mBuffer.writeTraceToFile(mTraceFile, proto);
             } catch (IOException e) {
                 Slog.e(TAG, "Unable to write buffer to file", e);

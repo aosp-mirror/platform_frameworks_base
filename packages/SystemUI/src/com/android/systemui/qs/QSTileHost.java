@@ -29,6 +29,7 @@ import android.util.Log;
 import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.UiEventLogger;
@@ -47,6 +48,7 @@ import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServiceKey;
 import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
@@ -88,6 +90,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     public static final int POSITION_AT_END = -1;
     public static final String TILES_SETTING = Secure.QS_TILES;
 
+    // Shared prefs that hold tile lifecycle info.
+    @VisibleForTesting
+    static final String TILES = "tiles_prefs";
+
     private final Context mContext;
     private final LinkedHashMap<String, QSTile> mTiles = new LinkedHashMap<>();
     protected final ArrayList<String> mTileSpecs = new ArrayList<>();
@@ -99,6 +105,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final InstanceIdSequence mInstanceIdSequence;
     private final CustomTileStatePersister mCustomTileStatePersister;
     private final Executor mMainExecutor;
+    private final UserFileManager mUserFileManager;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
     @Nullable
@@ -135,7 +142,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             SecureSettings secureSettings,
             CustomTileStatePersister customTileStatePersister,
             TileServiceRequestController.Builder tileServiceRequestControllerBuilder,
-            TileLifecycleManager.Factory tileLifecycleManagerFactory
+            TileLifecycleManager.Factory tileLifecycleManagerFactory,
+            UserFileManager userFileManager
     ) {
         mIconController = iconController;
         mContext = context;
@@ -148,6 +156,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mMainExecutor = mainExecutor;
         mTileServiceRequestController = tileServiceRequestControllerBuilder.create(this);
         mTileLifeCycleManagerFactory = tileLifecycleManagerFactory;
+        mUserFileManager = userFileManager;
 
         mInstanceIdSequence = new InstanceIdSequence(MAX_QS_INSTANCE_ID);
         mCentralSurfacesOptional = centralSurfacesOptional;
@@ -392,6 +401,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
      */
     @Override
     public void removeTile(String spec) {
+        if (spec.startsWith(CustomTile.PREFIX)) {
+            // If the tile is removed (due to it not actually existing), mark it as removed. That
+            // way it will be marked as newly added if it appears in the future.
+            setTileAdded(CustomTile.getComponentFromSpec(spec), mCurrentUser, false);
+        }
         mMainExecutor.execute(() -> changeTileSpecs(tileSpecs-> tileSpecs.remove(spec)));
     }
 
@@ -515,7 +529,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                 lifecycleManager.onStopListening();
                 lifecycleManager.onTileRemoved();
                 mCustomTileStatePersister.removeState(new TileServiceKey(component, mCurrentUser));
-                TileLifecycleManager.setTileAdded(mContext, component, false);
+                setTileAdded(component, mCurrentUser, false);
                 lifecycleManager.flushMessagesAndUnbind();
             }
         }
@@ -550,6 +564,36 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             }
         }
         throw new RuntimeException("Default factory didn't create view for " + tile.getTileSpec());
+    }
+
+    /**
+     * Check if a particular {@link CustomTile} has been added for a user and has not been removed
+     * since.
+     * @param componentName the {@link ComponentName} of the
+     *                      {@link android.service.quicksettings.TileService} associated with the
+     *                      tile.
+     * @param userId the user to check
+     */
+    public boolean isTileAdded(ComponentName componentName, int userId) {
+        return mUserFileManager
+                .getSharedPreferences(TILES, 0, userId)
+                .getBoolean(componentName.flattenToString(), false);
+    }
+
+    /**
+     * Persists whether a particular {@link CustomTile} has been added and it's currently in the
+     * set of selected tiles ({@link #mTiles}.
+     * @param componentName the {@link ComponentName} of the
+     *                      {@link android.service.quicksettings.TileService} associated
+     *                      with the tile.
+     * @param userId the user for this tile
+     * @param added {@code true} if the tile is being added, {@code false} otherwise
+     */
+    public void setTileAdded(ComponentName componentName, int userId, boolean added) {
+        mUserFileManager.getSharedPreferences(TILES, 0, userId)
+                .edit()
+                .putBoolean(componentName.flattenToString(), added)
+                .apply();
     }
 
     protected static List<String> loadTileSpecs(Context context, String tileList) {

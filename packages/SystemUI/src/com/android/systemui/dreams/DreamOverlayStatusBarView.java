@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -29,6 +30,7 @@ import com.android.systemui.R;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -58,6 +60,7 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
     public static final int STATUS_ICON_PRIORITY_MODE_ON = 6;
 
     private final Map<Integer, View> mStatusIcons = new HashMap<>();
+    private ViewGroup mSystemStatusViewGroup;
 
     public DreamOverlayStatusBarView(Context context) {
         this(context, null);
@@ -94,6 +97,8 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
                 fetchStatusIconForResId(R.id.dream_overlay_notification_indicator));
         mStatusIcons.put(STATUS_ICON_PRIORITY_MODE_ON,
                 fetchStatusIconForResId(R.id.dream_overlay_priority_mode));
+
+        mSystemStatusViewGroup = findViewById(R.id.dream_overlay_extra_items);
     }
 
     void showIcon(@StatusIconType int iconType, boolean show, @Nullable String contentDescription) {
@@ -105,6 +110,11 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
             icon.setContentDescription(contentDescription);
         }
         icon.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    void setExtraStatusBarItemViews(List<View> views) {
+        mSystemStatusViewGroup.removeAllViews();
+        views.forEach(view -> mSystemStatusViewGroup.addView(view));
     }
 
     private View fetchStatusIconForResId(int resId) {

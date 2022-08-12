@@ -3605,7 +3605,9 @@ public final class InputMethodManager {
      * specifying one of those statically defined subtypes in {@code subtypes}.</p>
      *
      * @param imiId Id of InputMethodInfo which additional input method subtypes will be added to.
+     * If the imiId is {@code null}, system would do nothing for this operation.
      * @param subtypes subtypes will be added as additional subtypes of the current input method.
+     * If the subtypes is {@code null}, system would do nothing for this operation.
      * @deprecated For IMEs that have already implemented features like customizable/downloadable
      *             keyboard layouts/languages, please start migration to other approaches. One idea
      *             would be exposing only one unified {@link InputMethodSubtype} then implement
@@ -3618,6 +3620,11 @@ public final class InputMethodManager {
         mServiceInvoker.setAdditionalInputMethodSubtypes(imiId, subtypes, UserHandle.myUserId());
     }
 
+    /**
+     * Returns the last used {@link InputMethodSubtype} in system history.
+     *
+     * @return the last {@link InputMethodSubtype}, {@code null} if last IME have no subtype.
+     */
     @Nullable
     public InputMethodSubtype getLastInputMethodSubtype() {
         return mServiceInvoker.getLastInputMethodSubtype(UserHandle.myUserId());
