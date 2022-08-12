@@ -70,4 +70,10 @@ public class BufferFlinger {
         }
         mBufferQ.add(buffer);
     }
+
+    public void freeBuffers() {
+        for (GraphicBuffer buffer : mBufferQ) {
+            buffer.destroy();
+        }
+    }
 }
