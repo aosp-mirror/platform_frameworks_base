@@ -207,7 +207,6 @@ import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -705,7 +704,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
             WakefulnessLifecycle wakefulnessLifecycle,
             SysuiStatusBarStateController statusBarStateController,
             Optional<Bubbles> bubblesOptional,
-            VisualStabilityManager visualStabilityManager,
             DeviceProvisionedController deviceProvisionedController,
             NavigationBarController navigationBarController,
             AccessibilityFloatingMenuController accessibilityFloatingMenuController,
@@ -793,7 +791,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mStatusBarStateController = statusBarStateController;
         mBubblesOptional = bubblesOptional;
-        mVisualStabilityManager = visualStabilityManager;
         mDeviceProvisionedController = deviceProvisionedController;
         mNavigationBarController = navigationBarController;
         mAccessibilityFloatingMenuController = accessibilityFloatingMenuController;
@@ -3930,9 +3927,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     // all notifications
     protected NotificationStackScrollLayout mStackScroller;
-
-    // handling reordering
-    private final VisualStabilityManager mVisualStabilityManager;
 
     protected AccessibilityManager mAccessibilityManager;
 

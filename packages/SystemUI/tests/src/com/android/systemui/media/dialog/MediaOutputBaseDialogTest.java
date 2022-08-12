@@ -43,7 +43,6 @@ import android.widget.TextView;
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.filters.SmallTest;
 
-import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
@@ -54,7 +53,7 @@ import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -83,8 +82,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
             LocalBluetoothLeBroadcast.class);
     private ActivityStarter mStarter = mock(ActivityStarter.class);
     private BroadcastSender mBroadcastSender = mock(BroadcastSender.class);
-    private NotificationEntryManager mNotificationEntryManager =
-            mock(NotificationEntryManager.class);
+    private final CommonNotifCollection mNotifCollection = mock(CommonNotifCollection.class);
     private NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
             NearbyMediaDevicesManager.class);
     private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
@@ -120,7 +118,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
 
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotificationEntryManager, mDialogLaunchAnimator,
+                mNotifCollection, mDialogLaunchAnimator,
                 Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager);
         mMediaOutputBaseDialogImpl = new MediaOutputBaseDialogImpl(mContext, mBroadcastSender,
                 mMediaOutputController);
