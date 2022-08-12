@@ -49,10 +49,12 @@ import android.app.BroadcastOptions;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
+import android.app.IProcessObserver;
 import android.app.IStopUserCallback;
 import android.app.IUidObserver;
 import android.app.IUserSwitchObserver;
 import android.app.KeyguardManager;
+import android.app.ProcessStateEnum;
 import android.app.ProfilerInfo;
 import android.app.RemoteServiceException.CrashedByAdbException;
 import android.app.UserSwitchObserver;
@@ -359,6 +361,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSetBgRestrictionLevel(pw);
                 case "get-bg-restriction-level":
                     return runGetBgRestrictionLevel(pw);
+                case "observe-foreground-process":
+                    return runGetCurrentForegroundProcess(pw, mInternal, mTaskInterface);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -3206,6 +3210,82 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println(e.getMessage());
         }
         return -1;
+    }
+
+    private int runGetCurrentForegroundProcess(PrintWriter pw,
+            IActivityManager iam, IActivityTaskManager iatm)
+            throws RemoteException {
+
+        ProcessObserver observer = new ProcessObserver(pw, iam, iatm, mInternal);
+        iam.registerProcessObserver(observer);
+
+        final InputStream mInput = getRawInputStream();
+        InputStreamReader converter = new InputStreamReader(mInput);
+        BufferedReader in = new BufferedReader(converter);
+        String line;
+        try {
+            while ((line = in.readLine()) != null) {
+                boolean addNewline = true;
+                if (line.length() <= 0) {
+                    addNewline = false;
+                } else if ("q".equals(line) || "quit".equals(line)) {
+                    break;
+                } else {
+                    pw.println("Invalid command: " + line);
+                }
+                if (addNewline) {
+                    pw.println("");
+                }
+                pw.flush();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            pw.flush();
+        } finally {
+            iam.unregisterProcessObserver(observer);
+        }
+        return 0;
+    }
+
+    static final class ProcessObserver extends IProcessObserver.Stub {
+
+        private PrintWriter mPw;
+        private IActivityManager mIam;
+        private IActivityTaskManager mIatm;
+        private ActivityManagerService mInternal;
+
+        ProcessObserver(PrintWriter mPw, IActivityManager mIam,
+                IActivityTaskManager mIatm, ActivityManagerService ams) {
+            this.mPw = mPw;
+            this.mIam = mIam;
+            this.mIatm = mIatm;
+            this.mInternal = ams;
+        }
+
+        @Override
+        public void onForegroundActivitiesChanged(int pid, int uid, boolean foregroundActivities) {
+            if (foregroundActivities) {
+                try {
+                    int prcState = mIam.getUidProcessState(uid, "android");
+                    int topPid = mInternal.getTopApp().getPid();
+                    if (prcState == ProcessStateEnum.TOP && topPid == pid) {
+                        mPw.println("New foreground process: " + pid);
+                    }
+                    mPw.flush();
+                } catch (RemoteException e) {
+                    mPw.println("Error occurred in binder call");
+                    mPw.flush();
+                }
+            }
+        }
+
+        @Override
+        public void onForegroundServicesChanged(int pid, int uid, int serviceTypes) {
+        }
+
+        @Override
+        public void onProcessDied(int pid, int uid) {
+        }
     }
 
     private int runSetMemoryFactor(PrintWriter pw) throws RemoteException {
