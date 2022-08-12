@@ -10,6 +10,9 @@
           "include-filter": "com.android.internal.inputmethod"
         },
         {
+          "include-filter": "android.accessibilityService.cts"
+        },
+        {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ],
