@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.shared.model
+package com.android.systemui.keyguard.domain.model
 
 /** Enumerates all possible positions for quick affordances that can appear on the lock-screen. */
 enum class KeyguardQuickAffordancePosition {
