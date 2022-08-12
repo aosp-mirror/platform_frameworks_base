@@ -64,6 +64,7 @@ import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -203,14 +204,24 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     }
 
     @VisibleForTesting
-    static boolean isRotationSeamless(@NonNull TransitionInfo info,
-            DisplayController displayController) {
+    static int getRotationAnimationHint(@NonNull TransitionInfo.Change displayChange,
+            @NonNull TransitionInfo info, @NonNull DisplayController displayController) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                "Display is changing, check if it should be seamless.");
-        boolean checkedDisplayLayout = false;
-        boolean hasTask = false;
-        boolean displayExplicitSeamless = false;
-        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                "Display is changing, resolve the animation hint.");
+        // The explicit request of display has the highest priority.
+        if (displayChange.getRotationAnimation() == ROTATION_ANIMATION_SEAMLESS) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                    "  display requests explicit seamless");
+            return ROTATION_ANIMATION_SEAMLESS;
+        }
+
+        boolean allTasksSeamless = false;
+        boolean rejectSeamless = false;
+        ActivityManager.RunningTaskInfo topTaskInfo = null;
+        int animationHint = ROTATION_ANIMATION_ROTATE;
+        // Traverse in top-to-bottom order so that the first task is top-most.
+        final int size = info.getChanges().size();
+        for (int i = 0; i < size; ++i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
 
             // Only look at changing things. showing/hiding don't need to rotate.
@@ -223,95 +234,69 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 if ((change.getFlags() & FLAG_DISPLAY_HAS_ALERT_WINDOWS) != 0) {
                     ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                             "  display has system alert windows, so not seamless.");
-                    return false;
+                    rejectSeamless = true;
                 }
-                displayExplicitSeamless =
-                        change.getRotationAnimation() == ROTATION_ANIMATION_SEAMLESS;
             } else if ((change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
                 if (change.getRotationAnimation() != ROTATION_ANIMATION_SEAMLESS) {
                     ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                             "  wallpaper is participating but isn't seamless.");
-                    return false;
+                    rejectSeamless = true;
                 }
             } else if (change.getTaskInfo() != null) {
-                hasTask = true;
+                final int anim = change.getRotationAnimation();
+                final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+                final boolean isTopTask = topTaskInfo == null;
+                if (isTopTask) {
+                    topTaskInfo = taskInfo;
+                    if (anim != ROTATION_ANIMATION_UNSPECIFIED
+                            && anim != ROTATION_ANIMATION_SEAMLESS) {
+                        animationHint = anim;
+                    }
+                }
                 // We only enable seamless rotation if all the visible task windows requested it.
-                if (change.getRotationAnimation() != ROTATION_ANIMATION_SEAMLESS) {
+                if (anim != ROTATION_ANIMATION_SEAMLESS) {
                     ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                             "  task %s isn't requesting seamless, so not seamless.",
-                            change.getTaskInfo().taskId);
-                    return false;
-                }
-
-                // This is the only way to get display-id currently, so we will check display
-                // capabilities here
-                if (!checkedDisplayLayout) {
-                    // only need to check display once.
-                    checkedDisplayLayout = true;
-                    final DisplayLayout displayLayout = displayController.getDisplayLayout(
-                            change.getTaskInfo().displayId);
-                    // For the upside down rotation we don't rotate seamlessly as the navigation
-                    // bar moves position. Note most apps (using orientation:sensor or user as
-                    // opposed to fullSensor) will not enter the reverse portrait orientation, so
-                    // actually the orientation won't change at all.
-                    int upsideDownRotation = displayLayout.getUpsideDownRotation();
-                    if (change.getStartRotation() == upsideDownRotation
-                            || change.getEndRotation() == upsideDownRotation) {
-                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                                "  rotation involves upside-down portrait, so not seamless.");
-                        return false;
-                    }
-
-                    // If the navigation bar can't change sides, then it will jump when we change
-                    // orientations and we don't rotate seamlessly - unless that is allowed, eg.
-                    // with gesture navigation where the navbar is low-profile enough that this
-                    // isn't very noticeable.
-                    if (!displayLayout.allowSeamlessRotationDespiteNavBarMoving()
-                            && (!(displayLayout.navigationBarCanMove()
-                                    && (change.getStartAbsBounds().width()
-                                            != change.getStartAbsBounds().height())))) {
-                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                                "  nav bar changes sides, so not seamless.");
-                        return false;
-                    }
+                            taskInfo.taskId);
+                    allTasksSeamless = false;
+                } else if (isTopTask) {
+                    allTasksSeamless = true;
                 }
             }
         }
 
-        // ROTATION_ANIMATION_SEAMLESS can only be requested by task or display.
-        if (hasTask || displayExplicitSeamless) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  Rotation IS seamless.");
-            return true;
+        if (!allTasksSeamless || rejectSeamless) {
+            return animationHint;
         }
-        return false;
-    }
 
-    /**
-     * Gets the rotation animation for the topmost task. Assumes that seamless is checked
-     * elsewhere, so it will default SEAMLESS to ROTATE.
-     */
-    private int getRotationAnimation(@NonNull TransitionInfo info) {
-        // Traverse in top-to-bottom order so that the first task is top-most
-        for (int i = 0; i < info.getChanges().size(); ++i) {
-            final TransitionInfo.Change change = info.getChanges().get(i);
-
-            // Only look at changing things. showing/hiding don't need to rotate.
-            if (change.getMode() != TRANSIT_CHANGE) continue;
-
-            // This container isn't rotating, so we can ignore it.
-            if (change.getEndRotation() == change.getStartRotation()) continue;
-
-            if (change.getTaskInfo() != null) {
-                final int anim = change.getRotationAnimation();
-                if (anim == ROTATION_ANIMATION_UNSPECIFIED
-                        // Fallback animation for seamless should also be default.
-                        || anim == ROTATION_ANIMATION_SEAMLESS) {
-                    return ROTATION_ANIMATION_ROTATE;
-                }
-                return anim;
-            }
+        // This is the only way to get display-id currently, so check display capabilities here.
+        final DisplayLayout displayLayout = displayController.getDisplayLayout(
+                topTaskInfo.displayId);
+        // For the upside down rotation we don't rotate seamlessly as the navigation bar moves
+        // position. Note most apps (using orientation:sensor or user as opposed to fullSensor)
+        // will not enter the reverse portrait orientation, so actually the orientation won't
+        // change at all.
+        final int upsideDownRotation = displayLayout.getUpsideDownRotation();
+        if (displayChange.getStartRotation() == upsideDownRotation
+                || displayChange.getEndRotation() == upsideDownRotation) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                    "  rotation involves upside-down portrait, so not seamless.");
+            return animationHint;
         }
-        return ROTATION_ANIMATION_ROTATE;
+
+        // If the navigation bar can't change sides, then it will jump when we change orientations
+        // and we don't rotate seamlessly - unless that is allowed, e.g. with gesture navigation
+        // where the navbar is low-profile enough that this isn't very noticeable.
+        if (!displayLayout.allowSeamlessRotationDespiteNavBarMoving()
+                && (!(displayLayout.navigationBarCanMove()
+                        && (displayChange.getStartAbsBounds().width()
+                                != displayChange.getStartAbsBounds().height())))) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                    "  nav bar changes sides, so not seamless.");
+            return animationHint;
+        }
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  Rotation IS seamless.");
+        return ROTATION_ANIMATION_SEAMLESS;
     }
 
     @Override
@@ -354,8 +339,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
             if (change.getMode() == TRANSIT_CHANGE && (change.getFlags() & FLAG_IS_DISPLAY) != 0) {
                 if (info.getType() == TRANSIT_CHANGE) {
-                    isSeamlessDisplayChange = isRotationSeamless(info, mDisplayController);
-                    final int anim = getRotationAnimation(info);
+                    final int anim = getRotationAnimationHint(change, info, mDisplayController);
+                    isSeamlessDisplayChange = anim == ROTATION_ANIMATION_SEAMLESS;
                     if (!(isSeamlessDisplayChange || anim == ROTATION_ANIMATION_JUMPCUT)) {
                         startRotationAnimation(startTransaction, change, info, anim, animations,
                                 onAnimFinish);
