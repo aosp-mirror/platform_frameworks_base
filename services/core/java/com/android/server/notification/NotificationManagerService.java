@@ -3593,7 +3593,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public String addAutomaticZenRule(AutomaticZenRule automaticZenRule) {
+        public String addAutomaticZenRule(AutomaticZenRule automaticZenRule, String pkg) {
             Preconditions.checkNotNull(automaticZenRule, "automaticZenRule is null");
             Preconditions.checkNotNull(automaticZenRule.getName(), "Name is null");
             if (automaticZenRule.getOwner() == null
@@ -3602,6 +3602,7 @@ public class NotificationManagerService extends SystemService {
                         "Rule must have a conditionproviderservice and/or configuration activity");
             }
             Preconditions.checkNotNull(automaticZenRule.getConditionId(), "ConditionId is null");
+            checkCallerIsSameApp(pkg);
             if (automaticZenRule.getZenPolicy() != null
                     && automaticZenRule.getInterruptionFilter() != INTERRUPTION_FILTER_PRIORITY) {
                 throw new IllegalArgumentException("ZenPolicy is only applicable to "
@@ -3609,7 +3610,7 @@ public class NotificationManagerService extends SystemService {
             }
             enforcePolicyAccess(Binder.getCallingUid(), "addAutomaticZenRule");
 
-            return mZenModeHelper.addAutomaticZenRule(automaticZenRule,
+            return mZenModeHelper.addAutomaticZenRule(pkg, automaticZenRule,
                     "addAutomaticZenRule");
         }
 
@@ -5262,13 +5263,17 @@ public class NotificationManagerService extends SystemService {
 
         @GuardedBy("mNotificationLock")
         void snoozeLocked(NotificationRecord r) {
+            final List<NotificationRecord> recordsToSnooze = new ArrayList<>();
             if (r.sbn.isGroup()) {
-                final List<NotificationRecord> groupNotifications = findGroupNotificationsLocked(
-                        r.sbn.getPackageName(), r.sbn.getGroupKey(), r.sbn.getUserId());
+                final List<NotificationRecord> groupNotifications =
+                        findGroupNotificationsLocked(r.sbn.getPackageName(),
+                                r.sbn.getGroupKey(), r.sbn.getUserId());
                 if (r.getNotification().isGroupSummary()) {
                     // snooze summary and all children
                     for (int i = 0; i < groupNotifications.size(); i++) {
-                        snoozeNotificationLocked(groupNotifications.get(i));
+                        if (!mKey.equals(groupNotifications.get(i).getKey())) {
+                            recordsToSnooze.add(groupNotifications.get(i));
+                        }
                     }
                 } else {
                     // if there is a valid summary for this group, and we are snoozing the only
@@ -5279,7 +5284,9 @@ public class NotificationManagerService extends SystemService {
                         } else {
                             // snooze summary and the one child
                             for (int i = 0; i < groupNotifications.size(); i++) {
-                                snoozeNotificationLocked(groupNotifications.get(i));
+                                if (!mKey.equals(groupNotifications.get(i).getKey())) {
+                                    recordsToSnooze.add(groupNotifications.get(i));
+                                }
                             }
                         }
                     } else {
@@ -5289,6 +5296,17 @@ public class NotificationManagerService extends SystemService {
             } else {
                 // just snooze the one notification
                 snoozeNotificationLocked(r);
+            }
+
+            // snooze the notification
+            recordsToSnooze.add(r);
+
+            if (mSnoozeHelper.canSnooze(recordsToSnooze.size())) {
+                for (int i = 0; i < recordsToSnooze.size(); i++) {
+                    snoozeNotificationLocked(recordsToSnooze.get(i));
+                }
+            } else {
+                Log.w(TAG, "Cannot snooze " + r.getKey() + ": too many snoozed notifications");
             }
         }
 
