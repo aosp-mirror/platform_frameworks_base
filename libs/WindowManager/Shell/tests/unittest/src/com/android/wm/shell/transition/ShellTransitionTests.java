@@ -61,8 +61,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.view.IDisplayWindowListener;
-import android.view.IWindowManager;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -84,6 +82,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
@@ -1035,16 +1034,13 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     private DisplayController createTestDisplayController() {
-        IWindowManager mockWM = mock(IWindowManager.class);
-        final IDisplayWindowListener[] displayListener = new IDisplayWindowListener[1];
-        try {
-            doReturn(new int[]{DEFAULT_DISPLAY}).when(mockWM).registerDisplayWindowListener(any());
-        } catch (RemoteException e) {
-            // No remote stuff happening, so this can't be hit
-        }
-        ShellInit shellInit = new ShellInit(mMainExecutor);
-        DisplayController out = new DisplayController(mContext, mockWM, shellInit, mMainExecutor);
-        shellInit.init();
+        DisplayLayout displayLayout = mock(DisplayLayout.class);
+        doReturn(Surface.ROTATION_180).when(displayLayout).getUpsideDownRotation();
+        // By default we ignore nav bar in deciding if a seamless rotation is allowed.
+        doReturn(true).when(displayLayout).allowSeamlessRotationDespiteNavBarMoving();
+
+        DisplayController out = mock(DisplayController.class);
+        doReturn(displayLayout).when(out).getDisplayLayout(DEFAULT_DISPLAY);
         return out;
     }
 
@@ -1055,17 +1051,4 @@ public class ShellTransitionTests extends ShellTestCase {
         shellInit.init();
         return t;
     }
-//
-//    private class TestDisplayController extends DisplayController {
-//        private final DisplayLayout mTestDisplayLayout;
-//        TestDisplayController() {
-//            super(mContext, mock(IWindowManager.class), mMainExecutor);
-//            mTestDisplayLayout = new DisplayLayout();
-//            mTestDisplayLayout.
-//        }
-//
-//        @Override
-//        DisplayLayout
-//    }
-
 }
