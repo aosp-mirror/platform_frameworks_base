@@ -361,10 +361,15 @@ class LicenseHtmlGeneratorFromXml {
 
         writer.println(HTML_MIDDLE_STRING);
 
-        count = 0;
         // Prints all contents of the license files in order of id.
         for (ContentIdAndFileNames contentIdAndFileNames : contentIdAndFileNamesList) {
-            writer.format("<tr id=\"id%d\"><td class=\"same-license\">\n", count);
+            // Assigns an id to a newly referred license file content (should never happen here)
+            if (!contentIdToOrderMap.containsKey(contentIdAndFileNames.mContentId)) {
+                contentIdToOrderMap.put(contentIdAndFileNames.mContentId, count);
+                count++;
+            }
+            int id = contentIdToOrderMap.get(contentIdAndFileNames.mContentId);
+            writer.format("<tr id=\"id%d\"><td class=\"same-license\">\n", id);
             for (Map.Entry<String, List<String>> libraryFiles :
                     contentIdAndFileNames.mLibraryToFileNameMap.entrySet()) {
                 String libraryName = libraryFiles.getKey();
@@ -379,7 +384,6 @@ class LicenseHtmlGeneratorFromXml {
                     writer.format("%s <br/>\n", fileName);
                 }
                 writer.println("</div><!-- file-list -->");
-                count++;
             }
             writer.println("<pre class=\"license-text\">");
             writer.println(contentIdToFileContentMap.get(
