@@ -49,7 +49,7 @@ public final class SingleKeyGestureDetector {
 
     // Key code of current key down event, reset when key up.
     private int mDownKeyCode = KeyEvent.KEYCODE_UNKNOWN;
-    private volatile boolean mHandledByLongPress = false;
+    private boolean mHandledByLongPress = false;
     private final Handler mHandler;
     private long mLastDownTime = 0;
 
@@ -194,8 +194,8 @@ public final class SingleKeyGestureDetector {
                 mHandledByLongPress = true;
                 mHandler.removeMessages(MSG_KEY_LONG_PRESS);
                 mHandler.removeMessages(MSG_KEY_VERY_LONG_PRESS);
-                final Message msg = mHandler.obtainMessage(MSG_KEY_LONG_PRESS, mActiveRule.mKeyCode,
-                        0, mActiveRule);
+                final Message msg = mHandler.obtainMessage(MSG_KEY_LONG_PRESS, keyCode, 0,
+                        mActiveRule);
                 msg.setAsynchronous(true);
                 mHandler.sendMessage(msg);
             }
@@ -274,11 +274,24 @@ public final class SingleKeyGestureDetector {
     }
 
     private boolean interceptKeyUp(KeyEvent event) {
-        mHandler.removeMessages(MSG_KEY_LONG_PRESS);
-        mHandler.removeMessages(MSG_KEY_VERY_LONG_PRESS);
         mDownKeyCode = KeyEvent.KEYCODE_UNKNOWN;
         if (mActiveRule == null) {
             return false;
+        }
+
+        if (!mHandledByLongPress) {
+            final long eventTime = event.getEventTime();
+            if (eventTime < mLastDownTime + mActiveRule.getLongPressTimeoutMs()) {
+                mHandler.removeMessages(MSG_KEY_LONG_PRESS);
+            } else {
+                mHandledByLongPress = mActiveRule.supportLongPress();
+            }
+
+            if (eventTime < mLastDownTime + mActiveRule.getVeryLongPressTimeoutMs()) {
+                mHandler.removeMessages(MSG_KEY_VERY_LONG_PRESS);
+            } else {
+                mHandledByLongPress = mActiveRule.supportVeryLongPress();
+            }
         }
 
         if (mHandledByLongPress) {
@@ -376,7 +389,6 @@ public final class SingleKeyGestureDetector {
                     if (DEBUG) {
                         Log.i(TAG, "Detect long press " + KeyEvent.keyCodeToString(keyCode));
                     }
-                    mHandledByLongPress = true;
                     rule.onLongPress(mLastDownTime);
                     break;
                 case MSG_KEY_VERY_LONG_PRESS:
@@ -384,7 +396,6 @@ public final class SingleKeyGestureDetector {
                         Log.i(TAG, "Detect very long press "
                                 + KeyEvent.keyCodeToString(keyCode));
                     }
-                    mHandledByLongPress = true;
                     rule.onVeryLongPress(mLastDownTime);
                     break;
                 case MSG_KEY_DELAYED_PRESS:
