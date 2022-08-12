@@ -369,6 +369,8 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
                     throws Exception {
         final LockscreenCredential parentPassword = newPassword("parentPassword");
         final LockscreenCredential profilePassword = newPattern("12345");
+        mService.setSeparateProfileChallengeEnabled(
+                MANAGED_PROFILE_USER_ID, true, profilePassword);
         initializeStorageWithCredential(PRIMARY_USER_ID, parentPassword);
         // Create and verify separate profile credentials.
         testCreateCredential(MANAGED_PROFILE_USER_ID, profilePassword);
@@ -550,11 +552,12 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
             throws RemoteException {
         assertEquals(0, mGateKeeperService.getSecureUserId(userId));
         synchronized (mService.mSpManager) {
-            mService.initializeSyntheticPasswordLocked(credential, userId);
+            mService.initializeSyntheticPasswordLocked(userId);
         }
         if (credential.isNone()) {
             assertEquals(0, mGateKeeperService.getSecureUserId(userId));
         } else {
+            assertTrue(mService.setLockCredential(credential, nonePassword(), userId));
             assertNotEquals(0, mGateKeeperService.getSecureUserId(userId));
         }
     }
