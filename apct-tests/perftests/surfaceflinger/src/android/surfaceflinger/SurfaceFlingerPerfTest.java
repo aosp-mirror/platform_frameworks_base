@@ -60,6 +60,7 @@ public class SurfaceFlingerPerfTest {
             bufferflinger.addBuffer(t, sc);
             t.apply();
         }
+        bufferflinger.freeBuffers();
     }
 }
 
