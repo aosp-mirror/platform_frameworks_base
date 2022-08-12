@@ -17,6 +17,7 @@
 package com.android.wm.shell.bubbles.animation;
 
 import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
+import static com.android.wm.shell.bubbles.BubbleStackView.ENABLE_FLING_TO_DISMISS_BUBBLE;
 
 import android.content.ContentResolver;
 import android.content.res.Resources;
@@ -1028,6 +1029,7 @@ public class StackAnimationController extends
             };
             mMagnetizedStack.setHapticsEnabled(true);
             mMagnetizedStack.setFlingToTargetMinVelocity(FLING_TO_DISMISS_MIN_VELOCITY);
+            mMagnetizedStack.setFlingToTargetEnabled(ENABLE_FLING_TO_DISMISS_BUBBLE);
         }
 
         final ContentResolver contentResolver = mLayout.getContext().getContentResolver();
