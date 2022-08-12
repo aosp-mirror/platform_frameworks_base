@@ -755,6 +755,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_VENDOR_SYSTEM_NATIVE = "vendor_system_native";
 
     /**
+     * Namespace for Vendor System Native Boot related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_VENDOR_SYSTEM_NATIVE_BOOT = "vendor_system_native_boot";
+
+    /**
      * Namespace for memory safety related features (e.g. MTE)
      *
      * @hide
