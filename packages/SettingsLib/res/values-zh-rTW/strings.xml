@@ -660,8 +660,8 @@
     <string name="dream_complication_title_weather" msgid="598609151677172783">"天氣"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"空氣品質"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"演出者資訊"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
+    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"居家控制系統"</string>
+    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"智慧空間"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"選擇個人資料相片"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"預設使用者圖示"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"實體鍵盤"</string>
