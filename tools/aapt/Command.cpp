@@ -1028,7 +1028,6 @@ int doDump(Bundle* bundle)
             // These permissions are required by services implementing services
             // the system binds to (IME, Accessibility, PrintServices, etc.)
             bool hasBindDeviceAdminPermission = false;
-            bool hasBindInputMethodPermission = false;
             bool hasBindAccessibilityServicePermission = false;
             bool hasBindPrintServicePermission = false;
             bool hasBindNfcServicePermission = false;
@@ -1738,7 +1737,6 @@ int doDump(Bundle* bundle)
                     hasMetaHostPaymentCategory = false;
                     hasMetaOffHostPaymentCategory = false;
                     hasBindDeviceAdminPermission = false;
-                    hasBindInputMethodPermission = false;
                     hasBindAccessibilityServicePermission = false;
                     hasBindPrintServicePermission = false;
                     hasBindNfcServicePermission = false;
@@ -1852,9 +1850,7 @@ int doDump(Bundle* bundle)
                             String8 permission = AaptXml::getAttribute(tree, PERMISSION_ATTR,
                                     &error);
                             if (error == "") {
-                                if (permission == "android.permission.BIND_INPUT_METHOD") {
-                                    hasBindInputMethodPermission = true;
-                                } else if (permission ==
+                                if (permission ==
                                         "android.permission.BIND_ACCESSIBILITY_SERVICE") {
                                     hasBindAccessibilityServicePermission = true;
                                 } else if (permission ==
