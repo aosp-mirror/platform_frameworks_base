@@ -93,7 +93,12 @@ public class ComponentController extends StateController {
         }
     };
 
-    private final SparseArrayMap<ComponentName, ServiceInfo> mServiceInfoCache =
+    /**
+     * Cache containing the processName of the ServiceInfo (see {@link ServiceInfo#processName})
+     * if the Service exists and is available.
+     * {@code null} will be stored if the service is currently unavailable.
+     */
+    private final SparseArrayMap<ComponentName, String> mServiceProcessCache =
             new SparseArrayMap<>();
 
     private final ComponentStateUpdateFunctor mComponentStateUpdateFunctor =
@@ -135,18 +140,18 @@ public class ComponentController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void onUserRemovedLocked(int userId) {
-        mServiceInfoCache.delete(userId);
+        mServiceProcessCache.delete(userId);
     }
 
     @Nullable
     @GuardedBy("mLock")
-    private ServiceInfo getServiceInfoLocked(JobStatus jobStatus) {
+    private String getServiceProcessLocked(JobStatus jobStatus) {
         final ComponentName service = jobStatus.getServiceComponent();
         final int userId = jobStatus.getUserId();
-        if (mServiceInfoCache.contains(userId, service)) {
+        if (mServiceProcessCache.contains(userId, service)) {
             // Return whatever is in the cache, even if it's null. When something changes, we
             // clear the cache.
-            return mServiceInfoCache.get(userId, service);
+            return mServiceProcessCache.get(userId, service);
         }
 
         ServiceInfo si;
@@ -165,30 +170,31 @@ public class ComponentController extends StateController {
             // Write null to the cache so we don't keep querying PM.
             si = null;
         }
-        mServiceInfoCache.add(userId, service, si);
+        final String processName = si == null ? null : si.processName;
+        mServiceProcessCache.add(userId, service, processName);
 
-        return si;
+        return processName;
     }
 
     @GuardedBy("mLock")
     private boolean updateComponentEnabledStateLocked(JobStatus jobStatus) {
-        final ServiceInfo service = getServiceInfoLocked(jobStatus);
+        final String processName = getServiceProcessLocked(jobStatus);
 
-        if (DEBUG && service == null) {
+        if (DEBUG && processName == null) {
             Slog.v(TAG, jobStatus.toShortString() + " component not present");
         }
-        final ServiceInfo ogService = jobStatus.serviceInfo;
-        jobStatus.serviceInfo = service;
-        return !Objects.equals(ogService, service);
+        final String ogProcess = jobStatus.serviceProcessName;
+        jobStatus.serviceProcessName = processName;
+        return !Objects.equals(ogProcess, processName);
     }
 
     @GuardedBy("mLock")
     private void clearComponentsForPackageLocked(final int userId, final String pkg) {
-        final int uIdx = mServiceInfoCache.indexOfKey(userId);
-        for (int c = mServiceInfoCache.numElementsForKey(userId) - 1; c >= 0; --c) {
-            final ComponentName cn = mServiceInfoCache.keyAt(uIdx, c);
+        final int uIdx = mServiceProcessCache.indexOfKey(userId);
+        for (int c = mServiceProcessCache.numElementsForKey(userId) - 1; c >= 0; --c) {
+            final ComponentName cn = mServiceProcessCache.keyAt(uIdx, c);
             if (cn.getPackageName().equals(pkg)) {
-                mServiceInfoCache.delete(userId, cn);
+                mServiceProcessCache.delete(userId, cn);
             }
         }
     }
@@ -207,7 +213,7 @@ public class ComponentController extends StateController {
 
     private void updateComponentStateForUser(final int userId) {
         synchronized (mLock) {
-            mServiceInfoCache.delete(userId);
+            mServiceProcessCache.delete(userId);
             updateComponentStatesLocked(jobStatus -> {
                 // Using user ID instead of source user ID because the service will run under the
                 // user ID, not source user ID.
@@ -247,15 +253,15 @@ public class ComponentController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void dumpControllerStateLocked(IndentingPrintWriter pw, Predicate<JobStatus> predicate) {
-        for (int u = 0; u < mServiceInfoCache.numMaps(); ++u) {
-            final int userId = mServiceInfoCache.keyAt(u);
-            for (int p = 0; p < mServiceInfoCache.numElementsForKey(userId); ++p) {
-                final ComponentName componentName = mServiceInfoCache.keyAt(u, p);
+        for (int u = 0; u < mServiceProcessCache.numMaps(); ++u) {
+            final int userId = mServiceProcessCache.keyAt(u);
+            for (int p = 0; p < mServiceProcessCache.numElementsForKey(userId); ++p) {
+                final ComponentName componentName = mServiceProcessCache.keyAt(u, p);
                 pw.print(userId);
                 pw.print("-");
                 pw.print(componentName);
                 pw.print(": ");
-                pw.print(mServiceInfoCache.valueAt(u, p));
+                pw.print(mServiceProcessCache.valueAt(u, p));
                 pw.println();
             }
         }

@@ -47,7 +47,6 @@ import android.app.usage.UsageStatsManagerInternal.EstimatedLaunchTimeChangedLis
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.ServiceInfo;
 import android.os.Looper;
 import android.os.Process;
 import android.os.SystemClock;
@@ -185,7 +184,7 @@ public class PrefetchControllerTest {
             JobInfo jobInfo) {
         JobStatus js = JobStatus.createFromJobInfo(
                 jobInfo, callingUid, packageName, SOURCE_USER_ID, testTag);
-        js.serviceInfo = mock(ServiceInfo.class);
+        js.serviceProcessName = "testProcess";
         js.setStandbyBucket(FREQUENT_INDEX);
         // Make sure Doze and background-not-restricted don't affect tests.
         js.setDeviceNotDozingConstraintSatisfied(/* nowElapsed */ sElapsedRealtimeClock.millis(),

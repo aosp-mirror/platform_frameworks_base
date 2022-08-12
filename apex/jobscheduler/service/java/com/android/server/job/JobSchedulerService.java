@@ -2554,9 +2554,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     private boolean isComponentUsable(@NonNull JobStatus job) {
-        final ServiceInfo service = job.serviceInfo;
+        final String processName = job.serviceProcessName;
 
-        if (service == null) {
+        if (processName == null) {
             if (DEBUG) {
                 Slog.v(TAG, "isComponentUsable: " + job.toShortString()
                         + " component not present");
@@ -2565,8 +2565,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         // Everything else checked out so far, so this is the final yes/no check
-        final boolean appIsBad = mActivityManagerInternal.isAppBad(
-                service.processName, service.applicationInfo.uid);
+        final boolean appIsBad = mActivityManagerInternal.isAppBad(processName, job.getUid());
         if (DEBUG && appIsBad) {
             Slog.i(TAG, "App is bad for " + job.toShortString() + " so not runnable");
         }
