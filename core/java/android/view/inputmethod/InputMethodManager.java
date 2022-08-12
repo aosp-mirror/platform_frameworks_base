@@ -89,6 +89,7 @@ import android.view.InputEventSender;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
+import android.view.WindowInsets;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillManager;
 import android.window.ImeOnBackInvokedDispatcher;
@@ -2122,8 +2123,9 @@ public final class InputMethodManager {
                 null /* icProto */);
         synchronized (mH) {
             final View view = getServedViewLocked();
-            if (mImeInsetsConsumer != null && view != null) {
-                if (mImeInsetsConsumer.isRequestedVisible()) {
+            if (view != null) {
+                final WindowInsets rootInsets = view.getRootWindowInsets();
+                if (rootInsets != null && rootInsets.isVisible(WindowInsets.Type.ime())) {
                     hideSoftInputFromWindow(view.getWindowToken(), hideFlags, null,
                             SoftInputShowHideReason.HIDE_TOGGLE_SOFT_INPUT);
                 } else {
