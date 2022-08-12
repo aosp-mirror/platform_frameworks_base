@@ -23,6 +23,7 @@ import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_LOGOUT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_OWNER_INFO;
@@ -50,7 +51,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.IActivityManager;
 import android.app.Instrumentation;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyResourcesManager;
@@ -161,8 +161,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Mock
     private LockPatternUtils mLockPatternUtils;
     @Mock
-    private IActivityManager mIActivityManager;
-    @Mock
     private KeyguardBypassController mKeyguardBypassController;
     @Mock
     private AccessibilityManager mAccessibilityManager;
@@ -256,8 +254,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
                 mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats,
                 mUserManager, mExecutor, mExecutor,  mFalsingManager, mLockPatternUtils,
-                mScreenLifecycle, mIActivityManager, mKeyguardBypassController,
-                mAccessibilityManager);
+                mScreenLifecycle, mKeyguardBypassController, mAccessibilityManager);
         mController.init();
         mController.setIndicationArea(mIndicationArea);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
@@ -971,11 +968,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onBiometricAuthenticated(0,
                 BiometricSourceType.FACE, false);
 
-        // THEN 'face unlocked. press unlock icon to open' message shows
-        String pressToOpen = mContext.getString(R.string.keyguard_face_successful_unlock_press);
-        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, pressToOpen);
-
-        assertThat(mTextView.getText()).isNotEqualTo(pressToOpen);
+        // THEN 'face unlocked' then 'press unlock icon to open' message show
+        String unlockedByFace = mContext.getString(R.string.keyguard_face_successful_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, unlockedByFace);
+        String pressToOpen = mContext.getString(R.string.keyguard_unlock_press);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP, pressToOpen);
     }
 
 
@@ -996,10 +993,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onBiometricAuthenticated(0,
                 BiometricSourceType.FACE, false);
 
-        // THEN show 'face unlocked. swipe up to open' message
-        String faceUnlockedSwipeToOpen =
-                mContext.getString(R.string.keyguard_face_successful_unlock_swipe);
-        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, faceUnlockedSwipeToOpen);
+        // THEN show 'face unlocked' and 'swipe up to open' messages
+        String unlockedByFace = mContext.getString(R.string.keyguard_face_successful_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, unlockedByFace);
+        String swipeUpToOpen = mContext.getString(R.string.keyguard_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP, swipeUpToOpen);
     }
 
     @Test
@@ -1018,10 +1016,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onBiometricAuthenticated(0,
                 BiometricSourceType.FACE, false);
 
-        // THEN show 'swipe up to open' message
-        String faceUnlockedSwipeToOpen =
-                mContext.getString(R.string.keyguard_face_successful_unlock_swipe);
-        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, faceUnlockedSwipeToOpen);
+        // THEN show 'face unlocked' and 'swipe up to open' messages
+        String unlockedByFace = mContext.getString(R.string.keyguard_face_successful_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, unlockedByFace);
+        String swipeUpToOpen = mContext.getString(R.string.keyguard_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP, swipeUpToOpen);
     }
 
     @Test
@@ -1039,10 +1038,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController.getKeyguardCallback().onBiometricAuthenticated(0,
                 BiometricSourceType.FACE, false);
 
-        // THEN show 'swipe up to open' message
-        String faceUnlockedSwipeToOpen =
-                mContext.getString(R.string.keyguard_face_successful_unlock_swipe);
-        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, faceUnlockedSwipeToOpen);
+        // THEN show 'face unlocked' and 'swipe up to open' messages
+        String unlockedByFace = mContext.getString(R.string.keyguard_face_successful_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, unlockedByFace);
+        String swipeUpToOpen = mContext.getString(R.string.keyguard_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP, swipeUpToOpen);
     }
 
     @Test
