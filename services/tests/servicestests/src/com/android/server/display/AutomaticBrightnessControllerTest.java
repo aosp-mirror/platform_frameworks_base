@@ -18,6 +18,7 @@ package com.android.server.display;
 
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -176,7 +177,7 @@ public class AutomaticBrightnessControllerTest {
 
         // Send new sensor value and verify
         listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux1));
-        assertEquals(normalizedBrightness1, mController.getAutomaticScreenBrightness(), 0.001f);
+        assertEquals(normalizedBrightness1, mController.getAutomaticScreenBrightness(), EPSILON);
 
         // Set up system to return 0.0f (minimum possible brightness) as a brightness value
         float lux2 = 10.0f;
@@ -190,7 +191,7 @@ public class AutomaticBrightnessControllerTest {
 
         // Send new sensor value and verify
         listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux2));
-        assertEquals(normalizedBrightness2, mController.getAutomaticScreenBrightness(), 0.001f);
+        assertEquals(normalizedBrightness2, mController.getAutomaticScreenBrightness(), EPSILON);
     }
 
     @Test
@@ -219,7 +220,7 @@ public class AutomaticBrightnessControllerTest {
 
         // Send new sensor value and verify
         listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux1));
-        assertEquals(normalizedBrightness1, mController.getAutomaticScreenBrightness(), 0.001f);
+        assertEquals(normalizedBrightness1, mController.getAutomaticScreenBrightness(), EPSILON);
 
 
         // Set up system to return 1.0f as a brightness value (brightness_max)
@@ -234,7 +235,7 @@ public class AutomaticBrightnessControllerTest {
 
         // Send new sensor value and verify
         listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux2));
-        assertEquals(normalizedBrightness2, mController.getAutomaticScreenBrightness(), 0.001f);
+        assertEquals(normalizedBrightness2, mController.getAutomaticScreenBrightness(), EPSILON);
     }
 
     @Test
@@ -416,6 +417,12 @@ public class AutomaticBrightnessControllerTest {
         // ambient lux goes to 0
         listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 0));
         assertEquals(0.0f, mController.getAmbientLux(), EPSILON);
+
+        // only the values within the horizon should be kept
+        assertArrayEquals(new float[] {10000, 10000, 0, 0, 0}, mController.getLastSensorValues(),
+                EPSILON);
+        assertArrayEquals(new long[] {4000, 4500, 5000, 5500, 6000},
+                mController.getLastSensorTimestamps());
     }
 
     @Test
@@ -486,5 +493,93 @@ public class AutomaticBrightnessControllerTest {
                 BRIGHTNESS_MAX_FLOAT /* brightness */, false /* userChangedBrightness */,
                 0 /* adjustment */, false /* userChanged */, DisplayPowerRequest.POLICY_BRIGHT);
         assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getAutomaticScreenBrightness(), 0.0f);
+    }
+
+    @Test
+    public void testGetSensorReadings() throws Exception {
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Choose values such that the ring buffer's capacity is extended and the buffer is pruned
+        int increment = 11;
+        int lux = 5000;
+        for (int i = 0; i < 1000; i++) {
+            lux += increment;
+            mClock.fastForward(increment);
+            listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, lux));
+        }
+
+        int valuesCount = (int) Math.ceil((double) AMBIENT_LIGHT_HORIZON_LONG / increment + 1);
+        float[] sensorValues = mController.getLastSensorValues();
+        long[] sensorTimestamps = mController.getLastSensorTimestamps();
+
+        // Only the values within the horizon should be kept
+        assertEquals(valuesCount, sensorValues.length);
+        assertEquals(valuesCount, sensorTimestamps.length);
+
+        long sensorTimestamp = mClock.now();
+        for (int i = valuesCount - 1; i >= 1; i--) {
+            assertEquals(lux, sensorValues[i], EPSILON);
+            assertEquals(sensorTimestamp, sensorTimestamps[i]);
+            lux -= increment;
+            sensorTimestamp -= increment;
+        }
+        assertEquals(lux, sensorValues[0], EPSILON);
+        assertEquals(mClock.now() - AMBIENT_LIGHT_HORIZON_LONG, sensorTimestamps[0]);
+    }
+
+    @Test
+    public void testGetSensorReadingsFullBuffer() throws Exception {
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+        int initialCapacity = 150;
+
+        // Choose values such that the ring buffer is pruned
+        int increment1 = 200;
+        int lux = 5000;
+        for (int i = 0; i < 20; i++) {
+            lux += increment1;
+            mClock.fastForward(increment1);
+            listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, lux));
+        }
+
+        int valuesCount = (int) Math.ceil((double) AMBIENT_LIGHT_HORIZON_LONG / increment1 + 1);
+
+        // Choose values such that the buffer becomes full
+        int increment2 = 1;
+        for (int i = 0; i < initialCapacity - valuesCount; i++) {
+            lux += increment2;
+            mClock.fastForward(increment2);
+            listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, lux));
+        }
+
+        float[] sensorValues = mController.getLastSensorValues();
+        long[] sensorTimestamps = mController.getLastSensorTimestamps();
+
+        // The buffer should be full
+        assertEquals(initialCapacity, sensorValues.length);
+        assertEquals(initialCapacity, sensorTimestamps.length);
+
+        long sensorTimestamp = mClock.now();
+        for (int i = initialCapacity - 1; i >= 1; i--) {
+            assertEquals(lux, sensorValues[i], EPSILON);
+            assertEquals(sensorTimestamp, sensorTimestamps[i]);
+
+            if (i >= valuesCount) {
+                lux -= increment2;
+                sensorTimestamp -= increment2;
+            } else {
+                lux -= increment1;
+                sensorTimestamp -= increment1;
+            }
+        }
+        assertEquals(lux, sensorValues[0], EPSILON);
+        assertEquals(mClock.now() - AMBIENT_LIGHT_HORIZON_LONG, sensorTimestamps[0]);
     }
 }
