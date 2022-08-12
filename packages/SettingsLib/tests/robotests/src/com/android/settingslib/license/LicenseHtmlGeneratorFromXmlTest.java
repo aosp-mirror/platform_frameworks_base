@@ -116,6 +116,7 @@ public class LicenseHtmlGeneratorFromXmlTest {
             + "<li><a href=\"#id0\">/file0 - libA</a></li>\n"
             + "<li><a href=\"#id1\">/file0 - libB</a></li>\n"
             + "<li><a href=\"#id0\">/file1 - libA</a></li>\n"
+            + "<li><a href=\"#id0\">/file2 - libC</a></li>\n"
             + "</ul>\n"
             + "</div><!-- table of contents -->\n"
             + "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n"
@@ -124,6 +125,10 @@ public class LicenseHtmlGeneratorFromXmlTest {
             + "<div class=\"file-list\">\n"
             + "/file0 <br/>\n"
             + "/file1 <br/>\n"
+            + "</div><!-- file-list -->\n"
+            + "<div class=\"label\"><strong>libC</strong> used by:</div>\n"
+            + "<div class=\"file-list\">\n"
+            + "/file2 <br/>\n"
             + "</div><!-- file-list -->\n"
             + "<pre class=\"license-text\">\n"
             + "license content #0\n"
@@ -224,13 +229,16 @@ public class LicenseHtmlGeneratorFromXmlTest {
         Map<String, String> contentIdToFileContentMap = new HashMap<>();
         Map<String, Set<String>> toBoth = new HashMap<>();
         Map<String, Set<String>> toOne = new HashMap<>();
+        Map<String, Set<String>> toOther = new HashMap<>();
 
         toBoth.put("libA", new HashSet<String>(Arrays.asList("0")));
         toBoth.put("libB", new HashSet<String>(Arrays.asList("1")));
         toOne.put("libA", new HashSet<String>(Arrays.asList("0")));
+        toOther.put("libC", new HashSet<String>(Arrays.asList("0")));
 
         fileNameToLibraryToContentIdMap.put("/file0", toBoth);
         fileNameToLibraryToContentIdMap.put("/file1", toOne);
+        fileNameToLibraryToContentIdMap.put("/file2", toOther);
         contentIdToFileContentMap.put("0", "license content #0");
         contentIdToFileContentMap.put("1", "license content #1");
 
@@ -249,7 +257,7 @@ public class LicenseHtmlGeneratorFromXmlTest {
         Map<String, Set<String>> toOne = new HashMap<>();
 
         toBoth.put("", new HashSet<String>(Arrays.asList("0", "1")));
-        toOne.put("", new HashSet<String>(Arrays.asList("0")));
+        toOne.put("", new HashSet<String>(Arrays.asList("0", "1")));
 
         fileNameToLibraryToContentIdMap.put("/file0", toBoth);
         fileNameToLibraryToContentIdMap.put("/file1", toOne);
@@ -269,13 +277,16 @@ public class LicenseHtmlGeneratorFromXmlTest {
         Map<String, String> contentIdToFileContentMap = new HashMap<>();
         Map<String, Set<String>> toBoth = new HashMap<>();
         Map<String, Set<String>> toOne = new HashMap<>();
+        Map<String, Set<String>> toOther = new HashMap<>();
 
         toBoth.put("libA", new HashSet<String>(Arrays.asList("0")));
         toBoth.put("libB", new HashSet<String>(Arrays.asList("1")));
         toOne.put("libA", new HashSet<String>(Arrays.asList("0")));
+        toOther.put("libC", new HashSet<String>(Arrays.asList("0")));
 
         fileNameToLibraryToContentIdMap.put("/file0", toBoth);
         fileNameToLibraryToContentIdMap.put("/file1", toOne);
+        fileNameToLibraryToContentIdMap.put("/file2", toOther);
         contentIdToFileContentMap.put("0", "license content #0");
         contentIdToFileContentMap.put("1", "license content #1");
 
