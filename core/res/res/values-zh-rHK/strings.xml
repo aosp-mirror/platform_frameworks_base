@@ -647,7 +647,7 @@
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"請以更直視的角度看著裝置。"</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到面孔，請將手機放在視線水平。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"裝置不夠穩定。請拿穩手機。"</string>
-    <string name="face_acquired_recalibrate" msgid="8724013080976469746">"請重新註冊臉孔。"</string>
+    <string name="face_acquired_recalibrate" msgid="8724013080976469746">"請重新註冊面孔。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"無法辨識面孔，請再試一次。"</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"請稍為轉換頭部的位置"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"盡可能直視手機"</string>
@@ -664,27 +664,27 @@
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"偵測到面部遮蓋物。您必須展示整個面孔。"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
-    <string name="face_error_hw_not_available" msgid="5085202213036026288">"無法驗證臉孔，硬件無法使用。"</string>
+    <string name="face_error_hw_not_available" msgid="5085202213036026288">"無法驗證面孔，硬件無法使用。"</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"請再次嘗試「面孔解鎖」"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"無法儲存新的臉容資料，請先刪除舊資料。"</string>
-    <string name="face_error_canceled" msgid="2164434737103802131">"臉孔操作已取消。"</string>
+    <string name="face_error_canceled" msgid="2164434737103802131">"面孔操作已取消。"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"使用者已取消「面孔解鎖」"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"嘗試次數過多，請稍後再試。"</string>
     <string name="face_error_lockout_permanent" msgid="3277134834042995260">"嘗試次數過多，因此系統已停用「面孔解鎖」。"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"嘗試次數過多，請改為解除螢幕鎖定來驗證身分。"</string>
-    <string name="face_error_unable_to_process" msgid="5723292697366130070">"無法驗證臉孔。請再試一次。"</string>
+    <string name="face_error_unable_to_process" msgid="5723292697366130070">"無法驗證面孔。請再試一次。"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"您尚未設定「面孔解鎖」"</string>
     <string name="face_error_hw_not_present" msgid="7940978724978763011">"此裝置不支援「面孔解鎖」"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"感應器已暫時停用。"</string>
-    <string name="face_name_template" msgid="3877037340223318119">"臉孔 <xliff:g id="FACEID">%d</xliff:g>"</string>
+    <string name="face_name_template" msgid="3877037340223318119">"面孔 <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="5854024256907828015">"使用「面孔解鎖」"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"使用臉孔或螢幕鎖定"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"使用面孔或螢幕鎖定"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"如要繼續操作，請使用您的面孔驗證身分"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"請使用面孔解鎖或螢幕鎖定功能驗證身分，才能繼續操作"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"發生錯誤，請再試一次。"</string>
-    <string name="face_icon_content_description" msgid="465030547475916280">"臉孔圖示"</string>
+    <string name="face_icon_content_description" msgid="465030547475916280">"面孔圖示"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"讀取同步處理設定"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"允許應用程式讀取帳戶的同步設定，例如確定「通訊錄」應用程式是否和某個帳戶保持同步。"</string>
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"開啟和關閉同步功能"</string>
@@ -1944,8 +1944,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"無法使用相機"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"請繼續透過手機操作"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"無法使用麥克風"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"無法使用「Play 商店」"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"無法使用 Android TV 設定"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"無法使用平板電腦設定"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"無法使用手機設定"</string>
@@ -1955,12 +1954,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"此應用程式要求額外的安全措施，請改用 Android TV 裝置。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"此應用程式要求額外的安全措施，請改用平板電腦。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"此應用程式要求額外的安全措施，請改用手機。"</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取此應用程式，請改用 Android TV 裝置。"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取此應用程式，請改用平板電腦。"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取此應用程式，請改用手機。"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"此應用程式專為舊版 Android 打造，因此可能無法正常運作。請嘗試檢查更新，或與開發人員聯絡。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"檢查更新"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"您有新的訊息"</string>

@@ -1944,8 +1944,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"ካሜራ አይገኝም"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"በስልክ ላይ ይቀጥሉ"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"ማይክሮፎን አይገኝም"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play መደብር አይገኝም"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"የAndroid TV ቅንጅቶች አይገኙም"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"የጡባዊ ቅንብሮች አይገኝም"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"የስልክ ቅንብሮች አይገኙም"</string>
@@ -1955,12 +1954,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ይህ መተግበሪያ ተጨማሪ ደህንነትን እየጠየቀ ነው። በምትኩ በAndroid TV መሣሪያዎ ላይ ይሞክሩ።"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ይህ መተግበሪያ ተጨማሪ ደህንነትን እየጠየቀ ነው። በምትኩ በጡባዊዎ ላይ ይሞክሩ።"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ይህ መተግበሪያ ተጨማሪ ደህንነትን እየጠየቀ ነው። በምትኩ በስልክዎ ላይ ይሞክሩ።"</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"ይህ በእርስዎ <xliff:g id="DEVICE">%1$s</xliff:g> ላይ ሊደረስበት አይችልም። በምትኩ በAndroid TV መሣሪያዎ ላይ ይሞክሩ።"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"ይህ በእርስዎ <xliff:g id="DEVICE">%1$s</xliff:g> ላይ ሊደረስበት አይችልም። በምትኩ በጡባዊዎ ላይ ይሞክሩ።"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"ይህ በእርስዎ <xliff:g id="DEVICE">%1$s</xliff:g> ላይ ሊደረስበት አይችልም። በምትኩ በስልክዎ ላይ ይሞክሩ።"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ይህ መተግበሪያ ለቆየ የAndroid ስሪት ነው የተገነባው፣ እና በአግባቡ ላይሰራ ይችላል። ዝማኔዎች ካሉ ለመመልከት ይሞክሩ፣ ወይም ደግሞ ገንቢውን ያነጋግሩ።"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ዝማኔ ካለ አረጋግጥ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"አዲስ መልዕክቶች አለዎት"</string>
