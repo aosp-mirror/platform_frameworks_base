@@ -20,7 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiActivityModel
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiModel
+import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
@@ -61,7 +61,7 @@ class WifiViewModelTest : SysuiTestCase() {
         )
 
         // Set up with a valid SSID
-        repository.setWifiModel(WifiModel(ssid = "AB"))
+        repository.setWifiNetwork(WifiNetworkModel.Active(networkId = 1, ssid = "AB"))
     }
 
     @Test

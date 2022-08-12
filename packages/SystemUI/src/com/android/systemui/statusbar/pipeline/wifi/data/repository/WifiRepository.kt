@@ -16,16 +16,26 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.data.repository
 
+import android.annotation.SuppressLint
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN
+import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
+import android.net.NetworkCapabilities.TRANSPORT_WIFI
+import android.net.NetworkRequest
+import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.TrafficStateCallback
 import android.util.Log
+import com.android.settingslib.Utils
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.SB_LOGGING_TAG
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiActivityModel
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiModel
+import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,9 +48,9 @@ import kotlinx.coroutines.flow.flowOf
  */
 interface WifiRepository {
     /**
-     * Observable for the current state of wifi; `null` when there is no active wifi.
+     * Observable for the current wifi network.
      */
-    val wifiModel: Flow<WifiModel?>
+    val wifiNetwork: Flow<WifiNetworkModel>
 
     /**
      * Observable for the current wifi network activity.
@@ -51,14 +61,57 @@ interface WifiRepository {
 /** Real implementation of [WifiRepository]. */
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
+@SuppressLint("MissingPermission")
 class WifiRepositoryImpl @Inject constructor(
+        connectivityManager: ConnectivityManager,
         wifiManager: WifiManager?,
         @Main mainExecutor: Executor,
         logger: ConnectivityPipelineLogger,
 ) : WifiRepository {
+    override val wifiNetwork: Flow<WifiNetworkModel> = conflatedCallbackFlow {
+        var currentWifi: WifiNetworkModel = WIFI_NETWORK_DEFAULT
 
-    // TODO(b/238425913): Actually implement the wifiModel flow.
-    override val wifiModel: Flow<WifiModel?> = flowOf(WifiModel(ssid = "AB"))
+        val callback = object : ConnectivityManager.NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
+            override fun onCapabilitiesChanged(
+                network: Network,
+                networkCapabilities: NetworkCapabilities
+            ) {
+                logger.logOnCapabilitiesChanged(network, networkCapabilities)
+
+                val wifiInfo = networkCapabilitiesToWifiInfo(networkCapabilities)
+                if (wifiInfo?.isPrimary == true) {
+                    val wifiNetworkModel = wifiInfoToModel(wifiInfo, network.getNetId())
+                    logger.logTransformation(
+                        WIFI_NETWORK_CALLBACK_NAME,
+                        oldValue = currentWifi,
+                        newValue = wifiNetworkModel
+                    )
+                    currentWifi = wifiNetworkModel
+                    trySend(wifiNetworkModel)
+                }
+            }
+
+            override fun onLost(network: Network) {
+                logger.logOnLost(network)
+                val wifi = currentWifi
+                if (wifi is WifiNetworkModel.Active && wifi.networkId == network.getNetId()) {
+                    val newNetworkModel = WifiNetworkModel.Inactive
+                    logger.logTransformation(
+                        WIFI_NETWORK_CALLBACK_NAME,
+                        oldValue = wifi,
+                        newValue = newNetworkModel
+                    )
+                    currentWifi = newNetworkModel
+                    trySend(newNetworkModel)
+                }
+            }
+        }
+
+        trySend(WIFI_NETWORK_DEFAULT)
+        connectivityManager.registerNetworkCallback(WIFI_NETWORK_CALLBACK_REQUEST, callback)
+
+        awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
+    }
 
     override val wifiActivity: Flow<WifiActivityModel> =
             if (wifiManager == null) {
@@ -71,8 +124,8 @@ class WifiRepositoryImpl @Inject constructor(
                         trySend(trafficStateToWifiActivityModel(state))
                     }
 
-                    wifiManager.registerTrafficStateCallback(mainExecutor, callback)
                     trySend(ACTIVITY_DEFAULT)
+                    wifiManager.registerTrafficStateCallback(mainExecutor, callback)
 
                     awaitClose { wifiManager.unregisterTrafficStateCallback(callback) }
                 }
@@ -80,6 +133,13 @@ class WifiRepositoryImpl @Inject constructor(
 
     companion object {
         val ACTIVITY_DEFAULT = WifiActivityModel(hasActivityIn = false, hasActivityOut = false)
+        // Start out with no known wifi network.
+        // Note: [WifiStatusTracker] (the old implementation of connectivity logic) does do an
+        // initial fetch to get a starting wifi network. But, it uses a deprecated API
+        // [WifiManager.getConnectionInfo()], and the deprecation doc indicates to just use
+        // [ConnectivityManager.NetworkCallback] results instead. So, for now we'll just rely on the
+        // NetworkCallback inside [wifiNetwork] for our wifi network information.
+        val WIFI_NETWORK_DEFAULT = WifiNetworkModel.Inactive
 
         private fun trafficStateToWifiActivityModel(state: Int): WifiActivityModel {
             return WifiActivityModel(
@@ -87,6 +147,30 @@ class WifiRepositoryImpl @Inject constructor(
                     state == TrafficStateCallback.DATA_ACTIVITY_INOUT,
                 hasActivityOut = state == TrafficStateCallback.DATA_ACTIVITY_OUT ||
                     state == TrafficStateCallback.DATA_ACTIVITY_INOUT,
+            )
+        }
+
+        private fun networkCapabilitiesToWifiInfo(
+            networkCapabilities: NetworkCapabilities
+        ): WifiInfo? {
+            return when {
+                networkCapabilities.hasTransport(TRANSPORT_WIFI) ->
+                    networkCapabilities.transportInfo as WifiInfo?
+                networkCapabilities.hasTransport(TRANSPORT_CELLULAR) ->
+                    // Sometimes, cellular networks can act as wifi networks (known as VCN --
+                    // virtual carrier network). So, see if this cellular network has wifi info.
+                    Utils.tryGetWifiInfoForVcn(networkCapabilities)
+                else -> null
+            }
+        }
+
+        private fun wifiInfoToModel(wifiInfo: WifiInfo, networkId: Int): WifiNetworkModel {
+            return WifiNetworkModel.Active(
+                networkId,
+                wifiInfo.ssid,
+                wifiInfo.isPasspointAp,
+                wifiInfo.isOsuAp,
+                wifiInfo.passpointProviderFriendlyName
             )
         }
 
@@ -99,5 +183,15 @@ class WifiRepositoryImpl @Inject constructor(
                 else -> "INVALID"
             }
         }
+
+        private val WIFI_NETWORK_CALLBACK_REQUEST: NetworkRequest =
+            NetworkRequest.Builder()
+                .clearCapabilities()
+                .addCapability(NET_CAPABILITY_NOT_VPN)
+                .addTransportType(TRANSPORT_WIFI)
+                .addTransportType(TRANSPORT_CELLULAR)
+                .build()
+
+        private const val WIFI_NETWORK_CALLBACK_NAME = "wifiNetworkModel"
     }
 }
