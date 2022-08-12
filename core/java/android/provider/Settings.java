@@ -17698,20 +17698,13 @@ public final class Settings {
                     "wear_activity_auto_resume_timeout_set_by_user";
 
             /**
-             * The maximum times that we are allowed to reset the activity auto-resume timeout
-             * timer.
-             * @hide
-             */
-            public static final String WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MAX_RESET_COUNT =
-                    "wear_activity_auto_resume_timeout_max_reset_count";
-
-            /**
              * If burn in protection is enabled.
              * @hide
              */
             public static final String BURN_IN_PROTECTION_ENABLED = "burn_in_protection";
 
             /**
+
              * Whether the device has combined location setting enabled.
              * @hide
              */
