@@ -336,6 +336,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
+import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.common.ProtoLog;
@@ -6734,7 +6735,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * @param windowPid The pid of the window input dispatching timed out on.
      * @return True if input dispatching should be aborted.
      */
-    public boolean inputDispatchingTimedOut(String reason, int windowPid) {
+    public boolean inputDispatchingTimedOut(TimeoutRecord timeoutRecord, int windowPid) {
         ActivityRecord anrActivity;
         WindowProcessController anrApp;
         boolean blameActivityProcess;
@@ -6748,12 +6749,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (blameActivityProcess) {
             return mAtmService.mAmInternal.inputDispatchingTimedOut(anrApp.mOwner,
                     anrActivity.shortComponentName, anrActivity.info.applicationInfo,
-                    shortComponentName, app, false, reason);
+                    shortComponentName, app, false, timeoutRecord);
         } else {
             // In this case another process added windows using this activity token. So, we call the
             // generic service input dispatch timed out method so that the right process is blamed.
             long timeoutMillis = mAtmService.mAmInternal.inputDispatchingTimedOut(
-                    windowPid, false /* aboveSystem */, reason);
+                    windowPid, false /* aboveSystem */, timeoutRecord);
             return timeoutMillis <= 0;
         }
     }

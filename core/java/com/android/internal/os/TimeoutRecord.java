@@ -1,0 +1,130 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.internal.os;
+
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.os.SystemClock;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+/**
+ * A timeout that has triggered on the system.
+ *
+ * @hide
+ */
+public class TimeoutRecord {
+    /** Kind of timeout, e.g. BROADCAST_RECEIVER, etc. */
+    @IntDef(value = {
+            TimeoutKind.INPUT_DISPATCH_NO_FOCUSED_WINDOW,
+            TimeoutKind.INPUT_DISPATCH_WINDOW_UNRESPONSIVE,
+            TimeoutKind.BROADCAST_RECEIVER,
+            TimeoutKind.SERVICE_START,
+            TimeoutKind.SERVICE_EXEC,
+            TimeoutKind.CONTENT_PROVIDER,
+            TimeoutKind.APP_REGISTERED})
+
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface TimeoutKind {
+        int INPUT_DISPATCH_NO_FOCUSED_WINDOW = 1;
+        int INPUT_DISPATCH_WINDOW_UNRESPONSIVE = 2;
+        int BROADCAST_RECEIVER = 3;
+        int SERVICE_START = 4;
+        int SERVICE_EXEC = 5;
+        int CONTENT_PROVIDER = 6;
+        int APP_REGISTERED = 7;
+    }
+
+    /** Kind of timeout, e.g. BROADCAST_RECEIVER, etc. */
+    @TimeoutKind
+    public final int mKind;
+
+    /** Reason for the timeout. */
+    public final String mReason;
+
+    /** System uptime in millis when the timeout was triggered. */
+    public final long mEndUptimeMillis;
+
+    /**
+     * Was the end timestamp taken right after the timeout triggered, before any potentially
+     * expensive operations such as taking locks?
+     */
+    public final boolean mEndTakenBeforeLocks;
+
+    private TimeoutRecord(@TimeoutKind int kind, @NonNull String reason, long endUptimeMillis,
+            boolean endTakenBeforeLocks) {
+        this.mKind = kind;
+        this.mReason = reason;
+        this.mEndUptimeMillis = endUptimeMillis;
+        this.mEndTakenBeforeLocks = endTakenBeforeLocks;
+    }
+
+    private static TimeoutRecord endingNow(@TimeoutKind int kind, String reason) {
+        long endUptimeMillis = SystemClock.uptimeMillis();
+        return new TimeoutRecord(kind, reason, endUptimeMillis, /* endTakenBeforeLocks */ true);
+    }
+
+    private static TimeoutRecord endingApproximatelyNow(@TimeoutKind int kind, String reason) {
+        long endUptimeMillis = SystemClock.uptimeMillis();
+        return new TimeoutRecord(kind, reason, endUptimeMillis, /* endTakenBeforeLocks */ false);
+    }
+
+    /** Record for a broadcast receiver timeout. */
+    @NonNull
+    public static TimeoutRecord forBroadcastReceiver(@NonNull String reason) {
+        return TimeoutRecord.endingNow(TimeoutKind.BROADCAST_RECEIVER, reason);
+    }
+
+    /** Record for an input dispatch no focused window timeout */
+    @NonNull
+    public static TimeoutRecord forInputDispatchNoFocusedWindow(@NonNull String reason) {
+        return TimeoutRecord.endingNow(TimeoutKind.INPUT_DISPATCH_NO_FOCUSED_WINDOW, reason);
+    }
+
+    /** Record for an input dispatch window unresponsive timeout. */
+    @NonNull
+    public static TimeoutRecord forInputDispatchWindowUnresponsive(@NonNull String reason) {
+        return TimeoutRecord.endingNow(TimeoutKind.INPUT_DISPATCH_WINDOW_UNRESPONSIVE, reason);
+    }
+
+    /** Record for a service exec timeout. */
+    @NonNull
+    public static TimeoutRecord forServiceExec(@NonNull String reason) {
+        return TimeoutRecord.endingNow(TimeoutKind.SERVICE_EXEC, reason);
+    }
+
+    /** Record for a service start timeout. */
+    @NonNull
+    public static TimeoutRecord forServiceStartWithEndTime(@NonNull String reason,
+            long endUptimeMillis) {
+        return new TimeoutRecord(TimeoutKind.SERVICE_START, reason,
+                endUptimeMillis, /* endTakenBeforeLocks */ true);
+    }
+
+    /** Record for a content provider timeout. */
+    @NonNull
+    public static TimeoutRecord forContentProvider(@NonNull String reason) {
+        return TimeoutRecord.endingApproximatelyNow(TimeoutKind.CONTENT_PROVIDER, reason);
+    }
+
+    /** Record for an app registered timeout. */
+    @NonNull
+    public static TimeoutRecord forApp(@NonNull String reason) {
+        return TimeoutRecord.endingApproximatelyNow(TimeoutKind.APP_REGISTERED, reason);
+    }
+}

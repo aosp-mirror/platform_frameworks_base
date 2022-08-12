@@ -75,6 +75,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
@@ -935,7 +936,9 @@ public class ContentProviderHelper {
                 return;
             }
 
-            mService.mAnrHelper.appNotResponding(host, "ContentProvider not responding");
+            TimeoutRecord timeoutRecord = TimeoutRecord.forContentProvider(
+                    "ContentProvider not responding");
+            mService.mAnrHelper.appNotResponding(host, timeoutRecord);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }

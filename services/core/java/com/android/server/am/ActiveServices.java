@@ -166,6 +166,7 @@ import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -5761,7 +5762,7 @@ public final class ActiveServices {
     }
 
     void serviceTimeout(ProcessRecord proc) {
-        String anrMessage = null;
+        TimeoutRecord timeoutRecord = null;
         synchronized(mAm) {
             if (proc.isDebugging()) {
                 // The app's being debugged, ignore timeout.
@@ -5796,7 +5797,8 @@ public final class ActiveServices {
                 mLastAnrDump = sw.toString();
                 mAm.mHandler.removeCallbacks(mLastAnrDumpClearer);
                 mAm.mHandler.postDelayed(mLastAnrDumpClearer, LAST_ANR_LIFETIME_DURATION_MSECS);
-                anrMessage = "executing service " + timeout.shortInstanceName;
+                String anrMessage = "executing service " + timeout.shortInstanceName;
+                timeoutRecord = TimeoutRecord.forServiceExec(anrMessage);
             } else {
                 Message msg = mAm.mHandler.obtainMessage(
                         ActivityManagerService.SERVICE_TIMEOUT_MSG);
@@ -5806,13 +5808,15 @@ public final class ActiveServices {
             }
         }
 
-        if (anrMessage != null) {
-            mAm.mAnrHelper.appNotResponding(proc, anrMessage);
+        if (timeoutRecord != null) {
+            mAm.mAnrHelper.appNotResponding(proc, timeoutRecord);
         }
     }
 
     void serviceForegroundTimeout(ServiceRecord r) {
         ProcessRecord app;
+        // Grab a timestamp before lock is taken.
+        long timeoutEndMs = SystemClock.uptimeMillis();
         synchronized (mAm) {
             if (!r.fgRequired || !r.fgWaiting || r.destroying) {
                 return;
@@ -5836,17 +5840,19 @@ public final class ActiveServices {
                     + "Service.startForeground(): " + r;
             Message msg = mAm.mHandler.obtainMessage(
                     ActivityManagerService.SERVICE_FOREGROUND_TIMEOUT_ANR_MSG);
+            TimeoutRecord timeoutRecord = TimeoutRecord.forServiceStartWithEndTime(annotation,
+                    timeoutEndMs);
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = app;
-            args.arg2 = annotation;
+            args.arg2 = timeoutRecord;
             msg.obj = args;
             mAm.mHandler.sendMessageDelayed(msg,
                     mAm.mConstants.mServiceStartForegroundAnrDelayMs);
         }
     }
 
-    void serviceForegroundTimeoutANR(ProcessRecord app, String annotation) {
-        mAm.mAnrHelper.appNotResponding(app, annotation);
+    void serviceForegroundTimeoutANR(ProcessRecord app, TimeoutRecord timeoutRecord) {
+        mAm.mAnrHelper.appNotResponding(app, timeoutRecord);
     }
 
     public void updateServiceApplicationInfoLocked(ApplicationInfo applicationInfo) {
