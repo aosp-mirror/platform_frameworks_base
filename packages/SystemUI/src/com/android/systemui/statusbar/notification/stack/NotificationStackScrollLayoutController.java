@@ -177,7 +177,6 @@ public class NotificationStackScrollLayoutController {
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
     private NotificationSwipeHelper mSwipeHelper;
-    private boolean mShowEmptyShadeView;
     @Nullable private Boolean mHistoryEnabled;
     private int mBarState;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
@@ -1173,8 +1172,21 @@ public class NotificationStackScrollLayoutController {
     }
 
     /**
-     * Update whether we should show the empty shade view (no notifications in the shade).
-     * If so, send the update to our view.
+     * Set the visibility of the view, and propagate it to specific children.
+     *
+     * @param visible either the view is visible or not.
+     */
+    public void updateVisibility(boolean visible) {
+        mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+
+        if (mView.getVisibility() == View.VISIBLE) {
+            // Synchronize EmptyShadeView visibility with the parent container.
+            updateShowEmptyShadeView();
+        }
+    }
+
+    /**
+     * Update whether we should show the empty shade view ("no notifications" in the shade).
      *
      * When in split mode, notifications are always visible regardless of the state of the
      * QuickSettings panel. That being the case, empty view is always shown if the other conditions
@@ -1182,18 +1194,31 @@ public class NotificationStackScrollLayoutController {
      */
     public void updateShowEmptyShadeView() {
         Trace.beginSection("NSSLC.updateShowEmptyShadeView");
-        mShowEmptyShadeView = mStatusBarStateController.getCurrentOrUpcomingState() != KEYGUARD
-                && !mView.isQsFullScreen()
-                && getVisibleNotificationCount() == 0;
 
-        mView.updateEmptyShadeView(
-                mShowEmptyShadeView,
-                mZenModeController.areNotificationsHiddenInShade());
+        final boolean shouldShow = getVisibleNotificationCount() == 0
+                && !mView.isQsFullScreen()
+                // Hide empty shade view when in transition to Keyguard.
+                // That avoids "No Notifications" to blink when transitioning to AOD.
+                // For more details, see: b/228790482
+                && !isInTransitionToKeyguard();
+
+        mView.updateEmptyShadeView(shouldShow, mZenModeController.areNotificationsHiddenInShade());
+
         Trace.endSection();
     }
 
+    /**
+     * @return true if {@link StatusBarStateController} is in transition to the KEYGUARD
+     *         and false otherwise.
+     */
+    private boolean isInTransitionToKeyguard() {
+        final int currentState = mStatusBarStateController.getState();
+        final int upcomingState = mStatusBarStateController.getCurrentOrUpcomingState();
+        return (currentState != upcomingState && upcomingState == KEYGUARD);
+    }
+
     public boolean isShowingEmptyShadeView() {
-        return mShowEmptyShadeView;
+        return mView.isEmptyShadeViewVisible();
     }
 
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
