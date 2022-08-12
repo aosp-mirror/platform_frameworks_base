@@ -37,6 +37,7 @@ import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
@@ -904,7 +905,7 @@ public final class CachedAppOptimizer {
                     }
 
                     if (!enable && opt.isFrozen()) {
-                        unfreezeAppLSP(process);
+                        unfreezeAppLSP(process, OomAdjuster.OOM_ADJ_REASON_NONE);
 
                         // Set freezerOverride *after* calling unfreezeAppLSP (it resets the flag)
                         opt.setFreezerOverride(true);
@@ -1214,11 +1215,11 @@ public final class CachedAppOptimizer {
 
     // This will ensure app will be out of the freezer for at least mFreezerDebounceTimeout.
     @GuardedBy("mAm")
-    void unfreezeTemporarily(ProcessRecord app) {
+    void unfreezeTemporarily(ProcessRecord app, @OomAdjuster.OomAdjReason int reason) {
         if (mUseFreezer) {
             synchronized (mProcLock) {
                 if (app.mOptRecord.isFrozen() || app.mOptRecord.isPendingFreeze()) {
-                    unfreezeAppLSP(app);
+                    unfreezeAppLSP(app, reason);
                     freezeAppAsyncLSP(app);
                 }
             }
@@ -1244,7 +1245,7 @@ public final class CachedAppOptimizer {
     }
 
     @GuardedBy({"mAm", "mProcLock", "mFreezerLock"})
-    void unfreezeAppInternalLSP(ProcessRecord app) {
+    void unfreezeAppInternalLSP(ProcessRecord app, @OomAdjuster.OomAdjReason int reason) {
         final int pid = app.getPid();
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         if (opt.isPendingFreeze()) {
@@ -1325,14 +1326,14 @@ public final class CachedAppOptimizer {
                     mFreezeHandler.obtainMessage(REPORT_UNFREEZE_MSG,
                         pid,
                         (int) Math.min(opt.getFreezeUnfreezeTime() - freezeTime, Integer.MAX_VALUE),
-                        app.processName));
+                        new Pair<String, Integer>(app.processName, reason)));
         }
     }
 
     @GuardedBy({"mAm", "mProcLock"})
-    void unfreezeAppLSP(ProcessRecord app) {
+    void unfreezeAppLSP(ProcessRecord app, @OomAdjuster.OomAdjReason int reason) {
         synchronized (mFreezerLock) {
-            unfreezeAppInternalLSP(app);
+            unfreezeAppInternalLSP(app, reason);
         }
     }
 
@@ -1343,25 +1344,14 @@ public final class CachedAppOptimizer {
      * The caller of this function should still trigger updateOomAdj for AMS to unfreeze the app.
      * @param pid pid of the process to be unfrozen
      */
-    void unfreezeProcess(int pid) {
+    void unfreezeProcess(int pid, @OomAdjuster.OomAdjReason int reason) {
         synchronized (mFreezerLock) {
             ProcessRecord app = mFrozenProcesses.get(pid);
             if (app == null) {
                 return;
             }
             Slog.d(TAG_AM, "quick sync unfreeze " + pid);
-            try {
-                freezeBinder(pid, false);
-            } catch (RuntimeException e) {
-                Slog.e(TAG_AM, "Unable to quick unfreeze binder for " + pid);
-                return;
-            }
-
-            try {
-                Process.setProcessFrozen(pid, app.uid, false);
-            } catch (Exception e) {
-                Slog.e(TAG_AM, "Unable to quick unfreeze " + pid);
-            }
+            unfreezeAppLSP(app, reason);
         }
     }
 
@@ -1880,9 +1870,11 @@ public final class CachedAppOptimizer {
                 case REPORT_UNFREEZE_MSG:
                     int pid = msg.arg1;
                     int frozenDuration = msg.arg2;
-                    String processName = (String) msg.obj;
+                    Pair<String, Integer> obj = (Pair<String, Integer>) msg.obj;
+                    String processName = obj.first;
+                    int reason = obj.second;
 
-                    reportUnfreeze(pid, frozenDuration, processName);
+                    reportUnfreeze(pid, frozenDuration, processName, reason);
                     break;
                 default:
                     return;
@@ -1893,7 +1885,7 @@ public final class CachedAppOptimizer {
         private void rescheduleFreeze(final ProcessRecord proc, final String reason) {
             Slog.d(TAG_AM, "Reschedule freeze for process " + proc.getPid()
                     + " " + proc.processName + " (" + reason + ")");
-            unfreezeAppLSP(proc);
+            unfreezeAppLSP(proc, OomAdjuster.OOM_ADJ_REASON_NONE);
             freezeAppAsyncLSP(proc);
         }
 
@@ -1981,7 +1973,8 @@ public final class CachedAppOptimizer {
                         FrameworkStatsLog.APP_FREEZE_CHANGED__ACTION__FREEZE_APP,
                         pid,
                         name,
-                        unfrozenDuration);
+                        unfrozenDuration,
+                        FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__NONE);
             }
 
             try {
@@ -2011,12 +2004,13 @@ public final class CachedAppOptimizer {
             } catch (Exception e) {
                 Slog.e(TAG_AM, "Unable to check file locks for " + name + "(" + pid + "): " + e);
                 synchronized (mProcLock) {
-                    unfreezeAppLSP(proc);
+                    unfreezeAppLSP(proc, OomAdjuster.OOM_ADJ_REASON_NONE);
                 }
             }
         }
 
-        private void reportUnfreeze(int pid, int frozenDuration, String processName) {
+        private void reportUnfreeze(int pid, int frozenDuration, String processName,
+                @OomAdjuster.OomAdjReason int reason) {
 
             EventLog.writeEvent(EventLogTags.AM_UNFREEZE, pid, processName);
 
@@ -2027,7 +2021,39 @@ public final class CachedAppOptimizer {
                         FrameworkStatsLog.APP_FREEZE_CHANGED__ACTION__UNFREEZE_APP,
                         pid,
                         processName,
-                        frozenDuration);
+                        frozenDuration,
+                        getUnfreezeReasonCode(reason));
+            }
+        }
+
+        private int getUnfreezeReasonCode(@OomAdjuster.OomAdjReason int oomAdjReason) {
+            switch (oomAdjReason) {
+                case OomAdjuster.OOM_ADJ_REASON_ACTIVITY:
+                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__ACTIVITY;
+                case OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER:
+                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__FINISH_RECEIVER;
+                case OomAdjuster.OOM_ADJ_REASON_START_RECEIVER:
+                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__START_RECEIVER;
+                case OomAdjuster.OOM_ADJ_REASON_BIND_SERVICE:
+                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__BIND_SERVICE;
+                case OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE:
+                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__UNBIND_SERVICE;
+                case OomAdjuster.OOM_ADJ_REASON_START_SERVICE:
+                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__START_SERVICE;
+                case OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER:
+                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__GET_PROVIDER;
+                case OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER:
+                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__REMOVE_PROVIDER;
+                case OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY:
+                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__UI_VISIBILITY;
+                case OomAdjuster.OOM_ADJ_REASON_ALLOWLIST:
+                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__ALLOWLIST;
+                case OomAdjuster.OOM_ADJ_REASON_PROCESS_BEGIN:
+                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__PROCESS_BEGIN;
+                case OomAdjuster.OOM_ADJ_REASON_PROCESS_END:
+                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__PROCESS_END;
+                default:
+                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__NONE;
             }
         }
 
@@ -2041,7 +2067,7 @@ public final class CachedAppOptimizer {
                 ProcessRecord app = mFrozenProcesses.get(pid);
                 if (app != null) {
                     Slog.i(TAG_AM, app.processName + " (" + pid + ") holds blocking file lock");
-                    unfreezeAppLSP(app);
+                    unfreezeAppLSP(app, OomAdjuster.OOM_ADJ_REASON_NONE);
                 }
             }
         }
