@@ -72,6 +72,13 @@ public final class IkeSessionParamsUtils {
     private static final String NATT_KEEPALIVE_DELAY_SEC_KEY = "NATT_KEEPALIVE_DELAY_SEC_KEY";
     private static final String IKE_OPTIONS_KEY = "IKE_OPTIONS_KEY";
 
+    // TODO: Use the IKE API when they are exposed
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static final int IKE_OPTION_AUTOMATIC_ADDRESS_FAMILY_SELECTION = 6;
+
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static final int IKE_OPTION_AUTOMATIC_NATT_KEEPALIVES = 7;
+
     private static final Set<Integer> IKE_OPTIONS = new ArraySet<>();
 
     static {
@@ -80,6 +87,9 @@ public final class IkeSessionParamsUtils {
         IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_MOBIKE);
         IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_FORCE_PORT_4500);
         IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_INITIAL_CONTACT);
+        IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_REKEY_MOBILITY);
+        IKE_OPTIONS.add(IKE_OPTION_AUTOMATIC_ADDRESS_FAMILY_SELECTION);
+        IKE_OPTIONS.add(IKE_OPTION_AUTOMATIC_NATT_KEEPALIVES);
     }
 
     /** Serializes an IkeSessionParams to a PersistableBundle. */
