@@ -19,6 +19,7 @@ package com.android.settingslib.collapsingtoolbar;
 import static android.text.Layout.HYPHENATION_FREQUENCY_NORMAL_FAST;
 
 import android.app.ActionBar;
+import android.content.res.Configuration;
 import android.graphics.text.LineBreakConfig;
 import android.os.Build;
 import android.view.LayoutInflater;
@@ -97,7 +98,7 @@ public class CollapsingToolbarDelegate {
                                         .build()));
             }
         }
-        disableCollapsingToolbarLayoutScrollingBehavior();
+        autoSetCollapsingToolbarLayoutScrolling();
         mToolbar = view.findViewById(R.id.action_bar);
         mContentFrameLayout = view.findViewById(R.id.content_frame);
         final ActionBar actionBar = mHostCallback.setActionBar(mToolbar);
@@ -148,7 +149,7 @@ public class CollapsingToolbarDelegate {
         return mAppBarLayout;
     }
 
-    private void disableCollapsingToolbarLayoutScrollingBehavior() {
+    private void autoSetCollapsingToolbarLayoutScrolling() {
         if (mAppBarLayout == null) {
             return;
         }
@@ -159,7 +160,9 @@ public class CollapsingToolbarDelegate {
                 new AppBarLayout.Behavior.DragCallback() {
                     @Override
                     public boolean canDrag(@NonNull AppBarLayout appBarLayout) {
-                        return false;
+                        // Header can be scrolling while device in landscape mode.
+                        return appBarLayout.getResources().getConfiguration().orientation
+                                == Configuration.ORIENTATION_LANDSCAPE;
                     }
                 });
         params.setBehavior(behavior);
