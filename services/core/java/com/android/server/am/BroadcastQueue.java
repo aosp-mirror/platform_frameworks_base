@@ -36,6 +36,8 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
+import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER;
+import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_START_RECEIVER;
 
 
 import android.annotation.NonNull;
@@ -347,7 +349,7 @@ public final class BroadcastQueue {
         // Force an update, even if there are other pending requests, overall it still saves time,
         // because time(updateOomAdj(N apps)) <= N * time(updateOomAdj(1 app)).
         mService.enqueueOomAdjTargetLocked(app);
-        mService.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_START_RECEIVER);
+        mService.updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_START_RECEIVER);
 
         // Tell the application to launch this receiver.
         maybeReportBroadcastDispatchedEventLocked(r, r.curReceiver.applicationInfo.uid);
@@ -960,10 +962,11 @@ public final class BroadcastQueue {
                 filter.receiverList.app.mReceivers.addCurReceiver(r);
                 mService.enqueueOomAdjTargetLocked(r.curApp);
                 mService.updateOomAdjPendingTargetsLocked(
-                        OomAdjuster.OOM_ADJ_REASON_START_RECEIVER);
+                        OOM_ADJ_REASON_START_RECEIVER);
             }
         } else if (filter.receiverList.app != null) {
-            mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(filter.receiverList.app);
+            mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(filter.receiverList.app,
+                    OOM_ADJ_REASON_START_RECEIVER);
         }
 
         try {
@@ -1244,7 +1247,7 @@ public final class BroadcastQueue {
                     // make sure all processes have correct oom and sched
                     // adjustments.
                     mService.updateOomAdjPendingTargetsLocked(
-                            OomAdjuster.OOM_ADJ_REASON_START_RECEIVER);
+                            OOM_ADJ_REASON_START_RECEIVER);
                 }
 
                 // when we have no more ordered broadcast on this queue, stop logging
@@ -1326,7 +1329,7 @@ public final class BroadcastQueue {
                     if (sendResult) {
                         if (r.callerApp != null) {
                             mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(
-                                    r.callerApp);
+                                    r.callerApp, OOM_ADJ_REASON_FINISH_RECEIVER);
                         }
                         try {
                             if (DEBUG_BROADCAST) {
