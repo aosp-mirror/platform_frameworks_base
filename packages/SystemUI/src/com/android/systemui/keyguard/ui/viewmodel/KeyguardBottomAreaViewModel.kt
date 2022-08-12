@@ -34,7 +34,7 @@ class KeyguardBottomAreaViewModel
 constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val quickAffordanceInteractor: KeyguardQuickAffordanceInteractor,
-    bottomAreaInteractor: KeyguardBottomAreaInteractor,
+    private val bottomAreaInteractor: KeyguardBottomAreaInteractor,
     private val burnInHelperWrapper: BurnInHelperWrapper,
 ) {
     /** An observable for the view-model of the "start button" quick affordance. */
@@ -43,12 +43,6 @@ constructor(
     /** An observable for the view-model of the "end button" quick affordance. */
     val endButton: Flow<KeyguardQuickAffordanceViewModel> =
         button(KeyguardQuickAffordancePosition.BOTTOM_END)
-    /**
-     * An observable for whether the next time a quick action button becomes visible, it should
-     * animate.
-     */
-    val animateButtonReveal: Flow<Boolean> =
-        bottomAreaInteractor.animateDozingTransitions.distinctUntilChanged()
     /** An observable for whether the overlay container should be visible. */
     val isOverlayContainerVisible: Flow<Boolean> =
         keyguardInteractor.isDozing.map { !it }.distinctUntilChanged()
@@ -80,18 +74,24 @@ constructor(
     private fun button(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceViewModel> {
-        return quickAffordanceInteractor
-            .quickAffordance(position)
-            .map { model -> model.toViewModel() }
+        return combine(
+                quickAffordanceInteractor.quickAffordance(position),
+                bottomAreaInteractor.animateDozingTransitions.distinctUntilChanged(),
+            ) { model, animateReveal ->
+                model.toViewModel(animateReveal)
+            }
             .distinctUntilChanged()
     }
 
-    private fun KeyguardQuickAffordanceModel.toViewModel(): KeyguardQuickAffordanceViewModel {
+    private fun KeyguardQuickAffordanceModel.toViewModel(
+        animateReveal: Boolean,
+    ): KeyguardQuickAffordanceViewModel {
         return when (this) {
             is KeyguardQuickAffordanceModel.Visible ->
                 KeyguardQuickAffordanceViewModel(
                     configKey = configKey,
                     isVisible = true,
+                    animateReveal = animateReveal,
                     icon = icon,
                     contentDescriptionResourceId = contentDescriptionResourceId,
                     onClicked = { parameters ->

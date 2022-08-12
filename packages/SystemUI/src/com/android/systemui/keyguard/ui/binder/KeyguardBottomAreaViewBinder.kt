@@ -95,35 +95,23 @@ object KeyguardBottomAreaViewBinder {
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    combine(viewModel.startButton, viewModel.animateButtonReveal) {
-                            buttonModel,
-                            animateReveal ->
-                            Pair(buttonModel, animateReveal)
-                        }
-                        .collect { (buttonModel, animateReveal) ->
-                            updateButton(
-                                view = startButton,
-                                viewModel = buttonModel,
-                                animateReveal = animateReveal,
-                                falsingManager = falsingManager,
-                            )
-                        }
+                    viewModel.startButton.collect { buttonModel ->
+                        updateButton(
+                            view = startButton,
+                            viewModel = buttonModel,
+                            falsingManager = falsingManager,
+                        )
+                    }
                 }
 
                 launch {
-                    combine(viewModel.endButton, viewModel.animateButtonReveal) {
-                            buttonModel,
-                            animateReveal ->
-                            Pair(buttonModel, animateReveal)
-                        }
-                        .collect { (buttonModel, animateReveal) ->
-                            updateButton(
-                                view = endButton,
-                                viewModel = buttonModel,
-                                animateReveal = animateReveal,
-                                falsingManager = falsingManager,
-                            )
-                        }
+                    viewModel.endButton.collect { buttonModel ->
+                        updateButton(
+                            view = endButton,
+                            viewModel = buttonModel,
+                            falsingManager = falsingManager,
+                        )
+                    }
                 }
 
                 launch {
@@ -226,7 +214,6 @@ object KeyguardBottomAreaViewBinder {
     private fun updateButton(
         view: ImageView,
         viewModel: KeyguardQuickAffordanceViewModel,
-        animateReveal: Boolean,
         falsingManager: FalsingManager,
     ) {
         if (!viewModel.isVisible) {
@@ -236,7 +223,7 @@ object KeyguardBottomAreaViewBinder {
 
         if (!view.isVisible) {
             view.isVisible = true
-            if (animateReveal) {
+            if (viewModel.animateReveal) {
                 view.alpha = 0f
                 view.translationY = view.height / 2f
                 view
