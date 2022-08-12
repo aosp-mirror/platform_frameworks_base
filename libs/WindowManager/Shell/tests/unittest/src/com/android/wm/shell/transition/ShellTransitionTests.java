@@ -43,11 +43,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -89,6 +91,7 @@ import com.android.wm.shell.sysui.ShellInit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 
 import java.util.ArrayList;
 
@@ -686,6 +689,204 @@ public class ShellTransitionTests extends ShellTestCase {
         verify(runnable2, times(0)).run();
         verify(runnable3, times(0)).run();
         verify(runnable4, times(1)).run();
+    }
+
+    @Test
+    public void testObserverLifecycle_basicTransitionFlow() {
+        Transitions transitions = createTestTransitions();
+        Transitions.TransitionObserver observer = mock(Transitions.TransitionObserver.class);
+        transitions.registerObserver(observer);
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken = new Binder();
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken, info, startT, finishT);
+
+        InOrder observerOrder = inOrder(observer);
+        observerOrder.verify(observer).onTransitionReady(transitToken, info, startT, finishT);
+        observerOrder.verify(observer).onTransitionStarting(transitToken);
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken), anyBoolean());
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        verify(observer).onTransitionFinished(transitToken, false);
+    }
+
+    @Test
+    public void testObserverLifecycle_queueing() {
+        Transitions transitions = createTestTransitions();
+        Transitions.TransitionObserver observer = mock(Transitions.TransitionObserver.class);
+        transitions.registerObserver(observer);
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken1 = new Binder();
+        transitions.requestStartTransition(transitToken1,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        TransitionInfo info1 = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        SurfaceControl.Transaction startT1 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT1 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken1, info1, startT1, finishT1);
+        verify(observer).onTransitionReady(transitToken1, info1, startT1, finishT1);
+
+        IBinder transitToken2 = new Binder();
+        transitions.requestStartTransition(transitToken2,
+                new TransitionRequestInfo(TRANSIT_CLOSE, null /* trigger */, null /* remote */));
+        TransitionInfo info2 = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        SurfaceControl.Transaction startT2 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT2 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken2, info2, startT2, finishT2);
+        verify(observer, times(1)).onTransitionReady(transitToken2, info2, startT2, finishT2);
+        verify(observer, times(0)).onTransitionStarting(transitToken2);
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken1), anyBoolean());
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken2), anyBoolean());
+
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        // first transition finished
+        verify(observer, times(1)).onTransitionFinished(transitToken1, false);
+        verify(observer, times(1)).onTransitionStarting(transitToken2);
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken2), anyBoolean());
+
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        verify(observer, times(1)).onTransitionFinished(transitToken2, false);
+    }
+
+
+    @Test
+    public void testObserverLifecycle_merging() {
+        Transitions transitions = createTestTransitions();
+        Transitions.TransitionObserver observer = mock(Transitions.TransitionObserver.class);
+        transitions.registerObserver(observer);
+        mDefaultHandler.setSimulateMerge(true);
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken1 = new Binder();
+        transitions.requestStartTransition(transitToken1,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        TransitionInfo info1 = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        SurfaceControl.Transaction startT1 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT1 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken1, info1, startT1, finishT1);
+
+        IBinder transitToken2 = new Binder();
+        transitions.requestStartTransition(transitToken2,
+                new TransitionRequestInfo(TRANSIT_CLOSE, null /* trigger */, null /* remote */));
+        TransitionInfo info2 = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        SurfaceControl.Transaction startT2 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT2 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken2, info2, startT2, finishT2);
+
+        InOrder observerOrder = inOrder(observer);
+        observerOrder.verify(observer).onTransitionReady(transitToken2, info2, startT2, finishT2);
+        observerOrder.verify(observer).onTransitionMerged(transitToken2, transitToken1);
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken1), anyBoolean());
+
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        // transition + merged all finished.
+        verify(observer, times(1)).onTransitionFinished(transitToken1, false);
+        // Merged transition won't receive any lifecycle calls beyond ready
+        verify(observer, times(0)).onTransitionStarting(transitToken2);
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken2), anyBoolean());
+    }
+
+    @Test
+    public void testObserverLifecycle_mergingAfterQueueing() {
+        Transitions transitions = createTestTransitions();
+        Transitions.TransitionObserver observer = mock(Transitions.TransitionObserver.class);
+        transitions.registerObserver(observer);
+        mDefaultHandler.setSimulateMerge(true);
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        // Make a test handler that only responds to multi-window triggers AND only animates
+        // Change transitions.
+        final WindowContainerTransaction handlerWCT = new WindowContainerTransaction();
+        TestTransitionHandler testHandler = new TestTransitionHandler() {
+            @Override
+            public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+                    @NonNull SurfaceControl.Transaction startTransaction,
+                    @NonNull SurfaceControl.Transaction finishTransaction,
+                    @NonNull Transitions.TransitionFinishCallback finishCallback) {
+                for (TransitionInfo.Change chg : info.getChanges()) {
+                    if (chg.getMode() == TRANSIT_CHANGE) {
+                        return super.startAnimation(transition, info, startTransaction,
+                                finishTransaction, finishCallback);
+                    }
+                }
+                return false;
+            }
+
+            @Nullable
+            @Override
+            public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
+                    @NonNull TransitionRequestInfo request) {
+                final RunningTaskInfo task = request.getTriggerTask();
+                return (task != null && task.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW)
+                        ? handlerWCT : null;
+            }
+        };
+        transitions.addHandler(testHandler);
+
+        // Use test handler to play an animation
+        IBinder transitToken1 = new Binder();
+        RunningTaskInfo mwTaskInfo =
+                createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        transitions.requestStartTransition(transitToken1,
+                new TransitionRequestInfo(TRANSIT_CHANGE, mwTaskInfo, null /* remote */));
+        TransitionInfo change = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(TRANSIT_CHANGE).build();
+        SurfaceControl.Transaction startT1 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT1 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken1, change, startT1, finishT1);
+
+        // Request the second transition that should be handled by the default handler
+        IBinder transitToken2 = new Binder();
+        TransitionInfo open = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        transitions.requestStartTransition(transitToken2,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        SurfaceControl.Transaction startT2 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT2 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken2, open, startT2, finishT2);
+        verify(observer).onTransitionReady(transitToken2, open, startT2, finishT2);
+        verify(observer, times(0)).onTransitionStarting(transitToken2);
+
+        // Request the third transition that should be merged into the second one
+        IBinder transitToken3 = new Binder();
+        transitions.requestStartTransition(transitToken3,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        SurfaceControl.Transaction startT3 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT3 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken3, open, startT3, finishT3);
+        verify(observer, times(0)).onTransitionStarting(transitToken2);
+        verify(observer).onTransitionReady(transitToken3, open, startT3, finishT3);
+        verify(observer, times(0)).onTransitionStarting(transitToken3);
+
+        testHandler.finishAll();
+        mMainExecutor.flushAll();
+
+        verify(observer).onTransitionFinished(transitToken1, false);
+
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+
+        InOrder observerOrder = inOrder(observer);
+        observerOrder.verify(observer).onTransitionStarting(transitToken2);
+        observerOrder.verify(observer).onTransitionMerged(transitToken3, transitToken2);
+        observerOrder.verify(observer).onTransitionFinished(transitToken2, false);
+
+        // Merged transition won't receive any lifecycle calls beyond ready
+        verify(observer, times(0)).onTransitionStarting(transitToken3);
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken3), anyBoolean());
     }
 
     class TransitionInfoBuilder {
