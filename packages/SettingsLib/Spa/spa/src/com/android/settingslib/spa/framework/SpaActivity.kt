@@ -24,9 +24,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.android.settingslib.spa.api.SettingsPageProvider
-import com.android.settingslib.spa.api.SettingsPageRepository
-import com.android.settingslib.spa.theme.SettingsTheme
+import com.android.settingslib.spa.framework.api.SettingsPageProvider
+import com.android.settingslib.spa.framework.api.SettingsPageRepository
+import com.android.settingslib.spa.framework.compose.localNavController
+import com.android.settingslib.spa.framework.theme.SettingsTheme
 
 open class SpaActivity(
     private val settingsPageRepository: SettingsPageRepository,

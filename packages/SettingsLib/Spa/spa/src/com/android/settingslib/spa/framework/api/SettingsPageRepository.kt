@@ -14,20 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.theme
+package com.android.settingslib.spa.framework.api
 
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.ui.unit.dp
-
-object SettingsDimension {
-    val itemIconContainerSize = 72.dp
-    val itemPaddingStart = 24.dp
-    val itemPaddingEnd = 16.dp
-    val itemPaddingVertical = 16.dp
-    val itemPadding = PaddingValues(
-        start = itemPaddingStart,
-        top = itemPaddingVertical,
-        end = itemPaddingEnd,
-        bottom = itemPaddingVertical,
-    )
-}
+data class SettingsPageRepository(
+    val allPages: List<SettingsPageProvider>,
+    val startDestination: String,
+)

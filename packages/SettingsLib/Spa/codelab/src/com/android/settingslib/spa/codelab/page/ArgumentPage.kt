@@ -22,10 +22,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.android.settingslib.spa.api.SettingsPageProvider
-import com.android.settingslib.spa.framework.navigator
-import com.android.settingslib.spa.framework.toState
-import com.android.settingslib.spa.theme.SettingsTheme
+import com.android.settingslib.spa.framework.api.SettingsPageProvider
+import com.android.settingslib.spa.framework.compose.navigator
+import com.android.settingslib.spa.framework.compose.toState
+import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 

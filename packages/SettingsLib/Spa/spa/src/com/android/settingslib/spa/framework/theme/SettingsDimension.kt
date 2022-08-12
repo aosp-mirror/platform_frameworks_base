@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.theme
+package com.android.settingslib.spa.framework.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.unit.dp
 
-/**
- * The Material 3 Theme for Settings.
- */
-@Composable
-fun SettingsTheme(content: @Composable () -> Unit) {
-    val isDarkTheme = isSystemInDarkTheme()
-    val colorScheme = materialColorScheme(isDarkTheme)
-
-    MaterialTheme(colorScheme = colorScheme) {
-        content()
-    }
+object SettingsDimension {
+    val itemIconContainerSize = 72.dp
+    val itemPaddingStart = 24.dp
+    val itemPaddingEnd = 16.dp
+    val itemPaddingVertical = 16.dp
+    val itemPadding = PaddingValues(
+        start = itemPaddingStart,
+        top = itemPaddingVertical,
+        end = itemPaddingEnd,
+        bottom = itemPaddingVertical,
+    )
 }
