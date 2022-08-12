@@ -660,7 +660,8 @@
     <string name="dream_complication_title_weather" msgid="598609151677172783">"বতৰ"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"বায়ুৰ গুণগত মান"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"কাষ্টৰ তথ্য"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
+    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"গৃহ নিয়ন্ত্ৰণ"</string>
+    <!-- no translation found for dream_complication_title_smartspace (4197829945636051120) -->
     <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"এখন প্ৰ’ফাইল চিত্ৰ বাছনি কৰক"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ডিফ’ল্ট ব্যৱহাৰকাৰীৰ চিহ্ন"</string>
