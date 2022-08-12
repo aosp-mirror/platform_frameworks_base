@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -30,7 +29,7 @@ import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowKeepVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerKeepVisible
-import com.android.wm.shell.flicker.splitAppLayerBoundsChanges
+import com.android.wm.shell.flicker.splitAppLayerBoundsKeepVisible
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -40,16 +39,17 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test resize split by dragging the divider bar.
+ * Test copy content from the left to the right side of the split-screen.
  *
- * To run this test: `atest WMShellFlickerTests:DragDividerToResize`
+ * To run this test: `atest WMShellFlickerTests:CopyContentInSplit`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
+class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
+    protected val textEditApp = SplitScreenHelper.getIme(instrumentation)
 
     // TODO(b/231399940): Remove this once we can use recent shortcut to enter split.
     @Before
@@ -62,18 +62,18 @@ class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(tes
             super.transition(this)
             setup {
                 eachRun {
-                    tapl.goHome()
-                    primaryApp.launchViaIntent(wmHelper)
+                    textEditApp.launchViaIntent(wmHelper)
                     // TODO(b/231399940): Use recent shortcut to enter split.
                     tapl.launchedAppState.taskbar
                         .openAllApps()
-                        .getAppIcon(secondaryApp.appName)
-                        .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
-                    SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
+                        .getAppIcon(primaryApp.appName)
+                        .dragToSplitscreen(primaryApp.`package`, textEditApp.`package`)
+                    SplitScreenHelper.waitForSplitComplete(wmHelper, textEditApp, primaryApp)
                 }
             }
             transitions {
-                SplitScreenHelper.dragDividerToResizeAndWait(device, wmHelper)
+                SplitScreenHelper.copyContentFromLeftToRight(
+                    instrumentation, device, primaryApp, textEditApp)
             }
         }
 
@@ -87,15 +87,17 @@ class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(tes
 
     @Presubmit
     @Test
-    fun secondaryAppLayerVisibilityChanges() {
-        testSpec.assertLayers {
-            this.isVisible(secondaryApp)
-                .then()
-                .isInvisible(secondaryApp)
-                .then()
-                .isVisible(secondaryApp)
-        }
-    }
+    fun textEditAppLayerKeepVisible() = testSpec.layerKeepVisible(textEditApp)
+
+    @Presubmit
+    @Test
+    fun primaryAppBoundsKeepVisible() = testSpec.splitAppLayerBoundsKeepVisible(
+        primaryApp, splitLeftTop = true)
+
+    @Presubmit
+    @Test
+    fun textEditAppBoundsKeepVisible() = testSpec.splitAppLayerBoundsKeepVisible(
+        textEditApp, splitLeftTop = false)
 
     @Presubmit
     @Test
@@ -103,17 +105,7 @@ class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(tes
 
     @Presubmit
     @Test
-    fun secondaryAppWindowKeepVisible() = testSpec.appWindowKeepVisible(secondaryApp)
-
-    @Presubmit
-    @Test
-    fun primaryAppBoundsChanges() = testSpec.splitAppLayerBoundsChanges(
-        primaryApp, splitLeftTop = false)
-
-    @Presubmit
-    @Test
-    fun secondaryAppBoundsChanges() = testSpec.splitAppLayerBoundsChanges(
-        secondaryApp, splitLeftTop = true)
+    fun textEditAppWindowKeepVisible() = testSpec.appWindowKeepVisible(textEditApp)
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -187,10 +179,9 @@ class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(tes
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
                 repetitions = SplitScreenHelper.TEST_REPETITIONS,
-                supportedRotations = listOf(Surface.ROTATION_0),
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
                 supportedNavigationModes =
-                listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
+                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
         }
     }
 }

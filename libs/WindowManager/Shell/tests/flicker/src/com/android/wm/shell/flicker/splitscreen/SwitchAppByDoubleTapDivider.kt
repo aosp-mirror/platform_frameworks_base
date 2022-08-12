@@ -29,6 +29,7 @@ import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.layerIsVisibleAtEnd
+import com.android.wm.shell.flicker.layerKeepVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import org.junit.Assume
 import org.junit.Before
@@ -80,11 +81,7 @@ class SwitchAppByDoubleTapDivider (testSpec: FlickerTestParameter) : SplitScreen
 
     @Presubmit
     @Test
-    fun splitScreenDividerKeepVisible() {
-        testSpec.assertLayers {
-            this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
-        }
-    }
+    fun splitScreenDividerKeepVisible() = testSpec.layerKeepVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
 
     @Presubmit
     @Test
