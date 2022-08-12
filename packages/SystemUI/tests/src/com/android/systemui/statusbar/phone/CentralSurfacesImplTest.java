@@ -418,7 +418,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 wakefulnessLifecycle,
                 mStatusBarStateController,
                 Optional.of(mBubbles),
-                mVisualStabilityManager,
                 mDeviceProvisionedController,
                 mNavigationBarController,
                 mAccessibilityFloatingMenuController,

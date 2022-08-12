@@ -36,7 +36,7 @@ import java.util.stream.Stream;
  * remove notifications that appear on screen for a period of time and dismiss themselves at the
  * appropriate time.  These include heads up notifications and ambient pulses.
  */
-public abstract class AlertingNotificationManager implements NotificationLifetimeExtender {
+public abstract class AlertingNotificationManager {
     private static final String TAG = "AlertNotifManager";
     protected final Clock mClock = new Clock();
     protected final ArrayMap<String, AlertEntry> mAlertEntries = new ArrayMap<>();
@@ -47,14 +47,6 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
         mHandler = handler;
     }
 
-    /**
-     * This is the list of entries that have already been removed from the
-     * NotificationManagerService side, but we keep it to prevent the UI from looking weird and
-     * will remove when possible. See {@link NotificationLifetimeExtender}
-     */
-    protected final ArraySet<NotificationEntry> mExtendedLifetimeAlertEntries = new ArraySet<>();
-
-    protected NotificationSafeToRemoveCallback mNotificationLifetimeFinishedCallback;
     protected int mMinimumDisplayTime;
     protected int mAutoDismissNotificationDecay;
     private final Handler mHandler;
@@ -209,12 +201,6 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
         onAlertEntryRemoved(alertEntry);
         entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         alertEntry.reset();
-        if (mExtendedLifetimeAlertEntries.contains(entry)) {
-            if (mNotificationLifetimeFinishedCallback != null) {
-                mNotificationLifetimeFinishedCallback.onSafeToRemove(key);
-            }
-            mExtendedLifetimeAlertEntries.remove(entry);
-        }
     }
 
     /**
@@ -243,19 +229,6 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
                 || alertEntry.mEntry.isRowDismissed();
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // NotificationLifetimeExtender Methods
-
-    @Override
-    public void setCallback(NotificationSafeToRemoveCallback callback) {
-        mNotificationLifetimeFinishedCallback = callback;
-    }
-
-    @Override
-    public boolean shouldExtendLifetime(NotificationEntry entry) {
-        return !canRemoveImmediately(entry.getKey());
-    }
-
     /**
      * @param key
      * @return true if the entry is pinned
@@ -279,20 +252,6 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
         }
         return 0;
     }
-
-    @Override
-    public void setShouldManageLifetime(NotificationEntry entry, boolean shouldExtend) {
-        if (shouldExtend) {
-            mExtendedLifetimeAlertEntries.add(entry);
-            // We need to make sure that entries are stopping to alert eventually, let's remove
-            // this as soon as possible.
-            AlertEntry alertEntry = mAlertEntries.get(entry.getKey());
-            alertEntry.removeAsSoonAsPossible();
-        } else {
-            mExtendedLifetimeAlertEntries.remove(entry);
-        }
-    }
-    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     protected class AlertEntry implements Comparable<AlertEntry> {
         @Nullable public NotificationEntry mEntry;
