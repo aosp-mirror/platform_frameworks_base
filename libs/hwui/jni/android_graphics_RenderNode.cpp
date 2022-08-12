@@ -850,22 +850,20 @@ static const JNINativeMethod gMethods[] = {
 
 int register_android_view_RenderNode(JNIEnv* env) {
     int robolectricApiLevel = GetRobolectricApiLevel(env);
-    if (robolectricApiLevel < 29) {
-        // Skip RenderNode registration for SDK < 29. RenderNode doesn't
-        // exist, and this JNI registration references some RenderNode
-        // internals.
-        return JNI_OK;
+    const char* const kClassPathName =
+            robolectricApiLevel >= 29 ? "android/graphics/RenderNode" : "android/view/RenderNode";
+
+    jclass clazz = FindClassOrDie(env, kClassPathName);
+    if (robolectricApiLevel >= 29) {
+        gPositionListener_PositionChangedMethod =
+                GetMethodIDOrDie(env, clazz, "positionChanged", "(JIIII)V");
+        gPositionListener_PositionLostMethod = GetMethodIDOrDie(env, clazz, "positionLost", "(J)V");
     }
-    jclass clazz = FindClassOrDie(env, "android/graphics/RenderNode$PositionUpdateListener");
-    gPositionListener_PositionChangedMethod = GetMethodIDOrDie(env, clazz,
-            "positionChanged", "(JIIII)V");
     if (robolectricApiLevel >= 31) {
         // applyStretch was added in Android S
         gPositionListener_ApplyStretchMethod =
                 GetMethodIDOrDie(env, clazz, "applyStretch", "(JFFFFFFFFFF)V");
     }
-    gPositionListener_PositionLostMethod = GetMethodIDOrDie(env, clazz,
-            "positionLost", "(J)V");
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
