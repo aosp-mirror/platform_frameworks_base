@@ -19,18 +19,19 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.annotation.StringRes
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.containeddrawable.ContainedDrawable
+import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
 import kotlin.reflect.KClass
 
 /** Models the UI state of a keyguard quick affordance button. */
 data class KeyguardQuickAffordanceViewModel(
-    val configKey: KClass<*>? = null,
+    val configKey: KClass<out KeyguardQuickAffordanceConfig>? = null,
     val isVisible: Boolean = false,
     val icon: ContainedDrawable = ContainedDrawable.WithResource(0),
     @StringRes val contentDescriptionResourceId: Int = 0,
     val onClicked: (OnClickedParameters) -> Unit = {},
 ) {
     data class OnClickedParameters(
-        val configKey: KClass<*>,
+        val configKey: KClass<out KeyguardQuickAffordanceConfig>,
         val animationController: ActivityLaunchAnimator.Controller?,
     )
 }
