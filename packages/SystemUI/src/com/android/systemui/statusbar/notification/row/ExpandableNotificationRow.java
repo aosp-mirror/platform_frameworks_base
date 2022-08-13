@@ -94,7 +94,6 @@ import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
@@ -902,21 +901,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public List<ExpandableNotificationRow> getAttachedChildren() {
         return mChildrenContainer == null ? null : mChildrenContainer.getAttachedChildren();
-    }
-
-    /**
-     * Apply the order given in the list to the children.
-     *
-     * @param childOrder the new list order
-     * @param visualStabilityManager
-     * @param callback the callback to invoked in case it is not allowed
-     * @return whether the list order has changed
-     */
-    public boolean applyChildOrder(List<ExpandableNotificationRow> childOrder,
-            VisualStabilityManager visualStabilityManager,
-            VisualStabilityManager.Callback callback) {
-        return mChildrenContainer != null && mChildrenContainer.applyChildOrder(childOrder,
-                visualStabilityManager, callback);
     }
 
     /** Updates states of all children. */

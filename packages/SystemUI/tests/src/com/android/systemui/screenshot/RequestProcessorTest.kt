@@ -23,8 +23,12 @@ import android.graphics.Insets
 import android.graphics.Rect
 import android.hardware.HardwareBuffer
 import android.net.Uri
-import android.view.WindowManager
-import android.view.WindowManager.ScreenshotSource
+import android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
+import android.view.WindowManager.ScreenshotSource.SCREENSHOT_OTHER
+import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
+import android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION
+import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
+
 import com.android.internal.util.ScreenshotHelper.HardwareBitmapBundler
 import com.android.internal.util.ScreenshotHelper.ScreenshotRequest
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback
@@ -43,13 +47,12 @@ class RequestProcessorTest {
 
     @Test
     fun testFullScreenshot() {
-        val request = ScreenshotRequest(ScreenshotSource.SCREENSHOT_KEY_CHORD)
+        val request = ScreenshotRequest(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_CHORD)
         val onSavedListener = mock<Consumer<Uri>>()
         val callback = mock<RequestCallback>()
         val processor = RequestProcessor(controller)
 
-        processor.processRequest(WindowManager.TAKE_SCREENSHOT_FULLSCREEN, onSavedListener,
-            request, callback)
+        processor.processRequest(request, onSavedListener, callback)
 
         verify(controller).takeScreenshotFullscreen(/* topComponent */ isNull(),
             eq(onSavedListener), eq(callback))
@@ -57,13 +60,12 @@ class RequestProcessorTest {
 
     @Test
     fun testSelectedRegionScreenshot() {
-        val request = ScreenshotRequest(ScreenshotSource.SCREENSHOT_KEY_CHORD)
+        val request = ScreenshotRequest(TAKE_SCREENSHOT_SELECTED_REGION, SCREENSHOT_KEY_CHORD)
         val onSavedListener = mock<Consumer<Uri>>()
         val callback = mock<RequestCallback>()
         val processor = RequestProcessor(controller)
 
-        processor.processRequest(WindowManager.TAKE_SCREENSHOT_SELECTED_REGION, onSavedListener,
-            request, callback)
+        processor.processRequest(request, onSavedListener, callback)
 
         verify(controller).takeScreenshotPartial(/* topComponent */ isNull(),
             eq(onSavedListener), eq(callback))
@@ -82,14 +84,13 @@ class RequestProcessorTest {
         val bitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB))!!
         val bitmapBundle = HardwareBitmapBundler.hardwareBitmapToBundle(bitmap)
 
-        val request = ScreenshotRequest(ScreenshotSource.SCREENSHOT_OTHER, bitmapBundle,
-            bounds, Insets.NONE, taskId, userId, topComponent)
+        val request = ScreenshotRequest(TAKE_SCREENSHOT_PROVIDED_IMAGE, SCREENSHOT_OTHER,
+            bitmapBundle, bounds, Insets.NONE, taskId, userId, topComponent)
 
         val onSavedListener = mock<Consumer<Uri>>()
         val callback = mock<RequestCallback>()
 
-        processor.processRequest(WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE, onSavedListener,
-            request, callback)
+        processor.processRequest(request, onSavedListener, callback)
 
         verify(controller).handleImageAsScreenshot(
             bitmapCaptor.capture(), eq(bounds), eq(Insets.NONE), eq(taskId), eq(userId),

@@ -90,7 +90,6 @@ import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
 import com.android.systemui.statusbar.notification.collection.PipelineDumper;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.OnGroupChangeListener;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
@@ -162,7 +161,6 @@ public class NotificationStackScrollLayoutController {
     private final NotificationEntryManager mNotificationEntryManager;
     private final UiEventLogger mUiEventLogger;
     private final NotificationRemoteInputManager mRemoteInputManager;
-    private final VisualStabilityManager mVisualStabilityManager;
     private final ShadeController mShadeController;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
@@ -646,7 +644,6 @@ public class NotificationStackScrollLayoutController {
             ShadeTransitionController shadeTransitionController,
             UiEventLogger uiEventLogger,
             NotificationRemoteInputManager remoteInputManager,
-            VisualStabilityManager visualStabilityManager,
             ShadeController shadeController,
             InteractionJankMonitor jankMonitor,
             StackStateLogger stackLogger,
@@ -693,7 +690,6 @@ public class NotificationStackScrollLayoutController {
         mNotificationEntryManager = notificationEntryManager;
         mUiEventLogger = uiEventLogger;
         mRemoteInputManager = remoteInputManager;
-        mVisualStabilityManager = visualStabilityManager;
         mShadeController = shadeController;
         updateResources();
     }
@@ -764,8 +760,6 @@ public class NotificationStackScrollLayoutController {
 
         mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
         mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
-
-        mVisualStabilityManager.setVisibilityLocationProvider(this::isInVisibleLocation);
 
         mTunerService.addTunable(
                 (key, newValue) -> {
