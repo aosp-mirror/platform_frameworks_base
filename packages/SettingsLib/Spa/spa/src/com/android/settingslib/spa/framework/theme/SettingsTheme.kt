@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework
+package com.android.settingslib.spa.framework.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.remember
 
 /**
- * Remember the [State] initialized with the [this].
+ * The Material 3 Theme for Settings.
  */
 @Composable
-fun <T> T.toState(): State<T> = remember { stateOf(this) }
+fun SettingsTheme(content: @Composable () -> Unit) {
+    val isDarkTheme = isSystemInDarkTheme()
+    val colorScheme = materialColorScheme(isDarkTheme)
 
-/**
- * Return a new [State] initialized with the passed in [value].
- */
-fun <T> stateOf(value: T) = object : State<T> {
-    override val value = value
+    MaterialTheme(colorScheme = colorScheme) {
+        content()
+    }
 }

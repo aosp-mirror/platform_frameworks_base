@@ -35,10 +35,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.android.settingslib.spa.framework.toState
-import com.android.settingslib.spa.theme.SettingsDimension
-import com.android.settingslib.spa.theme.SettingsOpacity
-import com.android.settingslib.spa.theme.SettingsTheme
+import com.android.settingslib.spa.framework.compose.toState
+import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.framework.theme.SettingsOpacity
+import com.android.settingslib.spa.framework.theme.SettingsTheme
 
 @Composable
 internal fun BaseLayout(
