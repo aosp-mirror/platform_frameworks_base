@@ -15,12 +15,12 @@
  *
  */
 
-package com.android.systemui.keyguard.data.quickaffordance
+package com.android.systemui.keyguard.domain.quickaffordance
 
 import android.content.Intent
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
+import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock

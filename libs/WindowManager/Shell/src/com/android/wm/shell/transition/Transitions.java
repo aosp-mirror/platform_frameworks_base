@@ -119,6 +119,8 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** List of possible handlers. Ordered by specificity (eg. tapped back to front). */
     private final ArrayList<TransitionHandler> mHandlers = new ArrayList<>();
 
+    private final ArrayList<TransitionObserver> mObservers = new ArrayList<>();
+
     /** List of {@link Runnable} instances to run when the last active transition has finished.  */
     private final ArrayList<Runnable> mRunWhenIdleQueue = new ArrayList<>();
 
@@ -240,6 +242,16 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** Unregisters a remote transition and all associated filters */
     public void unregisterRemote(@NonNull RemoteTransition remoteTransition) {
         mRemoteTransitionHandler.removeFiltered(remoteTransition);
+    }
+
+    /** Registers an observer on the lifecycle of transitions. */
+    public void registerObserver(@NonNull TransitionObserver observer) {
+        mObservers.add(observer);
+    }
+
+    /** Unregisters the observer. */
+    public void unregisterObserver(@NonNull TransitionObserver observer) {
+        mObservers.remove(observer);
     }
 
     /** Boosts the process priority of remote animation player. */
@@ -407,6 +419,11 @@ public class Transitions implements RemoteCallable<Transitions> {
                     + Arrays.toString(mActiveTransitions.stream().map(
                             activeTransition -> activeTransition.mToken).toArray()));
         }
+
+        for (int i = 0; i < mObservers.size(); ++i) {
+            mObservers.get(i).onTransitionReady(transitionToken, info, t, finishT);
+        }
+
         if (!info.getRootLeash().isValid()) {
             // Invalid root-leash implies that the transition is empty/no-op, so just do
             // housekeeping and return.
@@ -474,6 +491,10 @@ public class Transitions implements RemoteCallable<Transitions> {
     }
 
     private void playTransition(@NonNull ActiveTransition active) {
+        for (int i = 0; i < mObservers.size(); ++i) {
+            mObservers.get(i).onTransitionStarting(active.mToken);
+        }
+
         setupAnimHierarchy(active.mInfo, active.mStartT, active.mFinishT);
 
         // If a handler already chose to run this animation, try delegating to it first.
@@ -546,6 +567,10 @@ public class Transitions implements RemoteCallable<Transitions> {
                 active.mHandler.onTransitionConsumed(
                         active.mToken, abort, abort ? null : active.mFinishT);
             }
+            for (int i = 0; i < mObservers.size(); ++i) {
+                mObservers.get(i).onTransitionMerged(
+                        active.mToken, mActiveTransitions.get(0).mToken);
+            }
             return;
         }
         final ActiveTransition active = mActiveTransitions.get(activeIdx);
@@ -554,6 +579,9 @@ public class Transitions implements RemoteCallable<Transitions> {
             // Notifies to clean-up the aborted transition.
             active.mHandler.onTransitionConsumed(
                     transition, true /* aborted */, null /* finishTransaction */);
+        }
+        for (int i = 0; i < mObservers.size(); ++i) {
+            mObservers.get(i).onTransitionFinished(active.mToken, active.mAborted);
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "Transition animation finished (abort=%b), notifying core %s", abort, transition);
@@ -593,6 +621,9 @@ public class Transitions implements RemoteCallable<Transitions> {
                         transition, true /* aborted */, null /* finishTransaction */);
             }
             mOrganizer.finishTransition(aborted.mToken, null /* wct */, null /* wctCB */);
+            for (int i = 0; i < mObservers.size(); ++i) {
+                mObservers.get(i).onTransitionFinished(active.mToken, true);
+            }
         }
         if (mActiveTransitions.size() <= activeIdx) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "All active transition animations "
@@ -790,6 +821,52 @@ public class Transitions implements RemoteCallable<Transitions> {
          * @param scale The setting value of transition animation scale.
          */
         default void setAnimScaleSetting(float scale) {}
+    }
+
+    /**
+     * Interface for something that needs to know the lifecycle of some transitions, but never
+     * handles any transition by itself.
+     */
+    public interface TransitionObserver {
+        /**
+         * Called when the transition is ready to play. It may later be merged into other
+         * transitions. Note this doesn't mean this transition will be played anytime soon.
+         *
+         * @param transition the unique token of this transition
+         * @param startTransaction the transaction given to the handler to be applied before the
+         *                         transition animation. This will be applied when the transition
+         *                         handler that handles this transition starts the transition.
+         * @param finishTransaction the transaction given to the handler to be applied after the
+         *                          transition animation. The Transition system will apply it when
+         *                          finishCallback is called by the transition handler.
+         */
+        void onTransitionReady(@NonNull IBinder transition, @NonNull TransitionInfo info,
+                @NonNull SurfaceControl.Transaction startTransaction,
+                @NonNull SurfaceControl.Transaction finishTransaction);
+
+        /**
+         * Called when the transition is starting to play. It isn't called for merged transitions.
+         *
+         * @param transition the unique token of this transition
+         */
+        void onTransitionStarting(@NonNull IBinder transition);
+
+        /**
+         * Called when a transition is merged into another transition. There won't be any following
+         * lifecycle calls for the merged transition.
+         *
+         * @param merged the unique token of the transition that's merged to another one
+         * @param playing the unique token of the transition that accepts the merge
+         */
+        void onTransitionMerged(@NonNull IBinder merged, @NonNull IBinder playing);
+
+        /**
+         * Called when the transition is finished. This isn't called for merged transitions.
+         *
+         * @param transition the unique token of this transition
+         * @param aborted {@code true} if this transition is aborted; {@code false} otherwise.
+         */
+        void onTransitionFinished(@NonNull IBinder transition, boolean aborted);
     }
 
     @BinderThread

@@ -1105,6 +1105,12 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "-1018968224": {
+      "message": "Recorded task is removed, so stop recording on display %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
+    },
     "-1016578046": {
       "message": "Moving to %s Relaunching %s callers=%s",
       "level": "INFO",
@@ -2250,6 +2256,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "96494268": {
+      "message": "Stop MediaProjection on virtual display %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
     },
     "100936473": {
       "message": "Wallpaper animation!",
