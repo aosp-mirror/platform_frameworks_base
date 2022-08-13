@@ -26,9 +26,9 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import com.android.settingslib.spa.framework.toState
-import com.android.settingslib.spa.theme.SettingsDimension
-import com.android.settingslib.spa.theme.SettingsTheme
+import com.android.settingslib.spa.framework.compose.toState
+import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.framework.theme.SettingsTheme
 
 @Composable
 internal fun BasePreference(

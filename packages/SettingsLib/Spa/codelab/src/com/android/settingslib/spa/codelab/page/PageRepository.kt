@@ -16,7 +16,7 @@
 
 package com.android.settingslib.spa.codelab.page
 
-import com.android.settingslib.spa.api.SettingsPageRepository
+import com.android.settingslib.spa.framework.api.SettingsPageRepository
 
 object Destinations {
     const val Home = "Home"

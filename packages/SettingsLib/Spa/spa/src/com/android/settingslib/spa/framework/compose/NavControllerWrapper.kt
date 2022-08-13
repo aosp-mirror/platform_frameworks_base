@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework
+package com.android.settingslib.spa.framework.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
