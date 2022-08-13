@@ -229,11 +229,11 @@ public class TakeScreenshotService extends Service {
 
         if (mFeatureFlags.isEnabled(SCREENSHOT_REQUEST_PROCESSOR)) {
             Log.d(TAG, "handleMessage: Using request processor");
-            mProcessor.processRequest(msg.what, uriConsumer, screenshotRequest, requestCallback);
+            mProcessor.processRequest(screenshotRequest, uriConsumer, requestCallback);
             return true;
         }
 
-        switch (msg.what) {
+        switch (screenshotRequest.getType()) {
             case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:
                 if (DEBUG_SERVICE) {
                     Log.d(TAG, "handleMessage: TAKE_SCREENSHOT_FULLSCREEN");

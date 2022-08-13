@@ -66,7 +66,6 @@ import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -101,8 +100,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
     @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private SysuiStatusBarStateController mBarState;
-    @Mock private NotificationGroupManagerLegacy mGroupMembershipManger;
-    @Mock private NotificationGroupManagerLegacy mGroupExpansionManager;
+    @Mock private GroupMembershipManager mGroupMembershipManger;
+    @Mock private GroupExpansionManager mGroupExpansionManager;
     @Mock private DumpManager mDumpManager;
     @Mock private ExpandHelper mExpandHelper;
     @Mock private EmptyShadeView mEmptyShadeView;
