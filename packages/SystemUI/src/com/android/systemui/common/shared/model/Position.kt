@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.domain.usecase
+package com.android.systemui.common.shared.model
 
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
-import javax.inject.Inject
-
-/**
- * Use-case for setting whether the keyguard bottom area should animate the next doze transitions
- */
-class SetKeyguardBottomAreaAnimateDozingTransitionsUseCase
-@Inject
-constructor(
-    private val repository: KeyguardRepository,
-) {
-    operator fun invoke(animate: Boolean) {
-        repository.setAnimateDozingTransitions(animate)
-    }
-}
+/** Models a two-dimensional position */
+data class Position(
+    val x: Int,
+    val y: Int,
+)
