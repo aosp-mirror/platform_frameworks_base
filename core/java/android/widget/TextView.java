@@ -12076,6 +12076,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void onPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         super.onPopulateAccessibilityEventInternal(event);
 
+        if (this.isAccessibilityDataPrivate() && !event.isAccessibilityDataPrivate()) {
+            // This view's accessibility data is private, but another view that generated this event
+            // is not, so don't append this view's text to the event in order to prevent sharing
+            // this view's contents with non-accessibility-tool services.
+            return;
+        }
+
         final CharSequence text = getTextForAccessibility();
         if (!TextUtils.isEmpty(text)) {
             event.getText().add(text);
@@ -12489,7 +12496,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             RectF[] boundingRects = new RectF[positionInfoLength];
             final CursorAnchorInfo.Builder builder = new CursorAnchorInfo.Builder();
             populateCharacterBounds(builder, positionInfoStartIndex,
-                    positionInfoStartIndex + positionInfoLength,
+                    Math.min(positionInfoStartIndex + positionInfoLength, length()),
                     viewportToContentHorizontalOffset(), viewportToContentVerticalOffset());
             CursorAnchorInfo cursorAnchorInfo = builder.setMatrix(null).build();
             for (int i = 0; i < positionInfoLength; i++) {

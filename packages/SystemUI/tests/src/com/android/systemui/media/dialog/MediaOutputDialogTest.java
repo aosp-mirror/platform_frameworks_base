@@ -47,7 +47,7 @@ import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 
 import org.junit.After;
 import org.junit.Before;
@@ -78,8 +78,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     private final BroadcastSender mBroadcastSender = mock(BroadcastSender.class);
     private final LocalMediaManager mLocalMediaManager = mock(LocalMediaManager.class);
     private final MediaDevice mMediaDevice = mock(MediaDevice.class);
-    private final NotificationEntryManager mNotificationEntryManager =
-            mock(NotificationEntryManager.class);
+    private final CommonNotifCollection mNotifCollection = mock(CommonNotifCollection.class);
     private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
     private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
@@ -104,7 +103,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotificationEntryManager, mDialogLaunchAnimator,
+                mNotifCollection, mDialogLaunchAnimator,
                 Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputDialog = new MediaOutputDialog(mContext, false, mBroadcastSender,

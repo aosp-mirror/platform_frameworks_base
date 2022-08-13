@@ -354,16 +354,24 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
         if (supportsFlagForNotImportantViews(info)) {
             if ((info.flags & AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0) {
-                mFetchFlags |= AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+                mFetchFlags |=
+                        AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS;
             } else {
-                mFetchFlags &= ~AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+                mFetchFlags &=
+                        ~AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS;
             }
         }
 
         if ((info.flags & AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS) != 0) {
-            mFetchFlags |= AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS;
+            mFetchFlags |= AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS;
         } else {
-            mFetchFlags &= ~AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS;
+            mFetchFlags &= ~AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS;
+        }
+
+        if (mAccessibilityServiceInfo.isAccessibilityTool()) {
+            mFetchFlags |= AccessibilityNodeInfo.FLAG_SERVICE_IS_ACCESSIBILITY_TOOL;
+        } else {
+            mFetchFlags &= ~AccessibilityNodeInfo.FLAG_SERVICE_IS_ACCESSIBILITY_TOOL;
         }
 
         mRequestTouchExplorationMode = (info.flags
@@ -1522,9 +1530,16 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             return false;
         }
 
+        final boolean includeNotImportantViews = (mFetchFlags
+                & AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS) != 0;
         if ((event.getWindowId() != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID)
                 && !event.isImportantForAccessibility()
-                && (mFetchFlags & AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) == 0) {
+                && !includeNotImportantViews) {
+            return false;
+        }
+
+        if (event.isAccessibilityDataPrivate()
+                && (mFetchFlags & AccessibilityNodeInfo.FLAG_SERVICE_IS_ACCESSIBILITY_TOOL) == 0) {
             return false;
         }
 

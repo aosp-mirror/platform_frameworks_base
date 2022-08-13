@@ -357,6 +357,7 @@ import com.android.internal.os.ByteTransferPipe;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
 import com.android.internal.policy.AttributeCache;
@@ -1700,7 +1701,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             case SERVICE_FOREGROUND_TIMEOUT_ANR_MSG: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 mServices.serviceForegroundTimeoutANR((ProcessRecord) args.arg1,
-                        (String) args.arg2);
+                        (TimeoutRecord) args.arg2);
                 args.recycle();
             } break;
             case SERVICE_FOREGROUND_CRASH_MSG: {
@@ -5014,7 +5015,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 hostingRecord.getType(),
                 hostingRecord.getName(),
                 shortAction,
-                HostingRecord.getHostingTypeIdStatsd(hostingRecord.getType()));
+                HostingRecord.getHostingTypeIdStatsd(hostingRecord.getType()),
+                HostingRecord.getTriggerTypeForStatsd(hostingRecord.getTriggerType()));
         return true;
     }
 
@@ -6416,6 +6418,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void appNotResponding(final String reason) {
+        TimeoutRecord timeoutRecord = TimeoutRecord.forApp("App requested: " + reason);
         final int callingPid = Binder.getCallingPid();
 
         synchronized (mPidsSelfLocked) {
@@ -6425,7 +6428,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             mAnrHelper.appNotResponding(app, null, app.info, null, null, false,
-                    "App requested: " + reason);
+                    timeoutRecord);
         }
     }
 
@@ -14339,10 +14342,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (oldRecord.resultTo != null) {
                     final BroadcastQueue oldQueue = broadcastQueueForIntent(oldRecord.intent);
                     try {
+                        oldRecord.mIsReceiverAppRunning = true;
                         oldQueue.performReceiveLocked(oldRecord.callerApp, oldRecord.resultTo,
                                 oldRecord.intent,
                                 Activity.RESULT_CANCELED, null, null,
-                                false, false, oldRecord.userId, oldRecord.callingUid, callingUid);
+                                false, false, oldRecord.userId, oldRecord.callingUid, callingUid,
+                                SystemClock.uptimeMillis() - oldRecord.enqueueTime, 0);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failure ["
                                 + queue.mQueueName + "] sending broadcast result of "
@@ -17169,18 +17174,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason) {
-            return ActivityManagerService.this.inputDispatchingTimedOut(pid, aboveSystem, reason);
+        public long inputDispatchingTimedOut(int pid, boolean aboveSystem,
+                TimeoutRecord timeoutRecord) {
+            return ActivityManagerService.this.inputDispatchingTimedOut(pid, aboveSystem,
+                    timeoutRecord);
         }
 
         @Override
         public boolean inputDispatchingTimedOut(Object proc, String activityShortComponentName,
                 ApplicationInfo aInfo, String parentShortComponentName, Object parentProc,
-                boolean aboveSystem, String reason) {
+                boolean aboveSystem, TimeoutRecord timeoutRecord) {
             return ActivityManagerService.this.inputDispatchingTimedOut((ProcessRecord) proc,
                     activityShortComponentName, aInfo, parentShortComponentName,
-                    (WindowProcessController) parentProc, aboveSystem, reason);
-
+                    (WindowProcessController) parentProc, aboveSystem, timeoutRecord);
         }
 
         @Override
@@ -17742,7 +17748,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
+    long inputDispatchingTimedOut(int pid, final boolean aboveSystem, TimeoutRecord timeoutRecord) {
         if (checkCallingPermission(FILTER_EVENTS) != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission " + FILTER_EVENTS);
         }
@@ -17753,7 +17759,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long timeoutMillis = proc != null ? proc.getInputDispatchingTimeoutMillis() :
                 DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 
-        if (inputDispatchingTimedOut(proc, null, null, null, null, aboveSystem, reason)) {
+        if (inputDispatchingTimedOut(proc, null, null, null, null, aboveSystem, timeoutRecord)) {
             return 0;
         }
 
@@ -17766,16 +17772,10 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     boolean inputDispatchingTimedOut(ProcessRecord proc, String activityShortComponentName,
             ApplicationInfo aInfo, String parentShortComponentName,
-            WindowProcessController parentProcess, boolean aboveSystem, String reason) {
+            WindowProcessController parentProcess, boolean aboveSystem,
+            TimeoutRecord timeoutRecord) {
         if (checkCallingPermission(FILTER_EVENTS) != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission " + FILTER_EVENTS);
-        }
-
-        final String annotation;
-        if (reason == null) {
-            annotation = "Input dispatching timed out";
-        } else {
-            annotation = "Input dispatching timed out (" + reason + ")";
         }
 
         if (proc != null) {
@@ -17787,13 +17787,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (proc.getActiveInstrumentation() != null) {
                     Bundle info = new Bundle();
                     info.putString("shortMsg", "keyDispatchingTimedOut");
-                    info.putString("longMsg", annotation);
+                    info.putString("longMsg", timeoutRecord.mReason);
                     finishInstrumentationLocked(proc, Activity.RESULT_CANCELED, info);
                     return true;
                 }
             }
             mAnrHelper.appNotResponding(proc, activityShortComponentName, aInfo,
-                    parentShortComponentName, parentProcess, aboveSystem, annotation);
+                    parentShortComponentName, parentProcess, aboveSystem, timeoutRecord);
         }
 
         return true;

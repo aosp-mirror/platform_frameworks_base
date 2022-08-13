@@ -100,7 +100,9 @@ public class BatteryControllerTest {
         // Capture the listeners.
         ArgumentCaptor<BroadcastReceiver> receiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
-        mFlexibilityController = new FlexibilityController(mJobSchedulerService);
+
+        mFlexibilityController =
+                new FlexibilityController(mJobSchedulerService, mock(PrefetchController.class));
         mBatteryController = new BatteryController(mJobSchedulerService, mFlexibilityController);
 
         verify(mContext).registerReceiver(receiverCaptor.capture(),

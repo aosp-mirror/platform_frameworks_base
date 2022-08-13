@@ -480,4 +480,32 @@ public class PrefetchControllerTest {
 
         sSystemClock = getShiftedClock(sSystemClock, HOUR_IN_MILLIS + MINUTE_IN_MILLIS);
     }
+
+    @Test
+    public void testRegisterOnPrefetchChangedListener() {
+        when(mUsageStatsManagerInternal
+                .getEstimatedPackageLaunchTime(SOURCE_PACKAGE, SOURCE_USER_ID))
+                .thenReturn(sSystemClock.millis() + 10 * HOUR_IN_MILLIS);
+        // Needs to get wrapped in an array to get accessed by an inner class.
+        final boolean[] onPrefetchCacheChangedCalled = new boolean[1];
+        final PrefetchController.PrefetchChangedListener prefetchChangedListener =
+                new PrefetchController.PrefetchChangedListener() {
+                    @Override
+                    public void onPrefetchCacheUpdated(
+                            ArraySet<JobStatus> jobs, int userId, String pkgName,
+                            long prevEstimatedLaunchTime, long newEstimatedLaunchTime) {
+                        onPrefetchCacheChangedCalled[0] = true;
+                    }
+                };
+        mPrefetchController.registerPrefetchChangedListener(prefetchChangedListener);
+
+        JobStatus jobStatus = createJobStatus("testRegisterOnPrefetchChangedListener", 1);
+        trackJobs(jobStatus);
+
+        mEstimatedLaunchTimeChangedListener.onEstimatedLaunchTimeChanged(SOURCE_USER_ID,
+                SOURCE_PACKAGE, sSystemClock.millis() + HOUR_IN_MILLIS);
+        verify(mJobSchedulerService, timeout(DEFAULT_WAIT_MS)).onControllerStateChanged(any());
+
+        assertTrue(onPrefetchCacheChangedCalled[0]);
+    }
 }

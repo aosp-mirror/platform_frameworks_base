@@ -78,6 +78,11 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN;
 import static android.content.pm.ActivityInfo.PERSIST_ACROSS_REBOOTS;
 import static android.content.pm.ActivityInfo.PERSIST_ROOT_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
@@ -336,6 +341,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
+import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.common.ProtoLog;
@@ -6734,7 +6740,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * @param windowPid The pid of the window input dispatching timed out on.
      * @return True if input dispatching should be aborted.
      */
-    public boolean inputDispatchingTimedOut(String reason, int windowPid) {
+    public boolean inputDispatchingTimedOut(TimeoutRecord timeoutRecord, int windowPid) {
         ActivityRecord anrActivity;
         WindowProcessController anrApp;
         boolean blameActivityProcess;
@@ -6748,12 +6754,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (blameActivityProcess) {
             return mAtmService.mAmInternal.inputDispatchingTimedOut(anrApp.mOwner,
                     anrActivity.shortComponentName, anrActivity.info.applicationInfo,
-                    shortComponentName, app, false, reason);
+                    shortComponentName, app, false, timeoutRecord);
         } else {
             // In this case another process added windows using this activity token. So, we call the
             // generic service input dispatch timed out method so that the right process is blamed.
             long timeoutMillis = mAtmService.mAmInternal.inputDispatchingTimedOut(
-                    windowPid, false /* aboveSystem */, reason);
+                    windowPid, false /* aboveSystem */, timeoutRecord);
             return timeoutMillis <= 0;
         }
     }
@@ -8750,15 +8756,35 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * Returns the min aspect ratio of this activity.
      */
-    private float getMinAspectRatio() {
-        return info.getMinAspectRatio(getRequestedOrientation());
+    float getMinAspectRatio() {
+        if (info.applicationInfo == null || !info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO) || (
+                info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY)
+                        && !ActivityInfo.isFixedOrientationPortrait(getRequestedOrientation()))) {
+            return info.getMinAspectRatio();
+        }
+
+        if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN)) {
+            return Math.max(mLetterboxUiController.getSplitScreenAspectRatio(),
+                    info.getMinAspectRatio());
+        }
+
+        if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_LARGE)) {
+            return Math.max(ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
+                    info.getMinAspectRatio());
+        }
+
+        if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_MEDIUM)) {
+            return Math.max(ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE,
+                    info.getMinAspectRatio());
+        }
+        return info.getMinAspectRatio();
     }
 
     /**
      * Returns true if the activity has maximum or minimum aspect ratio.
      */
     private boolean hasFixedAspectRatio() {
-        return info.hasFixedAspectRatio(getRequestedOrientation());
+        return info.getMaxAspectRatio() != 0 || getMinAspectRatio() != 0;
     }
 
     /**

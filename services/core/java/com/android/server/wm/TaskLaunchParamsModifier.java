@@ -746,7 +746,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
 
         // First we get the default size we want.
         displayArea.getStableRect(mTmpStableBounds);
-        final Size defaultSize = LaunchParamsUtil.getDefaultFreeformSize(root.info, displayArea,
+        final Size defaultSize = LaunchParamsUtil.getDefaultFreeformSize(root, displayArea,
                 layout, orientation, mTmpStableBounds);
         mTmpBounds.set(0, 0, defaultSize.getWidth(), defaultSize.getHeight());
         if (hasInitialBounds || sizeMatches(inOutBounds, mTmpBounds)) {

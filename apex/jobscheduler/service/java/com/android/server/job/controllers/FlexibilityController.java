@@ -23,6 +23,7 @@ import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_BATTERY_NOT_LOW;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_CHARGING;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_CONNECTIVITY;
+import static com.android.server.job.controllers.JobStatus.CONSTRAINT_FLEXIBLE;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_IDLE;
 
 import android.annotation.ElapsedRealtimeLong;
@@ -36,6 +37,7 @@ import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
+import android.util.SparseArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -50,8 +52,6 @@ import java.util.function.Predicate;
 /**
  * Controller that tracks the number of flexible constraints being actively satisfied.
  * Drops constraint for TOP apps and lowers number of required constraints with time.
- *
- * TODO(b/238887951): handle prefetch
  */
 public final class FlexibilityController extends StateController {
     private static final String TAG = "JobScheduler.Flexibility";
@@ -78,6 +78,8 @@ public final class FlexibilityController extends StateController {
     @VisibleForTesting
     static final int NUM_FLEXIBLE_CONSTRAINTS = Integer.bitCount(FLEXIBLE_CONSTRAINTS);
 
+    private static final long NO_LIFECYCLE_END = Long.MAX_VALUE;
+
     /** Hard cutoff to remove flexible constraints. */
     private static final long DEADLINE_PROXIMITY_LIMIT_MS = 15 * MINUTE_IN_MILLIS;
 
@@ -85,7 +87,8 @@ public final class FlexibilityController extends StateController {
      * The default deadline that all flexible constraints should be dropped by if a job lacks
      * a deadline.
      */
-    private static final long DEFAULT_FLEXIBILITY_DEADLINE = 72 * HOUR_IN_MILLIS;
+    @VisibleForTesting
+    static final long DEFAULT_FLEXIBILITY_DEADLINE = 72 * HOUR_IN_MILLIS;
 
     /**
      * Keeps track of what flexible constraints are satisfied at the moment.
@@ -102,6 +105,10 @@ public final class FlexibilityController extends StateController {
     final FlexibilityTracker mFlexibilityTracker;
     private final FcConstants mFcConstants;
 
+    @VisibleForTesting
+    final PrefetchController mPrefetchController;
+
+    @GuardedBy("mLock")
     private final FlexibilityAlarmQueue mFlexibilityAlarmQueue;
     private static final long MIN_TIME_BETWEEN_ALARMS_MS = MINUTE_IN_MILLIS;
 
@@ -112,12 +119,58 @@ public final class FlexibilityController extends StateController {
      */
     private static final int[] PERCENT_TO_DROP_CONSTRAINTS = {50, 60, 70, 80};
 
-    public FlexibilityController(JobSchedulerService service) {
+    /**
+     * Stores the beginning of prefetch jobs lifecycle per app as a maximum of
+     * the last time the app was used and the last time the launch time was updated.
+     */
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    final SparseArrayMap<String, Long> mPrefetchLifeCycleStart = new SparseArrayMap<>();
+
+    @VisibleForTesting
+    final PrefetchController.PrefetchChangedListener mPrefetchChangedListener =
+            new PrefetchController.PrefetchChangedListener() {
+                @Override
+                public void onPrefetchCacheUpdated(ArraySet<JobStatus> jobs, int userId,
+                        String pkgName, long prevEstimatedLaunchTime, long newEstimatedLaunchTime) {
+                    synchronized (mLock) {
+                        final long nowElapsed = sElapsedRealtimeClock.millis();
+                        final long prefetchThreshold =
+                                mPrefetchController.getLaunchTimeThresholdMs();
+                        boolean jobWasInPrefetchWindow  = prevEstimatedLaunchTime
+                                - prefetchThreshold < nowElapsed;
+                        boolean jobIsInPrefetchWindow  = newEstimatedLaunchTime
+                                - prefetchThreshold < nowElapsed;
+                        if (jobIsInPrefetchWindow != jobWasInPrefetchWindow) {
+                            // If the job was in the window previously then changing the start
+                            // of the lifecycle to the current moment without a large change in the
+                            // end would squeeze the window too tight fail to drop constraints.
+                            mPrefetchLifeCycleStart.add(userId, pkgName, Math.max(nowElapsed,
+                                    mPrefetchLifeCycleStart.getOrDefault(userId, pkgName, 0L)));
+                        }
+                        for (int i = 0; i < jobs.size(); i++) {
+                            JobStatus js = jobs.valueAt(i);
+                            if (!js.hasFlexibilityConstraint()) {
+                                continue;
+                            }
+                            mFlexibilityTracker.resetJobNumDroppedConstraints(js);
+                            mFlexibilityAlarmQueue.scheduleDropNumConstraintsAlarm(js);
+                        }
+                    }
+                }
+            };
+
+    public FlexibilityController(
+            JobSchedulerService service, PrefetchController prefetchController) {
         super(service);
         mFlexibilityTracker = new FlexibilityTracker(NUM_FLEXIBLE_CONSTRAINTS);
         mFcConstants = new FcConstants();
         mFlexibilityAlarmQueue = new FlexibilityAlarmQueue(
                 mContext, JobSchedulerBackgroundThread.get().getLooper());
+        mPrefetchController = prefetchController;
+        if (mFlexibilityEnabled) {
+            mPrefetchController.registerPrefetchChangedListener(mPrefetchChangedListener);
+        }
     }
 
     /**
@@ -131,7 +184,7 @@ public final class FlexibilityController extends StateController {
             js.setTrackingController(JobStatus.TRACKING_FLEXIBILITY);
             final long nowElapsed = sElapsedRealtimeClock.millis();
             js.setFlexibilityConstraintSatisfied(nowElapsed, isFlexibilitySatisfiedLocked(js));
-            mFlexibilityAlarmQueue.addAlarm(js, getNextConstraintDropTimeElapsed(js));
+            mFlexibilityAlarmQueue.scheduleDropNumConstraintsAlarm(js);
         }
     }
 
@@ -142,6 +195,19 @@ public final class FlexibilityController extends StateController {
             mFlexibilityAlarmQueue.removeAlarmForKey(js);
             mFlexibilityTracker.remove(js);
         }
+    }
+
+    @Override
+    @GuardedBy("mLock")
+    public void onAppRemovedLocked(String packageName, int uid) {
+        final int userId = UserHandle.getUserId(uid);
+        mPrefetchLifeCycleStart.delete(userId, packageName);
+    }
+
+    @Override
+    @GuardedBy("mLock")
+    public void onUserRemovedLocked(int userId) {
+        mPrefetchLifeCycleStart.delete(userId);
     }
 
     /** Checks if the flexibility constraint is actively satisfied for a given job. */
@@ -165,6 +231,7 @@ public final class FlexibilityController extends StateController {
      * Sets the controller's constraint to a given state.
      * Changes flexibility constraint satisfaction for affected jobs.
      */
+    @VisibleForTesting
     void setConstraintSatisfied(int constraint, boolean state) {
         synchronized (mLock) {
             final boolean old = (mSatisfiedFlexibleConstraints & constraint) != 0;
@@ -187,21 +254,20 @@ public final class FlexibilityController extends StateController {
             // of satisfied system-wide constraints and iterate to the max number of potentially
             // satisfied constraints, determined by how many job-specific constraints exist.
             for (int j = 0; j <= NUM_JOB_SPECIFIC_FLEXIBLE_CONSTRAINTS; j++) {
-                final ArraySet<JobStatus> jobs = mFlexibilityTracker
+                final ArraySet<JobStatus> jobsByNumConstraints = mFlexibilityTracker
                         .getJobsByNumRequiredConstraints(numConstraintsToUpdate + j);
 
-                if (jobs == null) {
+                if (jobsByNumConstraints == null) {
                     // If there are no more jobs to iterate through we can just return.
                     return;
                 }
 
-                for (int i = 0; i < jobs.size(); i++) {
-                    JobStatus js = jobs.valueAt(i);
+                for (int i = 0; i < jobsByNumConstraints.size(); i++) {
+                    JobStatus js = jobsByNumConstraints.valueAt(i);
                     js.setFlexibilityConstraintSatisfied(
                             nowElapsed, isFlexibilitySatisfiedLocked(js));
                 }
             }
-
         }
     }
 
@@ -211,15 +277,77 @@ public final class FlexibilityController extends StateController {
         return (mSatisfiedFlexibleConstraints & constraint) != 0;
     }
 
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    long getLifeCycleBeginningElapsedLocked(JobStatus js) {
+        if (js.getJob().isPrefetch()) {
+            final long earliestRuntime = Math.max(js.enqueueTime, js.getEarliestRunTime());
+            final long estimatedLaunchTime =
+                    mPrefetchController.getNextEstimatedLaunchTimeLocked(js);
+            long prefetchWindowStart = mPrefetchLifeCycleStart.getOrDefault(
+                    js.getSourceUserId(), js.getSourcePackageName(), 0L);
+            if (estimatedLaunchTime != Long.MAX_VALUE) {
+                prefetchWindowStart = Math.max(prefetchWindowStart,
+                        estimatedLaunchTime - mPrefetchController.getLaunchTimeThresholdMs());
+            }
+            return Math.max(prefetchWindowStart, earliestRuntime);
+        }
+        return js.getEarliestRunTime() == JobStatus.NO_EARLIEST_RUNTIME
+                ? js.enqueueTime : js.getEarliestRunTime();
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    long getLifeCycleEndElapsedLocked(JobStatus js, long earliest) {
+        if (js.getJob().isPrefetch()) {
+            final long estimatedLaunchTime =
+                    mPrefetchController.getNextEstimatedLaunchTimeLocked(js);
+            // Prefetch jobs aren't supposed to have deadlines after T.
+            // But some legacy apps might still schedule them with deadlines.
+            if (js.getLatestRunTimeElapsed() != JobStatus.NO_LATEST_RUNTIME) {
+                // If there is a deadline, the earliest time is the end of the lifecycle.
+                return Math.min(
+                        estimatedLaunchTime - mConstants.PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS,
+                        js.getLatestRunTimeElapsed());
+            }
+            if (estimatedLaunchTime != Long.MAX_VALUE) {
+                return estimatedLaunchTime - mConstants.PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS;
+            }
+            // There is no deadline and no estimated launch time.
+            return NO_LIFECYCLE_END;
+        }
+        return js.getLatestRunTimeElapsed() == JobStatus.NO_LATEST_RUNTIME
+                ? earliest + DEFAULT_FLEXIBILITY_DEADLINE
+                : js.getLatestRunTimeElapsed();
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    int getCurPercentOfLifecycleLocked(JobStatus js) {
+        final long earliest = getLifeCycleBeginningElapsedLocked(js);
+        final long latest = getLifeCycleEndElapsedLocked(js, earliest);
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        if (latest == NO_LIFECYCLE_END || earliest > nowElapsed) {
+            return 0;
+        }
+        if (nowElapsed > latest || latest == earliest) {
+            return 100;
+        }
+        final int percentInTime = (int) ((nowElapsed - earliest) * 100 / (latest - earliest));
+        return percentInTime;
+    }
+
     /** The elapsed time that marks when the next constraint should be dropped. */
     @VisibleForTesting
     @ElapsedRealtimeLong
-    long getNextConstraintDropTimeElapsed(JobStatus js) {
-        final long earliest = js.getEarliestRunTime() == JobStatus.NO_EARLIEST_RUNTIME
-                ? js.enqueueTime : js.getEarliestRunTime();
-        final long latest = js.getLatestRunTimeElapsed() == JobStatus.NO_LATEST_RUNTIME
-                ? earliest + DEFAULT_FLEXIBILITY_DEADLINE
-                : js.getLatestRunTimeElapsed();
+    @GuardedBy("mLock")
+    long getNextConstraintDropTimeElapsedLocked(JobStatus js) {
+        final long earliest = getLifeCycleBeginningElapsedLocked(js);
+        final long latest = getLifeCycleEndElapsedLocked(js, earliest);
+        if (latest == NO_LIFECYCLE_END
+                || js.getNumDroppedFlexibleConstraints() == PERCENT_TO_DROP_CONSTRAINTS.length) {
+            return NO_LIFECYCLE_END;
+        }
         final int percent = PERCENT_TO_DROP_CONSTRAINTS[js.getNumDroppedFlexibleConstraints()];
         final long percentInTime = ((latest - earliest) * percent) / 100;
         return earliest + percentInTime;
@@ -233,10 +361,28 @@ public final class FlexibilityController extends StateController {
         }
         final long nowElapsed = sElapsedRealtimeClock.millis();
         List<JobStatus> jobsByUid = mService.getJobStore().getJobsByUid(uid);
+        boolean hasPrefetch = false;
         for (int i = 0; i < jobsByUid.size(); i++) {
             JobStatus js = jobsByUid.get(i);
             if (js.hasFlexibilityConstraint()) {
                 js.setFlexibilityConstraintSatisfied(nowElapsed, isFlexibilitySatisfiedLocked(js));
+                hasPrefetch |= js.getJob().isPrefetch();
+            }
+        }
+
+        // Prefetch jobs can't run when the app is TOP, so it should not be included in their
+        // lifecycle, and marks the beginning of a new lifecycle.
+        if (hasPrefetch && prevBias == JobInfo.BIAS_TOP_APP) {
+            final int userId = UserHandle.getUserId(uid);
+            final ArraySet<String> pkgs = mService.getPackagesForUidLocked(uid);
+            if (pkgs == null) {
+                return;
+            }
+            for (int i = 0; i < pkgs.size(); i++) {
+                String pkg = pkgs.valueAt(i);
+                mPrefetchLifeCycleStart.add(userId, pkg,
+                        Math.max(mPrefetchLifeCycleStart.getOrDefault(userId, pkg, 0L),
+                                nowElapsed));
             }
         }
     }
@@ -281,7 +427,7 @@ public final class FlexibilityController extends StateController {
 
         FlexibilityTracker(int numFlexibleConstraints) {
             mTrackedJobs = new ArrayList<>();
-            for (int i = 0; i <= numFlexibleConstraints; i++) {
+            for (int i = 0; i < numFlexibleConstraints; i++) {
                 mTrackedJobs.add(new ArraySet<JobStatus>());
             }
         }
@@ -310,6 +456,17 @@ public final class FlexibilityController extends StateController {
                 return;
             }
             mTrackedJobs.get(js.getNumRequiredFlexibleConstraints() - 1).remove(js);
+        }
+
+        public void resetJobNumDroppedConstraints(JobStatus js) {
+            final int curPercent = getCurPercentOfLifecycleLocked(js);
+            int toDrop = 0;
+            for (int i = 0; i < PERCENT_TO_DROP_CONSTRAINTS.length; i++) {
+                if (curPercent >= PERCENT_TO_DROP_CONSTRAINTS[i]) {
+                    toDrop++;
+                }
+            }
+            adjustJobsRequiredConstraints(js, js.getNumDroppedFlexibleConstraints() - toDrop);
         }
 
         /** Returns all tracked jobs. */
@@ -369,20 +526,39 @@ public final class FlexibilityController extends StateController {
             return js.getSourceUserId() == userId;
         }
 
+        protected void scheduleDropNumConstraintsAlarm(JobStatus js) {
+            long nextTimeElapsed;
+            synchronized (mLock) {
+                nextTimeElapsed = getNextConstraintDropTimeElapsedLocked(js);
+                if (nextTimeElapsed == NO_LIFECYCLE_END) {
+                    // There is no known or estimated next time to drop a constraint.
+                    removeAlarmForKey(js);
+                    return;
+                }
+                mFlexibilityAlarmQueue.addAlarm(js, nextTimeElapsed);
+            }
+        }
+
         @Override
         protected void processExpiredAlarms(@NonNull ArraySet<JobStatus> expired) {
             synchronized (mLock) {
-                JobStatus js;
+                ArraySet<JobStatus> changedJobs = new ArraySet<>();
                 for (int i = 0; i < expired.size(); i++) {
-                    js = expired.valueAt(i);
-                    long time = getNextConstraintDropTimeElapsed(js);
+                    JobStatus js = expired.valueAt(i);
+                    boolean wasFlexibilitySatisfied = js.isConstraintSatisfied(CONSTRAINT_FLEXIBLE);
+                    long time = getNextConstraintDropTimeElapsedLocked(js);
                     int toDecrease =
                             js.getLatestRunTimeElapsed() - time < DEADLINE_PROXIMITY_LIMIT_MS
-                            ? -js.getNumRequiredFlexibleConstraints() : -1;
-                    if (mFlexibilityTracker.adjustJobsRequiredConstraints(js, toDecrease)) {
+                                    ? -js.getNumRequiredFlexibleConstraints() : -1;
+                    if (mFlexibilityTracker.adjustJobsRequiredConstraints(js, toDecrease)
+                            && time != NO_LIFECYCLE_END) {
                         mFlexibilityAlarmQueue.addAlarm(js, time);
                     }
+                    if (wasFlexibilitySatisfied != js.isConstraintSatisfied(CONSTRAINT_FLEXIBLE)) {
+                        changedJobs.add(js);
+                    }
                 }
+                mStateChangedListener.onControllerStateChanged(changedJobs);
             }
         }
     }
@@ -410,6 +586,13 @@ public final class FlexibilityController extends StateController {
                     if (mFlexibilityEnabled != FLEXIBILITY_ENABLED) {
                         mFlexibilityEnabled = FLEXIBILITY_ENABLED;
                         mShouldReevaluateConstraints = true;
+                        if (mFlexibilityEnabled) {
+                            mPrefetchController
+                                    .registerPrefetchChangedListener(mPrefetchChangedListener);
+                        } else {
+                            mPrefetchController
+                                    .unRegisterPrefetchChangedListener(mPrefetchChangedListener);
+                        }
                     }
                     break;
             }

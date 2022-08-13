@@ -8291,14 +8291,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void setContentRecordingSession(@Nullable ContentRecordingSession incomingSession) {
+        public boolean setContentRecordingSession(
+                @Nullable ContentRecordingSession incomingSession) {
             synchronized (mGlobalLock) {
-                // Allow the controller to handle teardown or a non-task session.
+                // Allow the controller to handle teardown of a non-task session.
                 if (incomingSession == null
                         || incomingSession.getContentToRecord() != RECORD_CONTENT_TASK) {
                     mContentRecordingController.setContentRecordingSessionLocked(incomingSession,
                             WindowManagerService.this);
-                    return;
+                    return true;
                 }
                 // For a task session, find the activity identified by the launch cookie.
                 final WindowContainerToken wct = getTaskWindowContainerTokenForLaunchCookie(
@@ -8306,15 +8307,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (wct == null) {
                     Slog.w(TAG, "Handling a new recording session; unable to find the "
                             + "WindowContainerToken");
-                    mContentRecordingController.setContentRecordingSessionLocked(null,
-                            WindowManagerService.this);
-                    return;
+                    return false;
                 }
                 // Replace the launch cookie in the session details with the task's
                 // WindowContainerToken.
                 incomingSession.setTokenToRecord(wct.asBinder());
                 mContentRecordingController.setContentRecordingSessionLocked(incomingSession,
                         WindowManagerService.this);
+                return true;
             }
         }
     }

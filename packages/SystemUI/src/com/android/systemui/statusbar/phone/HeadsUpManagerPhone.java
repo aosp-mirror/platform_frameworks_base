@@ -330,14 +330,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         dumpInternal(pw, args);
     }
 
-    @Override
-    public boolean shouldExtendLifetime(NotificationEntry entry) {
-        // We should not defer the removal if reordering isn't allowed since otherwise
-        // these won't disappear until reordering is allowed again, which happens only once
-        // the notification panel is collapsed again.
-        return mVisualStabilityProvider.isReorderingAllowed() && super.shouldExtendLifetime(entry);
-    }
-
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //  OnReorderingAllowedListener:
 

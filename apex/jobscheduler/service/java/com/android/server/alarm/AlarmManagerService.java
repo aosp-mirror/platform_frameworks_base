@@ -3078,12 +3078,12 @@ public class AlarmManagerService extends SystemService {
                 pw.decreaseIndent();
                 pw.println();
             } else {
-                if (mAppStateTracker != null) {
-                    mAppStateTracker.dump(pw);
-                    pw.println();
-                }
-
                 pw.println("App Standby Parole: " + mAppStandbyParole);
+                pw.println();
+            }
+
+            if (mAppStateTracker != null) {
+                mAppStateTracker.dump(pw);
                 pw.println();
             }
 
