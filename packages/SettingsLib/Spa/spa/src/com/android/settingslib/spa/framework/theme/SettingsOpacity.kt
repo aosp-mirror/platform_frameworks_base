@@ -14,25 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.api
+package com.android.settingslib.spa.framework.theme
 
-import android.os.Bundle
-import androidx.compose.runtime.Composable
-import androidx.navigation.NamedNavArgument
-
-/**
- * An SettingsPageProvider represent a Settings page.
- */
-interface SettingsPageProvider {
-
-    /** The page name without arguments. */
-    val name: String
-
-    /** The page arguments, default is no arguments. */
-    val arguments: List<NamedNavArgument>
-        get() = emptyList()
-
-    /** The [Composable] used to render this page. */
-    @Composable
-    fun Page(arguments: Bundle?)
+object SettingsOpacity {
+    const val Full = 1f
+    const val Disabled = 0.38f
 }

@@ -20,7 +20,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
-import com.android.settingslib.spa.framework.stateOf
+import com.android.settingslib.spa.framework.compose.stateOf
 
 /**
  * The widget model for [Preference] widget.

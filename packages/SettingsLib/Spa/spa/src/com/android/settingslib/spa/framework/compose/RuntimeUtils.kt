@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.theme
+package com.android.settingslib.spa.framework.compose
 
-object SettingsOpacity {
-    const val Full = 1f
-    const val Disabled = 0.38f
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
+
+/**
+ * Remember the [State] initialized with the [this].
+ */
+@Composable
+fun <T> T.toState(): State<T> = remember { stateOf(this) }
+
+/**
+ * Return a new [State] initialized with the passed in [value].
+ */
+fun <T> stateOf(value: T) = object : State<T> {
+    override val value = value
 }
