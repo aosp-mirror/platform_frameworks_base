@@ -35,7 +35,7 @@ object ChannelExt {
      *             " - downstream canceled or failed.",
      *          it,
      *    )
-     *}
+     * }
      * ```
      */
     fun <T> SendChannel<T>.trySendWithFailureLogging(

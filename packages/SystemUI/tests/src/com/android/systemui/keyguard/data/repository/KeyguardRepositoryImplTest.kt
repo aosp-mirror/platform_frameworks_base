@@ -18,7 +18,7 @@ package com.android.systemui.keyguard.data.repository
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.data.model.Position
+import com.android.systemui.common.shared.model.Position
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.argumentCaptor

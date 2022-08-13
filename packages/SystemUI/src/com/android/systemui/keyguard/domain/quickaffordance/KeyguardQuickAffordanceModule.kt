@@ -25,5 +25,5 @@ interface KeyguardQuickAffordanceModule {
     @Binds
     fun keyguardQuickAffordanceRegistry(
         impl: KeyguardQuickAffordanceRegistryImpl
-    ): KeyguardQuickAffordanceRegistry
+    ): KeyguardQuickAffordanceRegistry<out KeyguardQuickAffordanceConfig>
 }

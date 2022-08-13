@@ -22,9 +22,9 @@ import javax.inject.Inject
 import kotlin.reflect.KClass
 
 /** Central registry of all known quick affordance configs. */
-interface KeyguardQuickAffordanceRegistry {
-    fun getAll(position: KeyguardQuickAffordancePosition): List<KeyguardQuickAffordanceConfig>
-    fun get(configClass: KClass<out KeyguardQuickAffordanceConfig>): KeyguardQuickAffordanceConfig
+interface KeyguardQuickAffordanceRegistry<T : KeyguardQuickAffordanceConfig> {
+    fun getAll(position: KeyguardQuickAffordancePosition): List<T>
+    fun get(configClass: KClass<out T>): T
 }
 
 class KeyguardQuickAffordanceRegistryImpl
@@ -33,7 +33,7 @@ constructor(
     homeControls: HomeControlsKeyguardQuickAffordanceConfig,
     quickAccessWallet: QuickAccessWalletKeyguardQuickAffordanceConfig,
     qrCodeScanner: QrCodeScannerKeyguardQuickAffordanceConfig,
-) : KeyguardQuickAffordanceRegistry {
+) : KeyguardQuickAffordanceRegistry<KeyguardQuickAffordanceConfig> {
     private val configsByPosition =
         mapOf(
             KeyguardQuickAffordancePosition.BOTTOM_START to
