@@ -243,11 +243,11 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
 
     /** Pool for {@link OpEventProxyInfoPool} to avoid to constantly reallocate new objects */
     @GuardedBy("this")
-    private final OpEventProxyInfoPool mOpEventProxyInfoPool = new OpEventProxyInfoPool();
+    final OpEventProxyInfoPool mOpEventProxyInfoPool = new OpEventProxyInfoPool();
 
     /** Pool for {@link InProgressStartOpEventPool} to avoid to constantly reallocate new objects */
     @GuardedBy("this")
-    private final InProgressStartOpEventPool mInProgressStartOpEventPool =
+    final InProgressStartOpEventPool mInProgressStartOpEventPool =
             new InProgressStartOpEventPool();
 
     private final AppOpsManagerInternalImpl mAppOpsManagerInternal
@@ -385,7 +385,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     /**
      * An unsynchronized pool of {@link OpEventProxyInfo} objects.
      */
-    private class OpEventProxyInfoPool extends SimplePool<OpEventProxyInfo> {
+    class OpEventProxyInfoPool extends SimplePool<OpEventProxyInfo> {
         OpEventProxyInfoPool() {
             super(MAX_UNUSED_POOLED_OBJECTS);
         }
@@ -405,7 +405,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     /**
      * An unsynchronized pool of {@link InProgressStartOpEvent} objects.
      */
-    private class InProgressStartOpEventPool extends SimplePool<InProgressStartOpEvent> {
+    class InProgressStartOpEventPool extends SimplePool<InProgressStartOpEvent> {
         InProgressStartOpEventPool() {
             super(MAX_UNUSED_POOLED_OBJECTS);
         }
@@ -653,7 +653,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     }
 
     /** A in progress startOp->finishOp event */
-    private static final class InProgressStartOpEvent implements IBinder.DeathRecipient {
+    static final class InProgressStartOpEvent implements IBinder.DeathRecipient {
         /** Wall clock time of startOp event (not monotonic) */
         private long mStartTime;
 
@@ -817,9 +817,18 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         public int getAttributionChainId() {
             return mAttributionChainId;
         }
+
+        public void setStartTime(long startTime) {
+            mStartTime = startTime;
+        }
+
+        public void setStartElapsedTime(long startElapsedTime) {
+            mStartElapsedTime = startElapsedTime;
+        }
     }
 
-    private final class AttributedOp {
+    final class AttributedOp {
+        private final @NonNull AppOpsService mAppOpsService;
         public final @Nullable String tag;
         public final @NonNull Op parent;
 
@@ -845,7 +854,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
          * <p>Key is clientId
          */
         @GuardedBy("AppOpsService.this")
-        private @Nullable ArrayMap<IBinder, InProgressStartOpEvent> mInProgressEvents;
+        @Nullable ArrayMap<IBinder, InProgressStartOpEvent> mInProgressEvents;
 
         /**
          * Currently paused startOp events
@@ -853,9 +862,11 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
          * <p>Key is clientId
          */
         @GuardedBy("AppOpsService.this")
-        private @Nullable ArrayMap<IBinder, InProgressStartOpEvent> mPausedInProgressEvents;
+        @Nullable ArrayMap<IBinder, InProgressStartOpEvent> mPausedInProgressEvents;
 
-        AttributedOp(@Nullable String tag, @NonNull Op parent) {
+        AttributedOp(@NonNull AppOpsService appOpsService, @Nullable String tag,
+                @NonNull Op parent) {
+            this.mAppOpsService = appOpsService;
             this.tag = tag;
             this.parent = parent;
         }
@@ -876,9 +887,9 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             accessed(accessTime, -1, proxyUid, proxyPackageName,
                     proxyAttributionTag, uidState, flags);
 
-            mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid, parent.packageName,
-                    tag, uidState, flags, accessTime, AppOpsManager.ATTRIBUTION_FLAGS_NONE,
-                    AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
+            mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
+                    parent.packageName, tag, uidState, flags, accessTime,
+                    AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
         }
 
         /**
@@ -903,13 +914,14 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
 
             OpEventProxyInfo proxyInfo = null;
             if (proxyUid != Process.INVALID_UID) {
-                proxyInfo = mOpEventProxyInfoPool.acquire(proxyUid, proxyPackageName,
+                proxyInfo = mAppOpsService.mOpEventProxyInfoPool.acquire(proxyUid, proxyPackageName,
                         proxyAttributionTag);
             }
 
             NoteOpEvent existingEvent = mAccessEvents.get(key);
             if (existingEvent != null) {
-                existingEvent.reinit(noteTime, duration, proxyInfo, mOpEventProxyInfoPool);
+                existingEvent.reinit(noteTime, duration, proxyInfo,
+                        mAppOpsService.mOpEventProxyInfoPool);
             } else {
                 mAccessEvents.put(key, new NoteOpEvent(noteTime, duration, proxyInfo));
             }
@@ -924,8 +936,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         public void rejected(@AppOpsManager.UidState int uidState, @OpFlags int flags) {
             rejected(System.currentTimeMillis(), uidState, flags);
 
-            mHistoricalRegistry.incrementOpRejected(parent.op, parent.uid, parent.packageName,
-                    tag, uidState, flags);
+            mAppOpsService.mHistoricalRegistry.incrementOpRejected(parent.op, parent.uid,
+                    parent.packageName, tag, uidState, flags);
         }
 
         /**
@@ -946,7 +958,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             // We do not collect proxy information for rejections yet
             NoteOpEvent existingEvent = mRejectEvents.get(key);
             if (existingEvent != null) {
-                existingEvent.reinit(noteTime, -1, null, mOpEventProxyInfoPool);
+                existingEvent.reinit(noteTime, -1, null, mAppOpsService.mOpEventProxyInfoPool);
             } else {
                 mRejectEvents.put(key, new NoteOpEvent(noteTime, -1, null));
             }
@@ -989,8 +1001,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 boolean triggerCallbackIfNeeded, boolean isStarted, @AttributionFlags
                 int attributionFlags, int attributionChainId) throws RemoteException {
             if (triggerCallbackIfNeeded && !parent.isRunning() && isStarted) {
-                scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid, parent.packageName,
-                        tag, true, attributionFlags, attributionChainId);
+                mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
+                        parent.packageName, tag, true, attributionFlags, attributionChainId);
             }
 
             if (isStarted && mInProgressEvents == null) {
@@ -1004,14 +1016,14 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             long startTime = System.currentTimeMillis();
             InProgressStartOpEvent event = events.get(clientId);
             if (event == null) {
-                event = mInProgressStartOpEventPool.acquire(startTime,
+                event = mAppOpsService.mInProgressStartOpEventPool.acquire(startTime,
                         SystemClock.elapsedRealtime(), clientId, tag,
                         PooledLambda.obtainRunnable(AppOpsService::onClientDeath, this, clientId),
                         proxyUid, proxyPackageName, proxyAttributionTag, uidState, flags,
                         attributionFlags, attributionChainId);
                 events.put(clientId, event);
             } else {
-                if (uidState != event.mUidState) {
+                if (uidState != event.getUidState()) {
                     onUidStateChanged(uidState);
                 }
             }
@@ -1019,7 +1031,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             event.numUnfinishedStarts++;
 
             if (isStarted) {
-                mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
+                mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
                         parent.packageName, tag, uidState, flags, startTime, attributionFlags,
                         attributionChainId);
             }
@@ -1075,21 +1087,21 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 mAccessEvents.put(makeKey(event.getUidState(), event.getFlags()),
                         finishedEvent);
 
-                mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
+                mAppOpsService.mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
                         parent.packageName, tag, event.getUidState(),
                         event.getFlags(), finishedEvent.getNoteTime(), finishedEvent.getDuration(),
                         event.getAttributionFlags(), event.getAttributionChainId());
 
                 if (!isPausing) {
-                    mInProgressStartOpEventPool.release(event);
+                    mAppOpsService.mInProgressStartOpEventPool.release(event);
                     if (mInProgressEvents.isEmpty()) {
                         mInProgressEvents = null;
 
                         // TODO ntmyren: Also callback for single attribution tag activity changes
                         if (triggerCallbackIfNeeded && !parent.isRunning()) {
-                            scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
-                                    parent.packageName, tag, false, event.getAttributionFlags(),
-                                    event.getAttributionChainId());
+                            mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op,
+                                    parent.uid, parent.packageName, tag, false,
+                                    event.getAttributionFlags(), event.getAttributionChainId());
                         }
                     }
                 }
@@ -1117,7 +1129,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             event.numUnfinishedStarts--;
             if (event.numUnfinishedStarts == 0) {
                 mPausedInProgressEvents.removeAt(indexOfToken);
-                mInProgressStartOpEventPool.release(event);
+                mAppOpsService.mInProgressStartOpEventPool.release(event);
                 if (mPausedInProgressEvents.isEmpty()) {
                     mPausedInProgressEvents = null;
                 }
@@ -1149,10 +1161,10 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
 
             for (int i = 0; i < mInProgressEvents.size(); i++) {
                 InProgressStartOpEvent event = mInProgressEvents.valueAt(i);
-                mPausedInProgressEvents.put(event.mClientId, event);
-                finishOrPause(event.mClientId, true, true);
+                mPausedInProgressEvents.put(event.getClientId(), event);
+                finishOrPause(event.getClientId(), true, true);
 
-                scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
+                mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
                         parent.packageName, tag, false,
                         event.getAttributionFlags(), event.getAttributionChainId());
             }
@@ -1177,20 +1189,21 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             long startTime = System.currentTimeMillis();
             for (int i = 0; i < mPausedInProgressEvents.size(); i++) {
                 InProgressStartOpEvent event = mPausedInProgressEvents.valueAt(i);
-                mInProgressEvents.put(event.mClientId, event);
-                event.mStartElapsedTime = SystemClock.elapsedRealtime();
-                event.mStartTime = startTime;
-                mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
-                        parent.packageName, tag, event.mUidState, event.mFlags, startTime,
+                mInProgressEvents.put(event.getClientId(), event);
+                event.setStartElapsedTime(SystemClock.elapsedRealtime());
+                event.setStartTime(startTime);
+                mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
+                        parent.packageName, tag, event.getUidState(), event.getFlags(), startTime,
                         event.getAttributionFlags(), event.getAttributionChainId());
                 if (shouldSendActive) {
-                    scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid, parent.packageName,
-                            tag, true, event.getAttributionFlags(), event.getAttributionChainId());
+                    mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
+                            parent.packageName, tag, true, event.getAttributionFlags(),
+                            event.getAttributionChainId());
                 }
                 // Note: this always sends MODE_ALLOWED, even if the mode is FOREGROUND
                 // TODO ntmyren: figure out how to get the real mode.
-                scheduleOpStartedIfNeededLocked(parent.op, parent.uid, parent.packageName,
-                        tag, event.getFlags(), MODE_ALLOWED, START_TYPE_RESUMED,
+                mAppOpsService.scheduleOpStartedIfNeededLocked(parent.op, parent.uid,
+                        parent.packageName, tag, event.getFlags(), MODE_ALLOWED, START_TYPE_RESUMED,
                         event.getAttributionFlags(), event.getAttributionChainId());
             }
             mPausedInProgressEvents = null;
@@ -1202,7 +1215,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
          * @param clientId The client that died
          */
         void onClientDeath(@NonNull IBinder clientId) {
-            synchronized (AppOpsService.this) {
+            synchronized (mAppOpsService) {
                 if (!isPaused() && !isRunning()) {
                     return;
                 }
@@ -1320,7 +1333,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     InProgressStartOpEvent event = ignoredEvents.valueAt(i);
 
                     event.finish();
-                    mInProgressStartOpEventPool.release(event);
+                    mAppOpsService.mInProgressStartOpEventPool.release(event);
                 }
             }
 
@@ -1425,7 +1438,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
 
             attributedOp = mAttributions.get(attributionTag);
             if (attributedOp == null) {
-                attributedOp = new AttributedOp(attributionTag, parent);
+                attributedOp = new AttributedOp(AppOpsService.this, attributionTag, parent);
                 mAttributions.put(attributionTag, attributedOp);
             }
 
@@ -1675,7 +1688,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     /**
      * Call {@link AttributedOp#onClientDeath attributedOp.onClientDeath(clientId)}.
      */
-    private static void onClientDeath(@NonNull AttributedOp attributedOp,
+    static void onClientDeath(@NonNull AttributedOp attributedOp,
             @NonNull IBinder clientId) {
         attributedOp.onClientDeath(clientId);
     }
@@ -1916,7 +1929,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 PackageInfo pi = getPackageManagerInternal().getPackageInfo(packageName,
                         PackageManager.GET_PERMISSIONS, Process.myUid(), mContext.getUserId());
                 if (isSamplingTarget(pi)) {
-                    synchronized (this) {
+                    synchronized (AppOpsService.this) {
                         mRarelyUsedPackages.add(packageName);
                     }
                 }
@@ -4016,7 +4029,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
     }
 
-    private void scheduleOpActiveChangedIfNeededLocked(int code, int uid, @NonNull
+    void scheduleOpActiveChangedIfNeededLocked(int code, int uid, @NonNull
             String packageName, @Nullable String attributionTag, boolean active, @AttributionFlags
             int attributionFlags, int attributionChainId) {
         ArraySet<ActiveCallback> dispatchedCallbacks = null;
@@ -4069,7 +4082,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
     }
 
-    private void scheduleOpStartedIfNeededLocked(int code, int uid, String pkgName,
+    void scheduleOpStartedIfNeededLocked(int code, int uid, String pkgName,
             String attributionTag, @OpFlags int flags, @Mode int result,
             @AppOpsManager.OnOpStartedListener.StartedType int startedType,
             @AttributionFlags int attributionFlags, int attributionChainId) {
