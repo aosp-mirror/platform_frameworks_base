@@ -15,11 +15,11 @@
  *
  */
 
-package com.android.systemui.keyguard.shared.model
+package com.android.systemui.keyguard.domain.model
 
 import androidx.annotation.StringRes
 import com.android.systemui.containeddrawable.ContainedDrawable
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
 import kotlin.reflect.KClass
 
 /**
@@ -27,7 +27,6 @@ import kotlin.reflect.KClass
  * lock-screen).
  */
 sealed class KeyguardQuickAffordanceModel {
-
     /** No affordance should show up. */
     object Hidden : KeyguardQuickAffordanceModel()
 
@@ -43,4 +42,21 @@ sealed class KeyguardQuickAffordanceModel {
          */
         @StringRes val contentDescriptionResourceId: Int,
     ) : KeyguardQuickAffordanceModel()
+
+    companion object {
+        fun from(
+            state: KeyguardQuickAffordanceConfig.State?,
+            configKey: KClass<out KeyguardQuickAffordanceConfig>,
+        ): KeyguardQuickAffordanceModel {
+            return when (state) {
+                is KeyguardQuickAffordanceConfig.State.Visible ->
+                    Visible(
+                        configKey = configKey,
+                        icon = state.icon,
+                        contentDescriptionResourceId = state.contentDescriptionResourceId,
+                    )
+                else -> Hidden
+            }
+        }
+    }
 }

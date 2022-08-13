@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.keyguard.data.quickaffordance
+package com.android.systemui.keyguard.domain.quickaffordance
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -23,7 +23,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
+import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional

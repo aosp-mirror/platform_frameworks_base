@@ -51,7 +51,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
     private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
     private final SyncTransactionQueue mSyncQueue;
-
     private FreeformTaskTransitionStarter mTransitionStarter;
 
     public CaptionWindowDecorViewModel(
@@ -165,6 +164,14 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel<Caption
                 }
                 if (Transitions.ENABLE_SHELL_TRANSITIONS) {
                     mTransitionStarter.startWindowingModeTransition(targetWindowingMode, wct);
+                } else {
+                    mSyncQueue.queue(wct);
+                }
+            } else if (id == R.id.minimize_window) {
+                WindowContainerTransaction wct = new WindowContainerTransaction();
+                wct.reorder(mTaskToken, false);
+                if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+                    mTransitionStarter.startMinimizedModeTransition(wct);
                 } else {
                     mSyncQueue.queue(wct);
                 }

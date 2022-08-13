@@ -26,4 +26,9 @@ interface KeyguardUseCaseModule {
     fun launchQuickAffordance(
         impl: LaunchKeyguardQuickAffordanceUseCaseImpl
     ): LaunchKeyguardQuickAffordanceUseCase
+
+    @Binds
+    fun observeKeyguardQuickAffordance(
+        impl: ObserveKeyguardQuickAffordanceUseCaseImpl
+    ): ObserveKeyguardQuickAffordanceUseCase
 }

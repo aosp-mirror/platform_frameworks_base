@@ -22,6 +22,17 @@
     android:gravity="end"
     android:background="@drawable/decor_caption_title">
     <Button
+        android:id="@+id/minimize_window"
+        android:visibility="gone"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="5dp"
+        android:padding="4dp"
+        android:layout_gravity="top|end"
+        android:contentDescription="@string/maximize_button_text"
+        android:background="@drawable/decor_minimize_button_dark"
+        android:duplicateParentState="true"/>
+    <Button
         android:id="@+id/maximize_window"
         android:layout_width="32dp"
         android:layout_height="32dp"
@@ -42,4 +53,3 @@
         android:background="@drawable/decor_close_button_dark"
         android:duplicateParentState="true"/>
 </com.android.wm.shell.windowdecor.WindowDecorLinearLayout>
-
