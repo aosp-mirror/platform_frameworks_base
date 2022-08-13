@@ -81,6 +81,8 @@ public class PrefetchController extends StateController {
      */
     @GuardedBy("mLock")
     private final SparseArrayMap<String, Long> mEstimatedLaunchTimes = new SparseArrayMap<>();
+    @GuardedBy("mLock")
+    private final ArraySet<PrefetchChangedListener> mPrefetchChangedListeners = new ArraySet<>();
     private final ThresholdAlarmListener mThresholdAlarmListener;
 
     /**
@@ -98,6 +100,13 @@ public class PrefetchController extends StateController {
      */
     @GuardedBy("mLock")
     private long mLaunchTimeAllowanceMs = PcConstants.DEFAULT_LAUNCH_TIME_ALLOWANCE_MS;
+
+    /** Called by Prefetch Controller after local cache has been updated */
+    public interface PrefetchChangedListener {
+        /** Callback to inform listeners when estimated launch times change. */
+        void onPrefetchCacheUpdated(ArraySet<JobStatus> jobs, int userId, String pkgName,
+                long prevEstimatedLaunchTime, long newEstimatedLaunchTime);
+    }
 
     @SuppressWarnings("FieldCanBeLocal")
     private final EstimatedLaunchTimeChangedListener mEstimatedLaunchTimeChangedListener =
@@ -291,12 +300,17 @@ public class PrefetchController extends StateController {
                 // Don't bother caching the value unless the app has scheduled prefetch jobs
                 // before. This is based on the assumption that if an app has scheduled a
                 // prefetch job before, then it will probably schedule another one again.
+                final long prevEstimatedLaunchTime = mEstimatedLaunchTimes.get(userId, pkgName);
                 mEstimatedLaunchTimes.add(userId, pkgName, newEstimatedLaunchTime);
 
                 if (!jobs.isEmpty()) {
                     final long now = sSystemClock.millis();
                     final long nowElapsed = sElapsedRealtimeClock.millis();
                     updateThresholdAlarmLocked(userId, pkgName, now, nowElapsed);
+                    for (int i = 0; i < mPrefetchChangedListeners.size(); i++) {
+                        mPrefetchChangedListeners.valueAt(i).onPrefetchCacheUpdated(jobs,
+                                userId, pkgName, prevEstimatedLaunchTime, newEstimatedLaunchTime);
+                    }
                     if (maybeUpdateConstraintForPkgLocked(now, nowElapsed, userId, pkgName)) {
                         mStateChangedListener.onControllerStateChanged(jobs);
                     }
@@ -445,6 +459,18 @@ public class PrefetchController extends StateController {
             if (changedJobs.size() > 0) {
                 mStateChangedListener.onControllerStateChanged(changedJobs);
             }
+        }
+    }
+
+    void registerPrefetchChangedListener(PrefetchChangedListener listener) {
+        synchronized (mLock) {
+            mPrefetchChangedListeners.add(listener);
+        }
+    }
+
+    void unRegisterPrefetchChangedListener(PrefetchChangedListener listener) {
+        synchronized (mLock) {
+            mPrefetchChangedListeners.remove(listener);
         }
     }
 

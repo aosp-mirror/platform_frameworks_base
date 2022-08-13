@@ -61,11 +61,11 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.icon.IconPack;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
@@ -421,7 +421,7 @@ public final class NotificationEntry extends ListEntry {
      * Get the children that are actually attached to this notification's row.
      *
      * TODO: Seems like most callers here should probably be using
-     * {@link NotificationGroupManagerLegacy#getChildren}
+     * {@link GroupMembershipManager#getChildren(ListEntry)}
      */
     public @Nullable List<NotificationEntry> getAttachedNotifChildren() {
         if (row == null) {

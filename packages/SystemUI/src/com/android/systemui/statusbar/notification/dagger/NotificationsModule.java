@@ -30,7 +30,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -53,7 +52,6 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.collection.inflation.BindEventManager;
 import com.android.systemui.statusbar.notification.collection.inflation.BindEventManagerImpl;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
-import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.OnUserInteractionCallbackImpl;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -123,22 +121,13 @@ public interface NotificationsModule {
             NotificationEntryManagerLogger logger,
             NotificationGroupManagerLegacy groupManager,
             NotifPipelineFlags notifPipelineFlags,
-            Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
             IStatusBarService statusBarService,
-            DumpManager dumpManager,
             @Background Executor bgExecutor) {
         return new NotificationEntryManager(
-                logger,
-                groupManager,
-                notifPipelineFlags,
-                notificationRowBinderLazy,
-                notificationRemoteInputManagerLazy,
-                leakDetector,
-                statusBarService,
-                dumpManager,
-                bgExecutor);
+                logger
+        );
     }
 
     /** Provides an instance of {@link NotificationGutsManager} */
@@ -162,8 +151,7 @@ public interface NotificationsModule {
             Optional<BubblesManager> bubblesManagerOptional,
             UiEventLogger uiEventLogger,
             OnUserInteractionCallback onUserInteractionCallback,
-            ShadeController shadeController,
-            DumpManager dumpManager) {
+            ShadeController shadeController) {
         return new NotificationGutsManager(
                 context,
                 centralSurfacesOptionalLazy,
@@ -181,8 +169,8 @@ public interface NotificationsModule {
                 bubblesManagerOptional,
                 uiEventLogger,
                 onUserInteractionCallback,
-                shadeController,
-                dumpManager);
+                shadeController
+        );
     }
 
     /** Provides an instance of {@link NotifGutsViewManager} */
@@ -193,19 +181,14 @@ public interface NotificationsModule {
     @SysUISingleton
     @Provides
     static VisualStabilityManager provideVisualStabilityManager(
-            NotificationEntryManager notificationEntryManager,
             VisualStabilityProvider visualStabilityProvider,
-            @Main Handler handler,
             StatusBarStateController statusBarStateController,
-            WakefulnessLifecycle wakefulnessLifecycle,
-            DumpManager dumpManager) {
+            WakefulnessLifecycle wakefulnessLifecycle) {
         return new VisualStabilityManager(
-                notificationEntryManager,
                 visualStabilityProvider,
-                handler,
                 statusBarStateController,
-                wakefulnessLifecycle,
-                dumpManager);
+                wakefulnessLifecycle
+        );
     }
 
     /** Provides an instance of {@link NotificationLogger} */

@@ -37,6 +37,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.os.TimeoutRecord;
 import com.android.server.appop.AppOpsService;
 import com.android.server.wm.WindowProcessController;
 
@@ -111,12 +112,15 @@ public class AnrHelperTest {
         final WindowProcessController parentProcess = mock(WindowProcessController.class);
         final boolean aboveSystem = false;
         final String annotation = "test";
+        final TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchWindowUnresponsive(
+                annotation);
         mAnrHelper.appNotResponding(mAnrApp, activityShortComponentName, appInfo,
-                parentShortComponentName, parentProcess, aboveSystem, annotation);
+                parentShortComponentName, parentProcess, aboveSystem, timeoutRecord);
 
         verify(mAnrApp.mErrorState, timeout(TIMEOUT_MS)).appNotResponding(
                 eq(activityShortComponentName), eq(appInfo), eq(parentShortComponentName),
-                eq(parentProcess), eq(aboveSystem), eq(annotation), eq(false) /* onlyDumpSelf */);
+                eq(parentProcess), eq(aboveSystem), eq(timeoutRecord),
+                eq(false) /* onlyDumpSelf */);
     }
 
     @Test
@@ -129,11 +133,13 @@ public class AnrHelperTest {
             processingLatch.await();
             return null;
         }).when(mAnrApp.mErrorState).appNotResponding(anyString(), any(), any(), any(),
-                anyBoolean(), anyString(), anyBoolean());
+                anyBoolean(), any(), anyBoolean());
         final ApplicationInfo appInfo = new ApplicationInfo();
+        final TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchWindowUnresponsive(
+                "annotation");
         final Runnable reportAnr = () -> mAnrHelper.appNotResponding(mAnrApp,
                 "activityShortComponentName", appInfo, "parentShortComponentName",
-                null /* parentProcess */, false /* aboveSystem */, "annotation");
+                null /* parentProcess */, false /* aboveSystem */, timeoutRecord);
         reportAnr.run();
         // This should be skipped because the pid is pending in queue.
         reportAnr.run();
@@ -149,6 +155,6 @@ public class AnrHelperTest {
         processingLatch.countDown();
         // There is only one ANR reported.
         verify(mAnrApp.mErrorState, timeout(TIMEOUT_MS).only()).appNotResponding(
-                anyString(), any(), any(), any(), anyBoolean(), anyString(), anyBoolean());
+                anyString(), any(), any(), any(), anyBoolean(), any(), anyBoolean());
     }
 }

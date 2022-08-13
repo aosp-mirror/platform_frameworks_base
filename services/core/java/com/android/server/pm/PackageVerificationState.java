@@ -31,6 +31,7 @@ class PackageVerificationState {
     private final SparseBooleanArray mSufficientVerifierUids;
 
     private final SparseBooleanArray mRequiredVerifierUids;
+    private final SparseBooleanArray mUnrespondedRequiredVerifierUids;
 
     private boolean mSufficientVerificationComplete;
 
@@ -52,6 +53,7 @@ class PackageVerificationState {
         mVerifyingSession = verifyingSession;
         mSufficientVerifierUids = new SparseBooleanArray();
         mRequiredVerifierUids = new SparseBooleanArray();
+        mUnrespondedRequiredVerifierUids = new SparseBooleanArray();
         mRequiredVerificationComplete = false;
         mRequiredVerificationPassed = true;
         mExtendedTimeout = false;
@@ -64,6 +66,7 @@ class PackageVerificationState {
     /** Add the user ID of the required package verifier. */
     void addRequiredVerifierUid(int uid) {
         mRequiredVerifierUids.put(uid, true);
+        mUnrespondedRequiredVerifierUids.put(uid, true);
     }
 
     /** Returns true if the uid a required verifier. */
@@ -103,8 +106,8 @@ class PackageVerificationState {
                     mRequiredVerificationPassed = false;
             }
 
-            mRequiredVerifierUids.delete(uid);
-            if (mRequiredVerifierUids.size() == 0) {
+            mUnrespondedRequiredVerifierUids.delete(uid);
+            if (mUnrespondedRequiredVerifierUids.size() == 0) {
                 mRequiredVerificationComplete = true;
             }
             return true;
@@ -129,7 +132,7 @@ class PackageVerificationState {
      * Mark the session as passed required verification.
      */
     void passRequiredVerification() {
-        if (mRequiredVerifierUids.size() > 0) {
+        if (mUnrespondedRequiredVerifierUids.size() > 0) {
             throw new RuntimeException("Required verifiers still present.");
         }
         mRequiredVerificationPassed = true;

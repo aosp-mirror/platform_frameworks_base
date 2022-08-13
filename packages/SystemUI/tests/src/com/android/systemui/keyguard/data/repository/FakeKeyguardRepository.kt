@@ -20,6 +20,7 @@ import com.android.systemui.common.data.model.Position
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.yield
 
 /** Fake implementation of [KeyguardRepository] */
 class FakeKeyguardRepository : KeyguardRepository {
@@ -43,11 +44,6 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _dozeAmount = MutableStateFlow(0f)
     override val dozeAmount: Flow<Float> = _dozeAmount
 
-    init {
-        setDozeAmount(0f)
-        setDozing(false)
-    }
-
     override fun setAnimateDozingTransitions(animate: Boolean) {
         _animateBottomAreaDozingTransitions.tryEmit(animate)
     }
@@ -60,15 +56,30 @@ class FakeKeyguardRepository : KeyguardRepository {
         _clockPosition.value = Position(x, y)
     }
 
-    fun setKeyguardShowing(isShowing: Boolean) {
+    suspend fun setKeyguardShowing(isShowing: Boolean) {
         _isKeyguardShowing.value = isShowing
+        // Yield to allow the test's collection coroutine to "catch up" and collect this value
+        // before the test continues to the next line.
+        // TODO(b/239834928): once coroutines.test is updated, switch to the approach described in
+        // https://developer.android.com/kotlin/flow/test#continuous-collection and remove this.
+        yield()
     }
 
-    fun setDozing(isDozing: Boolean) {
+    suspend fun setDozing(isDozing: Boolean) {
         _isDozing.value = isDozing
+        // Yield to allow the test's collection coroutine to "catch up" and collect this value
+        // before the test continues to the next line.
+        // TODO(b/239834928): once coroutines.test is updated, switch to the approach described in
+        // https://developer.android.com/kotlin/flow/test#continuous-collection and remove this.
+        yield()
     }
 
-    fun setDozeAmount(dozeAmount: Float) {
+    suspend fun setDozeAmount(dozeAmount: Float) {
         _dozeAmount.value = dozeAmount
+        // Yield to allow the test's collection coroutine to "catch up" and collect this value
+        // before the test continues to the next line.
+        // TODO(b/239834928): once coroutines.test is updated, switch to the approach described in
+        // https://developer.android.com/kotlin/flow/test#continuous-collection and remove this.
+        yield()
     }
 }

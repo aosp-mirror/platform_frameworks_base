@@ -41,6 +41,8 @@ import android.os.WorkSource;
 import android.util.ArraySet;
 import android.util.Pair;
 
+import com.android.internal.os.TimeoutRecord;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -440,10 +442,13 @@ public abstract class ActivityManagerInternal {
 
     /** Input dispatch timeout to a window, start the ANR process. Return the timeout extension,
      * in milliseconds, or 0 to abort dispatch. */
-    public abstract long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason);
+    public abstract long inputDispatchingTimedOut(int pid, boolean aboveSystem,
+            TimeoutRecord timeoutRecord);
+
     public abstract boolean inputDispatchingTimedOut(Object proc, String activityShortComponentName,
             ApplicationInfo aInfo, String parentShortComponentName, Object parentProc,
-            boolean aboveSystem, String reason);
+            boolean aboveSystem, TimeoutRecord timeoutRecord);
+
     /**
      * App started responding to input events. This signal can be used to abort the ANR process and
      * hide the ANR dialog.

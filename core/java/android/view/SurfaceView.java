@@ -119,10 +119,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     final int[] mLocation = new int[2];
 
     @UnsupportedAppUsage
-    // Used to ensure the Surface remains valid between SurfaceHolder#lockCanvas and
-    // SurfaceHolder#unlockCanvasAndPost calls. This prevents SurfaceView from destroying or
-    // invalidating the Surface. This means this lock should be acquired when destroying the
-    // BlastBufferQueue.
     final ReentrantLock mSurfaceLock = new ReentrantLock();
     @UnsupportedAppUsage
     final Surface mSurface = new Surface();       // Current surface in use
@@ -727,18 +723,14 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private void releaseSurfaces(boolean releaseSurfacePackage) {
         mSurfaceAlpha = 1f;
-        try {
-            mSurfaceLock.lock();
-            mSurface.destroy();
+        mSurface.destroy();
+
+        synchronized (mSurfaceControlLock) {
             if (mBlastBufferQueue != null) {
                 mBlastBufferQueue.destroy();
                 mBlastBufferQueue = null;
             }
-        } finally {
-            mSurfaceLock.unlock();
-        }
 
-        synchronized (mSurfaceControlLock) {
             final Transaction transaction = new Transaction();
             if (mSurfaceControl != null) {
                 transaction.remove(mSurfaceControl);
@@ -1240,21 +1232,16 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     .build();
         }
 
+        // Always recreate the IGBP for compatibility. This can be optimized in the future but
+        // the behavior change will need to be gated by SDK version.
+        if (mBlastBufferQueue != null) {
+            mBlastBufferQueue.destroy();
+        }
         mTransformHint = viewRoot.getBufferTransformHint();
         mBlastSurfaceControl.setTransformHint(mTransformHint);
 
-        // Always recreate the IGBP for compatibility. This can be optimized in the future but
-        // the behavior change will need to be gated by SDK version.
-        try {
-            mSurfaceLock.lock();
-            if (mBlastBufferQueue != null) {
-                mBlastBufferQueue.destroy();
-            }
-            mBlastBufferQueue = new BLASTBufferQueue(name, false /* updateDestinationFrame */);
-            mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight, mFormat);
-        } finally {
-            mSurfaceLock.unlock();
-        }
+        mBlastBufferQueue = new BLASTBufferQueue(name, false /* updateDestinationFrame */);
+        mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight, mFormat);
         mBlastBufferQueue.setTransactionHangCallback(ViewRootImpl.sTransactionHangCallback);
     }
 
@@ -1827,14 +1814,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             // so the next connect will always work if we end up reusing
             // the surface.
             if (mSurface.isValid()) {
-                // We need to grab this lock since mSurface.forceScopedDisconnect
-                // will free buffers from the queue.
-                try {
-                    mSurfaceLock.lock();
-                    mSurface.forceScopedDisconnect();
-                } finally {
-                    mSurfaceLock.unlock();
-                }
+                mSurface.forceScopedDisconnect();
             }
         }
     }

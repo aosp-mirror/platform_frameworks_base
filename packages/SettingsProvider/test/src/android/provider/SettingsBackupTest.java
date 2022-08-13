@@ -98,6 +98,7 @@ public class SettingsBackupTest {
                     Settings.System.VOLUME_VOICE, // deprecated since API 2?
                     Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
                     Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
+                    Settings.System.DESKTOP_MODE, // developer setting for internal prototyping
                     Settings.System.MIN_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.PEAK_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.SCREEN_BRIGHTNESS_FLOAT,
@@ -656,7 +657,6 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.CHARGING_SOUNDS_ENABLED,
                     Settings.Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED,
                     Settings.Global.Wearable.BEDTIME_MODE,
-                    Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MAX_RESET_COUNT,
                     Settings.Global.Wearable.EARLY_UPDATES_STATUS);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =

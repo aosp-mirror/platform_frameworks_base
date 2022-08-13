@@ -3047,6 +3047,10 @@ class StorageManagerService extends IStorageManager.Stub
 
         try {
             mVold.createUserKey(userId, serialNumber, ephemeral);
+            // New keys are always unlocked.
+            synchronized (mLock) {
+                mLocalUnlockedUsers.append(userId);
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -3058,6 +3062,10 @@ class StorageManagerService extends IStorageManager.Stub
 
         try {
             mVold.destroyUserKey(userId);
+            // Destroying a key also locks it.
+            synchronized (mLock) {
+                mLocalUnlockedUsers.remove(userId);
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }

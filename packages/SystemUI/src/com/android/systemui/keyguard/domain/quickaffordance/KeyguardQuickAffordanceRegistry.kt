@@ -15,29 +15,25 @@
  *
  */
 
-package com.android.systemui.keyguard.data.config
+package com.android.systemui.keyguard.domain.quickaffordance
 
-import com.android.systemui.keyguard.data.quickaffordance.HomeControlsKeyguardQuickAffordanceConfig
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
-import com.android.systemui.keyguard.data.quickaffordance.QrCodeScannerKeyguardQuickAffordanceConfig
-import com.android.systemui.keyguard.data.quickaffordance.QuickAccessWalletKeyguardQuickAffordanceConfig
-import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePosition
+import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
-/** Injectable provider of the positioning of the known quick affordance configs. */
-interface KeyguardQuickAffordanceConfigs {
+/** Central registry of all known quick affordance configs. */
+interface KeyguardQuickAffordanceRegistry {
     fun getAll(position: KeyguardQuickAffordancePosition): List<KeyguardQuickAffordanceConfig>
     fun get(configClass: KClass<out KeyguardQuickAffordanceConfig>): KeyguardQuickAffordanceConfig
 }
 
-class KeyguardQuickAffordanceConfigsImpl
+class KeyguardQuickAffordanceRegistryImpl
 @Inject
 constructor(
     homeControls: HomeControlsKeyguardQuickAffordanceConfig,
     quickAccessWallet: QuickAccessWalletKeyguardQuickAffordanceConfig,
     qrCodeScanner: QrCodeScannerKeyguardQuickAffordanceConfig,
-) : KeyguardQuickAffordanceConfigs {
+) : KeyguardQuickAffordanceRegistry {
     private val configsByPosition =
         mapOf(
             KeyguardQuickAffordancePosition.BOTTOM_START to

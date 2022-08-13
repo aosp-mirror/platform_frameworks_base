@@ -33,13 +33,9 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
-import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager.OnGroupExpansionChangeListener;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Compile;
 import com.android.wm.shell.bubbles.Bubbles;
 
@@ -47,7 +43,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -65,12 +60,7 @@ import dagger.Lazy;
  * 2. Tracking group expansion states
  */
 @SysUISingleton
-public class NotificationGroupManagerLegacy implements
-        OnHeadsUpChangedListener,
-        StateListener,
-        GroupMembershipManager,
-        GroupExpansionManager,
-        Dumpable {
+public class NotificationGroupManagerLegacy implements StateListener, Dumpable {
 
     private static final String TAG = "LegacyNotifGroupManager";
     private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
@@ -81,14 +71,10 @@ public class NotificationGroupManagerLegacy implements
      */
     private static final long POST_BATCH_MAX_AGE = 5000;
     private final HashMap<String, NotificationGroup> mGroupMap = new HashMap<>();
-    private final ArraySet<OnGroupExpansionChangeListener> mExpansionChangeListeners =
-            new ArraySet<>();
     private final Lazy<PeopleNotificationIdentifier> mPeopleNotificationIdentifier;
     private final Optional<Bubbles> mBubblesOptional;
     private final GroupEventDispatcher mEventDispatcher = new GroupEventDispatcher(mGroupMap::get);
-    private int mBarState = -1;
-    private HashMap<String, StatusBarNotification> mIsolatedEntries = new HashMap<>();
-    private HeadsUpManager mHeadsUpManager;
+    private final HashMap<String, StatusBarNotification> mIsolatedEntries = new HashMap<>();
     private boolean mIsUpdatingUnchangedGroup;
 
     @Inject
@@ -111,47 +97,8 @@ public class NotificationGroupManagerLegacy implements
         mEventDispatcher.registerGroupChangeListener(listener);
     }
 
-    @Override
-    public void registerGroupExpansionChangeListener(OnGroupExpansionChangeListener listener) {
-        mExpansionChangeListeners.add(listener);
-    }
-
-    @Override
-    public boolean isGroupExpanded(NotificationEntry entry) {
-        NotificationGroup group = mGroupMap.get(getGroupKey(entry.getSbn()));
-        if (group == null) {
-            return false;
-        }
-        return group.expanded;
-    }
-
-    /**
-     * @return if the group that this notification is associated with logically is expanded
-     */
-    public boolean isLogicalGroupExpanded(StatusBarNotification sbn) {
-        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
-        if (group == null) {
-            return false;
-        }
-        return group.expanded;
-    }
-
-    @Override
-    public void setGroupExpanded(NotificationEntry entry, boolean expanded) {
-        NotificationGroup group = mGroupMap.get(getGroupKey(entry.getSbn()));
-        if (group == null) {
-            return;
-        }
-        setGroupExpanded(group, expanded);
-    }
-
     private void setGroupExpanded(NotificationGroup group, boolean expanded) {
         group.expanded = expanded;
-        if (group.summary != null) {
-            for (OnGroupExpansionChangeListener listener : mExpansionChangeListeners) {
-                listener.onGroupExpansionChange(group.summary.getRow(), expanded);
-            }
-        }
     }
 
     /**
@@ -210,19 +157,6 @@ public class NotificationGroupManagerLegacy implements
                 mEventDispatcher.notifyGroupRemoved(group);
             }
         }
-    }
-
-    /**
-     * Notify the group manager that a new entry was added
-     */
-    public void onEntryAdded(final NotificationEntry added) {
-        if (SPEW) {
-            Log.d(TAG, "onEntryAdded: entry=" + logKey(added));
-        }
-        mEventDispatcher.openBufferScope();
-        updateIsolation(added);
-        onEntryAddedInternal(added);
-        mEventDispatcher.closeBufferScope();
     }
 
     private void onEntryAddedInternal(final NotificationEntry added) {
@@ -499,106 +433,13 @@ public class NotificationGroupManagerLegacy implements
         return result;
     }
 
-    /**
-     * Update an entry's group information
-     * @param entry notification entry to update
-     * @param oldNotification previous notification info before this update
-     */
-    public void onEntryUpdated(NotificationEntry entry, StatusBarNotification oldNotification) {
-        if (SPEW) {
-            Log.d(TAG, "onEntryUpdated: entry=" + logKey(entry));
-        }
-        onEntryUpdated(entry, oldNotification.getGroupKey(), oldNotification.isGroup(),
-                oldNotification.getNotification().isGroupSummary());
-    }
-
-    /**
-     * Updates an entry's group information
-     * @param entry notification entry to update
-     * @param oldGroupKey the notification's previous group key before this update
-     * @param oldIsGroup whether this notification was a group before this update
-     * @param oldIsGroupSummary whether this notification was a group summary before this update
-     */
-    public void onEntryUpdated(NotificationEntry entry, String oldGroupKey, boolean oldIsGroup,
-            boolean oldIsGroupSummary) {
-        String newGroupKey = entry.getSbn().getGroupKey();
-        boolean groupKeysChanged = !oldGroupKey.equals(newGroupKey);
-        boolean wasGroupChild = isGroupChild(entry.getKey(), oldIsGroup, oldIsGroupSummary);
-        boolean isGroupChild = isGroupChild(entry.getSbn());
-        mEventDispatcher.openBufferScope();
-        mIsUpdatingUnchangedGroup = !groupKeysChanged && wasGroupChild == isGroupChild;
-        if (mGroupMap.get(getGroupKey(entry.getKey(), oldGroupKey)) != null) {
-            onEntryRemovedInternal(entry, oldGroupKey, oldIsGroup, oldIsGroupSummary);
-        }
-        onEntryAddedInternal(entry);
-        mIsUpdatingUnchangedGroup = false;
-        if (isIsolated(entry.getSbn().getKey())) {
-            mIsolatedEntries.put(entry.getKey(), entry.getSbn());
-            if (groupKeysChanged) {
-                updateSuppression(mGroupMap.get(oldGroupKey));
-            }
-            // Always update the suppression of the group from which you're isolated, in case
-            // this entry was or now is the alertOverride for that group.
-            updateSuppression(mGroupMap.get(newGroupKey));
-        } else if (!wasGroupChild && isGroupChild) {
-            onEntryBecomingChild(entry);
-        }
-        mEventDispatcher.closeBufferScope();
-    }
-
-    /**
-     * Whether the given notification is the summary of a group that is being suppressed
-     */
-    public boolean isSummaryOfSuppressedGroup(StatusBarNotification sbn) {
-        return sbn.getNotification().isGroupSummary() && isGroupSuppressed(getGroupKey(sbn));
-    }
-
-    /**
-     * If the given notification is a summary, get the group for it.
-     */
-    public NotificationGroup getGroupForSummary(StatusBarNotification sbn) {
-        if (sbn.getNotification().isGroupSummary()) {
-            return mGroupMap.get(getGroupKey(sbn));
-        }
-        return null;
-    }
-
-    private boolean isOnlyChild(StatusBarNotification sbn) {
-        return !sbn.getNotification().isGroupSummary()
-                && getTotalNumberOfChildren(sbn) == 1;
-    }
-
-    @Override
-    public boolean isOnlyChildInGroup(NotificationEntry entry) {
-        final StatusBarNotification sbn = entry.getSbn();
-        if (!isOnlyChild(sbn)) {
-            return false;
-        }
-        NotificationEntry logicalGroupSummary = getLogicalGroupSummary(entry);
-        return logicalGroupSummary != null && !logicalGroupSummary.getSbn().equals(sbn);
-    }
-
-    private int getTotalNumberOfChildren(StatusBarNotification sbn) {
-        int isolatedChildren = getNumberOfIsolatedChildren(sbn.getGroupKey());
-        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
-        int realChildren = group != null ? group.children.size() : 0;
-        return isolatedChildren + realChildren;
-    }
-
-    private boolean isGroupSuppressed(String groupKey) {
-        NotificationGroup group = mGroupMap.get(groupKey);
-        return group != null && group.suppressed;
-    }
-
     private void setStatusBarState(int newState) {
-        mBarState = newState;
-        if (mBarState == StatusBarState.KEYGUARD) {
+        if (newState == StatusBarState.KEYGUARD) {
             collapseGroups();
         }
     }
 
-    @Override
-    public void collapseGroups() {
+    private void collapseGroups() {
         // Because notifications can become isolated when the group becomes suppressed it can
         // lead to concurrent modifications while looping. We need to make a copy.
         ArrayList<NotificationGroup> groupCopy = new ArrayList<>(mGroupMap.values());
@@ -612,7 +453,6 @@ public class NotificationGroupManagerLegacy implements
         }
     }
 
-    @Override
     public boolean isChildInGroup(NotificationEntry entry) {
         final StatusBarNotification sbn = entry.getSbn();
         if (!isGroupChild(sbn)) {
@@ -629,67 +469,6 @@ public class NotificationGroupManagerLegacy implements
             return false;
         }
         return true;
-    }
-
-    @Override
-    public boolean isGroupSummary(NotificationEntry entry) {
-        final StatusBarNotification sbn = entry.getSbn();
-        if (!isGroupSummary(sbn)) {
-            return false;
-        }
-        NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
-        if (group == null || group.summary == null) {
-            return false;
-        }
-        return !group.children.isEmpty() && Objects.equals(group.summary.getSbn(), sbn);
-    }
-
-    @Override
-    public NotificationEntry getGroupSummary(NotificationEntry entry) {
-        return getGroupSummary(getGroupKey(entry.getSbn()));
-    }
-
-    @Override
-    public NotificationEntry getLogicalGroupSummary(NotificationEntry entry) {
-        return getGroupSummary(entry.getSbn().getGroupKey());
-    }
-
-    @Nullable
-    private NotificationEntry getGroupSummary(String groupKey) {
-        NotificationGroup group = mGroupMap.get(groupKey);
-        //TODO: see if this can become an Entry
-        return group == null ? null
-                : group.summary;
-    }
-
-    /**
-     * Get the children that are logically in the summary's group, whether or not they are isolated.
-     *
-     * @param summary summary of a group
-     * @return list of the children
-     */
-    public ArrayList<NotificationEntry> getLogicalChildren(StatusBarNotification summary) {
-        NotificationGroup group = mGroupMap.get(summary.getGroupKey());
-        if (group == null) {
-            return null;
-        }
-        ArrayList<NotificationEntry> children = new ArrayList<>(group.children.values());
-        for (StatusBarNotification sbn : mIsolatedEntries.values()) {
-            if (sbn.getGroupKey().equals(summary.getGroupKey())) {
-                children.add(mGroupMap.get(sbn.getKey()).summary);
-            }
-        }
-        return children;
-    }
-
-    @Override
-    public @Nullable List<NotificationEntry> getChildren(ListEntry listEntrySummary) {
-        NotificationEntry summary = listEntrySummary.getRepresentativeEntry();
-        NotificationGroup group = mGroupMap.get(summary.getSbn().getGroupKey());
-        if (group == null) {
-            return null;
-        }
-        return new ArrayList<>(group.children.values());
     }
 
     /**
@@ -710,7 +489,7 @@ public class NotificationGroupManagerLegacy implements
      * @param sbn notification to check
      * @return the key of the notification
      */
-    public String getGroupKey(StatusBarNotification sbn) {
+    private String getGroupKey(StatusBarNotification sbn) {
         return getGroupKey(sbn.getKey(), sbn.getGroupKey());
     }
 
@@ -721,28 +500,8 @@ public class NotificationGroupManagerLegacy implements
         return groupKey;
     }
 
-    @Override
-    public boolean toggleGroupExpansion(NotificationEntry entry) {
-        NotificationGroup group = mGroupMap.get(getGroupKey(entry.getSbn()));
-        if (group == null) {
-            return false;
-        }
-        setGroupExpanded(group, !group.expanded);
-        return group.expanded;
-    }
-
     private boolean isIsolated(String sbnKey) {
         return mIsolatedEntries.containsKey(sbnKey);
-    }
-
-    /**
-     * Is this notification the summary of a group?
-     */
-    public boolean isGroupSummary(StatusBarNotification sbn) {
-        if (isIsolated(sbn.getKey())) {
-            return true;
-        }
-        return sbn.getNotification().isGroupSummary();
     }
 
     /**
@@ -751,7 +510,7 @@ public class NotificationGroupManagerLegacy implements
      * @param sbn notification to check
      * @return true if it is visually a group child
      */
-    public boolean isGroupChild(StatusBarNotification sbn) {
+    private boolean isGroupChild(StatusBarNotification sbn) {
         return isGroupChild(sbn.getKey(), sbn.isGroup(), sbn.getNotification().isGroupSummary());
     }
 
@@ -760,11 +519,6 @@ public class NotificationGroupManagerLegacy implements
             return false;
         }
         return isGroup && !isGroupSummary;
-    }
-
-    @Override
-    public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-        updateIsolation(entry);
     }
 
     /**
@@ -782,9 +536,6 @@ public class NotificationGroupManagerLegacy implements
         }
         if (isImportantConversation(entry)) {
             return true;
-        }
-        if (mHeadsUpManager != null && !mHeadsUpManager.isAlerting(entry.getKey())) {
-            return false;
         }
         NotificationGroup notificationGroup = mGroupMap.get(sbn.getGroupKey());
         return (sbn.getNotification().fullScreenIntent != null
@@ -825,7 +576,7 @@ public class NotificationGroupManagerLegacy implements
     /**
      * Update the isolation of an entry, splitting it from the group.
      */
-    public void updateIsolation(NotificationEntry entry) {
+    private void updateIsolation(NotificationEntry entry) {
         // We need to buffer a few events because we do isolation changes in 3 steps:
         // removeInternal, update mIsolatedEntries, addInternal.  This means that often the
         // alertOverride will update on the removal, however processing the event in that case can
@@ -866,13 +617,6 @@ public class NotificationGroupManagerLegacy implements
                 || notificationGroup.summary.isGroupNotFullyVisible();
     }
 
-    /**
-     * Directly set the heads up manager to avoid circular dependencies
-     */
-    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
-        mHeadsUpManager = headsUpManager;
-    }
-
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println("GroupManagerLegacy state:");
@@ -893,7 +637,7 @@ public class NotificationGroupManagerLegacy implements
     }
 
     /** Get the group key, reformatted for logging, for the (optional) group */
-    public static String logGroupKey(NotificationGroup group) {
+    private static String logGroupKey(NotificationGroup group) {
         if (group == null) {
             return "null";
         }

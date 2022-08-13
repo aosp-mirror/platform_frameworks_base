@@ -34,6 +34,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.FlakyTest;
 
+import com.android.internal.os.TimeoutRecord;
 import com.android.server.LocalServices;
 import com.android.server.wm.ActivityTaskManagerService;
 
@@ -195,8 +196,9 @@ public class ProcessRecordTests {
 
     private static void appNotResponding(ProcessErrorStateRecord processErrorState,
             String annotation) {
+        TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchNoFocusedWindow(annotation);
         processErrorState.appNotResponding(null /* activityShortComponentName */, null /* aInfo */,
                 null /* parentShortComponentName */, null /* parentProcess */,
-                false /* aboveSystem */, annotation, false /* onlyDumpSelf */);
+                false /* aboveSystem */, timeoutRecord, false /* onlyDumpSelf */);
     }
 }

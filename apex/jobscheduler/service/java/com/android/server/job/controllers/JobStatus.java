@@ -574,7 +574,6 @@ public final class JobStatus {
 
         if (!isRequestedExpeditedJob()
                 && satisfiesMinWindowException
-                && !job.isPrefetch()
                 && lacksSomeFlexibleConstraints) {
             mNumRequiredFlexibleConstraints =
                     NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS + (mPreferUnmetered ? 1 : 0);

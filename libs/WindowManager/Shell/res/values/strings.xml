@@ -197,6 +197,8 @@
     <!-- Freeform window caption strings -->
     <!-- Accessibility text for the maximize window button [CHAR LIMIT=NONE] -->
     <string name="maximize_button_text">Maximize</string>
+     <!-- Accessibility text for the minimize window button [CHAR LIMIT=NONE] -->
+     <string name="minimize_button_text">Minimize</string>
     <!-- Accessibility text for the close window button [CHAR LIMIT=NONE] -->
     <string name="close_button_text">Close</string>
 </resources>

@@ -58,9 +58,6 @@ android_library {
         "zxing-core-1.7",
     ],
 
-    // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
-    // LOCAL_SHARED_JAVA_LIBRARIES := androidx.lifecycle_lifecycle-common
-
     resource_dirs: ["res"],
 
     srcs: [

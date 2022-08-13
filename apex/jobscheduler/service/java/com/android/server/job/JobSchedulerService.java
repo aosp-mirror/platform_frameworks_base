@@ -1556,7 +1556,10 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         // Create the controllers.
         mControllers = new ArrayList<StateController>();
-        final FlexibilityController flexibilityController = new FlexibilityController(this);
+        mPrefetchController = new PrefetchController(this);
+        mControllers.add(mPrefetchController);
+        final FlexibilityController flexibilityController =
+                new FlexibilityController(this, mPrefetchController);
         mControllers.add(flexibilityController);
         final ConnectivityController connectivityController =
                 new ConnectivityController(this, flexibilityController);
@@ -1575,8 +1578,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(new ContentObserverController(this));
         mDeviceIdleJobsController = new DeviceIdleJobsController(this);
         mControllers.add(mDeviceIdleJobsController);
-        mPrefetchController = new PrefetchController(this);
-        mControllers.add(mPrefetchController);
         mQuotaController =
                 new QuotaController(this, backgroundJobsController, connectivityController);
         mControllers.add(mQuotaController);
