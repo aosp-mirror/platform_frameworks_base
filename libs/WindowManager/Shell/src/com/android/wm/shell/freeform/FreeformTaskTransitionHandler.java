@@ -92,6 +92,12 @@ public class FreeformTaskTransitionHandler
     }
 
     @Override
+    public void startMinimizedModeTransition(WindowContainerTransaction wct) {
+        final int type = WindowManager.TRANSIT_TO_BACK;
+        mPendingTransitionTokens.add(mTransitions.startTransition(type, wct, this));
+    }
+
+    @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startT,
             @NonNull SurfaceControl.Transaction finishT,
@@ -121,6 +127,8 @@ public class FreeformTaskTransitionHandler
                             transition, info.getType(), change, startT, finishT);
                     break;
                 case WindowManager.TRANSIT_TO_BACK:
+                    transitionHandled |= startMinimizeTransition(transition);
+                    break;
                 case WindowManager.TRANSIT_TO_FRONT:
                     break;
             }
@@ -167,6 +175,13 @@ public class FreeformTaskTransitionHandler
 
         // Intercepted transition to manage the window decorations. Let other handlers animate.
         return false;
+    }
+
+    private boolean startMinimizeTransition(IBinder transition) {
+        if (!mPendingTransitionTokens.contains(transition)) {
+            return false;
+        }
+        return true;
     }
 
     private boolean startChangeTransition(
@@ -243,4 +258,5 @@ public class FreeformTaskTransitionHandler
                 return null;
         }
     }
+
 }

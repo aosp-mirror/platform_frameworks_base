@@ -17,9 +17,9 @@
 package com.android.systemui.keyguard.domain.usecase
 
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.keyguard.data.config.KeyguardQuickAffordanceConfigs
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
+import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
+import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceRegistry
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
@@ -27,7 +27,7 @@ import kotlin.reflect.KClass
 class OnKeyguardQuickAffordanceClickedUseCase
 @Inject
 constructor(
-    private val configs: KeyguardQuickAffordanceConfigs,
+    private val registry: KeyguardQuickAffordanceRegistry,
     private val launchAffordanceUseCase: LaunchKeyguardQuickAffordanceUseCase,
 ) {
     operator fun invoke(
@@ -35,7 +35,7 @@ constructor(
         animationController: ActivityLaunchAnimator.Controller?,
     ) {
         @Suppress("UNCHECKED_CAST")
-        val config = configs.get(configKey as KClass<out KeyguardQuickAffordanceConfig>)
+        val config = registry.get(configKey as KClass<out KeyguardQuickAffordanceConfig>)
         when (val result = config.onQuickAffordanceClicked(animationController)) {
             is OnClickedResult.StartActivity ->
                 launchAffordanceUseCase(
