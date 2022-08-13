@@ -6071,7 +6071,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mRemoved = true;
 
         if (mContentRecorder != null) {
-            mContentRecorder.remove();
+            mContentRecorder.stopRecording();
         }
 
         // Only update focus/visibility for the last one because there may be many root tasks are
@@ -6348,6 +6348,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting void pauseRecording() {
         if (mContentRecorder != null) {
             mContentRecorder.pauseRecording();
+        }
+    }
+
+    /**
+     * The MediaProjection instance is torn down.
+     */
+    @VisibleForTesting void stopMediaProjection() {
+        if (mContentRecorder != null) {
+            mContentRecorder.stopMediaProjection();
         }
     }
 

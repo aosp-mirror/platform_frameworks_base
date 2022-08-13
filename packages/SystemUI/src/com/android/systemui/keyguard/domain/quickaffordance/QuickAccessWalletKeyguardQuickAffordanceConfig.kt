@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.keyguard.data.quickaffordance
+package com.android.systemui.keyguard.domain.quickaffordance
 
 import android.graphics.drawable.Drawable
 import android.service.quickaccesswallet.GetWalletCardsError

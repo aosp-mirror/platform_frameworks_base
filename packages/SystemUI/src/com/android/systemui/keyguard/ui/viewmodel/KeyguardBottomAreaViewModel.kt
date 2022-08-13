@@ -17,6 +17,8 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.doze.util.BurnInHelperWrapper
+import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
+import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.domain.usecase.ObserveAnimateBottomAreaTransitionsUseCase
 import com.android.systemui.keyguard.domain.usecase.ObserveBottomAreaAlphaUseCase
 import com.android.systemui.keyguard.domain.usecase.ObserveClockPositionUseCase
@@ -24,8 +26,6 @@ import com.android.systemui.keyguard.domain.usecase.ObserveDozeAmountUseCase
 import com.android.systemui.keyguard.domain.usecase.ObserveIsDozingUseCase
 import com.android.systemui.keyguard.domain.usecase.ObserveKeyguardQuickAffordanceUseCase
 import com.android.systemui.keyguard.domain.usecase.OnKeyguardQuickAffordanceClickedUseCase
-import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordanceModel
-import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePosition
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
