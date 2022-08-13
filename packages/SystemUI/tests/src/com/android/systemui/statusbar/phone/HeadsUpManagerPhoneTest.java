@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -35,8 +34,8 @@ import com.android.systemui.statusbar.AlertingNotificationManagerTest;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
@@ -60,19 +59,18 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     private HeadsUpManagerPhone mHeadsUpManager;
 
     @Mock private HeadsUpManagerLogger mHeadsUpManagerLogger;
-    @Mock private NotificationGroupManagerLegacy mGroupManager;
-    @Mock private View mNotificationShadeWindowView;
+    @Mock private GroupMembershipManager mGroupManager;
     @Mock private VisualStabilityProvider mVSProvider;
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private KeyguardBypassController mBypassController;
     @Mock private ConfigurationControllerImpl mConfigurationController;
     private boolean mLivesPastNormalTime;
 
-    private final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
+    private static final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
         TestableHeadsUpManagerPhone(
                 Context context,
                 HeadsUpManagerLogger headsUpManagerLogger,
-                NotificationGroupManagerLegacy groupManager,
+                GroupMembershipManager groupManager,
                 VisualStabilityProvider visualStabilityProvider,
                 StatusBarStateController statusBarStateController,
                 KeyguardBypassController keyguardBypassController,

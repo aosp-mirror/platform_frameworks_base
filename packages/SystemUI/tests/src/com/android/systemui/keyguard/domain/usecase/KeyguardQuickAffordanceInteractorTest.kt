@@ -17,14 +17,20 @@
 package com.android.systemui.keyguard.domain.usecase
 
 import androidx.test.filters.SmallTest
+import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.containeddrawable.ContainedDrawable
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
@@ -34,33 +40,39 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(JUnit4::class)
-class ObserveKeyguardQuickAffordanceUseCaseImplTest : SysuiTestCase() {
+class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
 
-    private lateinit var underTest: ObserveKeyguardQuickAffordanceUseCase
+    @Mock private lateinit var lockPatternUtils: LockPatternUtils
+    @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var userTracker: UserTracker
+    @Mock private lateinit var activityStarter: ActivityStarter
+
+    private lateinit var underTest: KeyguardQuickAffordanceInteractor
 
     private lateinit var repository: FakeKeyguardRepository
-    private lateinit var isDozingUseCase: ObserveIsDozingUseCase
-    private lateinit var isKeyguardShowingUseCase: ObserveIsKeyguardShowingUseCase
     private lateinit var homeControls: FakeKeyguardQuickAffordanceConfig
     private lateinit var quickAccessWallet: FakeKeyguardQuickAffordanceConfig
     private lateinit var qrCodeScanner: FakeKeyguardQuickAffordanceConfig
 
     @Before
-    fun setUp() = runBlockingTest {
+    fun setUp() {
+        MockitoAnnotations.initMocks(this)
+
         repository = FakeKeyguardRepository()
         repository.setKeyguardShowing(true)
-        isDozingUseCase = ObserveIsDozingUseCase(repository)
-        isKeyguardShowingUseCase = ObserveIsKeyguardShowingUseCase(repository)
 
         homeControls = object : FakeKeyguardQuickAffordanceConfig() {}
         quickAccessWallet = object : FakeKeyguardQuickAffordanceConfig() {}
         qrCodeScanner = object : FakeKeyguardQuickAffordanceConfig() {}
 
         underTest =
-            ObserveKeyguardQuickAffordanceUseCaseImpl(
+            KeyguardQuickAffordanceInteractor(
+                keyguardInteractor = KeyguardInteractor(repository = repository),
                 registry =
                     FakeKeyguardQuickAffordanceRegistry(
                         mapOf(
@@ -75,13 +87,15 @@ class ObserveKeyguardQuickAffordanceUseCaseImplTest : SysuiTestCase() {
                                 ),
                         ),
                     ),
-                isDozingUseCase = isDozingUseCase,
-                isKeyguardShowingUseCase = isKeyguardShowingUseCase,
+                lockPatternUtils = lockPatternUtils,
+                keyguardStateController = keyguardStateController,
+                userTracker = userTracker,
+                activityStarter = activityStarter,
             )
     }
 
     @Test
-    fun `invoke - bottom start affordance is visible`() = runBlockingTest {
+    fun `quickAffordance - bottom start affordance is visible`() = runBlockingTest {
         val configKey = homeControls::class
         homeControls.setState(
             KeyguardQuickAffordanceConfig.State.Visible(
@@ -92,7 +106,8 @@ class ObserveKeyguardQuickAffordanceUseCaseImplTest : SysuiTestCase() {
 
         var latest: KeyguardQuickAffordanceModel? = null
         val job =
-            underTest(KeyguardQuickAffordancePosition.BOTTOM_START)
+            underTest
+                .quickAffordance(KeyguardQuickAffordancePosition.BOTTOM_START)
                 .onEach { latest = it }
                 .launchIn(this)
 
@@ -106,7 +121,7 @@ class ObserveKeyguardQuickAffordanceUseCaseImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun `invoke - bottom end affordance is visible`() = runBlockingTest {
+    fun `quickAffordance - bottom end affordance is visible`() = runBlockingTest {
         val configKey = quickAccessWallet::class
         quickAccessWallet.setState(
             KeyguardQuickAffordanceConfig.State.Visible(
@@ -117,7 +132,8 @@ class ObserveKeyguardQuickAffordanceUseCaseImplTest : SysuiTestCase() {
 
         var latest: KeyguardQuickAffordanceModel? = null
         val job =
-            underTest(KeyguardQuickAffordancePosition.BOTTOM_END)
+            underTest
+                .quickAffordance(KeyguardQuickAffordancePosition.BOTTOM_END)
                 .onEach { latest = it }
                 .launchIn(this)
 
@@ -131,7 +147,7 @@ class ObserveKeyguardQuickAffordanceUseCaseImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun `invoke - bottom start affordance hidden while dozing`() = runBlockingTest {
+    fun `quickAffordance - bottom start affordance hidden while dozing`() = runBlockingTest {
         repository.setDozing(true)
         homeControls.setState(
             KeyguardQuickAffordanceConfig.State.Visible(
@@ -142,7 +158,8 @@ class ObserveKeyguardQuickAffordanceUseCaseImplTest : SysuiTestCase() {
 
         var latest: KeyguardQuickAffordanceModel? = null
         val job =
-            underTest(KeyguardQuickAffordancePosition.BOTTOM_START)
+            underTest
+                .quickAffordance(KeyguardQuickAffordancePosition.BOTTOM_START)
                 .onEach { latest = it }
                 .launchIn(this)
         assertThat(latest).isEqualTo(KeyguardQuickAffordanceModel.Hidden)
@@ -150,7 +167,7 @@ class ObserveKeyguardQuickAffordanceUseCaseImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun `invoke - bottom start affordance hidden when lockscreen is not showing`() =
+    fun `quickAffordance - bottom start affordance hidden when lockscreen is not showing`() =
         runBlockingTest {
             repository.setKeyguardShowing(false)
             homeControls.setState(
@@ -162,7 +179,8 @@ class ObserveKeyguardQuickAffordanceUseCaseImplTest : SysuiTestCase() {
 
             var latest: KeyguardQuickAffordanceModel? = null
             val job =
-                underTest(KeyguardQuickAffordancePosition.BOTTOM_START)
+                underTest
+                    .quickAffordance(KeyguardQuickAffordancePosition.BOTTOM_START)
                     .onEach { latest = it }
                     .launchIn(this)
             assertThat(latest).isEqualTo(KeyguardQuickAffordanceModel.Hidden)

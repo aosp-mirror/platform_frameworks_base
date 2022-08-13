@@ -5822,12 +5822,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSpeedBumpIndexDirty = true;
     }
 
-    /** Updates the indices of the boundaries between sections. */
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void updateSectionBoundaries(String reason) {
-        mSectionsManager.updateSectionBoundaries(reason);
-    }
-
     void updateContinuousBackgroundDrawing() {
         boolean continuousBackground = !mAmbientState.isFullyAwake()
                 && mSwipeHelper.isSwiping();
