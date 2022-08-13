@@ -1,5 +1,6 @@
 package com.android.server.wm;
 
+import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.processStateAmToProto;
@@ -274,6 +275,8 @@ class ActivityMetricsLogger {
         final boolean mProcessRunning;
         /** whether the process of the launching activity didn't have any active activity. */
         final boolean mProcessSwitch;
+        /** The process state of the launching activity prior to the launch */
+        final int mProcessState;
         /** Whether the last launched activity has reported drawn. */
         boolean mIsDrawn;
         /** The latest activity to have been launched. */
@@ -309,8 +312,8 @@ class ActivityMetricsLogger {
         @Nullable
         static TransitionInfo create(@NonNull ActivityRecord r,
                 @NonNull LaunchingState launchingState, @Nullable ActivityOptions options,
-                boolean processRunning, boolean processSwitch, boolean newActivityCreated,
-                int startResult) {
+                boolean processRunning, boolean processSwitch, int processState,
+                boolean newActivityCreated, int startResult) {
             if (startResult != START_SUCCESS && startResult != START_TASK_TO_FRONT) {
                 return null;
             }
@@ -325,18 +328,19 @@ class ActivityMetricsLogger {
                 transitionType = TYPE_TRANSITION_COLD_LAUNCH;
             }
             return new TransitionInfo(r, launchingState, options, transitionType, processRunning,
-                    processSwitch);
+                    processSwitch, processState);
         }
 
         /** Use {@link TransitionInfo#create} instead to ensure the transition type is valid. */
         private TransitionInfo(ActivityRecord r, LaunchingState launchingState,
                 ActivityOptions options, int transitionType, boolean processRunning,
-                boolean processSwitch) {
+                boolean processSwitch, int processState) {
             mLaunchingState = launchingState;
             mTransitionStartTimeNs = launchingState.mCurrentTransitionStartTimeNs;
             mTransitionType = transitionType;
             mProcessRunning = processRunning;
             mProcessSwitch = processSwitch;
+            mProcessState = processState;
             mTransitionDeviceUptimeMs = launchingState.mCurrentUpTimeMs;
             setLatestLaunchedActivity(r);
             // The launching state can be reused by consecutive launch. Its original association
@@ -640,12 +644,16 @@ class ActivityMetricsLogger {
         // interesting.
         final boolean processSwitch = !processRunning
                 || !processRecord.hasStartedActivity(launchedActivity);
+        final int processState = processRunning
+                ? processRecord.getCurrentProcState()
+                : PROCESS_STATE_NONEXISTENT;
 
         final TransitionInfo info = launchingState.mAssociatedTransitionInfo;
         if (DEBUG_METRICS) {
             Slog.i(TAG, "notifyActivityLaunched" + " resultCode=" + resultCode
                     + " launchedActivity=" + launchedActivity + " processRunning=" + processRunning
                     + " processSwitch=" + processSwitch
+                    + " processState=" + processState
                     + " newActivityCreated=" + newActivityCreated + " info=" + info);
         }
 
@@ -681,7 +689,8 @@ class ActivityMetricsLogger {
         }
 
         final TransitionInfo newInfo = TransitionInfo.create(launchedActivity, launchingState,
-                options, processRunning, processSwitch, newActivityCreated, resultCode);
+                options, processRunning, processSwitch, processState, newActivityCreated,
+                resultCode);
         if (newInfo == null) {
             abort(launchingState, "unrecognized launch");
             return;
@@ -995,8 +1004,9 @@ class ActivityMetricsLogger {
             final long timestamp = info.mTransitionStartTimeNs;
             final long uptime = info.mTransitionDeviceUptimeMs;
             final int transitionDelay = info.mCurrentTransitionDelayMs;
+            final int processState = info.mProcessState;
             mLoggerHandler.post(() -> logAppTransition(
-                    timestamp, uptime, transitionDelay, infoSnapshot, isHibernating));
+                    timestamp, uptime, transitionDelay, infoSnapshot, isHibernating, processState));
         }
         mLoggerHandler.post(() -> logAppDisplayed(infoSnapshot));
         if (info.mPendingFullyDrawn != null) {
@@ -1008,7 +1018,8 @@ class ActivityMetricsLogger {
 
     // This gets called on another thread without holding the activity manager lock.
     private void logAppTransition(long transitionStartTimeNs, long transitionDeviceUptimeMs,
-            int currentTransitionDelayMs, TransitionInfoSnapshot info, boolean isHibernating) {
+            int currentTransitionDelayMs, TransitionInfoSnapshot info, boolean isHibernating,
+            int processState) {
         final LogMaker builder = new LogMaker(APP_TRANSITION);
         builder.setPackageName(info.packageName);
         builder.setType(info.type);
@@ -1074,7 +1085,8 @@ class ActivityMetricsLogger {
                 isIncremental,
                 isLoading,
                 info.launchedActivityName.hashCode(),
-                TimeUnit.NANOSECONDS.toMillis(transitionStartTimeNs));
+                TimeUnit.NANOSECONDS.toMillis(transitionStartTimeNs),
+                processState);
 
         if (DEBUG_METRICS) {
             Slog.i(TAG, String.format("APP_START_OCCURRED(%s, %s, %s, %s, %s)",
