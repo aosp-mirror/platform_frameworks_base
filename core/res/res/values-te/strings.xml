@@ -1702,7 +1702,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"కలర్ మార్పిడి"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"కలర్ కరెక్షన్"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"వన్-హ్యాండెడ్ మోడ్"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"కాంతిని మరింత డిమ్ చేయడం"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ఎక్స్‌ట్రా డిమ్"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆన్ చేయబడింది"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ని ఉపయోగించడానికి వాల్యూమ్ కీలు రెండింటినీ 3 సెకన్లు నొక్కి ఉంచండి"</string>
