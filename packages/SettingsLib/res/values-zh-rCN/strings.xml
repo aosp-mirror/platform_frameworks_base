@@ -643,7 +643,7 @@
     <string name="dream_complication_title_date" msgid="8661176085446135789">"日期"</string>
     <string name="dream_complication_title_weather" msgid="598609151677172783">"天气"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"空气质量"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"投射信息"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"投放信息"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"选择个人资料照片"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"默认用户图标"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"实体键盘"</string>

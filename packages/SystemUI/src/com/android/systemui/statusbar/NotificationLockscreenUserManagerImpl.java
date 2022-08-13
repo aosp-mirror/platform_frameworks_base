@@ -642,6 +642,8 @@ public class NotificationLockscreenUserManagerImpl implements
         //   - device keyguard is shown in secure mode;
         //   - profile is locked with a work challenge.
         SparseArray<UserInfo> currentProfiles = getCurrentProfiles();
+        SparseBooleanArray oldPublicModes = mLockscreenPublicMode.clone();
+        SparseBooleanArray oldWorkChallenges = mUsersWithSeparateWorkChallenge.clone();
         mUsersWithSeparateWorkChallenge.clear();
         for (int i = currentProfiles.size() - 1; i >= 0; i--) {
             final int userId = currentProfiles.valueAt(i).id;
@@ -660,7 +662,10 @@ public class NotificationLockscreenUserManagerImpl implements
         }
         getEntryManager().updateNotifications("NotificationLockscreenUserManager.updatePublicMode");
         // TODO(b/234738798): Migrate KeyguardNotificationVisibilityProvider to use this listener
-        // notifyNotificationStateChanged();
+        if (!mLockscreenPublicMode.equals(oldPublicModes)
+                || !mUsersWithSeparateWorkChallenge.equals(oldWorkChallenges)) {
+            notifyNotificationStateChanged();
+        }
     }
 
     @Override
