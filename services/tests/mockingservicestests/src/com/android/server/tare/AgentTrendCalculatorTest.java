@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,10 @@
 package com.android.server.tare;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.util.ArraySet;
 import android.util.SparseLongArray;
@@ -99,7 +102,9 @@ public class AgentTrendCalculatorTest {
 
     @Before
     public void setUp() {
-        mEconomicPolicy = new MockEconomicPolicy(mock(InternalResourceService.class));
+        final InternalResourceService irs = mock(InternalResourceService.class);
+        when(irs.isVip(anyInt(), anyString())).thenReturn(false);
+        mEconomicPolicy = new MockEconomicPolicy(irs);
     }
 
     @Test

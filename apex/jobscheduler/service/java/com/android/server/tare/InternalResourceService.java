@@ -48,6 +48,7 @@ import android.os.Handler;
 import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -148,6 +149,9 @@ public class InternalResourceService extends SystemService {
     // TODO(144864180): include userID
     @GuardedBy("mLock")
     private ArraySet<String> mExemptedApps = new ArraySet<>();
+
+    @GuardedBy("mLock")
+    private final SparseArrayMap<String, Boolean> mVipOverrides = new SparseArrayMap<>();
 
     private volatile boolean mIsEnabled;
     private volatile int mBootPhase;
@@ -368,6 +372,21 @@ public class InternalResourceService extends SystemService {
         return UserHandle.isCore(getUid(userId, pkgName));
     }
 
+    boolean isVip(final int userId, @NonNull String pkgName) {
+        synchronized (mLock) {
+            final Boolean override = mVipOverrides.get(userId, pkgName);
+            if (override != null) {
+                return override;
+            }
+        }
+        if (isSystem(userId, pkgName)) {
+            // The government, I mean the system, can create ARCs as it needs to in order to
+            // operate.
+            return true;
+        }
+        return false;
+    }
+
     void onBatteryLevelChanged() {
         synchronized (mLock) {
             final int newBatteryLevel = getCurrentBatteryLevel();
@@ -470,6 +489,7 @@ public class InternalResourceService extends SystemService {
         }
         synchronized (mLock) {
             mUidToPackageCache.remove(uid, pkgName);
+            mVipOverrides.delete(userId, pkgName);
             for (int i = 0; i < mPkgCache.size(); ++i) {
                 final InstalledPackageInfo pkgInfo = mPkgCache.get(i);
                 if (UserHandle.getUserId(pkgInfo.uid) == userId
@@ -506,6 +526,7 @@ public class InternalResourceService extends SystemService {
 
     void onUserRemoved(final int userId) {
         synchronized (mLock) {
+            mVipOverrides.delete(userId);
             ArrayList<String> removedPkgs = new ArrayList<>();
             for (int i = mPkgCache.size() - 1; i >= 0; --i) {
                 final InstalledPackageInfo pkgInfo = mPkgCache.get(i);
@@ -886,6 +907,15 @@ public class InternalResourceService extends SystemService {
                 Binder.restoreCallingIdentity(identityToken);
             }
         }
+
+        @Override
+        public int handleShellCommand(@NonNull ParcelFileDescriptor in,
+                @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
+                @NonNull String[] args) {
+            return (new TareShellCommand(InternalResourceService.this)).exec(
+                    this, in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(),
+                    args);
+        }
     }
 
     private final class LocalService implements EconomyManagerInternal {
@@ -937,9 +967,9 @@ public class InternalResourceService extends SystemService {
             if (!mIsEnabled) {
                 return true;
             }
-            if (isSystem(userId, pkgName)) {
+            if (isVip(userId, pkgName)) {
                 // The government, I mean the system, can create ARCs as it needs to in order to
-                // operate.
+                // allow VIPs to operate.
                 return true;
             }
             // TODO: take temp-allowlist into consideration
@@ -965,7 +995,7 @@ public class InternalResourceService extends SystemService {
             if (!mIsEnabled) {
                 return FOREVER_MS;
             }
-            if (isSystem(userId, pkgName)) {
+            if (isVip(userId, pkgName)) {
                 return FOREVER_MS;
             }
             long totalCostPerSecond = 0;
@@ -1136,6 +1166,47 @@ public class InternalResourceService extends SystemService {
         }
     }
 
+    // Shell command infrastructure
+    int executeClearVip(@NonNull PrintWriter pw) {
+        synchronized (mLock) {
+            final SparseSetArray<String> changedPkgs = new SparseSetArray<>();
+            for (int u = mVipOverrides.numMaps() - 1; u >= 0; --u) {
+                final int userId = mVipOverrides.keyAt(u);
+
+                for (int p = mVipOverrides.numElementsForKeyAt(u) - 1; p >= 0; --p) {
+                    changedPkgs.add(userId, mVipOverrides.keyAt(u, p));
+                }
+            }
+            mVipOverrides.clear();
+            if (mIsEnabled) {
+                mAgent.onVipStatusChangedLocked(changedPkgs);
+            }
+        }
+        pw.println("Cleared all VIP statuses");
+        return TareShellCommand.COMMAND_SUCCESS;
+    }
+
+    int executeSetVip(@NonNull PrintWriter pw,
+            int userId, @NonNull String pkgName, @Nullable Boolean newVipState) {
+        final boolean changed;
+        synchronized (mLock) {
+            final boolean wasVip = isVip(userId, pkgName);
+            if (newVipState == null) {
+                mVipOverrides.delete(userId, pkgName);
+            } else {
+                mVipOverrides.add(userId, pkgName, newVipState);
+            }
+            changed = isVip(userId, pkgName) != wasVip;
+            if (mIsEnabled && changed) {
+                mAgent.onVipStatusChangedLocked(userId, pkgName);
+            }
+        }
+        pw.println(appToString(userId, pkgName) + " VIP status set to " + newVipState + "."
+                + " Final VIP state changed? " + changed);
+        return TareShellCommand.COMMAND_SUCCESS;
+    }
+
+    // Dump infrastructure
     private static void dumpHelp(PrintWriter pw) {
         pw.println("Resource Economy (economy) dump options:");
         pw.println("  [-h|--help] [package] ...");
@@ -1171,6 +1242,29 @@ public class InternalResourceService extends SystemService {
 
             pw.println();
             pw.print("Exempted apps", mExemptedApps);
+            pw.println();
+
+            boolean printedVips = false;
+            pw.println();
+            pw.print("VIPs:");
+            for (int u = 0; u < mVipOverrides.numMaps(); ++u) {
+                final int userId = mVipOverrides.keyAt(u);
+
+                for (int p = 0; p < mVipOverrides.numElementsForKeyAt(u); ++p) {
+                    final String pkgName = mVipOverrides.keyAt(u, p);
+
+                    printedVips = true;
+                    pw.println();
+                    pw.print(appToString(userId, pkgName));
+                    pw.print("=");
+                    pw.print(mVipOverrides.valueAt(u, p));
+                }
+            }
+            if (printedVips) {
+                pw.println();
+            } else {
+                pw.print(" None");
+            }
             pw.println();
 
             pw.println();

@@ -149,7 +149,6 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     private long mHardSatiatedConsumptionLimit;
 
     private final KeyValueListParser mParser = new KeyValueListParser(',');
-    private final InternalResourceService mInternalResourceService;
     private final Injector mInjector;
 
     private final SparseArray<Action> mActions = new SparseArray<>();
@@ -157,7 +156,6 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
 
     AlarmManagerEconomicPolicy(InternalResourceService irs, Injector injector) {
         super(irs);
-        mInternalResourceService = irs;
         mInjector = injector;
         loadConstants("", null);
     }
@@ -165,14 +163,14 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     @Override
     void setup(@NonNull DeviceConfig.Properties properties) {
         super.setup(properties);
-        ContentResolver resolver = mInternalResourceService.getContext().getContentResolver();
+        ContentResolver resolver = mIrs.getContext().getContentResolver();
         loadConstants(mInjector.getSettingsGlobalString(resolver, TARE_ALARM_MANAGER_CONSTANTS),
                 properties);
     }
 
     @Override
     long getMinSatiatedBalance(final int userId, @NonNull final String pkgName) {
-        if (mInternalResourceService.isPackageExempted(userId, pkgName)) {
+        if (mIrs.isPackageExempted(userId, pkgName)) {
             return mMinSatiatedBalanceExempted;
         }
         // TODO: take other exemptions into account
