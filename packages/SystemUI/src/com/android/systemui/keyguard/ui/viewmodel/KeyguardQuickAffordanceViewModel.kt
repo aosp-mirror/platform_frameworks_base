@@ -26,6 +26,8 @@ import kotlin.reflect.KClass
 data class KeyguardQuickAffordanceViewModel(
     val configKey: KClass<out KeyguardQuickAffordanceConfig>? = null,
     val isVisible: Boolean = false,
+    /** Whether to animate the transition of the quick affordance from invisible to visible. */
+    val animateReveal: Boolean = false,
     val icon: ContainedDrawable = ContainedDrawable.WithResource(0),
     @StringRes val contentDescriptionResourceId: Int = 0,
     val onClicked: (OnClickedParameters) -> Unit = {},
