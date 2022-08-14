@@ -208,7 +208,7 @@
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"Configurações para <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"Iniciar configurações do mecanismo"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Mecanismo preferencial"</string>
-    <string name="tts_general_section_title" msgid="8919671529502364567">"Gerais"</string>
+    <string name="tts_general_section_title" msgid="8919671529502364567">"Geral"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Redefinir o tom de voz"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Redefinir o tom de voz para o padrão."</string>
   <string-array name="tts_rate_entries">
@@ -660,8 +660,8 @@
     <string name="dream_complication_title_weather" msgid="598609151677172783">"Clima"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Qualidade ­do ar"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Info. de transmissão"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
+    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"Automação residencial"</string>
+    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"Smartspace"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Escolher a foto do perfil"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Ícone de usuário padrão"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclado físico"</string>

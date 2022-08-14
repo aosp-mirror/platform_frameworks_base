@@ -4416,13 +4416,20 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     @VisibleForTesting
     InsetsControlTarget computeImeControlTarget() {
+        if (mImeInputTarget == null) {
+            // A special case that if there is no IME input target while the IME is being killed,
+            // in case seeing unexpected IME surface visibility change when delivering the IME leash
+            // to the remote insets target during the IME restarting, but the focus window is not in
+            // multi-windowing mode, return null target until the next input target updated.
+            return null;
+        }
+
+        final WindowState imeInputTarget = mImeInputTarget.getWindowState();
         if (!isImeControlledByApp() && mRemoteInsetsControlTarget != null
-                || (mImeInputTarget != null
-                        && getImeHostOrFallback(mImeInputTarget.getWindowState())
-                               == mRemoteInsetsControlTarget)) {
+                || getImeHostOrFallback(imeInputTarget) == mRemoteInsetsControlTarget) {
             return mRemoteInsetsControlTarget;
         } else {
-            return mImeInputTarget != null ? mImeInputTarget.getWindowState() : null;
+            return imeInputTarget;
         }
     }
 

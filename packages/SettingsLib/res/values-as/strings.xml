@@ -121,7 +121,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"সম্পৰ্কসূচী আৰু কলৰ ইতিহাস শ্বেয়াৰ কৰাৰ বাবে ব্যৱহাৰ কৰক"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ইণ্টাৰনেট সংযোগ শ্বেয়াৰ"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"পাঠ বাৰ্তা"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"ছিম প্ৰৱেশ"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"ছিমৰ এক্সেছ"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"এইচ্ছডি অডি\'অ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"এইচ্ছডি অডিঅ’"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"শ্ৰৱণ যন্ত্ৰ"</string>
@@ -660,7 +660,8 @@
     <string name="dream_complication_title_weather" msgid="598609151677172783">"বতৰ"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"বায়ুৰ গুণগত মান"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"কাষ্টৰ তথ্য"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
+    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"গৃহ নিয়ন্ত্ৰণ"</string>
+    <!-- no translation found for dream_complication_title_smartspace (4197829945636051120) -->
     <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"এখন প্ৰ’ফাইল চিত্ৰ বাছনি কৰক"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ডিফ’ল্ট ব্যৱহাৰকাৰীৰ চিহ্ন"</string>
