@@ -2034,6 +2034,9 @@
          on grouped devices. -->
     <bool name="config_volumeAdjustmentForRemoteGroupSessions">true</bool>
 
+    <!-- Flag indicating current media Output Switcher version. -->
+    <integer name="config_mediaOutputSwitchDialogVersion">1</integer>
+
     <!-- Flag indicating that an outbound call must have a call capable phone account
          that has declared it can process the call's handle. -->
     <bool name="config_requireCallCapableAccountForHandle">false</bool>
