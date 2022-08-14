@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
+import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -25,13 +26,9 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.wm.shell.flicker.appWindowBecomesVisible
-import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
+import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
-import com.android.wm.shell.flicker.layerBecomesVisible
-import com.android.wm.shell.flicker.layerIsVisibleAtEnd
-import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
-import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
+import com.android.wm.shell.flicker.splitAppLayerBoundsChanges
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -41,16 +38,16 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test switch back to split pair after go home
+ * Test resize split by dragging the divider bar.
  *
- * To run this test: `atest WMShellFlickerTests:SwitchBackToSplitFromHome`
+ * To run this test: `atest WMShellFlickerTests:DragDividerToResize`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class SwitchBackToSplitFromHome(testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
+class DragDividerToResize (testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
 
     // TODO(b/231399940): Remove this once we can use recent shortcut to enter split.
     @Before
@@ -59,60 +56,78 @@ class SwitchBackToSplitFromHome(testSpec: FlickerTestParameter) : SplitScreenBas
     }
 
     override val transition: FlickerBuilder.() -> Unit
-    get() = {
-        super.transition(this)
-        setup {
-            eachRun {
-                primaryApp.launchViaIntent(wmHelper)
-                // TODO(b/231399940): Use recent shortcut to enter split.
-                tapl.launchedAppState.taskbar
-                    .openAllApps()
-                    .getAppIcon(secondaryApp.appName)
-                    .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
-                SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
-
-                tapl.goHome()
-                wmHelper.StateSyncBuilder()
-                    .withAppTransitionIdle()
-                    .withHomeActivityVisible()
-                    .waitForAndVerify()
+        get() = {
+            super.transition(this)
+            setup {
+                eachRun {
+                    tapl.goHome()
+                    primaryApp.launchViaIntent(wmHelper)
+                    // TODO(b/231399940): Use recent shortcut to enter split.
+                    tapl.launchedAppState.taskbar
+                        .openAllApps()
+                        .getAppIcon(secondaryApp.appName)
+                        .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
+                    SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
+                }
+            }
+            transitions {
+                SplitScreenHelper.dragDividerToResizeAndWait(device, wmHelper)
             }
         }
-        transitions {
-            tapl.workspace.quickSwitchToPreviousApp()
-            SplitScreenHelper.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
+
+    @Presubmit
+    @Test
+    fun splitScreenDividerKeepVisible() {
+        testSpec.assertLayers {
+            this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
         }
     }
 
     @Presubmit
     @Test
-    fun splitScreenDividerBecomesVisible() = testSpec.splitScreenDividerBecomesVisible()
+    fun primaryAppLayerKeepVisible() {
+        testSpec.assertLayers {
+            this.isVisible(primaryApp)
+        }
+    }
 
     @Presubmit
     @Test
-    fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp)
+    fun secondaryAppLayerVisibilityChanges() {
+        testSpec.assertLayers {
+            this.isVisible(secondaryApp)
+                .then()
+                .isInvisible(secondaryApp)
+                .then()
+                .isVisible(secondaryApp)
+        }
+    }
 
     @Presubmit
     @Test
-    fun secondaryAppLayerBecomesVisible() = testSpec.layerBecomesVisible(secondaryApp)
+    fun primaryAppWindowKeepVisible() {
+        testSpec.assertWm {
+            this.isAppWindowVisible(primaryApp)
+        }
+    }
 
     @Presubmit
     @Test
-    fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
+    fun secondaryAppWindowKeepVisible() {
+        testSpec.assertWm {
+            this.isAppWindowVisible(secondaryApp)
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun primaryAppBoundsChanges() = testSpec.splitAppLayerBoundsChanges(
         primaryApp, splitLeftTop = false)
 
     @Presubmit
     @Test
-    fun secondaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
+    fun secondaryAppBoundsChanges() = testSpec.splitAppLayerBoundsChanges(
         secondaryApp, splitLeftTop = true)
-
-    @Presubmit
-    @Test
-    fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp)
-
-    @Presubmit
-    @Test
-    fun secondaryAppWindowBecomesVisible() = testSpec.appWindowBecomesVisible(secondaryApp)
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -186,9 +201,10 @@ class SwitchBackToSplitFromHome(testSpec: FlickerTestParameter) : SplitScreenBas
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
                 repetitions = SplitScreenHelper.TEST_REPETITIONS,
+                supportedRotations = listOf(Surface.ROTATION_0),
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
                 supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
+                listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
         }
     }
 }
