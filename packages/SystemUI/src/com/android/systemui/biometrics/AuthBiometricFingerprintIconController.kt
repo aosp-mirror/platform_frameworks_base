@@ -16,10 +16,9 @@
 
 package com.android.systemui.biometrics
 
+import android.annotation.RawRes
 import android.content.Context
-import android.graphics.drawable.AnimatedVectorDrawable
-import android.graphics.drawable.Drawable
-import android.widget.ImageView
+import com.airbnb.lottie.LottieAnimationView
 import com.android.systemui.R
 import com.android.systemui.biometrics.AuthBiometricView.BiometricState
 import com.android.systemui.biometrics.AuthBiometricView.STATE_AUTHENTICATED
@@ -32,42 +31,42 @@ import com.android.systemui.biometrics.AuthBiometricView.STATE_PENDING_CONFIRMAT
 
 /** Fingerprint only icon animator for BiometricPrompt.  */
 open class AuthBiometricFingerprintIconController(
-    context: Context,
-    iconView: ImageView
+        context: Context,
+        iconView: LottieAnimationView
 ) : AuthIconController(context, iconView) {
 
-    var iconLayoutParamsSize = 0
+    var iconLayoutParamSize: Pair<Int, Int> = Pair(1, 1)
         set(value) {
             if (field == value) {
                 return
             }
-            iconView.layoutParams.width = value
-            iconView.layoutParams.height = value
+            iconView.layoutParams.width = value.first
+            iconView.layoutParams.height = value.second
             field = value
         }
 
     init {
-        iconLayoutParamsSize = context.resources.getDimensionPixelSize(
-            R.dimen.biometric_dialog_fingerprint_icon_size
-        )
+        iconLayoutParamSize = Pair(context.resources.getDimensionPixelSize(
+                R.dimen.biometric_dialog_fingerprint_icon_width),
+                context.resources.getDimensionPixelSize(
+                        R.dimen.biometric_dialog_fingerprint_icon_height))
     }
 
     override fun updateIcon(@BiometricState lastState: Int, @BiometricState newState: Int) {
         val icon = getAnimationForTransition(lastState, newState) ?: return
 
-        iconView.setImageDrawable(icon)
+        if (!(lastState == STATE_AUTHENTICATING_ANIMATING_IN && newState == STATE_AUTHENTICATING)) {
+            iconView.setAnimation(icon)
+        }
 
         val iconContentDescription = getIconContentDescription(newState)
         if (iconContentDescription != null) {
             iconView.contentDescription = iconContentDescription
         }
 
-        (icon as? AnimatedVectorDrawable)?.apply {
-            reset()
-            if (shouldAnimateForTransition(lastState, newState)) {
-                forceAnimationOnUI()
-                start()
-            }
+        iconView.frame = 0
+        if (shouldAnimateForTransition(lastState, newState)) {
+            iconView.playAnimation()
         }
     }
 
@@ -86,8 +85,8 @@ open class AuthBiometricFingerprintIconController(
     }
 
     protected open fun shouldAnimateForTransition(
-        @BiometricState oldState: Int,
-        @BiometricState newState: Int
+            @BiometricState oldState: Int,
+            @BiometricState newState: Int
     ) = when (newState) {
         STATE_HELP,
         STATE_ERROR -> true
@@ -97,24 +96,27 @@ open class AuthBiometricFingerprintIconController(
         else -> false
     }
 
+    @RawRes
     protected open fun getAnimationForTransition(
-        @BiometricState oldState: Int,
-        @BiometricState newState: Int
-    ): Drawable? {
+            @BiometricState oldState: Int,
+            @BiometricState newState: Int
+    ): Int? {
         val id = when (newState) {
             STATE_HELP,
-            STATE_ERROR -> R.drawable.fingerprint_dialog_fp_to_error
+            STATE_ERROR -> {
+                R.raw.fingerprint_dialogue_fingerprint_to_error_lottie
+            }
             STATE_AUTHENTICATING_ANIMATING_IN,
             STATE_AUTHENTICATING -> {
                 if (oldState == STATE_ERROR || oldState == STATE_HELP) {
-                    R.drawable.fingerprint_dialog_error_to_fp
+                    R.raw.fingerprint_dialogue_error_to_fingerprint_lottie
                 } else {
-                    R.drawable.fingerprint_dialog_fp_to_error
+                    R.raw.fingerprint_dialogue_fingerprint_to_error_lottie
                 }
             }
-            STATE_AUTHENTICATED -> R.drawable.fingerprint_dialog_fp_to_error
+            STATE_AUTHENTICATED -> R.raw.fingerprint_dialogue_fingerprint_to_error_lottie
             else -> return null
         }
-        return if (id != null) context.getDrawable(id) else null
+        return if (id != null) return id else null
     }
 }
