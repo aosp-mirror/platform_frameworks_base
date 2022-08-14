@@ -660,8 +660,8 @@
     <string name="dream_complication_title_weather" msgid="598609151677172783">"කාලගුණය"</string>
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"වායු ගුණත්වය"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"විකාශ තතු"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
+    <string name="dream_complication_title_home_controls" msgid="9153381632476738811">"නිවෙස් පාලන"</string>
+    <string name="dream_complication_title_smartspace" msgid="4197829945636051120">"ස්මාර්ට් අවකාශය"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"පැතිකඩ පින්තූරයක් තේරීම"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"පෙරනිමි පරිශීලක නිරූපකය"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"භෞතික යතුරු පුවරුව"</string>
