@@ -1946,8 +1946,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera není k dispozici"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Pokračujte na telefonu"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon není k dispozici"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Obchod Play není dostupný"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Nastavení Android TV není k dispozici"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Nastavení tabletu není k dispozici"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Nastavení telefonu není k dispozici"</string>
@@ -1957,12 +1956,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Tato aplikace požaduje další zabezpečení. Zkuste to na zařízení Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Tato aplikace požaduje další zabezpečení. Zkuste to na tabletu."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Tato aplikace požaduje další zabezpečení. Zkuste to na telefonu."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Tato položka na vašem zařízení <xliff:g id="DEVICE">%1$s</xliff:g> není k dispozici. Zkuste to na zařízení Android TV."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Tato položka na vašem zařízení <xliff:g id="DEVICE">%1$s</xliff:g> není k dispozici. Zkuste to na tabletu."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Tato položka na vašem zařízení <xliff:g id="DEVICE">%1$s</xliff:g> není k dispozici. Zkuste to na telefonu."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Tato aplikace byla vytvořena pro starší verzi systému Android a nemusí fungovat správně. Zkuste vyhledat aktualizace, případně kontaktujte vývojáře."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Zkontrolovat aktualizace"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Máte nové zprávy"</string>

@@ -1944,8 +1944,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"கேமராவைப் பயன்படுத்த முடியாது"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"மொபைலில் தொடருங்கள்"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"மைக்ரோஃபோனைப் பயன்படுத்த முடியாது"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store கிடைக்கவில்லை"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV அமைப்புகளைப் பயன்படுத்த முடியாது"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"டேப்லெட் அமைப்புகளைப் பயன்படுத்த முடியாது"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"மொபைல் அமைப்புகளைப் பயன்படுத்த முடியாது"</string>
@@ -1955,12 +1954,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"இந்த ஆப்ஸ் கூடுதல் பாதுகாப்பைக் கோருகிறது. அதற்குப் பதிலாக உங்கள் Android TV சாதனத்தில் பயன்படுத்திப் பார்க்கவும்."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"இந்த ஆப்ஸ் கூடுதல் பாதுகாப்பைக் கோருகிறது. அதற்குப் பதிலாக உங்கள் டேப்லெட்டில் பயன்படுத்திப் பார்க்கவும்."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"இந்த ஆப்ஸ் கூடுதல் பாதுகாப்பைக் கோருகிறது. அதற்குப் பதிலாக உங்கள் மொபைலில் பயன்படுத்திப் பார்க்கவும்."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தில் இதை அணுக முடியாது. அதற்குப் பதிலாக உங்கள் Android TV சாதனத்தில் முயன்று பாருங்கள்."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தில் இதை அணுக முடியாது. அதற்குப் பதிலாக உங்கள் டேப்லெட்டில் முயன்று பாருங்கள்."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தில் இதை அணுக முடியாது. அதற்குப் பதிலாக உங்கள் மொபைலில் முயன்று பாருங்கள்."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"இந்த ஆப்ஸ் Android இன் பழைய பதிப்புக்காக உருவாக்கப்பட்டதால், சரியாக வேலை செய்யாமல் போகலாம். புதுப்பிப்புகள் ஏதேனும் உள்ளதா எனப் பார்க்கவும் அல்லது டெவெலப்பரைத் தொடர்புகொள்ளவும்."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"புதுப்பிப்பு உள்ளதா எனப் பார்"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"புதிய செய்திகள் வந்துள்ளன"</string>
