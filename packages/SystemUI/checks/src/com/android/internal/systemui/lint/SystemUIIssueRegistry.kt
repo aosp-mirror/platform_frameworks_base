@@ -28,7 +28,9 @@ class SystemUIIssueRegistry : IssueRegistry() {
 
     override val issues: List<Issue>
         get() = listOf(BindServiceViaContextDetector.ISSUE,
-                BroadcastSentViaContextDetector.ISSUE)
+                BroadcastSentViaContextDetector.ISSUE,
+                RegisterReceiverViaContextDetector.ISSUE
+        )
 
     override val api: Int
         get() = CURRENT_API
