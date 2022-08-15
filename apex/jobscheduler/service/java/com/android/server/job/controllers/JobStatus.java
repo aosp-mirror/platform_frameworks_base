@@ -572,8 +572,11 @@ public final class JobStatus {
                 (latestRunTimeElapsedMillis - earliestRunTimeElapsedMillis)
                 >= MIN_WINDOW_FOR_FLEXIBILITY_MS;
 
+        // The first time a job is rescheduled it will not be subject to flexible constraints.
+        // Otherwise, every consecutive reschedule increases a jobs' flexibility deadline.
         if (!isRequestedExpeditedJob()
                 && satisfiesMinWindowException
+                && numFailures != 1
                 && lacksSomeFlexibleConstraints) {
             mNumRequiredFlexibleConstraints =
                     NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS + (mPreferUnmetered ? 1 : 0);
@@ -1928,35 +1931,38 @@ public final class JobStatus {
         proto.end(token);
     }
 
-    void dumpConstraints(PrintWriter pw, int constraints) {
-        if ((constraints&CONSTRAINT_CHARGING) != 0) {
+    static void dumpConstraints(PrintWriter pw, int constraints) {
+        if ((constraints & CONSTRAINT_CHARGING) != 0) {
             pw.print(" CHARGING");
         }
-        if ((constraints& CONSTRAINT_BATTERY_NOT_LOW) != 0) {
+        if ((constraints & CONSTRAINT_BATTERY_NOT_LOW) != 0) {
             pw.print(" BATTERY_NOT_LOW");
         }
-        if ((constraints& CONSTRAINT_STORAGE_NOT_LOW) != 0) {
+        if ((constraints & CONSTRAINT_STORAGE_NOT_LOW) != 0) {
             pw.print(" STORAGE_NOT_LOW");
         }
-        if ((constraints&CONSTRAINT_TIMING_DELAY) != 0) {
+        if ((constraints & CONSTRAINT_TIMING_DELAY) != 0) {
             pw.print(" TIMING_DELAY");
         }
-        if ((constraints&CONSTRAINT_DEADLINE) != 0) {
+        if ((constraints & CONSTRAINT_DEADLINE) != 0) {
             pw.print(" DEADLINE");
         }
-        if ((constraints&CONSTRAINT_IDLE) != 0) {
+        if ((constraints & CONSTRAINT_IDLE) != 0) {
             pw.print(" IDLE");
         }
-        if ((constraints&CONSTRAINT_CONNECTIVITY) != 0) {
+        if ((constraints & CONSTRAINT_CONNECTIVITY) != 0) {
             pw.print(" CONNECTIVITY");
         }
-        if ((constraints&CONSTRAINT_CONTENT_TRIGGER) != 0) {
+        if ((constraints & CONSTRAINT_FLEXIBLE) != 0) {
+            pw.print(" FLEXIBILITY");
+        }
+        if ((constraints & CONSTRAINT_CONTENT_TRIGGER) != 0) {
             pw.print(" CONTENT_TRIGGER");
         }
-        if ((constraints&CONSTRAINT_DEVICE_NOT_DOZING) != 0) {
+        if ((constraints & CONSTRAINT_DEVICE_NOT_DOZING) != 0) {
             pw.print(" DEVICE_NOT_DOZING");
         }
-        if ((constraints&CONSTRAINT_BACKGROUND_NOT_RESTRICTED) != 0) {
+        if ((constraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) != 0) {
             pw.print(" BACKGROUND_NOT_RESTRICTED");
         }
         if ((constraints & CONSTRAINT_PREFETCH) != 0) {
@@ -2242,6 +2248,14 @@ public final class JobStatus {
                     ((requiredConstraints | CONSTRAINT_WITHIN_QUOTA | CONSTRAINT_TARE_WEALTH)
                             & ~satisfiedConstraints));
             pw.println();
+            if (hasFlexibilityConstraint()) {
+                pw.print("Num Required Flexible constraints: ");
+                pw.print(getNumRequiredFlexibleConstraints());
+                pw.println();
+                pw.print("Num Dropped Flexible constraints: ");
+                pw.print(getNumDroppedFlexibleConstraints());
+                pw.println();
+            }
 
             pw.println("Constraint history:");
             pw.increaseIndent();
