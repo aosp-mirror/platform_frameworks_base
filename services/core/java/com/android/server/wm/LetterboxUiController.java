@@ -257,6 +257,10 @@ final class LetterboxUiController {
                             : mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
         }
 
+        return getSplitScreenAspectRatio();
+    }
+
+    float getSplitScreenAspectRatio() {
         int dividerWindowWidth =
                 getResources().getDimensionPixelSize(R.dimen.docked_stack_divider_thickness);
         int dividerInsets =
