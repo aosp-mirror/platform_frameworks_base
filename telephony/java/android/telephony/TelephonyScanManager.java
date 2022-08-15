@@ -171,7 +171,7 @@ public final class TelephonyScanManager {
                                 ci[i] = (CellInfo) parcelables[i];
                             }
                             executor.execute(() -> {
-                                Rlog.d(TAG, "onResults: " + ci.toString());
+                                Rlog.d(TAG, "onResults: " + Arrays.toString(ci));
                                 callback.onResults(Arrays.asList(ci));
                             });
                         } catch (Exception e) {

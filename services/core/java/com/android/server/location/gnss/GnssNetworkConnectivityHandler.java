@@ -554,7 +554,7 @@ class GnssNetworkConnectivityHandler {
                 mAGpsDataConnectionIpAddr = InetAddress.getByAddress(suplIpAddr);
                 if (DEBUG) Log.d(TAG, "IP address converted to: " + mAGpsDataConnectionIpAddr);
             } catch (UnknownHostException e) {
-                Log.e(TAG, "Bad IP Address: " + suplIpAddr, e);
+                Log.e(TAG, "Bad IP Address: " + Arrays.toString(suplIpAddr), e);
             }
         }
 

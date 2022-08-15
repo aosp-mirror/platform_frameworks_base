@@ -20,6 +20,7 @@ import android.util.AggStats;
 import android.util.Duration;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * This class contains a list of helper functions to write common proto in
@@ -91,27 +92,27 @@ public class ProtoUtils {
         final int wireType = proto.getWireType();
         long fieldConstant;
 
-        sb.append("Offset : 0x" + Integer.toHexString(proto.getOffset()));
-        sb.append("\nField Number : 0x" + Integer.toHexString(proto.getFieldNumber()));
+        sb.append("Offset : 0x").append(Integer.toHexString(proto.getOffset()));
+        sb.append("\nField Number : 0x").append(Integer.toHexString(proto.getFieldNumber()));
         sb.append("\nWire Type : ");
         switch (wireType) {
             case ProtoStream.WIRE_TYPE_VARINT:
-                sb.append("varint");
                 fieldConstant = ProtoStream.makeFieldId(fieldNumber,
                         ProtoStream.FIELD_COUNT_SINGLE | ProtoStream.FIELD_TYPE_INT64);
-                sb.append("\nField Value : 0x" + Long.toHexString(proto.readLong(fieldConstant)));
+                sb.append("varint\nField Value : 0x");
+                sb.append(Long.toHexString(proto.readLong(fieldConstant)));
                 break;
             case ProtoStream.WIRE_TYPE_FIXED64:
-                sb.append("fixed64");
                 fieldConstant = ProtoStream.makeFieldId(fieldNumber,
                         ProtoStream.FIELD_COUNT_SINGLE | ProtoStream.FIELD_TYPE_FIXED64);
-                sb.append("\nField Value : 0x" + Long.toHexString(proto.readLong(fieldConstant)));
+                sb.append("fixed64\nField Value : 0x");
+                sb.append(Long.toHexString(proto.readLong(fieldConstant)));
                 break;
             case ProtoStream.WIRE_TYPE_LENGTH_DELIMITED:
-                sb.append("length delimited");
                 fieldConstant = ProtoStream.makeFieldId(fieldNumber,
                         ProtoStream.FIELD_COUNT_SINGLE | ProtoStream.FIELD_TYPE_BYTES);
-                sb.append("\nField Bytes : " + proto.readBytes(fieldConstant));
+                sb.append("length delimited\nField Bytes : ");
+                sb.append(Arrays.toString(proto.readBytes(fieldConstant)));
                 break;
             case ProtoStream.WIRE_TYPE_START_GROUP:
                 sb.append("start group");
@@ -120,13 +121,13 @@ public class ProtoUtils {
                 sb.append("end group");
                 break;
             case ProtoStream.WIRE_TYPE_FIXED32:
-                sb.append("fixed32");
                 fieldConstant = ProtoStream.makeFieldId(fieldNumber,
                         ProtoStream.FIELD_COUNT_SINGLE | ProtoStream.FIELD_TYPE_FIXED32);
-                sb.append("\nField Value : 0x" + Integer.toHexString(proto.readInt(fieldConstant)));
+                sb.append("fixed32\nField Value : 0x");
+                sb.append(Integer.toHexString(proto.readInt(fieldConstant)));
                 break;
             default:
-                sb.append("unknown(" + proto.getWireType() + ")");
+                sb.append("unknown(").append(proto.getWireType()).append(")");
         }
         return sb.toString();
     }
