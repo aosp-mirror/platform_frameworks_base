@@ -1944,8 +1944,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"ಕ್ಯಾಮರಾ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ಫೋನ್‌ನಲ್ಲಿ ಮುಂದುವರಿಸಿ"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"ಮೈಕ್ರೊಫೋನ್ ಲಭ್ಯವಿಲ್ಲ"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"ಟ್ಯಾಬ್ಲೆಟ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"ಫೋನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
@@ -1955,12 +1954,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ಈ ಆ್ಯಪ್ ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಯನ್ನು ವಿನಂತಿಸುತ್ತಿದೆ. ಅದರ ಬದಲು ನಿಮ್ಮ Android TV ಸಾಧನದಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ಈ ಆ್ಯಪ್ ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಯನ್ನು ವಿನಂತಿಸುತ್ತಿದೆ. ಅದರ ಬದಲು ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ಈ ಆ್ಯಪ್ ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಯನ್ನು ವಿನಂತಿಸುತ್ತಿದೆ. ಅದರ ಬದಲು ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ನಲ್ಲಿ ಇದನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ Android TV ಸಾಧನದಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ನಲ್ಲಿ ಇದನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ನಲ್ಲಿ ಇದನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು Android ನ ಹಳೆಯ ಆವೃತ್ತಿಗೆ ರಚಿಸಲಾಗಿದೆ ಮತ್ತು ಸರಿಯಾಗಿ ಕೆಲಸ ಮಾಡದಿರಬಹುದು. ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಲು ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ಡೆವಲಪರ್ ಅನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ಅಪ್‌ಡೇಟ್‌ಗಾಗಿ ಪರಿಶೀಲಿಸಿ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ನೀವು ಹೊಸ ಸಂದೇಶಗಳನ್ನು ಹೊಂದಿರುವಿರಿ"</string>

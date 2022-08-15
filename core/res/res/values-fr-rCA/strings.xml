@@ -1944,8 +1944,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Appareil photo non accessible"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continuer sur le téléphone"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Microphone non accessible"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Boutique Play Store inaccessible"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Paramètres Android TV non accessibles"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Paramètres de la tablette non accessibles"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Paramètres du téléphone non accessibles"</string>
@@ -1955,12 +1954,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Cette application demande une sécurité supplémentaire. Essayez sur votre appareil Android TV à la place."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Cette application demande une sécurité supplémentaire. Essayez sur votre tablette à la place."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Cette application demande une sécurité supplémentaire. Essayez sur votre téléphone à la place."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Impossible d\'accéder à ce contenu sur votre appareil <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez sur votre appareil Android TV à la place."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Impossible d\'accéder à ce contenu sur votre appareil <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez sur votre tablette à la place."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Impossible d\'accéder à ce contenu sur votre appareil <xliff:g id="DEVICE">%1$s</xliff:g>. Essayez sur votre téléphone à la place."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Cette application a été conçue pour une ancienne version d\'Android et pourrait ne pas fonctionner correctement. Essayez de vérifier les mises à jour ou communiquez avec son développeur."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Vérifier la présence de mises à jour"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Vous avez de nouveaux messages"</string>

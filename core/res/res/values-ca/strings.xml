@@ -1944,8 +1944,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"La càmera no està disponible"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continua al telèfon"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"El micròfon no està disponible"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store no està disponible"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"La configuració d\'Android TV no està disponible"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"La configuració de la tauleta no està disponible"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"La configuració del telèfon no està disponible"</string>
@@ -1955,12 +1954,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Aquesta aplicació sol·licita seguretat addicional. Prova-ho al dispositiu Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Aquesta aplicació sol·licita seguretat addicional. Prova-ho a la tauleta."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Aquesta aplicació sol·licita seguretat addicional. Prova-ho al telèfon."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"No s\'hi pot accedir des del dispositiu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho al dispositiu Android TV."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"No s\'hi pot accedir des del dispositiu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho a la tauleta."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"No s\'hi pot accedir des del dispositiu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho al telèfon."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Aquesta aplicació es va crear per a una versió antiga d\'Android i pot ser que no funcioni correctament. Prova de cercar actualitzacions o contacta amb el desenvolupador."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Cerca actualitzacions"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tens missatges nous"</string>

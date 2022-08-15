@@ -1944,8 +1944,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Ikhamera ayitholakali"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Qhubeka kufoni"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Imakrofoni ayitholakali"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"I-Google Play ayitholakali"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Amasethingi e-Android TV awatholakali"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Amasethingi ethebulethi awatholakali"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Amasethingi efoni awatholakali"</string>
@@ -1955,12 +1954,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Le app icela ukuvikeleka okwengeziwe. Zama kudivayisi yakho ye-Android TV kunalokho."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Le app icela ukuvikeleka okwengeziwe. Zama kuthebhulethi yakho kunalokho."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Le app icela ukuvikeleka okwengeziwe. Zama efonini yakho kunalokho."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Lokhu akukwazi ukufinyelelwa ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho. Zama kudivayisi yakho ye-Android TV kunalokho."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Lokhu akukwazi ukufinyelelwa ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho. Zama kuthebulethi yakho kunalokho."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Lokhu akukwazi ukufinyelelwa ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho. Zama efonini yakho kunalokho."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Lolu hlelo lokusebenza belakhelwe inguqulo endala ye-Android futhi kungenzeka lungasebenzi kahle. Zama ukuhlolela izibuyekezo, noma uxhumane nonjiniyela."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Hlola izibuyekezo"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Unemilayezo emisha"</string>
