@@ -33,6 +33,7 @@ val codelabPageRepository = SettingsPageRepository(
         SwitchPreferencePageProvider,
         ArgumentPageProvider,
         SliderPageProvider,
+        FooterPageProvider,
     ),
     startDestination = Destinations.Home,
 )
