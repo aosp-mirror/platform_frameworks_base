@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -553,64 +554,77 @@ public class ShellTransitionTests extends ShellTestCase {
         final @Surface.Rotation int upsideDown = displays
                 .getDisplayLayout(DEFAULT_DISPLAY).getUpsideDownRotation();
 
+        TransitionInfo.Change displayChange = new ChangeBuilder(TRANSIT_CHANGE)
+                .setFlags(FLAG_IS_DISPLAY).setRotate().build();
+        // Set non-square display so nav bar won't be allowed to move.
+        displayChange.getStartAbsBounds().set(0, 0, 1000, 2000);
         final TransitionInfo normalDispRotate = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY).setRotate()
-                        .build())
+                .addChange(displayChange)
                 .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo).setRotate().build())
                 .build();
-        assertFalse(DefaultTransitionHandler.isRotationSeamless(normalDispRotate, displays));
+        assertEquals(ROTATION_ANIMATION_ROTATE, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, normalDispRotate, displays));
 
         // Seamless if all tasks are seamless
         final TransitionInfo rotateSeamless = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY).setRotate()
-                        .build())
+                .addChange(displayChange)
                 .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
                         .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
                 .build();
-        assertTrue(DefaultTransitionHandler.isRotationSeamless(rotateSeamless, displays));
+        assertEquals(ROTATION_ANIMATION_SEAMLESS, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, rotateSeamless, displays));
 
         // Not seamless if there is PiP (or any other non-seamless task)
         final TransitionInfo pipDispRotate = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY).setRotate()
-                        .build())
+                .addChange(displayChange)
                 .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
                         .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
                 .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfoPip)
                         .setRotate().build())
                 .build();
-        assertFalse(DefaultTransitionHandler.isRotationSeamless(pipDispRotate, displays));
-
-        // Not seamless if one of rotations is upside-down
-        final TransitionInfo seamlessUpsideDown = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
-                        .setRotate(upsideDown, ROTATION_ANIMATION_UNSPECIFIED).build())
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
-                        .setRotate(upsideDown, ROTATION_ANIMATION_SEAMLESS).build())
-                .build();
-        assertFalse(DefaultTransitionHandler.isRotationSeamless(seamlessUpsideDown, displays));
-
-        // Not seamless if system alert windows
-        final TransitionInfo seamlessButAlert = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(
-                        FLAG_IS_DISPLAY | FLAG_DISPLAY_HAS_ALERT_WINDOWS).setRotate().build())
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
-                        .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
-                .build();
-        assertFalse(DefaultTransitionHandler.isRotationSeamless(seamlessButAlert, displays));
+        assertEquals(ROTATION_ANIMATION_ROTATE, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, pipDispRotate, displays));
 
         // Not seamless if there is no changed task.
         final TransitionInfo noTask = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
-                        .setRotate().build())
+                .addChange(displayChange)
                 .build();
-        assertFalse(DefaultTransitionHandler.isRotationSeamless(noTask, displays));
+        assertEquals(ROTATION_ANIMATION_ROTATE, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, noTask, displays));
 
-        // Seamless if display is explicitly seamless.
-        final TransitionInfo seamlessDisplay = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
+        // Not seamless if one of rotations is upside-down
+        displayChange = new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
+                .setRotate(upsideDown, ROTATION_ANIMATION_UNSPECIFIED).build();
+        final TransitionInfo seamlessUpsideDown = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(displayChange)
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
+                        .setRotate(upsideDown, ROTATION_ANIMATION_SEAMLESS).build())
+                .build();
+        assertEquals(ROTATION_ANIMATION_ROTATE, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, seamlessUpsideDown, displays));
+
+        // Not seamless if system alert windows
+        displayChange = new ChangeBuilder(TRANSIT_CHANGE)
+                .setFlags(FLAG_IS_DISPLAY | FLAG_DISPLAY_HAS_ALERT_WINDOWS).setRotate().build();
+        final TransitionInfo seamlessButAlert = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(displayChange)
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
                         .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
                 .build();
-        assertTrue(DefaultTransitionHandler.isRotationSeamless(seamlessDisplay, displays));
+        assertEquals(ROTATION_ANIMATION_ROTATE, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, seamlessButAlert, displays));
+
+        // Seamless if display is explicitly seamless.
+        displayChange = new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
+                .setRotate(ROTATION_ANIMATION_SEAMLESS).build();
+        final TransitionInfo seamlessDisplay = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(displayChange)
+                // The animation hint of task will be ignored.
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
+                        .setRotate(ROTATION_ANIMATION_ROTATE).build())
+                .build();
+        assertEquals(ROTATION_ANIMATION_SEAMLESS, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, seamlessDisplay, displays));
     }
 
     @Test
