@@ -34,8 +34,6 @@ import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -606,13 +604,12 @@ class Agent {
     }
 
     /** Returns true if an app should be given credits in the general distributions. */
-    private boolean shouldGiveCredits(@NonNull PackageInfo packageInfo) {
-        final ApplicationInfo applicationInfo = packageInfo.applicationInfo;
+    private boolean shouldGiveCredits(@NonNull InstalledPackageInfo packageInfo) {
         // Skip apps that wouldn't be doing any work. Giving them ARCs would be wasteful.
-        if (applicationInfo == null || !applicationInfo.hasCode()) {
+        if (!packageInfo.hasCode) {
             return false;
         }
-        final int userId = UserHandle.getUserId(packageInfo.applicationInfo.uid);
+        final int userId = UserHandle.getUserId(packageInfo.uid);
         // No point allocating ARCs to the system. It can do whatever it wants.
         return !mIrs.isSystem(userId, packageInfo.packageName);
     }
@@ -623,15 +620,15 @@ class Agent {
 
     @GuardedBy("mLock")
     void distributeBasicIncomeLocked(int batteryLevel) {
-        List<PackageInfo> pkgs = mIrs.getInstalledPackages();
+        final List<InstalledPackageInfo> pkgs = mIrs.getInstalledPackages();
 
         final long now = getCurrentTimeMillis();
         for (int i = 0; i < pkgs.size(); ++i) {
-            final PackageInfo pkgInfo = pkgs.get(i);
+            final InstalledPackageInfo pkgInfo = pkgs.get(i);
             if (!shouldGiveCredits(pkgInfo)) {
                 continue;
             }
-            final int userId = UserHandle.getUserId(pkgInfo.applicationInfo.uid);
+            final int userId = UserHandle.getUserId(pkgInfo.uid);
             final String pkgName = pkgInfo.packageName;
             final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
             final long minBalance = mIrs.getMinBalanceLocked(userId, pkgName);
@@ -659,11 +656,11 @@ class Agent {
 
     @GuardedBy("mLock")
     void grantBirthrightsLocked(final int userId) {
-        final List<PackageInfo> pkgs = mIrs.getInstalledPackages(userId);
+        final List<InstalledPackageInfo> pkgs = mIrs.getInstalledPackages(userId);
         final long now = getCurrentTimeMillis();
 
         for (int i = 0; i < pkgs.size(); ++i) {
-            final PackageInfo packageInfo = pkgs.get(i);
+            final InstalledPackageInfo packageInfo = pkgs.get(i);
             if (!shouldGiveCredits(packageInfo)) {
                 continue;
             }

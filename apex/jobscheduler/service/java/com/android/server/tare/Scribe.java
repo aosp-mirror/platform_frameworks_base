@@ -22,7 +22,6 @@ import static com.android.server.tare.TareUtils.appToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.PackageInfo;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -210,11 +209,11 @@ public class Scribe {
         mRemainingConsumableCakes = 0;
 
         final SparseArray<ArraySet<String>> installedPackagesPerUser = new SparseArray<>();
-        final List<PackageInfo> installedPackages = mIrs.getInstalledPackages();
+        final List<InstalledPackageInfo> installedPackages = mIrs.getInstalledPackages();
         for (int i = 0; i < installedPackages.size(); ++i) {
-            final PackageInfo packageInfo = installedPackages.get(i);
-            if (packageInfo.applicationInfo != null) {
-                final int userId = UserHandle.getUserId(packageInfo.applicationInfo.uid);
+            final InstalledPackageInfo packageInfo = installedPackages.get(i);
+            if (packageInfo.uid != InstalledPackageInfo.NO_UID) {
+                final int userId = UserHandle.getUserId(packageInfo.uid);
                 ArraySet<String> pkgsForUser = installedPackagesPerUser.get(userId);
                 if (pkgsForUser == null) {
                     pkgsForUser = new ArraySet<>();
