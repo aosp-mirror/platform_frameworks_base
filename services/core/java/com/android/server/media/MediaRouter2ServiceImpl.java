@@ -927,8 +927,9 @@ class MediaRouter2ServiceImpl {
                         routerRecord.mUserRecord.mHandler, routerRecord, manager));
         }
 
-        userRecord.mHandler.sendMessage(obtainMessage(UserHandler::notifyRoutesToManager,
-                userRecord.mHandler, manager));
+        userRecord.mHandler.sendMessage(
+                obtainMessage(
+                        UserHandler::notifyInitialRoutesToManager, userRecord.mHandler, manager));
     }
 
     private void unregisterManagerLocked(@NonNull IMediaRouter2Manager manager, boolean died) {
@@ -1311,6 +1312,36 @@ class MediaRouter2ServiceImpl {
                 new CopyOnWriteArrayList<>();
         private final Map<String, RouterRecord> mSessionToRouterMap = new ArrayMap<>();
 
+        /**
+         * Latest list of routes sent to privileged {@link android.media.MediaRouter2 routers} and
+         * {@link android.media.MediaRouter2Manager managers}.
+         *
+         * <p>Privileged routers are instances of {@link android.media.MediaRouter2 MediaRouter2}
+         * that have {@code MODIFY_AUDIO_ROUTING} permission.
+         *
+         * <p>This list contains all routes exposed by route providers. This includes routes from
+         * both system route providers and user route providers.
+         *
+         * <p>See {@link #getRouters(boolean hasModifyAudioRoutingPermission)}.
+         */
+        private final Map<String, MediaRoute2Info> mLastNotifiedRoutesToPrivilegedRouters =
+                new ArrayMap<>();
+
+        /**
+         * Latest list of routes sent to non-privileged {@link android.media.MediaRouter2 routers}.
+         *
+         * <p>Non-privileged routers are instances of {@link android.media.MediaRouter2
+         * MediaRouter2} that do <i><b>not</b></i> have {@code MODIFY_AUDIO_ROUTING} permission.
+         *
+         * <p>This list contains all routes exposed by user route providers. It might also include
+         * the current default route from {@link #mSystemProvider} to expose local route updates
+         * (e.g. volume changes) to non-privileged routers.
+         *
+         * <p>See {@link SystemMediaRoute2Provider#mDefaultRoute}.
+         */
+        private final Map<String, MediaRoute2Info> mLastNotifiedRoutesToNonPrivilegedRouters =
+                new ArrayMap<>();
+
         private boolean mRunning;
 
         // TODO: (In Android S+) Pull out SystemMediaRoute2Provider out of UserHandler.
@@ -1425,91 +1456,182 @@ class MediaRouter2ServiceImpl {
         }
 
         private void onProviderStateChangedOnHandler(@NonNull MediaRoute2Provider provider) {
-            int providerInfoIndex = getLastProviderInfoIndex(provider.getUniqueId());
             MediaRoute2ProviderInfo currentInfo = provider.getProviderInfo();
-            MediaRoute2ProviderInfo prevInfo =
-                    (providerInfoIndex < 0) ? null : mLastProviderInfos.get(providerInfoIndex);
-            if (Objects.equals(prevInfo, currentInfo)) return;
 
-            List<MediaRoute2Info> addedRoutes = new ArrayList<>();
-            List<MediaRoute2Info> removedRoutes = new ArrayList<>();
-            List<MediaRoute2Info> changedRoutes = new ArrayList<>();
+            int providerInfoIndex =
+                    indexOfRouteProviderInfoByUniqueId(provider.getUniqueId(), mLastProviderInfos);
+
+            MediaRoute2ProviderInfo prevInfo =
+                    providerInfoIndex == -1 ? null : mLastProviderInfos.get(providerInfoIndex);
+
+            // Ignore if no changes
+            if (Objects.equals(prevInfo, currentInfo)) {
+                return;
+            }
+
+            boolean hasAddedOrModifiedRoutes = false;
+            boolean hasRemovedRoutes = false;
+
+            boolean isSystemProvider = provider.mIsSystemRouteProvider;
+
             if (prevInfo == null) {
+                // Provider is being added.
                 mLastProviderInfos.add(currentInfo);
-                addedRoutes.addAll(currentInfo.getRoutes());
+                addToRoutesMap(currentInfo.getRoutes(), isSystemProvider);
+                // Check if new provider exposes routes.
+                hasAddedOrModifiedRoutes = !currentInfo.getRoutes().isEmpty();
             } else if (currentInfo == null) {
+                // Provider is being removed.
+                hasRemovedRoutes = true;
                 mLastProviderInfos.remove(prevInfo);
-                removedRoutes.addAll(prevInfo.getRoutes());
+                removeFromRoutesMap(prevInfo.getRoutes(), isSystemProvider);
             } else {
+                // Provider is being updated.
                 mLastProviderInfos.set(providerInfoIndex, currentInfo);
-                final Collection<MediaRoute2Info> prevRoutes = prevInfo.getRoutes();
                 final Collection<MediaRoute2Info> currentRoutes = currentInfo.getRoutes();
 
+                // Checking for individual routes.
                 for (MediaRoute2Info route : currentRoutes) {
                     if (!route.isValid()) {
-                        Slog.w(TAG, "onProviderStateChangedOnHandler: Ignoring invalid route : "
-                                + route);
+                        Slog.w(
+                                TAG,
+                                "onProviderStateChangedOnHandler: Ignoring invalid route : "
+                                        + route);
                         continue;
                     }
+
                     MediaRoute2Info prevRoute = prevInfo.getRoute(route.getOriginalId());
-                    if (prevRoute == null) {
-                        addedRoutes.add(route);
-                    } else if (!Objects.equals(prevRoute, route)) {
-                        changedRoutes.add(route);
+                    if (prevRoute == null || !Objects.equals(prevRoute, route)) {
+                        hasAddedOrModifiedRoutes = true;
+                        mLastNotifiedRoutesToPrivilegedRouters.put(route.getId(), route);
+                        if (!isSystemProvider) {
+                            mLastNotifiedRoutesToNonPrivilegedRouters.put(route.getId(), route);
+                        }
                     }
                 }
 
+                // Checking for individual removals
                 for (MediaRoute2Info prevRoute : prevInfo.getRoutes()) {
                     if (currentInfo.getRoute(prevRoute.getOriginalId()) == null) {
-                        removedRoutes.add(prevRoute);
+                        hasRemovedRoutes = true;
+                        mLastNotifiedRoutesToPrivilegedRouters.remove(prevRoute.getId());
+                        if (!isSystemProvider) {
+                            mLastNotifiedRoutesToNonPrivilegedRouters.remove(prevRoute.getId());
+                        }
                     }
                 }
+            }
+
+            dispatchUpdates(
+                    hasAddedOrModifiedRoutes,
+                    hasRemovedRoutes,
+                    isSystemProvider,
+                    mSystemProvider.getDefaultRoute());
+        }
+
+        /**
+         * Adds provided routes to {@link #mLastNotifiedRoutesToPrivilegedRouters}. Also adds them
+         * to {@link #mLastNotifiedRoutesToNonPrivilegedRouters} if they were provided by a
+         * non-system route provider. Overwrites any route with matching id that already exists.
+         *
+         * @param routes list of routes to be added.
+         * @param isSystemRoutes indicates whether routes come from a system route provider.
+         */
+        private void addToRoutesMap(
+                @NonNull Collection<MediaRoute2Info> routes, boolean isSystemRoutes) {
+            for (MediaRoute2Info route : routes) {
+                if (!isSystemRoutes) {
+                    mLastNotifiedRoutesToNonPrivilegedRouters.put(route.getId(), route);
+                }
+                mLastNotifiedRoutesToPrivilegedRouters.put(route.getId(), route);
+            }
+        }
+
+        /**
+         * Removes provided routes from {@link #mLastNotifiedRoutesToPrivilegedRouters}. Also
+         * removes them from {@link #mLastNotifiedRoutesToNonPrivilegedRouters} if they were
+         * provided by a non-system route provider.
+         *
+         * @param routes list of routes to be removed.
+         * @param isSystemRoutes whether routes come from a system route provider.
+         */
+        private void removeFromRoutesMap(
+                @NonNull Collection<MediaRoute2Info> routes, boolean isSystemRoutes) {
+            for (MediaRoute2Info route : routes) {
+                if (!isSystemRoutes) {
+                    mLastNotifiedRoutesToNonPrivilegedRouters.remove(route.getId());
+                }
+                mLastNotifiedRoutesToPrivilegedRouters.remove(route.getId());
+            }
+        }
+
+        /**
+         * Dispatches the latest route updates in {@link #mLastNotifiedRoutesToPrivilegedRouters}
+         * and {@link #mLastNotifiedRoutesToNonPrivilegedRouters} to registered {@link
+         * android.media.MediaRouter2 routers} and {@link MediaRouter2Manager managers} after a call
+         * to {@link #onProviderStateChangedOnHandler(MediaRoute2Provider)}. Ignores if no changes
+         * were made.
+         *
+         * @param hasAddedOrModifiedRoutes whether routes were added or modified.
+         * @param hasRemovedRoutes whether routes were removed.
+         * @param isSystemProvider whether the latest update was caused by a system provider.
+         * @param defaultRoute the current default route in {@link #mSystemProvider}.
+         */
+        private void dispatchUpdates(
+                boolean hasAddedOrModifiedRoutes,
+                boolean hasRemovedRoutes,
+                boolean isSystemProvider,
+                MediaRoute2Info defaultRoute) {
+
+            // Ignore if no changes.
+            if (!hasAddedOrModifiedRoutes && !hasRemovedRoutes) {
+                return;
             }
 
             List<IMediaRouter2> routersWithModifyAudioRoutingPermission = getRouters(true);
             List<IMediaRouter2> routersWithoutModifyAudioRoutingPermission = getRouters(false);
             List<IMediaRouter2Manager> managers = getManagers();
-            List<MediaRoute2Info> defaultRoute = new ArrayList<>();
-            defaultRoute.add(mSystemProvider.getDefaultRoute());
 
-            if (addedRoutes.size() > 0) {
-                notifyRoutesAddedToRouters(routersWithModifyAudioRoutingPermission, addedRoutes);
-                if (!provider.mIsSystemRouteProvider) {
-                    notifyRoutesAddedToRouters(routersWithoutModifyAudioRoutingPermission,
-                            addedRoutes);
-                } else if (prevInfo == null) {
-                    notifyRoutesAddedToRouters(routersWithoutModifyAudioRoutingPermission,
-                            defaultRoute);
-                } // 'else' is handled as changed routes
-                notifyRoutesAddedToManagers(managers, addedRoutes);
-            }
-            if (removedRoutes.size() > 0) {
-                notifyRoutesRemovedToRouters(routersWithModifyAudioRoutingPermission,
-                        removedRoutes);
-                if (!provider.mIsSystemRouteProvider) {
-                    notifyRoutesRemovedToRouters(routersWithoutModifyAudioRoutingPermission,
-                            removedRoutes);
-                }
-                notifyRoutesRemovedToManagers(managers, removedRoutes);
-            }
-            if (changedRoutes.size() > 0) {
-                notifyRoutesChangedToRouters(routersWithModifyAudioRoutingPermission,
-                        changedRoutes);
-                if (!provider.mIsSystemRouteProvider) {
-                    notifyRoutesChangedToRouters(routersWithoutModifyAudioRoutingPermission,
-                            changedRoutes);
-                } else if (prevInfo != null) {
-                    notifyRoutesChangedToRouters(routersWithoutModifyAudioRoutingPermission,
-                            defaultRoute);
-                } // 'else' is handled as added routes
-                notifyRoutesChangedToManagers(managers, changedRoutes);
+            // Managers receive all provider updates with all routes.
+            notifyRoutesUpdatedToManagers(
+                    managers, new ArrayList<>(mLastNotifiedRoutesToPrivilegedRouters.values()));
+
+            // Routers with modify audio permission (usually system routers) receive all provider
+            // updates with all routes.
+            notifyRoutesUpdatedToRouters(
+                    routersWithModifyAudioRoutingPermission,
+                    new ArrayList<>(mLastNotifiedRoutesToPrivilegedRouters.values()));
+
+            if (!isSystemProvider) {
+                // Regular routers receive updates from all non-system providers with all non-system
+                // routes.
+                notifyRoutesUpdatedToRouters(
+                        routersWithoutModifyAudioRoutingPermission,
+                        new ArrayList<>(mLastNotifiedRoutesToNonPrivilegedRouters.values()));
+            } else if (hasAddedOrModifiedRoutes) {
+                // On system provider updates, regular routers receive the updated default route.
+                // This is the only system route they should receive.
+                mLastNotifiedRoutesToNonPrivilegedRouters.put(defaultRoute.getId(), defaultRoute);
+                notifyRoutesUpdatedToRouters(
+                        routersWithoutModifyAudioRoutingPermission,
+                        new ArrayList<>(mLastNotifiedRoutesToNonPrivilegedRouters.values()));
             }
         }
 
-        private int getLastProviderInfoIndex(@NonNull String providerId) {
-            for (int i = 0; i < mLastProviderInfos.size(); i++) {
-                MediaRoute2ProviderInfo providerInfo = mLastProviderInfos.get(i);
-                if (TextUtils.equals(providerInfo.getUniqueId(), providerId)) {
+        /**
+         * Returns the index of the first element in {@code lastProviderInfos} that matches the
+         * specified unique id.
+         *
+         * @param uniqueId unique id of {@link MediaRoute2ProviderInfo} to be found.
+         * @param lastProviderInfos list of {@link MediaRoute2ProviderInfo}.
+         * @return index of found element, or -1 if not found.
+         */
+        private static int indexOfRouteProviderInfoByUniqueId(
+                @NonNull String uniqueId,
+                @NonNull List<MediaRoute2ProviderInfo> lastProviderInfos) {
+            for (int i = 0; i < lastProviderInfos.size(); i++) {
+                MediaRoute2ProviderInfo providerInfo = lastProviderInfos.get(i);
+                if (TextUtils.equals(providerInfo.getUniqueId(), uniqueId)) {
                     return i;
                 }
             }
@@ -1989,41 +2111,19 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifyRoutesAddedToRouters(@NonNull List<IMediaRouter2> routers,
-                @NonNull List<MediaRoute2Info> routes) {
+        private void notifyRoutesUpdatedToRouters(
+                @NonNull List<IMediaRouter2> routers, @NonNull List<MediaRoute2Info> routes) {
             for (IMediaRouter2 router : routers) {
                 try {
-                    router.notifyRoutesAdded(routes);
+                    router.notifyRoutesUpdated(routes);
                 } catch (RemoteException ex) {
-                    Slog.w(TAG, "Failed to notify routes added. Router probably died.", ex);
+                    Slog.w(TAG, "Failed to notify routes updated. Router probably died.", ex);
                 }
             }
         }
 
-        private void notifyRoutesRemovedToRouters(@NonNull List<IMediaRouter2> routers,
-                @NonNull List<MediaRoute2Info> routes) {
-            for (IMediaRouter2 router : routers) {
-                try {
-                    router.notifyRoutesRemoved(routes);
-                } catch (RemoteException ex) {
-                    Slog.w(TAG, "Failed to notify routes removed. Router probably died.", ex);
-                }
-            }
-        }
-
-        private void notifyRoutesChangedToRouters(@NonNull List<IMediaRouter2> routers,
-                @NonNull List<MediaRoute2Info> routes) {
-            for (IMediaRouter2 router : routers) {
-                try {
-                    router.notifyRoutesChanged(routes);
-                } catch (RemoteException ex) {
-                    Slog.w(TAG, "Failed to notify routes changed. Router probably died.", ex);
-                }
-            }
-        }
-
-        private void notifySessionInfoChangedToRouters(@NonNull List<IMediaRouter2> routers,
-                @NonNull RoutingSessionInfo sessionInfo) {
+        private void notifySessionInfoChangedToRouters(
+                @NonNull List<IMediaRouter2> routers, @NonNull RoutingSessionInfo sessionInfo) {
             for (IMediaRouter2 router : routers) {
                 try {
                     router.notifySessionInfoChanged(sessionInfo);
@@ -2033,48 +2133,31 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifyRoutesToManager(@NonNull IMediaRouter2Manager manager) {
-            List<MediaRoute2Info> routes = new ArrayList<>();
-            for (MediaRoute2ProviderInfo providerInfo : mLastProviderInfos) {
-                routes.addAll(providerInfo.getRoutes());
-            }
-            if (routes.size() == 0) {
+        /**
+         * Notifies {@code manager} with all known routes. This only happens once after {@code
+         * manager} is registered through {@link #registerManager(IMediaRouter2Manager, String)
+         * registerManager()}.
+         *
+         * @param manager {@link IMediaRouter2Manager} to be notified.
+         */
+        private void notifyInitialRoutesToManager(@NonNull IMediaRouter2Manager manager) {
+            if (mLastNotifiedRoutesToPrivilegedRouters.isEmpty()) {
                 return;
             }
             try {
-                manager.notifyRoutesAdded(routes);
+                manager.notifyRoutesUpdated(
+                        new ArrayList<>(mLastNotifiedRoutesToPrivilegedRouters.values()));
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify all routes. Manager probably died.", ex);
             }
         }
 
-        private void notifyRoutesAddedToManagers(@NonNull List<IMediaRouter2Manager> managers,
+        private void notifyRoutesUpdatedToManagers(
+                @NonNull List<IMediaRouter2Manager> managers,
                 @NonNull List<MediaRoute2Info> routes) {
             for (IMediaRouter2Manager manager : managers) {
                 try {
-                    manager.notifyRoutesAdded(routes);
-                } catch (RemoteException ex) {
-                    Slog.w(TAG, "Failed to notify routes added. Manager probably died.", ex);
-                }
-            }
-        }
-
-        private void notifyRoutesRemovedToManagers(@NonNull List<IMediaRouter2Manager> managers,
-                @NonNull List<MediaRoute2Info> routes) {
-            for (IMediaRouter2Manager manager : managers) {
-                try {
-                    manager.notifyRoutesRemoved(routes);
-                } catch (RemoteException ex) {
-                    Slog.w(TAG, "Failed to notify routes removed. Manager probably died.", ex);
-                }
-            }
-        }
-
-        private void notifyRoutesChangedToManagers(@NonNull List<IMediaRouter2Manager> managers,
-                @NonNull List<MediaRoute2Info> routes) {
-            for (IMediaRouter2Manager manager : managers) {
-                try {
-                    manager.notifyRoutesChanged(routes);
+                    manager.notifyRoutesUpdated(routes);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to notify routes changed. Manager probably died.", ex);
                 }
