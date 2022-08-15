@@ -770,6 +770,10 @@ public class DevicePolicyManager {
      * <p>If this extra is set to {@code true}, the provisioning flow will still try to connect to
      * the internet, but if it fails it will start the offline provisioning flow.
      *
+     * <p>For T if this extra is set to {@code true}, the provisioning flow will be forced through
+     * the platform and there will be no attempt to download and install the device policy
+     * management role holder.
+     *
      * <p>The default value is {@code false}.
      *
      * <p>This extra is respected when provided via the provisioning intent actions such as {@link
@@ -9260,6 +9264,21 @@ public class DevicePolicyManager {
             return mGetProfileOwnerOrDeviceOwnerSupervisionComponentCache.query(user);
         }
         return null;
+    }
+
+    /**
+     * Checks if the specified component is the supervision component.
+     * @hide
+     */
+    public boolean isSupervisionComponent(@NonNull ComponentName who) {
+        if (mService != null) {
+            try {
+                return getService().isSupervisionComponent(who);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 
     /**

@@ -317,7 +317,7 @@ public class DomainVerificationService extends SystemService
         mEnforcer.assertApprovedVerifier(callingUid, mProxy);
         final Computer snapshot = mConnection.snapshot();
         synchronized (mLock) {
-            List<String> verifiedDomains = new ArrayList<>();
+            List<String> newlyVerifiedDomains = new ArrayList<>();
 
             GetAttachedResult result = getAndValidateAttachedLocked(domainSetId, domains,
                     true /* forAutoVerify */, callingUid, null /* userId */, snapshot);
@@ -329,21 +329,28 @@ public class DomainVerificationService extends SystemService
             ArrayMap<String, Integer> stateMap = pkgState.getStateMap();
             for (String domain : domains) {
                 Integer previousState = stateMap.get(domain);
-                if (previousState != null
-                        && !DomainVerificationState.isModifiable(previousState)) {
-                    continue;
+                // Skip if the state hasn't changed or can't be changed
+                if (previousState != null) {
+                    if (previousState == state
+                            || !DomainVerificationState.isModifiable(previousState)) {
+                        continue;
+                    }
                 }
 
                 if (DomainVerificationState.isVerified(state)) {
-                    verifiedDomains.add(domain);
+                    if (previousState == null
+                            || !DomainVerificationState.isVerified(previousState)) {
+                        newlyVerifiedDomains.add(domain);
+                    }
                 }
 
                 stateMap.put(domain, state);
             }
 
-            int size = verifiedDomains.size();
+            // For newly verified domains, revoke their user states across other packages
+            int size = newlyVerifiedDomains.size();
             for (int index = 0; index < size; index++) {
-                removeUserStatesForDomain(verifiedDomains.get(index));
+                removeUserStatesForDomain(pkgState, newlyVerifiedDomains.get(index));
             }
         }
 
@@ -367,7 +374,6 @@ public class DomainVerificationService extends SystemService
                         "State must be one of NO_RESPONSE, SUCCESS, APPROVED, or DENIED");
         }
 
-        ArraySet<String> verifiedDomains = new ArraySet<>();
         if (packageName == null) {
             final Computer snapshot = mConnection.snapshot();
             synchronized (mLock) {
@@ -395,10 +401,6 @@ public class DomainVerificationService extends SystemService
                         validDomains.retainAll(autoVerifyDomains);
                     }
 
-                    if (DomainVerificationState.isVerified(state)) {
-                        verifiedDomains.addAll(validDomains);
-                    }
-
                     setDomainVerificationStatusInternal(pkgState, state, validDomains);
                 }
             }
@@ -424,19 +426,33 @@ public class DomainVerificationService extends SystemService
                     validDomains.retainAll(mCollector.collectValidAutoVerifyDomains(pkg));
                 }
 
+                ArraySet<String> newlyVerifiedDomains = null;
                 if (DomainVerificationState.isVerified(state)) {
-                    verifiedDomains.addAll(validDomains);
+                    newlyVerifiedDomains = new ArraySet<>();
+                    ArrayMap<String, Integer> stateMap = pkgState.getStateMap();
+                    int domainsSize = validDomains.size();
+                    for (int domainIndex = 0; domainIndex < domainsSize; domainIndex++) {
+                        String domain = validDomains.valueAt(domainIndex);
+                        Integer oldState = stateMap.get(domain);
+                        // Only remove if not previously verified
+                        if (oldState == null || !DomainVerificationState.isVerified(oldState)) {
+                            newlyVerifiedDomains.add(domain);
+                        }
+                    }
                 }
 
                 setDomainVerificationStatusInternal(pkgState, state, validDomains);
-            }
-        }
 
-        // Mirror SystemApi behavior of revoking user selection for approved domains.
-        if (DomainVerificationState.isVerified(state)) {
-            final int size = verifiedDomains.size();
-            for (int index = 0; index < size; index++) {
-                removeUserStatesForDomain(verifiedDomains.valueAt(index));
+                // Mirror SystemApi behavior of revoking user selection for approved domains.
+                // This is done in a second pass so that the previous state can be compared before
+                // the previous method overwrites it with the new state.
+                if (newlyVerifiedDomains != null) {
+                    int domainsSize = newlyVerifiedDomains.size();
+                    for (int domainIndex = 0; domainIndex < domainsSize; domainIndex++) {
+                        String domain = newlyVerifiedDomains.valueAt(domainIndex);
+                        removeUserStatesForDomain(pkgState, domain);
+                    }
+                }
             }
         }
 
@@ -452,7 +468,10 @@ public class DomainVerificationService extends SystemService
         }
     }
 
-    private void removeUserStatesForDomain(@NonNull String domain) {
+    private void removeUserStatesForDomain(@NonNull DomainVerificationPkgState owningPkgState,
+            @NonNull String domain) {
+        SparseArray<DomainVerificationInternalUserState> owningUserStates =
+                owningPkgState.getUserStates();
         synchronized (mLock) {
             final int size = mAttachedPkgStates.size();
             for (int index = 0; index < size; index++) {
@@ -460,6 +479,15 @@ public class DomainVerificationService extends SystemService
                 SparseArray<DomainVerificationInternalUserState> array = pkgState.getUserStates();
                 int arraySize = array.size();
                 for (int arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) {
+                    int userId = array.keyAt(arrayIndex);
+                    DomainVerificationInternalUserState owningUserState =
+                            owningUserStates.get(userId);
+                    if (owningUserState != null && !owningUserState.isLinkHandlingAllowed()) {
+                        // Skip users where the owning package has their link handling disabled,
+                        // since revoking those users would lead to no apps being able to handle
+                        // the domain.
+                        continue;
+                    }
                     array.valueAt(arrayIndex).removeHost(domain);
                 }
             }
@@ -527,6 +555,8 @@ public class DomainVerificationService extends SystemService
         mConnection.scheduleWriteSettings();
     }
 
+    @CheckResult
+    @DomainVerificationManager.Error
     public int setDomainVerificationUserSelection(@NonNull UUID domainSetId,
             @NonNull Set<String> domains, boolean enabled, @UserIdInt int userId)
             throws NameNotFoundException {

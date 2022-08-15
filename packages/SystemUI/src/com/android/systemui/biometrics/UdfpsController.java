@@ -24,7 +24,10 @@ import static com.android.systemui.classifier.Classifier.UDFPS_AUTHENTICATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Point;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.display.DisplayManager;
@@ -333,6 +336,20 @@ public class UdfpsController implements DozeReceiver {
         return velocity > 750f;
     }
 
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mOverlay != null
+                    && mOverlay.getRequestReason() != REASON_AUTH_KEYGUARD
+                    && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received, mRequestReason: "
+                        + mOverlay.getRequestReason());
+                mOverlay.cancel();
+                hideUdfpsOverlay();
+            }
+        }
+    };
+
     /**
      * Forwards touches to the udfps controller / view
      */
@@ -633,6 +650,11 @@ public class UdfpsController implements DozeReceiver {
 
         final UdfpsOverlayController mUdfpsOverlayController = new UdfpsOverlayController();
         mFingerprintManager.setUdfpsOverlayController(mUdfpsOverlayController);
+
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        context.registerReceiver(mBroadcastReceiver, filter,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
 
         udfpsHapticsSimulator.setUdfpsController(this);
         udfpsShell.setUdfpsOverlayController(mUdfpsOverlayController);

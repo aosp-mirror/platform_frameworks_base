@@ -16,15 +16,23 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.content.pm.PackageManager.MATCH_ALL;
+
 import android.app.Activity;
+import android.app.ActivityThread;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.LayoutDirection;
+import android.util.Pair;
+import android.util.Size;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowMetrics;
@@ -34,6 +42,8 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.concurrent.Executor;
 
 /**
@@ -41,9 +51,12 @@ import java.util.concurrent.Executor;
  * {@link SplitController}.
  */
 class SplitPresenter extends JetpackTaskFragmentOrganizer {
-    private static final int POSITION_START = 0;
-    private static final int POSITION_END = 1;
-    private static final int POSITION_FILL = 2;
+    @VisibleForTesting
+    static final int POSITION_START = 0;
+    @VisibleForTesting
+    static final int POSITION_END = 1;
+    @VisibleForTesting
+    static final int POSITION_FILL = 2;
 
     @IntDef(value = {
             POSITION_START,
@@ -51,6 +64,41 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             POSITION_FILL,
     })
     private @interface Position {}
+
+    /**
+     * Result of {@link #expandSplitContainerIfNeeded(WindowContainerTransaction, SplitContainer,
+     * Activity, Activity, Intent)}.
+     * No need to expand the splitContainer because screen is big enough to
+     * {@link #shouldShowSideBySide(Rect, SplitRule, Pair)} and minimum dimensions is satisfied.
+     */
+    static final int RESULT_NOT_EXPANDED = 0;
+    /**
+     * Result of {@link #expandSplitContainerIfNeeded(WindowContainerTransaction, SplitContainer,
+     * Activity, Activity, Intent)}.
+     * The splitContainer should be expanded. It is usually because minimum dimensions is not
+     * satisfied.
+     * @see #shouldShowSideBySide(Rect, SplitRule, Pair)
+     */
+    static final int RESULT_EXPANDED = 1;
+    /**
+     * Result of {@link #expandSplitContainerIfNeeded(WindowContainerTransaction, SplitContainer,
+     * Activity, Activity, Intent)}.
+     * The splitContainer should be expanded, but the client side hasn't received
+     * {@link android.window.TaskFragmentInfo} yet. Fallback to create new expanded SplitContainer
+     * instead.
+     */
+    static final int RESULT_EXPAND_FAILED_NO_TF_INFO = 2;
+
+    /**
+     * Result of {@link #expandSplitContainerIfNeeded(WindowContainerTransaction, SplitContainer,
+     * Activity, Activity, Intent)}
+     */
+    @IntDef(value = {
+            RESULT_NOT_EXPANDED,
+            RESULT_EXPANDED,
+            RESULT_EXPAND_FAILED_NO_TF_INFO,
+    })
+    private @interface ResultCode {}
 
     private final SplitController mController;
 
@@ -103,8 +151,10 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             @NonNull WindowContainerTransaction wct, @NonNull Activity primaryActivity,
             @NonNull Intent secondaryIntent, @NonNull SplitPairRule rule) {
         final Rect parentBounds = getParentContainerBounds(primaryActivity);
+        final Pair<Size, Size> minDimensionsPair = getActivityIntentMinDimensionsPair(
+                primaryActivity, secondaryIntent);
         final Rect primaryRectBounds = getBoundsForPosition(POSITION_START, parentBounds, rule,
-                isLtr(primaryActivity, rule));
+                primaryActivity, minDimensionsPair);
         final TaskFragmentContainer primaryContainer = prepareContainerForActivity(wct,
                 primaryActivity, primaryRectBounds, null);
 
@@ -113,7 +163,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final TaskFragmentContainer secondaryContainer = mController.newContainer(
                 secondaryIntent, primaryActivity, taskId);
         final Rect secondaryRectBounds = getBoundsForPosition(POSITION_END, parentBounds,
-                rule, isLtr(primaryActivity, rule));
+                rule, primaryActivity, minDimensionsPair);
         final int windowingMode = mController.getTaskContainer(taskId)
                 .getWindowingModeForSplitTaskFragment(secondaryRectBounds);
         createTaskFragment(wct, secondaryContainer.getTaskFragmentToken(),
@@ -121,7 +171,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 windowingMode);
 
         // Set adjacent to each other so that the containers below will be invisible.
-        setAdjacentTaskFragments(wct, primaryContainer, secondaryContainer, rule);
+        setAdjacentTaskFragments(wct, primaryContainer, secondaryContainer, rule,
+                minDimensionsPair);
 
         mController.registerSplit(wct, primaryContainer, primaryActivity, secondaryContainer, rule);
 
@@ -144,13 +195,15 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         final Rect parentBounds = getParentContainerBounds(primaryActivity);
+        final Pair<Size, Size> minDimensionsPair = getActivitiesMinDimensionsPair(primaryActivity,
+                secondaryActivity);
         final Rect primaryRectBounds = getBoundsForPosition(POSITION_START, parentBounds, rule,
-                isLtr(primaryActivity, rule));
+                primaryActivity, minDimensionsPair);
         final TaskFragmentContainer primaryContainer = prepareContainerForActivity(wct,
                 primaryActivity, primaryRectBounds, null);
 
         final Rect secondaryRectBounds = getBoundsForPosition(POSITION_END, parentBounds, rule,
-                isLtr(primaryActivity, rule));
+                primaryActivity, minDimensionsPair);
         final TaskFragmentContainer curSecondaryContainer = mController.getContainerWithActivity(
                 secondaryActivity);
         TaskFragmentContainer containerToAvoid = primaryContainer;
@@ -162,7 +215,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 secondaryActivity, secondaryRectBounds, containerToAvoid);
 
         // Set adjacent to each other so that the containers below will be invisible.
-        setAdjacentTaskFragments(wct, primaryContainer, secondaryContainer, rule);
+        setAdjacentTaskFragments(wct, primaryContainer, secondaryContainer, rule,
+                minDimensionsPair);
 
         mController.registerSplit(wct, primaryContainer, primaryActivity, secondaryContainer, rule);
 
@@ -211,10 +265,12 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     void startActivityToSide(@NonNull Activity launchingActivity, @NonNull Intent activityIntent,
             @Nullable Bundle activityOptions, @NonNull SplitRule rule, boolean isPlaceholder) {
         final Rect parentBounds = getParentContainerBounds(launchingActivity);
+        final Pair<Size, Size> minDimensionsPair = getActivityIntentMinDimensionsPair(
+                launchingActivity, activityIntent);
         final Rect primaryRectBounds = getBoundsForPosition(POSITION_START, parentBounds, rule,
-                isLtr(launchingActivity, rule));
+                launchingActivity, minDimensionsPair);
         final Rect secondaryRectBounds = getBoundsForPosition(POSITION_END, parentBounds, rule,
-                isLtr(launchingActivity, rule));
+                launchingActivity, minDimensionsPair);
 
         TaskFragmentContainer primaryContainer = mController.getContainerWithActivity(
                 launchingActivity);
@@ -258,11 +314,11 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         if (activity == null) {
             return;
         }
-        final boolean isLtr = isLtr(activity, rule);
+        final Pair<Size, Size> minDimensionsPair = splitContainer.getMinDimensionsPair();
         final Rect primaryRectBounds = getBoundsForPosition(POSITION_START, parentBounds, rule,
-                isLtr);
+                activity, minDimensionsPair);
         final Rect secondaryRectBounds = getBoundsForPosition(POSITION_END, parentBounds, rule,
-                isLtr);
+                activity, minDimensionsPair);
         final TaskFragmentContainer secondaryContainer = splitContainer.getSecondaryContainer();
         // Whether the placeholder is becoming side-by-side with the primary from fullscreen.
         final boolean isPlaceholderBecomingSplit = splitContainer.isPlaceholderContainer()
@@ -273,7 +329,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         // are created again.
         resizeTaskFragmentIfRegistered(wct, primaryContainer, primaryRectBounds);
         resizeTaskFragmentIfRegistered(wct, secondaryContainer, secondaryRectBounds);
-        setAdjacentTaskFragments(wct, primaryContainer, secondaryContainer, rule);
+        setAdjacentTaskFragments(wct, primaryContainer, secondaryContainer, rule,
+                minDimensionsPair);
         if (isPlaceholderBecomingSplit) {
             // When placeholder is shown in split, we should keep the focus on the primary.
             wct.requestFocusOnTaskFragment(primaryContainer.getTaskFragmentToken());
@@ -287,11 +344,12 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
     private void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer primaryContainer,
-            @NonNull TaskFragmentContainer secondaryContainer, @NonNull SplitRule splitRule) {
+            @NonNull TaskFragmentContainer secondaryContainer, @NonNull SplitRule splitRule,
+            @NonNull Pair<Size, Size> minDimensionsPair) {
         final Rect parentBounds = getParentContainerBounds(primaryContainer);
         // Clear adjacent TaskFragments if the container is shown in fullscreen, or the
         // secondaryContainer could not be finished.
-        if (!shouldShowSideBySide(parentBounds, splitRule)) {
+        if (!shouldShowSideBySide(parentBounds, splitRule, minDimensionsPair)) {
             setAdjacentTaskFragments(wct, primaryContainer.getTaskFragmentToken(),
                     null /* secondary */, null /* splitRule */);
         } else {
@@ -373,41 +431,170 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         super.updateWindowingMode(wct, fragmentToken, windowingMode);
     }
 
-    boolean shouldShowSideBySide(@NonNull SplitContainer splitContainer) {
-        final Rect parentBounds = getParentContainerBounds(splitContainer.getPrimaryContainer());
-        return shouldShowSideBySide(parentBounds, splitContainer.getSplitRule());
+    /**
+     * Expands the split container if the current split bounds are smaller than the Activity or
+     * Intent that is added to the container.
+     *
+     * @return the {@link ResultCode} based on {@link #shouldShowSideBySide(Rect, SplitRule, Pair)}
+     * and if {@link android.window.TaskFragmentInfo} has reported to the client side.
+     */
+    @ResultCode
+    int expandSplitContainerIfNeeded(@NonNull WindowContainerTransaction wct,
+            @NonNull SplitContainer splitContainer, @NonNull Activity primaryActivity,
+            @Nullable Activity secondaryActivity, @Nullable Intent secondaryIntent) {
+        if (secondaryActivity == null && secondaryIntent == null) {
+            throw new IllegalArgumentException("Either secondaryActivity or secondaryIntent must be"
+                    + " non-null.");
+        }
+        final Rect taskBounds = getParentContainerBounds(primaryActivity);
+        final Pair<Size, Size> minDimensionsPair;
+        if (secondaryActivity != null) {
+            minDimensionsPair = getActivitiesMinDimensionsPair(primaryActivity, secondaryActivity);
+        } else {
+            minDimensionsPair = getActivityIntentMinDimensionsPair(primaryActivity,
+                    secondaryIntent);
+        }
+        // Expand the splitContainer if minimum dimensions are not satisfied.
+        if (!shouldShowSideBySide(taskBounds, splitContainer.getSplitRule(), minDimensionsPair)) {
+            // If the client side hasn't received TaskFragmentInfo yet, we can't change TaskFragment
+            // bounds. Return failure to create a new SplitContainer which fills task bounds.
+            if (splitContainer.getPrimaryContainer().getInfo() == null
+                    || splitContainer.getSecondaryContainer().getInfo() == null) {
+                return RESULT_EXPAND_FAILED_NO_TF_INFO;
+            }
+            expandTaskFragment(wct, splitContainer.getPrimaryContainer().getTaskFragmentToken());
+            expandTaskFragment(wct, splitContainer.getSecondaryContainer().getTaskFragmentToken());
+            return RESULT_EXPANDED;
+        }
+        return RESULT_NOT_EXPANDED;
     }
 
-    boolean shouldShowSideBySide(@Nullable Rect parentBounds, @NonNull SplitRule rule) {
+    static boolean shouldShowSideBySide(@NonNull Rect parentBounds, @NonNull SplitRule rule) {
+        return shouldShowSideBySide(parentBounds, rule, null /* minimumDimensionPair */);
+    }
+
+    static boolean shouldShowSideBySide(@NonNull SplitContainer splitContainer) {
+        final Rect parentBounds = getParentContainerBounds(splitContainer.getPrimaryContainer());
+
+        return shouldShowSideBySide(parentBounds, splitContainer.getSplitRule(),
+                splitContainer.getMinDimensionsPair());
+    }
+
+    static boolean shouldShowSideBySide(@NonNull Rect parentBounds, @NonNull SplitRule rule,
+            @Nullable Pair<Size, Size> minDimensionsPair) {
         // TODO(b/190433398): Supply correct insets.
         final WindowMetrics parentMetrics = new WindowMetrics(parentBounds,
                 new WindowInsets(new Rect()));
-        return rule.checkParentMetrics(parentMetrics);
+        // Don't show side by side if bounds is not qualified.
+        if (!rule.checkParentMetrics(parentMetrics)) {
+            return false;
+        }
+        final float splitRatio = rule.getSplitRatio();
+        // We only care the size of the bounds regardless of its position.
+        final Rect primaryBounds = getPrimaryBounds(parentBounds, splitRatio, true /* isLtr */);
+        final Rect secondaryBounds = getSecondaryBounds(parentBounds, splitRatio, true /* isLtr */);
+
+        if (minDimensionsPair == null) {
+            return true;
+        }
+        return !boundsSmallerThanMinDimensions(primaryBounds, minDimensionsPair.first)
+                && !boundsSmallerThanMinDimensions(secondaryBounds, minDimensionsPair.second);
     }
 
     @NonNull
-    private Rect getBoundsForPosition(@Position int position, @NonNull Rect parentBounds,
-            @NonNull SplitRule rule, boolean isLtr) {
-        if (!shouldShowSideBySide(parentBounds, rule)) {
-            return new Rect();
-        }
-
-        final float splitRatio = rule.getSplitRatio();
-        final float rtlSplitRatio = 1 - splitRatio;
-        switch (position) {
-            case POSITION_START:
-                return isLtr ? getLeftContainerBounds(parentBounds, splitRatio)
-                        : getRightContainerBounds(parentBounds, rtlSplitRatio);
-            case POSITION_END:
-                return isLtr ? getRightContainerBounds(parentBounds, splitRatio)
-                        : getLeftContainerBounds(parentBounds, rtlSplitRatio);
-            case POSITION_FILL:
-                return parentBounds;
-        }
-        return parentBounds;
+    static Pair<Size, Size> getActivitiesMinDimensionsPair(Activity primaryActivity,
+            Activity secondaryActivity) {
+        return new Pair<>(getMinDimensions(primaryActivity), getMinDimensions(secondaryActivity));
     }
 
-    private Rect getLeftContainerBounds(@NonNull Rect parentBounds, float splitRatio) {
+    @NonNull
+    static Pair<Size, Size> getActivityIntentMinDimensionsPair(Activity primaryActivity,
+            Intent secondaryIntent) {
+        return new Pair<>(getMinDimensions(primaryActivity), getMinDimensions(secondaryIntent));
+    }
+
+    @Nullable
+    static Size getMinDimensions(@Nullable Activity activity) {
+        if (activity == null) {
+            return null;
+        }
+        final ActivityInfo.WindowLayout windowLayout = activity.getActivityInfo().windowLayout;
+        if (windowLayout == null) {
+            return null;
+        }
+        return new Size(windowLayout.minWidth, windowLayout.minHeight);
+    }
+
+    // TODO(b/232871351): find a light-weight approach for this check.
+    @Nullable
+    static Size getMinDimensions(@Nullable Intent intent) {
+        if (intent == null) {
+            return null;
+        }
+        final PackageManager packageManager = ActivityThread.currentActivityThread()
+                .getApplication().getPackageManager();
+        final ResolveInfo resolveInfo = packageManager.resolveActivity(intent,
+                PackageManager.ResolveInfoFlags.of(MATCH_ALL));
+        if (resolveInfo == null) {
+            return null;
+        }
+        final ActivityInfo activityInfo = resolveInfo.activityInfo;
+        if (activityInfo == null) {
+            return null;
+        }
+        final ActivityInfo.WindowLayout windowLayout = activityInfo.windowLayout;
+        if (windowLayout == null) {
+            return null;
+        }
+        return new Size(windowLayout.minWidth, windowLayout.minHeight);
+    }
+
+    static boolean boundsSmallerThanMinDimensions(@NonNull Rect bounds,
+            @Nullable Size minDimensions) {
+        if (minDimensions == null) {
+            return false;
+        }
+        return bounds.width() < minDimensions.getWidth()
+                || bounds.height() < minDimensions.getHeight();
+    }
+
+    @VisibleForTesting
+    @NonNull
+    static Rect getBoundsForPosition(@Position int position, @NonNull Rect parentBounds,
+            @NonNull SplitRule rule, @NonNull Activity primaryActivity,
+            @Nullable Pair<Size, Size> minDimensionsPair) {
+        if (!shouldShowSideBySide(parentBounds, rule, minDimensionsPair)) {
+            return new Rect();
+        }
+        final boolean isLtr = isLtr(primaryActivity, rule);
+        final float splitRatio = rule.getSplitRatio();
+
+        switch (position) {
+            case POSITION_START:
+                return getPrimaryBounds(parentBounds, splitRatio, isLtr);
+            case POSITION_END:
+                return getSecondaryBounds(parentBounds, splitRatio, isLtr);
+            case POSITION_FILL:
+            default:
+                return new Rect();
+        }
+    }
+
+    @NonNull
+    private static Rect getPrimaryBounds(@NonNull Rect parentBounds, float splitRatio,
+            boolean isLtr) {
+        return isLtr ? getLeftContainerBounds(parentBounds, splitRatio)
+                : getRightContainerBounds(parentBounds, 1 - splitRatio);
+    }
+
+    @NonNull
+    private static Rect getSecondaryBounds(@NonNull Rect parentBounds, float splitRatio,
+            boolean isLtr) {
+        return isLtr ? getRightContainerBounds(parentBounds, splitRatio)
+                : getLeftContainerBounds(parentBounds, 1 - splitRatio);
+    }
+
+    private static Rect getLeftContainerBounds(@NonNull Rect parentBounds, float splitRatio) {
         return new Rect(
                 parentBounds.left,
                 parentBounds.top,
@@ -415,7 +602,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 parentBounds.bottom);
     }
 
-    private Rect getRightContainerBounds(@NonNull Rect parentBounds, float splitRatio) {
+    private static Rect getRightContainerBounds(@NonNull Rect parentBounds, float splitRatio) {
         return new Rect(
                 (int) (parentBounds.left + parentBounds.width() * splitRatio),
                 parentBounds.top,
@@ -427,7 +614,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * Checks if a split with the provided rule should be displays in left-to-right layout
      * direction, either always or with the current configuration.
      */
-    private boolean isLtr(@NonNull Context context, @NonNull SplitRule rule) {
+    private static boolean isLtr(@NonNull Context context, @NonNull SplitRule rule) {
         switch (rule.getLayoutDirection()) {
             case LayoutDirection.LOCALE:
                 return context.getResources().getConfiguration().getLayoutDirection()
@@ -441,7 +628,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     @NonNull
-    Rect getParentContainerBounds(@NonNull TaskFragmentContainer container) {
+    static Rect getParentContainerBounds(@NonNull TaskFragmentContainer container) {
         return container.getTaskContainer().getTaskBounds();
     }
 
@@ -451,11 +638,19 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         if (container != null) {
             return getParentContainerBounds(container);
         }
-        return getTaskBoundsFromActivity(activity);
+        // Obtain bounds from Activity instead because the Activity hasn't been embedded yet.
+        return getNonEmbeddedActivityBounds(activity);
     }
 
+    /**
+     * Obtains the bounds from a non-embedded Activity.
+     * <p>
+     * Note that callers should use {@link #getParentContainerBounds(Activity)} instead for most
+     * cases unless we want to obtain task bounds before
+     * {@link TaskContainer#isTaskBoundsInitialized()}.
+     */
     @NonNull
-    static Rect getTaskBoundsFromActivity(@NonNull Activity activity) {
+    static Rect getNonEmbeddedActivityBounds(@NonNull Activity activity) {
         final WindowConfiguration windowConfiguration =
                 activity.getResources().getConfiguration().windowConfiguration;
         if (!activity.isInMultiWindowMode()) {

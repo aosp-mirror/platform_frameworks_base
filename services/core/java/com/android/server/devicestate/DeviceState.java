@@ -18,6 +18,7 @@ package com.android.server.devicestate;
 
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -48,9 +49,16 @@ public final class DeviceState {
      */
     public static final int FLAG_CANCEL_OVERRIDE_REQUESTS = 1 << 0;
 
+    /**
+     * Flag that indicates this device state is inaccessible for applications to be placed in. This
+     * could be a device-state where the {@link DEFAULT_DISPLAY} is not enabled.
+     */
+    public static final int FLAG_APP_INACCESSIBLE = 1 << 1;
+
     /** @hide */
     @IntDef(prefix = {"FLAG_"}, flag = true, value = {
             FLAG_CANCEL_OVERRIDE_REQUESTS,
+            FLAG_APP_INACCESSIBLE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeviceStateFlags {}
@@ -97,7 +105,8 @@ public final class DeviceState {
 
     @Override
     public String toString() {
-        return "DeviceState{" + "identifier=" + mIdentifier + ", name='" + mName + '\'' + '}';
+        return "DeviceState{" + "identifier=" + mIdentifier + ", name='" + mName + '\''
+                + ", app_accessible=" + !hasFlag(FLAG_APP_INACCESSIBLE) + "}";
     }
 
     @Override

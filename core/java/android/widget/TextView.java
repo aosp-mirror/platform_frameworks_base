@@ -4781,12 +4781,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * TextView is {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}, and the default value for
      * EditText is {@link Layout#BREAK_STRATEGY_SIMPLE}, the latter to avoid the
      * text "dancing" when being edited.
-     * <p/>
+     * <p>
      * Enabling hyphenation with either using {@link Layout#HYPHENATION_FREQUENCY_NORMAL} or
      * {@link Layout#HYPHENATION_FREQUENCY_FULL} while line breaking is set to one of
      * {@link Layout#BREAK_STRATEGY_BALANCED}, {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}
      * improves the structure of text layout however has performance impact and requires more time
-     * to do the text layout.
+     * to do the text layout.</p>
+     * <p>
+     * Compared with {@link #setLineBreakStyle(int)}, line break style with different strictness is
+     * evaluated in the ICU to identify the potential breakpoints. In
+     * {@link #setBreakStrategy(int)}, line break strategy handles the post processing of ICU's line
+     * break result. It aims to evaluate ICU's breakpoints and break the lines based on the
+     * constraint.
+     * </p>
      *
      * @attr ref android.R.styleable#TextView_breakStrategy
      * @see #getBreakStrategy()

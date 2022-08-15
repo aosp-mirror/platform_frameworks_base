@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefonoa"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Ahots-laguntza"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Zorroa"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Diru-zorroa"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR kodeen eskanerra"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Desblokeatu"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Gailua blokeatuta dago"</string>
@@ -158,7 +158,7 @@
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Hurrengo saiakeran pasahitza oker idazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sakatu hatz-marken sentsorea"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Hatz-markaren ikonoa"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ez da hauteman aurpegia. Erabili hatz-marka."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ezin da hauteman aurpegia. Erabili hatz-marka."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth-a konektatuta."</string>
@@ -406,7 +406,7 @@
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Laneko aplikazioak <xliff:g id="VPN_APP">%1$s</xliff:g> bidez daude konektatuta Internetera. IKT saileko administratzaileak eta VPNaren hornitzaileak laneko aplikazioen bidez egiten dituzun sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko dituzte."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Aplikazio pertsonalak <xliff:g id="VPN_APP">%1$s</xliff:g> bidez daude konektatuta Internetera. IKT saileko administratzaileak sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Ireki VPN ezarpenak"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Ireki VPN sarearen ezarpenak"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Zure gurasoak kudeatzen du gailua. Zure gurasoak gailuko informazioa ikusi eta kudea dezake; besteak beste, zer aplikazio erabiltzen dituzun, zure kokapena zein den eta pantaila aurrean zenbat eta noiz egoten zaren."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPNa"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent bidez desblokeatuta"</string>
@@ -455,14 +455,14 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"dardara"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s gailuaren bolumena kontrolatzeko aukerak"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Tonuak jo egingo du deiak eta jakinarazpenak jasotzean (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <string name="system_ui_tuner" msgid="1471348823289954729">"Sistemako erabiltzaile-interfazearen konfiguratzailea"</string>
+    <string name="system_ui_tuner" msgid="1471348823289954729">"Sistemaren erabiltzaile-interfazearen konfiguratzailea"</string>
     <string name="status_bar" msgid="4357390266055077437">"Egoera-barra"</string>
     <string name="demo_mode" msgid="263484519766901593">"Sistemaren erabiltzaile-interfazearen demo modua"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Gaitu demo modua"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Erakutsi demo modua"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Diru-zorroa"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Konfiguratu erosketa bizkorrago eta seguruagoak egiteko telefonoarekin"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Erakutsi guztiak"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Irekitzeko, sakatu hau"</string>
@@ -479,12 +479,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Wifi-gunea"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Work profila"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Dibertsioa batzuentzat, baina ez guztientzat"</string>
-    <string name="tuner_warning" msgid="1861736288458481650">"Sistemako erabiltzaile-interfazearen konfiguratzaileak Android erabiltzaile-interfazea moldatzeko eta pertsonalizatzeko modu gehiago eskaintzen dizkizu. Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
+    <string name="tuner_warning" msgid="1861736288458481650">"Sistemaren erabiltzaile-interfazearen konfiguratzaileak Android erabiltzaile-interfazea moldatzeko eta pertsonalizatzeko modu gehiago eskaintzen dizkizu. Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
     <string name="got_it" msgid="477119182261892069">"Ados"</string>
-    <string name="tuner_toast" msgid="3812684836514766951">"Zorionak! Sistemako erabiltzaile-interfazearen konfiguratzailea Ezarpenak atalean gehitu da"</string>
+    <string name="tuner_toast" msgid="3812684836514766951">"Zorionak! Sistemaren erabiltzaile-interfazearen konfiguratzailea Ezarpenak atalean gehitu da"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"Kendu Ezarpenak ataletik"</string>
-    <string name="remove_from_settings_prompt" msgid="551565437265615426">"Sistemako erabiltzaile-interfazearen konfiguratzailea ezarpenetatik kendu nahi duzu, eta haren eginbide guztiak erabiltzeari utzi nahi diozu?"</string>
+    <string name="remove_from_settings_prompt" msgid="551565437265615426">"Sistemaren erabiltzaile-interfazearen konfiguratzailea ezarpenetatik kendu nahi duzu, eta haren eginbide guztiak erabiltzeari utzi nahi diozu?"</string>
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Bluetooth eginbidea aktibatu nahi duzu?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Teklatua tabletara konektatzeko, Bluetooth eginbidea aktibatu behar duzu."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Aktibatu"</string>
@@ -552,7 +552,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Ezkerrera"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Eskuinera"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Erdiratu"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabuladorea"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Zuriunea"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Sartu"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Atzera"</string>
@@ -577,7 +577,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Atzera"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Jakinarazpenak"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Lasterbideak"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Aldatu teklatuaren diseinua"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Aldatu tekl. diseinua"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplikazioak"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Laguntzailea"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Arakatzailea"</string>

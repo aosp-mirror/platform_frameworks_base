@@ -24,9 +24,11 @@ import static androidx.window.extensions.embedding.SplitContainer.getFinishSecon
 import static androidx.window.extensions.embedding.SplitContainer.isStickyPlaceholderRule;
 import static androidx.window.extensions.embedding.SplitContainer.shouldFinishAssociatedContainerWhenAdjacent;
 import static androidx.window.extensions.embedding.SplitContainer.shouldFinishAssociatedContainerWhenStacked;
+import static androidx.window.extensions.embedding.SplitPresenter.RESULT_EXPAND_FAILED_NO_TF_INFO;
+import static androidx.window.extensions.embedding.SplitPresenter.getActivityIntentMinDimensionsPair;
+import static androidx.window.extensions.embedding.SplitPresenter.getNonEmbeddedActivityBounds;
+import static androidx.window.extensions.embedding.SplitPresenter.shouldShowSideBySide;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityClient;
 import android.app.ActivityOptions;
@@ -43,11 +45,15 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
+import android.util.Size;
 import android.util.SparseArray;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.GuardedBy;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -63,7 +69,7 @@ import java.util.function.Consumer;
  */
 public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmentCallback,
         ActivityEmbeddingComponent {
-    private static final String TAG = "SplitController";
+    static final String TAG = "SplitController";
 
     @VisibleForTesting
     @GuardedBy("mLock")
@@ -350,7 +356,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             if (!(rule instanceof SplitRule)) {
                 continue;
             }
-            if (mPresenter.shouldShowSideBySide(taskContainer.getTaskBounds(), (SplitRule) rule)) {
+            if (shouldShowSideBySide(taskContainer.getTaskBounds(), (SplitRule) rule)) {
                 return true;
             }
         }
@@ -575,8 +581,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /** Finds the activity below the given activity. */
+    @VisibleForTesting
     @Nullable
-    private Activity findActivityBelow(@NonNull Activity activity) {
+    Activity findActivityBelow(@NonNull Activity activity) {
         Activity activityBelow = null;
         final TaskFragmentContainer container = getContainerWithActivity(activity);
         if (container != null) {
@@ -620,11 +627,15 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
             secondaryContainer.addPendingAppearedActivity(secondaryActivity);
             final WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.reparentActivityToTaskFragment(
-                    secondaryContainer.getTaskFragmentToken(),
-                    secondaryActivity.getActivityToken());
-            mPresenter.applyTransaction(wct);
-            return true;
+            if (mPresenter.expandSplitContainerIfNeeded(wct, splitContainer, primaryActivity,
+                    secondaryActivity, null /* secondaryIntent */)
+                    != RESULT_EXPAND_FAILED_NO_TF_INFO) {
+                wct.reparentActivityToTaskFragment(
+                        secondaryContainer.getTaskFragmentToken(),
+                        secondaryActivity.getActivityToken());
+                mPresenter.applyTransaction(wct);
+                return true;
+            }
         }
         // Create new split pair.
         mPresenter.createNewSplitContainer(primaryActivity, secondaryActivity, splitRule);
@@ -632,6 +643,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     private void onActivityConfigurationChanged(@NonNull Activity activity) {
+        if (activity.isFinishing()) {
+            // Do nothing if the activity is currently finishing.
+            return;
+        }
+
         if (isInPictureInPicture(activity)) {
             // We don't embed activity when it is in PIP.
             return;
@@ -790,7 +806,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (splitContainer != null && existingContainer == splitContainer.getPrimaryContainer()
                 && (canReuseContainer(splitRule, splitContainer.getSplitRule())
                 // TODO(b/231845476) we should always respect clearTop.
-                || !respectClearTop)) {
+                || !respectClearTop)
+                && mPresenter.expandSplitContainerIfNeeded(wct, splitContainer, primaryActivity,
+                        null /* secondaryActivity */, intent) != RESULT_EXPAND_FAILED_NO_TF_INFO) {
             // Can launch in the existing secondary container if the rules share the same
             // presentation.
             return splitContainer.getSecondaryContainer();
@@ -860,7 +878,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 pendingAppearedIntent, taskContainer, this);
         if (!taskContainer.isTaskBoundsInitialized()) {
             // Get the initial bounds before the TaskFragment has appeared.
-            final Rect taskBounds = SplitPresenter.getTaskBoundsFromActivity(activityInTask);
+            final Rect taskBounds = getNonEmbeddedActivityBounds(activityInTask);
             if (!taskContainer.setTaskBounds(taskBounds)) {
                 Log.w(TAG, "Can't find bounds from activity=" + activityInTask);
             }
@@ -1103,6 +1121,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     boolean launchPlaceholderIfNecessary(@NonNull Activity activity, boolean isOnCreated) {
+        if (activity.isFinishing()) {
+            return false;
+        }
+
         final TaskFragmentContainer container = getContainerWithActivity(activity);
         // Don't launch placeholder if the container is occluded.
         if (container != null && container != getTopActiveContainer(container.getTaskId())) {
@@ -1117,8 +1139,16 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         // Check if there is enough space for launch
         final SplitPlaceholderRule placeholderRule = getPlaceholderRule(activity);
-        if (placeholderRule == null || !mPresenter.shouldShowSideBySide(
-                mPresenter.getParentContainerBounds(activity), placeholderRule)) {
+
+        if (placeholderRule == null) {
+            return false;
+        }
+
+        final Pair<Size, Size> minDimensionsPair = getActivityIntentMinDimensionsPair(activity,
+                placeholderRule.getPlaceholderIntent());
+        if (!shouldShowSideBySide(
+                mPresenter.getParentContainerBounds(activity), placeholderRule,
+                minDimensionsPair)) {
             return false;
         }
 
@@ -1161,7 +1191,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return false;
         }
 
-        if (mPresenter.shouldShowSideBySide(splitContainer)) {
+        if (shouldShowSideBySide(splitContainer)) {
             return false;
         }
 
@@ -1233,7 +1263,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                         // Splits that are not showing side-by-side are reported as having 0 split
                         // ratio, since by definition in the API the primary container occupies no
                         // width of the split when covered by the secondary.
-                        mPresenter.shouldShowSideBySide(container)
+                        shouldShowSideBySide(container)
                                 ? container.getSplitRule().getSplitRatio()
                                 : 0.0f);
                 splitStates.add(splitState);
@@ -1402,7 +1432,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
         // Decide whether the associated container should be retained based on the current
         // presentation mode.
-        if (mPresenter.shouldShowSideBySide(splitContainer)) {
+        if (shouldShowSideBySide(splitContainer)) {
             return !shouldFinishAssociatedContainerWhenAdjacent(finishBehavior);
         } else {
             return !shouldFinishAssociatedContainerWhenStacked(finishBehavior);

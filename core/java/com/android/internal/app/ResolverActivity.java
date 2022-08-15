@@ -1501,7 +1501,10 @@ public class ResolverActivity extends Activity implements
                         : R.string.miniresolver_use_personal_browser);
 
         findViewById(R.id.use_same_profile_browser).setOnClickListener(
-                v -> safelyStartActivity(sameProfileResolveInfo));
+                v -> {
+                    safelyStartActivity(sameProfileResolveInfo);
+                    finish();
+                });
 
         findViewById(R.id.button_open).setOnClickListener(v -> {
             Intent intent = otherProfileResolveInfo.getResolvedIntent();
@@ -1510,6 +1513,7 @@ public class ResolverActivity extends Activity implements
             }
             safelyStartActivityAsUser(otherProfileResolveInfo,
                     inactiveAdapter.mResolverListController.getUserHandle());
+            finish();
         });
     }
 

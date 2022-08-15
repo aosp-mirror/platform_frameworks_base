@@ -5003,15 +5003,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
 
         final HostingRecord hostingRecord = app.getHostingRecord();
-        final String action = hostingRecord.getAction();
-        String shortAction = action;
-        if (action != null) {
-            // only log the last part of the action string to save stats data.
-            int index = action.lastIndexOf(".");
-            if (index != -1 && index != action.length() - 1) {
-                shortAction = action.substring(index + 1);
-            }
-        }
+        String shortAction = getShortAction(hostingRecord.getAction());
         FrameworkStatsLog.write(
                 FrameworkStatsLog.PROCESS_START_TIME,
                 app.info.uid,
@@ -5040,6 +5032,20 @@ public class ActivityManagerService extends IActivityManager.Stub
             attachApplicationLocked(thread, callingPid, callingUid, startSeq);
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    /**
+     * @return The last part of the string of an intent's action.
+     */
+    static @Nullable String getShortAction(@Nullable String action) {
+        String shortAction = action;
+        if (action != null) {
+            int index = action.lastIndexOf('.');
+            if (index != -1 && index != action.length() - 1) {
+                shortAction = action.substring(index + 1);
+            }
+        }
+        return shortAction;
     }
 
     void checkTime(long startTime, String where) {
@@ -14262,7 +14268,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         oldQueue.performReceiveLocked(oldRecord.callerApp, oldRecord.resultTo,
                                 oldRecord.intent,
                                 Activity.RESULT_CANCELED, null, null,
-                                false, false, oldRecord.userId);
+                                false, false, oldRecord.userId, oldRecord.callingUid, callingUid);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failure ["
                                 + queue.mQueueName + "] sending broadcast result of "

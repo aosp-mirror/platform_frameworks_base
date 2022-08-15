@@ -486,7 +486,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     public void onMotionEvent(MotionEvent event) {
         if (mBackAnimation != null) {
             mBackAnimation.onBackMotion(
-                    event,
+                    event.getX(), event.getY(),
                     event.getActionMasked(),
                     mIsLeftPanel ? BackEvent.EDGE_LEFT : BackEvent.EDGE_RIGHT);
         }

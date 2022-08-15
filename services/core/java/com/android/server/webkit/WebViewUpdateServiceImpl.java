@@ -21,6 +21,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
 import android.os.AsyncTask;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.webkit.UserPackage;
@@ -265,10 +266,12 @@ class WebViewUpdateServiceImpl {
                 // Either the current relro creation  isn't done yet, or the new relro creatioin
                 // hasn't kicked off yet (the last relro creation used an out-of-date WebView).
                 webViewStatus = WebViewFactory.LIBLOAD_FAILED_WAITING_FOR_RELRO;
-                Slog.e(TAG, "Timed out waiting for relro creation, relros started "
+                String timeoutError = "Timed out waiting for relro creation, relros started "
                         + mNumRelroCreationsStarted
                         + " relros finished " + mNumRelroCreationsFinished
-                        + " package dirty? " + mWebViewPackageDirty);
+                        + " package dirty? " + mWebViewPackageDirty;
+                Slog.e(TAG, timeoutError);
+                Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, timeoutError);
             }
         }
         if (!webViewReady) Slog.w(TAG, "creating relro file timed out");

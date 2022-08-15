@@ -16,15 +16,13 @@
 
 package com.android.systemui.statusbar.notification.collection.provider
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
 import android.util.Log
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.statusbar.commandline.Command
+import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.util.Assert
 import com.android.systemui.util.ListenerSet
@@ -39,20 +37,19 @@ import javax.inject.Inject
  * The only configuration is a list of allowed packages.  When this list is empty, the feature is
  * disabled.  When SystemUI starts up, this feature is disabled.
  *
- * To enabled filtering, provide the list of packages in a comma-separated list using the command:
+ * To enabled filtering, provide the space-separated list of packages using the command:
  *
- * `$ adb shell am broadcast -a com.android.systemui.action.SET_NOTIF_DEBUG_MODE
- *          --esal allowed_packages <comma-separated-packages>`
+ * `$ adb shell cmd statusbar notif-filter allowed-pkgs <package> ...`
  *
- * To disable filtering, send the action without a list:
+ * To disable filtering, send the command without any packages, or explicitly reset:
  *
- * `$ adb shell am broadcast -a com.android.systemui.action.SET_NOTIF_DEBUG_MODE`
+ * `$ adb shell cmd statusbar notif-filter reset`
  *
  * NOTE: this feature only works on debug builds, and when the broadcaster is root.
  */
 @SysUISingleton
 class DebugModeFilterProvider @Inject constructor(
-    private val context: Context,
+    private val commandRegistry: CommandRegistry,
     dumpManager: DumpManager
 ) : Dumpable {
     private var allowedPackages: List<String> = emptyList()
@@ -74,10 +71,8 @@ class DebugModeFilterProvider @Inject constructor(
         val needsInitialization = listeners.isEmpty()
         listeners.addIfAbsent(listener)
         if (needsInitialization) {
-            val filter = IntentFilter().apply { addAction(ACTION_SET_NOTIF_DEBUG_MODE) }
-            val permission = NOTIF_DEBUG_MODE_PERMISSION
-            context.registerReceiver(mReceiver, filter, permission, null, Context.RECEIVER_EXPORTED)
-            Log.d(TAG, "Registered: $mReceiver")
+            commandRegistry.registerCommand("notif-filter") { NotifFilterCommand() }
+            Log.d(TAG, "Registered notif-filter command")
         }
     }
 
@@ -100,30 +95,49 @@ class DebugModeFilterProvider @Inject constructor(
         }
     }
 
-    private val mReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent?) {
-            val action = intent?.action
-            if (ACTION_SET_NOTIF_DEBUG_MODE == action) {
-                // TODO(b/235268992) remove
-                Log.d(TAG, "ACTION_SET_NOTIF_DEBUG_MODE enter")
-                allowedPackages = intent.extras?.getStringArrayList(EXTRA_ALLOWED_PACKAGES)
-                    ?: emptyList()
-                Log.d(TAG, "Updated allowedPackages: $allowedPackages")
-                listeners.forEach(Runnable::run)
-                // TODO(b/235268992) remove
-                Log.d(TAG, "ACTION_SET_NOTIF_DEBUG_MODE leave")
-            } else {
-                Log.d(TAG, "Malformed intent: $intent")
-            }
-        }
-    }
-
     companion object {
         private const val TAG = "DebugModeFilterProvider"
-        private const val ACTION_SET_NOTIF_DEBUG_MODE =
-            "com.android.systemui.action.SET_NOTIF_DEBUG_MODE"
-        private const val NOTIF_DEBUG_MODE_PERMISSION =
-            "com.android.systemui.permission.NOTIF_DEBUG_MODE"
-        private const val EXTRA_ALLOWED_PACKAGES = "allowed_packages"
+    }
+
+    inner class NotifFilterCommand : Command {
+        override fun execute(pw: PrintWriter, args: List<String>) {
+            when (args.firstOrNull()) {
+                "reset" -> {
+                    if (args.size > 1) {
+                        return invalidCommand(pw, "Unexpected arguments for 'reset' command")
+                    }
+                    allowedPackages = emptyList()
+                }
+                "allowed-pkgs" -> {
+                    allowedPackages = args.drop(1)
+                }
+                null -> return invalidCommand(pw, "Missing command")
+                else -> return invalidCommand(pw, "Unknown command: ${args.firstOrNull()}")
+            }
+            Log.d(TAG, "Updated allowedPackages: $allowedPackages")
+            if (allowedPackages.isEmpty()) {
+                pw.print("Resetting allowedPackages ... ")
+            } else {
+                pw.print("Updating allowedPackages: $allowedPackages ... ")
+            }
+            listeners.forEach(Runnable::run)
+            pw.println("DONE")
+        }
+
+        private fun invalidCommand(pw: PrintWriter, reason: String) {
+            pw.println("Error: $reason")
+            pw.println()
+            help(pw)
+        }
+
+        override fun help(pw: PrintWriter) {
+            pw.println("Usage: adb shell cmd statusbar notif-filter <command>")
+            pw.println("Available commands:")
+            pw.println("  reset")
+            pw.println("     Restore the default system behavior.")
+            pw.println("  allowed-pkgs <package> ...")
+            pw.println("     Hide all notification except from packages listed here.")
+            pw.println("     Providing no packages is treated as a reset.")
+        }
     }
 }

@@ -58,6 +58,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 
 import org.junit.Assert;
@@ -65,6 +66,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -412,27 +414,15 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     public void testGetIsNonblockable() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-
-        assertFalse(row.getIsNonblockable());
-    }
-
-    @Test
-    public void testGetIsNonblockable_criticalDeviceFunction() throws Exception {
-        ExpandableNotificationRow row =
-                mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-        row.getEntry().getChannel().setImportanceLockedByCriticalDeviceFunction(true);
-        row.getEntry().getChannel().setBlockable(false);
+        row.setEntry(null);
 
         assertTrue(row.getIsNonblockable());
-    }
 
-    @Test
-    public void testGetIsNonblockable_criticalDeviceFunction_butBlockable() throws Exception {
-        ExpandableNotificationRow row =
-                mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-        row.getEntry().getChannel().setImportanceLockedByCriticalDeviceFunction(true);
-        row.getEntry().getChannel().setBlockable(true);
+        NotificationEntry entry = mock(NotificationEntry.class);
 
+        Mockito.doReturn(false, true).when(entry).isBlockable();
+        row.setEntry(entry);
+        assertTrue(row.getIsNonblockable());
         assertFalse(row.getIsNonblockable());
     }
 

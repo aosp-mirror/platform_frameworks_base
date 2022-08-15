@@ -927,6 +927,15 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(app.isReadyToDispatchInsetsState());
         mDisplayContent.getInsetsStateController().notifyInsetsChanged();
         verify(app).notifyInsetsChanged();
+
+        // Verify that invisible non-activity window won't dispatch insets changed.
+        final WindowState overlay = createWindow(null, TYPE_APPLICATION_OVERLAY, "overlay");
+        makeWindowVisible(overlay);
+        assertTrue(overlay.isReadyToDispatchInsetsState());
+        overlay.mHasSurface = false;
+        assertFalse(overlay.isReadyToDispatchInsetsState());
+        mDisplayContent.getInsetsStateController().notifyInsetsChanged();
+        assertFalse(overlay.getWindowFrames().hasInsetsChanged());
     }
 
     @UseTestDisplay(addWindows = {W_INPUT_METHOD, W_ACTIVITY})

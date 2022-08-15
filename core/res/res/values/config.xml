@@ -2034,6 +2034,9 @@
          on grouped devices. -->
     <bool name="config_volumeAdjustmentForRemoteGroupSessions">true</bool>
 
+    <!-- Flag indicating current media Output Switcher version. -->
+    <integer name="config_mediaOutputSwitchDialogVersion">1</integer>
+
     <!-- Flag indicating that an outbound call must have a call capable phone account
          that has declared it can process the call's handle. -->
     <bool name="config_requireCallCapableAccountForHandle">false</bool>
@@ -2940,7 +2943,7 @@
 
     <!-- System bluetooth stack package name -->
     <string name="config_systemBluetoothStack" translatable="false">
-        com.android.bluetooth.services
+        com.android.bluetooth
     </string>
 
     <!-- Flag indicating that the media framework should not allow changes or mute on any
@@ -5657,6 +5660,9 @@
 
     <!-- Determines whether SafetyCenter feature is enabled. -->
     <bool name="config_enableSafetyCenter">true</bool>
+
+    <!-- Config for whether Safety Protection is enabled. -->
+    <bool name="config_safetyProtectionEnabled">false</bool>
 
     <!-- Flag indicating if help links for Settings app should be enabled. -->
     <bool name="config_settingsHelpLinksEnabled">false</bool>

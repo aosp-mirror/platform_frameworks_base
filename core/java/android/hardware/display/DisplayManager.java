@@ -559,18 +559,21 @@ public final class DisplayManager {
      * @see #DISPLAY_CATEGORY_PRESENTATION
      */
     public Display[] getDisplays(String category) {
-        final int[] displayIds = mGlobal.getDisplayIds();
+        boolean includeDisabledDisplays = (category != null
+                && category.equals(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED));
+        final int[] displayIds = mGlobal.getDisplayIds(includeDisabledDisplays);
         synchronized (mLock) {
             try {
-                if (category == null
-                        || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category)) {
-                    addAllDisplaysLocked(mTempDisplays, displayIds);
-                } else if (category.equals(DISPLAY_CATEGORY_PRESENTATION)) {
+                if (category != null && category.equals(DISPLAY_CATEGORY_PRESENTATION)) {
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_EXTERNAL);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_VIRTUAL);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_INTERNAL);
+                } else if ((category == null
+                        || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category))) {
+                    // All displays requested.
+                    addAllDisplaysLocked(mTempDisplays, displayIds);
                 }
                 return mTempDisplays.toArray(new Display[mTempDisplays.size()]);
             } finally {

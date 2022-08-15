@@ -1982,6 +1982,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             mOwners.load();
             setDeviceOwnershipSystemPropertyLocked();
+            if (mOwners.hasDeviceOwner()) {
+                setGlobalSettingDeviceOwnerType(
+                        mOwners.getDeviceOwnerType(mOwners.getDeviceOwnerPackageName()));
+            }
         }
     }
 
@@ -8811,6 +8815,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         deleteTransferOwnershipBundleLocked(userId);
         toggleBackupServiceActive(UserHandle.USER_SYSTEM, true);
         pushUserControlDisabledPackagesLocked(userId);
+        setGlobalSettingDeviceOwnerType(DEVICE_OWNER_TYPE_DEFAULT);
     }
 
     private void clearApplicationRestrictions(int userId) {
@@ -9292,11 +9297,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             // Check profile owner first as that is what most likely is set.
-            if (isSupervisionComponent(poComponent)) {
+            if (isSupervisionComponentLocked(poComponent)) {
                 return poComponent;
             }
 
-            if (isSupervisionComponent(doComponent)) {
+            if (isSupervisionComponentLocked(doComponent)) {
                 return doComponent;
             }
 
@@ -9304,7 +9309,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean isSupervisionComponent(@Nullable ComponentName who) {
+    /**
+     * Returns if the specified component is the supervision component.
+     */
+    @Override
+    public boolean isSupervisionComponent(@NonNull ComponentName who) {
+        if (!mHasFeature) {
+            return false;
+        }
+        synchronized (getLockObject()) {
+            if (mConstants.USE_TEST_ADMIN_AS_SUPERVISION_COMPONENT) {
+                final CallerIdentity caller = getCallerIdentity();
+                if (isAdminTestOnlyLocked(who, caller.getUserId())) {
+                    return true;
+                }
+            }
+            return isSupervisionComponentLocked(who);
+        }
+    }
+
+    private boolean isSupervisionComponentLocked(@Nullable ComponentName who) {
         if (who == null) {
             return false;
         }
@@ -9508,7 +9532,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     "Cannot set the profile owner on a user which is already set-up");
 
             if (!mIsWatch) {
-                if (!isSupervisionComponent(owner)) {
+                if (!isSupervisionComponentLocked(owner)) {
                     throw new IllegalStateException("Unable to set non-default profile owner"
                             + " post-setup " + owner);
                 }
@@ -12102,8 +12126,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             // Allow testOnly admins to bypass supervision config requirement.
             Preconditions.checkCallAuthorization(isAdminTestOnlyLocked(who, caller.getUserId())
-                    || isSupervisionComponent(caller.getComponentName()), "Admin %s is not the "
-                    + "default supervision component", caller.getComponentName());
+                    || isSupervisionComponentLocked(caller.getComponentName()), "Admin %s is not "
+                    + "the default supervision component", caller.getComponentName());
             DevicePolicyData policy = getUserData(caller.getUserId());
             policy.mSecondaryLockscreenEnabled = enabled;
             saveSettingsLocked(caller.getUserId());
@@ -13004,7 +13028,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     return false;
                 }
 
-                return isSupervisionComponent(admin.info.getComponent());
+                return isSupervisionComponentLocked(admin.info.getComponent());
             }
         }
 
@@ -18358,6 +18382,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 "Test only admins can only set the device owner type more than once");
 
         mOwners.setDeviceOwnerType(packageName, deviceOwnerType, isAdminTestOnly);
+        setGlobalSettingDeviceOwnerType(deviceOwnerType);
+    }
+
+    // TODO(b/237065504): Allow mainline modules to get the device owner type. This is a workaround
+    // to get the device owner type in PermissionController. See HibernationPolicy.kt.
+    private void setGlobalSettingDeviceOwnerType(int deviceOwnerType) {
+        mInjector.binderWithCleanCallingIdentity(
+                () -> mInjector.settingsGlobalPutInt("device_owner_type", deviceOwnerType));
     }
 
     @Override

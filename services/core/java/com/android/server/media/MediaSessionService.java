@@ -563,14 +563,16 @@ public class MediaSessionService extends SystemService implements Monitor {
         try {
             enforcePackageName(callingPackage, callingUid);
             if (targetUid != callingUid) {
-                Log.d(TAG, "tempAllowlistTargetPkgIfPossible callingPackage:"
-                        + callingPackage + " targetPackage:" + targetPackage
-                        + " reason:" + reason);
                 boolean canAllowWhileInUse = mActivityManagerLocal
                         .canAllowWhileInUsePermissionInFgs(callingPid, callingUid, callingPackage);
                 boolean canStartFgs = canAllowWhileInUse
                         || mActivityManagerLocal.canStartForegroundService(callingPid, callingUid,
                         callingPackage);
+                Log.i(TAG, "tempAllowlistTargetPkgIfPossible callingPackage:"
+                        + callingPackage + " targetPackage:" + targetPackage
+                        + " reason:" + reason
+                        + (canAllowWhileInUse ? " [WIU]" : "")
+                        + (canStartFgs ? " [FGS]" : ""));
                 if (canAllowWhileInUse) {
                     mActivityManagerLocal.tempAllowWhileInUsePermissionInFgs(targetUid,
                             MediaSessionDeviceConfig

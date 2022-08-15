@@ -94,7 +94,7 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Obaveštenje o sesiji snimanja ekrana je aktivno"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Želite da započnete snimanje?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Tokom snimanja Android sistem može da snimi osetljive informacije koje su vidljive na ekranu ili koje se puštaju na uređaju. To obuhvata lozinke, informacije o plaćanju, slike, poruke i zvuk."</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimi zvuk"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimaj zvuk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk uređaja"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk sa uređaja, na primer, muzika, pozivi i melodije zvona"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
@@ -952,14 +952,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Tekst je kopiran"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Slika je kopirana"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Sadržaj je kopiran"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"Uređivač privremene memorije"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Privremena memorija"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Pregled slike"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"izmenite"</string>
     <string name="add" msgid="81036585205287996">"Dodaj"</string>
     <string name="manage_users" msgid="1823875311934643849">"Upravljajte korisnicima"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Ovo obaveštenje ne podržava prevlačenje na podeljeni ekran."</string>

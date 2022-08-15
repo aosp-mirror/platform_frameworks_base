@@ -216,13 +216,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     override fun setLauncherUnlockController(callback: ILauncherUnlockAnimationController?) {
         launcherUnlockController = callback
-
-        // If the provided callback dies, set it to null. We'll always check whether it's null
-        // to avoid DeadObjectExceptions.
-        callback?.asBinder()?.linkToDeath({
-            launcherUnlockController = null
-            launcherSmartspaceState = null
-        }, 0 /* flags */)
     }
 
     /**

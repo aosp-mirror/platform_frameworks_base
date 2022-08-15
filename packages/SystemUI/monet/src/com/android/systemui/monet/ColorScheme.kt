@@ -435,7 +435,7 @@ class ColorScheme(
             val h = "H${hct.hue.roundToInt().toString().padEnd(width)}"
             val c = "C${hct.chroma.roundToInt().toString().padEnd(width)}"
             val t = "T${CamUtils.lstarFromInt(color).roundToInt().toString().padEnd(width)}"
-            val hex = Integer.toHexString(color).replaceRange(0, 2, "").uppercase()
+            val hex = Integer.toHexString(color and 0xffffff).padStart(6, '0').uppercase()
             return "$h$c$t = #$hex"
         }
 

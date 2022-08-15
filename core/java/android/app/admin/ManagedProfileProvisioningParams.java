@@ -252,6 +252,7 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
          * Sets a {@link Bundle} that contains admin-specific extras.
          */
         @NonNull
+        //TODO(b/235783053) The adminExtras parameter is actually @Nullable.
         public Builder setAdminExtras(@NonNull PersistableBundle adminExtras) {
             mAdminExtras = adminExtras != null
                     ? new PersistableBundle(adminExtras)
@@ -274,7 +275,7 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
                     mLeaveAllSystemAppsEnabled,
                     mOrganizationOwnedProvisioning,
                     mKeepingAccountOnMigration,
-                    mAdminExtras);
+                    mAdminExtras != null ? mAdminExtras : new PersistableBundle());
         }
     }
 

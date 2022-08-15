@@ -158,13 +158,6 @@ public final class NotificationEntry extends ListEntry {
     private long initializationTime = -1;
 
     /**
-     * Whether or not this row represents a system notification. Note that if this is
-     * {@code null}, that means we were either unable to retrieve the info or have yet to
-     * retrieve the info.
-     */
-    public Boolean mIsSystemNotification;
-
-    /**
      * Has the user sent a reply through this Notification.
      */
     private boolean hasSentReply;
@@ -777,10 +770,26 @@ public final class NotificationEntry extends ListEntry {
         if (mSbn.getNotification().isMediaNotification()) {
             return true;
         }
-        if (mIsSystemNotification != null && mIsSystemNotification) {
+        if (!isBlockable()) {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns whether this row is considered blockable (i.e. it's not a system notif
+     * or is not in an allowList).
+     */
+    public boolean isBlockable() {
+        if (getChannel() == null) {
+            return false;
+        }
+        if (getChannel().isImportanceLockedByCriticalDeviceFunction()
+                && !getChannel().isBlockable()) {
+            return false;
+        }
+
+        return true;
     }
 
     private boolean shouldSuppressVisualEffect(int effect) {
@@ -855,15 +864,6 @@ public final class NotificationEntry extends ListEntry {
 
     private static boolean isCategory(String category, Notification n) {
         return Objects.equals(n.category, category);
-    }
-
-    /**
-     * Whether or not this row represents a system notification. Note that if this is
-     * {@code null}, that means we were either unable to retrieve the info or have yet to
-     * retrieve the info.
-     */
-    public Boolean isSystemNotification() {
-        return mIsSystemNotification;
     }
 
     /**

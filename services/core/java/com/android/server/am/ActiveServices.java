@@ -63,6 +63,12 @@ import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 
 import static com.android.internal.messages.nano.SystemMessageProto.SystemMessage.NOTE_FOREGROUND_SERVICE_BG_LAUNCH;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__REQUEST_TYPE__BIND;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__REQUEST_TYPE__START;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
@@ -522,8 +528,9 @@ public final class ActiveServices {
                             + " delayedStop=" + r.delayedStop);
                 } else {
                     try {
-                        startServiceInnerLocked(this, r.pendingStarts.get(0).intent, r, false,
-                                true);
+                        final ServiceRecord.StartItem si = r.pendingStarts.get(0);
+                        startServiceInnerLocked(this, si.intent, r, false, true, si.callingId,
+                                r.startRequested);
                     } catch (TransactionTooLargeException e) {
                         // Ignore, nobody upstack cares.
                     }
@@ -865,6 +872,7 @@ public final class ActiveServices {
         if (unscheduleServiceRestartLocked(r, callingUid, false)) {
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "START SERVICE WHILE RESTART PENDING: " + r);
         }
+        final boolean wasStartRequested = r.startRequested;
         r.lastActivity = SystemClock.uptimeMillis();
         r.startRequested = true;
         r.delayedStop = false;
@@ -954,7 +962,8 @@ public final class ActiveServices {
         if (allowBackgroundActivityStarts) {
             r.allowBgActivityStartsOnServiceStart(backgroundActivityStartsToken);
         }
-        ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
+        ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting,
+                callingUid, wasStartRequested);
         return cmp;
     }
 
@@ -1150,7 +1159,8 @@ public final class ActiveServices {
     }
 
     ComponentName startServiceInnerLocked(ServiceMap smap, Intent service, ServiceRecord r,
-            boolean callerFg, boolean addToStarting) throws TransactionTooLargeException {
+            boolean callerFg, boolean addToStarting, int callingUid, boolean wasStartRequested)
+            throws TransactionTooLargeException {
         synchronized (mAm.mProcessStats.mLock) {
             final ServiceState stracker = r.getTracker();
             if (stracker != null) {
@@ -1176,6 +1186,15 @@ public final class ActiveServices {
         if (error != null) {
             return new ComponentName("!!", error);
         }
+
+        FrameworkStatsLog.write(SERVICE_REQUEST_EVENT_REPORTED, uid, callingUid,
+                ActivityManagerService.getShortAction(service.getAction()),
+                SERVICE_REQUEST_EVENT_REPORTED__REQUEST_TYPE__START, false,
+                r.app == null || r.app.getThread() == null
+                ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD
+                : (wasStartRequested || !r.getConnections().isEmpty()
+                ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT
+                : SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM));
 
         if (r.startRequested && addToStarting) {
             boolean first = smap.mStartingBackground.size() == 0;
@@ -2876,6 +2895,8 @@ public final class ActiveServices {
                 mAm.requireAllowedAssociationsLocked(s.appInfo.packageName);
             }
 
+            final boolean wasStartRequested = s.startRequested;
+            final boolean hadConnections = !s.getConnections().isEmpty();
             mAm.startAssociationLocked(callerApp.uid, callerApp.processName,
                     callerApp.mState.getCurProcState(), s.appInfo.uid, s.appInfo.longVersionCode,
                     s.instanceName, s.processName);
@@ -2961,6 +2982,15 @@ public final class ActiveServices {
             if (needOomAdj) {
                 mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_BIND_SERVICE);
             }
+
+            FrameworkStatsLog.write(SERVICE_REQUEST_EVENT_REPORTED, s.appInfo.uid, callingUid,
+                    ActivityManagerService.getShortAction(service.getAction()),
+                    SERVICE_REQUEST_EVENT_REPORTED__REQUEST_TYPE__BIND, false,
+                    s.app == null || s.app.getThread() == null
+                    ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD
+                    : (wasStartRequested || hadConnections
+                    ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT
+                    : SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM));
 
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bind " + s + " with " + b
                     + ": received=" + b.intent.received
@@ -6917,7 +6947,8 @@ public final class ActiveServices {
                 durationMs,
                 r.mStartForegroundCount,
                 ActivityManagerUtils.hashComponentNameForAtom(r.shortInstanceName),
-                r.mFgsHasNotificationPermission);
+                r.mFgsHasNotificationPermission,
+                r.foregroundServiceType);
 
         int event = 0;
         if (state == FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER) {

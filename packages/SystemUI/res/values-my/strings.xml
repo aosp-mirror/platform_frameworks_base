@@ -90,7 +90,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ဘယ်ဘက်အနားသတ် <xliff:g id="PERCENT">%1$d</xliff:g> ရာခိုင်နှုန်း"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ညာဘက်အနားသတ် <xliff:g id="PERCENT">%1$d</xliff:g> ရာခိုင်နှုန်း"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ဖန်သားပြင် ရိုက်ကူးမှု"</string>
-    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ဖန်သားပြင်ရိုက်ကူးနေသည်"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"စကရင်ရိုက်ကူးမှု အပြီးသတ်နေသည်"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ဖန်သားပြင် ရိုက်ကူးသည့် စက်ရှင်အတွက် ဆက်တိုက်လာနေသော အကြောင်းကြားချက်"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"စတင် ရိုက်ကူးမလား။"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"ရိုက်ကူးနေစဉ်အတွင်း Android စနစ်သည် သင့်ဖန်သားပြင်ပေါ်တွင် မြင်နိုင်သော (သို့) သင့်စက်ပစ္စည်းတွင် ဖွင့်ထားသော အရေးကြီးသည့် အချက်အလက်များကို ရိုက်ယူနိုင်သည်။ ၎င်းတွင် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ ဓာတ်ပုံ၊ မက်ဆေ့ဂျ်နှင့် အသံများ ပါဝင်သည်။"</string>
@@ -945,14 +945,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"စာသားကို မိတ္တူကူးပြီးပြီ"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"ပုံ ကူးပြီးပြီ"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"အကြောင်းအရာများကို ကူးယူပြီးပါပြီ"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"ကလစ်ဘုတ် တည်းဖြတ်စနစ်"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"ကလစ်ဘုတ်"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"ပုံအစမ်းကြည့်ခြင်း"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"တည်းဖြတ်ရန်"</string>
     <string name="add" msgid="81036585205287996">"ထည့်ရန်"</string>
     <string name="manage_users" msgid="1823875311934643849">"အသုံးပြုသူများ စီမံရန်"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"ဤအကြောင်းကြားချက်သည် ‘မျက်နှာပြင်ခွဲ၍ပြသမှု’ သို့ ဖိဆွဲခြင်းကို မပံ့ပိုးပါ။"</string>

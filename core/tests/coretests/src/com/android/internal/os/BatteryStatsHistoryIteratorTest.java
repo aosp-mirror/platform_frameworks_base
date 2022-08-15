@@ -154,19 +154,21 @@ public class BatteryStatsHistoryIteratorTest {
 
         for (int i = 0; i < eventCount; i++) {
             String name = "a" + (i % 10);
-            assertThat(iterator.next(item)).isTrue();
-            // Skip a blank event inserted at the start of every buffer
-            if (item.eventCode == BatteryStats.HistoryItem.EVENT_NONE) {
+            do {
                 assertThat(iterator.next(item)).isTrue();
-            }
+                // Skip a blank event inserted at the start of every buffer
+            } while (item.cmd != BatteryStats.HistoryItem.CMD_UPDATE
+                    || item.eventCode == BatteryStats.HistoryItem.EVENT_NONE);
+
             assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_ALARM
                     | BatteryStats.HistoryItem.EVENT_FLAG_START);
             assertThat(item.eventTag.string).isEqualTo(name);
 
-            assertThat(iterator.next(item)).isTrue();
-            if (item.eventCode == BatteryStats.HistoryItem.EVENT_NONE) {
+            do {
                 assertThat(iterator.next(item)).isTrue();
-            }
+            } while (item.cmd != BatteryStats.HistoryItem.CMD_UPDATE
+                    || item.eventCode == BatteryStats.HistoryItem.EVENT_NONE);
+
             assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_ALARM
                     | BatteryStats.HistoryItem.EVENT_FLAG_FINISH);
             assertThat(item.eventTag.string).isEqualTo(name);

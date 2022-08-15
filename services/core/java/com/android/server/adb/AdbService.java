@@ -152,6 +152,14 @@ public class AdbService extends IAdbManager.Stub {
         }
 
         @Override
+        public void notifyKeyFilesUpdated() {
+            if (mDebuggingManager == null) {
+                return;
+            }
+            mDebuggingManager.notifyKeyFilesUpdated();
+        }
+
+        @Override
         public void startAdbdForTransport(byte transportType) {
             FgThread.getHandler().sendMessage(obtainMessage(
                     AdbService::setAdbdEnabledForTransport, AdbService.this, true, transportType));

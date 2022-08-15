@@ -280,8 +280,8 @@
     <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Включване, когато стане време за сън"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"До края на времето за сън"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
-    <string name="quick_settings_nfc_off" msgid="3465000058515424663">"КБП е деактивирана"</string>
-    <string name="quick_settings_nfc_on" msgid="1004976611203202230">"КБП е активирана"</string>
+    <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC е деактивирана"</string>
+    <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC е активирана"</string>
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Запис на екрана"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Старт"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Стоп"</string>
@@ -945,14 +945,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Текстът е копиран"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Изображението е копирано"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Съдържанието е копирано"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"Редактор на буферната памет"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Буферна памет"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Визуализация на изображението"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"редактиране"</string>
     <string name="add" msgid="81036585205287996">"Добавяне"</string>
     <string name="manage_users" msgid="1823875311934643849">"Управление на потребителите"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Това известие не поддържа плъзгане за разделяне на екрана."</string>

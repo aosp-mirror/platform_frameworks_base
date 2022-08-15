@@ -1653,7 +1653,7 @@ public class StaticMetadata {
                 modeList.contains(CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_OFF));
         checkArrayValuesInRange(key, modes,
                 CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_OFF,
-                CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_ON);
+                CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION);
 
         return modes;
     }

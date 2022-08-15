@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
 
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.testing.AndroidTestingRunner;
 
@@ -185,7 +187,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
 
         // WHEN it's not dozing (showing the notification list)
         when(mStatusBarStateController.isDozing()).thenReturn(false);
-
+        
         // THEN filter out the notification
         assertTrue(mCapturedDozingFilter.shouldFilterOut(mEntry, 0));
     }
@@ -277,6 +279,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
 
     private RankingBuilder getRankingForUnfilteredNotif() {
         return new RankingBuilder(mEntry.getRanking())
+                .setChannel(new NotificationChannel("id", null, IMPORTANCE_DEFAULT))
                 .setSuppressedVisualEffects(0)
                 .setSuspended(false);
     }
@@ -292,7 +295,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         mEntry.setRanking(new RankingBuilder(mEntry.getRanking())
                 .setImportance(ambient
                         ? NotificationManager.IMPORTANCE_MIN
-                        : NotificationManager.IMPORTANCE_DEFAULT)
+                        : IMPORTANCE_DEFAULT)
                 .build());
         assertEquals(ambient, mEntry.getRanking().isAmbient());
     }

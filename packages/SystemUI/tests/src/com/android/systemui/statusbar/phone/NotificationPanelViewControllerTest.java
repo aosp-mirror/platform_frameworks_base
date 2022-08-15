@@ -889,11 +889,40 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         updateSmallestScreenWidth(300);
         when(mResources.getBoolean(
                 com.android.internal.R.bool.config_keyguardUserSwitcher)).thenReturn(true);
-        when(mUserManager.isUserSwitcherEnabled()).thenReturn(true);
+        when(mResources.getBoolean(R.bool.qs_show_user_switcher_for_single_user)).thenReturn(false);
+        when(mUserManager.isUserSwitcherEnabled(false)).thenReturn(true);
 
         updateSmallestScreenWidth(800);
 
         verify(mUserSwitcherStubView).inflate();
+    }
+
+    @Test
+    public void testFinishInflate_userSwitcherDisabled_doNotInflateUserSwitchView() {
+        givenViewAttached();
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_keyguardUserSwitcher)).thenReturn(true);
+        when(mResources.getBoolean(R.bool.qs_show_user_switcher_for_single_user)).thenReturn(false);
+        when(mUserManager.isUserSwitcherEnabled(false /* showEvenIfNotActionable */))
+                .thenReturn(false);
+
+        mNotificationPanelViewController.onFinishInflate();
+
+        verify(mUserSwitcherStubView, never()).inflate();
+    }
+
+    @Test
+    public void testReInflateViews_userSwitcherDisabled_doNotInflateUserSwitchView() {
+        givenViewAttached();
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_keyguardUserSwitcher)).thenReturn(true);
+        when(mResources.getBoolean(R.bool.qs_show_user_switcher_for_single_user)).thenReturn(false);
+        when(mUserManager.isUserSwitcherEnabled(false /* showEvenIfNotActionable */))
+                .thenReturn(false);
+
+        mNotificationPanelViewController.reInflateViews();
+
+        verify(mUserSwitcherStubView, never()).inflate();
     }
 
     @Test
@@ -954,6 +983,21 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 0f, true /* expand */, 1000f, 1f, false);
         mNotificationPanelViewController.cancelHeightAnimator();
         verify(mKeyguardStateController).notifyPanelFlingEnd();
+    }
+
+    @Test
+    public void testSwipe_exactlyToTarget_notifiesNssl() {
+        // No over-expansion
+        mNotificationPanelViewController.setOverExpansion(0f);
+        // Fling to a target that is equal to the current position (i.e. a no-op fling).
+        mNotificationPanelViewController.flingToHeight(
+                0f,
+                true,
+                mNotificationPanelViewController.mExpandedHeight,
+                1f,
+                false);
+        // Verify that the NSSL is notified that the panel is *not* flinging.
+        verify(mNotificationStackScrollLayoutController).setPanelFlinging(false);
     }
 
     @Test
@@ -1298,7 +1342,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     private void updateMultiUserSetting(boolean enabled) {
-        when(mUserManager.isUserSwitcherEnabled()).thenReturn(enabled);
+        when(mResources.getBoolean(R.bool.qs_show_user_switcher_for_single_user)).thenReturn(false);
+        when(mUserManager.isUserSwitcherEnabled(false)).thenReturn(enabled);
         final ArgumentCaptor<ContentObserver> observerCaptor =
                 ArgumentCaptor.forClass(ContentObserver.class);
         verify(mContentResolver)

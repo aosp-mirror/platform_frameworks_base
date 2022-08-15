@@ -107,6 +107,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         @Override
         void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin, int position) {
             super.onBind(device, topMargin, bottomMargin, position);
+            boolean isMutingExpectedDeviceExist = mController.hasMutingExpectedDevice();
             final boolean currentlyConnected = !mIncludeDynamicGroup
                     && isCurrentlyConnected(device);
             boolean isCurrentSeekbarInvisible = mSeekBar.getVisibility() == View.GONE;
@@ -146,7 +147,19 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 }
             } else {
                 // Set different layout for each device
-                if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
+                if (device.isMutingExpectedDevice()
+                        && !mController.isCurrentConnectedDeviceRemote()) {
+                    mTitleIcon.setImageDrawable(
+                            mContext.getDrawable(R.drawable.media_output_icon_volume));
+                    mTitleIcon.setColorFilter(mController.getColorItemContent());
+                    mTitleText.setTextColor(mController.getColorItemContent());
+                    setSingleLineLayout(getItemTitle(device), true /* bFocused */,
+                            false /* showSeekBar */,
+                            false /* showProgressBar */, false /* showStatus */);
+                    initMutingExpectedDevice();
+                    mCurrentActivePosition = position;
+                    mContainerLayout.setOnClickListener(v -> onItemClick(v, device));
+                } else if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
                     setUpDeviceIcon(device);
                     mStatusIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_status_failed));
@@ -193,17 +206,26 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mEndTouchArea.setImportantForAccessibility(
                             View.IMPORTANT_FOR_ACCESSIBILITY_YES);
                     setUpContentDescriptionForView(mEndTouchArea, true, device);
-                } else if (!mController.hasAdjustVolumeUserRestriction() && currentlyConnected) {
-                    mTitleIcon.setImageDrawable(
-                            mContext.getDrawable(R.drawable.media_output_icon_volume));
-                    mTitleIcon.setColorFilter(mController.getColorItemContent());
-                    mTitleText.setTextColor(mController.getColorItemContent());
-                    setSingleLineLayout(getItemTitle(device), true /* bFocused */,
-                            true /* showSeekBar */,
-                            false /* showProgressBar */, false /* showStatus */);
-                    initSeekbar(device, isCurrentSeekbarInvisible);
-                    setUpContentDescriptionForView(mContainerLayout, false, device);
-                    mCurrentActivePosition = position;
+                } else if (!mController.hasAdjustVolumeUserRestriction()
+                        && currentlyConnected) {
+                    if (isMutingExpectedDeviceExist
+                            && !mController.isCurrentConnectedDeviceRemote()) {
+                        // mark as disconnected and set special click listener
+                        setUpDeviceIcon(device);
+                        setSingleLineLayout(getItemTitle(device), false /* bFocused */);
+                        mContainerLayout.setOnClickListener(v -> cancelMuteAwaitConnection());
+                    } else {
+                        mTitleIcon.setImageDrawable(
+                                mContext.getDrawable(R.drawable.media_output_icon_volume));
+                        mTitleIcon.setColorFilter(mController.getColorItemContent());
+                        mTitleText.setTextColor(mController.getColorItemContent());
+                        setSingleLineLayout(getItemTitle(device), true /* bFocused */,
+                                true /* showSeekBar */,
+                                false /* showProgressBar */, false /* showStatus */);
+                        initSeekbar(device, isCurrentSeekbarInvisible);
+                        setUpContentDescriptionForView(mContainerLayout, false, device);
+                        mCurrentActivePosition = position;
+                    }
                 } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
                     setUpDeviceIcon(device);
                     mCheckBox.setOnCheckedChangeListener(null);
@@ -247,6 +269,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         }
 
         private void onGroupActionTriggered(boolean isChecked, MediaDevice device) {
+            disableSeekBar();
             if (isChecked && isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
                 mController.addDeviceToPlayMedia(device);
             } else if (!isChecked && isDeviceIncluded(mController.getDeselectableMediaDevice(),
@@ -263,9 +286,15 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 Log.d(TAG, "This device is already connected! : " + device.getName());
                 return;
             }
+            mController.setTemporaryAllowListExceptionIfNeeded(device);
             mCurrentActivePosition = -1;
             mController.connectDevice(device);
             device.setState(MediaDeviceState.STATE_CONNECTING);
+            notifyDataSetChanged();
+        }
+
+        private void cancelMuteAwaitConnection() {
+            mController.cancelMuteAwaitConnection();
             notifyDataSetChanged();
         }
 
