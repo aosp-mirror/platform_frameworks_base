@@ -908,7 +908,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 && mRequestedVisible;
         final boolean sizeChanged = mSurfaceWidth != myWidth || mSurfaceHeight != myHeight;
         final boolean windowVisibleChanged = mWindowVisibility != mLastWindowVisibility;
-        getLocationInSurface(mLocation);
+        getLocationInWindow(mLocation);
         final boolean positionChanged = mWindowSpaceLeft != mLocation[0]
             || mWindowSpaceTop != mLocation[1];
         final boolean layoutSizeChanged = getWidth() != mScreenRect.width()
@@ -919,7 +919,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         if (creating || formatChanged || sizeChanged || visibleChanged ||
                 (mUseAlpha && alphaChanged) || windowVisibleChanged ||
                 positionChanged || layoutSizeChanged || hintChanged) {
-            getLocationInWindow(mLocation);
 
             if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
                     + "Changes: creating=" + creating
