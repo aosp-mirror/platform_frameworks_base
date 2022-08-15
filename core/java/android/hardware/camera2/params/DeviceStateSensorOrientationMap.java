@@ -204,7 +204,7 @@ public final class DeviceStateSensorOrientationMap {
          *
          */
         @SuppressLint("MissingGetterMatchingBuilder")
-        public @NonNull Builder addOrientationForState(long deviceState, long angle) {
+        public @NonNull Builder addOrientationForState(@DeviceState long deviceState, long angle) {
             if (angle % 90 != 0) {
                 throw new IllegalArgumentException("Sensor orientation not divisible by 90: "
                         + angle);
