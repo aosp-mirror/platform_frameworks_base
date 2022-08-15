@@ -22,9 +22,15 @@ object Destinations {
     const val Home = "Home"
     const val Preference = "Preference"
     const val Argument = "Argument"
+    const val Slider = "Slider"
 }
 
 val codelabPageRepository = SettingsPageRepository(
-    allPages = listOf(HomePageProvider, PreferencePageProvider, ArgumentPageProvider),
+    allPages = listOf(
+        HomePageProvider,
+        PreferencePageProvider,
+        ArgumentPageProvider,
+        SliderPageProvider,
+    ),
     startDestination = Destinations.Home,
 )
