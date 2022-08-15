@@ -16,7 +16,6 @@
 
 package com.android.systemui.media
 
-import org.mockito.Mockito.`when` as whenever
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -30,6 +29,7 @@ import com.android.systemui.controls.controller.ControlsControllerImplTest.Compa
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.testing.FakeNotifPanelEvents
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -50,10 +50,11 @@ import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
@@ -61,32 +62,19 @@ import org.mockito.junit.MockitoJUnit
 @TestableLooper.RunWithLooper
 class MediaHierarchyManagerTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var lockHost: MediaHost
-    @Mock
-    private lateinit var qsHost: MediaHost
-    @Mock
-    private lateinit var qqsHost: MediaHost
-    @Mock
-    private lateinit var bypassController: KeyguardBypassController
-    @Mock
-    private lateinit var keyguardStateController: KeyguardStateController
-    @Mock
-    private lateinit var statusBarStateController: SysuiStatusBarStateController
-    @Mock
-    private lateinit var notificationLockscreenUserManager: NotificationLockscreenUserManager
-    @Mock
-    private lateinit var mediaCarouselController: MediaCarouselController
-    @Mock
-    private lateinit var mediaCarouselScrollHandler: MediaCarouselScrollHandler
-    @Mock
-    private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
-    @Mock
-    private lateinit var keyguardViewController: KeyguardViewController
-    @Mock
-    private lateinit var uniqueObjectHostView: UniqueObjectHostView
-    @Mock
-    private lateinit var dreamOverlayStateController: DreamOverlayStateController
+    @Mock private lateinit var lockHost: MediaHost
+    @Mock private lateinit var qsHost: MediaHost
+    @Mock private lateinit var qqsHost: MediaHost
+    @Mock private lateinit var bypassController: KeyguardBypassController
+    @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
+    @Mock private lateinit var notificationLockscreenUserManager: NotificationLockscreenUserManager
+    @Mock private lateinit var mediaCarouselController: MediaCarouselController
+    @Mock private lateinit var mediaCarouselScrollHandler: MediaCarouselScrollHandler
+    @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
+    @Mock private lateinit var keyguardViewController: KeyguardViewController
+    @Mock private lateinit var uniqueObjectHostView: UniqueObjectHostView
+    @Mock private lateinit var dreamOverlayStateController: DreamOverlayStateController
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
     @Captor
@@ -97,6 +85,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private lateinit var mediaHiearchyManager: MediaHierarchyManager
     private lateinit var mediaFrame: ViewGroup
     private val configurationController = FakeConfigurationController()
+    private val notifPanelEvents = FakeNotifPanelEvents()
 
     @Before
     fun setup() {
@@ -111,10 +100,12 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 bypassController,
                 mediaCarouselController,
                 notificationLockscreenUserManager,
+                keyguardViewController,
+                dreamOverlayStateController,
                 configurationController,
                 wakefulnessLifecycle,
-                keyguardViewController,
-                dreamOverlayStateController)
+                notifPanelEvents,
+        )
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
         setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN, LOCKSCREEN_TOP)
@@ -212,6 +203,25 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun calculateTransformationType_notOnLockscreen_returnsTransition() {
+        expandQS()
+
+        val transformType = mediaHiearchyManager.calculateTransformationType()
+
+        assertThat(transformType).isEqualTo(MediaHierarchyManager.TRANSFORMATION_TYPE_TRANSITION)
+    }
+
+    @Test
+    fun calculateTransformationType_onLockscreen_returnsTransition() {
+        goToLockscreen()
+        expandQS()
+
+        val transformType = mediaHiearchyManager.calculateTransformationType()
+
+        assertThat(transformType).isEqualTo(MediaHierarchyManager.TRANSFORMATION_TYPE_FADE)
+    }
+
+    @Test
     fun calculateTransformationType_onLockShade_inSplitShade_goingToFullShade_returnsTransition() {
         enableSplitShade()
         goToLockscreen()
@@ -292,6 +302,18 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         whenever(qqsHost.visible).thenReturn(true)
 
         assertThat(mediaHiearchyManager.isCurrentlyInGuidedTransformation()).isTrue()
+    }
+
+    @Test
+    fun isCurrentlyInGuidedTransformation_hostsVisible_expandImmediateEnabled_returnsFalse() {
+        notifPanelEvents.changeExpandImmediate(expandImmediate = true)
+        goToLockscreen()
+        enterGuidedTransformation()
+        whenever(lockHost.visible).thenReturn(true)
+        whenever(qsHost.visible).thenReturn(true)
+        whenever(qqsHost.visible).thenReturn(true)
+
+        assertThat(mediaHiearchyManager.isCurrentlyInGuidedTransformation()).isFalse()
     }
 
     @Test

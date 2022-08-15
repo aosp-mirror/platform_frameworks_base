@@ -1702,10 +1702,15 @@ public final class NotificationPanelViewController extends PanelViewController {
         }
 
         if (mQsExpanded) {
-            mQsExpandImmediate = true;
+            setQsExpandImmediate(true);
             setShowShelfOnly(true);
         }
         super.collapse(delayed, speedUpFactor);
+    }
+
+    private void setQsExpandImmediate(boolean expandImmediate) {
+        mQsExpandImmediate = expandImmediate;
+        mPanelEventsEmitter.notifyExpandImmediateChange(expandImmediate);
     }
 
     private void setShowShelfOnly(boolean shelfOnly) {
@@ -1760,7 +1765,7 @@ public final class NotificationPanelViewController extends PanelViewController {
 
     public void expandWithQs() {
         if (isQsExpansionEnabled()) {
-            mQsExpandImmediate = true;
+            setQsExpandImmediate(true);
             setShowShelfOnly(true);
         }
         if (mSplitShadeEnabled && isOnKeyguard()) {
@@ -2089,7 +2094,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         if (mTwoFingerQsExpandPossible && isOpenQsEvent(event) && event.getY(event.getActionIndex())
                 < mStatusBarMinHeight) {
             mMetricsLogger.count(COUNTER_PANEL_OPEN_QS, 1);
-            mQsExpandImmediate = true;
+            setQsExpandImmediate(true);
             setShowShelfOnly(true);
             requestPanelHeightUpdate();
 
@@ -3291,7 +3296,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         } else {
             setListening(true);
         }
-        mQsExpandImmediate = false;
+        setQsExpandImmediate(false);
         setShowShelfOnly(false);
         mTwoFingerQsExpandPossible = false;
         updateTrackingHeadsUp(null);
@@ -3349,7 +3354,7 @@ public final class NotificationPanelViewController extends PanelViewController {
         super.onTrackingStarted();
         mScrimController.onTrackingStarted();
         if (mQsFullyExpanded) {
-            mQsExpandImmediate = true;
+            setQsExpandImmediate(true);
             setShowShelfOnly(true);
         }
         mNotificationStackScrollLayoutController.onPanelTrackingStarted();
@@ -4914,7 +4919,7 @@ public final class NotificationPanelViewController extends PanelViewController {
             // to locked will trigger this event and we're not actually in the process of opening
             // the shade, lockscreen is just always expanded
             if (mSplitShadeEnabled && !isOnKeyguard()) {
-                mQsExpandImmediate = true;
+                setQsExpandImmediate(true);
             }
             mCentralSurfaces.makeExpandedVisible(false);
         }
@@ -4979,6 +4984,12 @@ public final class NotificationPanelViewController extends PanelViewController {
         private void notifyPanelCollapsingChanged(boolean isCollapsing) {
             for (NotifPanelEvents.Listener cb : mListeners) {
                 cb.onPanelCollapsingChanged(isCollapsing);
+            }
+        }
+
+        private void notifyExpandImmediateChange(boolean expandImmediateEnabled) {
+            for (NotifPanelEvents.Listener cb : mListeners) {
+                cb.onExpandImmediateChanged(expandImmediateEnabled);
             }
         }
     }
