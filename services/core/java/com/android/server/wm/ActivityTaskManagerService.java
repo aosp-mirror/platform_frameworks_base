@@ -4623,7 +4623,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /** Update AMS states when an activity is resumed. */
-    void setResumedActivityUncheckLocked(ActivityRecord r, String reason) {
+    void setLastResumedActivityUncheckLocked(ActivityRecord r, String reason) {
         final Task task = r.getTask();
         if (task.isActivityTypeStandard()) {
             if (mCurAppTimeTracker != r.appTimeTracker) {

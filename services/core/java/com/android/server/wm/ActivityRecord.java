@@ -3247,7 +3247,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         rootTask.moveToFront(reason, task);
         // Report top activity change to tracking services and WM
         if (mRootWindowContainer.getTopResumedActivity() == this) {
-            mAtmService.setResumedActivityUncheckLocked(this, reason);
+            mAtmService.setLastResumedActivityUncheckLocked(this, reason);
         }
         return true;
     }

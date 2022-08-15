@@ -460,7 +460,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
         final ActivityRecord prevR = mResumedActivity;
         mResumedActivity = r;
-        mTaskSupervisor.updateTopResumedActivityIfNeeded();
+        mTaskSupervisor.updateTopResumedActivityIfNeeded(reason);
         if (r == null && prevR.mDisplayContent != null
                 && prevR.mDisplayContent.getFocusedRootTask() == null) {
             // Only need to notify DWPC when no activity will resume.
@@ -773,9 +773,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 Slog.v(TAG, "set resumed activity to:" + record + " reason:" + reason);
             }
             setResumedActivity(record, reason + " - onActivityStateChanged");
-            if (record == mRootWindowContainer.getTopResumedActivity()) {
-                mAtmService.setResumedActivityUncheckLocked(record, reason);
-            }
             mTaskSupervisor.mRecentTasks.add(record.getTask());
         }
     }
