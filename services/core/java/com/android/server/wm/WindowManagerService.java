@@ -1328,8 +1328,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScaleSetting);
         mTransitionAnimationScaleSetting = getTransitionAnimationScaleSetting();
 
-        setAnimatorDurationScale(Settings.Global.getFloat(resolver,
-                Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScaleSetting));
+        setAnimatorDurationScale(getAnimatorDurationScaleSetting());
 
         mForceDesktopModeOnExternalDisplays = Settings.Global.getInt(resolver,
                 DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 0) != 0;
@@ -1407,6 +1406,11 @@ public class WindowManagerService extends IWindowManager.Stub
         return fixScale(Settings.Global.getFloat(mContext.getContentResolver(),
                 Settings.Global.TRANSITION_ANIMATION_SCALE, mContext.getResources().getFloat(
                                 R.dimen.config_appTransitionAnimationDurationScaleDefault)));
+    }
+
+    private float getAnimatorDurationScaleSetting() {
+        return fixScale(Settings.Global.getFloat(mContext.getContentResolver(),
+                Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScaleSetting));
     }
 
     /**
@@ -5335,10 +5339,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             break;
                         }
                         case ANIMATION_DURATION_SCALE: {
-                            mAnimatorDurationScaleSetting = Settings.Global.getFloat(
-                                    mContext.getContentResolver(),
-                                    Settings.Global.ANIMATOR_DURATION_SCALE,
-                                    mAnimatorDurationScaleSetting);
+                            mAnimatorDurationScaleSetting = getAnimatorDurationScaleSetting();
                             dispatchNewAnimatorScaleLocked(null);
                             break;
                         }
