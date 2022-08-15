@@ -1944,8 +1944,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kameraet er ikke tilgængeligt"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Fortsæt på telefonen"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofonen er ikke tilgængelig"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Butik er ikke tilgængelig"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV-indstillingerne er ikke tilgængelige"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Tabletindstillingerne er ikke tilgængelige"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Telefonindstillingerne er ikke tilgængelige"</string>
@@ -1955,12 +1954,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Denne app anmoder om yderligere sikkerhed. Prøv på din Android TV-enhed i stedet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Denne app anmoder om yderligere sikkerhed. Prøv på din tablet i stedet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Denne app anmoder om yderligere sikkerhed. Prøv på din telefon i stedet."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Du kan ikke gøre dette på din <xliff:g id="DEVICE">%1$s</xliff:g>. Prøv på din Android TV-enhed i stedet."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Du kan ikke gøre dette på din <xliff:g id="DEVICE">%1$s</xliff:g>. Prøv på din tablet i stedet."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Du kan ikke gøre dette på din <xliff:g id="DEVICE">%1$s</xliff:g>. Prøv på din telefon i stedet."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Denne app er lavet til en ældre version af Android og fungerer muligvis ikke korrekt. Prøv at søge efter opdateringer, eller kontakt udvikleren."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Søg efter opdatering"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du har nye beskeder"</string>

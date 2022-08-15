@@ -1022,9 +1022,9 @@
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nMöchtest du diese Seite wirklich verlassen?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"Bestätigen"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"Tipp: Zum Vergrößern und Verkleinern doppeltippen"</string>
-    <string name="autofill_this_form" msgid="3187132440451621492">"Automatisches Ausfüllen"</string>
-    <string name="setup_autofill" msgid="5431369130866618567">"Autom.Ausfüll.konf."</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"Mit <xliff:g id="SERVICENAME">%1$s</xliff:g> automatisch ausfüllen"</string>
+    <string name="autofill_this_form" msgid="3187132440451621492">"Autofill"</string>
+    <string name="setup_autofill" msgid="5431369130866618567">"Autofill einrichten"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"Autofill mit <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="760522655085707045">", "</string>
@@ -1145,7 +1145,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"Text auswählen"</string>
     <string name="undo" msgid="3175318090002654673">"Rückgängig machen"</string>
     <string name="redo" msgid="7231448494008532233">"Wiederholen"</string>
-    <string name="autofill" msgid="511224882647795296">"Automatisches Ausfüllen"</string>
+    <string name="autofill" msgid="511224882647795296">"Autofill"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Textauswahl"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"Zum Wörterbuch hinzufügen"</string>
     <string name="deleteText" msgid="4200807474529938112">"Löschen"</string>
@@ -1944,8 +1944,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera nicht verfügbar"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Weiter auf Smartphone"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon nicht verfügbar"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store nicht verfügbar"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV-Einstellungen nicht verfügbar"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Tablet-Einstellungen nicht verfügbar"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Smartphone-Einstellungen nicht verfügbar"</string>
@@ -1955,12 +1954,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Diese App fordert zusätzliche Sicherheit an. Versuch es stattdessen auf deinem Android TV-Gerät."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Diese App fordert zusätzliche Sicherheit an. Versuch es stattdessen auf deinem Tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Diese App fordert zusätzliche Sicherheit an. Versuch es stattdessen auf deinem Smartphone."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Android TV-Gerät."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Tablet."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Smartphone."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Diese App wurde für eine ältere Android-Version entwickelt und funktioniert möglicherweise nicht mehr richtig. Prüfe, ob Updates verfügbar sind oder kontaktiere den Entwickler."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Auf Updates prüfen"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du hast neue Nachrichten"</string>
@@ -1999,11 +1995,11 @@
     <string name="time_picker_prompt_label" msgid="303588544656363889">"Uhrzeit eingeben"</string>
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"In den Texteingabemodus wechseln, um die Uhrzeit einzugeben."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"In den Uhrzeitmodus wechseln, um die Uhrzeit einzugeben."</string>
-    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Optionen für automatisches Ausfüllen"</string>
-    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Für „Automatisches Ausfüllen“ speichern"</string>
+    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Autofill-Optionen"</string>
+    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Für Autofill speichern"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Inhalte können nicht automatisch ausgefüllt werden"</string>
-    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Keine Vorschläge für automatisches Ausfüllen"</string>
-    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Ein Vorschlag für automatisches Ausfüllen}other{# Vorschläge für automatisches Ausfüllen}}"</string>
+    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Keine Autofill-Vorschläge"</string>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{1 Autofill-Vorschlag}other{# Autofill-Vorschläge}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"In "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" speichern?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g> in "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" speichern?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"<xliff:g id="TYPE_0">%1$s</xliff:g> und <xliff:g id="TYPE_1">%2$s</xliff:g> in "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" speichern?"</string>

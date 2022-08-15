@@ -166,7 +166,7 @@
     <string name="httpErrorIO" msgid="3860318696166314490">"या सर्व्हरशी संवाद प्रस्थापित करू शकलो नाही. नंतर पुन्हा प्रयत्न करा."</string>
     <string name="httpErrorTimeout" msgid="7446272815190334204">"सर्व्हरवरील कनेक्शन टाइमआउट झाले."</string>
     <string name="httpErrorRedirectLoop" msgid="8455757777509512098">"पृष्ठामध्ये बरीच सर्व्हर पुनर्निर्देशने आहेत."</string>
-    <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"प्रोटोकॉल समर्थित नाही."</string>
+    <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"प्रोटोकॉलला सपोर्ट नाही."</string>
     <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"सुरक्षित कनेक्शन इंस्टॉल करू शकलो नाही."</string>
     <string name="httpErrorBadUrl" msgid="754447723314832538">"URL अवैध असल्यामुळे पेज उघडू शकलो नाही."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"फायलीवर प्रवेश करू शकलो नाही."</string>
@@ -1442,7 +1442,7 @@
     <string name="ext_media_status_mounted_ro" msgid="1974809199760086956">"केवळ-वाचनीय"</string>
     <string name="ext_media_status_bad_removal" msgid="508448566481406245">"असुरक्षितपणे काढले"</string>
     <string name="ext_media_status_unmountable" msgid="7043574843541087748">"दूषित झाले"</string>
-    <string name="ext_media_status_unsupported" msgid="5460509911660539317">"समर्थित नसलेले"</string>
+    <string name="ext_media_status_unsupported" msgid="5460509911660539317">"सपोर्ट नसलेले"</string>
     <string name="ext_media_status_ejecting" msgid="7532403368044013797">"बाहेर काढत आहे…"</string>
     <string name="ext_media_status_formatting" msgid="774148701503179906">"फॉर्मेट करत आहे..."</string>
     <string name="ext_media_status_missing" msgid="6520746443048867314">"घातले नाही"</string>

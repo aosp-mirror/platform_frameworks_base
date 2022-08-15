@@ -127,7 +127,7 @@
     <item msgid="468830943567116703">"Untuk menelepon dan mengirim pesan melalui Wi-Fi, tanyalah ke operator Anda terlebih dahulu untuk menyiapkan layanan ini. Kemudian, aktifkan kembali panggilan Wi-Fi dari Setelan. (Kode error: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="4795145070505729156">"Terjadi masalah saat mendaftarkan panggilan Wi‑Fi dengan operator Anda: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+    <item msgid="4795145070505729156">"Terjadi error saat mendaftarkan panggilan Wi‑Fi dengan operator Anda: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
     <!-- no translation found for wfcSpnFormat_spn (2982505428519096311) -->
     <skip />
@@ -157,7 +157,7 @@
     <string name="fcComplete" msgid="1080909484660507044">"Kode fitur selesai."</string>
     <string name="fcError" msgid="5325116502080221346">"Masalah sambungan atau kode fitur tidak valid."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Oke"</string>
-    <string name="httpError" msgid="3406003584150566720">"Terjadi kesalahan jaringan."</string>
+    <string name="httpError" msgid="3406003584150566720">"Terjadi error jaringan."</string>
     <string name="httpErrorLookup" msgid="3099834738227549349">"Tidak dapat menemukan URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"Skema autentikasi situs tidak didukung."</string>
     <string name="httpErrorAuth" msgid="469553140922938968">"Tidak dapat mengautentikasi."</string>
@@ -1821,7 +1821,7 @@
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"Potret tidak diketahui"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"Lanskap tidak diketahui"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Dibatalkan"</string>
-    <string name="write_fail_reason_cannot_write" msgid="432118118378451508">"Terjadi kesalahan saat menulis konten"</string>
+    <string name="write_fail_reason_cannot_write" msgid="432118118378451508">"Terjadi error saat menulis konten"</string>
     <string name="reason_unknown" msgid="5599739807581133337">"tak diketahui"</string>
     <string name="reason_service_unavailable" msgid="5288405248063804713">"Layanan cetak tidak diaktifkan"</string>
     <string name="print_service_installed_title" msgid="6134880817336942482">"Layanan <xliff:g id="NAME">%s</xliff:g> telah terpasang"</string>
@@ -1944,8 +1944,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera tidak tersedia"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Lanjutkan di ponsel"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon tidak tersedia"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store tidak tersedia"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Setelan Android TV tidak tersedia"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Setelan tablet tidak tersedia"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Setelan ponsel tidak tersedia"</string>
@@ -1955,12 +1954,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Aplikasi ini meminta keamanan tambahan. Coba di perangkat Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Aplikasi ini meminta keamanan tambahan. Coba di tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Aplikasi ini meminta keamanan tambahan. Coba di ponsel."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Setelan ini tidak dapat diakses di <xliff:g id="DEVICE">%1$s</xliff:g>. Coba di perangkat Android TV."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Setelan ini tidak dapat diakses di <xliff:g id="DEVICE">%1$s</xliff:g>. Coba di tablet."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Setelan ini tidak dapat diakses di <xliff:g id="DEVICE">%1$s</xliff:g>. Coba di ponsel."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Aplikasi ini dibuat untuk Android versi lama dan mungkin tidak berfungsi sebagaimana mestinya. Coba periksa apakah ada update, atau hubungi developer."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Periksa apakah ada update"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ada pesan baru"</string>
