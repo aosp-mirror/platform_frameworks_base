@@ -1944,8 +1944,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"କ୍ୟାମେରା ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ଫୋନରେ ଜାରି ରଖନ୍ତୁ"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"ମାଇକ୍ରୋଫୋନ ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV ସେଟିଂସ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"ଟାବଲେଟ ସେଟିଂସ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"ଫୋନ ସେଟିଂସ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -1955,12 +1954,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ଏହି ଆପ ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ଅନୁରୋଧ କରୁଛି। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ଏହି ଆପ ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ଅନୁରୋଧ କରୁଛି। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଟାବଲେଟରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ଏହି ଆପ ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ଅନୁରୋଧ କରୁଛି। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଟାବଲେଟରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ଏହି ଆପ୍‌କୁ Androidର ପୁରୁଣା ଭର୍ସନ୍ ପାଇଁ ନିର୍ମାଣ କରାଯାଇଥିଲା ଏବଂ ଠିକ୍ ଭାବେ କାମ କରିନପାରେ। ଏହାପାଇଁ ଅପଡେଟ୍‌ ଅଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ କିମ୍ବା ଡେଭେଲପର୍‌ଙ୍କ ସହିତ ସମ୍ପର୍କ କରନ୍ତୁ।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ଅପଡେଟ୍‌ ପାଇଁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ଆପଣଙ୍କ ପାଖରେ ନୂଆ ମେସେଜ୍‍ ରହିଛି"</string>

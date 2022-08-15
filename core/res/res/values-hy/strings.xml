@@ -1944,8 +1944,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Տեսախցիկն անհասանելի է"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Շարունակեք հեռախոսով"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Խոսափողն անհասանելի է"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Խանութը հասանելի չէ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV-ի կարգավորումներն անհասանելի են"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Պլանշետի կարգավորումներն անհասանելի են"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Հեռախոսի կարգավորումներն անհասանելի են"</string>
@@ -1955,12 +1954,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Այս հավելվածը պահանջում է անվտանգության լրացուցիչ միջոցներ։ Օգտագործեք ձեր Android TV սարքը։"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Այս հավելվածը պահանջում է անվտանգության լրացուցիչ միջոցներ։ Օգտագործեք ձեր պլանշետը։"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Այս հավելվածը պահանջում է անվտանգության լրացուցիչ միջոցներ։ Օգտագործեք ձեր հեռախոսը։"</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Այս գործառույթը հասանելի չէ <xliff:g id="DEVICE">%1$s</xliff:g> սարքում։ Օգտագործեք ձեր Android TV սարքը։"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Այս գործառույթը հասանելի չէ <xliff:g id="DEVICE">%1$s</xliff:g> սարքում։ Օգտագործեք ձեր պլանշետը։"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Այս գործառույթը հասանելի չէ <xliff:g id="DEVICE">%1$s</xliff:g> սարքում։ Օգտագործեք ձեր հեռախոսը։"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Այս հավելվածը ստեղծվել է Android-ի ավելի հին տարբերակի համար և կարող է պատշաճ չաշխատել: Ստուգեք թարմացումների առկայությունը կամ դիմեք մշակողին:"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Ստուգել նոր տարբերակի առկայությունը"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Դուք ունեք նոր հաղորդագրություններ"</string>
