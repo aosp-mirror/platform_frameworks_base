@@ -50,6 +50,7 @@ import android.app.AlarmManager;
 import android.app.job.JobInfo;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Looper;
 import android.provider.DeviceConfig;
@@ -92,6 +93,8 @@ public class FlexibilityControllerTest {
     private JobSchedulerService mJobSchedulerService;
     @Mock
     private PrefetchController mPrefetchController;
+    @Mock
+    private PackageManager mPackageManager;
 
     @Before
     public void setup() {
@@ -109,6 +112,9 @@ public class FlexibilityControllerTest {
         // Called in FlexibilityController constructor.
         when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
         when(mContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mAlarmManager);
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.hasSystemFeature(
+                PackageManager.FEATURE_AUTOMOTIVE)).thenReturn(false);
         // Used in FlexibilityController.FcConstants.
         doAnswer((Answer<Void>) invocationOnMock -> null)
                 .when(() -> DeviceConfig.addOnPropertiesChangedListener(
@@ -857,6 +863,29 @@ public class FlexibilityControllerTest {
         assertEquals(100L, (long) mFlexibilityController
                 .mPrefetchLifeCycleStart.get(js.getSourceUserId(), js.getSourcePackageName()));
 
+    }
+
+    @Test
+    public void testDeviceDisabledFlexibility_Auto() {
+        when(mPackageManager.hasSystemFeature(
+                PackageManager.FEATURE_AUTOMOTIVE)).thenReturn(true);
+        mFlexibilityController =
+                new FlexibilityController(mJobSchedulerService, mPrefetchController);
+        assertFalse(mFlexibilityController.mFlexibilityEnabled);
+
+        JobStatus js = createJobStatus("testIsAuto", createJob(0));
+
+        mFlexibilityController.maybeStartTrackingJobLocked(js, null);
+        assertTrue(js.isConstraintSatisfied(CONSTRAINT_FLEXIBLE));
+
+        setDeviceConfigBoolean(KEY_FLEXIBILITY_ENABLED, true);
+        assertFalse(mFlexibilityController.mFlexibilityEnabled);
+
+        ArrayList<ArraySet<JobStatus>> jobs =
+                mFlexibilityController.mFlexibilityTracker.getArrayList();
+        for (int i = 0; i < jobs.size(); i++) {
+            assertEquals(0, jobs.get(i).size());
+        }
     }
 
     private void setUidBias(int uid, int bias) {
