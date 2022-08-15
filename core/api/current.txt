@@ -15111,7 +15111,7 @@ package android.graphics {
     field @NonNull public static final android.os.Parcelable.Creator<android.graphics.ParcelableColorSpace> CREATOR;
   }
 
-  public class Path {
+  public class Path implements java.lang.Iterable<android.graphics.PathIterator.Segment> {
     ctor public Path();
     ctor public Path(@Nullable android.graphics.Path);
     method public void addArc(@NonNull android.graphics.RectF, float, float);
@@ -15134,13 +15134,18 @@ package android.graphics {
     method public void arcTo(float, float, float, float, float, float, boolean);
     method public void close();
     method public void computeBounds(@NonNull android.graphics.RectF, boolean);
+    method public void conicTo(float, float, float, float, float);
     method public void cubicTo(float, float, float, float, float, float);
     method @NonNull public android.graphics.Path.FillType getFillType();
+    method public int getGenerationId();
     method public void incReserve(int);
+    method public boolean interpolate(@NonNull android.graphics.Path, float, @NonNull android.graphics.Path);
     method @Deprecated public boolean isConvex();
     method public boolean isEmpty();
+    method public boolean isInterpolatable(@NonNull android.graphics.Path);
     method public boolean isInverseFillType();
     method public boolean isRect(@Nullable android.graphics.RectF);
+    method @NonNull public android.graphics.PathIterator iterator();
     method public void lineTo(float, float);
     method public void moveTo(float, float);
     method public void offset(float, float, @Nullable android.graphics.Path);
@@ -15148,6 +15153,7 @@ package android.graphics {
     method public boolean op(@NonNull android.graphics.Path, @NonNull android.graphics.Path.Op);
     method public boolean op(@NonNull android.graphics.Path, @NonNull android.graphics.Path, @NonNull android.graphics.Path.Op);
     method public void quadTo(float, float, float, float);
+    method public void rConicTo(float, float, float, float, float);
     method public void rCubicTo(float, float, float, float, float, float);
     method public void rLineTo(float, float);
     method public void rMoveTo(float, float);
@@ -15194,6 +15200,27 @@ package android.graphics {
 
   public class PathEffect {
     ctor public PathEffect();
+  }
+
+  public class PathIterator implements java.util.Iterator<android.graphics.PathIterator.Segment> {
+    method public boolean hasNext();
+    method @NonNull public int next(@NonNull float[], int);
+    method @NonNull public android.graphics.PathIterator.Segment next();
+    method @NonNull public int peek();
+    field public static final int VERB_CLOSE = 5; // 0x5
+    field public static final int VERB_CONIC = 3; // 0x3
+    field public static final int VERB_CUBIC = 4; // 0x4
+    field public static final int VERB_DONE = 6; // 0x6
+    field public static final int VERB_LINE = 1; // 0x1
+    field public static final int VERB_MOVE = 0; // 0x0
+    field public static final int VERB_QUAD = 2; // 0x2
+  }
+
+  public static class PathIterator.Segment {
+    ctor public PathIterator.Segment(@NonNull int, @NonNull float[], float);
+    method public float getConicWeight();
+    method @NonNull public float[] getPoints();
+    method @NonNull public int getVerb();
   }
 
   public class PathMeasure {
