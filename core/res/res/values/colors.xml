@@ -454,4 +454,9 @@
     <!-- Lily Language Picker language item view colors -->
     <color name="language_picker_item_text_color">#202124</color>
     <color name="language_picker_item_text_color_secondary">#5F6368</color>
+
+    <!-- Color for side fps toast light theme -->
+    <color name="side_fps_toast_background">#F7F9FA</color>
+    <color name="side_fps_text_color">#191C1D</color>
+    <color name="side_fps_button_color">#00677E</color>
 </resources>
