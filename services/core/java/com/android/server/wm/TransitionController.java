@@ -730,7 +730,7 @@ class TransitionController {
 
     void dispatchLegacyAppTransitionStarting(TransitionInfo info, long statusBarTransitionDelay) {
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
-            // TODO(shell-transitions): handle (un)occlude transition.
+            mLegacyListeners.get(i).onAppTransitionStartingLocked(info);
             mLegacyListeners.get(i).onAppTransitionStartingLocked(
                     SystemClock.uptimeMillis() + statusBarTransitionDelay,
                     AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);

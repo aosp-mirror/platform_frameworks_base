@@ -252,7 +252,12 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         mAtm.setLockScreenShown(true, true);
         mRootWindowContainer.forAllDisplays(displayContent -> {
             assertTrue(displayContent.isKeyguardLocked());
-            assertTrue(displayContent.isAodShowing());
+            // Only default display supports AOD.
+            if (displayContent.isDefaultDisplay) {
+                assertTrue(displayContent.isAodShowing());
+            } else {
+                assertFalse(displayContent.isAodShowing());
+            }
         });
 
         // Check setLockScreenShown unlocking both displays
