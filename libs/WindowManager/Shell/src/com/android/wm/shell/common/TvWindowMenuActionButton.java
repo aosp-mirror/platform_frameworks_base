@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip.tv;
+package com.android.wm.shell.common;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -28,33 +28,32 @@ import android.widget.RelativeLayout;
 import com.android.wm.shell.R;
 
 /**
- * A View that represents Pip Menu action button, such as "Fullscreen" and "Close" as well custom
- * (provided by the application in Pip) and media buttons.
+ * A common action button for TV window menu layouts.
  */
-public class TvPipMenuActionButton extends RelativeLayout implements View.OnClickListener {
+public class TvWindowMenuActionButton extends RelativeLayout implements View.OnClickListener {
     private final ImageView mIconImageView;
     private final View mButtonBackgroundView;
     private final View mButtonView;
     private OnClickListener mOnClickListener;
 
-    public TvPipMenuActionButton(Context context) {
+    public TvWindowMenuActionButton(Context context) {
         this(context, null, 0, 0);
     }
 
-    public TvPipMenuActionButton(Context context, AttributeSet attrs) {
+    public TvWindowMenuActionButton(Context context, AttributeSet attrs) {
         this(context, attrs, 0, 0);
     }
 
-    public TvPipMenuActionButton(Context context, AttributeSet attrs, int defStyleAttr) {
+    public TvWindowMenuActionButton(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public TvPipMenuActionButton(
+    public TvWindowMenuActionButton(
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         final LayoutInflater inflater = (LayoutInflater) getContext()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.tv_pip_menu_action_button, this);
+        inflater.inflate(R.layout.tv_window_menu_action_button, this);
 
         mIconImageView = findViewById(R.id.icon);
         mButtonView = findViewById(R.id.button);
@@ -129,20 +128,27 @@ public class TvPipMenuActionButton extends RelativeLayout implements View.OnClic
         return mButtonView.isEnabled();
     }
 
-    void setIsCustomCloseAction(boolean isCustomCloseAction) {
+    /**
+     * Marks this button as a custom close action button.
+     * This changes the style of the action button to highlight that this action finishes the
+     * Picture-in-Picture activity.
+     *
+     * @param isCustomCloseAction sets or unsets this button as a custom close action button.
+     */
+    public void setIsCustomCloseAction(boolean isCustomCloseAction) {
         mIconImageView.setImageTintList(
                 getResources().getColorStateList(
-                        isCustomCloseAction ? R.color.tv_pip_menu_close_icon
-                                : R.color.tv_pip_menu_icon));
+                        isCustomCloseAction ? R.color.tv_window_menu_close_icon
+                                : R.color.tv_window_menu_icon));
         mButtonBackgroundView.setBackgroundTintList(getResources()
-                .getColorStateList(isCustomCloseAction ? R.color.tv_pip_menu_close_icon_bg
-                        : R.color.tv_pip_menu_icon_bg));
+                .getColorStateList(isCustomCloseAction ? R.color.tv_window_menu_close_icon_bg
+                        : R.color.tv_window_menu_icon_bg));
     }
 
     @Override
     public String toString() {
         if (mButtonView.getContentDescription() == null) {
-            return TvPipMenuActionButton.class.getSimpleName();
+            return TvWindowMenuActionButton.class.getSimpleName();
         }
         return mButtonView.getContentDescription().toString();
     }
