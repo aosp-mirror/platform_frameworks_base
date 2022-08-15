@@ -24,7 +24,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        minSdk minSdk_version
+        minSdk spa_min_sdk
         targetSdk 33
     }
 
@@ -49,7 +49,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion compose_version
+        kotlinCompilerExtensionVersion jetpack_compose_version
     }
     packagingOptions {
         resources {
@@ -59,11 +59,11 @@ android {
 }
 
 dependencies {
-    api "androidx.compose.material3:material3:$compose_material3_version"
-    api "androidx.compose.material:material-icons-extended:$compose_version"
-    api "androidx.compose.runtime:runtime-livedata:$compose_version"
-    api "androidx.compose.ui:ui-tooling-preview:$compose_version"
+    api "androidx.compose.material3:material3:$jetpack_compose_material3_version"
+    api "androidx.compose.material:material-icons-extended:$jetpack_compose_version"
+    api "androidx.compose.runtime:runtime-livedata:$jetpack_compose_version"
+    api "androidx.compose.ui:ui-tooling-preview:$jetpack_compose_version"
     api 'androidx.navigation:navigation-compose:2.5.0'
     api 'com.google.android.material:material:1.6.1'
-    debugApi "androidx.compose.ui:ui-tooling:$compose_version"
+    debugApi "androidx.compose.ui:ui-tooling:$jetpack_compose_version"
 }

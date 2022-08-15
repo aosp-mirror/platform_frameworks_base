@@ -14,29 +14,39 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework.compose
+package com.android.settingslib.spa.widget.ui
 
-import android.content.Context
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 
 @Composable
-fun <T> rememberContext(constructor: (Context) -> T): T {
-    val context = LocalContext.current
-    return remember(context) { constructor(context) }
+fun SettingsTitle(title: State<String>) {
+    SettingsTitle(title.value)
 }
 
-/**
- * Remember the [State] initialized with the [this].
- */
 @Composable
-fun <T> T.toState(): State<T> = remember { stateOf(this) }
+fun SettingsTitle(title: String) {
+    Text(
+        text = title,
+        color = MaterialTheme.colorScheme.onSurface,
+        style = MaterialTheme.typography.titleMedium,
+    )
+}
 
-/**
- * Return a new [State] initialized with the passed in [value].
- */
-fun <T> stateOf(value: T) = object : State<T> {
-    override val value = value
+@Composable
+fun SettingsBody(body: State<String>) {
+    SettingsBody(body.value)
+}
+
+@Composable
+fun SettingsBody(body: String) {
+    if (body.isNotEmpty()) {
+        Text(
+            text = body,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+    }
 }

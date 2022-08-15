@@ -13,15 +13,15 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-  -->
+-->
 <resources>
 
-    <style name="Theme.SettingsLib.Compose" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.SpaLib" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
-    <style name="Theme.SettingsLib.Compose.DayNight">
+    <style name="Theme.SpaLib.DayNight">
         <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

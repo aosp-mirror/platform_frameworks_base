@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-buildscript {
-    ext {
-        spa_min_sdk = 31
-        jetpack_compose_version = '1.2.0-alpha04'
-        jetpack_compose_material3_version = '1.0.0-alpha06'
-    }
-}
-plugins {
-    id 'com.android.application' version '7.3.0-beta04' apply false
-    id 'com.android.library' version '7.3.0-beta04' apply false
-    id 'org.jetbrains.kotlin.android' version '1.6.10' apply false
+package com.android.settingslib.spaprivileged.framework.app
+
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+
+object PackageManagers {
+    fun getPackageInfoAsUser(packageName: String, userId: Int): PackageInfo =
+        PackageManager.getPackageInfoAsUserCached(packageName, 0, userId)
 }
