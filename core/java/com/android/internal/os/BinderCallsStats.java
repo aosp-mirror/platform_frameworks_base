@@ -1169,15 +1169,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     }
 
-    /** @hide */
-    public static void startForWifi(Context context) {
-        new BinderCallsStats.SettingsObserver(
-            context,
-            new BinderCallsStats(
-                new BinderCallsStats.Injector(),
-                com.android.internal.os.BinderLatencyProto.Dims.WIFI));
 
-    }
 
     /**
      * Settings observer for other processes (not system_server).

@@ -107,7 +107,6 @@ import android.net.ConnectivityManager;
 import android.net.Proxy;
 import android.net.TrafficStats;
 import android.net.Uri;
-import android.net.wifi.WifiFrameworkInitializer;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.BluetoothServiceManager;
@@ -7901,8 +7900,6 @@ public final class ActivityThread extends ClientTransactionHandler
         BluetoothFrameworkInitializer.setBluetoothServiceManager(new BluetoothServiceManager());
         BluetoothFrameworkInitializer.setBinderCallsStatsInitializer(context -> {
             BinderCallsStats.startForBluetooth(context); });
-        WifiFrameworkInitializer.setBinderCallsStatsInitializer(context -> {
-            BinderCallsStats.startForWifi(context); });
     }
 
     private void purgePendingResources() {
