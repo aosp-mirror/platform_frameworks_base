@@ -50,10 +50,11 @@ private fun HomePage() {
         )
 
         PreferencePageProvider.EntryItem()
-
+        SwitchPreferencePageProvider.EntryItem()
         ArgumentPageProvider.EntryItem(stringParam = "foo", intParam = 0)
 
         SliderPageProvider.EntryItem()
+        FooterPageProvider.EntryItem()
     }
 }
 

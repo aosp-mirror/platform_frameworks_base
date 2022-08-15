@@ -31,6 +31,9 @@ android_library {
         "androidx.navigation_navigation-compose",
         "com.google.android.material_material",
     ],
-    kotlincflags: ["-Xjvm-default=all"],
+    kotlincflags: [
+        "-Xjvm-default=all",
+        "-Xopt-in=kotlin.RequiresOptIn",
+    ],
     min_sdk_version: "31",
 }
