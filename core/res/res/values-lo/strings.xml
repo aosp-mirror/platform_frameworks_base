@@ -1944,8 +1944,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"ກ້ອງຖ່າຍຮູບບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ສືບຕໍ່ຢູ່ໂທລະສັບ"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"ໄມໂຄຣໂຟນບໍ່ສາມາດໃຊ້ໄດ້"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"ບໍ່ສາມາດໃຊ້ Play Store ໄດ້"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"ການຕັ້ງຄ່າ Android TV ບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"ການຕັ້ງຄ່າແທັບເລັດບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"ການຕັ້ງຄ່າໂທລະສັບບໍ່ສາມາດໃຊ້ໄດ້"</string>
@@ -1955,12 +1954,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ແອັບນີ້ກຳລັງຮ້ອງຂໍຄວາມປອດໄພເພີ່ມເຕີມ. ກະລຸນາລອງໃຊ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານແທນ."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ແອັບນີ້ກຳລັງຮ້ອງຂໍຄວາມປອດໄພເພີ່ມເຕີມ. ກະລຸນາລອງຢູ່ແທັບເລັດຂອງທ່ານແທນ."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ແອັບນີ້ກຳລັງຮ້ອງຂໍຄວາມປອດໄພເພີ່ມເຕີມ. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານ. ກະລຸນາລອງໃຊ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານແທນ."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານ. ກະລຸນາລອງຢູ່ແທັບເລັດຂອງທ່ານແທນ."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານ. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ແອັບນີ້ຖືກສ້າງຂຶ້ນສຳລັບ Android ເວີຊັນທີ່ເກົ່າກວ່າ ແລະ ອາດເຮັດວຽກໄດ້ບໍ່ປົກກະຕິ. ໃຫ້ລອງກວດສອບເບິ່ງອັບເດດ ຫຼື ຕິດຕໍ່ຜູ້ພັດທະນາ."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ກວດເບິ່ງອັບເດດ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ທ່ານມີຂໍ້ຄວາມໃໝ່"</string>
