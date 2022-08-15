@@ -814,7 +814,12 @@ public final class ProcessList {
                                                 < LmkdStatsReporter.KILL_OCCURRED_MSG_SIZE) {
                                             return false;
                                         }
-                                        LmkdStatsReporter.logKillOccurred(inputData);
+                                        Pair<Integer, Integer> temp = getNumForegroundServices();
+                                        final int totalForegroundServices = temp.first;
+                                        final int procsWithForegroundServices = temp.second;
+                                        LmkdStatsReporter.logKillOccurred(inputData,
+                                                totalForegroundServices,
+                                                procsWithForegroundServices);
                                         return true;
                                     case LMK_STATE_CHANGED:
                                         if (receivedLen
@@ -5121,6 +5126,26 @@ public final class ProcessList {
                 }
             }
         }
+    }
+
+    /**
+     * Get the number of foreground services in all processes and number of processes that have
+     * foreground service within.
+     */
+    Pair<Integer, Integer> getNumForegroundServices() {
+        int numForegroundServices = 0;
+        int procs = 0;
+        synchronized (mService) {
+            for (int i = 0, size = mLruProcesses.size(); i < size; i++) {
+                ProcessRecord pr = mLruProcesses.get(i);
+                int numFgs = pr.mServices.getNumForegroundServices();
+                if (numFgs > 0) {
+                    numForegroundServices += numFgs;
+                    procs++;
+                }
+            }
+        }
+        return new Pair<>(numForegroundServices, procs);
     }
 
     private final class ImperceptibleKillRunner extends IUidObserver.Stub {
