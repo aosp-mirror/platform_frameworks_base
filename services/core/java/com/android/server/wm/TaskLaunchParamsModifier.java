@@ -731,7 +731,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         // First we get the default size we want.
-        getDefaultFreeformSize(root.info, displayArea, layout, orientation, mTmpBounds);
+        getDefaultFreeformSize(root, displayArea, layout, orientation, mTmpBounds);
         if (hasInitialBounds || sizeMatches(inOutBounds, mTmpBounds)) {
             // We're here because either input parameters specified initial bounds, or the suggested
             // bounds have the same size of the default freeform size. We should use the suggested
@@ -799,7 +799,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return orientation;
     }
 
-    private void getDefaultFreeformSize(@NonNull ActivityInfo info,
+    private void getDefaultFreeformSize(@NonNull ActivityRecord activityRecord,
             @NonNull TaskDisplayArea displayArea,
             @NonNull ActivityInfo.WindowLayout layout, int orientation, @NonNull Rect bounds) {
         // Default size, which is letterboxing/pillarboxing in displayArea. That's to say the large
@@ -807,6 +807,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // dimension of default size is calculated to keep the same aspect ratio as the
         // displayArea's. Here we use stable bounds of displayArea because that indicates the area
         // that isn't occupied by system widgets (e.g. sysbar and navbar).
+        final ActivityInfo info = activityRecord.info;
         final Rect stableBounds = mTmpStableBounds;
         displayArea.getStableRect(stableBounds);
         final int portraitHeight = Math.min(stableBounds.width(), stableBounds.height());
@@ -832,7 +833,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         final int layoutMinHeight = (layout == null) ? -1 : layout.minHeight;
 
         // Aspect ratio requirements.
-        final float minAspectRatio = info.getMinAspectRatio(orientation);
+        final float minAspectRatio = activityRecord.getMinAspectRatio();
         final float maxAspectRatio = info.getMaxAspectRatio();
 
         final int width = Math.min(defaultWidth, Math.max(phoneWidth, layoutMinWidth));
