@@ -115,6 +115,11 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_ACCESSIBILITY_SIMPLE_CURSOR =
             "settings_accessibility_simple_cursor";
 
+    /**
+     * Enable new language and keyboard settings UI
+     * @hide
+     */
+    public static final String SETTINGS_NEW_KEYBOARD_UI = "settings_new_keyboard_ui";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -148,6 +153,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_GUEST_MODE_UX_CHANGES, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_CLEAR_CALLING, "false");
         DEFAULT_FLAGS.put(SETTINGS_ACCESSIBILITY_SIMPLE_CURSOR, "false");
+        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
@@ -161,6 +167,7 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME);
         PERSISTENT_FLAGS.add(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE);
         PERSISTENT_FLAGS.add(SETTINGS_AUTO_TEXT_WRAPPING);
+        PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_UI);
     }
 
     /**
