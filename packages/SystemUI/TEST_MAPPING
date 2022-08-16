@@ -20,6 +20,25 @@
       ]
     }
   ],
+  "presubmit-sysui": [
+    {
+      "name": "PlatformScenarioTests",
+      "options": [
+        {
+            "include-filter": "android.platform.test.scenario.sysui"
+        },
+        {
+            "include-annotation": "android.platform.test.scenario.annotation.Scenario"
+        },
+        {
+            "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+            "exclude-annotation": "android.platform.test.annotations.Postsubmit"
+        }
+      ]
+    }
+  ],
   "presubmit": [
     {
       "name": "SystemUIGoogleTests",

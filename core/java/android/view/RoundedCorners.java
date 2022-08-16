@@ -98,10 +98,10 @@ public class RoundedCorners implements Parcelable {
      * @android:dimen/rounded_corner_radius_top and @android:dimen/rounded_corner_radius_bottom
      */
     public static RoundedCorners fromResources(
-            Resources res, String displayUniqueId, int stableDisplayWidth, int stableDisplayHeight,
-            int displayWidth, int displayHeight) {
-        return fromRadii(loadRoundedCornerRadii(res, displayUniqueId), stableDisplayWidth,
-                stableDisplayHeight, displayWidth, displayHeight);
+            Resources res, String displayUniqueId, int physicalDisplayWidth,
+            int physicalDisplayHeight, int displayWidth, int displayHeight) {
+        return fromRadii(loadRoundedCornerRadii(res, displayUniqueId), physicalDisplayWidth,
+                physicalDisplayHeight, displayWidth, displayHeight);
     }
 
     /**
@@ -113,14 +113,14 @@ public class RoundedCorners implements Parcelable {
         return fromRadii(radii, displayWidth, displayHeight, displayWidth, displayHeight);
     }
 
-    private static RoundedCorners fromRadii(Pair<Integer, Integer> radii, int stableDisplayWidth,
-            int stableDisplayHeight, int displayWidth, int displayHeight) {
+    private static RoundedCorners fromRadii(Pair<Integer, Integer> radii, int physicalDisplayWidth,
+            int physicalDisplayHeight, int displayWidth, int displayHeight) {
         if (radii == null) {
             return null;
         }
 
         final float physicalPixelDisplaySizeRatio = DisplayUtils.getPhysicalPixelDisplaySizeRatio(
-                stableDisplayWidth, stableDisplayHeight, displayWidth, displayHeight);
+                physicalDisplayWidth, physicalDisplayHeight, displayWidth, displayHeight);
 
         synchronized (CACHE_LOCK) {
             if (radii.equals(sCachedRadii) && sCachedDisplayWidth == displayWidth

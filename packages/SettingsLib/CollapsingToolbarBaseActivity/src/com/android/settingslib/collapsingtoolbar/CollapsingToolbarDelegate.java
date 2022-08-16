@@ -16,6 +16,8 @@
 
 package com.android.settingslib.collapsingtoolbar;
 
+import static android.text.Layout.HYPHENATION_FREQUENCY_NORMAL_FAST;
+
 import android.app.ActionBar;
 import android.os.Build;
 import android.view.LayoutInflater;
@@ -82,6 +84,9 @@ public class CollapsingToolbarDelegate {
         mAppBarLayout = view.findViewById(R.id.app_bar);
         if (mCollapsingToolbarLayout != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             mCollapsingToolbarLayout.setLineSpacingMultiplier(TOOLBAR_LINE_SPACING_MULTIPLIER);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                mCollapsingToolbarLayout.setHyphenationFrequency(HYPHENATION_FREQUENCY_NORMAL_FAST);
+            }
         }
         disableCollapsingToolbarLayoutScrollingBehavior();
         mToolbar = view.findViewById(R.id.action_bar);

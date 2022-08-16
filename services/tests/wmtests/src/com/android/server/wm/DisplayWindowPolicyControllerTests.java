@@ -242,5 +242,10 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
             mRunningUids.clear();
             mRunningUids.addAll(runningUids);
         }
+
+        @Override
+        public boolean canShowTasksInRecents() {
+            return true;
+        }
     }
 }

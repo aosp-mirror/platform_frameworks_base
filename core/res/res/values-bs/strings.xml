@@ -306,8 +306,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"pristupa vašem kalendaru"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"šalje i pregleda SMS poruke"</string>
-    <string name="permgrouplab_storage" msgid="17339216290379241">"Datoteke"</string>
-    <string name="permgroupdesc_storage" msgid="5378659041354582769">"pristupati datotekama na vašem uređaju"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Fajlovi"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"pristup fajlovima na vašem uređaju"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzika i audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"pristupanje muzici i zvuku na vašem uređaju"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotografije i videozapisi"</string>
@@ -653,7 +653,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Malo manje zakrenite glavu."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Malo manje nagnite glavu."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Malo manje zakrenite glavu."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Uklonite prepreke koje blokiraju vaše lice."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Uklonite sve što vam zaklanja lice."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Očistite vrh ekrana, uključujući crnu traku"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -2041,7 +2041,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Dozvoliti aplikaciji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> da pristupa svim zapisnicima uređaja?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Dozvoli jednokratan pristup"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nemoj dozvoliti"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Zapisnici uređaja bilježe šta se dešava na uređaju. Aplikacije mogu koristiti te zapisnike da pronađu i isprave probleme.\n\nNeki zapisnici mogu sadržavati osjetljive podatke. Zato pristup svim zapisnicima uređaja dozvolite samo aplikacijama kojima vjerujete. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač uređaja će možda i dalje biti u stanju pristupiti nekim zapisnicima ili podacima na uređaju. Saznajte više"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Zapisnici uređaja bilježe šta se dešava na uređaju. Aplikacije mogu koristiti te zapisnike da pronađu i riješe probleme.\n\nNeki zapisnici mogu sadržavati osjetljive podatke. Stoga pristup svim zapisnicima uređaja dozvolite samo aplikacijama kojima vjerujete. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač uređaja će možda i dalje biti u stanju pristupiti nekim zapisnicima ili podacima na uređaju. Saznajte više"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne prikazuj ponovo"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi prikazati isječke aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Uredi"</string>

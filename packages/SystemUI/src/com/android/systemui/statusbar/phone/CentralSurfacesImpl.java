@@ -83,7 +83,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -107,7 +106,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.DateTimeView;
-import android.window.SplashScreen;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -781,7 +779,8 @@ public class CentralSurfacesImpl extends CoreStartable implements
             InteractionJankMonitor jankMonitor,
             DeviceStateManager deviceStateManager,
             DreamOverlayStateController dreamOverlayStateController,
-            WiredChargingRippleController wiredChargingRippleController) {
+            WiredChargingRippleController wiredChargingRippleController,
+            IDreamManager dreamManager) {
         super(context);
         mNotificationsController = notificationsController;
         mFragmentService = fragmentService;
@@ -872,6 +871,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
         mNotifPipelineFlags = notifPipelineFlags;
+        mDreamManager = dreamManager;
         lockscreenShadeTransitionController.setCentralSurfaces(this);
         statusBarWindowStateController.addListener(this::onStatusBarWindowStateChanged);
 
@@ -925,8 +925,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
                 SysuiStatusBarStateController.RANK_STATUS_BAR);
 
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mDreamManager = IDreamManager.Stub.asInterface(
-                ServiceManager.checkService(DreamService.DREAM_SERVICE));
 
         mDisplay = mContext.getDisplay();
         mDisplayId = mDisplay.getDisplayId();
@@ -1598,7 +1596,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
                         }
                     }
                 });
-        mStatusBarKeyguardViewManager.registerCentralSurfaces(
+        mKeyguardViewMediator.registerCentralSurfaces(
                 /* statusBar= */ this,
                 mNotificationPanelViewController,
                 mPanelExpansionStateManager,
@@ -1762,6 +1760,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
                     // activity is exited.
                     if (mKeyguardStateController.isShowing()
                             && !mKeyguardStateController.isKeyguardGoingAway()) {
+                        Log.d(TAG, "Setting occluded = true in #startActivity.");
                         mKeyguardViewMediator.setOccluded(true /* isOccluded */,
                                 true /* animate */);
                     }
@@ -1791,6 +1790,12 @@ public class CentralSurfacesImpl extends CoreStartable implements
             // The animation will take care of dismissing the shade at the end of the animation. If
             // we don't animate, collapse it directly.
             collapseShade();
+        }
+
+        // We should exit the dream to prevent the activity from starting below the
+        // dream.
+        if (mKeyguardUpdateMonitor.isDreaming()) {
+            awakenDreams();
         }
 
         mActivityLaunchAnimator.startIntentWithAnimation(controller, animate,
@@ -2732,6 +2737,10 @@ public class CentralSurfacesImpl extends CoreStartable implements
             mStatusBarKeyguardViewManager.dismissWithAction(action, cancelAction,
                     afterKeyguardGone);
         } else {
+            // If the keyguard isn't showing but the device is dreaming, we should exit the dream.
+            if (mKeyguardUpdateMonitor.isDreaming()) {
+                awakenDreams();
+            }
             action.onDismiss();
         }
     }
@@ -3508,11 +3517,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     @Override
     public void onTrackingStopped(boolean expand) {
-        if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            if (!expand && !mKeyguardStateController.canDismissLockScreen()) {
-                mStatusBarKeyguardViewManager.showBouncer(false /* scrimmed */);
-            }
-        }
     }
 
     // TODO: Figure out way to remove these.
@@ -3683,6 +3687,18 @@ public class CentralSurfacesImpl extends CoreStartable implements
         public void onFinishedWakingUp() {
             mWakeUpCoordinator.setFullyAwake(true);
             mWakeUpCoordinator.setWakingUp(false);
+            if (mKeyguardStateController.isOccluded()
+                    && !mDozeParameters.canControlUnlockedScreenOff()) {
+                // When the keyguard is occluded we don't use the KEYGUARD state which would
+                // normally cause these redaction updates.  If AOD is on, the KEYGUARD state is used
+                // to show the doze, AND UnlockedScreenOffAnimationController.onFinishedWakingUp()
+                // would force a KEYGUARD state that would take care of recalculating redaction.
+                // So if AOD is off or unsupported we need to trigger these updates at screen on
+                // when the keyguard is occluded.
+                mLockscreenUserManager.updatePublicMode();
+                mNotificationPanelViewController.getNotificationStackScrollLayoutController()
+                        .updateSensitivenessForOccludedWakeup();
+            }
             if (mLaunchCameraWhenFinishedWaking) {
                 mNotificationPanelViewController.launchCamera(
                         false /* animate */, mLastCameraLaunchSource);
@@ -3970,7 +3986,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     protected WindowManager mWindowManager;
     protected IWindowManager mWindowManagerService;
-    private IDreamManager mDreamManager;
+    private final IDreamManager mDreamManager;
 
     protected Display mDisplay;
     private int mDisplayId;

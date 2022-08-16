@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"የእርስዎን ቀን መቁጠሪያ ይድረሱበት"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"ኤስኤምኤስ"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"የኤስኤምኤስ መልዕክቶችን ይላኩና ይመልከቱ"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ፋይሎች"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"በመሣሪያዎ ላይ የሚገኙ ፋይሎች መዳረሻ"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"ሙዚቃ እና ኦዲዮ"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"በመሣሪያዎ ላይ ሙዚቃን እና ኦዲዮን መድረስ"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ፎቶዎች እና ቪዲዮዎች"</string>
@@ -423,7 +421,7 @@
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"መተግበሪያው በእርስዎ ስልክ ላይ ስለተከማቹ እውቂያዎችዎ ያለ ውሂብን እንዲቀይር ያስችለዋል። ይህ ፈቃድ መተግበሪያዎች የእውቂያ ውሂብን እንዲሰርዙ ያስችላቸዋል።"</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"የጥሪ ምዝግብ ማስታወሻን ያንብቡ"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"ይህ መተግበሪያ የእርስዎን የጥሪ ታሪክ ማንበብ ይችላል።"</string>
-    <string name="permlab_writeCallLog" msgid="670292975137658895">"የጥሪ ምዝግብ ማስታወሻን ፃፍ"</string>
+    <string name="permlab_writeCallLog" msgid="670292975137658895">"የጥሪ ምዝግብ ማስታወሻን ጻፍ"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የጡባዊተኮህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"መተግበሪያው ስለገቢ እና ወጪ ጥሪዎች ያለ ውሂብም ጨምሮ የእርስዎ Android TV መሣሪያ ምዝግብ ማስታወሻ እንዲቀይር ያስችለዋል። ተንኮል-አዘል መተግበሪያዎች ይህን ተጠቅመው የስልክዎን ምዝግብ ማስታወሻ ሊደመስሱ ወይም ሊቀይሩ ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የስልክህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>

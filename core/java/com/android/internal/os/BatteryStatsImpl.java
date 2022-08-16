@@ -4503,10 +4503,13 @@ public class BatteryStatsImpl extends BatteryStats {
             for (Map.Entry<HistoryTag, Integer> entry: mHistoryTagPool.entrySet()) {
                 entry.setValue(entry.getValue() | TAG_FIRST_OCCURRENCE_FLAG);
             }
+            // Make a copy of mHistoryCur.
+            HistoryItem copy = new HistoryItem();
+            copy.setTo(cur);
+            // startRecordingHistory will reset mHistoryCur.
             startRecordingHistory(elapsedRealtimeMs, uptimeMs, false);
-            HistoryItem newItem = new HistoryItem();
-            newItem.setTo(cur);
-            addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_UPDATE, newItem);
+            // Add the copy into history buffer.
+            addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_UPDATE, copy);
             return;
         }
 

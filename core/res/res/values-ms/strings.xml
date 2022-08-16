@@ -652,7 +652,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Pusingkan kepala anda kurang sedikit."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Sengetkan kepala anda kurang sedikit."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Pusingkan kepala anda kurang sedikit."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Alih keluar apa saja yang melindungi wajah anda."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Alih keluar apa-apa yang melindungi wajah anda."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Bersihkan bahagian atas skrin anda, termasuk bar hitam"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -2038,7 +2038,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"BUKA JUGA"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Apl berbahaya dikesan"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Benarkan <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> mengakses semua log peranti?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Benarkan akses sekali"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Benarkan akses satu kali"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Jangan benarkan"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Log peranti merekodkan perkara yang berlaku pada peranti anda. Apl dapat menggunakan log ini untuk menemukan dan membetulkan isu.\n\nSesetengah log mungkin mengandungi maklumat sensitif, jadi benarkan apl yang anda percaya sahaja untuk mengakses semua log peranti. \n\nJika anda tidak membenarkan apl ini mengakses semua log peranti, apl masih boleh mengakses log sendiri. Pengilang peranti anda mungkin masih boleh mengakses sesetengah log atau maklumat pada peranti anda. Ketahui lebih lanjut"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Jangan tunjuk lagi"</string>

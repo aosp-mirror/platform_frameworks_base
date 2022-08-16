@@ -35,4 +35,12 @@ class SharedCoordinatorLogger @Inject constructor(
             "Current user or profiles changed. Current user is $int1; profiles are $str1"
         })
     }
+
+    fun logKeyguardCoordinatorInvalidated(reason: String) {
+        buffer.log("KeyguardCoordinator", LogLevel.DEBUG, {
+            str1 = reason
+        }, {
+            "KeyguardCoordinator invalidated: $str1"
+        })
+    }
 }

@@ -335,7 +335,10 @@ final class InstallPackageHelper {
             mPm.mTransferredPackages.add(pkg.getPackageName());
         }
 
-        if (reconciledPkg.mCollectedSharedLibraryInfos != null) {
+        if (reconciledPkg.mCollectedSharedLibraryInfos != null
+                || (oldPkgSetting != null && oldPkgSetting.getUsesLibraryInfos() != null)) {
+            // Reconcile if the new package or the old package uses shared libraries.
+            // It is possible that the old package uses shared libraries but the new one doesn't.
             mSharedLibraries.executeSharedLibrariesUpdateLPw(pkg, pkgSetting, null, null,
                     reconciledPkg.mCollectedSharedLibraryInfos, allUsers);
         }
@@ -648,10 +651,6 @@ final class InstallPackageHelper {
             int userId, PackageInstalledInfo res, @Nullable PostInstallData data) {
         if (DEBUG_INSTALL) {
             Log.v(TAG, "restoreAndPostInstall userId=" + userId + " package=" + res.mPkg);
-        }
-
-        if (res.mPkg != null) {
-            PackageManagerServiceUtils.verifySelinuxLabels(res.mPkg.getPath());
         }
 
         // A restore should be requested at this point if (a) the install
@@ -2549,28 +2548,31 @@ final class InstallPackageHelper {
     public void sendPendingBroadcasts() {
         String[] packages;
         ArrayList<String>[] components;
-        int size = 0;
+        int numBroadcasts = 0, numUsers;
         int[] uids;
 
         synchronized (mPm.mLock) {
             final SparseArray<ArrayMap<String, ArrayList<String>>> userIdToPackagesToComponents =
                     mPm.mPendingBroadcasts.copiedMap();
-            size = userIdToPackagesToComponents.size();
-            if (size <= 0) {
+            numUsers = userIdToPackagesToComponents.size();
+            for (int n = 0; n < numUsers; n++) {
+                numBroadcasts += userIdToPackagesToComponents.valueAt(n).size();
+            }
+            if (numBroadcasts == 0) {
                 // Nothing to be done. Just return
                 return;
             }
-            packages = new String[size];
-            components = new ArrayList[size];
-            uids = new int[size];
+            packages = new String[numBroadcasts];
+            components = new ArrayList[numBroadcasts];
+            uids = new int[numBroadcasts];
             int i = 0;  // filling out the above arrays
 
-            for (int n = 0; n < size; n++) {
+            for (int n = 0; n < numUsers; n++) {
                 final int packageUserId = userIdToPackagesToComponents.keyAt(n);
                 final ArrayMap<String, ArrayList<String>> componentsToBroadcast =
                         userIdToPackagesToComponents.valueAt(n);
                 final int numComponents = CollectionUtils.size(componentsToBroadcast);
-                for (int index = 0; i < size && index < numComponents; index++) {
+                for (int index = 0; index < numComponents; index++) {
                     packages[i] = componentsToBroadcast.keyAt(index);
                     components[i] = componentsToBroadcast.valueAt(index);
                     final PackageSetting ps = mPm.mSettings.getPackageLPr(packages[i]);
@@ -2580,12 +2582,12 @@ final class InstallPackageHelper {
                     i++;
                 }
             }
-            size = i;
+            numBroadcasts = i;
             mPm.mPendingBroadcasts.clear();
         }
         final Computer snapshot = mPm.snapshotComputer();
         // Send broadcasts
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < numBroadcasts; i++) {
             mPm.sendPackageChangedBroadcast(snapshot, packages[i], true /* dontKillApp */,
                     components[i], uids[i], null /* reason */);
         }
@@ -3577,7 +3579,6 @@ final class InstallPackageHelper {
             @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags,
             @Nullable UserHandle user) throws PackageManagerException {
-        PackageManagerServiceUtils.verifySelinuxLabels(parsedPackage.getPath());
 
         final Pair<ScanResult, Boolean> scanResultPair = scanSystemPackageLI(
                 parsedPackage, parseFlags, scanFlags, user);
@@ -3700,8 +3701,9 @@ final class InstallPackageHelper {
                     parsedPackage.getPackageName());
 
             boolean ignoreSharedUserId = false;
-            if (installedPkgSetting == null) {
-                // We can directly ignore sharedUserSetting for new installs
+            if (installedPkgSetting == null || !installedPkgSetting.hasSharedUser()) {
+                // Directly ignore sharedUserSetting for new installs, or if the app has
+                // already left shared UID
                 ignoreSharedUserId = parsedPackage.isLeavingSharedUid();
             }
 

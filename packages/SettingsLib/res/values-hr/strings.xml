@@ -395,11 +395,11 @@
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Razmjer duljine animatora"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulacija sek. zaslona"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikacije"</string>
-    <string name="immediately_destroy_activities" msgid="1826287490705167403">"Uklanjanje aktivnosti"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Aktivnost se prekida čim je korisnik napusti."</string>
+    <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ukloni aktivnosti"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Aktivnost se uklanja čim je korisnik napusti"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Ograničenje pozadinskog procesa"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Pokaži pozadinske ANR-ove"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Dijalog o pozadinskim aplikacijama koje ne reagiraju"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Prikaz dijaloškog okvira o pozadinskim aplikacijama koje ne reagiraju"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Prikaži upozorenja kanala obavijesti"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Prikazuje upozorenje na zaslonu kada aplikacija objavi obavijest bez važećeg kanala"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Prisilno dopusti aplikacije u vanjskoj pohrani"</string>

@@ -147,6 +147,7 @@ public class PreparationCoordinator implements Coordinator {
     @Override
     public void attach(NotifPipeline pipeline) {
         mNotifErrorManager.addInflationErrorListener(mInflationErrorListener);
+        mAdjustmentProvider.addDirtyListener(mNotifInflatingFilter::invalidateList);
 
         pipeline.addCollectionListener(mNotifCollectionListener);
         // Inflate after grouping/sorting since that affects what views to inflate.

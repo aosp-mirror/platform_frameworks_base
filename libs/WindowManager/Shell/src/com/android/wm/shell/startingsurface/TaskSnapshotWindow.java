@@ -389,6 +389,9 @@ public class TaskSnapshotWindow {
         reportDrawn();
 
         // In case window manager leaks us, make sure we don't retain the snapshot.
+        if (mSnapshot.getHardwareBuffer() != null) {
+            mSnapshot.getHardwareBuffer().close();
+        }
         mSnapshot = null;
         mSurfaceControl.release();
     }

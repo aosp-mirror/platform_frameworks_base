@@ -39,6 +39,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
@@ -70,6 +71,7 @@ import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.wm.ActivityAssistInfo;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -79,6 +81,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConnection.Callback {
     final static String TAG = "VoiceInteractionServiceManager";
@@ -86,15 +89,20 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     final static String CLOSE_REASON_VOICE_INTERACTION = "voiceinteraction";
 
+    /** The delay time for retrying to request DirectActions. */
+    private static final long REQUEST_DIRECT_ACTIONS_RETRY_TIME_MS = 200;
+
     final boolean mValid;
 
     final Context mContext;
     final Handler mHandler;
+    final Handler mDirectActionsHandler;
     final VoiceInteractionManagerService.VoiceInteractionManagerServiceStub mServiceStub;
     final int mUser;
     final ComponentName mComponent;
     final IActivityManager mAm;
     final IActivityTaskManager mAtm;
+    final PackageManagerInternal mPackageManagerInternal;
     final VoiceInteractionServiceInfo mInfo;
     final ComponentName mSessionComponentName;
     final IWindowManager mIWindowManager;
@@ -184,11 +192,14 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             int userHandle, ComponentName service) {
         mContext = context;
         mHandler = handler;
+        mDirectActionsHandler = new Handler(true);
         mServiceStub = stub;
         mUser = userHandle;
         mComponent = service;
         mAm = ActivityManager.getService();
         mAtm = ActivityTaskManager.getService();
+        mPackageManagerInternal = Objects.requireNonNull(
+                LocalServices.getService(PackageManagerInternal.class));
         VoiceInteractionServiceInfo info;
         try {
             info = new VoiceInteractionServiceInfo(context.getPackageManager(), service, mUser);
@@ -222,6 +233,15 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mContext.registerReceiver(mBroadcastReceiver, filter, null, handler,
                 Context.RECEIVER_EXPORTED);
+    }
+
+    public void grantImplicitAccessLocked(int grantRecipientUid, @Nullable Intent intent) {
+        final int grantRecipientAppId = UserHandle.getAppId(grantRecipientUid);
+        final int grantRecipientUserId = UserHandle.getUserId(grantRecipientUid);
+        final int voiceInteractionUid = mInfo.getServiceInfo().applicationInfo.uid;
+        mPackageManagerInternal.grantImplicitAccess(
+                grantRecipientUserId, intent, grantRecipientAppId, voiceInteractionUid,
+                /* direct= */ true);
     }
 
     public boolean showSessionLocked(Bundle args, int flags,
@@ -343,14 +363,45 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 .getAttachedNonFinishingActivityForTask(taskId, null);
         if (tokens == null || tokens.getAssistToken() != assistToken) {
             Slog.w(TAG, "Unknown activity to query for direct actions");
-            callback.sendResult(null);
+            mDirectActionsHandler.sendMessageDelayed(PooledLambda.obtainMessage(
+                    VoiceInteractionManagerServiceImpl::retryRequestDirectActions,
+                    VoiceInteractionManagerServiceImpl.this, token, taskId, assistToken,
+                    cancellationCallback, callback), REQUEST_DIRECT_ACTIONS_RETRY_TIME_MS);
         } else {
+            grantImplicitAccessLocked(tokens.getUid(), /* intent= */ null);
             try {
                 tokens.getApplicationThread().requestDirectActions(tokens.getActivityToken(),
                         mActiveSession.mInteractor, cancellationCallback, callback);
             } catch (RemoteException e) {
                 Slog.w("Unexpected remote error", e);
                 callback.sendResult(null);
+            }
+        }
+    }
+
+    private void retryRequestDirectActions(@NonNull IBinder token, int taskId,
+            @NonNull IBinder assistToken,  @Nullable RemoteCallback cancellationCallback,
+            @NonNull RemoteCallback callback) {
+        synchronized (mServiceStub) {
+            if (mActiveSession == null || token != mActiveSession.mToken) {
+                Slog.w(TAG, "retryRequestDirectActions does not match active session");
+                callback.sendResult(null);
+                return;
+            }
+            final ActivityTokens tokens = LocalServices.getService(
+                            ActivityTaskManagerInternal.class)
+                    .getAttachedNonFinishingActivityForTask(taskId, null);
+            if (tokens == null || tokens.getAssistToken() != assistToken) {
+                Slog.w(TAG, "Unknown activity to query for direct actions during retrying");
+                callback.sendResult(null);
+            } else {
+                try {
+                    tokens.getApplicationThread().requestDirectActions(tokens.getActivityToken(),
+                            mActiveSession.mInteractor, cancellationCallback, callback);
+                } catch (RemoteException e) {
+                    Slog.w("Unexpected remote error", e);
+                    callback.sendResult(null);
+                }
             }
         }
     }

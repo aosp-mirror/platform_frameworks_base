@@ -25,7 +25,6 @@ import android.graphics.Canvas
 import android.text.TextUtils
 import android.text.format.DateFormat
 import android.util.AttributeSet
-import android.util.Log
 import android.widget.TextView
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
@@ -133,22 +132,6 @@ class AnimatableClockView @JvmOverloads constructor(
         // relayout if the text didn't actually change.
         if (!TextUtils.equals(text, formattedText)) {
             text = formattedText
-            Log.d(
-                tag, "refreshTime this=$this" +
-                        " currTimeContextDesc=$contentDescription" +
-                        " measuredHeight=$measuredHeight" +
-                        " lastMeasureCall=$lastMeasureCall" +
-                        " isSingleLineInternal=$isSingleLineInternal"
-            )
-        } else {
-            Log.d(
-                tag, "refreshTime (skipped due to unchanged text)" +
-                        " this=$this" +
-                        " currTimeContextDesc=$contentDescription" +
-                        " measuredHeight=$measuredHeight" +
-                        " lastMeasureCall=$lastMeasureCall" +
-                        " isSingleLineInternal=$isSingleLineInternal"
-            )
         }
     }
 
@@ -169,20 +152,10 @@ class AnimatableClockView @JvmOverloads constructor(
         } else {
             animator.updateLayout(layout)
         }
-        Log.v(tag, "onMeasure this=$this" +
-                " currTimeContextDesc=$contentDescription" +
-                " heightMeasureSpecMode=${MeasureSpec.getMode(heightMeasureSpec)}" +
-                " heightMeasureSpecSize=${MeasureSpec.getSize(heightMeasureSpec)}" +
-                " measuredWidth=$measuredWidth" +
-                " measuredHeight=$measuredHeight" +
-                " isSingleLineInternal=$isSingleLineInternal")
     }
 
     override fun onDraw(canvas: Canvas) {
         // intentionally doesn't call super.onDraw here or else the text will be rendered twice
-        Log.d(tag, "onDraw this=$this" +
-                " currTimeContextDesc=$contentDescription" +
-                " isSingleLineInternal=$isSingleLineInternal")
         textAnimator?.draw(canvas)
     }
 

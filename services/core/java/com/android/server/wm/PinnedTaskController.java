@@ -172,7 +172,7 @@ class PinnedTaskController {
      */
     void deferOrientationChangeForEnteringPipFromFullScreenIfNeeded() {
         final ActivityRecord topFullscreen = mDisplayContent.getActivity(
-                a -> a.fillsParent() && !a.getTask().inMultiWindowMode());
+                a -> a.providesOrientation() && !a.getTask().inMultiWindowMode());
         if (topFullscreen == null || topFullscreen.hasFixedRotationTransform()) {
             return;
         }

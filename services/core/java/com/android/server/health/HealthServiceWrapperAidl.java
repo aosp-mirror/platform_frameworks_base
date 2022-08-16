@@ -208,7 +208,9 @@ class HealthServiceWrapperAidl extends HealthServiceWrapper {
                                 if (Objects.equals(newBinder, oldBinder)) return;
 
                                 Slog.i(TAG, "New health AIDL HAL service registered");
-                                mRegCallback.onRegistration(oldService, newService);
+                                if (mRegCallback != null) {
+                                    mRegCallback.onRegistration(oldService, newService);
+                                }
                             });
         }
     }

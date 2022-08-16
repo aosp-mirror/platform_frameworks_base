@@ -2704,4 +2704,8 @@ easier.
         <item name="textColorPrimary">@color/system_neutral1_900</item>
         <item name="textColorSecondary">@color/system_neutral2_700</item>
     </style>
+    <style name="Theme.DeviceDefault.AutofillHalfScreenDialogList" parent="Theme.DeviceDefault.DayNight">
+        <item name="colorListDivider">@color/list_divider_opacity_device_default_light</item>
+        <item name="opacityListDivider">@color/list_divider_opacity_device_default_light</item>
+    </style>
 </resources>

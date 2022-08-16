@@ -135,6 +135,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.window.CompatOnBackInvokedCallback;
 import android.window.ImeOnBackInvokedDispatcher;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
@@ -350,7 +351,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private RingBuffer<MotionEvent> mPendingEvents;
     private ImeOnBackInvokedDispatcher mImeDispatcher;
     private Boolean mBackCallbackRegistered = false;
-    private final OnBackInvokedCallback mCompatBackCallback = this::compatHandleBack;
+    private final CompatOnBackInvokedCallback mCompatBackCallback = this::compatHandleBack;
 
     /**
      * Returns whether {@link InputMethodService} is responsible for rendering the back button and
@@ -806,17 +807,21 @@ public class InputMethodService extends AbstractInputMethodService {
                 @NonNull EditorInfo editorInfo, boolean restarting,
                 @NonNull IBinder startInputToken, @InputMethodNavButtonFlags int navButtonFlags,
                 @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
-            mImeDispatcher = imeDispatcher;
-            if (mWindow != null) {
-                mWindow.getOnBackInvokedDispatcher().setImeOnBackInvokedDispatcher(
-                        imeDispatcher);
-            }
             mPrivOps.reportStartInputAsync(startInputToken);
             mNavigationBarController.onNavButtonFlagsChanged(navButtonFlags);
             if (restarting) {
                 restartInput(inputConnection, editorInfo);
             } else {
                 startInput(inputConnection, editorInfo);
+            }
+            // Update the IME dispatcher last, so that the previously registered back callback
+            // (if any) can be unregistered using the old dispatcher if {@link #doFinishInput()}
+            // is called from {@link #startInput(InputConnection, EditorInfo)} or
+            // {@link #restartInput(InputConnection, EditorInfo)}.
+            mImeDispatcher = imeDispatcher;
+            if (mWindow != null) {
+                mWindow.getOnBackInvokedDispatcher().setImeOnBackInvokedDispatcher(
+                        imeDispatcher);
             }
         }
 
@@ -3860,6 +3865,11 @@ public class InputMethodService extends AbstractInputMethodService {
     };
 
     private void compatHandleBack() {
+        if (!mDecorViewVisible) {
+            Log.e(TAG, "Back callback invoked on a hidden IME. Removing the callback...");
+            unregisterCompatOnBackInvokedCallback();
+            return;
+        }
         final KeyEvent downEvent = createBackKeyEvent(
                 KeyEvent.ACTION_DOWN, false /* isTracking */);
         onKeyDown(KeyEvent.KEYCODE_BACK, downEvent);

@@ -165,6 +165,7 @@ class DragState {
                     .setContainerLayer()
                     .setName("Drag and Drop Input Consumer")
                     .setCallsite("DragState.showInputSurface")
+                    .setParent(mDisplayContent.getOverlayLayer())
                     .build();
         }
         final InputWindowHandle h = getInputWindowHandle();

@@ -86,7 +86,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -191,6 +190,7 @@ public class PreferencesHelper implements RankingConfig {
     private boolean mIsMediaNotificationFilteringEnabled = DEFAULT_MEDIA_NOTIFICATION_FILTERING;
     private boolean mAreChannelsBypassingDnd;
     private boolean mHideSilentStatusBarIcons = DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS;
+    private boolean mShowReviewPermissionsNotification;
 
     private boolean mAllowInvalidShortcuts = false;
 
@@ -198,7 +198,8 @@ public class PreferencesHelper implements RankingConfig {
             ZenModeHelper zenHelper, PermissionHelper permHelper,
             NotificationChannelLogger notificationChannelLogger,
             AppOpsManager appOpsManager,
-            SysUiStatsEvent.BuilderFactory statsEventBuilderFactory) {
+            SysUiStatsEvent.BuilderFactory statsEventBuilderFactory,
+            boolean showReviewPermissionsNotification) {
         mContext = context;
         mZenModeHelper = zenHelper;
         mRankingHandler = rankingHandler;
@@ -207,6 +208,7 @@ public class PreferencesHelper implements RankingConfig {
         mNotificationChannelLogger = notificationChannelLogger;
         mAppOps = appOpsManager;
         mStatsEventBuilderFactory = statsEventBuilderFactory;
+        mShowReviewPermissionsNotification = showReviewPermissionsNotification;
 
         XML_VERSION = 4;
 
@@ -226,7 +228,8 @@ public class PreferencesHelper implements RankingConfig {
         final int xmlVersion = parser.getAttributeInt(null, ATT_VERSION, -1);
         boolean upgradeForBubbles = xmlVersion == XML_VERSION_BUBBLES_UPGRADE;
         boolean migrateToPermission = (xmlVersion < XML_VERSION_NOTIF_PERMISSION);
-        if (xmlVersion < XML_VERSION_REVIEW_PERMISSIONS_NOTIFICATION) {
+        if (mShowReviewPermissionsNotification
+                && (xmlVersion < XML_VERSION_REVIEW_PERMISSIONS_NOTIFICATION)) {
             // make a note that we should show the notification at some point.
             // it shouldn't be possible for the user to already have seen it, as the XML version
             // would be newer then.

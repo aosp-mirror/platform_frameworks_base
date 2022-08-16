@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"mengakses kalender"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"mengirim dan melihat pesan SMS"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"File"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"mengakses file di perangkat Anda"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musik dan audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"mengakses musik dan audio di perangkat Anda"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foto dan video"</string>
@@ -747,7 +745,7 @@
     <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Mengizinkan pemegang memulai layar untuk meninjau keputusan izin. Tidak pernah dibutuhkan untuk aplikasi normal."</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"mulai lihat fitur aplikasi"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Memungkinkan pemegang mulai melihat info fitur untuk aplikasi."</string>
-    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"mengakses data sensor pada frekuensi pengambilan sampel yang tinggi"</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"mengakses data sensor pada frekuensi sampling yang tinggi"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Mengizinkan aplikasi mengambil sampel data sensor pada frekuensi yang lebih besar dari 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Mengontrol panjang dan karakter yang diizinkan dalam sandi dan PIN kunci layar."</string>
@@ -1556,7 +1554,7 @@
     <string name="content_description_sliding_handle" msgid="982510275422590757">"Gagang geser. Sentuh lama."</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Geser untuk membuka kunci."</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Navigasi ke beranda"</string>
-    <string name="action_bar_up_description" msgid="6611579697195026932">"Navigasi naik"</string>
+    <string name="action_bar_up_description" msgid="6611579697195026932">"Navigasi ke atas"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Opsi lainnya"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>

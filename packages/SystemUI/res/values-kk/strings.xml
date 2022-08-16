@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Камера"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Телефон"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Дауыс көмекшісі"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Әмиян"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR кодын сканерлеу қолданбасы"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Бекітпесін ашу"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Құрылғы құлыпталды."</string>
@@ -313,10 +313,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Ашу үшін жоғары қарай сырғытыңыз."</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Ашу үшін құлыпты ашу белгішесін басыңыз."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Бет үлгісі арқылы ашылды. Ашу үшін құлыпты ашу белгішесін басыңыз."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Солға жылжыту"</item>
+    <item msgid="5558598599408514296">"Төмен жылжыту"</item>
+    <item msgid="4844142668312841831">"Оңға жылжыту"</item>
+    <item msgid="5640521437931460125">"Жоғары жылжыту"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Әрекетті қайталау үшін жоғары сырғытыңыз."</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC пайдалану үшін құлыпты ашыңыз."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Бұл құрылғы ұйымыңызға тиесілі."</string>
@@ -383,7 +385,7 @@
     <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Бұл құрылғы интернетке VPN желілері арқылы қосылған."</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Жұмыс қолданбаларыңыз интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> арқылы қосылған."</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Жеке қолданбаларыңыз интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> арқылы қосылған."</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Бұл желі интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> арқылы қосылған."</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Бұл құрылғы интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> арқылы қосылған."</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Бұл құрылғыны <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ұсынады"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Құрылғыны басқару"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -404,7 +406,7 @@
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Жұмыс қолданбаларыңыз интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> арқылы қосылған. Жұмыс қолданбаларында жасаған желідегі әрекетіңіз, соның ішінде электрондық пошталар мен браузерді пайдалану деректеріңіз әкімшіге және VPN провайдеріне көрінеді."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Жеке қолданбаларыңыз интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> арқылы қосылған. Желідегі әрекетіңіз, соның ішінде электрондық пошталар мен браузерді пайдалану деректеріңіз VPN провайдеріне көрінеді."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN параметрлерін ашу"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN параметрлерін ашыңыз."</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Бұл құрылғыны ата-анаңыз басқарады. Ата-анаңыз сіз пайдаланатын қолданбалар, геодерегіңіз және пайдалану уақытыңыз сияқты ақпаратты көре және басқара алады."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent арқылы құлпы ашылды."</string>
@@ -460,7 +462,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Демо режимін көрсету"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Оятқыш"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Әмиян"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Телефоныңызбен бұрынғыдан да жылдам әрі қауіпсіз сатып алу үшін параметрлерді орнатыңыз."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Барлығын көрсету"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Ашу үшін түртіңіз"</string>
@@ -737,6 +739,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"камера"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"геодерек"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"микрофон"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"экранды бейнеге жазу"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Атауы жоқ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Күту режимі"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ұлғайту терезесі"</string>
@@ -841,8 +844,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Бұл сеансты трансляциялау үшін қолданбаны ашыңыз."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Белгісіз қолданба"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Трансляцияны тоқтату"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Аудио шығыс үшін қолжетімді құрылғылар бар."</string>
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Дыбыс деңгейі"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Тарату қалай жүзеге асады"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Тарату"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Үйлесімді Bluetooth құрылғылары бар маңайдағы адамдар сіз таратып жатқан медиамазмұнды тыңдай алады."</string>
@@ -928,23 +931,24 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Жаңа ақпарат"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Істеп тұрған қолданбалар"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Бұл қолданбаларды қолданып жатпасаңыз да, олар қосылып тұр және батарея жұмысының ұзақтығына әсер етуі мүмкін."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Бұл қолданбаларды пайдаланбасаңыз да, олар іске қосылып, жұмыс істеп тұрады. Бұл олардың жұмысын жақсартады, алайда батарея жұмысының ұзақтығына да әсер етуі мүмкін."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Тоқтату"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Тоқтатылған"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Дайын"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Көшірілді"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> қолданбасынан"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Көшіру интерфейсін жабу"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"Көшірілген мәтінді жою"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Көшірілген мәтінді өңдеу"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Көшірілген суретті өңдеу"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Маңайдағы құрылғыға жіберу"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Көру үшін түртіңіз."</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Мәтін көшірілді."</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Сурет көшірілді."</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Мазмұн көшірілді."</string>
+    <string name="clipboard_editor" msgid="2971197550401892843">"Буфер редакторы"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Буфер"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Суретті алдын ала көру"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"өзгерту"</string>
     <string name="add" msgid="81036585205287996">"Қосу"</string>
     <string name="manage_users" msgid="1823875311934643849">"Пайдаланушыларды басқару"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Бұл хабарландыруды бөлінген экранға сүйреп апару мүмкін емес."</string>

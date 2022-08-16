@@ -1495,7 +1495,14 @@ please see styles_device_defaults.xml.
         <item name="background">@drawable/autofill_dataset_picker_background</item>
     </style>
 
-    <!-- @hide -->
+    <!-- @hide Autofill save dialog title -->
+    <style name="AutofillSaveUiTitle" parent="TextAppearance.DeviceDefault.Subhead">
+        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="fontFamily">google-sans</item>
+        <item name="textSize">24sp</item>
+    </style>
+
+    <!--@hide -->
     <style name="AutofillHalfScreenAnimation">
         <item name="android:windowEnterAnimation">@anim/slide_in_up</item>
         <item name="android:windowExitAnimation">@anim/slide_out_down</item>

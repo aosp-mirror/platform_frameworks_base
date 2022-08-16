@@ -23,6 +23,7 @@ import static android.os.PowerExemptionManager.REASON_DENIED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_BOUND_SERVICE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -693,6 +694,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 app.removeAllowBackgroundActivityStartsToken(this);
             }
             app.mServices.updateBoundClientUids();
+            app.mServices.updateHostingComonentTypeForBindingsLocked();
         }
         app = proc;
         if (pendingConnectionGroup > 0 && proc != null) {
@@ -717,6 +719,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
         if (proc != null) {
             proc.mServices.updateBoundClientUids();
+            proc.mServices.updateHostingComonentTypeForBindingsLocked();
         }
     }
 
@@ -736,6 +739,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         // if we have a process attached, add bound client uid of this connection to it
         if (app != null) {
             app.mServices.addBoundClientUid(c.clientUid);
+            app.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_BOUND_SERVICE);
         }
     }
 
@@ -744,6 +748,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         // if we have a process attached, tell it to update the state of bound clients
         if (app != null) {
             app.mServices.updateBoundClientUids();
+            app.mServices.updateHostingComonentTypeForBindingsLocked();
         }
     }
 

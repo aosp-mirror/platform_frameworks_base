@@ -39,6 +39,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,6 +58,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -101,6 +103,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private SysuiStatusBarStateController mBarState;
     @Mock private NotificationGroupManagerLegacy mGroupMembershipManger;
     @Mock private NotificationGroupManagerLegacy mGroupExpansionManager;
+    @Mock private DumpManager mDumpManager;
     @Mock private ExpandHelper mExpandHelper;
     @Mock private EmptyShadeView mEmptyShadeView;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
@@ -120,8 +123,12 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         // Interact with real instance of AmbientState.
-        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController,
-                mStatusBarKeyguardViewManager);
+        mAmbientState = spy(new AmbientState(
+                mContext,
+                mDumpManager,
+                mNotificationSectionsManager,
+                mBypassController,
+                mStatusBarKeyguardViewManager));
 
         // Inject dependencies before initializing the layout
         mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);
@@ -184,7 +191,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 endHeight, dozeAmount);
 
         mStackScroller.updateStackHeight(endHeight, expansionFraction);
-        assertTrue(mAmbientState.getStackHeight() == expected);
+        assertThat(mAmbientState.getStackHeight()).isEqualTo(expected);
     }
 
     @Test
@@ -199,7 +206,74 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 endHeight, expansionFraction);
 
         mStackScroller.updateStackHeight(endHeight, expansionFraction);
-        assertTrue(mAmbientState.getStackHeight() == expected);
+        assertThat(mAmbientState.getStackHeight()).isEqualTo(expected);
+    }
+
+    @Test
+    public void updateStackEndHeightAndStackHeight_normallyUpdatesBoth() {
+        final float expansionFraction = 0.5f;
+        mAmbientState.setStatusBarState(StatusBarState.KEYGUARD);
+
+        // Validate that by default we update everything
+        clearInvocations(mAmbientState);
+        mStackScroller.updateStackEndHeightAndStackHeight(expansionFraction);
+        verify(mAmbientState).setStackEndHeight(anyFloat());
+        verify(mAmbientState).setStackHeight(anyFloat());
+    }
+
+    @Test
+    public void updateStackEndHeightAndStackHeight_onlyUpdatesStackHeightDuringSwipeUp() {
+        final float expansionFraction = 0.5f;
+        mAmbientState.setStatusBarState(StatusBarState.KEYGUARD);
+        mAmbientState.setSwipingUp(true);
+
+        // Validate that when the gesture is in progress, we update only the stackHeight
+        clearInvocations(mAmbientState);
+        mStackScroller.updateStackEndHeightAndStackHeight(expansionFraction);
+        verify(mAmbientState, never()).setStackEndHeight(anyFloat());
+        verify(mAmbientState).setStackHeight(anyFloat());
+    }
+
+    @Test
+    public void setPanelFlinging_updatesStackEndHeightOnlyOnFinish() {
+        final float expansionFraction = 0.5f;
+        mAmbientState.setStatusBarState(StatusBarState.KEYGUARD);
+        mAmbientState.setSwipingUp(true);
+        mStackScroller.setPanelFlinging(true);
+        mAmbientState.setSwipingUp(false);
+
+        // Validate that when the animation is running, we update only the stackHeight
+        clearInvocations(mAmbientState);
+        mStackScroller.updateStackEndHeightAndStackHeight(expansionFraction);
+        verify(mAmbientState, never()).setStackEndHeight(anyFloat());
+        verify(mAmbientState).setStackHeight(anyFloat());
+
+        // Validate that when the animation ends the stackEndHeight is recalculated immediately
+        clearInvocations(mAmbientState);
+        mStackScroller.setPanelFlinging(false);
+        verify(mAmbientState).setIsFlinging(eq(false));
+        verify(mAmbientState).setStackEndHeight(anyFloat());
+        verify(mAmbientState).setStackHeight(anyFloat());
+    }
+
+    @Test
+    public void setUnlockHintRunning_updatesStackEndHeightOnlyOnFinish() {
+        final float expansionFraction = 0.5f;
+        mAmbientState.setStatusBarState(StatusBarState.KEYGUARD);
+        mStackScroller.setUnlockHintRunning(true);
+
+        // Validate that when the animation is running, we update only the stackHeight
+        clearInvocations(mAmbientState);
+        mStackScroller.updateStackEndHeightAndStackHeight(expansionFraction);
+        verify(mAmbientState, never()).setStackEndHeight(anyFloat());
+        verify(mAmbientState).setStackHeight(anyFloat());
+
+        // Validate that when the animation ends the stackEndHeight is recalculated immediately
+        clearInvocations(mAmbientState);
+        mStackScroller.setUnlockHintRunning(false);
+        verify(mAmbientState).setUnlockHintRunning(eq(false));
+        verify(mAmbientState).setStackEndHeight(anyFloat());
+        verify(mAmbientState).setStackHeight(anyFloat());
     }
 
     @Test
@@ -608,10 +682,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         assertFalse(mStackScroller.isInsideQsHeader(event1));
 
         MotionEvent event2 = transformEventForView(createMotionEvent(150f, 150f), mStackScroller);
-        assertTrue(mStackScroller.isInsideQsHeader(event2));
+        assertFalse(mStackScroller.isInsideQsHeader(event2));
 
         MotionEvent event3 = transformEventForView(createMotionEvent(250f, 250f), mStackScroller);
-        assertTrue(mStackScroller.isInsideQsHeader(event2));
+        assertTrue(mStackScroller.isInsideQsHeader(event3));
     }
 
     @Test

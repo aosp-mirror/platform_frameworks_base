@@ -86,7 +86,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
         SurfaceControl.Transaction tx = mock(SurfaceControl.Transaction.class);
         BackNavigationInfo backNavigationInfo = mBackNavigationController.startBackNavigation(mWm,
-                tx);
+                tx, true);
         assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
         assertThat(backNavigationInfo.getDepartingAnimationTarget()).isNotNull();
         assertThat(backNavigationInfo.getTaskWindowConfiguration()).isNotNull();
@@ -181,7 +181,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
         Task task = createTopTaskWithActivity();
         WindowState appWindow = task.getTopVisibleAppMainWindow();
-        WindowOnBackInvokedDispatcher dispatcher = new WindowOnBackInvokedDispatcher();
+        WindowOnBackInvokedDispatcher dispatcher =
+                new WindowOnBackInvokedDispatcher(true /* applicationCallbackEnabled */);
         doAnswer(invocation -> {
             appWindow.setOnBackInvokedCallbackInfo(invocation.getArgument(1));
             return null;
@@ -242,7 +243,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Nullable
     private BackNavigationInfo startBackNavigation() {
-        return mBackNavigationController.startBackNavigation(mWm, new StubTransaction());
+        return mBackNavigationController.startBackNavigation(mWm, new StubTransaction(), true);
     }
 
     @NonNull

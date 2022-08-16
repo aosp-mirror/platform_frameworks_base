@@ -1336,6 +1336,79 @@ public class AppsFilterImplTest {
 
     }
 
+    @Test
+    public void testSdkSandbox_canSeeForceQueryable() throws Exception {
+        final AppsFilterImpl appsFilter =
+                new AppsFilterImpl(mFeatureConfigMock, new String[]{}, false, null,
+                        mMockHandler);
+        simulateAddBasicAndroid(appsFilter);
+        appsFilter.onSystemReady(mPmInternal);
+
+        PackageSetting target = simulateAddPackage(appsFilter,
+                pkg("com.some.package").setForceQueryable(true), DUMMY_TARGET_APPID,
+                setting -> setting.setPkgFlags(ApplicationInfo.FLAG_SYSTEM));
+
+        int callingUid = 20123;
+        assertTrue(Process.isSdkSandboxUid(callingUid));
+
+        assertFalse(
+                appsFilter.shouldFilterApplication(mSnapshot, callingUid,
+                        null /* callingSetting */, target, SYSTEM_USER));
+    }
+
+    @Test
+    public void testSdkSandbox_cannotSeeNonForceQueryable() throws Exception {
+        final AppsFilterImpl appsFilter =
+                new AppsFilterImpl(mFeatureConfigMock, new String[]{}, false, null,
+                        mMockHandler);
+        simulateAddBasicAndroid(appsFilter);
+        appsFilter.onSystemReady(mPmInternal);
+
+        PackageSetting target = simulateAddPackage(appsFilter,
+                pkg("com.some.package"), DUMMY_TARGET_APPID,
+                setting -> setting.setPkgFlags(ApplicationInfo.FLAG_SYSTEM));
+
+        int callingUid = 20123;
+        assertTrue(Process.isSdkSandboxUid(callingUid));
+
+        assertTrue(
+                appsFilter.shouldFilterApplication(mSnapshot, callingUid,
+                        null /* callingSetting */, target, SYSTEM_USER));
+    }
+
+    @Test
+    public void testSdkSandbox_implicitAccessGranted_canSeePackage() throws Exception {
+        final AppsFilterImpl appsFilter =
+                new AppsFilterImpl(mFeatureConfigMock, new String[]{}, false, null,
+                        mMockHandler);
+        final WatchableTester watcher = new WatchableTester(appsFilter, "onChange");
+        watcher.register();
+        simulateAddBasicAndroid(appsFilter);
+        watcher.verifyChangeReported("addBasic");
+        appsFilter.onSystemReady(mPmInternal);
+        watcher.verifyChangeReported("systemReady");
+
+        PackageSetting target = simulateAddPackage(appsFilter,
+                pkg("com.some.package"), DUMMY_TARGET_APPID,
+                setting -> setting.setPkgFlags(ApplicationInfo.FLAG_SYSTEM));
+
+        int callingUid = 20123;
+        assertTrue(Process.isSdkSandboxUid(callingUid));
+
+        // Without granting the implicit access the app shouldn't be visible to the sdk sandbox uid.
+        assertTrue(
+                appsFilter.shouldFilterApplication(mSnapshot, callingUid,
+                        null /* callingSetting */, target, SYSTEM_USER));
+
+        appsFilter.grantImplicitAccess(callingUid, target.getAppId(), false /* retainOnUpdate */);
+        watcher.verifyChangeReported("grantImplicitAccess");
+
+        // After implicit access was granted the app should be visible to the sdk sandbox uid.
+        assertFalse(
+                appsFilter.shouldFilterApplication(mSnapshot, callingUid,
+                        null /* callingSetting */, target, SYSTEM_USER));
+    }
+
     private List<Integer> toList(int[] array) {
         ArrayList<Integer> ret = new ArrayList<>(array.length);
         for (int i = 0; i < array.length; i++) {

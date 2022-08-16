@@ -1265,43 +1265,43 @@ public final class MandatoryStreamCombination {
     private static StreamCombinationTemplate sPreviewStabilizedStreamCombinations[] = {
         // 1 stream combinations
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD)},
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p)},
                 "Stabilized preview, GPU video processing, or no-preview stabilized recording"),
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD)},
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p)},
                 "Stabilized preview, GPU video processing, or no-preview stabilized recording"),
         //2 stream combinations
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM),
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p)},
                 "Standard JPEG still imaging with stabilized preview"),
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM),
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p)},
                 "Standard YUV still imaging with stabilized preview"),
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM),
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p)},
                 "Standard YUV still imaging with stabilized in-app image processing stream"),
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM),
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p)},
                 "Standard JPEG still imaging with stabilized in-app image processing stream"),
 
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p),
                 new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
                 "High-resolution video recording with preview both streams stabilized"),
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p),
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
                 "High-resolution video recording with preview both streams stabilized"),
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p),
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
                 "High-resolution video recording with preview both streams stabilized"),
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p),
                 new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
                 "High-resolution video recording with preview both streams stabilized"),
     };
@@ -1430,7 +1430,7 @@ public final class MandatoryStreamCombination {
             StreamCombinationTemplate []chosenStreamCombinations =
                     sPreviewStabilizedStreamCombinations;
 
-            if (mIsPreviewStabilizationSupported) {
+            if (!mIsPreviewStabilizationSupported) {
                 Log.v(TAG, "Device does not support preview stabilization");
                  return null;
              }

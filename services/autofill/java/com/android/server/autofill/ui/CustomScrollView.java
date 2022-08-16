@@ -56,39 +56,41 @@ public class CustomScrollView extends ScrollView {
 
     private int mWidth = -1;
     private int mHeight = -1;
-    private int mMaxPortraitBodyHeightPercent = 20;
-    private int mMaxLandscapeBodyHeightPercent = 20;
+    private int mMaxPortraitBodyHeightPercent;
+    private int mMaxLandscapeBodyHeightPercent;
+    private int mAttrBasedMaxHeightPercent;
 
     public CustomScrollView(Context context) {
         super(context);
-        setMaxBodyHeightPercent();
+        setMaxBodyHeightPercent(context);
     }
 
     public CustomScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setMaxBodyHeightPercent();
+        setMaxBodyHeightPercent(context);
     }
 
     public CustomScrollView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        setMaxBodyHeightPercent();
+        setMaxBodyHeightPercent(context);
     }
 
     public CustomScrollView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        setMaxBodyHeightPercent();
+        setMaxBodyHeightPercent(context);
     }
 
-    private void setMaxBodyHeightPercent() {
+    private void setMaxBodyHeightPercent(Context context) {
+        mAttrBasedMaxHeightPercent = getAttrBasedMaxHeightPercent(context);
         mMaxPortraitBodyHeightPercent = DeviceConfig.getInt(
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_SAVE_DIALOG_PORTRAIT_BODY_HEIGHT_MAX_PERCENT,
-                mMaxPortraitBodyHeightPercent);
+                mAttrBasedMaxHeightPercent);
         mMaxLandscapeBodyHeightPercent = DeviceConfig.getInt(
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_SAVE_DIALOG_LANDSCAPE_BODY_HEIGHT_MAX_PERCENT,
-                mMaxLandscapeBodyHeightPercent);
+                mAttrBasedMaxHeightPercent);
     }
 
     @Override
@@ -117,29 +119,27 @@ public class CustomScrollView extends ScrollView {
         final int contentHeight = content.getMeasuredHeight();
         int displayHeight = point.y;
 
-        int configBasedMaxHeight = (getResources().getConfiguration().orientation
+        int maxHeight = (getResources().getConfiguration().orientation
                     == Configuration.ORIENTATION_LANDSCAPE)
                 ? (int) (mMaxLandscapeBodyHeightPercent * displayHeight / 100)
                 : (int) (mMaxPortraitBodyHeightPercent * displayHeight / 100);
-        mHeight = configBasedMaxHeight > 0
-                ? Math.min(contentHeight, configBasedMaxHeight)
-                : Math.min(contentHeight, getAttrBasedMaxHeight(context, displayHeight));
+        mHeight = Math.min(contentHeight, maxHeight);
 
         if (sDebug) {
             Slog.d(TAG, "calculateDimensions():"
                     + " mMaxPortraitBodyHeightPercent=" + mMaxPortraitBodyHeightPercent
                     + ", mMaxLandscapeBodyHeightPercent=" + mMaxLandscapeBodyHeightPercent
-                    + ", configBasedMaxHeight=" + configBasedMaxHeight
-                    + ", attrBasedMaxHeight=" + getAttrBasedMaxHeight(context, displayHeight)
+                    + ", mAttrBasedMaxHeightPercent=" + mAttrBasedMaxHeightPercent
+                    + ", maxHeight=" + maxHeight
                     + ", contentHeight=" + contentHeight
                     + ", w=" + mWidth + ", h=" + mHeight);
         }
     }
 
-    private int getAttrBasedMaxHeight(Context context, int displayHeight) {
+    private int getAttrBasedMaxHeightPercent(Context context) {
         final TypedValue maxHeightAttrTypedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.autofillSaveCustomSubtitleMaxHeight,
                 maxHeightAttrTypedValue, true);
-        return (int) maxHeightAttrTypedValue.getFraction(displayHeight, displayHeight);
+        return (int) maxHeightAttrTypedValue.getFraction(100, 100);
     }
 }

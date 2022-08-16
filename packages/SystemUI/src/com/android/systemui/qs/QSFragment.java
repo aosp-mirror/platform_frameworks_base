@@ -624,7 +624,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (mQSAnimator != null) {
             mQSAnimator.setPosition(expansion);
         }
-        mQqsMediaHost.setSquishFraction(mSquishinessFraction);
         updateMediaPositions();
     }
 

@@ -2163,7 +2163,9 @@ public class Tuner implements AutoCloseable  {
             if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB, mLnbLock)
                     && mLnb != null) {
                 mLnb.setCallbackAndOwner(this, executor, cb);
-                setLnb(mLnb);
+                if (mFrontendHandle != null && mFrontend != null) {
+                    setLnb(mLnb);
+                }
                 return mLnb;
             }
             return null;
@@ -2197,7 +2199,9 @@ public class Tuner implements AutoCloseable  {
                 }
                 mLnb = newLnb;
                 mLnb.setCallbackAndOwner(this, executor, cb);
-                setLnb(mLnb);
+                if (mFrontendHandle != null && mFrontend != null) {
+                    setLnb(mLnb);
+                }
             }
             return mLnb;
         } finally {

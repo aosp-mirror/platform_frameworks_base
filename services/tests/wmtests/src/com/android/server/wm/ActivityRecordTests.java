@@ -756,8 +756,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(activity.getTask()).build();
         topActivity.setOccludesParent(false);
-        // The requested occluding state doesn't affect whether it fills parent.
-        assertTrue(topActivity.fillsParent());
+        // The requested occluding state doesn't affect whether it can decide orientation.
+        assertTrue(topActivity.providesOrientation());
         activity.setState(STOPPED, "Testing");
         activity.setVisibility(true);
         activity.makeActiveIfNeeded(null /* activeActivity */);
@@ -779,7 +779,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                     }
 
                     @Override
-                    public void onAnimationCancelled() {
+                    public void onAnimationCancelled(boolean isKeyguardOccluded) {
                     }
                 }, 0, 0));
         activity.updateOptionsLocked(opts);
@@ -2811,11 +2811,17 @@ public class ActivityRecordTests extends WindowTestsBase {
                 true, false, false, false);
         waitUntilHandlersIdle();
 
+        final WindowState startingWindow = activityTop.mStartingWindow;
+        assertNotNull(startingWindow);
+
         // Make the top one invisible, and try transferring the starting window from the top to the
         // bottom one.
         activityTop.setVisibility(false, false);
         activityBottom.transferStartingWindowFromHiddenAboveTokenIfNeeded();
         waitUntilHandlersIdle();
+
+        // Expect getFrozenInsetsState will be null when transferring the starting window.
+        assertNull(startingWindow.getFrozenInsetsState());
 
         // Assert that the bottom window now has the starting window.
         assertNoStartingWindow(activityTop);

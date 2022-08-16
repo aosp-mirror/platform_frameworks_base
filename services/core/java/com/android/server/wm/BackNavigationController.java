@@ -61,10 +61,6 @@ class BackNavigationController {
         return SystemProperties.getInt("persist.wm.debug.predictive_back_screenshot", 0) != 0;
     }
 
-    private static boolean isAnimationEnabled() {
-        return SystemProperties.getInt("persist.wm.debug.predictive_back_anim", 0) != 0;
-    }
-
     /**
      * Set up the necessary leashes and build a {@link BackNavigationInfo} instance for an upcoming
      * back gesture animation.
@@ -74,20 +70,21 @@ class BackNavigationController {
      * fallback on dispatching the key event.
      */
     @Nullable
-    BackNavigationInfo startBackNavigation(@NonNull WindowManagerService wmService) {
-        return startBackNavigation(wmService, null);
+    BackNavigationInfo startBackNavigation(@NonNull WindowManagerService wmService,
+            boolean requestAnimation) {
+        return startBackNavigation(wmService, null, requestAnimation);
     }
 
     /**
      * @param tx, a transaction to be used for the attaching the animation leash.
      *            This is used in tests. If null, the object will be initialized with a new {@link
      *            SurfaceControl.Transaction}
-     * @see #startBackNavigation(WindowManagerService)
+     * @see #startBackNavigation(WindowManagerService, boolean)
      */
     @VisibleForTesting
     @Nullable
     BackNavigationInfo startBackNavigation(WindowManagerService wmService,
-            @Nullable SurfaceControl.Transaction tx) {
+            @Nullable SurfaceControl.Transaction tx, boolean requestAnimation) {
 
         if (tx == null) {
             tx = new SurfaceControl.Transaction();
@@ -295,7 +292,7 @@ class BackNavigationController {
             }
 
             // Special handling for back to home animation
-            if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME && isAnimationEnabled()
+            if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME && requestAnimation
                     && prevTask != null) {
                 currentTask.mBackGestureStarted = true;
                 // Make launcher show from behind by marking its top activity as visible and
@@ -350,7 +347,7 @@ class BackNavigationController {
             Task finalTask = currentTask;
             RemoteCallback onBackNavigationDone = new RemoteCallback(result -> onBackNavigationDone(
                     result, finalRemovedWindowContainer, finalBackType, finalTask,
-                    finalprevActivity));
+                    finalprevActivity, requestAnimation));
             infoBuilder.setOnBackNavigationDone(onBackNavigationDone);
         }
 
@@ -384,14 +381,14 @@ class BackNavigationController {
 
     private void onBackNavigationDone(
             Bundle result, WindowContainer<?> windowContainer, int backType,
-            Task task, ActivityRecord prevActivity) {
+            Task task, ActivityRecord prevActivity, boolean requestAnimation) {
         SurfaceControl surfaceControl = windowContainer.getSurfaceControl();
         boolean triggerBack = result != null && result.getBoolean(
                 BackNavigationInfo.KEY_TRIGGER_BACK);
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "onBackNavigationDone backType=%s, "
                 + "task=%s, prevActivity=%s", backType, task, prevActivity);
 
-        if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME && isAnimationEnabled()) {
+        if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME && requestAnimation) {
             if (triggerBack) {
                 if (surfaceControl != null && surfaceControl.isValid()) {
                     // When going back to home, hide the task surface before it is re-parented to

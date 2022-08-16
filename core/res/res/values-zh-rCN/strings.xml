@@ -1611,9 +1611,9 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"系统"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"蓝牙音频"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"无线显示"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"投射"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"投放"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"连接到设备"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"将屏幕投射到设备上"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"将屏幕投放到设备上"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"正在搜索设备…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"设置"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"断开连接"</string>
@@ -1678,7 +1678,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不开启"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"已开启"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"已关闭"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允许<xliff:g id="SERVICE">%1$s</xliff:g>完全控制您的设备吗？"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允许“<xliff:g id="SERVICE">%1$s</xliff:g>”完全控制您的设备吗？"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"对于能满足您的无障碍功能需求的应用，可授予其完全控制权限；但对大部分应用来说，都不适合授予此权限。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看和控制屏幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"此功能可以读出屏幕上的所有内容，并在其他应用上层显示内容。"</string>

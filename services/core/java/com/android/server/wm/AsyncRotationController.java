@@ -20,7 +20,7 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLES
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_FIXED_TRANSFORM;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFORM;
 
 import android.annotation.IntDef;
 import android.os.HandlerExecutor;
@@ -224,7 +224,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             if (DEBUG) Slog.d(TAG, "finishOp fade-in " + windowToken.getTopChild());
             // The previous animation leash will be dropped when preparing fade-in animation, so
             // simply apply new animation without restoring the transformation.
-            fadeWindowToken(true /* show */, windowToken, ANIMATION_TYPE_FIXED_TRANSFORM);
+            fadeWindowToken(true /* show */, windowToken, ANIMATION_TYPE_TOKEN_TRANSFORM);
         } else if (op.mAction == Operation.ACTION_SEAMLESS && mRotator != null
                 && op.mLeash != null && op.mLeash.isValid()) {
             if (DEBUG) Slog.d(TAG, "finishOp undo seamless " + windowToken.getTopChild());
@@ -298,7 +298,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             final WindowToken windowToken = mTargetWindowTokens.keyAt(i);
             final Operation op = mTargetWindowTokens.valueAt(i);
             if (op.mAction == Operation.ACTION_FADE) {
-                fadeWindowToken(false /* show */, windowToken, ANIMATION_TYPE_FIXED_TRANSFORM);
+                fadeWindowToken(false /* show */, windowToken, ANIMATION_TYPE_TOKEN_TRANSFORM);
                 op.mLeash = windowToken.getAnimationLeash();
                 if (DEBUG) Slog.d(TAG, "Start fade-out " + windowToken.getTopChild());
             } else if (op.mAction == Operation.ACTION_SEAMLESS) {
@@ -332,7 +332,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         mHideImmediately = true;
         final Operation op = new Operation(Operation.ACTION_FADE);
         mTargetWindowTokens.put(windowToken, op);
-        fadeWindowToken(false /* show */, windowToken, ANIMATION_TYPE_FIXED_TRANSFORM);
+        fadeWindowToken(false /* show */, windowToken, ANIMATION_TYPE_TOKEN_TRANSFORM);
         op.mLeash = windowToken.getAnimationLeash();
         mHideImmediately = original;
         if (DEBUG) Slog.d(TAG, "hideImmediately " + windowToken.getTopChild());

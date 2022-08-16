@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"相机"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"电话"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"语音助理"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"电子钱包"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"钱包"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"二维码扫描器"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"解锁"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"设备已锁定"</string>
@@ -192,7 +192,7 @@
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"闹钟已设置为：<xliff:g id="TIME">%s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"延长时间。"</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"缩短时间。"</string>
-    <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"屏幕投射已停止。"</string>
+    <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"屏幕投放已停止。"</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"屏幕亮度"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"已暂停使用移动数据网络"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"数据网络已暂停使用"</string>
@@ -235,8 +235,8 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"没有可用的网络"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"没有 WLAN 网络"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"正在开启…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"屏幕投射"</string>
-    <string name="quick_settings_casting" msgid="1435880708719268055">"正在投射"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"屏幕投放"</string>
+    <string name="quick_settings_casting" msgid="1435880708719268055">"正在投放"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"未命名设备"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"没有可用设备"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"未连接到 WLAN 网络"</string>
@@ -313,10 +313,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑动即可打开"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"按下解锁图标即可打开"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"已通过面孔识别解锁。按下解锁图标即可打开。"</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"左移"</item>
+    <item msgid="5558598599408514296">"下移"</item>
+    <item msgid="4844142668312841831">"右移"</item>
+    <item msgid="5640521437931460125">"上移"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑动即可重试"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"需要解锁才能使用 NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"此设备归贵单位所有"</string>
@@ -351,10 +353,10 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"是否移除用户？"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"此用户的所有应用和数据均将被删除。"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"移除"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"在录制或投射内容时，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>将可获取您屏幕上显示或设备中播放的所有信息，其中包括密码、付款明细、照片、消息以及您播放的音频等信息。"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"在录制或投射内容时，提供此功能的服务将可获取您屏幕上显示或设备中播放的所有信息，其中包括密码、付款明细、照片、消息以及您播放的音频等信息。"</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"要开始录制或投射内容吗？"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"要开始使用<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>录制或投射内容吗？"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"在录制或投放内容时，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>将可获取您屏幕上显示或设备中播放的所有信息，其中包括密码、付款明细、照片、消息以及您播放的音频等信息。"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"在录制或投放内容时，提供此功能的服务将可获取您屏幕上显示或设备中播放的所有信息，其中包括密码、付款明细、照片、消息以及您播放的音频等信息。"</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"要开始录制或投放内容吗？"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"要开始使用<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>录制或投放内容吗？"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"全部清除"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"历史记录"</string>
@@ -460,7 +462,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"显示演示模式"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"以太网"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"闹钟"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"电子钱包"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"钱包"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"开始设置，享受更加快捷安全的手机购物体验"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"全部显示"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"点按即可打开"</string>
@@ -737,6 +739,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"相机"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"位置信息"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"麦克风"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"屏幕录制"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"无标题"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待机"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"放大窗口"</string>
@@ -838,11 +841,11 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"（已断开连接）"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"无法切换。点按即可重试。"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"与新设备配对"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"如需投射此会话，请打开相关应用。"</string>
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"如需投放此会话，请打开相关应用。"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"未知应用"</string>
-    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"停止投射"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"停止投放"</string>
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"音频输出的可用设备。"</string>
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"音量"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"广播的运作方式"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"广播"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"附近使用兼容蓝牙设备的用户可以收听您广播的媒体内容"</string>
@@ -928,13 +931,13 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新信息"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"已开启的应用"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"即使您未使用这些应用，它们仍会处于活动状态，并可能会影响电池续航时间"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"这些应用正在保持活跃运行状态，即使您没有在使用它们。这可以改进它们的功能，但可能会影响到电池续航时间。"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"已停止"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完成"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"已复制"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"来自<xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"关闭复制界面"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"忽略复制的文字"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"修改所复制的文字"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"编辑所复制的图片"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"发送到附近的设备"</string>
@@ -942,6 +945,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"文本已复制"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"图片已复制"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"内容已复制"</string>
+    <string name="clipboard_editor" msgid="2971197550401892843">"剪贴板编辑器"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"剪贴板"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"图片预览"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"修改"</string>
     <string name="add" msgid="81036585205287996">"添加"</string>
     <string name="manage_users" msgid="1823875311934643849">"管理用户"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"此通知不支持拖动到分屏中。"</string>

@@ -398,11 +398,11 @@ public class CommandQueue extends IStatusBar.Stub implements
 
         /**
          * @see IStatusBar#showToast(int, String, IBinder, CharSequence, IBinder, int,
-         * ITransientNotificationCallback)
+         * ITransientNotificationCallback, int)
          */
         default void showToast(int uid, String packageName, IBinder token, CharSequence text,
                 IBinder windowToken, int duration,
-                @Nullable ITransientNotificationCallback callback) { }
+                @Nullable ITransientNotificationCallback callback, int displayId) { }
 
         /**
          * @see IStatusBar#hideToast(String, IBinder) (String, IBinder)
@@ -944,7 +944,8 @@ public class CommandQueue extends IStatusBar.Stub implements
 
     @Override
     public void showToast(int uid, String packageName, IBinder token, CharSequence text,
-            IBinder windowToken, int duration, @Nullable ITransientNotificationCallback callback) {
+            IBinder windowToken, int duration, @Nullable ITransientNotificationCallback callback,
+            int displayId) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = packageName;
@@ -954,6 +955,7 @@ public class CommandQueue extends IStatusBar.Stub implements
             args.arg5 = callback;
             args.argi1 = uid;
             args.argi2 = duration;
+            args.argi3 = displayId;
             mHandler.obtainMessage(MSG_SHOW_TOAST, args).sendToTarget();
         }
     }
@@ -1600,9 +1602,10 @@ public class CommandQueue extends IStatusBar.Stub implements
                             (ITransientNotificationCallback) args.arg5;
                     int uid = args.argi1;
                     int duration = args.argi2;
+                    int displayId = args.argi3;
                     for (Callbacks callbacks : mCallbacks) {
                         callbacks.showToast(uid, packageName, token, text, windowToken, duration,
-                                callback);
+                                callback, displayId);
                     }
                     break;
                 }

@@ -217,60 +217,30 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         CameraSessionConfig sessionConfig = mSessionProcessor.initSession(mCameraDevice.getId(),
                 previewSurface, captureSurface);
         List<CameraOutputConfig> outputConfigs = sessionConfig.outputConfigs;
-        // map camera output ids to output configurations
-        HashMap<Integer, OutputConfiguration> cameraOutputs = new HashMap<>();
-        for (CameraOutputConfig output : outputConfigs) {
-            OutputConfiguration cameraOutput = null;
-            switch(output.type) {
-                case CameraOutputConfig.TYPE_SURFACE:
-                    if (output.surface == null) {
-                        Log.w(TAG, "Unsupported client output id: " + output.outputId.id +
-                                ", skipping!");
-                        continue;
-                    }
-                    cameraOutput = new OutputConfiguration(output.surfaceGroupId,
-                            output.surface);
-                    break;
-                case CameraOutputConfig.TYPE_IMAGEREADER:
-                    if ((output.imageFormat == ImageFormat.UNKNOWN) || (output.size.width <= 0) ||
-                            (output.size.height <= 0)) {
-                        Log.w(TAG, "Unsupported client output id: " + output.outputId.id +
-                                ", skipping!");
-                        continue;
-                    }
-                    ImageReader reader = ImageReader.newInstance(output.size.width,
-                            output.size.height, output.imageFormat, output.capacity);
-                    mReaderMap.put(output.outputId.id, reader);
-                    cameraOutput = new OutputConfiguration(output.surfaceGroupId,
-                            reader.getSurface());
-                    break;
-                case CameraOutputConfig.TYPE_MULTIRES_IMAGEREADER:
-                    // Support for multi-resolution outputs to be added in future releases
-                default:
-                    throw new IllegalArgumentException("Unsupported output config type: " +
-                            output.type);
-            }
-            cameraOutput.setPhysicalCameraId(output.physicalCameraId);
-            cameraOutputs.put(output.outputId.id, cameraOutput);
-        }
-
         ArrayList<OutputConfiguration> outputList = new ArrayList<>();
         for (CameraOutputConfig output : outputConfigs) {
-            if (!cameraOutputs.containsKey(output.outputId.id)) {
-                // Shared surface already removed by a previous iteration
+            Surface outputSurface = initializeSurfrace(output);
+            if (outputSurface == null) {
                 continue;
             }
-            OutputConfiguration outConfig = cameraOutputs.get(output.outputId.id);
-            if ((output.surfaceSharingOutputConfigs != null) &&
-                    !output.surfaceSharingOutputConfigs.isEmpty()) {
-                outConfig.enableSurfaceSharing();
-                for (OutputConfigId outputId : output.surfaceSharingOutputConfigs) {
-                    outConfig.addSurface(cameraOutputs.get(outputId.id).getSurface());
-                    cameraOutputs.remove(outputId.id);
+            OutputConfiguration cameraOutput = new OutputConfiguration(output.surfaceGroupId,
+                    outputSurface);
+
+            if ((output.sharedSurfaceConfigs != null) && !output.sharedSurfaceConfigs.isEmpty()) {
+                cameraOutput.enableSurfaceSharing();
+                for (CameraOutputConfig sharedOutputConfig : output.sharedSurfaceConfigs) {
+                    Surface sharedSurface = initializeSurfrace(sharedOutputConfig);
+                    if (sharedSurface == null) {
+                        continue;
+                    }
+                    cameraOutput.addSurface(sharedSurface);
+                    mCameraConfigMap.put(sharedSurface, sharedOutputConfig);
                 }
             }
-            outputList.add(outConfig);
-            mCameraConfigMap.put(outConfig.getSurface(), output);
+
+            cameraOutput.setPhysicalCameraId(output.physicalCameraId);
+            outputList.add(cameraOutput);
+            mCameraConfigMap.put(cameraOutput.getSurface(), output);
         }
 
         SessionConfiguration sessionConfiguration = new SessionConfiguration(
@@ -994,5 +964,33 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         CaptureRequest ret = builder.build();
         CameraMetadataNative.update(ret.getNativeMetadata(), request.parameters);
         return ret;
+    }
+
+    private Surface initializeSurfrace(CameraOutputConfig output) {
+        switch(output.type) {
+            case CameraOutputConfig.TYPE_SURFACE:
+                if (output.surface == null) {
+                    Log.w(TAG, "Unsupported client output id: " + output.outputId.id +
+                            ", skipping!");
+                    return null;
+                }
+                return output.surface;
+            case CameraOutputConfig.TYPE_IMAGEREADER:
+                if ((output.imageFormat == ImageFormat.UNKNOWN) || (output.size.width <= 0) ||
+                        (output.size.height <= 0)) {
+                    Log.w(TAG, "Unsupported client output id: " + output.outputId.id +
+                            ", skipping!");
+                    return null;
+                }
+                ImageReader reader = ImageReader.newInstance(output.size.width,
+                        output.size.height, output.imageFormat, output.capacity);
+                mReaderMap.put(output.outputId.id, reader);
+                return reader.getSurface();
+            case CameraOutputConfig.TYPE_MULTIRES_IMAGEREADER:
+                // Support for multi-resolution outputs to be added in future releases
+            default:
+                throw new IllegalArgumentException("Unsupported output config type: " +
+                        output.type);
+        }
     }
 }

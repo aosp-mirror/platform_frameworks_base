@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"auf deinen Kalender zugreifen"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS senden und abrufen"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Dateien"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"auf Dateien auf deinem Gerät zugreifen"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musik und Audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"Zugriff auf Musik und Audio auf deinem Gerät"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos und Videos"</string>
@@ -1627,7 +1625,7 @@
     <string name="display_manager_built_in_display_name" msgid="1015775198829722440">"Integrierter Bildschirm"</string>
     <string name="display_manager_hdmi_display_name" msgid="1022758026251534975">"HDMI-Bildschirm"</string>
     <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"Overlay-Nr. <xliff:g id="ID">%1$d</xliff:g>"</string>
-    <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> × <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", sicher"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"Muster vergessen"</string>
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Falsches Muster"</string>
@@ -1692,7 +1690,7 @@
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Funktionen auswählen, die du mit der Schaltfläche \"Bedienungshilfen\" verwenden möchtest"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Funktionen für Verknüpfung mit Lautstärketaste auswählen"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> wurde deaktiviert"</string>
-    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Verknüpfungen bearbeiten"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Kurzbefehle bearbeiten"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fertig"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Verknüpfung deaktivieren"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Verknüpfung verwenden"</string>

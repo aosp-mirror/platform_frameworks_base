@@ -18,6 +18,8 @@ package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -28,6 +30,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.os.Handler;
@@ -57,8 +60,6 @@ import java.util.ArrayList;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class JetpackTaskFragmentOrganizerTest {
-    private static final int TASK_ID = 10;
-
     @Mock
     private WindowContainerTransaction mTransaction;
     @Mock
@@ -115,7 +116,7 @@ public class JetpackTaskFragmentOrganizerTest {
     public void testExpandTaskFragment() {
         final TaskContainer taskContainer = new TaskContainer(TASK_ID);
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                taskContainer, mSplitController);
+                new Intent(), taskContainer, mSplitController);
         final TaskFragmentInfo info = createMockInfo(container);
         mOrganizer.mFragmentInfos.put(container.getTaskFragmentToken(), info);
         container.setInfo(info);
@@ -130,6 +131,7 @@ public class JetpackTaskFragmentOrganizerTest {
         return new TaskFragmentInfo(container.getTaskFragmentToken(),
                 mock(WindowContainerToken.class), new Configuration(), 0 /* runningActivityCount */,
                 false /* isVisible */, new ArrayList<>(), new Point(),
-                false /* isTaskClearedForReuse */, false /* isTaskFragmentClearedForPip */);
+                false /* isTaskClearedForReuse */, false /* isTaskFragmentClearedForPip */,
+                new Point());
     }
 }

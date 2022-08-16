@@ -111,8 +111,8 @@ public class DropboxRateLimiter {
 
     /** Holds information on whether we should rate limit and how many events have been dropped. */
     public class RateLimitResult {
-        boolean mShouldRateLimit;
-        int mDroppedCountSinceRateLimitActivated;
+        final boolean mShouldRateLimit;
+        final int mDroppedCountSinceRateLimitActivated;
 
         public RateLimitResult(boolean shouldRateLimit, int droppedCountSinceRateLimitActivated) {
             mShouldRateLimit = shouldRateLimit;
@@ -127,6 +127,11 @@ public class DropboxRateLimiter {
         /** The number of dropped events since rate limit was activated. */
         public int droppedCountSinceRateLimitActivated() {
             return mDroppedCountSinceRateLimitActivated;
+        }
+
+        /** Returns a header indicating the number of dropped events. */
+        public String createHeader() {
+            return "Dropped-Count: " + mDroppedCountSinceRateLimitActivated + "\n";
         }
     }
 

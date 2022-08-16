@@ -423,8 +423,8 @@ public class DisplayLayout {
         }
         final DisplayCutout.CutoutPathParserInfo info = cutout.getCutoutPathParserInfo();
         final DisplayCutout.CutoutPathParserInfo newInfo = new DisplayCutout.CutoutPathParserInfo(
-                info.getDisplayWidth(), info.getDisplayHeight(), info.getStableDisplayWidth(),
-                info.getStableDisplayHeight(), info.getDensity(), info.getCutoutSpec(), rotation,
+                info.getDisplayWidth(), info.getDisplayHeight(), info.getPhysicalDisplayWidth(),
+                info.getPhysicalDisplayHeight(), info.getDensity(), info.getCutoutSpec(), rotation,
                 info.getScale(), info.getPhysicalPixelDisplaySizeRatio());
         return computeSafeInsets(
                 DisplayCutout.constructDisplayCutout(newBounds, waterfallInsets, newInfo),

@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
@@ -70,7 +71,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.util.Collections;
 import java.util.List;
@@ -87,7 +90,10 @@ public class AutoTileManagerTest extends SysuiTestCase {
     private static final String TEST_SETTING_COMPONENT = "setting_component";
     private static final String TEST_COMPONENT = "test_pkg/test_cls";
     private static final String TEST_CUSTOM_SPEC = "custom(" + TEST_COMPONENT + ")";
-    private static final String TEST_CUSTOM_SAFETY_SPEC = "custom(safety_pkg/safety_cls)";
+    private static final String TEST_CUSTOM_SAFETY_CLASS = "safety_cls";
+    private static final String TEST_CUSTOM_SAFETY_PKG = "safety_pkg";
+    private static final String TEST_CUSTOM_SAFETY_SPEC = CustomTile.toSpec(new ComponentName(
+            TEST_CUSTOM_SAFETY_PKG, TEST_CUSTOM_SAFETY_CLASS));
     private static final String SEPARATOR = AutoTileManager.SETTING_SEPARATOR;
 
     private static final int USER = 0;
@@ -106,6 +112,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
     @Mock(answer = Answers.RETURNS_SELF)
     private AutoAddTracker.Builder mAutoAddTrackerBuilder;
     @Mock private Context mUserContext;
+    @Spy private PackageManager mPackageManager;
     private final boolean mIsReduceBrightColorsAvailable = true;
 
     private AutoTileManager mAutoTileManager;
@@ -126,13 +133,18 @@ public class AutoTileManagerTest extends SysuiTestCase {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_nightDisplayAvailable, true);
         mContext.getOrCreateTestableResources().addOverride(
-                R.string.safety_quick_settings_tile, TEST_CUSTOM_SAFETY_SPEC);
+                R.string.safety_quick_settings_tile_class, TEST_CUSTOM_SAFETY_CLASS);
 
         when(mAutoAddTrackerBuilder.build()).thenReturn(mAutoAddTracker);
         when(mQsTileHost.getUserContext()).thenReturn(mUserContext);
         when(mUserContext.getUser()).thenReturn(UserHandle.of(USER));
+        mPackageManager = Mockito.spy(mContext.getPackageManager());
+        when(mPackageManager.getPermissionControllerPackageName())
+                .thenReturn(TEST_CUSTOM_SAFETY_PKG);
+        Context context = Mockito.spy(mContext);
+        when(context.getPackageManager()).thenReturn(mPackageManager);
 
-        mAutoTileManager = createAutoTileManager(mContext);
+        mAutoTileManager = createAutoTileManager(context);
         mAutoTileManager.init();
     }
 

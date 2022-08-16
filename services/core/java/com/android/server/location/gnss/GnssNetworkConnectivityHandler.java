@@ -599,6 +599,7 @@ class GnssNetworkConnectivityHandler {
                     SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS);
         } catch (RuntimeException e) {
             Log.e(TAG, "Failed to request network.", e);
+            mSuplConnectivityCallback = null;
             handleReleaseSuplConnection(GPS_AGPS_DATA_CONN_FAILED);
         }
     }

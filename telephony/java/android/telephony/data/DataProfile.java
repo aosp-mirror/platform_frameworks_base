@@ -232,13 +232,14 @@ public final class DataProfile implements Parcelable {
     }
 
     /**
-     * @return True if the profile is enabled.
+     * @return {@code true} if the profile is enabled. If the profile only has a
+     * {@link TrafficDescriptor}, but no {@link ApnSetting}, then this profile is always enabled.
      */
     public boolean isEnabled() {
         if (mApnSetting != null) {
             return mApnSetting.isEnabled();
         }
-        return false;
+        return true;
     }
 
     /**
@@ -534,7 +535,7 @@ public final class DataProfile implements Parcelable {
         @Type
         private int mType = -1;
 
-        private boolean mEnabled;
+        private boolean mEnabled = true;
 
         @ApnType
         private int mSupportedApnTypesBitmask;

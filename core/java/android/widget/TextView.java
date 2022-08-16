@@ -4781,12 +4781,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * TextView is {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}, and the default value for
      * EditText is {@link Layout#BREAK_STRATEGY_SIMPLE}, the latter to avoid the
      * text "dancing" when being edited.
-     * <p/>
+     * <p>
      * Enabling hyphenation with either using {@link Layout#HYPHENATION_FREQUENCY_NORMAL} or
      * {@link Layout#HYPHENATION_FREQUENCY_FULL} while line breaking is set to one of
      * {@link Layout#BREAK_STRATEGY_BALANCED}, {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}
      * improves the structure of text layout however has performance impact and requires more time
-     * to do the text layout.
+     * to do the text layout.</p>
+     * <p>
+     * Compared with {@link #setLineBreakStyle(int)}, line break style with different strictness is
+     * evaluated in the ICU to identify the potential breakpoints. In
+     * {@link #setBreakStrategy(int)}, line break strategy handles the post processing of ICU's line
+     * break result. It aims to evaluate ICU's breakpoints and break the lines based on the
+     * constraint.
+     * </p>
      *
      * @attr ref android.R.styleable#TextView_breakStrategy
      * @see #getBreakStrategy()
@@ -14240,13 +14247,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Collects a {@link ViewTranslationRequest} which represents the content to be translated in
      * the view.
      *
-     * <p>NOTE: When overriding the method, it should not translate the password. If the subclass
-     * uses {@link TransformationMethod} to display the translated result, it's also not recommend
-     * to translate text is selectable or editable.
+     * <p>NOTE: When overriding the method, it should not collect a request to translate this
+     * TextView if it is displaying a password.
      *
      * @param supportedFormats the supported translation format. The value could be {@link
      *                         android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
-     * @return the {@link ViewTranslationRequest} which contains the information to be translated.
+     * @param requestsCollector {@link Consumer} to receiver the {@link ViewTranslationRequest}
+     *                                         which contains the information to be translated.
      */
     @Override
     public void onCreateViewTranslationRequest(@NonNull int[] supportedFormats,
@@ -14268,18 +14275,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
             boolean isPassword = isAnyPasswordInputType() || hasPasswordTransformationMethod();
-            // TODO(b/177214256): support selectable text translation.
-            //  We use the TransformationMethod to implement showing the translated text. The
-            //  TextView does not support the text length change for TransformationMethod. If the
-            //  text is selectable or editable, it will crash while selecting the text. To support
-            //  it, it needs broader changes to text APIs, we only allow to translate non selectable
-            //  and editable text in S.
-            if (isTextEditable() || isPassword || isTextSelectable()) {
-                if (UiTranslationController.DEBUG) {
-                    Log.w(LOG_TAG, "Cannot create translation request. editable = "
-                            + isTextEditable() + ", isPassword = " + isPassword + ", selectable = "
-                            + isTextSelectable());
-                }
+            if (isTextEditable() || isPassword) {
+                Log.w(LOG_TAG, "Cannot create translation request. editable = "
+                        + isTextEditable() + ", isPassword = " + isPassword);
                 return;
             }
             // TODO(b/176488462): apply the view's important for translation

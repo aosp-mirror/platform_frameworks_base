@@ -371,7 +371,7 @@
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Onyesha masasisho ya safu za maunzi"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Angaza kijani safu za maunzi zinaposasisha"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Tatua uondoaji wa GPU"</string>
-    <string name="disable_overlays" msgid="4206590799671557143">"Lemaza miekeleo ya HW"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"Zima miekeleo ya HW"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Daima tumia GPU kwa mchanganyiko wa skrini"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Kuiga nafasi ya rangi"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Wezesha ufuatiliaji wa OpenGL"</string>
@@ -397,7 +397,7 @@
     <string name="debug_applications_category" msgid="5394089406638954196">"Programu"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Usihifadhi shughuli"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Haribu kila shughuli pindi tu mtumiaji anapoondoka"</string>
-    <string name="app_process_limit_title" msgid="8361367869453043007">"Kikomo cha mchakato wa mandhari nyuma"</string>
+    <string name="app_process_limit_title" msgid="8361367869453043007">"Kikomo cha michakato ya chinichini"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Onyesha historia ya ANR"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Onyesha kidirisha cha Programu Kutorejesha Majibu kwa programu zinazotumika chinichini"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Onyesha arifa za maonyo ya kituo"</string>

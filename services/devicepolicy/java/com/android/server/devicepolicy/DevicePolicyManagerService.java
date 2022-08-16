@@ -1982,6 +1982,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             mOwners.load();
             setDeviceOwnershipSystemPropertyLocked();
+            if (mOwners.hasDeviceOwner()) {
+                setGlobalSettingDeviceOwnerType(
+                        mOwners.getDeviceOwnerType(mOwners.getDeviceOwnerPackageName()));
+            }
         }
     }
 
@@ -8811,6 +8815,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         deleteTransferOwnershipBundleLocked(userId);
         toggleBackupServiceActive(UserHandle.USER_SYSTEM, true);
         pushUserControlDisabledPackagesLocked(userId);
+        setGlobalSettingDeviceOwnerType(DEVICE_OWNER_TYPE_DEFAULT);
     }
 
     private void clearApplicationRestrictions(int userId) {
@@ -9290,22 +9295,58 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     return poComponent;
                 }
             }
-            final String supervisor = mContext.getResources().getString(
-                    com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
-            if (supervisor == null) {
-                return null;
+
+            // Check profile owner first as that is what most likely is set.
+            if (isSupervisionComponentLocked(poComponent)) {
+                return poComponent;
             }
-            final ComponentName supervisorComponent = ComponentName.unflattenFromString(supervisor);
-            if (supervisorComponent == null) {
-                return null;
+
+            if (isSupervisionComponentLocked(doComponent)) {
+                return doComponent;
             }
-            if (supervisorComponent.equals(doComponent) || supervisorComponent.equals(
-                    poComponent)) {
-                return supervisorComponent;
-            } else {
-                return null;
+
+            return null;
+        }
+    }
+
+    /**
+     * Returns if the specified component is the supervision component.
+     */
+    @Override
+    public boolean isSupervisionComponent(@NonNull ComponentName who) {
+        if (!mHasFeature) {
+            return false;
+        }
+        synchronized (getLockObject()) {
+            if (mConstants.USE_TEST_ADMIN_AS_SUPERVISION_COMPONENT) {
+                final CallerIdentity caller = getCallerIdentity();
+                if (isAdminTestOnlyLocked(who, caller.getUserId())) {
+                    return true;
+                }
+            }
+            return isSupervisionComponentLocked(who);
+        }
+    }
+
+    private boolean isSupervisionComponentLocked(@Nullable ComponentName who) {
+        if (who == null) {
+            return false;
+        }
+
+        final String configComponent = mContext.getResources().getString(
+                com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
+        if (configComponent != null) {
+            final ComponentName componentName = ComponentName.unflattenFromString(configComponent);
+            if (who.equals(componentName)) {
+                return true;
             }
         }
+
+        // Check the system supervision role.
+        final String configPackage = mContext.getResources().getString(
+                com.android.internal.R.string.config_systemSupervision);
+
+        return who.getPackageName().equals(configPackage);
     }
 
     @Override
@@ -9491,22 +9532,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     "Cannot set the profile owner on a user which is already set-up");
 
             if (!mIsWatch) {
-                final String supervisionRolePackage = mContext.getResources().getString(
-                        com.android.internal.R.string.config_systemSupervision);
-                // Only the default supervision profile owner or supervision role holder
-                // can be set as profile owner after SUW
-                final String supervisor = mContext.getResources().getString(
-                        com.android.internal.R.string
-                                .config_defaultSupervisionProfileOwnerComponent);
-                if (supervisor == null && supervisionRolePackage == null) {
-                    throw new IllegalStateException("Unable to set profile owner post-setup, no"
-                            + "default supervisor profile owner defined");
-                }
-
-                final ComponentName supervisorComponent = ComponentName.unflattenFromString(
-                        supervisor);
-                if (!owner.equals(supervisorComponent)
-                        && !owner.getPackageName().equals(supervisionRolePackage)) {
+                if (!isSupervisionComponentLocked(owner)) {
                     throw new IllegalStateException("Unable to set non-default profile owner"
                             + " post-setup " + owner);
                 }
@@ -12100,8 +12126,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             // Allow testOnly admins to bypass supervision config requirement.
             Preconditions.checkCallAuthorization(isAdminTestOnlyLocked(who, caller.getUserId())
-                    || isDefaultSupervisor(caller), "Admin %s is not the "
-                    + "default supervision component", caller.getComponentName());
+                    || isSupervisionComponentLocked(caller.getComponentName()), "Admin %s is not "
+                    + "the default supervision component", caller.getComponentName());
             DevicePolicyData policy = getUserData(caller.getUserId());
             policy.mSecondaryLockscreenEnabled = enabled;
             saveSettingsLocked(caller.getUserId());
@@ -12117,16 +12143,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private boolean isManagedProfileOwner(CallerIdentity caller) {
         return isProfileOwner(caller) && isManagedProfile(caller.getUserId());
-    }
-
-    private boolean isDefaultSupervisor(CallerIdentity caller) {
-        final String supervisor = mContext.getResources().getString(
-                com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
-        if (supervisor == null) {
-            return false;
-        }
-        final ComponentName supervisorComponent = ComponentName.unflattenFromString(supervisor);
-        return caller.getComponentName().equals(supervisorComponent);
     }
 
     @Override
@@ -13012,16 +13028,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     return false;
                 }
 
-                final String supervisionString = mContext.getResources().getString(
-                        com.android.internal.R.string
-                                .config_defaultSupervisionProfileOwnerComponent);
-                if (supervisionString == null) {
-                    return false;
-                }
-
-                final ComponentName supervisorComponent = ComponentName.unflattenFromString(
-                        supervisionString);
-                return admin.info.getComponent().equals(supervisorComponent);
+                return isSupervisionComponentLocked(admin.info.getComponent());
             }
         }
 
@@ -18375,6 +18382,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 "Test only admins can only set the device owner type more than once");
 
         mOwners.setDeviceOwnerType(packageName, deviceOwnerType, isAdminTestOnly);
+        setGlobalSettingDeviceOwnerType(deviceOwnerType);
+    }
+
+    // TODO(b/237065504): Allow mainline modules to get the device owner type. This is a workaround
+    // to get the device owner type in PermissionController. See HibernationPolicy.kt.
+    private void setGlobalSettingDeviceOwnerType(int deviceOwnerType) {
+        mInjector.binderWithCleanCallingIdentity(
+                () -> mInjector.settingsGlobalPutInt("device_owner_type", deviceOwnerType));
     }
 
     @Override

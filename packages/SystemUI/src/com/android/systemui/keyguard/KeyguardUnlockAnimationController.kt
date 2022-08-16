@@ -216,13 +216,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     override fun setLauncherUnlockController(callback: ILauncherUnlockAnimationController?) {
         launcherUnlockController = callback
-
-        // If the provided callback dies, set it to null. We'll always check whether it's null
-        // to avoid DeadObjectExceptions.
-        callback?.asBinder()?.linkToDeath({
-            launcherUnlockController = null
-            launcherSmartspaceState = null
-        }, 0 /* flags */)
     }
 
     /**
@@ -409,7 +402,19 @@ class KeyguardUnlockAnimationController @Inject constructor(
         if (willUnlockWithSmartspaceTransition) {
             lockscreenSmartspaceBounds = Rect().apply {
                 lockscreenSmartspace!!.getBoundsOnScreen(this)
+
+                // The smartspace container on the lockscreen has left and top padding to align it
+                // with other lockscreen content. This padding is inside the bounds on screen, so
+                // add it to those bounds so that the padding-less launcher smartspace is properly
+                // aligned.
                 offset(lockscreenSmartspace!!.paddingLeft, lockscreenSmartspace!!.paddingTop)
+
+                // Also offset by the current card's top padding, if it has any. This allows us to
+                // align the tops of the lockscreen/launcher smartspace cards. Some cards, such as
+                // the three-line date/weather/alarm card, only have three lines on lockscreen but
+                // two on launcher.
+                offset(0, (lockscreenSmartspace
+                        as? BcSmartspaceDataPlugin.SmartspaceView)?.currentCardTopPadding ?: 0)
             }
         }
 

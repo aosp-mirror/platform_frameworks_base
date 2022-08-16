@@ -172,22 +172,9 @@ class FileInstallArgs extends InstallArgs {
             return false;
         }
 
-        if (onIncremental) {
-            Slog.i(TAG, PackageManagerServiceUtils.SELINUX_BUG
-                    + ": Skipping restorecon for Incremental install of " + beforeCodeFile);
-        } else {
-            try {
-                if (!SELinux.restoreconRecursive(afterCodeFile)) {
-                    Slog.w(TAG, "Failed to restorecon");
-                    return false;
-                }
-                PackageManagerServiceUtils.verifySelinuxLabels(afterCodeFile.getAbsolutePath());
-            } catch (Exception e) {
-                Slog.e(TAG,
-                        PackageManagerServiceUtils.SELINUX_BUG + ": Exception from restorecon on "
-                                + beforeCodeFile, e);
-                throw e;
-            }
+        if (!onIncremental && !SELinux.restoreconRecursive(afterCodeFile)) {
+            Slog.w(TAG, "Failed to restorecon");
+            return false;
         }
 
         // Reflect the rename internally

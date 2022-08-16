@@ -538,13 +538,12 @@ public final class AuthSession implements IBinder.DeathRecipient {
 
     void onDialogAnimatedIn() {
         if (mState != STATE_AUTH_STARTED) {
-            Slog.w(TAG, "onDialogAnimatedIn, unexpected state: " + mState);
+            Slog.e(TAG, "onDialogAnimatedIn, unexpected state: " + mState);
+            return;
         }
 
         mState = STATE_AUTH_STARTED_UI_SHOWING;
-
         startAllPreparedFingerprintSensors();
-        mState = STATE_AUTH_STARTED_UI_SHOWING;
     }
 
     void onTryAgainPressed() {

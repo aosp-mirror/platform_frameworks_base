@@ -42,7 +42,6 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -56,7 +55,6 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Property;
-import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -90,8 +88,8 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
-import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
+import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -515,16 +513,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * or is in an allowList).
      */
     public boolean getIsNonblockable() {
-        if (mEntry == null || mEntry.getChannel() == null) {
-            Log.w(TAG, "missing entry or channel");
+        if (mEntry == null) {
             return true;
         }
-        if (mEntry.getChannel().isImportanceLockedByCriticalDeviceFunction()
-                && !mEntry.getChannel().isBlockable()) {
-            return true;
-        }
-
-        return false;
+        return !mEntry.isBlockable();
     }
 
     private boolean isConversation() {
@@ -1505,8 +1497,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mUseIncreasedHeadsUpHeight = use;
     }
 
+    /** @deprecated TODO: Remove this when the old pipeline code is removed. */
+    @Deprecated
     public void setNeedsRedaction(boolean needsRedaction) {
-        // TODO: Move inflation logic out of this call and remove this method
         if (mNeedsRedaction != needsRedaction) {
             mNeedsRedaction = needsRedaction;
             if (!isRemoved()) {
@@ -1668,6 +1661,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             long timeUntilNoLongerRecent = RECENTLY_ALERTED_THRESHOLD_MS - timeSinceAlertedAudibly;
             postDelayed(mExpireRecentlyAlertedFlag, timeUntilNoLongerRecent);
         }
+    }
+
+    @VisibleForTesting
+    protected void setEntry(NotificationEntry entry) {
+        mEntry = entry;
     }
 
     private final Runnable mExpireRecentlyAlertedFlag = () -> applyAudiblyAlertedRecently(false);
@@ -2588,8 +2586,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void setSensitive(boolean sensitive, boolean hideSensitive) {
+        int intrinsicBefore = getIntrinsicHeight();
         mSensitive = sensitive;
         mSensitiveHiddenInGeneral = hideSensitive;
+        if (intrinsicBefore != getIntrinsicHeight()) {
+            // The animation has a few flaws and is highly visible, so jump cut instead.
+            notifyHeightChanged(false /* needsAnimation */);
+        }
     }
 
     @Override

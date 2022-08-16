@@ -26,7 +26,6 @@ import android.app.IStopUserCallback;
 import android.app.UserSwitchObserver;
 import android.app.WaitResult;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -115,6 +114,7 @@ public class UserLifecycleTests {
     private PackageManager mPm;
     private ArrayList<Integer> mUsersToRemove;
     private boolean mHasManagedUserFeature;
+    private BroadcastWaiter mBroadcastWaiter;
 
     private final BenchmarkRunner mRunner = new BenchmarkRunner();
     @Rule
@@ -129,6 +129,10 @@ public class UserLifecycleTests {
         mUsersToRemove = new ArrayList<>();
         mPm = context.getPackageManager();
         mHasManagedUserFeature = mPm.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS);
+        mBroadcastWaiter = new BroadcastWaiter(context, TAG, TIMEOUT_IN_SECOND,
+                Intent.ACTION_USER_STARTED,
+                Intent.ACTION_MEDIA_MOUNTED,
+                Intent.ACTION_USER_UNLOCKED);
         removeAnyPreviousTestUsers();
         if (mAm.getCurrentUser() != UserHandle.USER_SYSTEM) {
             Log.w(TAG, "WARNING: Tests are being run from user " + mAm.getCurrentUser()
@@ -138,6 +142,7 @@ public class UserLifecycleTests {
 
     @After
     public void tearDown() {
+        mBroadcastWaiter.close();
         for (int userId : mUsersToRemove) {
             try {
                 mUm.removeUser(userId);
@@ -168,12 +173,10 @@ public class UserLifecycleTests {
             Log.i(TAG, "Starting timer");
             final int userId = createUserNoFlags();
 
-            final CountDownLatch latch = new CountDownLatch(1);
-            registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userId);
             // Don't use this.startUserInBackgroundAndWaitForUnlock() since only waiting until
             // ACTION_USER_STARTED.
             mIam.startUserInBackground(userId);
-            waitForLatch("Failed to achieve ACTION_USER_STARTED for user " + userId, latch);
+            waitForBroadcast(Intent.ACTION_USER_STARTED, userId);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
@@ -191,13 +194,11 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createUserNoFlags();
-            final CountDownLatch latch = new CountDownLatch(1);
-            registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userId);
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
             mIam.startUserInBackground(userId);
-            waitForLatch("Failed to achieve ACTION_USER_STARTED for user " + userId, latch);
+            waitForBroadcast(Intent.ACTION_USER_STARTED, userId);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
@@ -255,14 +256,11 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
             final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ true);
-            final CountDownLatch latch = new CountDownLatch(1);
-            registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch, testUser);
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
             mAm.switchUser(testUser);
-            waitForLatch("Failed to achieve 2nd ACTION_USER_UNLOCKED for user " + testUser, latch);
-
+            waitForBroadcast(Intent.ACTION_USER_UNLOCKED, testUser);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
@@ -298,13 +296,11 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createUserNoFlags();
-            final CountDownLatch latch1 = new CountDownLatch(1);
-            final CountDownLatch latch2 = new CountDownLatch(1);
-            registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch1, userId);
-            registerMediaBroadcastReceiver(latch2, userId);
             mIam.startUserInBackground(userId);
-            waitForLatch("Failed to achieve ACTION_USER_STARTED for user " + userId, latch1);
-            waitForLatch("Failed to achieve ACTION_MEDIA_MOUNTED for user " + userId, latch2);
+
+            waitForBroadcast(Intent.ACTION_USER_STARTED, userId);
+            waitForBroadcast(Intent.ACTION_MEDIA_MOUNTED, userId);
+
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
@@ -347,10 +343,9 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
             final int userId = createUserWithFlags(UserInfo.FLAG_EPHEMERAL | UserInfo.FLAG_DEMO);
-            final CountDownLatch prelatch = new CountDownLatch(1);
-            registerMediaBroadcastReceiver(prelatch, userId);
             switchUser(userId);
-            waitForLatch("Failed to achieve ACTION_MEDIA_MOUNTED for user " + userId, prelatch);
+            waitForBroadcast(Intent.ACTION_MEDIA_MOUNTED, userId);
+
             final CountDownLatch latch = new CountDownLatch(1);
             InstrumentationRegistry.getContext().registerReceiver(new BroadcastReceiver() {
                 @Override
@@ -552,10 +547,9 @@ public class UserLifecycleTests {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createManagedProfile();
-            final CountDownLatch prelatch = new CountDownLatch(1);
-            registerMediaBroadcastReceiver(prelatch, userId);
             startUserInBackgroundAndWaitForUnlock(userId);
-            waitForLatch("Failed to achieve ACTION_MEDIA_MOUNTED for user " + userId, prelatch);
+            waitForBroadcast(Intent.ACTION_MEDIA_MOUNTED, userId);
+
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
@@ -710,13 +704,9 @@ public class UserLifecycleTests {
         final int origUser = mAm.getCurrentUser();
         // First, create and switch to testUser, waiting for its ACTION_USER_UNLOCKED
         final int testUser = createUserNoFlags();
-        final CountDownLatch latch1 = new CountDownLatch(1);
-        final CountDownLatch latch2 = new CountDownLatch(1);
-        registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch1, testUser);
-        registerMediaBroadcastReceiver(latch2, testUser);
         mAm.switchUser(testUser);
-        waitForLatch("Failed to achieve initial ACTION_USER_UNLOCKED for user " + testUser, latch1);
-        waitForLatch("Failed to achieve initial ACTION_MEDIA_MOUNTED for user " + testUser, latch2);
+        waitForBroadcast(Intent.ACTION_USER_UNLOCKED, testUser);
+        waitForBroadcast(Intent.ACTION_MEDIA_MOUNTED, testUser);
 
         // Second, switch back to origUser, waiting merely for switchUser() to finish
         switchUser(origUser);
@@ -786,50 +776,6 @@ public class UserLifecycleTests {
                 }, TAG);
     }
 
-    private void registerBroadcastReceiver(final String action, final CountDownLatch latch,
-            final int userId) {
-        InstrumentationRegistry.getContext().registerReceiverAsUser(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (action.equals(intent.getAction()) && intent.getIntExtra(
-                        Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL) == userId) {
-                    latch.countDown();
-                }
-            }
-        }, UserHandle.of(userId), new IntentFilter(action), null, null);
-    }
-
-    /**
-     * Register for a broadcast to indicate that Storage has processed the given user.
-     * Without this as part of setup, for tests dealing with already-switched users, Storage may not
-     * have finished, making the resulting processing inconsistent.
-     *
-     * Strictly speaking, the receiver should always be unregistered afterwards, but we don't
-     * necessarily bother since receivers from failed tests will be removed on test uninstallation.
-     */
-    private void registerMediaBroadcastReceiver(final CountDownLatch latch, final int userId) {
-        final String action = Intent.ACTION_MEDIA_MOUNTED;
-
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(action);
-        filter.addDataScheme(ContentResolver.SCHEME_FILE);
-
-        final Context context = InstrumentationRegistry.getContext();
-        context.registerReceiverAsUser(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final String data = intent.getDataString();
-                if (action.equals(intent.getAction())) {
-                    Log.d(TAG, "Received ACTION_MEDIA_MOUNTED with " + data);
-                    if (data != null && data.contains("/" + userId)) {
-                        latch.countDown();
-                        context.unregisterReceiver(this);
-                    }
-                }
-            }
-        }, UserHandle.of(userId), filter, null, null);
-    }
-
     private class ProgressWaiter extends IProgressListener.Stub {
         private final CountDownLatch mFinishedLatch = new CountDownLatch(1);
 
@@ -852,6 +798,17 @@ public class UserLifecycleTests {
                 return false;
             }
         }
+    }
+
+    /**
+     * Waits TIMEOUT_IN_SECOND for the broadcast to be received, otherwise declares the given error.
+     * It only works for the broadcasts provided in {@link #mBroadcastWaiter}'s instantiation above.
+     * @param action action of the broadcast, i.e. {@link Intent#ACTION_USER_STARTED}
+     * @param userId sendingUserId of the broadcast. See {@link BroadcastReceiver#getSendingUserId}
+     */
+    private void waitForBroadcast(String action, int userId) {
+        attestTrue("Failed to achieve " + action + " for user " + userId,
+                mBroadcastWaiter.waitActionForUser(action, userId));
     }
 
     /** Waits TIMEOUT_IN_SECOND for the latch to complete, otherwise declares the given error. */
@@ -880,6 +837,9 @@ public class UserLifecycleTests {
     }
 
     private void removeUser(int userId) {
+        if (mBroadcastWaiter.hasActionBeenReceivedForUser(Intent.ACTION_USER_STARTED, userId)) {
+            mBroadcastWaiter.waitActionForUserIfNotReceivedYet(Intent.ACTION_MEDIA_MOUNTED, userId);
+        }
         try {
             mUm.removeUser(userId);
             final long startTime = System.currentTimeMillis();

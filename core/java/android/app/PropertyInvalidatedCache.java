@@ -33,6 +33,7 @@ import com.android.internal.util.FastPrintWriter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -1444,7 +1445,6 @@ public class PropertyInvalidatedCache<Query, Result> {
                     mCache.size(), mMaxEntries, mHighWaterMark, mMissOverflow));
             pw.println(TextUtils.formatSimple("    Enabled: %s", mDisabled ? "false" : "true"));
             pw.println("");
-            pw.flush();
 
             // No specific cache was requested.  This is the default, and no details
             // should be dumped.
@@ -1463,7 +1463,6 @@ public class PropertyInvalidatedCache<Query, Result> {
 
                 pw.println(TextUtils.formatSimple("      Key: %s\n      Value: %s\n", key, value));
             }
-            pw.flush();
         }
     }
 
@@ -1488,34 +1487,54 @@ public class PropertyInvalidatedCache<Query, Result> {
      * provided ParcelFileDescriptor.  Optional switches allow the caller to choose
      * specific caches (selection is by cache name or property name); if these switches
      * are used then the output includes both cache statistics and cache entries.
+     */
+    private static void dumpCacheInfo(@NonNull PrintWriter pw, @NonNull String[] args) {
+        if (!sEnabled) {
+            pw.println("  Caching is disabled in this process.");
+            return;
+        }
+
+        // See if detailed is requested for any cache.  If there is a specific detailed request,
+        // then only that cache is reported.
+        boolean detail = anyDetailed(args);
+
+        ArrayList<PropertyInvalidatedCache> activeCaches;
+        synchronized (sCorkLock) {
+            activeCaches = getActiveCaches();
+            if (!detail) {
+                dumpCorkInfo(pw);
+            }
+        }
+
+        for (int i = 0; i < activeCaches.size(); i++) {
+            PropertyInvalidatedCache currentCache = activeCaches.get(i);
+            currentCache.dumpContents(pw, detail, args);
+        }
+    }
+
+    /**
+     * Without arguments, this dumps statistics from every cache in the process to the
+     * provided ParcelFileDescriptor.  Optional switches allow the caller to choose
+     * specific caches (selection is by cache name or property name); if these switches
+     * are used then the output includes both cache statistics and cache entries.
      * @hide
      */
     public static void dumpCacheInfo(@NonNull ParcelFileDescriptor pfd, @NonNull String[] args) {
-        try  (
-            FileOutputStream fout = new FileOutputStream(pfd.getFileDescriptor());
-            PrintWriter pw = new FastPrintWriter(fout);
-        ) {
-            if (!sEnabled) {
-                pw.println("  Caching is disabled in this process.");
-                return;
-            }
+        // Create a PrintWriter that uses a byte array.  The code can safely write to
+        // this array without fear of blocking.  The completed byte array will be sent
+        // to the caller after all the data has been collected and all locks have been
+        // released.
+        ByteArrayOutputStream barray = new ByteArrayOutputStream();
+        PrintWriter bout = new PrintWriter(barray);
+        dumpCacheInfo(bout, args);
+        bout.close();
 
-            // See if detailed is requested for any cache.  If there is a specific detailed request,
-            // then only that cache is reported.
-            boolean detail = anyDetailed(args);
-
-            ArrayList<PropertyInvalidatedCache> activeCaches;
-            synchronized (sCorkLock) {
-                activeCaches = getActiveCaches();
-                if (!detail) {
-                    dumpCorkInfo(pw);
-                }
-            }
-
-            for (int i = 0; i < activeCaches.size(); i++) {
-                PropertyInvalidatedCache currentCache = activeCaches.get(i);
-                currentCache.dumpContents(pw, detail, args);
-            }
+        try {
+            // Send the final byte array to the output.  This happens outside of all locks.
+            var out = new FileOutputStream(pfd.getFileDescriptor());
+            barray.writeTo(out);
+            out.close();
+            barray.close();
         } catch (IOException e) {
             Log.e(TAG, "Failed to dump PropertyInvalidatedCache instances");
         }

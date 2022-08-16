@@ -1389,16 +1389,19 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     public void switchSubDeviceContent() {
         // Backup from main device
         BluetoothDevice tmpDevice = mDevice;
-        short tmpRssi = mRssi;
-        boolean tmpJustDiscovered = mJustDiscovered;
+        final short tmpRssi = mRssi;
+        final boolean tmpJustDiscovered = mJustDiscovered;
+        final int tmpDeviceSide = mDeviceSide;
         // Set main device from sub device
         mDevice = mSubDevice.mDevice;
         mRssi = mSubDevice.mRssi;
         mJustDiscovered = mSubDevice.mJustDiscovered;
+        mDeviceSide = mSubDevice.mDeviceSide;
         // Set sub device from backup
         mSubDevice.mDevice = tmpDevice;
         mSubDevice.mRssi = tmpRssi;
         mSubDevice.mJustDiscovered = tmpJustDiscovered;
+        mSubDevice.mDeviceSide = tmpDeviceSide;
         fetchActiveDevices();
     }
 

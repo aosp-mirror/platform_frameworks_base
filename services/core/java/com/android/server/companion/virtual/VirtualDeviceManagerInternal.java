@@ -17,7 +17,6 @@
 package com.android.server.companion.virtual;
 
 import android.companion.virtual.IVirtualDevice;
-import android.window.DisplayWindowPolicyController;
 
 /**
  * Virtual device manager local service interface.
@@ -29,17 +28,6 @@ public abstract class VirtualDeviceManagerInternal {
      * Validate the virtual device.
      */
     public abstract boolean isValidVirtualDevice(IVirtualDevice virtualDevice);
-
-    /**
-     * Notify a virtual display is created.
-     *
-     * @param virtualDevice The virtual device where the virtual display located.
-     * @param displayId The display id of the created virtual display.
-     *
-     * @return The {@link DisplayWindowPolicyController} of the virtual device.
-     */
-    public abstract DisplayWindowPolicyController onVirtualDisplayCreated(
-            IVirtualDevice virtualDevice, int displayId);
 
     /**
      * Notify a virtual display is removed.

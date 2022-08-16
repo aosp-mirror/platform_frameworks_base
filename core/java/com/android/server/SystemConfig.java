@@ -113,6 +113,24 @@ public class SystemConfig {
 
     final ArrayList<SplitPermissionInfo> mSplitPermissions = new ArrayList<>();
 
+    private static boolean isAtLeastSdkLevel(String version) {
+        try {
+            return UnboundedSdkLevel.isAtLeast(version);
+        } catch (IllegalArgumentException e) {
+            // UnboundedSdkLevel throws when it sees a known old codename
+            return false;
+        }
+    }
+
+    private static boolean isAtMostSdkLevel(String version) {
+        try {
+            return UnboundedSdkLevel.isAtMost(version);
+        } catch (IllegalArgumentException e) {
+            // UnboundedSdkLevel throws when it sees a known old codename
+            return true;
+        }
+    }
+
     public static final class SharedLibraryEntry {
         public final String name;
         public final String filename;
@@ -180,9 +198,9 @@ public class SystemConfig {
             // - onBootclasspathBefore is set and we are before that SDK
             canBeSafelyIgnored =
                     (this.onBootclasspathSince != null
-                            && UnboundedSdkLevel.isAtLeast(this.onBootclasspathSince))
+                            && isAtLeastSdkLevel(this.onBootclasspathSince))
                             || (this.onBootclasspathBefore != null
-                            && !UnboundedSdkLevel.isAtLeast(this.onBootclasspathBefore));
+                            && !isAtLeastSdkLevel(this.onBootclasspathBefore));
         }
     }
 
@@ -885,11 +903,9 @@ public class SystemConfig {
                                         + parser.getPositionDescription());
                             } else {
                                 boolean allowedMinSdk =
-                                        minDeviceSdk == null || UnboundedSdkLevel.isAtLeast(
-                                                minDeviceSdk);
+                                        minDeviceSdk == null || isAtLeastSdkLevel(minDeviceSdk);
                                 boolean allowedMaxSdk =
-                                        maxDeviceSdk == null || UnboundedSdkLevel.isAtMost(
-                                                maxDeviceSdk);
+                                        maxDeviceSdk == null || isAtMostSdkLevel(maxDeviceSdk);
                                 final boolean exists = new File(lfile).exists();
                                 if (allowedMinSdk && allowedMaxSdk && exists) {
                                     String bcpSince = parser.getAttributeValue(null,

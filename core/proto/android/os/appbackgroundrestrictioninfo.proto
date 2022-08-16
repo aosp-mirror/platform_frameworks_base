@@ -176,6 +176,7 @@ message AppBackgroundRestrictionsInfo {
         REASON_CARRIER_PRIVILEGED_APP = 321;
         REASON_DPO_PROTECTED_APP = 322;
         REASON_DISALLOW_APPS_CONTROL = 323;
+        REASON_ACTIVE_DEVICE_ADMIN = 324;
         // app requested to be exempt
         REASON_OPT_OUT_REQUESTED = 1000;
     }

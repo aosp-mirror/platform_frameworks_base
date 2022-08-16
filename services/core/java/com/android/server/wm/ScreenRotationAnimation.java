@@ -164,6 +164,10 @@ class ScreenRotationAnimation {
                             .setCaptureSecureLayers(true)
                             .setAllowProtected(true)
                             .setSourceCrop(new Rect(0, 0, width, height))
+                            // Exclude rounded corner overlay from screenshot buffer. Rounded
+                            // corner overlay windows are un-rotated during rotation animation
+                            // for a seamless transition.
+                            .setExcludeLayers(displayContent.findRoundedCornerOverlays())
                             .build();
             SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
                     SurfaceControl.captureLayers(args);

@@ -40,7 +40,6 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -103,7 +102,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var udfpsView: UdfpsView
     @Mock private lateinit var udfpsEnrollView: UdfpsEnrollView
     @Mock private lateinit var activityLaunchAnimator: ActivityLaunchAnimator
-    @Mock private lateinit var broadcastSender: BroadcastSender
     @Captor private lateinit var layoutParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
 
     private val onTouch = { _: View, _: MotionEvent, _: Boolean -> true }
@@ -133,8 +131,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             keyguardUpdateMonitor, dialogManager, dumpManager, transitionController,
             configurationController, systemClock, keyguardStateController,
             unlockedScreenOffAnimationController, HAL_CONTROLS_ILLUMINATION, hbmProvider,
-            REQUEST_ID, reason, controllerCallback, onTouch, activityLaunchAnimator,
-            broadcastSender)
+            REQUEST_ID, reason, controllerCallback, onTouch, activityLaunchAnimator)
         block()
     }
 

@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Kaamera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefon"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Häälabi"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Rahakott"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR-koodi skanner"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Luku avamine"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Seade on lukustatud"</string>
@@ -313,10 +313,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Pühkige avamiseks üles"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Avamiseks vajutage avamise ikooni"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Avati näoga. Avamiseks vajutage avamise ikooni."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Teisalda vasakule"</item>
+    <item msgid="5558598599408514296">"Teisalda alla"</item>
+    <item msgid="4844142668312841831">"Teisalda paremale"</item>
+    <item msgid="5640521437931460125">"Teisalda üles"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Uuesti proovimiseks pühkige üles"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC kasutamiseks avage."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"See seade kuulub teie organisatsioonile"</string>
@@ -370,7 +372,7 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Teie organisatsioon on selle seadme omanik ja võib jälgida võrguliiklust"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> on selle seadme omanik ja võib jälgida võrguliiklust"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Selle seadme on andnud <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"See seade kuulub teie organisatsioonile ja on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"See seade kuulub teie organisatsioonile ja on ühendatud internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"See seade kuulub organisatsioonile <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ja on internetiga rakenduse <xliff:g id="VPN_APP">%2$s</xliff:g> kaudu ühendatud"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"See seade kuulub teie organisatsioonile"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Selle seadme omanik on <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
@@ -380,8 +382,8 @@
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> võib jälgida võrguliiklust teie tööprofiilil"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Tööprofiili võrgutegevused on teie IT-administraatorile nähtavad"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Võrku võidakse jälgida"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"See seade on internetiga VPN-ide kaudu ühendatud"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Teie töörakendused on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"See seade on ühendatud internetiga VPN-ide kaudu"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Teie töörakendused on ühendatud internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Teie isiklikud rakendused on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"See seade on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Selle seadme on andnud <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -400,8 +402,8 @@
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Teie administraator lülitas sisse võrgu logimise funktsiooni, mis jälgib teie seadmes liiklust."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Teie administraator on sisse lülitanud võrgu logimise funktsiooni, mis jälgib liiklust teie võrguprofiilil, kuid mitte teie isiklikul profiilil."</string>
     <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"See seade on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud. Teie võrgutegevus, sealhulgas meilid ja sirvimisandmed, on nähtav teie IT-administraatorile."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"See seade on internetiga rakenduse <xliff:g id="VPN_APP_0">%1$s</xliff:g> ja <xliff:g id="VPN_APP_1">%2$s</xliff:g> kaudu ühendatud. Teie võrgutegevus, sealhulgas meilid ja sirvimisandmed, on nähtav teie IT-administraatorile."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Teie töörakendused on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud. Teie töörakenduste võrgutegevus, sealhulgas meilid ja sirvimisandmed, on nähtav teie IT-administraatorile ning VPN-i teenusepakkujale."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"See seade on ühendatud internetiga rakenduste <xliff:g id="VPN_APP_0">%1$s</xliff:g> ja <xliff:g id="VPN_APP_1">%2$s</xliff:g> kaudu. Teie võrgutegevused (sealhulgas meilid ja sirvimisandmed) on nähtavad teie IT-administraatorile."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Teie töörakendused on ühendatud internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu. Teie töörakenduste võrgutegevused (sealhulgas meilid ja sirvimisandmed) on nähtavad teie IT-administraatorile ning VPN-i teenusepakkujale."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Teie isiklikud rakendused on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud. Teie võrgutegevus, sealhulgas meilid ja sirvimisandmed, on nähtav teie VPN-i teenusepakkujale."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN-i seadete avamine"</string>
@@ -460,7 +462,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Kuva demorežiim"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Äratus"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Rahakott"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Seadistage kiirem ja turvalisem viis telefoniga ostmiseks"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Kuva kõik"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Puudutage avamiseks"</string>
@@ -550,7 +552,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Vasakule"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Paremale"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Keskele"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulaator"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Tühik"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Sisestusklahv"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Tagasilüke"</string>
@@ -737,6 +739,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"kaamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"asukoht"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"ekraanikuva salvest."</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Pealkiri puudub"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Ooterežiim"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Suurendamisaken"</string>
@@ -841,8 +844,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Selle seansi ülekandmiseks avage rakendus."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Tundmatu rakendus"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Lõpeta ülekanne"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Saadaolevad seadmed heli esitamiseks."</string>
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Helitugevus"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kuidas ülekandmine toimib?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Ülekanne"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Teie läheduses olevad inimesed, kellel on ühilduvad Bluetooth-seadmed, saavad kuulata teie ülekantavat meediat"</string>
@@ -928,23 +931,24 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Uus teave"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktiivsed rakendused"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Isegi kui te neid rakendusi ei kasuta, on need siiski aktiivsed ja võivad mõjutada aku tööiga"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Need rakendused on aktiivsed ja neid käitatakse isegi siis, kui te neid ei kasuta. Tänu sellele toimivad need paremini, kuid see võib mõjutada aku tööiga."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Peata"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Peatatud"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Valmis"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Kopeeritud"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Rakendusest <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Koopiast loobumise kasutajaliides"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"Loobu kopeeritud tekstist"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Muuda kopeeritud teksti"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Muuda kopeeritud pilti"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Saada läheduses olevasse seadmesse"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Puudutage kuvamiseks"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Tekst kopeeriti"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Pilt kopeeriti"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Sisu kopeeriti"</string>
+    <string name="clipboard_editor" msgid="2971197550401892843">"Lõikelaua sisu muutmine"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Lõikelaud"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Pildi eelvaade"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"muutmine"</string>
     <string name="add" msgid="81036585205287996">"Lisa"</string>
     <string name="manage_users" msgid="1823875311934643849">"Kasutajate haldamine"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"See märguanne ei toeta jagatud ekraanikuvale lohistamist."</string>

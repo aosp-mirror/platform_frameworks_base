@@ -185,8 +185,6 @@ public class StackAnimationController extends
      * stack goes offscreen intentionally.
      */
     private int mBubblePaddingTop;
-    /** How far offscreen the stack rests. */
-    private int mBubbleOffscreen;
     /** Contains display size, orientation, and inset information. */
     private BubblePositioner mPositioner;
 
@@ -212,7 +210,8 @@ public class StackAnimationController extends
         public Rect getAllowedFloatingBoundsRegion() {
             final Rect floatingBounds = getFloatingBoundsOnScreen();
             final Rect allowableStackArea = new Rect();
-            getAllowableStackPositionRegion().roundOut(allowableStackArea);
+            mPositioner.getAllowableStackPositionRegion(getBubbleCount())
+                    .roundOut(allowableStackArea);
             allowableStackArea.right += floatingBounds.width();
             allowableStackArea.bottom += floatingBounds.height();
             return allowableStackArea;
@@ -349,7 +348,7 @@ public class StackAnimationController extends
                 ? velX < ESCAPE_VELOCITY
                 : velX < -ESCAPE_VELOCITY;
 
-        final RectF stackBounds = getAllowableStackPositionRegion();
+        final RectF stackBounds = mPositioner.getAllowableStackPositionRegion(getBubbleCount());
 
         // Target X translation (either the left or right side of the screen).
         final float destinationRelativeX = stackShouldFlingLeft
@@ -425,7 +424,7 @@ public class StackAnimationController extends
         }
         final PointF stackPos = getStackPosition();
         final boolean onLeft = mLayout.isFirstChildXLeftOfCenter(stackPos.x);
-        final RectF bounds = getAllowableStackPositionRegion();
+        final RectF bounds = mPositioner.getAllowableStackPositionRegion(getBubbleCount());
 
         stackPos.x = onLeft ? bounds.left : bounds.right;
         return stackPos;
@@ -464,7 +463,7 @@ public class StackAnimationController extends
 
         StackPositionProperty firstBubbleProperty = new StackPositionProperty(property);
         final float currentValue = firstBubbleProperty.getValue(this);
-        final RectF bounds = getAllowableStackPositionRegion();
+        final RectF bounds = mPositioner.getAllowableStackPositionRegion(getBubbleCount());
         final float min =
                 property.equals(DynamicAnimation.TRANSLATION_X)
                         ? bounds.left
@@ -525,7 +524,8 @@ public class StackAnimationController extends
      * of the stack if it's not moving).
      */
     public float animateForImeVisibility(boolean imeVisible) {
-        final float maxBubbleY = getAllowableStackPositionRegion().bottom;
+        final float maxBubbleY = mPositioner.getAllowableStackPositionRegion(
+                getBubbleCount()).bottom;
         float destinationY = UNSET;
 
         if (imeVisible) {
@@ -565,25 +565,6 @@ public class StackAnimationController extends
         floatingBounds.offsetTo((int) x, (int) y);
         mAnimatingToBounds = floatingBounds;
         mFloatingContentCoordinator.onContentMoved(mStackFloatingContent);
-    }
-
-    /**
-     * Returns the region that the stack position must stay within. This goes slightly off the left
-     * and right sides of the screen, below the status bar/cutout and above the navigation bar.
-     * While the stack position is not allowed to rest outside of these bounds, it can temporarily
-     * be animated or dragged beyond them.
-     */
-    public RectF getAllowableStackPositionRegion() {
-        final RectF allowableRegion = new RectF(mPositioner.getAvailableRect());
-        final int imeHeight = mPositioner.getImeHeight();
-        final float bottomPadding = getBubbleCount() > 1
-                ? mBubblePaddingTop + mStackOffset
-                : mBubblePaddingTop;
-        allowableRegion.left -= mBubbleOffscreen;
-        allowableRegion.top += mBubblePaddingTop;
-        allowableRegion.right += mBubbleOffscreen - mBubbleSize;
-        allowableRegion.bottom -= imeHeight + bottomPadding + mBubbleSize;
-        return allowableRegion;
     }
 
     /** Moves the stack in response to a touch event. */
@@ -861,13 +842,12 @@ public class StackAnimationController extends
     @Override
     void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
         Resources res = layout.getResources();
-        mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
+        mStackOffset = mPositioner.getStackOffset();
         mSwapAnimationOffset = res.getDimensionPixelSize(R.dimen.bubble_swap_animation_offset);
         mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
         mElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mBubbleSize = mPositioner.getBubbleSize();
-        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
-        mBubbleOffscreen = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
+        mBubblePaddingTop = mPositioner.getBubblePaddingTop();
     }
 
     /**
@@ -958,7 +938,8 @@ public class StackAnimationController extends
     }
 
     public void setStackPosition(BubbleStackView.RelativeStackPosition position) {
-        setStackPosition(position.getAbsolutePositionInRegion(getAllowableStackPositionRegion()));
+        setStackPosition(position.getAbsolutePositionInRegion(
+                mPositioner.getAllowableStackPositionRegion(getBubbleCount())));
     }
 
     private boolean isStackPositionSet() {

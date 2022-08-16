@@ -338,14 +338,16 @@ public abstract class ActivityTaskManagerInternal {
         private final @NonNull IBinder mAssistToken;
         private final @NonNull IBinder mShareableActivityToken;
         private final @NonNull IApplicationThread mAppThread;
+        private final int mUid;
 
         public ActivityTokens(@NonNull IBinder activityToken,
                 @NonNull IBinder assistToken, @NonNull IApplicationThread appThread,
-                @NonNull IBinder shareableActivityToken) {
+                @NonNull IBinder shareableActivityToken, int uid) {
             mActivityToken = activityToken;
             mAssistToken = assistToken;
             mAppThread = appThread;
             mShareableActivityToken = shareableActivityToken;
+            mUid = uid;
         }
 
         /**
@@ -374,6 +376,13 @@ public abstract class ActivityTaskManagerInternal {
          */
         public @NonNull IApplicationThread getApplicationThread() {
             return mAppThread;
+        }
+
+        /**
+         * @return The UID of the activity
+         */
+        public int getUid() {
+            return mUid;
         }
     }
 

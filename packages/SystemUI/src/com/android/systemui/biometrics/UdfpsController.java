@@ -54,7 +54,6 @@ import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.biometrics.dagger.BiometricsBackground;
-import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
@@ -128,7 +127,6 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final UnlockedScreenOffAnimationController
             mUnlockedScreenOffAnimationController;
     @NonNull private final LatencyTracker mLatencyTracker;
-    @NonNull private final BroadcastSender mBroadcastSender;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
     @NonNull private final ActivityLaunchAnimator mActivityLaunchAnimator;
 
@@ -209,7 +207,7 @@ public class UdfpsController implements DozeReceiver {
                             mUnlockedScreenOffAnimationController, mHalControlsIllumination,
                             mHbmProvider, requestId, reason, callback,
                             (view, event, fromUdfpsView) -> onTouch(requestId, event,
-                                    fromUdfpsView), mActivityLaunchAnimator, mBroadcastSender)));
+                                    fromUdfpsView), mActivityLaunchAnimator)));
         }
 
         @Override
@@ -606,7 +604,6 @@ public class UdfpsController implements DozeReceiver {
             @NonNull LatencyTracker latencyTracker,
             @NonNull ActivityLaunchAnimator activityLaunchAnimator,
             @NonNull Optional<AlternateUdfpsTouchProvider> aternateTouchProvider,
-            @NonNull BroadcastSender broadcastSender,
             @BiometricsBackground Executor biometricsExecutor) {
         mContext = context;
         mExecution = execution;
@@ -637,7 +634,6 @@ public class UdfpsController implements DozeReceiver {
         mLatencyTracker = latencyTracker;
         mActivityLaunchAnimator = activityLaunchAnimator;
         mAlternateTouchProvider = aternateTouchProvider.orElse(null);
-        mBroadcastSender = broadcastSender;
         mBiometricExecutor = biometricsExecutor;
 
         mOrientationListener = new BiometricDisplayListener(

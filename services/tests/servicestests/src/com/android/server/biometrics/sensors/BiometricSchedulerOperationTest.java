@@ -80,11 +80,14 @@ public class BiometricSchedulerOperationTest {
 
     private Handler mHandler;
     private BiometricSchedulerOperation mOperation;
+    private boolean mIsDebuggable;
 
     @Before
     public void setUp() {
         mHandler = new Handler(TestableLooper.get(this).getLooper());
-        mOperation = new BiometricSchedulerOperation(mClientMonitor, mClientCallback);
+        mIsDebuggable = false;
+        mOperation = new BiometricSchedulerOperation(mClientMonitor, mClientCallback,
+                () -> mIsDebuggable);
     }
 
     @Test
@@ -123,6 +126,34 @@ public class BiometricSchedulerOperationTest {
         assertThat(mOperation.isFinished()).isFalse();
         verify(mClientMonitor).waitForCookie(any());
         verify(mClientMonitor, never()).start(any());
+    }
+
+    @Test
+    public void testSecondStartWithCookieCrashesWhenDebuggable() {
+        final int cookie = 5;
+        mIsDebuggable = true;
+        when(mClientMonitor.getCookie()).thenReturn(cookie);
+        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+
+        final boolean started = mOperation.startWithCookie(mOnStartCallback, cookie);
+        assertThat(started).isTrue();
+
+        assertThrows(IllegalStateException.class,
+                () -> mOperation.startWithCookie(mOnStartCallback, cookie));
+    }
+
+    @Test
+    public void testSecondStartWithCookieFailsNicelyWhenNotDebuggable() {
+        final int cookie = 5;
+        mIsDebuggable = false;
+        when(mClientMonitor.getCookie()).thenReturn(cookie);
+        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+
+        final boolean started = mOperation.startWithCookie(mOnStartCallback, cookie);
+        assertThat(started).isTrue();
+
+        final boolean startedAgain = mOperation.startWithCookie(mOnStartCallback, cookie);
+        assertThat(startedAgain).isFalse();
     }
 
     @Test
@@ -170,7 +201,34 @@ public class BiometricSchedulerOperationTest {
     }
 
     @Test
+    public void secondStartCrashesWhenDebuggable() {
+        mIsDebuggable = true;
+        when(mClientMonitor.getCookie()).thenReturn(0);
+        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+
+        final boolean started = mOperation.start(mOnStartCallback);
+        assertThat(started).isTrue();
+
+        assertThrows(IllegalStateException.class, () -> mOperation.start(mOnStartCallback));
+    }
+
+    @Test
+    public void secondStartFailsNicelyWhenNotDebuggable() {
+        mIsDebuggable = false;
+        when(mClientMonitor.getCookie()).thenReturn(0);
+        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+
+        final boolean started = mOperation.start(mOnStartCallback);
+        assertThat(started).isTrue();
+
+        final boolean startedAgain = mOperation.start(mOnStartCallback);
+        assertThat(startedAgain).isFalse();
+    }
+
+    @Test
     public void doesNotStartWithCookie() {
+        // This class only throws exceptions when debuggable.
+        mIsDebuggable = true;
         when(mClientMonitor.getCookie()).thenReturn(9);
         assertThrows(IllegalStateException.class,
                 () -> mOperation.start(mock(ClientMonitorCallback.class)));
@@ -178,6 +236,8 @@ public class BiometricSchedulerOperationTest {
 
     @Test
     public void cannotRestart() {
+        // This class only throws exceptions when debuggable.
+        mIsDebuggable = true;
         when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
         mOperation.start(mOnStartCallback);
@@ -188,6 +248,8 @@ public class BiometricSchedulerOperationTest {
 
     @Test
     public void abortsNotRunning() {
+        // This class only throws exceptions when debuggable.
+        mIsDebuggable = true;
         when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
         mOperation.abort();
@@ -200,12 +262,23 @@ public class BiometricSchedulerOperationTest {
     }
 
     @Test
-    public void cannotAbortRunning() {
+    public void abortCrashesWhenDebuggableIfOperationIsRunning() {
+        mIsDebuggable = true;
         when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
         mOperation.start(mOnStartCallback);
 
         assertThrows(IllegalStateException.class, () -> mOperation.abort());
+    }
+
+    @Test
+    public void abortFailsNicelyWhenNotDebuggableIfOperationIsRunning() {
+        mIsDebuggable = false;
+        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+
+        mOperation.start(mOnStartCallback);
+
+        mOperation.abort();
     }
 
     @Test
@@ -251,6 +324,30 @@ public class BiometricSchedulerOperationTest {
         verify(mClientMonitor, never()).start(any());
         verify(mClientMonitor, never()).cancel();
         verify(mClientMonitor).destroy();
+    }
+
+    @Test
+    public void cancelCrashesWhenDebuggableIfOperationIsFinished() {
+        mIsDebuggable = true;
+        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+
+        mOperation.abort();
+        assertThat(mOperation.isFinished()).isTrue();
+
+        final ClientMonitorCallback cancelCb = mock(ClientMonitorCallback.class);
+        assertThrows(IllegalStateException.class, () -> mOperation.cancel(mHandler, cancelCb));
+    }
+
+    @Test
+    public void cancelFailsNicelyWhenNotDebuggableIfOperationIsFinished() {
+        mIsDebuggable = false;
+        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+
+        mOperation.abort();
+        assertThat(mOperation.isFinished()).isTrue();
+
+        final ClientMonitorCallback cancelCb = mock(ClientMonitorCallback.class);
+        mOperation.cancel(mHandler, cancelCb);
     }
 
     @Test
