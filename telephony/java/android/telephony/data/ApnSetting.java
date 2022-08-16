@@ -1134,10 +1134,7 @@ public class ApnSetting implements Parcelable {
             return false;
         }
         // DEFAULT can handle HIPRI.
-        if (hasApnType(type)) {
-            return true;
-        }
-        return false;
+        return hasApnType(type);
     }
 
     // Check whether the types of two APN same (even only one type of each APN is same).

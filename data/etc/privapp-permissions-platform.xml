@@ -38,23 +38,6 @@ applications that come with the platform
         <permission name="android.permission.CRYPT_KEEPER"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.cellbroadcastreceiver.module">
-        <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"/>
-        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-        <permission name="android.permission.MANAGE_USERS"/>
-        <permission name="android.permission.MODIFY_PHONE_STATE"/>
-        <permission name="android.permission.MODIFY_CELL_BROADCASTS"/>
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
-        <permission name="android.permission.RECEIVE_EMERGENCY_BROADCAST"/>
-        <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.cellbroadcastservice">
-        <permission name="android.permission.MODIFY_PHONE_STATE"/>
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
-        <permission name="android.permission.RECEIVE_EMERGENCY_BROADCAST"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.externalstorage">
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>

@@ -150,7 +150,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-
 /**
  * Provides access to information about the telephony services on
  * the device. Applications can use the methods in this class to
@@ -6559,7 +6558,7 @@ public class TelephonyManager {
          * list will be provided. If an error occurs, null will be provided unless the onError
          * callback is overridden.
          *
-         * @param cellInfo a list of {@link CellInfo}, an empty list, or null.
+         * @param cellInfo a list of {@link CellInfo} or an empty list.
          *
          * {@see android.telephony.TelephonyManager#getAllCellInfo getAllCellInfo()}
          */
@@ -8812,7 +8811,7 @@ public class TelephonyManager {
      * @param executor The executor through which the callback should be invoked. Since the scan
      *        request may trigger multiple callbacks and they must be invoked in the same order as
      *        they are received by the platform, the user should provide an executor which executes
-     *        tasks one at a time in serial order. For example AsyncTask.SERIAL_EXECUTOR.
+     *        tasks one at a time in serial order.
      * @param callback Returns network scan results or errors.
      * @return A NetworkScan obj which contains a callback which can be used to stop the scan.
      */
@@ -8857,7 +8856,7 @@ public class TelephonyManager {
      * @param executor The executor through which the callback should be invoked. Since the scan
      *        request may trigger multiple callbacks and they must be invoked in the same order as
      *        they are received by the platform, the user should provide an executor which executes
-     *        tasks one at a time in serial order. For example AsyncTask.SERIAL_EXECUTOR.
+     *        tasks one at a time in serial order.
      * @param callback Returns network scan results or errors.
      * @return A NetworkScan obj which contains a callback which can be used to stop the scan.
      */
@@ -16762,5 +16761,38 @@ public class TelephonyManager {
             throw new IllegalStateException("Telephony registry service is null");
         }
         mTelephonyRegistryMgr.removeCarrierPrivilegesCallback(callback);
+    }
+
+    /**
+     * Sets a voice service state override from telecom based on the current {@link PhoneAccount}s
+     * registered. See {@link PhoneAccount#CAPABILITY_VOICE_CALLING_AVAILABLE}.
+     *
+     * <p>Currently, this API is only called to indicate over-the-top voice calling capability of
+     * the SIM call manager, which will get merged into {@link ServiceState#getState} and propagated
+     * to interested callers via {@link #getServiceState} and {@link
+     * TelephonyCallback.ServiceStateListener}.
+     *
+     * <p>If callers are truly interested in the actual device <-> tower connection status and not
+     * an overall "device can make voice calls" boolean, they can use {@link
+     * ServiceState#getNetworkRegistrationInfo} to check CS registration state.
+     *
+     * <p>TODO(b/215240050) In the future, this API will be removed and replaced with a new superset
+     * API to disentangle the "true" {@link ServiceState} meaning of "this is the connection status
+     * to the tower" from IMS registration state and over-the-top voice calling capabilities.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.BIND_TELECOM_CONNECTION_SERVICE)
+    public void setVoiceServiceStateOverride(boolean hasService) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                throw new IllegalStateException("Telephony service is null");
+            }
+            telephony.setVoiceServiceStateOverride(getSubId(), hasService, getOpPackageName());
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
     }
 }

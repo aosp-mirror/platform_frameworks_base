@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;未命名&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(沒有電話號碼)"</string>
@@ -644,7 +639,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"減少頭部左右轉動幅度。"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"減少頭部傾斜幅度。"</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"減少頭部左右轉動幅度。"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"移除遮住您臉孔的任何東西。"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"移開遮住面孔的任何物件。"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"請清理螢幕頂部，包括黑色列"</string>
   <string-array name="face_acquired_vendor">
   </string-array>

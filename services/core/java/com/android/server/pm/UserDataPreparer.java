@@ -125,8 +125,11 @@ class UserDataPreparer {
                     flags | StorageManager.FLAG_STORAGE_DE, false);
             } else {
                 try {
-                    Log.e(TAG, "prepareUserData failed", e);
-                    RecoverySystem.rebootPromptAndWipeUserData(mContext, "prepareUserData failed");
+                    Log.wtf(TAG, "prepareUserData failed for user " + userId, e);
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        RecoverySystem.rebootPromptAndWipeUserData(mContext,
+                                "prepareUserData failed for system user");
+                    }
                 } catch (IOException e2) {
                     throw new RuntimeException("error rebooting into recovery", e2);
                 }

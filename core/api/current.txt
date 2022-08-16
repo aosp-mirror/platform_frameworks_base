@@ -29758,7 +29758,7 @@ package android.os {
     method @Deprecated public static void changeDebugPort(int);
     method public static void dumpHprofData(String) throws java.io.IOException;
     method public static boolean dumpService(String, java.io.FileDescriptor, String[]);
-    method public static void enableEmulatorTraceOutput();
+    method @Deprecated public static void enableEmulatorTraceOutput();
     method public static int getBinderDeathObjectCount();
     method public static int getBinderLocalObjectCount();
     method public static int getBinderProxyObjectCount();
@@ -39102,8 +39102,10 @@ package android.telecom {
     field public static final int CAPABILITY_SELF_MANAGED = 2048; // 0x800
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
     field public static final int CAPABILITY_SUPPORTS_VIDEO_CALLING = 1024; // 0x400
+    field public static final int CAPABILITY_SUPPORTS_VOICE_CALLING_INDICATIONS = 65536; // 0x10000
     field public static final int CAPABILITY_VIDEO_CALLING = 8; // 0x8
     field public static final int CAPABILITY_VIDEO_CALLING_RELIES_ON_PRESENCE = 256; // 0x100
+    field public static final int CAPABILITY_VOICE_CALLING_AVAILABLE = 131072; // 0x20000
     field @NonNull public static final android.os.Parcelable.Creator<android.telecom.PhoneAccount> CREATOR;
     field public static final String EXTRA_ADD_SELF_MANAGED_CALLS_TO_INCALLSERVICE = "android.telecom.extra.ADD_SELF_MANAGED_CALLS_TO_INCALLSERVICE";
     field public static final String EXTRA_ALWAYS_USE_VOIP_AUDIO_MODE = "android.telecom.extra.ALWAYS_USE_VOIP_AUDIO_MODE";

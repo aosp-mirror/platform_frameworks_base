@@ -642,6 +642,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     audioDevice = AudioSystem.DEVICE_IN_BLE_HEADSET;
                 }
                 break;
+            case BluetoothProfile.LE_AUDIO_BROADCAST:
+                audioDevice = AudioSystem.DEVICE_OUT_BLE_BROADCAST;
+                break;
             default: throw new IllegalArgumentException("Invalid profile " + d.mInfo.getProfile());
         }
         return new BtDeviceInfo(d, device, state, audioDevice, codec);

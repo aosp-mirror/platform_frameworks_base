@@ -2998,7 +2998,8 @@ public class AudioService extends IAudioService.Stub
                 mDeviceBroker.postSetAvrcpAbsoluteVolumeIndex(newIndex / 10);
             }
 
-            if (device == AudioSystem.DEVICE_OUT_BLE_HEADSET
+            if ((device == AudioSystem.DEVICE_OUT_BLE_HEADSET
+                    || device == AudioSystem.DEVICE_OUT_BLE_BROADCAST)
                     && streamType == getBluetoothContextualVolumeStream()
                     && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
@@ -3583,6 +3584,36 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    private void setLeAudioVolumeOnModeUpdate(int mode) {
+        switch (mode) {
+            case AudioSystem.MODE_IN_COMMUNICATION:
+            case AudioSystem.MODE_IN_CALL:
+            case AudioSystem.MODE_NORMAL:
+                break;
+            case AudioSystem.MODE_RINGTONE:
+                // not changing anything for ringtone
+                return;
+            case AudioSystem.MODE_CURRENT:
+            case AudioSystem.MODE_INVALID:
+            default:
+                // don't know what to do in this case, better bail
+                return;
+        }
+
+        int streamType = getBluetoothContextualVolumeStream(mode);
+
+        // Currently, DEVICE_OUT_BLE_HEADSET is the only output type for LE_AUDIO profile.
+        // (See AudioDeviceBroker#createBtDeviceInfo())
+        int index = mStreamStates[streamType].getIndex(AudioSystem.DEVICE_OUT_BLE_HEADSET);
+        int maxIndex = mStreamStates[streamType].getMaxIndex();
+
+        if (DEBUG_VOL) {
+            Log.d(TAG, "setLeAudioVolumeOnModeUpdate postSetLeAudioVolumeIndex index="
+                    + index + " maxIndex=" + maxIndex + " streamType=" + streamType);
+        }
+        mDeviceBroker.postSetLeAudioVolumeIndex(index, maxIndex, streamType);
+    }
+
     private void setStreamVolume(int streamType, int index, int flags, String callingPackage,
             String caller, int uid, boolean hasModifyAudioSettings) {
         if (DEBUG_VOL) {
@@ -3644,7 +3675,8 @@ public class AudioService extends IAudioService.Stub
                 mDeviceBroker.postSetAvrcpAbsoluteVolumeIndex(index / 10);
             }
 
-            if (device == AudioSystem.DEVICE_OUT_BLE_HEADSET
+            if ((device == AudioSystem.DEVICE_OUT_BLE_HEADSET
+                    || device == AudioSystem.DEVICE_OUT_BLE_BROADCAST)
                     && streamType == getBluetoothContextualVolumeStream()
                     && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
@@ -4912,6 +4944,10 @@ public class AudioService extends IAudioService.Stub
 
                 // change of mode may require volume to be re-applied on some devices
                 updateAbsVolumeMultiModeDevices(previousMode, mode);
+
+                // Forcefully set LE audio volume as a workaround, since the value of 'device'
+                // is not DEVICE_OUT_BLE_* even when BLE is connected.
+                setLeAudioVolumeOnModeUpdate(mode);
 
                 // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all SCO
                 // connections not started by the application changing the mode when pid changes
@@ -6336,6 +6372,7 @@ public class AudioService extends IAudioService.Stub
             BluetoothProfile.A2DP,
             BluetoothProfile.A2DP_SINK,
             BluetoothProfile.LE_AUDIO,
+            BluetoothProfile.LE_AUDIO_BROADCAST,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BtProfile {}
@@ -6357,6 +6394,7 @@ public class AudioService extends IAudioService.Stub
         final int profile = info.getProfile();
         if (profile != BluetoothProfile.A2DP && profile != BluetoothProfile.A2DP_SINK
                 && profile != BluetoothProfile.LE_AUDIO
+                && profile != BluetoothProfile.LE_AUDIO_BROADCAST
                 && profile != BluetoothProfile.HEARING_AID) {
             throw new IllegalArgumentException("Illegal BluetoothProfile profile for device "
                     + previousDevice + " -> " + newDevice + ". Got: " + profile);

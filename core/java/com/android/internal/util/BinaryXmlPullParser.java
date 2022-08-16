@@ -73,12 +73,6 @@ import java.util.Objects;
  * </ul>
  */
 public final class BinaryXmlPullParser implements TypedXmlPullParser {
-    /**
-     * Default buffer size, which matches {@code FastXmlSerializer}. This should
-     * be kept in sync with {@link BinaryXmlPullParser}.
-     */
-    private static final int BUFFER_SIZE = 32_768;
-
     private FastDataInput mIn;
 
     private int mCurrentToken = START_DOCUMENT;
@@ -100,7 +94,12 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
             throw new UnsupportedOperationException();
         }
 
-        mIn = new FastDataInput(is, BUFFER_SIZE);
+        if (mIn != null) {
+            mIn.release();
+            mIn = null;
+        }
+
+        mIn = FastDataInput.obtainUsing4ByteSequences(is);
 
         mCurrentToken = START_DOCUMENT;
         mCurrentDepth = 0;

@@ -81,7 +81,7 @@ class SplashScreenExceptionList {
     @SuppressWarnings("AndroidFrameworkCompatChange") // Target sdk check
     public boolean isException(@NonNull String packageName, int targetSdk,
             @Nullable Supplier<ApplicationInfo> infoSupplier) {
-        if (targetSdk >= Build.VERSION_CODES.S) {
+        if (targetSdk > Build.VERSION_CODES.S_V2) {
             return false;
         }
 

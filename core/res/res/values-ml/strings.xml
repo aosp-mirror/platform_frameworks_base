@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;ശീർഷകമില്ലാത്ത&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(ഫോൺ നമ്പറില്ല)"</string>
@@ -48,7 +43,7 @@
     <string name="invalidPin" msgid="7542498253319440408">"4 മുതൽ 8 വരെ അക്കങ്ങളുള്ള ഒരു പിൻ ടൈപ്പുചെയ്യുക."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"എട്ടോ അതിലധികമോ അക്കങ്ങളുള്ള ഒരു PUK ടൈപ്പുചെയ്യുക."</string>
     <string name="needPuk" msgid="7321876090152422918">"നിങ്ങളുടെ സിം കാർഡ് PUK ലോക്ക് ചെയ്‌തതാണ്. ഇത് അൺലോക്ക് ചെയ്യാൻ PUK കോഡ് ടൈപ്പുചെയ്യുക."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"സിം കാർഡ് തടഞ്ഞത് മാറ്റാൻ PUK2 ടൈപ്പുചെയ്യുക."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"സിം കാർഡ് അൺബ്ലോക്ക് ചെയ്യാൻ PUK2 ടൈപ്പ് ചെയ്യുക."</string>
     <string name="enablePin" msgid="2543771964137091212">"വിജയകരമല്ല, സിം/RUIM ലോക്ക് പ്രവർത്തനക്ഷമമാക്കുക."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">SIM ലോക്കാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>
@@ -995,7 +990,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"ഈ പേജിൽ തുടരുക"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nഈ പേജിൽ നിന്നും നാവിഗേറ്റുചെയ്‌തു പോകണമെന്ന് തീർച്ചയാണോ?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"സ്ഥിരീകരിക്കുക"</string>
-    <string name="double_tap_toast" msgid="7065519579174882778">"നുറുങ്ങ്: സൂം ഇൻ ചെയ്യാനും സൂം ഔട്ട് ചെയ്യാനും ഇരട്ട-ടാപ്പുചെയ്യുക."</string>
+    <string name="double_tap_toast" msgid="7065519579174882778">"നുറുങ്ങ്: സൂം ഇൻ ചെയ്യാനും സൂം ഔട്ട് ചെയ്യാനും ഡബിൾ ടാപ്പ് ചെയ്യുക."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"ഓട്ടോഫിൽ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"ഓട്ടോഫിൽ സജ്ജീകരിക്കുക"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ഉപയോഗിച്ച് സ്വമേധയാ പൂരിപ്പിക്കുക"</string>

@@ -10,3 +10,10 @@ jayachandranc@google.com
 chinmayd@google.com
 amruthr@google.com
 sasindran@google.com
+
+# Temporarily reduced the owner during refactoring
+per-file SubscriptionManager.java=set noparent
+per-file SubscriptionManager.java=jackyu@google.com,amruthr@google.com
+per-file SubscriptionInfo.java=set noparent
+per-file SubscriptionInfo.java=jackyu@google.com,amruthr@google.com
+

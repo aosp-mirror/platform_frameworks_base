@@ -33,6 +33,7 @@ import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.MathUtils;
+import android.util.Pair;
 import android.util.Size;
 import android.util.SizeF;
 import android.util.Slog;
@@ -766,7 +767,7 @@ public final class Parcel {
     }
 
     /**
-     * Set the bytes in data to be the raw bytes of this Parcel.
+     * Fills the raw bytes of this Parcel with the supplied data.
      */
     public final void unmarshall(@NonNull byte[] data, int offset, int length) {
         nativeUnmarshall(mNativePtr, data, offset, length);
@@ -4858,28 +4859,36 @@ public final class Parcel {
         if (name == null) {
             return null;
         }
-        Parcelable.Creator<?> creator;
-        HashMap<String, Parcelable.Creator<?>> map;
-        synchronized (mCreators) {
-            map = mCreators.get(loader);
+
+        Pair<Parcelable.Creator<?>, Class<?>> creatorAndParcelableClass;
+        synchronized (sPairedCreators) {
+            HashMap<String, Pair<Parcelable.Creator<?>, Class<?>>> map =
+                    sPairedCreators.get(loader);
             if (map == null) {
-                map = new HashMap<>();
-                mCreators.put(loader, map);
+                sPairedCreators.put(loader, new HashMap<>());
+                mCreators.put(loader, new HashMap<>());
+                creatorAndParcelableClass = null;
+            } else {
+                creatorAndParcelableClass = map.get(name);
             }
-            creator = map.get(name);
         }
-        if (creator != null) {
+
+        if (creatorAndParcelableClass != null) {
+            Parcelable.Creator<?> creator = creatorAndParcelableClass.first;
+            Class<?> parcelableClass = creatorAndParcelableClass.second;
             if (clazz != null) {
-                Class<?> parcelableClass = creator.getClass().getEnclosingClass();
                 if (!clazz.isAssignableFrom(parcelableClass)) {
                     throw new BadTypeParcelableException("Parcelable creator " + name + " is not "
                             + "a subclass of required class " + clazz.getName()
                             + " provided in the parameter");
                 }
             }
+
             return (Parcelable.Creator<T>) creator;
         }
 
+        Parcelable.Creator<?> creator;
+        Class<?> parcelableClass;
         try {
             // If loader == null, explicitly emulate Class.forName(String) "caller
             // classloader" behavior.
@@ -4887,7 +4896,7 @@ public final class Parcel {
                     (loader == null ? getClass().getClassLoader() : loader);
             // Avoid initializing the Parcelable class until we know it implements
             // Parcelable and has the necessary CREATOR field. http://b/1171613.
-            Class<?> parcelableClass = Class.forName(name, false /* initialize */,
+            parcelableClass = Class.forName(name, false /* initialize */,
                     parcelableClassLoader);
             if (!Parcelable.class.isAssignableFrom(parcelableClass)) {
                 throw new BadParcelableException("Parcelable protocol requires subclassing "
@@ -4934,8 +4943,9 @@ public final class Parcel {
                     + "CREATOR on class " + name);
         }
 
-        synchronized (mCreators) {
-            map.put(name, creator);
+        synchronized (sPairedCreators) {
+            sPairedCreators.get(loader).put(name, Pair.create(creator, parcelableClass));
+            mCreators.get(loader).put(name, creator);
         }
 
         return (Parcelable.Creator<T>) creator;
@@ -5086,12 +5096,17 @@ public final class Parcel {
         }
     }
 
-    // Cache of previously looked up CREATOR.createFromParcel() methods for
-    // particular classes.  Keys are the names of the classes, values are
-    // Method objects.
+
+    // Left due to the UnsupportedAppUsage. Do not use anymore - use sPairedCreators instead
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-    private static final HashMap<ClassLoader,HashMap<String,Parcelable.Creator<?>>>
-        mCreators = new HashMap<>();
+    private static final HashMap<ClassLoader, HashMap<String, Parcelable.Creator<?>>>
+            mCreators = new HashMap<>();
+
+    // Cache of previously looked up CREATOR.createFromParcel() methods for particular classes.
+    // Keys are the names of the classes, values are a pair consisting of a parcelable creator,
+    // and the class of the parcelable type for the object.
+    private static final HashMap<ClassLoader, HashMap<String,
+            Pair<Parcelable.Creator<?>, Class<?>>>> sPairedCreators = new HashMap<>();
 
     /** @hide for internal use only. */
     static protected final Parcel obtain(int obj) {

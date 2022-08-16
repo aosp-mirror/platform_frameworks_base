@@ -363,11 +363,13 @@ public class VolumeDialogImpl implements VolumeDialog,
 
         // The ringer and rows container has extra height at the top to fit the expanded ringer
         // drawer. This area should not be touchable unless the ringer drawer is open.
+        // In landscape the ringer expands to the left and it has to be ensured that if there
+        // are multiple rows they are touchable.
         if (view == mTopContainer && !mIsRingerDrawerOpen) {
             if (!isLandscape()) {
                 y += getRingerDrawerOpenExtraSize();
-            } else {
-                x += getRingerDrawerOpenExtraSize();
+            } else if (getRingerDrawerOpenExtraSize() > getVisibleRowsExtraSize()) {
+                x += (getRingerDrawerOpenExtraSize() - getVisibleRowsExtraSize());
             }
         }
 
@@ -1924,6 +1926,21 @@ public class VolumeDialogImpl implements VolumeDialog,
      */
     private int getRingerDrawerOpenExtraSize() {
         return (mRingerCount - 1) * mRingerDrawerItemSize;
+    }
+
+    /**
+     * Return the size of the additionally visible rows next to the default stream.
+     * An additional row is visible for example while receiving a voice call.
+     */
+    private int getVisibleRowsExtraSize() {
+        VolumeRow activeRow = getActiveRow();
+        int visibleRows = 0;
+        for (final VolumeRow row : mRows) {
+            if (shouldBeVisibleH(row, activeRow)) {
+                visibleRows++;
+            }
+        }
+        return (visibleRows - 1) * (mDialogWidth + mRingerRowsPadding);
     }
 
     private void updateBackgroundForDrawerClosedAmount() {

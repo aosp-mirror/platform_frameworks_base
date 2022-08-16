@@ -3040,8 +3040,9 @@ public class SubscriptionManager {
      * @param callback Callback will be triggered once it succeeds or failed.
      *                 Pass null if don't care about the result.
      *
+     * @throws IllegalStateException when subscription manager service is not available.
+     * @throws SecurityException when clients do not have MODIFY_PHONE_STATE permission.
      * @hide
-     *
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -3051,7 +3052,9 @@ public class SubscriptionManager {
         if (VDBG) logd("[setPreferredDataSubscriptionId]+ subId:" + subId);
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub == null) return;
+            if (iSub == null) {
+                throw new IllegalStateException("subscription manager service is null.");
+            }
 
             ISetOpportunisticDataCallback callbackStub = new ISetOpportunisticDataCallback.Stub() {
                 @Override
@@ -3071,7 +3074,8 @@ public class SubscriptionManager {
             };
             iSub.setPreferredDataSubscriptionId(subId, needValidation, callbackStub);
         } catch (RemoteException ex) {
-            // ignore it
+            loge("setPreferredDataSubscriptionId RemoteException=" + ex);
+            ex.rethrowFromSystemServer();
         }
     }
 

@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Akunasihloko&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Ayikho inombolo yefoni)"</string>
@@ -628,7 +623,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Vakashela umhlinzeki wokulungisa."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Ayikwazanga ukuthwebula idatha enembile yobuso. Zama futhi."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Kukhanya kakhulu. Zama ukukhanya okuthambile."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Kumnyama kakhulu Zama ukukhanyisa okukhanyayo."</string>
+    <string name="face_acquired_too_dark" msgid="252573548464426546">"Kumnyama kakhulu Zama ukukhanyisa okukhudlwana."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Hambisa ifoni kude."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Sondeza ifoni eduze."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Hambisa ifoni phezulu."</string>
