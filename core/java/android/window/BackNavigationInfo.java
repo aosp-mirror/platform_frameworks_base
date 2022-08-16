@@ -19,14 +19,10 @@ package android.window;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.WindowConfiguration;
-import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteCallback;
-import android.view.RemoteAnimationTarget;
-import android.view.SurfaceControl;
 
 /**
  * Information to be sent to SysUI about a back event.
@@ -84,75 +80,50 @@ public final class BackNavigationInfo implements Parcelable {
             TYPE_CROSS_TASK,
             TYPE_CALLBACK
     })
-    @interface BackTargetType {
+    public @interface BackTargetType {
     }
 
     private final int mType;
     @Nullable
-    private final RemoteAnimationTarget mDepartingAnimationTarget;
-    @Nullable
-    private final SurfaceControl mScreenshotSurface;
-    @Nullable
-    private final HardwareBuffer mScreenshotBuffer;
-    @Nullable
     private final RemoteCallback mOnBackNavigationDone;
     @Nullable
-    private final WindowConfiguration mTaskWindowConfiguration;
-    @Nullable
     private final IOnBackInvokedCallback mOnBackInvokedCallback;
+    private final boolean mPrepareRemoteAnimation;
 
     /**
      * Create a new {@link BackNavigationInfo} instance.
      *
      * @param type                    The {@link BackTargetType} of the destination (what will be
-     *                                displayed after the back action).
-     * @param departingAnimationTarget  The remote animation target, containing a leash to animate
-     *                                  away the departing window. The consumer of the leash is
-     *                                  responsible for removing it.
-     * @param screenshotSurface       The screenshot of the previous activity to be displayed.
-     * @param screenshotBuffer        A buffer containing a screenshot used to display the activity.
-     *                                See {@link  #getScreenshotHardwareBuffer()} for information
-     *                                about nullity.
-     * @param taskWindowConfiguration The window configuration of the Task being animated beneath.
      * @param onBackNavigationDone    The callback to be called once the client is done with the
      *                                back preview.
      * @param onBackInvokedCallback   The back callback registered by the current top level window.
+     * @param isPrepareRemoteAnimation  Return whether the core is preparing a back gesture
+     *                                  animation, if true, the caller of startBackNavigation should
+     *                                  be expected to receive an animation start callback.
      */
     private BackNavigationInfo(@BackTargetType int type,
-            @Nullable RemoteAnimationTarget departingAnimationTarget,
-            @Nullable SurfaceControl screenshotSurface,
-            @Nullable HardwareBuffer screenshotBuffer,
-            @Nullable WindowConfiguration taskWindowConfiguration,
             @Nullable RemoteCallback onBackNavigationDone,
-            @Nullable IOnBackInvokedCallback onBackInvokedCallback) {
+            @Nullable IOnBackInvokedCallback onBackInvokedCallback,
+            boolean isPrepareRemoteAnimation) {
         mType = type;
-        mDepartingAnimationTarget = departingAnimationTarget;
-        mScreenshotSurface = screenshotSurface;
-        mScreenshotBuffer = screenshotBuffer;
-        mTaskWindowConfiguration = taskWindowConfiguration;
         mOnBackNavigationDone = onBackNavigationDone;
         mOnBackInvokedCallback = onBackInvokedCallback;
+        mPrepareRemoteAnimation = isPrepareRemoteAnimation;
     }
 
     private BackNavigationInfo(@NonNull Parcel in) {
         mType = in.readInt();
-        mDepartingAnimationTarget = in.readTypedObject(RemoteAnimationTarget.CREATOR);
-        mScreenshotSurface = in.readTypedObject(SurfaceControl.CREATOR);
-        mScreenshotBuffer = in.readTypedObject(HardwareBuffer.CREATOR);
-        mTaskWindowConfiguration = in.readTypedObject(WindowConfiguration.CREATOR);
         mOnBackNavigationDone = in.readTypedObject(RemoteCallback.CREATOR);
         mOnBackInvokedCallback = IOnBackInvokedCallback.Stub.asInterface(in.readStrongBinder());
+        mPrepareRemoteAnimation = in.readBoolean();
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mType);
-        dest.writeTypedObject(mDepartingAnimationTarget, flags);
-        dest.writeTypedObject(mScreenshotSurface, flags);
-        dest.writeTypedObject(mScreenshotBuffer, flags);
-        dest.writeTypedObject(mTaskWindowConfiguration, flags);
         dest.writeTypedObject(mOnBackNavigationDone, flags);
         dest.writeStrongInterface(mOnBackInvokedCallback);
+        dest.writeBoolean(mPrepareRemoteAnimation);
     }
 
     /**
@@ -162,49 +133,6 @@ public final class BackNavigationInfo implements Parcelable {
      */
     public @BackTargetType int getType() {
         return mType;
-    }
-
-    /**
-     * Returns a {@link RemoteAnimationTarget}, containing a leash to the top window container
-     * that needs to be animated. This can be null if the back animation is controlled by
-     * the application.
-     */
-    @Nullable
-    public RemoteAnimationTarget getDepartingAnimationTarget() {
-        return mDepartingAnimationTarget;
-    }
-
-    /**
-     * Returns the {@link SurfaceControl} that should be used to display a screenshot of the
-     * previous activity.
-     */
-    @Nullable
-    public SurfaceControl getScreenshotSurface() {
-        return mScreenshotSurface;
-    }
-
-    /**
-     * Returns the {@link HardwareBuffer} containing the screenshot the activity about to be
-     * shown. This can be null if one of the following conditions is met:
-     * <ul>
-     *     <li>The screenshot is not available
-     *     <li> The previous activity is the home screen ( {@link  #TYPE_RETURN_TO_HOME}
-     *     <li> The current window is a dialog ({@link  #TYPE_DIALOG_CLOSE}
-     *     <li> The back animation is controlled by the application
-     * </ul>
-     */
-    @Nullable
-    public HardwareBuffer getScreenshotHardwareBuffer() {
-        return mScreenshotBuffer;
-    }
-
-    /**
-     * Returns the {@link WindowConfiguration} of the current task. This is null when the top
-     * application is controlling the back animation.
-     */
-    @Nullable
-    public WindowConfiguration getTaskWindowConfiguration() {
-        return mTaskWindowConfiguration;
     }
 
     /**
@@ -219,6 +147,13 @@ public final class BackNavigationInfo implements Parcelable {
     @Nullable
     public IOnBackInvokedCallback getOnBackInvokedCallback() {
         return mOnBackInvokedCallback;
+    }
+
+    /**
+     * Return true if the core is preparing a back gesture nimation.
+     */
+    public boolean isPrepareRemoteAnimation() {
+        return mPrepareRemoteAnimation;
     }
 
     /**
@@ -256,10 +191,6 @@ public final class BackNavigationInfo implements Parcelable {
     public String toString() {
         return "BackNavigationInfo{"
                 + "mType=" + typeToString(mType) + " (" + mType + ")"
-                + ", mDepartingAnimationTarget=" + mDepartingAnimationTarget
-                + ", mScreenshotSurface=" + mScreenshotSurface
-                + ", mTaskWindowConfiguration= " + mTaskWindowConfiguration
-                + ", mScreenshotBuffer=" + mScreenshotBuffer
                 + ", mOnBackNavigationDone=" + mOnBackNavigationDone
                 + ", mOnBackInvokedCallback=" + mOnBackInvokedCallback
                 + '}';
@@ -291,60 +222,17 @@ public final class BackNavigationInfo implements Parcelable {
      */
     @SuppressWarnings("UnusedReturnValue") // Builder pattern
     public static class Builder {
-
         private int mType = TYPE_UNDEFINED;
-        @Nullable
-        private RemoteAnimationTarget mDepartingAnimationTarget = null;
-        @Nullable
-        private SurfaceControl mScreenshotSurface = null;
-        @Nullable
-        private HardwareBuffer mScreenshotBuffer = null;
-        @Nullable
-        private WindowConfiguration mTaskWindowConfiguration = null;
         @Nullable
         private RemoteCallback mOnBackNavigationDone = null;
         @Nullable
         private IOnBackInvokedCallback mOnBackInvokedCallback = null;
-
+        private boolean mPrepareRemoteAnimation;
         /**
          * @see BackNavigationInfo#getType()
          */
         public Builder setType(@BackTargetType int type) {
             mType = type;
-            return this;
-        }
-
-        /**
-         * @see BackNavigationInfo#getDepartingAnimationTarget
-         */
-        public Builder setDepartingAnimationTarget(
-                @Nullable RemoteAnimationTarget departingAnimationTarget) {
-            mDepartingAnimationTarget = departingAnimationTarget;
-            return this;
-        }
-
-        /**
-         * @see BackNavigationInfo#getScreenshotSurface
-         */
-        public Builder setScreenshotSurface(@Nullable SurfaceControl screenshotSurface) {
-            mScreenshotSurface = screenshotSurface;
-            return this;
-        }
-
-        /**
-         * @see BackNavigationInfo#getScreenshotHardwareBuffer()
-         */
-        public Builder setScreenshotBuffer(@Nullable HardwareBuffer screenshotBuffer) {
-            mScreenshotBuffer = screenshotBuffer;
-            return this;
-        }
-
-        /**
-         * @see BackNavigationInfo#getTaskWindowConfiguration
-         */
-        public Builder setTaskWindowConfiguration(
-                @Nullable WindowConfiguration taskWindowConfiguration) {
-            mTaskWindowConfiguration = taskWindowConfiguration;
             return this;
         }
 
@@ -366,12 +254,19 @@ public final class BackNavigationInfo implements Parcelable {
         }
 
         /**
+         * @param prepareRemoteAnimation Whether core prepare animation for shell.
+         */
+        public Builder setPrepareRemoteAnimation(boolean prepareRemoteAnimation) {
+            mPrepareRemoteAnimation = prepareRemoteAnimation;
+            return this;
+        }
+
+        /**
          * Builds and returns an instance of {@link BackNavigationInfo}
          */
         public BackNavigationInfo build() {
-            return new BackNavigationInfo(mType, mDepartingAnimationTarget, mScreenshotSurface,
-                    mScreenshotBuffer, mTaskWindowConfiguration, mOnBackNavigationDone,
-                    mOnBackInvokedCallback);
+            return new BackNavigationInfo(mType, mOnBackNavigationDone,
+                    mOnBackInvokedCallback, mPrepareRemoteAnimation);
         }
     }
 }

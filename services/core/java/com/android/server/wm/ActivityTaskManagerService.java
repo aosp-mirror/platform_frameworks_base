@@ -227,6 +227,7 @@ import android.view.IWindowFocusObserver;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
+import android.window.BackAnimationAdapter;
 import android.window.BackNavigationInfo;
 import android.window.IWindowOrganizerController;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
@@ -1846,14 +1847,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public BackNavigationInfo startBackNavigation(boolean requestAnimation,
-            IWindowFocusObserver observer) {
+    public BackNavigationInfo startBackNavigation(
+            IWindowFocusObserver observer, BackAnimationAdapter adapter) {
         mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
                 "startBackNavigation()");
         if (mBackNavigationController == null) {
             return null;
         }
-        return mBackNavigationController.startBackNavigation(requestAnimation, observer);
+
+        return mBackNavigationController.startBackNavigation(observer, adapter);
     }
 
     /**

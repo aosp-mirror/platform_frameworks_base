@@ -1111,6 +1111,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1033630971": {
+      "message": "onBackNavigationDone backType=%s, triggerBack=%b",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-1022146708": {
       "message": "Skipping %s: mismatch activity type",
       "level": "DEBUG",
@@ -3990,12 +3996,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "1778919449": {
-      "message": "onBackNavigationDone backType=%s, task=%s, prevActivity=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "1781673113": {
       "message": "onAnimationFinished(): targetRootTask=%s targetActivity=%s mRestoreTargetBehindRootTask=%s",
