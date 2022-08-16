@@ -43,6 +43,19 @@ fun FlickerTestParameter.navBarWindowIsAlwaysVisible() {
 }
 
 /**
+ * Checks that [ComponentMatcher.NAV_BAR] window is visible and above the app windows at the start
+ * and end of the WM trace
+ */
+fun FlickerTestParameter.navBarWindowIsVisibleAtStartAndEnd() {
+    assertWmStart {
+        this.isAboveAppWindowVisible(ComponentMatcher.NAV_BAR)
+    }
+    assertWmEnd {
+        this.isAboveAppWindowVisible(ComponentMatcher.NAV_BAR)
+    }
+}
+
+/**
  * Checks that [ComponentMatcher.TASK_BAR] window is visible and above the app windows in
  * all WM trace entries
  */
