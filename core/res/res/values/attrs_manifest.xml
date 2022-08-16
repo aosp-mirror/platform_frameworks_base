@@ -2175,6 +2175,11 @@
         tag; often this is one of the {@link android.Manifest.permission standard
         system permissions}. -->
         <attr name="name" />
+        <!-- Optional: specify the minimum version of the Android OS for which the
+             application wishes to request the permission.  When running on a version
+             of Android lower than the number given here, the permission will not
+             be requested. -->
+        <attr name="minSdkVersion" format="integer|string" />
         <!-- Optional: specify the maximum version of the Android OS for which the
              application wishes to request the permission.  When running on a version
              of Android higher than the number given here, the permission will not
