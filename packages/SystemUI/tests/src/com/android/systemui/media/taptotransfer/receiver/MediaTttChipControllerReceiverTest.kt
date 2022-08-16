@@ -241,5 +241,5 @@ private const val PACKAGE_NAME = "com.android.systemui"
 
 private val routeInfo = MediaRoute2Info.Builder("id", "Test route name")
     .addFeature("feature")
-    .setPackageName(PACKAGE_NAME)
+    .setClientPackageName(PACKAGE_NAME)
     .build()

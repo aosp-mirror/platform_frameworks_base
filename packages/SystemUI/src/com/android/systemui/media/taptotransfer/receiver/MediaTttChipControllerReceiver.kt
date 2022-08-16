@@ -143,7 +143,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         super.updateChipView(newChipInfo, currentChipView)
         setIcon(
                 currentChipView,
-                newChipInfo.routeInfo.packageName,
+                newChipInfo.routeInfo.clientPackageName,
                 newChipInfo.appIconDrawableOverride,
                 newChipInfo.appNameOverride
         )
