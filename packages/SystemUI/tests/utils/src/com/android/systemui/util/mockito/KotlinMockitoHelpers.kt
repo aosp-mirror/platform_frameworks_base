@@ -91,6 +91,8 @@ class KotlinArgumentCaptor<T> constructor(clazz: Class<T>) {
     fun capture(): T = wrapped.capture()
     val value: T
         get() = wrapped.value
+    val allValues: List<T>
+        get() = wrapped.allValues
 }
 
 /**
