@@ -447,4 +447,10 @@
     <!-- Color of camera light when camera is in use -->
     <color name="camera_privacy_light_day">#FFFFFF</color>
     <color name="camera_privacy_light_night">#FFFFFF</color>
+
+    <!-- Color for side fps toast light theme -->
+    <color name="side_fps_toast_background">#F7F9FA</color>
+    <color name="side_fps_text_color">#191C1D</color>
+    <color name="side_fps_button_color">#00677E</color>
+
 </resources>
