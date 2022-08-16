@@ -137,4 +137,13 @@ public class DecorContext extends ContextThemeWrapper {
         }
         return false;
     }
+
+    @Override
+    public boolean isConfigurationContext() {
+        Context context = mContext.get();
+        if (context != null) {
+            return context.isConfigurationContext();
+        }
+        return false;
+    }
 }
