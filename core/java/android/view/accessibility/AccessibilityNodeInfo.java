@@ -217,29 +217,14 @@ public class AccessibilityNodeInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface PrefetchingStrategy {}
 
-    /**
-     * @see AccessibilityServiceInfo#FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
-     * @hide
-     */
-    public static final int FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS = 0x00000080;
-
-    /**
-     * @see AccessibilityServiceInfo#FLAG_REPORT_VIEW_IDS
-     * @hide
-     */
-    public static final int FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS = 0x00000100;
-
-    /**
-     * @see AccessibilityServiceInfo#isAccessibilityTool()
-     * @hide
-     */
-    public static final int FLAG_SERVICE_IS_ACCESSIBILITY_TOOL = 0x00000200;
+    /** @hide */
+    public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 0x00000080;
 
     /** @hide */
-    public static final int FLAG_REPORT_MASK =
-            FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS
-                    | FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS
-                    | FLAG_SERVICE_IS_ACCESSIBILITY_TOOL;
+    public static final int FLAG_REPORT_VIEW_IDS = 0x00000100;
+
+    /** @hide */
+    public static final int FLAG_REPORT_MASK = 0x00000180;
 
     // Actions.
 

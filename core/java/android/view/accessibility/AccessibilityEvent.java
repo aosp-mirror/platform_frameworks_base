@@ -46,17 +46,15 @@ import java.util.List;
  * </p>
  * <p>
  * The main purpose of an accessibility event is to communicate changes in the UI to an
- * {@link android.accessibilityservice.AccessibilityService}. If needed, the service may then
- * inspect the user interface by examining the View hierarchy through the event's
- * {@link #getSource() source}, as represented by a tree of {@link AccessibilityNodeInfo}s (snapshot
- * of a View state) which can be used for exploring the window content. Note that the privilege for
- * accessing an event's source, thus the window content, has to be explicitly requested. For more
+ * {@link android.accessibilityservice.AccessibilityService}. The service may then inspect,
+ * if needed the user interface by examining the View hierarchy, as represented by a tree of
+ * {@link AccessibilityNodeInfo}s (snapshot of a View state)
+ * which can be used for exploring the window content. Note that the privilege for accessing
+ * an event's source, thus the window content, has to be explicitly requested. For more
  * details refer to {@link android.accessibilityservice.AccessibilityService}. If an
  * accessibility service has not requested to retrieve the window content the event will
- * not contain reference to its source. <strong>Note: </strong> for events of type
- * {@link #TYPE_NOTIFICATION_STATE_CHANGED} the source is never available, and Views that set
- * {@link android.view.View#isAccessibilityDataPrivate()} may not populate all event properties on
- * events sent from higher up in the view hierarchy.
+ * not contain reference to its source. Also for events of type
+ * {@link #TYPE_NOTIFICATION_STATE_CHANGED} the source is never available.
  * </p>
  * <p>
  * This class represents various semantically different accessibility event
@@ -1091,47 +1089,6 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public void setContentChangeTypes(@ContentChangeTypes int changeTypes) {
         enforceNotSealed();
         mContentChangeTypes = changeTypes;
-    }
-
-    /**
-     * Whether the event should only be delivered to an
-     * {@link android.accessibilityservice.AccessibilityService} with the
-     * {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool} property
-     * set to true.
-     *
-     * <p>
-     * Initial value matches the {@link android.view.View#isAccessibilityDataPrivate} property from
-     * the event's source node, if present, or false by default.
-     * </p>
-     *
-     * @return True if the event should be delivered only to isAccessibilityTool services, false
-     * otherwise.
-     * @see #setAccessibilityDataPrivate
-     */
-    @Override
-    public boolean isAccessibilityDataPrivate() {
-        return super.isAccessibilityDataPrivate();
-    }
-
-    /**
-     * Sets whether the event should only be delivered to an
-     * {@link android.accessibilityservice.AccessibilityService} with the
-     * {@link android.accessibilityservice.AccessibilityServiceInfo#isAccessibilityTool} property
-     * set to true.
-     *
-     * <p>
-     * This will be set automatically based on the event's source (if present). If creating and
-     * sending an event directly through {@link AccessibilityManager} (where an event may have
-     * no source) then this method must be called explicitly if you want non-default behavior.
-     * </p>
-     *
-     * @param accessibilityDataPrivate True if the event should be delivered only to
-     *                                 isAccessibilityTool services, false otherwise.
-     * @throws IllegalStateException If called from an AccessibilityService.
-     */
-    @Override
-    public void setAccessibilityDataPrivate(boolean accessibilityDataPrivate) {
-        super.setAccessibilityDataPrivate(accessibilityDataPrivate);
     }
 
     /**
