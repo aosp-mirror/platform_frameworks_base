@@ -169,9 +169,11 @@ public abstract class EconomicPolicy {
         }
     }
 
+    protected final InternalResourceService mIrs;
     private static final Modifier[] COST_MODIFIER_BY_INDEX = new Modifier[NUM_COST_MODIFIERS];
 
     EconomicPolicy(@NonNull InternalResourceService irs) {
+        mIrs = irs;
         for (int mId : getCostModifiers()) {
             initModifier(mId, irs);
         }
@@ -240,7 +242,7 @@ public abstract class EconomicPolicy {
     @NonNull
     final Cost getCostOfAction(int actionId, int userId, @NonNull String pkgName) {
         final Action action = getAction(actionId);
-        if (action == null) {
+        if (action == null || mIrs.isVip(userId, pkgName)) {
             return new Cost(0, 0);
         }
         long ctp = action.costToProduce;

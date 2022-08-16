@@ -44,6 +44,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArrayMap;
+import android.util.SparseSetArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -282,6 +283,7 @@ class Agent {
 
         for (int i = 0; i < pkgNames.size(); ++i) {
             final String pkgName = pkgNames.valueAt(i);
+            final boolean isVip = mIrs.isVip(userId, pkgName);
             SparseArrayMap<String, OngoingEvent> ongoingEvents =
                     mCurrentOngoingEvents.get(userId, pkgName);
             if (ongoingEvents != null) {
@@ -296,8 +298,8 @@ class Agent {
                     for (int n = 0; n < size; ++n) {
                         final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(n);
                         note.recalculateCosts(economicPolicy, userId, pkgName);
-                        final boolean isAffordable =
-                                isAffordableLocked(newBalance,
+                        final boolean isAffordable = isVip
+                                || isAffordableLocked(newBalance,
                                         note.getCachedModifiedPrice(), note.getCtp());
                         if (note.isCurrentlyAffordable() != isAffordable) {
                             note.setNewAffordability(isAffordable);
@@ -306,6 +308,51 @@ class Agent {
                     }
                 }
                 scheduleBalanceCheckLocked(userId, pkgName);
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    void onVipStatusChangedLocked(final int userId, @NonNull String pkgName) {
+        final long now = getCurrentTimeMillis();
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
+
+        final boolean isVip = mIrs.isVip(userId, pkgName);
+        SparseArrayMap<String, OngoingEvent> ongoingEvents =
+                mCurrentOngoingEvents.get(userId, pkgName);
+        if (ongoingEvents != null) {
+            mOngoingEventUpdater.reset(userId, pkgName, now, nowElapsed);
+            ongoingEvents.forEach(mOngoingEventUpdater);
+        }
+        final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
+                mActionAffordabilityNotes.get(userId, pkgName);
+        if (actionAffordabilityNotes != null) {
+            final int size = actionAffordabilityNotes.size();
+            final long newBalance =
+                    mScribe.getLedgerLocked(userId, pkgName).getCurrentBalance();
+            for (int n = 0; n < size; ++n) {
+                final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(n);
+                note.recalculateCosts(economicPolicy, userId, pkgName);
+                final boolean isAffordable = isVip
+                        || isAffordableLocked(newBalance,
+                        note.getCachedModifiedPrice(), note.getCtp());
+                if (note.isCurrentlyAffordable() != isAffordable) {
+                    note.setNewAffordability(isAffordable);
+                    mIrs.postAffordabilityChanged(userId, pkgName, note);
+                }
+            }
+        }
+        scheduleBalanceCheckLocked(userId, pkgName);
+    }
+
+    @GuardedBy("mLock")
+    void onVipStatusChangedLocked(@NonNull SparseSetArray<String> pkgs) {
+        for (int u = pkgs.size() - 1; u >= 0; --u) {
+            final int userId = pkgs.keyAt(u);
+
+            for (int p = pkgs.sizeAt(u) - 1; p >= 0; --p) {
+                onVipStatusChangedLocked(userId, pkgs.valueAt(u, p));
             }
         }
     }
@@ -347,11 +394,12 @@ class Agent {
                 if (actionAffordabilityNotes != null) {
                     final int size = actionAffordabilityNotes.size();
                     final long newBalance = getBalanceLocked(userId, pkgName);
+                    final boolean isVip = mIrs.isVip(userId, pkgName);
                     for (int n = 0; n < size; ++n) {
                         final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(n);
                         note.recalculateCosts(economicPolicy, userId, pkgName);
-                        final boolean isAffordable =
-                                isAffordableLocked(newBalance,
+                        final boolean isAffordable = isVip
+                                || isAffordableLocked(newBalance,
                                         note.getCachedModifiedPrice(), note.getCtp());
                         if (note.isCurrentlyAffordable() != isAffordable) {
                             note.setNewAffordability(isAffordable);
@@ -452,6 +500,14 @@ class Agent {
                     "Tried to adjust system balance for " + appToString(userId, pkgName));
             return;
         }
+        if (mIrs.isVip(userId, pkgName)) {
+            // This could happen if the app was made a VIP after it started performing actions.
+            // Continue recording the transaction for debugging purposes, but don't let it change
+            // any numbers.
+            transaction = new Ledger.Transaction(
+                    transaction.startTimeMs, transaction.endTimeMs,
+                    transaction.eventId, transaction.tag, 0 /* delta */, transaction.ctp);
+        }
         final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
         final long originalBalance = ledger.getCurrentBalance();
         if (transaction.delta > 0
@@ -477,10 +533,11 @@ class Agent {
                     mActionAffordabilityNotes.get(userId, pkgName);
             if (actionAffordabilityNotes != null) {
                 final long newBalance = ledger.getCurrentBalance();
+                final boolean isVip = mIrs.isVip(userId, pkgName);
                 for (int i = 0; i < actionAffordabilityNotes.size(); ++i) {
                     final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
-                    final boolean isAffordable =
-                            isAffordableLocked(newBalance,
+                    final boolean isAffordable = isVip
+                            || isAffordableLocked(newBalance,
                                     note.getCachedModifiedPrice(), note.getCtp());
                     if (note.isCurrentlyAffordable() != isAffordable) {
                         note.setNewAffordability(isAffordable);
@@ -866,7 +923,7 @@ class Agent {
     private void scheduleBalanceCheckLocked(final int userId, @NonNull final String pkgName) {
         SparseArrayMap<String, OngoingEvent> ongoingEvents =
                 mCurrentOngoingEvents.get(userId, pkgName);
-        if (ongoingEvents == null) {
+        if (ongoingEvents == null || mIrs.isVip(userId, pkgName)) {
             // No ongoing transactions. No reason to schedule
             mBalanceThresholdAlarmQueue.removeAlarmForKey(new Package(userId, pkgName));
             return;
@@ -1059,9 +1116,10 @@ class Agent {
                 note.setNewAffordability(true);
                 return;
             }
+            final boolean isVip = mIrs.isVip(userId, pkgName);
             note.recalculateCosts(economicPolicy, userId, pkgName);
-            note.setNewAffordability(
-                    isAffordableLocked(getBalanceLocked(userId, pkgName),
+            note.setNewAffordability(isVip
+                    || isAffordableLocked(getBalanceLocked(userId, pkgName),
                             note.getCachedModifiedPrice(), note.getCtp()));
             mIrs.postAffordabilityChanged(userId, pkgName, note);
             // Update ongoing alarm
@@ -1200,11 +1258,12 @@ class Agent {
                         if (actionAffordabilityNotes != null
                                 && actionAffordabilityNotes.size() > 0) {
                             final long newBalance = getBalanceLocked(userId, pkgName);
+                            final boolean isVip = mIrs.isVip(userId, pkgName);
 
                             for (int i = 0; i < actionAffordabilityNotes.size(); ++i) {
                                 final ActionAffordabilityNote note =
                                         actionAffordabilityNotes.valueAt(i);
-                                final boolean isAffordable = isAffordableLocked(
+                                final boolean isAffordable = isVip || isAffordableLocked(
                                         newBalance, note.getCachedModifiedPrice(), note.getCtp());
                                 if (note.isCurrentlyAffordable() != isAffordable) {
                                     note.setNewAffordability(isAffordable);
