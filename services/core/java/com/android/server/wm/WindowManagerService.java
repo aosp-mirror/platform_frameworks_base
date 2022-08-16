@@ -1324,8 +1324,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }, UserHandle.ALL, suspendPackagesFilter, null, null);
 
         // Get persisted window scale setting
-        mWindowAnimationScaleSetting = Settings.Global.getFloat(resolver,
-                Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScaleSetting);
+        mWindowAnimationScaleSetting = getWindowAnimationScaleSetting();
         mTransitionAnimationScaleSetting = getTransitionAnimationScaleSetting();
 
         setAnimatorDurationScale(getAnimatorDurationScaleSetting());
@@ -1411,6 +1410,11 @@ public class WindowManagerService extends IWindowManager.Stub
     private float getAnimatorDurationScaleSetting() {
         return fixScale(Settings.Global.getFloat(mContext.getContentResolver(),
                 Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScaleSetting));
+    }
+
+    private float getWindowAnimationScaleSetting() {
+        return fixScale(Settings.Global.getFloat(mContext.getContentResolver(),
+                Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScaleSetting));
     }
 
     /**
@@ -5327,10 +5331,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     final int mode = msg.arg1;
                     switch (mode) {
                         case WINDOW_ANIMATION_SCALE: {
-                            mWindowAnimationScaleSetting = Settings.Global.getFloat(
-                                    mContext.getContentResolver(),
-                                    Settings.Global.WINDOW_ANIMATION_SCALE,
-                                    mWindowAnimationScaleSetting);
+                            mWindowAnimationScaleSetting = getWindowAnimationScaleSetting();
                             break;
                         }
                         case TRANSITION_ANIMATION_SCALE: {
