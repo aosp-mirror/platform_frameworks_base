@@ -132,6 +132,7 @@ public class BroadcastRadioService {
     }
 
     public @NonNull Collection<RadioManager.ModuleProperties> listModules() {
+        Slog.v(TAG, "List HIDL 2.0 modules");
         synchronized (mLock) {
             return mModules.values().stream().map(module -> module.mProperties)
                     .collect(Collectors.toList());
@@ -152,10 +153,11 @@ public class BroadcastRadioService {
 
     public ITuner openSession(int moduleId, @Nullable RadioManager.BandConfig legacyConfig,
         boolean withAudio, @NonNull ITunerCallback callback) throws RemoteException {
+        Slog.v(TAG, "Open HIDL 2.0 session");
         Objects.requireNonNull(callback);
 
         if (!withAudio) {
-            throw new IllegalArgumentException("Non-audio sessions not supported with HAL 2.x");
+            throw new IllegalArgumentException("Non-audio sessions not supported with HAL 2.0");
         }
 
         RadioModule module = null;
@@ -175,6 +177,7 @@ public class BroadcastRadioService {
 
     public ICloseHandle addAnnouncementListener(@NonNull int[] enabledTypes,
             @NonNull IAnnouncementListener listener) {
+        Slog.v(TAG, "Add announcementListener");
         AnnouncementAggregator aggregator = new AnnouncementAggregator(listener, mLock);
         boolean anySupported = false;
         synchronized (mLock) {
