@@ -25,7 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * An advertisement request which can be sent to TV interactive App service to inform AD status.
+ * An advertisement response which can be sent to TV interactive App service to inform AD status.
  */
 public final class AdResponse implements Parcelable {
     /** @hide */
