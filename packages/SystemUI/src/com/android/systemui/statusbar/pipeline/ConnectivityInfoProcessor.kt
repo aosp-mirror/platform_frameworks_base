@@ -43,7 +43,7 @@ class ConnectivityInfoProcessor @Inject constructor(
         private val wifiViewModelProvider: Provider<WifiViewModel>,
 ) : CoreStartable(context) {
     override fun start() {
-        if (!statusBarPipelineFlags.isNewPipelineEnabled()) {
+        if (!statusBarPipelineFlags.isNewPipelineBackendEnabled()) {
             return
         }
         // TODO(b/238425913): The view binder should do this instead. For now, do it here so we can

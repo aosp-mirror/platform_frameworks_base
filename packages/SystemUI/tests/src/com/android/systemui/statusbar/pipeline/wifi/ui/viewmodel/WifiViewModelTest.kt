@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
@@ -43,6 +44,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     private lateinit var underTest: WifiViewModel
 
+    @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var constants: WifiConstants
     private lateinit var repository: FakeWifiRepository
@@ -55,9 +57,10 @@ class WifiViewModelTest : SysuiTestCase() {
         interactor = WifiInteractor(repository)
 
         underTest = WifiViewModel(
-                constants,
-                logger,
-                interactor
+            statusBarPipelineFlags,
+            constants,
+            logger,
+            interactor
         )
 
         // Set up with a valid SSID
