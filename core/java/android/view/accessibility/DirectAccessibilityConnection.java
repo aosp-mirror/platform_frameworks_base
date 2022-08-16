@@ -55,8 +55,8 @@ class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Defa
     // Fetch all views, but do not use prefetching/cache since this "connection" does not
     // receive cache invalidation events (as it is not linked to an AccessibilityService).
     private static final int FETCH_FLAGS =
-            AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS
-                    | AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+            AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS
+                    | AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS;
     private static final MagnificationSpec MAGNIFICATION_SPEC = new MagnificationSpec();
     private static final int PID = Process.myPid();
     private static final Region INTERACTIVE_REGION = null;

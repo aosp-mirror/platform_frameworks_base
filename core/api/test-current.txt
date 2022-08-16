@@ -90,6 +90,7 @@ package android.accessibilityservice {
 
   public class AccessibilityServiceInfo implements android.os.Parcelable {
     method @NonNull public android.content.ComponentName getComponentName();
+    method public void setAccessibilityTool(boolean);
   }
 
 }

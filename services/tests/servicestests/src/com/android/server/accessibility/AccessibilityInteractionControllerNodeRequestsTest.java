@@ -17,13 +17,13 @@
 package com.android.server.accessibility;
 
 
-import static android.view.accessibility.AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
 import static android.view.accessibility.AccessibilityNodeInfo.FLAG_PREFETCH_ANCESTORS;
 import static android.view.accessibility.AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST;
 import static android.view.accessibility.AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST;
 import static android.view.accessibility.AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID;
 import static android.view.accessibility.AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS;
 import static android.view.accessibility.AccessibilityNodeInfo.FLAG_PREFETCH_UNINTERRUPTIBLE;
+import static android.view.accessibility.AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS;
 import static android.view.accessibility.AccessibilityNodeInfo.ROOT_NODE_ID;
 
 import static org.junit.Assert.assertEquals;
@@ -528,7 +528,8 @@ public class AccessibilityInteractionControllerNodeRequestsTest {
                     // different client that holds different fetch flags for TextView1.
                     sendNodeRequestToController(nodeId, mMockClientCallback2,
                             mMockClient2InteractionId,
-                            FLAG_PREFETCH_SIBLINGS | FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
+                            FLAG_PREFETCH_SIBLINGS
+                                    | FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS
                                     | FLAG_PREFETCH_ANCESTORS);
                 }
             }

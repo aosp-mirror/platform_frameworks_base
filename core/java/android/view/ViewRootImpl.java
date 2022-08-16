@@ -2836,6 +2836,7 @@ public final class ViewRootImpl implements ViewParent,
             // However, windows are now always 32 bits by default, so choose 32 bits
             mAttachInfo.mUse32BitDrawingCache = true;
             mAttachInfo.mWindowVisibility = viewVisibility;
+            mAttachInfo.mWindowSecure = (lp.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0;
             mAttachInfo.mRecomputeGlobalAttributes = false;
             mLastConfigurationFromResources.setTo(config);
             mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
