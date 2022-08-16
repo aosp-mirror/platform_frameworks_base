@@ -297,6 +297,9 @@ public class CachedBluetoothDeviceManager {
                     mCachedDevices.remove(i);
                 }
             }
+
+            // To clear the SetMemberPair flag when the Bluetooth is turning off.
+            mOngoingSetMemberPair = null;
         }
     }
 
