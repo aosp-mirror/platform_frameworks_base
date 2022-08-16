@@ -129,7 +129,11 @@ public class BatterySaverPolicy extends ContentObserver implements
     @VisibleForTesting
     static final String KEY_ENABLE_NIGHT_MODE = "enable_night_mode";
 
+    /** @deprecated Old key used to set CPU frequency caps directly in sys files. */
+    @Deprecated
     private static final String KEY_CPU_FREQ_INTERACTIVE = "cpufreq-i";
+    /** @deprecated Old key used to set CPU frequency caps directly in sys files. */
+    @Deprecated
     private static final String KEY_CPU_FREQ_NONINTERACTIVE = "cpufreq-n";
 
     private static final String KEY_SUFFIX_ADAPTIVE = "_adaptive";
@@ -138,8 +142,6 @@ public class BatterySaverPolicy extends ContentObserver implements
     static final Policy OFF_POLICY = new Policy(
             1f,    /* adjustBrightnessFactor */
             false, /* advertiseIsEnabled */
-            new CpuFrequencies(), /* cpuFrequenciesForInteractive */
-            new CpuFrequencies(), /* cpuFrequenciesForNoninteractive */
             false, /* deferFullBackup */
             false, /* deferKeyValueBackup */
             false, /* disableAnimation */
@@ -163,8 +165,6 @@ public class BatterySaverPolicy extends ContentObserver implements
     private static final Policy DEFAULT_FULL_POLICY = new Policy(
             0.5f,  /* adjustBrightnessFactor */
             true,  /* advertiseIsEnabled */
-            new CpuFrequencies(), /* cpuFrequenciesForInteractive */
-            new CpuFrequencies(), /* cpuFrequenciesForNoninteractive */
             true,  /* deferFullBackup */
             true,  /* deferKeyValueBackup */
             false, /* disableAnimation */
@@ -276,7 +276,7 @@ public class BatterySaverPolicy extends ContentObserver implements
     }
 
     /**
-     * Called by {@link PowerManagerService#systemReady}, *with no lock held.*
+     * Called by {@link PowerManagerService#onBootPhase}, *with no lock held.*
      */
     public void systemReady() {
         ConcurrentUtils.wtfIfLockHeld(TAG, mLock);
@@ -487,8 +487,6 @@ public class BatterySaverPolicy extends ContentObserver implements
         mEffectivePolicyRaw = new Policy(
                 rawPolicy.adjustBrightnessFactor,
                 rawPolicy.advertiseIsEnabled,
-                rawPolicy.cpuFrequenciesForInteractive,
-                rawPolicy.cpuFrequenciesForNoninteractive,
                 rawPolicy.deferFullBackup,
                 rawPolicy.deferKeyValueBackup,
                 rawPolicy.disableAnimation,
@@ -648,22 +646,6 @@ public class BatterySaverPolicy extends ContentObserver implements
         public final boolean enableQuickDoze;
 
         /**
-         * List of CPU frequencies that should be written when battery saver is activated
-         * and the device is interactive.
-         *
-         * We use this to change the max CPU frequencies.
-         */
-        public final CpuFrequencies cpuFrequenciesForInteractive;
-
-        /**
-         * List of CPU frequencies that should be written when battery saver is activated
-         * and the device is non-interactive.
-         *
-         * We use this to change the max CPU frequencies.
-         */
-        public final CpuFrequencies cpuFrequenciesForNoninteractive;
-
-        /**
          * Whether to put all apps in the stand-by mode.
          */
         public final boolean forceAllAppsStandby;
@@ -687,8 +669,6 @@ public class BatterySaverPolicy extends ContentObserver implements
         Policy(
                 float adjustBrightnessFactor,
                 boolean advertiseIsEnabled,
-                CpuFrequencies cpuFrequenciesForInteractive,
-                CpuFrequencies cpuFrequenciesForNoninteractive,
                 boolean deferFullBackup,
                 boolean deferKeyValueBackup,
                 boolean disableAnimation,
@@ -708,8 +688,6 @@ public class BatterySaverPolicy extends ContentObserver implements
 
             this.adjustBrightnessFactor = Math.min(1, Math.max(0, adjustBrightnessFactor));
             this.advertiseIsEnabled = advertiseIsEnabled;
-            this.cpuFrequenciesForInteractive = cpuFrequenciesForInteractive;
-            this.cpuFrequenciesForNoninteractive = cpuFrequenciesForNoninteractive;
             this.deferFullBackup = deferFullBackup;
             this.deferKeyValueBackup = deferKeyValueBackup;
             this.disableAnimation = disableAnimation;
@@ -744,8 +722,6 @@ public class BatterySaverPolicy extends ContentObserver implements
             mHashCode = Objects.hash(
                     adjustBrightnessFactor,
                     advertiseIsEnabled,
-                    cpuFrequenciesForInteractive,
-                    cpuFrequenciesForNoninteractive,
                     deferFullBackup,
                     deferKeyValueBackup,
                     disableAnimation,
@@ -772,16 +748,10 @@ public class BatterySaverPolicy extends ContentObserver implements
 
             // Device-specific parameters.
             Map<String, String> deviceSpecificSettings = config.getDeviceSpecificSettings();
-            final String cpuFreqInteractive =
-                    deviceSpecificSettings.getOrDefault(KEY_CPU_FREQ_INTERACTIVE, "");
-            final String cpuFreqNoninteractive =
-                    deviceSpecificSettings.getOrDefault(KEY_CPU_FREQ_NONINTERACTIVE, "");
 
             return new Policy(
                     config.getAdjustBrightnessFactor(),
                     config.getAdvertiseIsEnabled(),
-                    (new CpuFrequencies()).parseString(cpuFreqInteractive),
-                    (new CpuFrequencies()).parseString(cpuFreqNoninteractive),
                     config.getDeferFullBackup(),
                     config.getDeferKeyValueBackup(),
                     config.getDisableAnimation(),
@@ -803,10 +773,6 @@ public class BatterySaverPolicy extends ContentObserver implements
 
         BatterySaverPolicyConfig toConfig() {
             return new BatterySaverPolicyConfig.Builder()
-                    .addDeviceSpecificSetting(KEY_CPU_FREQ_INTERACTIVE,
-                            cpuFrequenciesForInteractive.toString())
-                    .addDeviceSpecificSetting(KEY_CPU_FREQ_NONINTERACTIVE,
-                            cpuFrequenciesForNoninteractive.toString())
                     .setAdjustBrightnessFactor(adjustBrightnessFactor)
                     .setAdvertiseIsEnabled(advertiseIsEnabled)
                     .setDeferFullBackup(deferFullBackup)
@@ -847,9 +813,6 @@ public class BatterySaverPolicy extends ContentObserver implements
                 Slog.wtf(TAG, "Bad device specific battery saver constants: "
                         + deviceSpecificSettings);
             }
-
-            final String cpuFreqInteractive = parser.getString(KEY_CPU_FREQ_INTERACTIVE, "");
-            final String cpuFreqNoninteractive = parser.getString(KEY_CPU_FREQ_NONINTERACTIVE, "");
 
             // Non-device-specific parameters.
             try {
@@ -918,8 +881,6 @@ public class BatterySaverPolicy extends ContentObserver implements
             return new Policy(
                     adjustBrightnessFactor,
                     advertiseIsEnabled,
-                    (new CpuFrequencies()).parseString(cpuFreqInteractive),
-                    (new CpuFrequencies()).parseString(cpuFreqNoninteractive),
                     deferFullBackup,
                     deferKeyValueBackup,
                     disableAnimation,
@@ -962,10 +923,7 @@ public class BatterySaverPolicy extends ContentObserver implements
                     && forceAllAppsStandby == other.forceAllAppsStandby
                     && forceBackgroundCheck == other.forceBackgroundCheck
                     && locationMode == other.locationMode
-                    && soundTriggerMode == other.soundTriggerMode
-                    && cpuFrequenciesForInteractive.equals(other.cpuFrequenciesForInteractive)
-                    && cpuFrequenciesForNoninteractive.equals(
-                            other.cpuFrequenciesForNoninteractive);
+                    && soundTriggerMode == other.soundTriggerMode;
         }
 
         @Override
@@ -1179,14 +1137,6 @@ public class BatterySaverPolicy extends ContentObserver implements
         }
     }
 
-    public ArrayMap<String, String> getFileValues(boolean interactive) {
-        synchronized (mLock) {
-            return interactive
-                    ? getCurrentPolicyLocked().cpuFrequenciesForInteractive.toSysFileMap()
-                    : getCurrentPolicyLocked().cpuFrequenciesForNoninteractive.toSysFileMap();
-        }
-    }
-
     public boolean isLaunchBoostDisabled() {
         synchronized (mLock) {
             return getCurrentPolicyLocked().disableLaunchBoost;
@@ -1273,17 +1223,6 @@ public class BatterySaverPolicy extends ContentObserver implements
         pw.println(KEY_SOUNDTRIGGER_MODE + "=" + p.soundTriggerMode);
         pw.println(KEY_ENABLE_QUICK_DOZE + "=" + p.enableQuickDoze);
         pw.println(KEY_ENABLE_NIGHT_MODE + "=" + p.enableNightMode);
-
-        pw.println("Interactive File values:");
-        pw.increaseIndent();
-        dumpMap(pw, p.cpuFrequenciesForInteractive.toSysFileMap());
-        pw.decreaseIndent();
-        pw.println();
-
-        pw.println("Noninteractive File values:");
-        pw.increaseIndent();
-        dumpMap(pw, p.cpuFrequenciesForNoninteractive.toSysFileMap());
-        pw.decreaseIndent();
 
         // Decrease from indent right after "Policy" line
         pw.decreaseIndent();

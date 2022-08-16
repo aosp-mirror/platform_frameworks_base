@@ -39,4 +39,6 @@ interface IImageCaptureExtenderImpl
     int getMaxCaptureStage();
     @nullable List<SizeList> getSupportedResolutions();
     LatencyRange getEstimatedCaptureLatencyRange(in Size outputSize);
+    CameraMetadataNative getAvailableCaptureRequestKeys();
+    CameraMetadataNative getAvailableCaptureResultKeys();
 }

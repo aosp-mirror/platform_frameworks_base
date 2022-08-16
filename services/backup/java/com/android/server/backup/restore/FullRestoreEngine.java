@@ -21,7 +21,6 @@ import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_FILENAME;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA_FILENAME;
-import static com.android.server.backup.UserBackupManagerService.OP_TYPE_RESTORE_WAIT;
 import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
 
@@ -52,6 +51,8 @@ import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FileMetadata;
 import com.android.server.backup.KeyValueAdbRestoreEngine;
+import com.android.server.backup.OperationStorage;
+import com.android.server.backup.OperationStorage.OpType;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
@@ -76,6 +77,7 @@ import java.util.Objects;
 public class FullRestoreEngine extends RestoreEngine {
 
     private final UserBackupManagerService mBackupManagerService;
+    private final OperationStorage mOperationStorage;
     private final int mUserId;
 
     // Task in charge of monitoring timeouts
@@ -137,14 +139,17 @@ public class FullRestoreEngine extends RestoreEngine {
     @GuardedBy("mPipesLock")
     private boolean mPipesClosed;
     private final BackupEligibilityRules mBackupEligibilityRules;
+
     private FileMetadata mReadOnlyParent = null;
 
-    public FullRestoreEngine(UserBackupManagerService backupManagerService,
+    public FullRestoreEngine(
+            UserBackupManagerService backupManagerService, OperationStorage operationStorage,
             BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
             IBackupManagerMonitor monitor, PackageInfo onlyPackage, boolean allowApks,
             int ephemeralOpToken, boolean isAdbRestore,
             BackupEligibilityRules backupEligibilityRules) {
         mBackupManagerService = backupManagerService;
+        mOperationStorage = operationStorage;
         mEphemeralOpToken = ephemeralOpToken;
         mMonitorTask = monitorTask;
         mObserver = observer;
@@ -170,6 +175,7 @@ public class FullRestoreEngine extends RestoreEngine {
         mAgentTimeoutParameters = null;
         mBuffer = null;
         mBackupManagerService = null;
+        mOperationStorage = null;
         mMonitor = null;
         mMonitorTask = null;
         mOnlyPackage = null;
@@ -435,7 +441,7 @@ public class FullRestoreEngine extends RestoreEngine {
                             mBackupManagerService.prepareOperationTimeout(token,
                                     timeout,
                                     mMonitorTask,
-                                    OP_TYPE_RESTORE_WAIT);
+                                    OpType.RESTORE_WAIT);
 
                             if (FullBackup.OBB_TREE_TOKEN.equals(info.domain)) {
                                 if (DEBUG) {
@@ -668,9 +674,9 @@ public class FullRestoreEngine extends RestoreEngine {
                     long fullBackupAgentTimeoutMillis =
                             mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
                     final AdbRestoreFinishedLatch latch = new AdbRestoreFinishedLatch(
-                            mBackupManagerService, token);
+                            mBackupManagerService, mOperationStorage, token);
                     mBackupManagerService.prepareOperationTimeout(
-                            token, fullBackupAgentTimeoutMillis, latch, OP_TYPE_RESTORE_WAIT);
+                            token, fullBackupAgentTimeoutMillis, latch, OpType.RESTORE_WAIT);
                     if (mTargetApp.processName.equals("system")) {
                         if (MORE_DEBUG) {
                             Slog.d(TAG, "system agent - restoreFinished on thread");

@@ -17,8 +17,8 @@ package com.android.systemui.unfold.updates
 
 import android.annotation.FloatRange
 import android.annotation.IntDef
-import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 import com.android.systemui.statusbar.policy.CallbackController
+import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 
 /**
  * Allows to subscribe to main events related to fold/unfold process such as hinge angle update,
@@ -28,32 +28,30 @@ interface FoldStateProvider : CallbackController<FoldUpdatesListener> {
     fun start()
     fun stop()
 
-    val isFullyOpened: Boolean
+    val isFinishedOpening: Boolean
 
     interface FoldUpdatesListener {
         fun onHingeAngleUpdate(@FloatRange(from = 0.0, to = 180.0) angle: Float)
         fun onFoldUpdate(@FoldUpdate update: Int)
     }
 
-    @IntDef(prefix = ["FOLD_UPDATE_"], value = [
-        FOLD_UPDATE_START_OPENING,
-        FOLD_UPDATE_HALF_OPEN,
-        FOLD_UPDATE_START_CLOSING,
-        FOLD_UPDATE_ABORTED,
-        FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE,
-        FOLD_UPDATE_FINISH_HALF_OPEN,
-        FOLD_UPDATE_FINISH_FULL_OPEN,
-        FOLD_UPDATE_FINISH_CLOSED
-    ])
+    @IntDef(
+        prefix = ["FOLD_UPDATE_"],
+        value =
+            [
+                FOLD_UPDATE_START_OPENING,
+                FOLD_UPDATE_START_CLOSING,
+                FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE,
+                FOLD_UPDATE_FINISH_HALF_OPEN,
+                FOLD_UPDATE_FINISH_FULL_OPEN,
+                FOLD_UPDATE_FINISH_CLOSED])
     @Retention(AnnotationRetention.SOURCE)
     annotation class FoldUpdate
 }
 
 const val FOLD_UPDATE_START_OPENING = 0
-const val FOLD_UPDATE_HALF_OPEN = 1
-const val FOLD_UPDATE_START_CLOSING = 2
-const val FOLD_UPDATE_ABORTED = 3
-const val FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE = 4
-const val FOLD_UPDATE_FINISH_HALF_OPEN = 5
-const val FOLD_UPDATE_FINISH_FULL_OPEN = 6
-const val FOLD_UPDATE_FINISH_CLOSED = 7
+const val FOLD_UPDATE_START_CLOSING = 1
+const val FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE = 2
+const val FOLD_UPDATE_FINISH_HALF_OPEN = 3
+const val FOLD_UPDATE_FINISH_FULL_OPEN = 4
+const val FOLD_UPDATE_FINISH_CLOSED = 5

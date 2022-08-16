@@ -29,7 +29,6 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Insira sua senha de criptografia do dispositivo abaixo. Ela também será usada para criptografar o arquivo de backup."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Digite uma senha para usar para criptografar os dados de backup por completo. Se isso for deixado em branco, sua senha atual de backup será usada:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Se você quer criptografar os dados de backup por completo, digite uma senha abaixo:"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"Como seu dispositivo está criptografado, é necessário criptografar seu backup. Insira uma senha abaixo:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Se os dados restaurados forem criptografada, digite a senha abaixo:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Iniciando backup..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"O backup foi concluído"</string>

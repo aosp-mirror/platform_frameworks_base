@@ -47,6 +47,7 @@ import libcore.util.EmptyArray;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,9 +91,24 @@ final class HdmiCecController {
 
     private static final int MAX_DEDICATED_ADDRESS = 11;
 
-    private static final int MAX_HDMI_MESSAGE_HISTORY = 250;
+    private static final int INITIAL_HDMI_MESSAGE_HISTORY_SIZE = 250;
 
     private static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
+
+    /*
+     * The three flags below determine the action when a message is received. If CEC_DISABLED_IGNORE
+     * bit is set in ACTION_ON_RECEIVE_MSG, then the message is forwarded irrespective of whether
+     * CEC is enabled or disabled. The other flags/bits are also ignored.
+     */
+    private static final int CEC_DISABLED_IGNORE = 1 << 0;
+
+    /* If CEC_DISABLED_LOG_WARNING bit is set, a warning message is printed if CEC is disabled. */
+    private static final int CEC_DISABLED_LOG_WARNING = 1 << 1;
+
+    /* If CEC_DISABLED_DROP_MSG bit is set, the message is dropped if CEC is disabled. */
+    private static final int CEC_DISABLED_DROP_MSG = 1 << 2;
+
+    private static final int ACTION_ON_RECEIVE_MSG = CEC_DISABLED_LOG_WARNING;
 
     /** Cookie for matching the right end point. */
     protected static final int HDMI_CEC_HAL_DEATH_COOKIE = 353;
@@ -123,8 +139,10 @@ final class HdmiCecController {
     private final HdmiControlService mService;
 
     // Stores recent CEC messages and HDMI Hotplug event history for debugging purpose.
-    private final ArrayBlockingQueue<Dumpable> mMessageHistory =
-            new ArrayBlockingQueue<>(MAX_HDMI_MESSAGE_HISTORY);
+    private ArrayBlockingQueue<Dumpable> mMessageHistory =
+            new ArrayBlockingQueue<>(INITIAL_HDMI_MESSAGE_HISTORY_SIZE);
+
+    private final Object mMessageHistoryLock = new Object();
 
     private final NativeWrapper mNativeWrapperImpl;
 
@@ -307,7 +325,8 @@ final class HdmiCecController {
     /**
      * Return the physical address of the device.
      *
-     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     * <p>Declared as package-private. accessed by {@link HdmiControlService} and
+     * {@link HdmiCecNetwork} only.
      *
      * @return CEC physical address of the device. The range of success address
      *         is between 0x0000 and 0xFFFF. If failed it returns -1
@@ -568,6 +587,16 @@ final class HdmiCecController {
     @VisibleForTesting
     void onReceiveCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        if (((ACTION_ON_RECEIVE_MSG & CEC_DISABLED_IGNORE) == 0)
+                && !mService.isControlEnabled()
+                && !HdmiCecMessage.isCecTransportMessage(message.getOpcode())) {
+            if ((ACTION_ON_RECEIVE_MSG & CEC_DISABLED_LOG_WARNING) != 0) {
+                HdmiLogger.warning("Message " + message + " received when cec disabled");
+            }
+            if ((ACTION_ON_RECEIVE_MSG & CEC_DISABLED_DROP_MSG) != 0) {
+                return;
+            }
+        }
         if (mService.isAddressAllocated() && !isAcceptableAddress(message.getDestination())) {
             return;
         }
@@ -666,7 +695,19 @@ final class HdmiCecController {
     @ServiceThreadOnly
     private void handleIncomingCecCommand(int srcAddress, int dstAddress, byte[] body) {
         assertRunOnServiceThread();
-        HdmiCecMessage command = HdmiCecMessageBuilder.of(srcAddress, dstAddress, body);
+
+        if (body.length == 0) {
+            Slog.e(TAG, "Message with empty body received.");
+            return;
+        }
+
+        HdmiCecMessage command = HdmiCecMessage.build(srcAddress, dstAddress, body[0],
+                Arrays.copyOfRange(body, 1, body.length));
+
+        if (command.getValidationResult() != HdmiCecMessageValidator.OK) {
+            Slog.e(TAG, "Invalid message received: " + command);
+        }
+
         HdmiLogger.debug("[R]:" + command);
         addCecMessageToHistory(true /* isReceived */, command);
 
@@ -725,10 +766,37 @@ final class HdmiCecController {
     }
 
     private void addEventToHistory(Dumpable event) {
-        if (!mMessageHistory.offer(event)) {
-            mMessageHistory.poll();
-            mMessageHistory.offer(event);
+        synchronized (mMessageHistoryLock) {
+            if (!mMessageHistory.offer(event)) {
+                mMessageHistory.poll();
+                mMessageHistory.offer(event);
+            }
         }
+    }
+
+    int getMessageHistorySize() {
+        synchronized (mMessageHistoryLock) {
+            return mMessageHistory.size() + mMessageHistory.remainingCapacity();
+        }
+    }
+
+    boolean setMessageHistorySize(int newSize) {
+        if (newSize < INITIAL_HDMI_MESSAGE_HISTORY_SIZE) {
+            return false;
+        }
+        ArrayBlockingQueue<Dumpable> newMessageHistory = new ArrayBlockingQueue<>(newSize);
+
+        synchronized (mMessageHistoryLock) {
+            if (newSize < mMessageHistory.size()) {
+                for (int i = 0; i < mMessageHistory.size() - newSize; i++) {
+                    mMessageHistory.poll();
+                }
+            }
+
+            newMessageHistory.addAll(mMessageHistory);
+            mMessageHistory = newMessageHistory;
+        }
+        return true;
     }
 
     void dump(final IndentingPrintWriter pw) {

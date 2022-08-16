@@ -39,10 +39,14 @@ import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.wm.shell.animation.FlingAnimationUtils;
+
+import java.util.function.Consumer;
 
 public class SwipeHelper implements Gefingerpoken {
     static final String TAG = "com.android.systemui.SwipeHelper";
@@ -82,6 +86,7 @@ public class SwipeHelper implements Gefingerpoken {
     private final int mSwipeDirection;
     private final VelocityTracker mVelocityTracker;
     private final FalsingManager mFalsingManager;
+    private final FeatureFlags mFeatureFlags;
 
     private float mInitialTouchPos;
     private float mPerpendicularInitialTouchPos;
@@ -128,7 +133,8 @@ public class SwipeHelper implements Gefingerpoken {
 
     public SwipeHelper(
             int swipeDirection, Callback callback, Resources resources,
-            ViewConfiguration viewConfiguration, FalsingManager falsingManager) {
+            ViewConfiguration viewConfiguration, FalsingManager falsingManager,
+            FeatureFlags featureFlags) {
         mCallback = callback;
         mHandler = new Handler();
         mSwipeDirection = swipeDirection;
@@ -146,6 +152,7 @@ public class SwipeHelper implements Gefingerpoken {
         mFadeDependingOnAmountSwiped = resources.getBoolean(
                 R.bool.config_fadeDependingOnAmountSwiped);
         mFalsingManager = falsingManager;
+        mFeatureFlags = featureFlags;
         mFlingAnimationUtils = new FlingAnimationUtils(resources.getDisplayMetrics(),
                 getMaxEscapeAnimDuration() / 1000f);
     }
@@ -372,6 +379,11 @@ public class SwipeHelper implements Gefingerpoken {
     }
 
     /**
+     * After dismissChild() and related animation finished, this function will be called.
+     */
+    protected void onDismissChildWithAnimationFinished() {}
+
+    /**
      * @param view The view to be dismissed
      * @param velocity The desired pixels/second speed at which the view should move
      * @param useAccelerateInterpolator Should an accelerating Interpolator be used
@@ -389,7 +401,7 @@ public class SwipeHelper implements Gefingerpoken {
      * @param useAccelerateInterpolator Should an accelerating Interpolator be used
      * @param fixedDuration If not 0, this exact duration will be taken
      */
-    public void dismissChild(final View animView, float velocity, final Runnable endAction,
+    public void dismissChild(final View animView, float velocity, final Consumer<Boolean> endAction,
             long delay, boolean useAccelerateInterpolator, long fixedDuration,
             boolean isDismissAll) {
         final boolean canBeDismissed = mCallback.canChildBeDismissed(animView);
@@ -436,6 +448,7 @@ public class SwipeHelper implements Gefingerpoken {
 
         Animator anim = getViewTranslationAnimator(animView, newPos, updateListener);
         if (anim == null) {
+            onDismissChildWithAnimationFinished();
             return;
         }
         if (useAccelerateInterpolator) {
@@ -476,11 +489,12 @@ public class SwipeHelper implements Gefingerpoken {
                     resetSwipeState();
                 }
                 if (endAction != null) {
-                    endAction.run();
+                    endAction.accept(mCancelled);
                 }
                 if (!mDisableHwLayers) {
                     animView.setLayerType(View.LAYER_TYPE_NONE, null);
                 }
+                onDismissChildWithAnimationFinished();
             }
         });
 
@@ -505,6 +519,11 @@ public class SwipeHelper implements Gefingerpoken {
         // Do nothing
     }
 
+    /**
+     * After snapChild() and related animation finished, this function will be called.
+     */
+    protected void onSnapChildWithAnimationFinished() {}
+
     public void snapChild(final View animView, final float targetLeft, float velocity) {
         final boolean canBeDismissed = mCallback.canChildBeDismissed(animView);
         AnimatorUpdateListener updateListener = animation -> onTranslationUpdate(animView,
@@ -512,6 +531,7 @@ public class SwipeHelper implements Gefingerpoken {
 
         Animator anim = getViewTranslationAnimator(animView, targetLeft, updateListener);
         if (anim == null) {
+            onSnapChildWithAnimationFinished();
             return;
         }
         anim.addListener(new AnimatorListenerAdapter() {
@@ -529,6 +549,7 @@ public class SwipeHelper implements Gefingerpoken {
                     updateSwipeProgressFromOffset(animView, canBeDismissed);
                     resetSwipeState();
                 }
+                onSnapChildWithAnimationFinished();
             }
         });
         prepareSnapBackAnimation(animView, anim);
@@ -781,7 +802,7 @@ public class SwipeHelper implements Gefingerpoken {
     }
 
     private boolean isAvailableToDragAndDrop(View v) {
-        if (v.getResources().getBoolean(R.bool.config_notificationToContents)) {
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_DRAG_TO_CONTENTS)) {
             if (v instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow enr = (ExpandableNotificationRow) v;
                 boolean canBubble = enr.getEntry().canBubble();

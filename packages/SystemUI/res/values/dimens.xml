@@ -30,19 +30,21 @@
     <dimen name="navigation_bar_deadzone_size_max">32dp</dimen>
 
     <!-- dimensions for the navigation bar handle -->
-    <dimen name="navigation_handle_radius">1dp</dimen>
-    <dimen name="navigation_handle_bottom">6dp</dimen>
+    <dimen name="navigation_handle_radius">2dp</dimen>
+    <dimen name="navigation_handle_bottom">10dp</dimen>
     <dimen name="navigation_handle_sample_horizontal_margin">10dp</dimen>
-    <dimen name="navigation_home_handle_width">72dp</dimen>
+    <dimen name="navigation_home_handle_width">108dp</dimen>
 
     <!-- Size of the nav bar edge panels, should be greater to the
          edge sensitivity + the drag threshold -->
-    <dimen name="navigation_edge_panel_width">70dp</dimen>
+    <dimen name="navigation_edge_panel_width">105dp</dimen>
     <!-- Padding at the end of the navigation panel to allow the arrow not to be clipped off -->
     <dimen name="navigation_edge_panel_padding">8dp</dimen>
-    <dimen name="navigation_edge_panel_height">96dp</dimen>
+    <dimen name="navigation_edge_panel_height">268dp</dimen>
     <!-- The threshold to drag to trigger the edge action -->
     <dimen name="navigation_edge_action_drag_threshold">16dp</dimen>
+    <!-- The threshold to progress back animation for edge swipe -->
+    <dimen name="navigation_edge_action_progress_threshold">400dp</dimen>
     <!-- The minimum display position of the arrow on the screen -->
     <dimen name="navigation_edge_arrow_min_y">64dp</dimen>
     <!-- The amount by which the arrow is shifted to avoid the finger-->
@@ -137,7 +139,7 @@
     <!-- Height of a heads up notification in the status bar -->
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
 
-    <!-- Side padding on the lockscreen on the side of notifications -->
+    <!-- Side padding on the side of notifications -->
     <dimen name="notification_side_paddings">16dp</dimen>
 
     <!-- padding between the heads up and the statusbar -->
@@ -258,39 +260,43 @@
 
     <!-- Dimensions related to screenshots -->
 
-    <!-- The padding on the global screenshot background image -->
-    <dimen name="global_screenshot_legacy_bg_padding">20dp</dimen>
-    <dimen name="global_screenshot_bg_padding">20dp</dimen>
-    <dimen name="global_screenshot_bg_protection_height">400dp</dimen>
-    <dimen name="global_screenshot_x_scale">80dp</dimen>
-    <dimen name="screenshot_bg_protection_height">242dp</dimen>
-    <dimen name="screenshot_preview_elevation">4dp</dimen>
-    <dimen name="screenshot_offset_y">8dp</dimen>
-    <dimen name="screenshot_offset_x">16dp</dimen>
-    <dimen name="screenshot_dismiss_button_tappable_size">48dp</dimen>
-    <dimen name="screenshot_dismiss_button_margin">8dp</dimen>
-    <dimen name="screenshot_action_container_corner_radius">18dp</dimen>
-    <dimen name="screenshot_action_container_padding_vertical">4dp</dimen>
-    <dimen name="screenshot_action_container_margin_horizontal">8dp</dimen>
-    <dimen name="screenshot_action_container_padding_right">8dp</dimen>
-    <!-- Radius of the chip background on global screenshot actions -->
-    <dimen name="screenshot_button_corner_radius">8dp</dimen>
-    <!-- Margin between successive chips -->
-    <dimen name="screenshot_action_chip_margin_start">8dp</dimen>
-    <!-- Padding to make tappable chip height 48dp (18+11+11+4+4) -->
-    <dimen name="screenshot_action_chip_margin_vertical">4dp</dimen>
-    <dimen name="screenshot_action_chip_padding_vertical">11dp</dimen>
-    <dimen name="screenshot_action_chip_icon_size">18sp</dimen>
-    <!-- Padding on each side of the icon for icon-only chips -->
-    <dimen name="screenshot_action_chip_icon_only_padding_horizontal">14dp</dimen>
-    <!-- Padding at the edges of the chip for icon-and-text chips -->
-    <dimen name="screenshot_action_chip_padding_horizontal">12dp</dimen>
-    <!-- Spacing between chip icon and chip text -->
-    <dimen name="screenshot_action_chip_spacing">8dp</dimen>
-    <dimen name="screenshot_action_chip_text_size">14sp</dimen>
-    <dimen name="screenshot_dismissal_height_delta">80dp</dimen>
-    <dimen name="screenshot_crop_handle_thickness">3dp</dimen>
 
+    <dimen name="screenshot_crop_handle_thickness">3dp</dimen>
+    <dimen name="long_screenshot_action_bar_top_margin">8dp</dimen>
+
+    <!-- Dimensions shared between "overlays" (clipboard and screenshot preview UIs) -->
+    <!-- Constrained size of the floating overlay preview -->
+    <dimen name="overlay_x_scale">80dp</dimen>
+    <!-- Radius of the chip background on floating overlay actions -->
+    <dimen name="overlay_button_corner_radius">8dp</dimen>
+    <!-- Margin between successive chips -->
+    <dimen name="overlay_action_chip_margin_start">8dp</dimen>
+    <!-- Padding to make tappable chip height 48dp (18+11+11+4+4) -->
+    <dimen name="overlay_action_chip_margin_vertical">4dp</dimen>
+    <dimen name="overlay_action_chip_padding_vertical">11dp</dimen>
+    <dimen name="overlay_action_chip_icon_size">18sp</dimen>
+    <!-- Padding on each side of the icon for icon-only chips -->
+    <dimen name="overlay_action_chip_icon_only_padding_horizontal">14dp</dimen>
+    <!-- Padding at the edges of the chip for icon-and-text chips -->
+    <dimen name="overlay_action_chip_padding_horizontal">12dp</dimen>
+    <!-- Spacing between chip icon and chip text -->
+    <dimen name="overlay_action_chip_spacing">8dp</dimen>
+    <dimen name="overlay_action_chip_text_size">14sp</dimen>
+    <dimen name="overlay_offset_x">16dp</dimen>
+    <dimen name="overlay_action_container_margin_horizontal">8dp</dimen>
+    <dimen name="overlay_bg_protection_height">242dp</dimen>
+    <dimen name="overlay_action_container_corner_radius">18dp</dimen>
+    <dimen name="overlay_action_container_padding_vertical">4dp</dimen>
+    <dimen name="overlay_action_container_padding_right">8dp</dimen>
+    <dimen name="overlay_dismiss_button_tappable_size">48dp</dimen>
+    <dimen name="overlay_dismiss_button_margin">8dp</dimen>
+    <dimen name="overlay_border_width">4dp</dimen>
+    <!-- need a negative margin for some of the constraints. should be overlay_border_width * -1 -->
+    <dimen name="overlay_border_width_neg">-4dp</dimen>
+
+    <dimen name="clipboard_preview_size">@dimen/overlay_x_scale</dimen>
+    <dimen name="clipboard_overlay_min_font">10sp</dimen>
+    <dimen name="clipboard_overlay_max_font">50sp</dimen>
 
     <!-- The width of the view containing navigation buttons -->
     <dimen name="navigation_key_width">70dp</dimen>
@@ -298,17 +304,12 @@
     <!-- The width/height of the icon of a navigation button -->
     <dimen name="navigation_icon_size">32dp</dimen>
 
-    <dimen name="navigation_key_padding">0dp</dimen>
-
     <!-- The padding on the side of the navigation bar. Must be greater than or equal to
          navigation_extra_key_width -->
     <dimen name="navigation_side_padding">36dp</dimen>
 
     <!-- Move the back button drawable for 3 button layout upwards in ime mode and in portrait -->
     <dimen name="navbar_back_button_ime_offset">2dp</dimen>
-
-    <!-- Amount of close_handle that will NOT overlap the notification list -->
-    <dimen name="close_handle_underlap">32dp</dimen>
 
     <!-- Height of the status bar header bar in the car setting. -->
     <dimen name="car_status_bar_header_height">128dp</dimen>
@@ -324,17 +325,21 @@
          car setting. -->
     <dimen name="car_qs_header_system_icons_area_height">54dp</dimen>
 
-    <!-- The height of the quick settings footer that holds the user switcher, settings icon,
-         etc. -->
-    <dimen name="qs_footer_height">96dp</dimen>
+    <!-- The height of the quick settings footer that holds the pagination dots and edit button -->
+    <dimen name="qs_footer_height">48dp</dimen>
+
+    <!-- 40dp (circles) + 8dp (circle padding) + 8dp (top) + 4dp (bottom) -->
+    <dimen name="footer_actions_height">60dp</dimen>
 
     <!-- The size of each of the icon buttons in the QS footer -->
     <dimen name="qs_footer_action_button_size">48dp</dimen>
 
     <dimen name="qs_footer_action_corner_radius">20dp</dimen>
 
-    <!-- (48dp - 44dp) / 2 -->
-    <dimen name="qs_footer_action_inset">2dp</dimen>
+    <!-- (48dp - 40dp) / 2 -->
+    <dimen name="qs_footer_action_inset">4dp</dimen>
+    <dimen name="qs_footer_actions_bottom_padding">4dp</dimen>
+    <dimen name="qs_footer_action_inset_negative">-4dp</dimen>
 
     <!-- Margins on each side of QS Footer -->
     <dimen name="qs_footer_margin">2dp</dimen>
@@ -359,21 +364,33 @@
     <dimen name="match_parent">-1px</dimen>
 
     <!-- Height of status bar in split shade mode - visible only on large screens -->
-    <dimen name="split_shade_header_height">@*android:dimen/quick_qs_offset_height</dimen>
-    <dimen name="split_shade_header_min_height">@dimen/qs_header_row_min_height</dimen>
+    <dimen name="large_screen_shade_header_height">@*android:dimen/quick_qs_offset_height</dimen>
+    <dimen name="large_screen_shade_header_min_height">@dimen/qs_header_row_min_height</dimen>
 
-    <!-- The top margin of the panel that holds the list of notifications. -->
+    <!-- The top margin of the panel that holds the list of notifications.
+         On phones it's always 0dp but it's overridden in Car UI
+    -->
     <dimen name="notification_panel_margin_top">0dp</dimen>
 
-    <!-- The bottom margin of the panel that holds the list of notifications. -->
-    <dimen name="notification_panel_margin_bottom">0dp</dimen>
+    <!-- The minimum content height for the split shade NSSL.
+         It is used because if the height is too small, the expansion motion is too fast.
+         Note that the value of 256dp is more or less a random value and can be changed to tweak
+         the expansion motion.
+    -->
+    <dimen name="nssl_split_shade_min_content_height">256dp</dimen>
 
-    <dimen name="notification_panel_width">@dimen/match_parent</dimen>
+    <dimen name="notification_panel_margin_bottom">32dp</dimen>
+
+    <!-- The bottom padding of the panel that holds the list of notifications. -->
+    <dimen name="notification_panel_padding_bottom">0dp</dimen>
+
+    <dimen name="split_shade_notifications_scrim_margin_bottom">0dp</dimen>
+
+    <dimen name="shelf_and_lock_icon_overlap">@dimen/notification_shelf_height</dimen>
+
+    <dimen name="notification_panel_margin_horizontal">0dp</dimen>
 
     <dimen name="brightness_mirror_height">48dp</dimen>
-
-    <!-- The width of the panel that holds the quick settings. -->
-    <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
     <dimen name="volume_dialog_panel_transparent_padding_right">8dp</dimen>
 
@@ -425,7 +442,14 @@
     <!-- Size of the icon inside each item in the ringer selector drawer. -->
     <dimen name="volume_ringer_drawer_icon_size">24dp</dimen>
 
-    <dimen name="rounded_corner_content_padding">0dp</dimen>
+    <!-- The maximum width of the navigation bar ripples. -->
+    <dimen name="key_button_ripple_max_width">95dp</dimen>
+
+    <dimen name="rounded_corner_content_padding">
+        @*android:dimen/rounded_corner_content_padding
+    </dimen>
+
+    <dimen name="navigation_key_padding">0dp</dimen>
 
     <!-- Floating rotation button -->
     <dimen name="floating_rotation_button_diameter">40dp</dimen>
@@ -443,18 +467,31 @@
     <dimen name="pull_span_min">25dp</dimen>
 
     <dimen name="qs_corner_radius">28dp</dimen>
-    <dimen name="qs_tile_height">84dp</dimen>
+    <dimen name="qs_tile_height">80dp</dimen>
     <dimen name="qs_tile_margin_horizontal">8dp</dimen>
     <dimen name="qs_tile_margin_vertical">@dimen/qs_tile_margin_horizontal</dimen>
     <dimen name="qs_tile_margin_top_bottom">4dp</dimen>
     <dimen name="qs_brightness_margin_top">8dp</dimen>
     <dimen name="qs_brightness_margin_bottom">24dp</dimen>
     <dimen name="qqs_layout_margin_top">16dp</dimen>
-    <!-- The height of the qs customize header. Should be
-         (qs_panel_padding_top (48dp) +  brightness_mirror_height (48dp) + qs_brightness_margin_top(8dp) + qs_brightness_margin_bottom (24dp)) -
-         (Toolbar_minWidth (56dp) + qs_tile_margin_top_bottom (4dp))
-    -->
-    <dimen name="qs_customize_header_min_height">68dp</dimen>
+    <dimen name="qqs_layout_padding_bottom">24dp</dimen>
+
+    <!-- Most of the time it should be the same as notification_side_paddings as it's vertically
+         aligned with notifications. The exception is split shade when this value becomes
+         independent  -->
+    <dimen name="qs_horizontal_margin">@dimen/notification_side_paddings</dimen>
+
+    <!-- Most of the time it should be the same as notification_shade_content_margin_horizontal as
+         it's vertically aligned with notifications. The exception is split shade when this value
+         becomes independent  -->
+    <dimen name="qs_content_horizontal_padding">@dimen/notification_shade_content_margin_horizontal</dimen>
+
+    <!-- Most of the time it should be the same as notification_side_paddings as it's vertically
+        aligned with notifications. That's not the case on large screen when we have either split
+        shade and QS is not above notifications or in portrait shade when notification scrim is no
+        longer full width and next page of tiles should be at the edge of the screen -->
+    <dimen name="qs_tiles_page_horizontal_margin">@dimen/notification_side_paddings</dimen>
+
     <dimen name="qs_customize_internal_side_paddings">8dp</dimen>
     <dimen name="qs_icon_size">20dp</dimen>
     <dimen name="qs_side_view_size">28dp</dimen>
@@ -472,28 +509,13 @@
     <dimen name="qs_tile_text_size">14sp</dimen>
     <dimen name="qs_panel_padding">16dp</dimen>
     <dimen name="qs_dual_tile_padding_horizontal">6dp</dimen>
-    <dimen name="qs_panel_padding_bottom">0dp</dimen>
+    <dimen name="qs_panel_elevation">4dp</dimen>
+    <dimen name="qs_panel_padding_bottom">@dimen/footer_actions_height</dimen>
     <dimen name="qs_panel_padding_top">48dp</dimen>
-    <dimen name="qs_detail_header_padding">0dp</dimen>
-    <dimen name="qs_detail_image_width">56dp</dimen>
-    <dimen name="qs_detail_image_height">56dp</dimen>
-    <dimen name="qs_detail_image_padding">16dp</dimen>
-    <dimen name="qs_detail_item_height">48dp</dimen>
-    <dimen name="qs_detail_header_text_size">20sp</dimen>
-    <dimen name="qs_detail_button_text_size">14sp</dimen>
-    <dimen name="qs_detail_item_primary_text_size">16sp</dimen>
-    <dimen name="qs_detail_item_secondary_text_size">14sp</dimen>
-    <dimen name="qs_detail_empty_text_size">14sp</dimen>
-    <dimen name="qs_detail_header_margin_top">28dp</dimen>
-    <dimen name="qs_detail_header_text_padding">16dp</dimen>
+
     <dimen name="qs_data_usage_text_size">14sp</dimen>
     <dimen name="qs_data_usage_usage_text_size">36sp</dimen>
-    <dimen name="qs_detail_padding_start">16dp</dimen>
-    <dimen name="qs_detail_items_padding_top">4dp</dimen>
-    <dimen name="qs_detail_item_icon_size">24dp</dimen>
-    <dimen name="qs_detail_item_icon_width">32dp</dimen>
-    <dimen name="qs_detail_item_icon_marginStart">0dp</dimen>
-    <dimen name="qs_detail_item_icon_marginEnd">20dp</dimen>
+
     <dimen name="qs_header_mobile_icon_size">@dimen/status_bar_icon_drawing_size</dimen>
     <dimen name="qs_header_carrier_separator_width">6dp</dimen>
     <dimen name="qs_carrier_margin_width">4dp</dimen>
@@ -507,9 +529,6 @@
     <dimen name="qs_security_footer_background_inset">0dp</dimen>
     <dimen name="qs_security_footer_corner_radius">28dp</dimen>
 
-    <!-- Desired qs icon overlay size. -->
-    <dimen name="qs_detail_icon_overlay_size">24dp</dimen>
-
     <dimen name="segmented_button_spacing">0dp</dimen>
     <dimen name="borderless_button_radius">2dp</dimen>
 
@@ -520,8 +539,6 @@
 
     <!-- Padding between subtitles and the following text in the QSFooter dialog -->
     <dimen name="qs_footer_dialog_subtitle_padding">20dp</dimen>
-
-    <dimen name="qs_detail_margin_top">@*android:dimen/quick_qs_offset_height</dimen>
 
     <!-- Zen mode panel: spacing between two-line condition upper and lower lines -->
     <dimen name="zen_mode_condition_detail_item_interline_spacing">4dp</dimen>
@@ -555,15 +572,16 @@
     <dimen name="notification_shade_content_margin_horizontal">16dp</dimen>
 
     <!-- The top margin for the notification children container in its non-expanded form. -->
-    <dimen name="notification_children_container_margin_top">
-        @*android:dimen/notification_content_margin_top
-    </dimen>
+    <dimen name="notification_children_container_margin_top">48dp</dimen>
 
     <!-- The height of the gap between adjacent notification sections. -->
     <dimen name="notification_section_divider_height">@dimen/notification_side_paddings</dimen>
 
+    <!-- The height of the gap between adjacent notification sections on lockscreen. -->
+    <dimen name="notification_section_divider_height_lockscreen">4dp</dimen>
+
     <!-- Size of the face pile shown on one-line (children of a group) conversation notifications -->
-    <dimen name="conversation_single_line_face_pile_size">25dp</dimen>
+    <dimen name="conversation_single_line_face_pile_size">24dp</dimen>
 
     <!-- Size of the avatars within a face pile shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_face_pile_avatar_size">17dp</dimen>
@@ -632,10 +650,13 @@
     <dimen name="panel_overshoot_amount">16dp</dimen>
 
     <!-- The padding between notification children when collapsed -->
-    <dimen name="notification_children_padding">4dp</dimen>
+    <dimen name="notification_children_padding">8dp</dimen>
 
     <!-- The padding on top of the first notification to the children container -->
     <dimen name="notification_children_container_top_padding">8dp</dimen>
+
+    <!-- The padding on the bottom of the last group hybrid notification when collapsed -->
+    <dimen name="notification_children_collapsed_bottom_padding">16dp</dimen>
 
     <!-- end margin for system icons if multi user switch is hidden -->
     <dimen name="system_icons_switcher_hidden_expanded_margin">16dp</dimen>
@@ -715,9 +736,6 @@
     <dimen name="wide_type_icon_start_padding_qs">3dp</dimen>
 
     <dimen name="signal_indicator_to_icon_frame_spacing">3dp</dimen>
-
-    <!-- The maximum width of the navigation bar ripples. -->
-    <dimen name="key_button_ripple_max_width">95dp</dimen>
 
     <!-- Starting margin before the signal cluster -->
 
@@ -874,7 +892,8 @@
     <dimen name="remote_input_history_extra_height">60dp</dimen>
 
     <!-- Biometric Dialog values -->
-    <dimen name="biometric_dialog_biometric_icon_size">64dp</dimen>
+    <dimen name="biometric_dialog_face_icon_size">64dp</dimen>
+    <dimen name="biometric_dialog_fingerprint_icon_size">80dp</dimen>
     <dimen name="biometric_dialog_button_negative_max_width">160dp</dimen>
     <dimen name="biometric_dialog_button_positive_max_width">136dp</dimen>
     <dimen name="biometric_dialog_corner_size">4dp</dimen>
@@ -938,6 +957,9 @@
     <!--  Three privacy items. This value must not be exceeded  -->
     <dimen name="ongoing_appops_chip_max_width">76dp</dimen>
     <dimen name="ongoing_appops_dot_diameter">6dp</dimen>
+    <dimen name="ongoing_appops_chip_min_animation_width">10dp</dimen>
+    <dimen name="ongoing_appops_chip_animation_in_status_bar_translation_x">15dp</dimen>
+    <dimen name="ongoing_appops_chip_animation_out_status_bar_translation_x">7dp</dimen>
     <!--  Total minimum padding to enforce to ensure that the dot can always show  -->
     <dimen name="ongoing_appops_dot_min_padding">20dp</dimen>
 
@@ -953,13 +975,9 @@
 
     <!-- Size of media cards in the QSPanel carousel -->
     <dimen name="qs_media_padding">16dp</dimen>
-    <dimen name="qs_media_album_size_small">72dp</dimen>
-    <dimen name="qs_media_album_size">84dp</dimen>
     <dimen name="qs_media_album_radius">14dp</dimen>
-    <dimen name="qs_media_album_device_padding">26dp</dimen>
     <dimen name="qs_media_info_margin">12dp</dimen>
     <dimen name="qs_media_info_spacing">8dp</dimen>
-    <dimen name="qs_media_icon_size">20dp</dimen>
     <dimen name="qs_media_icon_offset">4dp</dimen>
     <dimen name="qs_center_guideline_padding">10dp</dimen>
     <dimen name="qs_media_action_spacing">4dp</dimen>
@@ -968,16 +986,38 @@
     <dimen name="qs_seamless_icon_size">12dp</dimen>
     <dimen name="qs_media_disabled_seekbar_height">1dp</dimen>
     <dimen name="qs_media_enabled_seekbar_height">2dp</dimen>
-    <dimen name="qs_media_enabled_seekbar_vertical_padding">28dp</dimen>
-    <dimen name="qs_media_disabled_seekbar_vertical_padding">29dp</dimen>
+    <dimen name="qs_media_app_icon_size">24dp</dimen>
+
+    <dimen name="qs_media_session_enabled_seekbar_vertical_padding">15dp</dimen>
+    <dimen name="qs_media_session_disabled_seekbar_vertical_padding">16dp</dimen>
+    <dimen name="qs_media_session_height_expanded">184dp</dimen>
+    <dimen name="qs_media_session_height_collapsed">128dp</dimen>
+    <dimen name="qs_media_seekbar_progress_wavelength">20dp</dimen>
+    <dimen name="qs_media_seekbar_progress_amplitude">1.5dp</dimen>
+    <dimen name="qs_media_seekbar_progress_phase">8dp</dimen>
+    <dimen name="qs_media_seekbar_progress_stroke_width">2dp</dimen>
+    <dimen name="qs_media_session_collapsed_guideline">144dp</dimen>
 
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
-    <dimen name="qs_aa_media_rec_album_size_collapsed">72dp</dimen>
-    <dimen name="qs_aa_media_rec_album_size_expanded">76dp</dimen>
-    <dimen name="qs_aa_media_gradient_bg_width">32dp</dimen>
-    <dimen name="qs_aa_media_rec_album_margin">8dp</dimen>
-    <dimen name="qs_aa_media_rec_album_margin_vert">4dp</dimen>
-    <dimen name="qq_aa_media_rec_header_text_size">16sp</dimen>
+    <dimen name="qs_media_rec_album_size">88dp</dimen>
+    <dimen name="qs_media_rec_album_side_margin">16dp</dimen>
+    <dimen name="qs_media_rec_album_bottom_margin">8dp</dimen>
+
+    <!-- Media tap-to-transfer chip for sender device -->
+    <dimen name="media_ttt_chip_outer_padding">16dp</dimen>
+    <dimen name="media_ttt_text_size">16sp</dimen>
+    <dimen name="media_ttt_app_icon_size">24dp</dimen>
+    <dimen name="media_ttt_status_icon_size">20dp</dimen>
+    <dimen name="media_ttt_undo_button_vertical_padding">8dp</dimen>
+    <dimen name="media_ttt_undo_button_vertical_negative_margin">-8dp</dimen>
+    <dimen name="media_ttt_last_item_start_margin">12dp</dimen>
+
+    <!-- Media tap-to-transfer chip for receiver device -->
+    <dimen name="media_ttt_chip_size_receiver">100dp</dimen>
+    <dimen name="media_ttt_icon_size_receiver">95dp</dimen>
+    <!-- Since the generic icon isn't circular, we need to scale it down so it still fits within
+         the circular chip. -->
+    <dimen name="media_ttt_generic_icon_size_receiver">70dp</dimen>
 
     <!-- Window magnification -->
     <dimen name="magnification_border_drag_size">35dp</dimen>
@@ -1003,6 +1043,7 @@
     <dimen name="controls_header_bottom_margin">24dp</dimen>
     <dimen name="controls_header_app_icon_size">24dp</dimen>
     <dimen name="controls_top_margin">48dp</dimen>
+    <dimen name="controls_padding_horizontal">0dp</dimen>
     <dimen name="control_header_text_size">20sp</dimen>
     <dimen name="control_item_text_size">16sp</dimen>
     <dimen name="control_menu_item_text_size">16sp</dimen>
@@ -1013,6 +1054,7 @@
     <dimen name="control_spinner_padding_horizontal">20dp</dimen>
     <dimen name="control_text_size">14sp</dimen>
     <dimen name="control_icon_size">24dp</dimen>
+    <dimen name="control_chevron_icon_size">20dp</dimen>
     <dimen name="control_spacing">8dp</dimen>
     <dimen name="control_list_divider">1dp</dimen>
     <dimen name="control_corner_radius">14dp</dimen>
@@ -1029,6 +1071,9 @@
     <dimen name="controls_setup_subtitle">14sp</dimen>
     <dimen name="controls_setup_vertical_padding">52dp</dimen>
     <dimen name="controls_detail_dialog_header_height">52dp</dimen>
+    <!-- Limit the TaskView to this percentage of the overall screen width (0.0 - 1.0) -->
+    <item name="controls_task_view_width_percentage" translatable="false" format="float" type="dimen">1.0</item>
+    <dimen name="controls_task_view_right_margin">0dp</dimen>
 
     <!-- Home Controls activity view detail panel-->
     <dimen name="controls_activity_view_corner_radius">@*android:dimen/config_bottomDialogCornerRadius</dimen>
@@ -1087,28 +1132,74 @@
 
     <!-- Output switcher panel related dimensions -->
     <dimen name="media_output_dialog_list_margin">12dp</dimen>
-    <dimen name="media_output_dialog_list_max_height">364dp</dimen>
-    <dimen name="media_output_dialog_header_album_icon_size">48dp</dimen>
+    <dimen name="media_output_dialog_list_max_height">355dp</dimen>
+    <dimen name="media_output_dialog_header_album_icon_size">72dp</dimen>
     <dimen name="media_output_dialog_header_back_icon_size">32dp</dimen>
     <dimen name="media_output_dialog_header_icon_padding">16dp</dimen>
-    <dimen name="media_output_dialog_icon_corner_radius">8dp</dimen>
+    <dimen name="media_output_dialog_icon_corner_radius">16dp</dimen>
     <dimen name="media_output_dialog_title_anim_y_delta">12.5dp</dimen>
+    <dimen name="media_output_dialog_app_tier_icon_size">20dp</dimen>
+    <dimen name="media_output_dialog_background_radius">16dp</dimen>
+    <dimen name="media_output_dialog_active_background_radius">28dp</dimen>
 
-    <!-- Distance that the full shade transition takes in order for qs to fully transition to the
-         shade -->
-    <dimen name="lockscreen_shade_qs_transition_distance">200dp</dimen>
+    <!-- Distance that the full shade transition takes in order to complete by tapping on a button
+         like "expand". -->
+    <dimen name="lockscreen_shade_transition_by_tap_distance">200dp</dimen>
+
+    <!-- Distance that the full shade transition takes in order to complete.  -->
+    <dimen name="lockscreen_shade_full_transition_distance">80dp</dimen>
 
     <!-- Distance that the full shade transition takes in order for scrim to fully transition to
          the shade (in alpha) -->
-    <dimen name="lockscreen_shade_scrim_transition_distance">80dp</dimen>
+    <dimen name="lockscreen_shade_scrim_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that it takes in order for the notifications scrim fade in to start. -->
+    <dimen name="lockscreen_shade_notifications_scrim_transition_delay">0dp</dimen>
+
+    <!-- Distance that it takes for the notifications scrim to fully fade if after it started. -->
+    <dimen name="lockscreen_shade_notifications_scrim_transition_distance">@dimen/lockscreen_shade_scrim_transition_distance</dimen>
+
+    <!-- Distance that the full shade transition takes in order for the keyguard content on
+         NotificationPanelViewController to fully fade (e.g. Clock & Smartspace) -->
+    <dimen name="lockscreen_shade_npvc_keyguard_content_alpha_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that the full shade transition takes in order for the notification shelf to fully
+         expand. -->
+    <dimen name="lockscreen_shade_notif_shelf_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that the full shade transition takes in order for the Quick Settings to fully
+         fade and expand. -->
+    <dimen name="lockscreen_shade_qs_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that the full shade transition takes in order for depth of the wallpaper to fully
+         change.  -->
+    <dimen name="lockscreen_shade_depth_controller_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that the full shade transition takes in order for the UDFPS Keyguard View to fully
+         fade. -->
+    <dimen name="lockscreen_shade_udfps_keyguard_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Used for StatusBar to know that a transition is in progress. At the moment it only checks
+         whether the progress is > 0, therefore this value is not very important. -->
+    <dimen name="lockscreen_shade_status_bar_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that the full shade transition takes in order for the keyguard elements to fully
+         translate into their final position. -->
+    <dimen name="lockscreen_shade_keyguard_transition_distance">@dimen/lockscreen_shade_media_transition_distance</dimen>
+
+    <!-- The amount of vertical offset for the keyguard during the full shade transition. -->
+    <dimen name="lockscreen_shade_keyguard_transition_vertical_offset">0dp</dimen>
 
     <!-- Distance that the full shade transition takes in order for media to fully transition to
          the shade -->
     <dimen name="lockscreen_shade_media_transition_distance">120dp</dimen>
 
-    <!-- Maximum overshoot for the topPadding of notifications when transitioning to the full
-         shade -->
-    <dimen name="lockscreen_shade_notification_movement">24dp</dimen>
+    <!-- Maximum over scroll amount for the shade when transition to the full shade. -->
+    <dimen name="lockscreen_shade_max_over_scroll_amount">24dp</dimen>
+
+    <!-- Maximum over scroll amount for the shade when transition to the full shade.
+         Only used for split-shade. -->
+    <dimen name="shade_max_over_scroll_amount">@dimen/lockscreen_shade_max_over_scroll_amount</dimen>
 
     <!-- Maximum overshoot for the pulse expansion -->
     <dimen name="pulse_expansion_max_top_overshoot">32dp</dimen>
@@ -1279,6 +1370,10 @@
 
     <dimen name="drag_and_drop_icon_size">70dp</dimen>
 
+    <dimen name="qs_tile_service_request_dialog_width">304dp</dimen>
+    <dimen name="qs_tile_service_request_tile_width">192dp</dimen>
+    <dimen name="qs_tile_service_request_content_space">24dp</dimen>
+
     <!-- Dimensions for unified SystemUI dialogs styling. Used by Theme.SystemUI.Dialog and
          alert_dialog_systemui.xml
       -->
@@ -1294,4 +1389,79 @@
     <!-- ************************************************************************* -->
 
     <dimen name="keyguard_unfold_translation_x">16dp</dimen>
+
+    <dimen name="fgs_manager_list_top_spacing">12dp</dimen>
+
+    <!-- Dream overlay related dimensions -->
+    <dimen name="dream_overlay_status_bar_height">60dp</dimen>
+    <dimen name="dream_overlay_status_bar_margin">40dp</dimen>
+    <dimen name="dream_overlay_status_icon_margin">8dp</dimen>
+    <dimen name="dream_overlay_status_bar_icon_size">
+        @*android:dimen/status_bar_system_icon_size</dimen>
+    <dimen name="dream_overlay_camera_mic_off_indicator_size">8dp</dimen>
+    <dimen name="dream_overlay_notification_indicator_size">6dp</dimen>
+
+    <!-- Dream overlay complications related dimensions -->
+    <dimen name="dream_overlay_complication_clock_time_text_size">100sp</dimen>
+    <dimen name="dream_overlay_complication_clock_subtitle_text_size">24sp</dimen>
+    <dimen name="dream_overlay_complication_preview_text_size">36sp</dimen>
+    <dimen name="dream_overlay_complication_preview_icon_padding">28dp</dimen>
+    <dimen name="dream_overlay_complication_shadow_padding">2dp</dimen>
+
+    <!-- The position of the end guide, which dream overlay complications can align their start with
+         if their end is aligned with the parent end. Represented as the percentage over from the
+         start of the parent container. -->
+    <item name="dream_overlay_complication_guide_end_percent" format="float" type="dimen">
+        0.75
+    </item>
+
+    <!-- The position of the start guide, which dream overlay complications can align their end to
+         if their start is aligned with the parent start. Represented as the percentage over from
+         the start of the parent container. -->
+    <item name="dream_overlay_complication_guide_start_percent" format="float" type="dimen">
+        0.25
+    </item>
+
+    <!-- The position of the bottom guide, which dream overlay complications can align their top to
+         if their bottom is aligned with the parent bottom. Represented as the percentage over from
+         the top of the parent container. -->
+    <item name="dream_overlay_complication_guide_bottom_percent" format="float" type="dimen">
+        0.90
+    </item>
+
+    <!-- The position of the top guide, which dream overlay complications can align their bottom to
+     if their top is aligned with the parent top. Represented as the percentage over from
+     the top of the parent container. -->
+    <item name="dream_overlay_complication_guide_top_percent" format="float" type="dimen">
+        0.10
+    </item>
+
+    <!-- The percentage of the screen from which a swipe can start to reveal the bouncer. -->
+    <item name="dream_overlay_bouncer_start_region_screen_percentage" format="float" type="dimen">
+        .2
+    </item>
+
+    <!-- The margins applied to the dream overlay container -->
+    <dimen name="dream_overlay_container_margin_start">0dp</dimen>
+    <dimen name="dream_overlay_container_margin_end">0dp</dimen>
+    <dimen name="dream_overlay_container_margin_top">0dp</dimen>
+    <dimen name="dream_overlay_container_margin_bottom">0dp</dimen>
+
+    <!-- The margin applied between complications -->
+    <dimen name="dream_overlay_complication_margin">0dp</dimen>
+
+    <dimen name="dream_overlay_y_offset">80dp</dimen>
+
+    <dimen name="status_view_margin_horizontal">0dp</dimen>
+
+    <!-- Media output broadcast dialog QR code picture size -->
+    <dimen name="media_output_qrcode_size">216dp</dimen>
+    <dimen name="media_output_broadcast_info">21dp</dimen>
+    <dimen name="media_output_broadcast_info_item_width">256dp</dimen>
+    <dimen name="media_output_broadcast_info_item_height">56dp</dimen>
+    <dimen name="media_output_broadcast_info_item_padding_start">43dp</dimen>
+    <dimen name="media_output_broadcast_info_item_padding_end">31dp</dimen>
+    <dimen name="media_output_broadcast_info_title_height">24dp</dimen>
+    <dimen name="media_output_broadcast_info_summary_height">20dp</dimen>
+    <dimen name="media_output_broadcast_info_edit">18dp</dimen>
 </resources>

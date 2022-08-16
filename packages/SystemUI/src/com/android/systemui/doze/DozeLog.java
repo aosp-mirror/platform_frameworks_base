@@ -28,7 +28,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -129,14 +128,6 @@ public class DozeLog implements Dumpable {
      */
     public void traceDozingChanged(boolean dozing) {
         mLogger.logDozingChanged(dozing);
-    }
-
-    /**
-     * Appends dozing event to the logs
-     * @param suppressed true if dozing is suppressed
-     */
-    public void traceDozingSuppressed(boolean suppressed) {
-        mLogger.logDozingSuppressed(suppressed);
     }
 
     /**
@@ -257,7 +248,7 @@ public class DozeLog implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         synchronized (DozeLog.class) {
             pw.print("  Doze summary stats (for ");
             TimeUtils.formatDuration(System.currentTimeMillis() - mSince, pw);
@@ -325,15 +316,41 @@ public class DozeLog implements Dumpable {
     }
 
     /**
-     * Appends doze suppressed event to the logs
+     * Appends the doze state that was suppressed to the doze event log
      * @param suppressedState The {@link DozeMachine.State} that was suppressed
+     * @param reason what suppressed always on
      */
-    public void traceDozeSuppressed(DozeMachine.State suppressedState) {
-        mLogger.logDozeSuppressed(suppressedState);
+    public void traceAlwaysOnSuppressed(DozeMachine.State suppressedState, String reason) {
+        mLogger.logAlwaysOnSuppressed(suppressedState, reason);
     }
 
     /**
-     * Appends new AOD sreen brightness to logs
+     * Appends reason why doze immediately ended.
+     */
+    public void traceImmediatelyEndDoze(String reason) {
+        mLogger.logImmediatelyEndDoze(reason);
+    }
+
+    /**
+     * Appends power save changes that may cause a new doze state
+     * @param powerSaveActive true if power saving is active
+     * @param nextState the state that we'll transition to
+     */
+    public void tracePowerSaveChanged(boolean powerSaveActive, DozeMachine.State nextState) {
+        mLogger.logPowerSaveChanged(powerSaveActive, nextState);
+    }
+
+    /**
+     * Appends an event on AOD suppression change
+     * @param suppressed true if AOD is being suppressed
+     * @param nextState the state that we'll transition to
+     */
+    public void traceAlwaysOnSuppressedChange(boolean suppressed, DozeMachine.State nextState) {
+        mLogger.logAlwaysOnSuppressedChange(suppressed, nextState);
+    }
+
+    /**
+     * Appends new AOD screen brightness to logs
      * @param brightness display brightness setting
      */
     public void traceDozeScreenBrightness(int brightness) {
@@ -378,8 +395,8 @@ public class DozeLog implements Dumpable {
         }
 
         @Override
-        public void onKeyguardBouncerChanged(boolean bouncer) {
-            traceKeyguardBouncerChanged(bouncer);
+        public void onKeyguardBouncerFullyShowingChanged(boolean fullyShowing) {
+            traceKeyguardBouncerChanged(fullyShowing);
         }
 
         @Override

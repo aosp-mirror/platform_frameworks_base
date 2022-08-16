@@ -78,6 +78,7 @@ public class LongScreenshotActivity extends Activity {
     private ImageView mTransitionView;
     private ImageView mEnterTransitionView;
     private View mSave;
+    private View mCancel;
     private View mEdit;
     private View mShare;
     private CropView mCropView;
@@ -119,15 +120,15 @@ public class LongScreenshotActivity extends Activity {
         mSave = requireViewById(R.id.save);
         mEdit = requireViewById(R.id.edit);
         mShare = requireViewById(R.id.share);
+        mCancel = requireViewById(R.id.cancel);
         mCropView = requireViewById(R.id.crop_view);
         mMagnifierView = requireViewById(R.id.magnifier);
         mCropView.setCropInteractionListener(mMagnifierView);
         mTransitionView = requireViewById(R.id.transition);
         mEnterTransitionView = requireViewById(R.id.enter_transition);
 
-        requireViewById(R.id.cancel).setOnClickListener(v -> finishAndRemoveTask());
-
         mSave.setOnClickListener(this::onClicked);
+        mCancel.setOnClickListener(this::onClicked);
         mEdit.setOnClickListener(this::onClicked);
         mShare.setOnClickListener(this::onClicked);
 
@@ -353,6 +354,7 @@ public class LongScreenshotActivity extends Activity {
         v.setPressed(true);
         setButtonsEnabled(false);
         if (id == R.id.save) {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_SAVED);
             startExport(PendingAction.SAVE);
         } else if (id == R.id.edit) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_EDIT);
@@ -360,6 +362,9 @@ public class LongScreenshotActivity extends Activity {
         } else if (id == R.id.share) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_SHARE);
             startExport(PendingAction.SHARE);
+        } else if (id == R.id.cancel) {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_EXIT);
+            finishAndRemoveTask();
         }
     }
 

@@ -88,6 +88,11 @@ public class UiEventLoggerFake implements UiEventLogger {
     }
 
     @Override
+    public void log(UiEventEnum event, InstanceId instance) {
+        logWithInstanceId(event, 0, null, instance);
+    }
+
+    @Override
     public void log(UiEventEnum event, int uid, String packageName) {
         final int eventId = event.getId();
         if (eventId > 0) {

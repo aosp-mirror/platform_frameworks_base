@@ -25,6 +25,7 @@
 
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
+#include "androidfw/ResourceTypes.h"
 #include "androidfw/ResourceUtils.h"
 #include "androidfw/Util.h"
 #include "utils/ByteOrder.h"
@@ -600,6 +601,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
     return base::unexpected(result.error());
   }
 
+  bool overlaid = false;
   if (!stop_at_first_match && !ignore_configuration && !apk_assets_[result->cookie]->IsLoader()) {
     for (const auto& id_map : package_group.overlays_) {
       auto overlay_entry = id_map.overlay_res_maps_.Lookup(resid);
@@ -616,6 +618,27 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
         if (UNLIKELY(logging_enabled)) {
           last_resolution_.steps.push_back(
               Resolution::Step{Resolution::Step::Type::OVERLAID_INLINE, String8(), result->cookie});
+          if (auto path = apk_assets_[result->cookie]->GetPath()) {
+            const std::string overlay_path = path->data();
+            if (IsFabricatedOverlay(overlay_path)) {
+              // FRRO don't have package name so we use the creating package here.
+              String8 frro_name = String8("FRRO");
+              // Get the first part of it since the expected one should be like
+              // {overlayPackageName}-{overlayName}-{4 alphanumeric chars}.frro
+              // under /data/resource-cache/.
+              const std::string name = overlay_path.substr(overlay_path.rfind('/') + 1);
+              const size_t end = name.find('-');
+              if (frro_name.size() != overlay_path.size() && end != std::string::npos) {
+                frro_name.append(base::StringPrintf(" created by %s",
+                                                    name.substr(0 /* pos */,
+                                                                end).c_str()).c_str());
+              }
+              last_resolution_.best_package_name = frro_name;
+            } else {
+              last_resolution_.best_package_name = result->package_name->c_str();
+            }
+          }
+          overlaid = true;
         }
         continue;
       }
@@ -646,6 +669,9 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
         last_resolution_.steps.push_back(
             Resolution::Step{Resolution::Step::Type::OVERLAID, overlay_result->config.toString(),
                              overlay_result->cookie});
+        last_resolution_.best_package_name =
+            overlay_result->package_name->c_str();
+        overlaid = true;
       }
     }
   }
@@ -654,6 +680,10 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
     last_resolution_.cookie = result->cookie;
     last_resolution_.type_string_ref = result->type_string_ref;
     last_resolution_.entry_string_ref = result->entry_string_ref;
+    last_resolution_.best_config_name = result->config.toString();
+    if (!overlaid) {
+      last_resolution_.best_package_name = result->package_name->c_str();
+    }
   }
 
   return result;
@@ -670,8 +700,6 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
   const ResTable_config* best_config = nullptr;
   uint32_t best_offset = 0U;
   uint32_t type_flags = 0U;
-
-  std::vector<Resolution::Step> resolution_steps;
 
   // If `desired_config` is not the same as the set configuration or the caller will accept a value
   // from any configuration, then we cannot use our filtered list of types since it only it contains
@@ -725,7 +753,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
         resolution_type = Resolution::Step::Type::OVERLAID;
       } else {
         if (UNLIKELY(logging_enabled)) {
-          resolution_steps.push_back(Resolution::Step{Resolution::Step::Type::SKIPPED,
+          last_resolution_.steps.push_back(Resolution::Step{Resolution::Step::Type::SKIPPED,
                                                       this_config.toString(),
                                                       cookie});
         }
@@ -742,7 +770,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
 
       if (!offset.has_value()) {
         if (UNLIKELY(logging_enabled)) {
-          resolution_steps.push_back(Resolution::Step{Resolution::Step::Type::NO_ENTRY,
+          last_resolution_.steps.push_back(Resolution::Step{Resolution::Step::Type::NO_ENTRY,
                                                       this_config.toString(),
                                                       cookie});
         }
@@ -806,6 +834,8 @@ void AssetManager2::ResetResourceResolution() const {
   last_resolution_.steps.clear();
   last_resolution_.type_string_ref = StringPoolRef();
   last_resolution_.entry_string_ref = StringPoolRef();
+  last_resolution_.best_config_name.clear();
+  last_resolution_.best_package_name.clear();
 }
 
 void AssetManager2::SetResourceResolutionLoggingEnabled(bool enabled) {
@@ -865,7 +895,32 @@ std::string AssetManager2::GetLastResourceResolution() const {
     }
   }
 
+  log_stream << "\nBest matching is from "
+             << (last_resolution_.best_config_name.isEmpty() ? "default"
+                                                   : last_resolution_.best_config_name)
+             << " configuration of " << last_resolution_.best_package_name;
   return log_stream.str();
+}
+
+base::expected<uint32_t, NullOrIOError> AssetManager2::GetParentThemeResourceId(uint32_t resid)
+const {
+  auto entry = FindEntry(resid, 0u /* density_override */,
+                         false /* stop_at_first_match */,
+                         false /* ignore_configuration */);
+  if (!entry.has_value()) {
+    return base::unexpected(entry.error());
+  }
+
+  auto entry_map = std::get_if<incfs::verified_map_ptr<ResTable_map_entry>>(&entry->entry);
+  if (entry_map == nullptr) {
+    // Not a bag, nothing to do.
+    return base::unexpected(std::nullopt);
+  }
+
+  auto map = *entry_map;
+  const uint32_t parent_resid = dtohl(map->parent.ident);
+
+  return parent_resid;
 }
 
 base::expected<AssetManager2::ResourceName, NullOrIOError> AssetManager2::GetResourceName(

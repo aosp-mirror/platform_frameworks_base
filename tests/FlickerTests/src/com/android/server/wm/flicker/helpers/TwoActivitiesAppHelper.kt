@@ -19,11 +19,13 @@ package com.android.server.wm.flicker.helpers
 import android.app.Instrumentation
 import android.support.test.launcherhelper.ILauncherStrategy
 import android.support.test.launcherhelper.LauncherStrategyFactory
+import android.view.Display
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
@@ -36,17 +38,29 @@ class TwoActivitiesAppHelper @JvmOverloads constructor(
         .getInstance(instr)
         .launcherStrategy
 ) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
+
+    private val secondActivityComponent =
+        ActivityOptions.SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME.toFlickerComponent()
+
     fun openSecondActivity(device: UiDevice, wmHelper: WindowManagerStateHelper) {
-        val button = device.wait(
-                Until.findObject(By.res(getPackage(), "launch_second_activity")),
-                FIND_TIMEOUT)
+        val launchActivityButton = By.res(getPackage(), LAUNCH_SECOND_ACTIVITY)
+        val button = device.wait(Until.findObject(launchActivityButton), FIND_TIMEOUT)
 
         require(button != null) {
             "Button not found, this usually happens when the device " +
                     "was left in an unknown state (e.g. in split screen)"
         }
         button.click()
-        wmHelper.waitForAppTransitionIdle()
-        wmHelper.waitForFullScreenApp(component)
+
+        device.wait(Until.gone(launchActivityButton), FIND_TIMEOUT)
+        wmHelper.waitFor(
+            WindowManagerStateHelper.isAppFullScreen(secondActivityComponent),
+            WindowManagerConditionsFactory.isAppTransitionIdle(Display.DEFAULT_DISPLAY),
+            WindowManagerConditionsFactory.hasLayersAnimating().negate()
+        )
+    }
+
+    companion object {
+        private const val LAUNCH_SECOND_ACTIVITY = "launch_second_activity"
     }
 }

@@ -382,6 +382,7 @@ public class BatteryStatsHistory {
     /**
      * Read all history files and serialize into a big Parcel.
      * Checkin file calls this method.
+     *
      * @param out the output parcel
      */
     public void writeToParcel(Parcel out) {
@@ -389,11 +390,12 @@ public class BatteryStatsHistory {
     }
 
     /**
-     * Read all history files and serialize into a big Parcel. This is to send history files to
-     * Settings app since Settings app can not access /data/system directory.
+     * This is for Settings app, when Settings app receives big history parcel, it call
+     * this method to parse it into list of parcels.
      * @param out the output parcel
      */
     public void writeToBatteryUsageStatsParcel(Parcel out) {
+        out.writeBlob(mHistoryBuffer.marshall());
         writeToParcel(out, true /* useBlobs */);
     }
 
@@ -421,20 +423,27 @@ public class BatteryStatsHistory {
     }
 
     /**
+     * Reads a BatteryStatsHistory from a parcel written with
+     * the {@link #writeToBatteryUsageStatsParcel} method.
+     */
+    public static BatteryStatsHistory createFromBatteryUsageStatsParcel(Parcel in) {
+        final byte[] historyBlob = in.readBlob();
+
+        Parcel historyBuffer = Parcel.obtain();
+        historyBuffer.unmarshall(historyBlob, 0, historyBlob.length);
+
+        BatteryStatsHistory history = new BatteryStatsHistory(historyBuffer);
+        history.readFromParcel(in, true /* useBlobs */);
+        return history;
+    }
+
+    /**
      * This is for the check-in file, which has all history files embedded.
+     *
      * @param in the input parcel.
      */
     public void readFromParcel(Parcel in) {
         readFromParcel(in, false /* useBlobs */);
-    }
-
-    /**
-     * This is for Settings app, when Settings app receives big history parcel, it calls
-     * this method to parse it into list of parcels.
-     * @param in the input parcel.
-     */
-    public void readFromBatteryUsageStatsParcel(Parcel in) {
-        readFromParcel(in, true /* useBlobs */);
     }
 
     private void readFromParcel(Parcel in, boolean useBlobs) {

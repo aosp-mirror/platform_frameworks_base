@@ -23,19 +23,19 @@ import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
+import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_FULLSCREEN_MAGNIFICATION;
 import static android.window.DisplayAreaOrganizer.FEATURE_HIDE_DISPLAY_CUTOUT;
 import static android.window.DisplayAreaOrganizer.FEATURE_IME_PLACEHOLDER;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
-import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED_BACKGROUND_PANEL;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
 import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
 import static com.android.server.wm.DisplayAreaPolicyBuilder.HierarchyBuilder;
 
+import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -88,6 +88,9 @@ public abstract class DisplayAreaPolicy {
      */
     public abstract TaskDisplayArea getDefaultTaskDisplayArea();
 
+    /** Returns the {@link TaskDisplayArea} specified by launch options. */
+    public abstract TaskDisplayArea getTaskDisplayArea(@Nullable Bundle options);
+
     /** Provider for platform-default display area policy. */
     static final class DefaultProvider implements DisplayAreaPolicy.Provider {
         @Override
@@ -134,15 +137,11 @@ public abstract class DisplayAreaPolicy {
                         .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL, TYPE_STATUS_BAR,
                                 TYPE_NOTIFICATION_SHADE)
                         .build())
-                        .addFeature(new Feature.Builder(wmService.mPolicy,
-                                "OneHandedBackgroundPanel",
-                                FEATURE_ONE_HANDED_BACKGROUND_PANEL)
-                                .upTo(TYPE_WALLPAPER)
-                                .build())
                         .addFeature(new Feature.Builder(wmService.mPolicy, "OneHanded",
                                 FEATURE_ONE_HANDED)
                                 .all()
-                                .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL)
+                                .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL,
+                                        TYPE_SECURE_SYSTEM_OVERLAY)
                                 .build());
             }
             rootHierarchy

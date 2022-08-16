@@ -142,8 +142,8 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     }
 
     private NetworkPolicy(Parcel source) {
-        template = source.readParcelable(null);
-        cycleRule = source.readParcelable(null);
+        template = source.readParcelable(null, android.net.NetworkTemplate.class);
+        cycleRule = source.readParcelable(null, android.util.RecurrenceRule.class);
         warningBytes = source.readLong();
         limitBytes = source.readLong();
         lastWarningSnooze = source.readLong();

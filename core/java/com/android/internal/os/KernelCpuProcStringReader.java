@@ -17,7 +17,6 @@
 package com.android.internal.os;
 
 import android.os.StrictMode;
-import android.os.SystemClock;
 import android.util.Slog;
 
 import java.io.BufferedReader;
@@ -89,6 +88,7 @@ public class KernelCpuProcStringReader {
 
     private int mErrors = 0;
     private final Path mFile;
+    private final Clock mClock;
     private char[] mBuf;
     private int mSize;
     private long mLastReadTime = 0;
@@ -97,7 +97,12 @@ public class KernelCpuProcStringReader {
     private final ReentrantReadWriteLock.WriteLock mWriteLock = mLock.writeLock();
 
     public KernelCpuProcStringReader(String file) {
+        this(file, Clock.SYSTEM_CLOCK);
+    }
+
+    public KernelCpuProcStringReader(String file, Clock clock) {
         mFile = Paths.get(file);
+        mClock = clock;
     }
 
     /**
@@ -168,7 +173,7 @@ public class KernelCpuProcStringReader {
                 }
             }
             mSize = total;
-            mLastReadTime = SystemClock.elapsedRealtime();
+            mLastReadTime = mClock.elapsedRealtime();
             // ReentrantReadWriteLock allows lock downgrading.
             mReadLock.lock();
             return new ProcFileIterator(total);
@@ -186,7 +191,7 @@ public class KernelCpuProcStringReader {
     }
 
     private boolean dataValid() {
-        return mSize > 0 && (SystemClock.elapsedRealtime() - mLastReadTime < FRESHNESS);
+        return mSize > 0 && (mClock.elapsedRealtime() - mLastReadTime < FRESHNESS);
     }
 
     /**

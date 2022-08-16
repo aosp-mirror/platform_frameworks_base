@@ -19,10 +19,11 @@ package com.android.wm.shell.draganddrop;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
+
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
@@ -33,6 +34,7 @@ import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPL
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
 
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
@@ -51,9 +53,11 @@ import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipDescription;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
@@ -111,7 +115,6 @@ public class DragAndDropPolicyTest {
     private ActivityManager.RunningTaskInfo mHomeTask;
     private ActivityManager.RunningTaskInfo mFullscreenAppTask;
     private ActivityManager.RunningTaskInfo mNonResizeableFullscreenAppTask;
-    private ActivityManager.RunningTaskInfo mSplitPrimaryAppTask;
 
     @Before
     public void setUp() throws RemoteException {
@@ -144,8 +147,6 @@ public class DragAndDropPolicyTest {
         mNonResizeableFullscreenAppTask =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         mNonResizeableFullscreenAppTask.isResizeable = false;
-        mSplitPrimaryAppTask = createTaskInfo(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
-                ACTIVITY_TYPE_STANDARD);
 
         setRunningTask(mFullscreenAppTask);
     }
@@ -181,6 +182,12 @@ public class DragAndDropPolicyTest {
         info.configuration.windowConfiguration.setActivityType(actType);
         info.configuration.windowConfiguration.setWindowingMode(winMode);
         info.isResizeable = true;
+        info.baseActivity = new ComponentName(getInstrumentation().getContext().getPackageName(),
+                ".ActivityWithMode" + winMode);
+        ActivityInfo activityInfo = new ActivityInfo();
+        activityInfo.packageName = info.baseActivity.getPackageName();
+        activityInfo.name = info.baseActivity.getClassName();
+        info.topActivityInfo = activityInfo;
         return info;
     }
 
@@ -254,6 +261,62 @@ public class DragAndDropPolicyTest {
             assertTrue(mPolicy.getTargetAtLocation(t.hitRegion.left, t.hitRegion.bottom - 1)
                     == t);
         }
+    }
+
+    @Test
+    public void testLaunchMultipleTask_differentActivity() {
+        setRunningTask(mFullscreenAppTask);
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
+        Intent fillInIntent = mPolicy.getStartIntentFillInIntent(mock(PendingIntent.class), 0);
+        assertNull(fillInIntent);
+    }
+
+    @Test
+    public void testLaunchMultipleTask_differentActivity_inSplitscreen() {
+        setRunningTask(mFullscreenAppTask);
+        doReturn(true).when(mSplitScreenStarter).isSplitScreenVisible();
+        doReturn(mFullscreenAppTask).when(mSplitScreenStarter).getTaskInfo(anyInt());
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
+        Intent fillInIntent = mPolicy.getStartIntentFillInIntent(mock(PendingIntent.class), 0);
+        assertNull(fillInIntent);
+    }
+
+    @Test
+    public void testLaunchMultipleTask_sameActivity() {
+        setRunningTask(mFullscreenAppTask);
+
+        // Replace the mocked drag pending intent and ensure it resolves to the same activity
+        PendingIntent launchIntent = mock(PendingIntent.class);
+        ResolveInfo launchInfo = new ResolveInfo();
+        launchInfo.activityInfo = mFullscreenAppTask.topActivityInfo;
+        doReturn(Collections.singletonList(launchInfo))
+                .when(launchIntent).queryIntentComponents(anyInt());
+        mActivityClipData.getItemAt(0).getIntent().putExtra(ClipDescription.EXTRA_PENDING_INTENT,
+                launchIntent);
+
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
+        Intent fillInIntent = mPolicy.getStartIntentFillInIntent(launchIntent, 0);
+        assertTrue((fillInIntent.getFlags() & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) != 0);
+    }
+
+    @Test
+    public void testLaunchMultipleTask_sameActivity_inSplitScreen() {
+        setRunningTask(mFullscreenAppTask);
+
+        // Replace the mocked drag pending intent and ensure it resolves to the same activity
+        PendingIntent launchIntent = mock(PendingIntent.class);
+        ResolveInfo launchInfo = new ResolveInfo();
+        launchInfo.activityInfo = mFullscreenAppTask.topActivityInfo;
+        doReturn(Collections.singletonList(launchInfo))
+                .when(launchIntent).queryIntentComponents(anyInt());
+        mActivityClipData.getItemAt(0).getIntent().putExtra(ClipDescription.EXTRA_PENDING_INTENT,
+                launchIntent);
+
+        doReturn(true).when(mSplitScreenStarter).isSplitScreenVisible();
+        doReturn(mFullscreenAppTask).when(mSplitScreenStarter).getTaskInfo(anyInt());
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
+        Intent fillInIntent = mPolicy.getStartIntentFillInIntent(launchIntent, 0);
+        assertTrue((fillInIntent.getFlags() & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) != 0);
     }
 
     private Target filterTargetByType(ArrayList<Target> targets, int type) {

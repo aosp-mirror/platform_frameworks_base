@@ -138,7 +138,8 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
         // By default CLOSE_SYSTEM_DIALOGS broadcast is sent only for current user, which is user
         // 10 on devices with headless system user enabled.
         // In order to receive the broadcast, register the broadcast receiver with UserHandle.ALL.
-        context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
+        context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null,
+                Context.RECEIVER_EXPORTED);
 
         mHasTelephony =
                 context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);

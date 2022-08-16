@@ -22,6 +22,7 @@ import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 
 import android.Manifest;
+import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -65,6 +66,8 @@ import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PowerExemptionManager;
+import android.os.PowerExemptionManager.ReasonCode;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -177,6 +180,17 @@ public class ActivityManager {
      * @hide
      */
     public static final int INSTR_FLAG_NO_RESTART = 1 << 3;
+    /**
+     * Force the check that instrumentation and the target package are signed with the same
+     * certificate even if {@link Build#IS_DEBUGGABLE} is {@code true}.
+     * @hide
+     */
+    public static final int INSTR_FLAG_ALWAYS_CHECK_SIGNATURE = 1 << 4;
+    /**
+     * Instrument Sdk Sandbox process that corresponds to the target package.
+     * @hide
+     */
+    public static final int INSTR_FLAG_INSTRUMENT_SDK_SANDBOX = 1 << 5;
 
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;
@@ -207,6 +221,9 @@ public class ActivityManager {
         }
 
         @Override public void onUidCachedChanged(int uid, boolean cached) {
+        }
+
+        @Override public void onUidProcAdjChanged(int uid) {
         }
     }
 
@@ -811,6 +828,9 @@ public class ActivityManager {
     /** @hide Flag for registerUidObserver: report uid capability has changed. */
     public static final int UID_OBSERVER_CAPABILITY = 1<<5;
 
+    /** @hide Flag for registerUidObserver: report pid oom adj has changed. */
+    public static final int UID_OBSERVER_PROC_OOM_ADJ = 1 << 6;
+
     /** @hide Mode for {@link IActivityManager#isAppStartModeDisabled}: normal free-to-run operation. */
     public static final int APP_START_MODE_NORMAL = 0;
 
@@ -936,6 +956,121 @@ public class ActivityManager {
     @ChangeId
     @EnabledSince(targetSdkVersion = VERSION_CODES.S)
     public static final long LOCK_DOWN_CLOSE_SYSTEM_DIALOGS = 174664365L;
+
+    // The background process restriction levels. The definitions here are meant for internal
+    // bookkeeping only.
+
+    /**
+     * Not a valid restriction level.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_UNKNOWN = 0;
+
+    /**
+     * No background restrictions at all, this should NEVER be used
+     * for any process other than selected system processes, currently it's reserved.
+     *
+     * <p>In the future, apps in {@link #RESTRICTION_LEVEL_EXEMPTED} would receive permissive
+     * background restrictions to protect the system from buggy behaviors; in other words,
+     * the {@link #RESTRICTION_LEVEL_EXEMPTED} would not be the truly "unrestricted" state, while
+     * the {@link #RESTRICTION_LEVEL_UNRESTRICTED} here would be the last resort if there is
+     * a strong reason to grant such a capability to a system app. </p>
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_UNRESTRICTED = 10;
+
+    /**
+     * The default background restriction level for the "unrestricted" apps set by the user,
+     * where it'll have the {@link android.app.AppOpsManager#OP_RUN_ANY_IN_BACKGROUND} set to
+     * ALLOWED, being added into the device idle allow list; however there will be still certain
+     * restrictions to apps in this level.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_EXEMPTED = 20;
+
+    /**
+     * The default background restriction level for all other apps, they'll be moved between
+     * various standby buckets, including
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_ACTIVE},
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_WORKING_SET},
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_FREQUENT},
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RARE}.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_ADAPTIVE_BUCKET = 30;
+
+    /**
+     * The background restriction level where the apps will be placed in the restricted bucket
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED}.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_RESTRICTED_BUCKET = 40;
+
+    /**
+     * The background restricted level, where apps would get more restrictions,
+     * such as not allowed to launch foreground services besides on TOP.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_BACKGROUND_RESTRICTED = 50;
+
+    /**
+     * The most restricted level where the apps are considered "in-hibernation",
+     * its package visibility to the rest of the system is limited.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_HIBERNATION = 60;
+
+    /**
+     * Not a valid restriction level, it defines the maximum numerical value of restriction level.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_MAX = 100;
+
+    /** @hide */
+    @IntDef(prefix = { "RESTRICTION_LEVEL_" }, value = {
+            RESTRICTION_LEVEL_UNKNOWN,
+            RESTRICTION_LEVEL_UNRESTRICTED,
+            RESTRICTION_LEVEL_EXEMPTED,
+            RESTRICTION_LEVEL_ADAPTIVE_BUCKET,
+            RESTRICTION_LEVEL_RESTRICTED_BUCKET,
+            RESTRICTION_LEVEL_BACKGROUND_RESTRICTED,
+            RESTRICTION_LEVEL_HIBERNATION,
+            RESTRICTION_LEVEL_MAX,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RestrictionLevel{}
+
+    /** @hide */
+    public static String restrictionLevelToName(@RestrictionLevel int level) {
+        switch (level) {
+            case RESTRICTION_LEVEL_UNKNOWN:
+                return "unknown";
+            case RESTRICTION_LEVEL_UNRESTRICTED:
+                return "unrestricted";
+            case RESTRICTION_LEVEL_EXEMPTED:
+                return "exempted";
+            case RESTRICTION_LEVEL_ADAPTIVE_BUCKET:
+                return "adaptive_bucket";
+            case RESTRICTION_LEVEL_RESTRICTED_BUCKET:
+                return "restricted_bucket";
+            case RESTRICTION_LEVEL_BACKGROUND_RESTRICTED:
+                return "background_restricted";
+            case RESTRICTION_LEVEL_HIBERNATION:
+                return "hibernation";
+            case RESTRICTION_LEVEL_MAX:
+                return "max";
+            default:
+                return "";
+        }
+    }
 
     /** @hide */
     public int getFrontActivityScreenCompatMode() {
@@ -1141,6 +1276,104 @@ public class ActivityManager {
         private int mMinWidth;
         private int mMinHeight;
 
+        /**
+         * Provides a convenient way to set the fields of a {@link TaskDescription} when creating a
+         * new instance.
+         */
+        public static final class Builder {
+            /**
+             * Default values for the TaskDescription
+             */
+            @Nullable
+            private String mLabel = null;
+            @DrawableRes
+            private int mIconRes = Resources.ID_NULL;
+            private int mPrimaryColor = 0;
+            private int mBackgroundColor = 0;
+            private int mStatusBarColor = 0;
+            private int mNavigationBarColor = 0;
+
+            /**
+             * Set the label to use in the TaskDescription.
+             * @param label A label and description of the current state of this activity.
+             * @return The same instance of the builder.
+             */
+            @NonNull
+            public Builder setLabel(@Nullable String label) {
+                this.mLabel = label;
+                return this;
+            }
+
+            /**
+             * Set the drawable resource of the icon to use in the TaskDescription.
+             * @param iconRes A drawable resource of an icon that represents the current state of
+             *                this activity.
+             * @return The same instance of the builder.
+             */
+            @NonNull
+            public Builder setIcon(@DrawableRes int iconRes) {
+                this.mIconRes = iconRes;
+                return this;
+            }
+
+            /**
+             * Set the primary color to use in the TaskDescription.
+             * @param color A color to override the theme's primary color. The color must be opaque.
+             * @return The same instance of the builder.
+             */
+            @NonNull
+            public Builder setPrimaryColor(@ColorInt int color) {
+                this.mPrimaryColor = color;
+                return this;
+            }
+
+            /**
+             * Set the background color to use in the TaskDescription.
+             * @param color A color to override the theme's background color. The color must be
+             *              opaque.
+             * @return The same instance of the builder.
+             */
+            @NonNull
+            public Builder setBackgroundColor(@ColorInt int color) {
+                this.mBackgroundColor = color;
+                return this;
+            }
+
+            /**
+             * Set the status bar color to use in the TaskDescription.
+             * @param color A color to override the theme's status bar color.
+             * @return The same instance of the builder.
+             */
+            @NonNull
+            public Builder setStatusBarColor(@ColorInt int color) {
+                this.mStatusBarColor = color;
+                return this;
+            }
+
+            /**
+             * Set the navigation bar color to use in the TaskDescription.
+             * @param color A color to override the theme's navigation bar color.
+             * @return The same instance of the builder.
+             */
+            @NonNull
+            public Builder setNavigationBarColor(@ColorInt int color) {
+                this.mNavigationBarColor = color;
+                return this;
+            }
+
+            /**
+             * Build the TaskDescription.
+             * @return the TaskDescription object.
+             */
+            @NonNull
+            public TaskDescription build() {
+                final Icon icon = mIconRes == Resources.ID_NULL ? null :
+                        Icon.createWithResource(ActivityThread.currentPackageName(), mIconRes);
+                return new TaskDescription(mLabel, icon, mPrimaryColor, mBackgroundColor,
+                        mStatusBarColor, mNavigationBarColor, false, false, RESIZE_MODE_RESIZEABLE,
+                        -1, -1, 0);
+            }
+        }
 
         /**
          * Creates the TaskDescription to the specified values.
@@ -1150,7 +1383,10 @@ public class ActivityManager {
          *                activity.
          * @param colorPrimary A color to override the theme's primary color.  This color must be
          *                     opaque.
+         *
+         * @deprecated Use {@link Builder} instead.
          */
+        @Deprecated
         public TaskDescription(String label, @DrawableRes int iconRes, int colorPrimary) {
             this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
                     colorPrimary, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
@@ -1165,7 +1401,10 @@ public class ActivityManager {
          * @param label A label and description of the current state of this activity.
          * @param iconRes A drawable resource of an icon that represents the current state of this
          *                activity.
+         *
+         * @deprecated Use {@link Builder} instead.
          */
+        @Deprecated
         public TaskDescription(String label, @DrawableRes int iconRes) {
             this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
                     0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
@@ -1175,14 +1414,20 @@ public class ActivityManager {
          * Creates the TaskDescription to the specified values.
          *
          * @param label A label and description of the current state of this activity.
+         *
+         * @deprecated Use {@link Builder} instead.
          */
+        @Deprecated
         public TaskDescription(String label) {
             this(label, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
          * Creates an empty TaskDescription.
+         *
+         * @deprecated Use {@link Builder} instead.
          */
+        @Deprecated
         public TaskDescription() {
             this(null, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
@@ -1194,7 +1439,8 @@ public class ActivityManager {
          * @param icon An icon that represents the current state of this task.
          * @param colorPrimary A color to override the theme's primary color.  This color must be
          *                     opaque.
-         * @deprecated use TaskDescription constructor with icon resource instead
+         *
+         * @deprecated Use {@link Builder} instead.
          */
         @Deprecated
         public TaskDescription(String label, Bitmap icon, int colorPrimary) {
@@ -1210,7 +1456,8 @@ public class ActivityManager {
          *
          * @param label A label and description of the current state of this activity.
          * @param icon An icon that represents the current state of this activity.
-         * @deprecated use TaskDescription constructor with icon resource instead
+         *
+         * @deprecated Use {@link Builder} instead.
          */
         @Deprecated
         public TaskDescription(String label, Bitmap icon) {
@@ -1512,15 +1759,15 @@ public class ActivityManager {
         /**
          * @return The color override on the theme's primary color.
          */
+        @ColorInt
         public int getPrimaryColor() {
             return mColorPrimary;
         }
 
         /**
-         * @return The background color.
-         * @hide
+         * @return The color override on the theme's background color.
          */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+        @ColorInt
         public int getBackgroundColor() {
             return mColorBackground;
         }
@@ -1534,15 +1781,17 @@ public class ActivityManager {
         }
 
         /**
-         * @hide
+         * @return The color override on the theme's status bar color.
          */
+        @ColorInt
         public int getStatusBarColor() {
             return mStatusBarColor;
         }
 
         /**
-         * @hide
+         * @return The color override on the theme's navigation bar color.
          */
+        @ColorInt
         public int getNavigationBarColor() {
             return mNavigationBarColor;
         }
@@ -1903,7 +2152,7 @@ public class ActivityManager {
         public void readFromParcel(Parcel source) {
             id = source.readInt();
             persistentId = source.readInt();
-            childrenTaskInfos = source.readArrayList(RecentTaskInfo.class.getClassLoader());
+            childrenTaskInfos = source.readArrayList(RecentTaskInfo.class.getClassLoader(), android.app.ActivityManager.RecentTaskInfo.class);
             lastSnapshotData.taskSize = source.readTypedObject(Point.CREATOR);
             lastSnapshotData.contentInsets = source.readTypedObject(Rect.CREATOR);
             lastSnapshotData.bufferSize = source.readTypedObject(Point.CREATOR);
@@ -2840,7 +3089,13 @@ public class ActivityManager {
      * Returns a list of any processes that are currently in an error condition.  The result
      * will be null if all processes are running properly at this time.
      *
-     * @return Returns a list of ProcessErrorStateInfo records, or null if there are no
+     * <p>As of {@link android.os.Build.VERSION_CODES#TIRAMISU Android TIRAMISU}, for regular apps
+     * this method will only return {@link ProcessErrorStateInfo} records for the processes running
+     * as the caller's uid, unless the caller has the permission
+     * {@link android.Manifest.permission#DUMP}.
+     * </p>
+     *
+     * @return Returns a list of {@link ProcessErrorStateInfo} records, or null if there are no
      * current error conditions (it will not return an empty list).  This list ordering is not
      * specified.
      */
@@ -3455,10 +3710,16 @@ public class ActivityManager {
     /**
      * Returns the process state of this uid.
      *
+     * If the caller does not hold {@link Manifest.permission#INTERACT_ACROSS_USERS_FULL}
+     * permission, they can only query process state of UIDs running in the same user as the caller.
+     *
      * @hide
      */
     @TestApi
-    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(allOf = {
+            Manifest.permission.PACKAGE_USAGE_STATS,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL
+    }, conditional = true)
     public int getUidProcessState(int uid) {
         try {
             return getService().getUidProcessState(uid, mContext.getOpPackageName());
@@ -3470,10 +3731,17 @@ public class ActivityManager {
     /**
      * Returns the process capability of this uid.
      *
+     * If the caller does not hold {@link Manifest.permission#INTERACT_ACROSS_USERS_FULL}
+     * permission, they can only query process capabilities of UIDs running in the same user
+     * as the caller.
+     *
      * @hide
      */
     @TestApi
-    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(allOf = {
+            Manifest.permission.PACKAGE_USAGE_STATS,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL
+    }, conditional = true)
     public @ProcessCapability int getUidProcessCapabilities(int uid) {
         try {
             return getService().getUidProcessCapabilities(uid, mContext.getOpPackageName());
@@ -4226,23 +4494,6 @@ public class ActivityManager {
     }
 
     /**
-     * Logs out current current foreground user by switching to the system user and stopping the
-     * user being switched from.
-     * @hide
-     */
-    public static void logoutCurrentUser() {
-        int currentUser = ActivityManager.getCurrentUser();
-        if (currentUser != UserHandle.USER_SYSTEM) {
-            try {
-                getService().switchUser(UserHandle.USER_SYSTEM);
-                getService().stopUser(currentUser, /* force= */ false, null);
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
      * Stops the given {@code userId}.
      *
      * @hide
@@ -4946,6 +5197,27 @@ public class ActivityManager {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @return The reason code of whether or not the given UID should be exempted from background
+     * restrictions here.
+     *
+     * <p>
+     * Note: Call it with caution as it'll try to acquire locks in other services.
+     * </p>
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    @ReasonCode
+    public int getBackgroundRestrictionExemptionReason(int uid) {
+        try {
+            return getService().getBackgroundRestrictionExemptionReason(uid);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return PowerExemptionManager.REASON_DENIED;
     }
 
     /**

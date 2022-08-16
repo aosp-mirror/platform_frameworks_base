@@ -66,8 +66,8 @@ public class WearPackageUtil {
     /**
      * In order to make sure that the Wearable Asset Manager has a reasonable apk that can be used
      * by the PackageManager, we will parse it before sending it to the PackageManager.
-     * Unfortunately, PackageParser needs a file to parse. So, we have to temporarily convert the fd
-     * to a File.
+     * Unfortunately, ParsingPackageUtils needs a file to parse. So, we have to temporarily convert
+     * the fd to a File.
      *
      * @param context
      * @param fd FileDescriptor to convert to File

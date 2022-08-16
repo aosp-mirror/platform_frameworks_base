@@ -32,7 +32,7 @@ public abstract class MediaManager {
     private static final String TAG = "MediaManager";
 
     protected final Collection<MediaDeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
-    protected final List<MediaDevice> mMediaDevices = new ArrayList<>();
+    protected final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
 
     protected Context mContext;
     protected Notification mNotification;

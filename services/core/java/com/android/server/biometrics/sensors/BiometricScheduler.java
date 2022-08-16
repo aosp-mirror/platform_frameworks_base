@@ -46,6 +46,7 @@ import java.util.Date;
 import java.util.Deque;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 /**
  * A scheduler for biometric HAL operations. Maintains a queue of {@link BaseClientMonitor}
@@ -160,7 +161,7 @@ public class BiometricScheduler {
     // Internal callback, notified when an operation is complete. Notifies the requester
     // that the operation is complete, before performing internal scheduler work (such as
     // starting the next client).
-    private final BaseClientMonitor.Callback mInternalCallback = new BaseClientMonitor.Callback() {
+    private final ClientMonitorCallback mInternalCallback = new ClientMonitorCallback() {
         @Override
         public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
             Slog.d(getTag(), "[Started] " + clientMonitor);
@@ -247,7 +248,7 @@ public class BiometricScheduler {
     }
 
     @VisibleForTesting
-    public BaseClientMonitor.Callback getInternalCallback() {
+    public ClientMonitorCallback getInternalCallback() {
         return mInternalCallback;
     }
 
@@ -285,7 +286,7 @@ public class BiometricScheduler {
 
         // Not all operations start immediately. BiometricPrompt waits for its operation
         // to arrive at the head of the queue, before pinging it to start.
-        final int cookie = mCurrentOperation.isReadyToStart();
+        final int cookie = mCurrentOperation.isReadyToStart(mInternalCallback);
         if (cookie == 0) {
             if (!mCurrentOperation.start(mInternalCallback)) {
                 // Note down current length of queue
@@ -316,7 +317,8 @@ public class BiometricScheduler {
             }
         } else {
             try {
-                mBiometricService.onReadyForAuthentication(cookie);
+                mBiometricService.onReadyForAuthentication(
+                        mCurrentOperation.getClientMonitor().getRequestId(), cookie);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when contacting BiometricService", e);
             }
@@ -368,7 +370,7 @@ public class BiometricScheduler {
      * @param clientCallback optional callback, invoked when the client state changes.
      */
     public void scheduleClientMonitor(@NonNull BaseClientMonitor clientMonitor,
-            @Nullable BaseClientMonitor.Callback clientCallback) {
+            @Nullable ClientMonitorCallback clientCallback) {
         // If the incoming operation should interrupt preceding clients, mark any interruptable
         // pending clients as canceling. Once they reach the head of the queue, the scheduler will
         // send ERROR_CANCELED and skip the operation.
@@ -456,10 +458,33 @@ public class BiometricScheduler {
     }
 
     /**
+     * Get current operation <code>BaseClientMonitor</code>
+     * @deprecated TODO: b/229994966, encapsulate client monitors
      * @return the current operation
      */
+    @Deprecated
+    @Nullable
     public BaseClientMonitor getCurrentClient() {
         return mCurrentOperation != null ? mCurrentOperation.getClientMonitor() : null;
+    }
+
+    /**
+     * The current operation if the requestId is set and matches.
+     * @deprecated TODO: b/229994966, encapsulate client monitors
+     */
+    @Deprecated
+    @Nullable
+    public void getCurrentClientIfMatches(long requestId,
+            @NonNull Consumer<BaseClientMonitor> clientMonitorConsumer) {
+        mHandler.post(() -> {
+            if (mCurrentOperation != null) {
+                if (mCurrentOperation.isMatchingRequestId(requestId)) {
+                    clientMonitorConsumer.accept(mCurrentOperation.getClientMonitor());
+                    return;
+                }
+            }
+            clientMonitorConsumer.accept(null);
+        });
     }
 
     public int getCurrentPendingCount() {

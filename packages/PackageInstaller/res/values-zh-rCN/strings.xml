@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"要卸载此应用吗？"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"要为"<b>"所有"</b>"用户卸载此应用吗？系统将为设备上的"<b>"所有"</b>"用户移除此应用及其数据。"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"要为用户<xliff:g id="USERNAME">%1$s</xliff:g>卸载此应用吗？"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"您想从您的工作资料中卸载此应用吗？"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"要将此应用替换为出厂版本吗？这样会移除所有数据。"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"要将此应用替换为出厂版本吗？这样会移除所有数据，并会影响此设备的所有用户（包括已设置工作资料的用户）。"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"保留 <xliff:g id="SIZE">%1$s</xliff:g> 的应用数据。"</string>

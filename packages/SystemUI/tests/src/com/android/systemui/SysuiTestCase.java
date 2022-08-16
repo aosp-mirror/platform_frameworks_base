@@ -42,10 +42,13 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
+import org.mockito.Mockito;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -110,6 +113,11 @@ public abstract class SysuiTestCase {
         // KeyguardUpdateMonitor to be created (injected).
         // TODO(b/1531701009) Clean up NotificationContentView creation to prevent this
         mDependency.injectMockDependency(SmartReplyController.class);
+
+        // Make sure that all tests on any SystemUIDialog does not crash because this dependency
+        // is missing (constructing the actual one would throw).
+        // TODO(b/219008720): Remove this.
+        mDependency.injectMockDependency(SystemUIDialogManager.class);
     }
 
     @After
@@ -120,9 +128,13 @@ public abstract class SysuiTestCase {
             TestableLooper.get(this).processAllMessages();
         }
         disallowTestableLooperAsMainThread();
-        SystemUIFactory.cleanup();
         mContext.cleanUpReceivers(this.getClass().getSimpleName());
         mFakeBroadcastDispatcher.cleanUpReceivers(this.getClass().getSimpleName());
+    }
+
+    @AfterClass
+    public static void mockitoTearDown() {
+        Mockito.framework().clearInlineMocks();
     }
 
     /**
@@ -194,6 +206,11 @@ public abstract class SysuiTestCase {
             throw new RuntimeException(
                 "This method can not be called from the looper being synced");
         }
+    }
+
+    /** Delegates to {@link android.testing.TestableResources#addOverride(int, Object)}. */
+    protected void overrideResource(int resourceId, Object value) {
+        mContext.getOrCreateTestableResources().addOverride(resourceId, value);
     }
 
     public static final class EmptyRunnable implements Runnable {

@@ -465,7 +465,7 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
         for (int i = 0; i < end; i++) {
             final V val = Snapshots.maybeSnapshot(src.valueAt(i));
             final K key = src.keyAt(i);
-            dst.put(key, val);
+            dst.mStorage.put(key, val);
         }
         dst.seal();
     }

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2022 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!-- NOTE: outer layout is required to provide proper shadow. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/autofill_dialog_picker"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/autofill_bottomsheet_background"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="@dimen/autofill_save_outer_top_margin"
+        android:layout_marginBottom="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/autofill_service_icon"
+            android:scaleType="fitStart"
+            android:visibility="gone"
+            android:layout_width="@dimen/autofill_dialog_icon_size"
+            android:layout_height="@dimen/autofill_dialog_icon_size"/>
+
+        <LinearLayout
+            android:id="@+id/autofill_dialog_header"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:paddingStart="@dimen/autofill_save_inner_padding"
+            android:paddingEnd="@dimen/autofill_save_inner_padding"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- For Authentication. -->
+    <LinearLayout
+        android:id="@+id/autofill_dialog_container"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:visibility="gone"
+        android:paddingBottom="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp" />
+
+    <ListView
+        android:id="@+id/autofill_dialog_list"
+        android:layout_weight="1"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:paddingBottom="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:clipToPadding="false"
+        android:drawSelectorOnTop="true"
+        android:clickable="true"
+        android:divider="@null"
+        android:visibility="gone" />
+
+    <com.android.internal.widget.ButtonBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="18dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:theme="@style/Theme.DeviceDefault.AutofillHalfScreenDialogButton"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/autofill_dialog_no"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            style="@style/AutofillHalfSheetOutlinedButton"
+            android:text="@string/autofill_save_no">
+        </Button>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="invisible">
+        </Space>
+
+        <Button
+            android:id="@+id/autofill_dialog_yes"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            style="@style/AutofillHalfSheetTonalButton"
+            android:text="@string/autofill_save_yes"
+            android:visibility="gone" >
+        </Button>
+
+    </com.android.internal.widget.ButtonBarLayout>
+
+</LinearLayout>

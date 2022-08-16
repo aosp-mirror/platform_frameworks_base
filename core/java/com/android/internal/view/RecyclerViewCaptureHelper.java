@@ -18,10 +18,13 @@ package com.android.internal.view;
 
 import android.annotation.NonNull;
 import android.graphics.Rect;
+import android.os.CancellationSignal;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+
+import java.util.function.Consumer;
 
 /**
  * ScrollCapture for RecyclerView and <i>RecyclerView-like</i> ViewGroups.
@@ -44,6 +47,12 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
     private int mOverScrollMode;
 
     @Override
+    public boolean onAcceptSession(@NonNull ViewGroup view) {
+        return view.isVisibleToUser()
+                && (view.canScrollVertically(UP) || view.canScrollVertically(DOWN));
+    }
+
+    @Override
     public void onPrepareForStart(@NonNull ViewGroup view, Rect scrollBounds) {
         mScrollDelta = 0;
 
@@ -55,8 +64,8 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
     }
 
     @Override
-    public ScrollResult onScrollRequested(@NonNull ViewGroup recyclerView, Rect scrollBounds,
-            Rect requestRect) {
+    public void onScrollRequested(@NonNull ViewGroup recyclerView, Rect scrollBounds,
+            Rect requestRect, CancellationSignal signal, Consumer<ScrollResult> resultConsumer) {
         ScrollResult result = new ScrollResult();
         result.requestedArea = new Rect(requestRect);
         result.scrollDelta = mScrollDelta;
@@ -64,7 +73,8 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
 
         if (!recyclerView.isVisibleToUser() || recyclerView.getChildCount() == 0) {
             Log.w(TAG, "recyclerView is empty or not visible, cannot continue");
-            return result; // result.availableArea == empty Rect
+            resultConsumer.accept(result); // result.availableArea == empty Rect
+            return;
         }
 
         // move from scrollBounds-relative to parent-local coordinates
@@ -77,7 +87,8 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
         View anchor = findChildNearestTarget(recyclerView, requestedContainerBounds);
         if (anchor == null) {
             Log.w(TAG, "Failed to locate anchor view");
-            return result; // result.availableArea == empty rect
+            resultConsumer.accept(result); // result.availableArea == empty rect
+            return;
         }
 
         Rect requestedContentBounds = new Rect(requestedContainerBounds);
@@ -107,13 +118,14 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
 
         if (!requestedContainerBounds.intersect(recyclerLocalVisible)) {
             // Requested area is still not visible
-            return result;
+            resultConsumer.accept(result);
+            return;
         }
         Rect available = new Rect(requestedContainerBounds);
         available.offset(-scrollBounds.left, -scrollBounds.top);
         available.offset(0, mScrollDelta);
         result.availableArea = available;
-        return result;
+        resultConsumer.accept(result);
     }
 
     /**

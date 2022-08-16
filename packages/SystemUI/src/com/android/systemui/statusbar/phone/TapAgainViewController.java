@@ -20,7 +20,7 @@ import static com.android.systemui.classifier.FalsingModule.DOUBLE_TAP_TIMEOUT_M
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.util.ViewController;
@@ -32,7 +32,7 @@ import javax.inject.Named;
 /**
  * Controller for {@link TapAgainView}.
  */
-@StatusBarComponent.StatusBarScope
+@CentralSurfacesComponent.CentralSurfacesScope
 public class TapAgainViewController extends ViewController<TapAgainView> {
     private final DelayableExecutor mDelayableExecutor;
     private final ConfigurationController mConfigurationController;

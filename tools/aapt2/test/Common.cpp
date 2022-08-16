@@ -48,7 +48,7 @@ Value* GetValueForConfigAndProduct<Value>(ResourceTable* table,
                                           const android::StringPiece& res_name,
                                           const ConfigDescription& config,
                                           const android::StringPiece& product) {
-  Maybe<ResourceTable::SearchResult> result = table->FindResource(ParseNameOrDie(res_name));
+  std::optional<ResourceTable::SearchResult> result = table->FindResource(ParseNameOrDie(res_name));
   if (result) {
     ResourceConfigValue* config_value = result.value().entry->FindValue(config, product);
     if (config_value) {

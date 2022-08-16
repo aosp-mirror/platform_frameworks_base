@@ -158,12 +158,51 @@ public interface UsbPortHal {
      *                 completion.
      * @param callback callback object to be invoked when the operation is complete.
      * @return True when the operation is asynchronous. The caller of
-     *         {@link UsbOperationCallbackInternal} must therefore call
-     *         {@link UsbOperationCallbackInternal#waitForOperationComplete} for processing
+     *         {@link UsbOperationInternal} must therefore call
+     *         {@link UsbOperationInternal#waitForOperationComplete} for processing
      *         the result.
      *         False when the operation is synchronous. Caller can proceed reading the result
-     *         through {@link UsbOperationCallbackInternal#getStatus}
+     *         through {@link UsbOperationInternal#getStatus}
      */
     public boolean enableUsbData(String portName, boolean enable, long transactionId,
+            IUsbOperationInternal callback);
+
+    /**
+     * Invoked to enable  UsbData when disabled due to docking event.
+     *
+     * @param portName Port Identifier.
+     * @param transactionId Used for tracking the current request and is passed down to the HAL
+     *                      implementation as needed.
+     * @param callback callback object to be invoked to invoke the status of the operation upon
+     *                 completion.
+     */
+    public void enableUsbDataWhileDocked(String portName, long transactionId,
+            IUsbOperationInternal callback);
+
+    /**
+     * Invoked to enableLimitPowerTransfer on the specified port.
+     *
+     * @param portName Port Identifier.
+     * @param limit limit power transfer when true. Port wouldn't charge or power USB accessoried
+     *              when set.
+     *              Lift power transfer restrictions when false.
+     * @param transactionId Used for tracking the current request and is passed down to the HAL
+     *                      implementation as needed.
+     * @param callback callback object to be invoked to invoke the status of the operation upon
+     *                 completion.
+     */
+    public void enableLimitPowerTransfer(String portName, boolean limit, long transactionId,
+            IUsbOperationInternal callback);
+
+    /**
+     * Invoked to reset UsbData on the specified port.
+     *
+     * @param portName Port Identifier.
+     * @param transactionId Used for tracking the current request and is passed down to the HAL
+     *                      implementation as needed.
+     * @param callback callback object to be invoked to invoke the status of the operation upon
+     *                 completion.
+     */
+    public void resetUsbPort(String portName, long transactionId,
             IUsbOperationInternal callback);
 }

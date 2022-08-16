@@ -72,6 +72,7 @@ void VkFunctorDrawHandler::draw(const GrBackendDrawableInfo& info) {
             .clip_top = mClip.fTop,
             .clip_right = mClip.fRight,
             .clip_bottom = mClip.fBottom,
+            .is_layer = !vulkan_info.fFromSwapchainOrAndroidWindow,
     };
     mat4.getColMajor(&params.transform[0]);
     params.secondary_command_buffer = vulkan_info.fSecondaryCommandBuffer;

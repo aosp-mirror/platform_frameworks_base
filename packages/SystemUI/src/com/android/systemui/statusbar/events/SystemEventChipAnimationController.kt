@@ -16,18 +16,26 @@
 
 package com.android.systemui.statusbar.events
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.Rect
+import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.MeasureSpec.AT_MOST
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import com.android.systemui.R
-import com.android.systemui.statusbar.phone.StatusBarLocationPublisher
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 /**
  * Controls the view for system event animations.
@@ -35,105 +43,264 @@ import javax.inject.Inject
 class SystemEventChipAnimationController @Inject constructor(
     private val context: Context,
     private val statusBarWindowController: StatusBarWindowController,
-    private val locationPublisher: StatusBarLocationPublisher
-) : SystemStatusChipAnimationCallback {
-    var showPersistentDot = false
-        set(value) {
-            field = value
-            statusBarWindowController.setForceStatusBarVisible(value)
-            maybeUpdateShowDot()
-        }
+    private val contentInsetsProvider: StatusBarContentInsetsProvider
+) : SystemStatusAnimationCallback {
 
     private lateinit var animationWindowView: FrameLayout
-    private lateinit var animationDotView: View
-    private var currentAnimatedView: View? = null
+    private lateinit var themedContext: ContextThemeWrapper
+
+    private var currentAnimatedView: BackgroundAnimatableView? = null
+
+    // Left for LTR, Right for RTL
+    private var animationDirection = LEFT
+    private var chipRight = 0
+    private var chipLeft = 0
+    private var chipWidth = 0
+    private var chipMinWidth = context.resources.getDimensionPixelSize(
+            R.dimen.ongoing_appops_chip_min_animation_width)
+    private var dotSize = context.resources.getDimensionPixelSize(
+            R.dimen.ongoing_appops_dot_diameter)
+    // Use during animation so that multiple animators can update the drawing rect
+    private var animRect = Rect()
 
     // TODO: move to dagger
     private var initialized = false
 
-    override fun onChipAnimationStart(
-        viewCreator: (context: Context) -> View,
-        @SystemAnimationState state: Int
-    ) {
-        if (!initialized) init()
+    /**
+     * Give the chip controller a chance to inflate and configure the chip view before we start
+     * animating
+     */
+    fun prepareChipAnimation(viewCreator: ViewCreator) {
+        if (!initialized) {
+            init()
+        }
+        animationDirection = if (animationWindowView.isLayoutRtl) RIGHT else LEFT
 
-        if (state == ANIMATING_IN) {
-            currentAnimatedView = viewCreator(context)
-            animationWindowView.addView(currentAnimatedView, layoutParamsDefault())
+        // Initialize the animated view
+        val insets = contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation()
+        currentAnimatedView = viewCreator(themedContext).also {
+            animationWindowView.addView(
+                    it.view,
+                    layoutParamsDefault(
+                            if (animationWindowView.isLayoutRtl) insets.first
+                            else insets.second))
+            it.view.alpha = 0f
+            // For some reason, the window view's measured width is always 0 here, so use the
+            // parent (status bar)
+            it.view.measure(
+                    View.MeasureSpec.makeMeasureSpec(
+                            (animationWindowView.parent as View).width, AT_MOST),
+                    View.MeasureSpec.makeMeasureSpec(animationWindowView.height, AT_MOST))
+            chipWidth = it.chipWidth
+        }
 
-            // We are animating IN; chip comes in from View.END
-            currentAnimatedView?.apply {
-                val translation = width.toFloat()
-                translationX = if (isLayoutRtl) -translation else translation
-                alpha = 0f
-                visibility = View.VISIBLE
-                setPadding(locationPublisher.marginLeft, 0, locationPublisher.marginRight, 0)
+        // decide which direction we're animating from, and then set some screen coordinates
+        val contentRect = contentInsetsProvider.getStatusBarContentAreaForCurrentRotation()
+        when (animationDirection) {
+            LEFT -> {
+                chipRight = contentRect.right
+                chipLeft = contentRect.right - chipWidth
             }
+            else /* RIGHT */ -> {
+                chipLeft = contentRect.left
+                chipRight = contentRect.left + chipWidth
+            }
+        }
+    }
+
+    override fun onSystemEventAnimationBegin(): Animator {
+        initializeAnimRect()
+
+        val alphaIn = ValueAnimator.ofFloat(0f, 1f).apply {
+            startDelay = 7.frames
+            duration = 5.frames
+            interpolator = null
+            addUpdateListener { currentAnimatedView?.view?.alpha = animatedValue as Float }
+        }
+        val moveIn = ValueAnimator.ofInt(chipMinWidth, chipWidth).apply {
+            startDelay = 7.frames
+            duration = 23.frames
+            interpolator = STATUS_BAR_X_MOVE_IN
+            addUpdateListener {
+                updateAnimatedViewBoundsWidth(animatedValue as Int)
+            }
+        }
+        val animSet = AnimatorSet()
+        animSet.playTogether(alphaIn, moveIn)
+        return animSet
+    }
+
+    override fun onSystemEventAnimationFinish(hasPersistentDot: Boolean): Animator {
+        initializeAnimRect()
+        val finish = if (hasPersistentDot) {
+            createMoveOutAnimationForDot()
         } else {
-            // We are animating away
-            currentAnimatedView?.apply {
-                translationX = 0f
-                alpha = 1f
-            }
+            createMoveOutAnimationDefault()
         }
+
+        finish.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator?) {
+                animationWindowView.removeView(currentAnimatedView!!.view)
+            }
+        })
+
+        return finish
     }
 
-    override fun onChipAnimationEnd(@SystemAnimationState state: Int) {
-        if (state == ANIMATING_IN) {
-            // Finished animating in
-            currentAnimatedView?.apply {
-                translationX = 0f
-                alpha = 1f
+    private fun createMoveOutAnimationForDot(): Animator {
+        val width1 = ValueAnimator.ofInt(chipWidth, chipMinWidth).apply {
+            duration = 9.frames
+            interpolator = STATUS_CHIP_WIDTH_TO_DOT_KEYFRAME_1
+            addUpdateListener {
+                updateAnimatedViewBoundsWidth(it.animatedValue as Int)
             }
-        } else {
-            // Finished animating away
-            currentAnimatedView?.apply {
-                visibility = View.INVISIBLE
-            }
-            animationWindowView.removeView(currentAnimatedView)
         }
+
+        val width2 = ValueAnimator.ofInt(chipMinWidth, dotSize).apply {
+            startDelay = 9.frames
+            duration = 20.frames
+            interpolator = STATUS_CHIP_WIDTH_TO_DOT_KEYFRAME_2
+            addUpdateListener {
+                updateAnimatedViewBoundsWidth(it.animatedValue as Int)
+            }
+        }
+
+        val keyFrame1Height = dotSize * 2
+        val v = currentAnimatedView!!.view
+        val chipVerticalCenter = v.top + v.measuredHeight / 2
+        val height1 = ValueAnimator.ofInt(
+                currentAnimatedView!!.view.measuredHeight, keyFrame1Height).apply {
+            startDelay = 8.frames
+            duration = 6.frames
+            interpolator = STATUS_CHIP_HEIGHT_TO_DOT_KEYFRAME_1
+            addUpdateListener {
+                updateAnimatedViewBoundsHeight(it.animatedValue as Int, chipVerticalCenter)
+            }
+        }
+
+        val height2 = ValueAnimator.ofInt(keyFrame1Height, dotSize).apply {
+            startDelay = 14.frames
+            duration = 15.frames
+            interpolator = STATUS_CHIP_HEIGHT_TO_DOT_KEYFRAME_2
+            addUpdateListener {
+                updateAnimatedViewBoundsHeight(it.animatedValue as Int, chipVerticalCenter)
+            }
+        }
+
+        // Move the chip view to overlap exactly with the privacy dot. The chip displays by default
+        // exactly adjacent to the dot, so we can just move over by the diameter of the dot itself
+        val moveOut = ValueAnimator.ofInt(0, dotSize).apply {
+            startDelay = 3.frames
+            duration = 11.frames
+            interpolator = STATUS_CHIP_MOVE_TO_DOT
+            addUpdateListener {
+                // If RTL, we can just invert the move
+                val amt = if (animationDirection == LEFT) {
+                        animatedValue as Int
+                } else {
+                    -(animatedValue as Int)
+                }
+                updateAnimatedBoundsX(amt)
+            }
+        }
+
+        val animSet = AnimatorSet()
+        animSet.playTogether(width1, width2, height1, height2, moveOut)
+        return animSet
     }
 
-    override fun onChipAnimationUpdate(
-        animator: ValueAnimator,
-        @SystemAnimationState state: Int
-    ) {
-        // Alpha is parameterized 0,1, and translation from (width, 0)
-        currentAnimatedView?.apply {
-            val amt = animator.animatedValue as Float
-
-            alpha = amt
-
-            val w = width
-            val translation = (1 - amt) * w
-            translationX = if (isLayoutRtl) -translation else translation
+    private fun createMoveOutAnimationDefault(): Animator {
+        val moveOut = ValueAnimator.ofInt(chipWidth, chipMinWidth).apply {
+            duration = 23.frames
+            addUpdateListener {
+                currentAnimatedView?.apply {
+                    updateAnimatedViewBoundsWidth(it.animatedValue as Int)
+                }
+            }
         }
-    }
-
-    private fun maybeUpdateShowDot() {
-        if (!initialized) return
-        if (!showPersistentDot && currentAnimatedView == null) {
-            animationDotView.visibility = View.INVISIBLE
-        }
+        return moveOut
     }
 
     private fun init() {
         initialized = true
-        animationWindowView = LayoutInflater.from(context)
+        themedContext = ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
+        animationWindowView = LayoutInflater.from(themedContext)
                 .inflate(R.layout.system_event_animation_window, null) as FrameLayout
-        animationDotView = animationWindowView.findViewById(R.id.dot_view)
         val lp = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         lp.gravity = Gravity.END or Gravity.CENTER_VERTICAL
         statusBarWindowController.addViewToWindow(animationWindowView, lp)
+        animationWindowView.clipToPadding = false
+        animationWindowView.clipChildren = false
     }
 
-    private fun start() = if (animationWindowView.isLayoutRtl) right() else left()
-    private fun right() = locationPublisher.marginRight
-    private fun left() = locationPublisher.marginLeft
+    private fun layoutParamsDefault(marginEnd: Int): FrameLayout.LayoutParams =
+            FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).also {
+                it.gravity = Gravity.END or Gravity.CENTER_VERTICAL
+                it.marginEnd = marginEnd
+            }
 
-    private fun layoutParamsDefault(): FrameLayout.LayoutParams =
-        FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).also {
-            it.gravity = Gravity.END or Gravity.CENTER_VERTICAL
-            it.marginStart = start()
+    private fun initializeAnimRect() = animRect.set(
+            chipLeft,
+            currentAnimatedView!!.view.top,
+            chipRight,
+            currentAnimatedView!!.view.bottom)
+
+    /**
+     * To be called during an animation, sets the width and updates the current animated chip view
+     */
+    private fun updateAnimatedViewBoundsWidth(width: Int) {
+        when (animationDirection) {
+            LEFT -> {
+                animRect.set((chipRight - width), animRect.top, chipRight, animRect.bottom)
+            } else /* RIGHT */ -> {
+                animRect.set(chipLeft, animRect.top, (chipLeft + width), animRect.bottom)
+            }
+        }
+
+        updateCurrentAnimatedView()
+    }
+
+    /**
+     * To be called during an animation, updates the animation rect and sends the update to the chip
+     */
+    private fun updateAnimatedViewBoundsHeight(height: Int, verticalCenter: Int) {
+        animRect.set(
+                animRect.left,
+                verticalCenter - (height.toFloat() / 2).roundToInt(),
+                animRect.right,
+                verticalCenter + (height.toFloat() / 2).roundToInt())
+
+        updateCurrentAnimatedView()
+    }
+
+    /**
+     * To be called during an animation, updates the animation rect offset and updates the chip
+     */
+    private fun updateAnimatedBoundsX(translation: Int) {
+        currentAnimatedView?.view?.translationX = translation.toFloat()
+    }
+
+    /**
+     * To be called during an animation. Sets the chip rect to animRect
+     */
+    private fun updateCurrentAnimatedView() {
+        currentAnimatedView?.setBoundsForAnimation(
+                animRect.left, animRect.top, animRect.right, animRect.bottom
+        )
     }
 }
+
+/**
+ * Chips should provide a view that can be animated with something better than a fade-in
+ */
+interface BackgroundAnimatableView {
+    val view: View // Since this can't extend View, add a view prop
+        get() = this as View
+    val chipWidth: Int
+        get() = view.measuredWidth
+    fun setBoundsForAnimation(l: Int, t: Int, r: Int, b: Int)
+}
+
+// Animation directions
+private const val LEFT = 1
+private const val RIGHT = 2

@@ -22,8 +22,11 @@ import static com.android.server.accessibility.gestures.TouchExplorer.DEBUG;
 
 import android.annotation.IntDef;
 import android.util.Slog;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityEvent;
+
+import com.android.server.accessibility.AccessibilityManagerService;
 
 /**
  * This class describes the state of the touch explorer as well as the state of received and
@@ -36,7 +39,7 @@ public class TouchState {
     // This constant captures the current implementation detail that
     // pointer IDs are between 0 and 31 inclusive (subject to change).
     // (See MAX_POINTER_ID in frameworks/base/include/ui/Input.h)
-    static final int MAX_POINTER_COUNT = 32;
+    public static final int MAX_POINTER_COUNT = 32;
     // Constant referring to the ids bits of all pointers.
     public static final int ALL_POINTER_ID_BITS = 0xFFFFFFFF;
 
@@ -50,8 +53,8 @@ public class TouchState {
     public static final int STATE_TOUCH_EXPLORING = 2;
     // the user is dragging with two fingers.
     public static final int STATE_DRAGGING = 3;
-    // The user is performing some other two finger gesture which we pass through to the view
-    // hierarchy as a one-finger gesture e.g. two-finger scrolling.
+    // The user is performing some other two finger gesture which we pass through to the
+    // input pipeline as a one-finger gesture e.g. two-finger pinch.
     public static final int STATE_DELEGATING = 4;
     // The user is performing something that might be a gesture.
     public static final int STATE_GESTURE_DETECTING = 5;
@@ -75,6 +78,8 @@ public class TouchState {
     private MotionEvent mLastReceivedEvent;
     // The accompanying raw event without any transformations.
     private MotionEvent mLastReceivedRawEvent;
+    // The policy flags of the last received event.
+    int mLastReceivedPolicyFlags;
     // The id of the last touch explored window.
     private int mLastTouchedWindowId;
     // The last injected hover event.
@@ -85,20 +90,28 @@ public class TouchState {
     private long mLastInjectedDownEventTime;
     // Keep track of which pointers sent to the system are down.
     private int mInjectedPointersDown;
+    private boolean mServiceDetectsGestures = false;
+    // The requested mode for mServiceDetectsGestures. This will take effect on the next touch
+    // interaction.
+    private boolean mServiceDetectsGesturesRequested = false;
+    private AccessibilityManagerService mAms;
+    private int mDisplayId = Display.INVALID_DISPLAY;
 
-    public TouchState() {
+    public TouchState(int displayId, AccessibilityManagerService ams) {
+        mDisplayId = displayId;
+        mAms = ams;
         mReceivedPointerTracker = new ReceivedPointerTracker();
     }
 
     /** Clears the internal shared state. */
     public void clear() {
         setState(STATE_CLEAR);
+        mServiceDetectsGestures = mServiceDetectsGesturesRequested;
         // Reset the pointer trackers.
         if (mLastReceivedEvent != null) {
             mLastReceivedEvent.recycle();
             mLastReceivedEvent = null;
         }
-        mLastTouchedWindowId = -1;
         mReceivedPointerTracker.clear();
         mInjectedPointersDown = 0;
     }
@@ -108,14 +121,19 @@ public class TouchState {
      *
      * @param rawEvent The raw touch event.
      */
-    public void onReceivedMotionEvent(MotionEvent rawEvent) {
+    public void onReceivedMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (isClear() && event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            clear();
+        }
         if (mLastReceivedEvent != null) {
             mLastReceivedEvent.recycle();
         }
         if (mLastReceivedRawEvent != null) {
             mLastReceivedRawEvent.recycle();
         }
-        mLastReceivedEvent = MotionEvent.obtain(rawEvent);
+        mLastReceivedEvent = MotionEvent.obtain(event);
+        mLastReceivedRawEvent = MotionEvent.obtain(rawEvent);
+        mLastReceivedPolicyFlags = policyFlags;
         mReceivedPointerTracker.onMotionEvent(rawEvent);
     }
 
@@ -124,7 +142,7 @@ public class TouchState {
      *
      * @param event The event to process.
      */
-    void onInjectedMotionEvent(MotionEvent event) {
+    public void onInjectedMotionEvent(MotionEvent event) {
         final int action = event.getActionMasked();
         final int pointerId = event.getPointerId(event.getActionIndex());
         final int pointerFlag = (1 << pointerId);
@@ -184,6 +202,7 @@ public class TouchState {
         }
     }
 
+    /** Updates the state in response to an injected accessibility event. */
     public void onInjectedAccessibilityEvent(int type) {
         // The below state transitions go here because the related events are often sent on a
         // delay.
@@ -196,7 +215,8 @@ public class TouchState {
                 startTouchInteracting();
                 break;
             case AccessibilityEvent.TYPE_TOUCH_INTERACTION_END:
-                clear();
+                setState(STATE_CLEAR);
+                // We will clear when we actually handle the next ACTION_DOWN.
                 break;
             case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START:
                 startTouchExploring();
@@ -229,6 +249,9 @@ public class TouchState {
             Slog.i(LOG_TAG, getStateSymbolicName(mState) + "->" + getStateSymbolicName(state));
         }
         mState = state;
+        if (mServiceDetectsGestures) {
+            mAms.onTouchStateChanged(mDisplayId, state);
+        }
     }
 
     public boolean isTouchExploring() {
@@ -315,6 +338,16 @@ public class TouchState {
         return mLastReceivedEvent;
     }
 
+    /** Gets the most recently received policy flags. */
+    public int getLastReceivedPolicyFlags() {
+        return mLastReceivedPolicyFlags;
+    }
+
+    /** Gets the most recently received raw event. */
+    public MotionEvent getLastReceivedRawEvent() {
+        return mLastReceivedRawEvent;
+    }
+
     /** @return The the last injected hover event. */
     public MotionEvent getLastInjectedHoverEvent() {
         return mLastInjectedHoverEvent;
@@ -353,6 +386,18 @@ public class TouchState {
     /** @return The the last injected hover event used for a click. */
     public MotionEvent getLastInjectedHoverEventForClick() {
         return mLastInjectedHoverEventForClick;
+    }
+
+    public boolean isServiceDetectingGestures() {
+        return mServiceDetectsGestures;
+    }
+
+    /** Whether the service is handling gesture detection. */
+    public void setServiceDetectsGestures(boolean mode) {
+        if (DEBUG) {
+            Slog.d(LOG_TAG, "serviceDetectsGestures: " + mode);
+        }
+        mServiceDetectsGesturesRequested = mode;
     }
 
     /** This class tracks where and when a pointer went down. It does not track its movement. */

@@ -107,7 +107,7 @@ private:
             jint n = env->CallIntMethod(fJavaInputStream,
                                         gInputStream_readMethodID, fJavaByteArray, 0, requested);
             if (checkException(env)) {
-                SkDebugf("---- read threw an exception\n");
+                ALOGD("---- read threw an exception\n");
                 return bytesRead;
             }
 
@@ -119,7 +119,7 @@ private:
             env->GetByteArrayRegion(fJavaByteArray, 0, n,
                                     reinterpret_cast<jbyte*>(buffer));
             if (checkException(env)) {
-                SkDebugf("---- read:GetByteArrayRegion threw an exception\n");
+                ALOGD("---- read:GetByteArrayRegion threw an exception\n");
                 return bytesRead;
             }
 
@@ -136,7 +136,7 @@ private:
         jlong skipped = env->CallLongMethod(fJavaInputStream,
                                             gInputStream_skipMethodID, (jlong)size);
         if (checkException(env)) {
-            SkDebugf("------- skip threw an exception\n");
+            ALOGD("------- skip threw an exception\n");
             return 0;
         }
         if (skipped < 0) {
@@ -236,7 +236,7 @@ public:
             if (env->ExceptionCheck()) {
                 env->ExceptionDescribe();
                 env->ExceptionClear();
-                SkDebugf("--- write:SetByteArrayElements threw an exception\n");
+                ALOGD("--- write:SetByteArrayElements threw an exception\n");
                 return false;
             }
 
@@ -245,7 +245,7 @@ public:
             if (env->ExceptionCheck()) {
                 env->ExceptionDescribe();
                 env->ExceptionClear();
-                SkDebugf("------- write threw an exception\n");
+                ALOGD("------- write threw an exception\n");
                 return false;
             }
 

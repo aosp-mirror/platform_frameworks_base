@@ -162,6 +162,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         updateBackgroundTint();
     }
 
+    /**
+     * @param width The actual width to apply to the background view.
+     */
+    public void setBackgroundWidth(int width) {
+        if (mBackgroundNormal == null) {
+            return;
+        }
+        mBackgroundNormal.setActualWidth(width);
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -424,7 +434,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     @Override
-    public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear) {
+    public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear,
+            Runnable onFinishRunnable) {
         enableAppearDrawing(true);
         mIsHeadsUpAnimation = isHeadsUpAppear;
         if (mDrawingAppearAnimation) {

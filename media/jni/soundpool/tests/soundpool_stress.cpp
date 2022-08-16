@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
         .content_type = AUDIO_CONTENT_TYPE_MUSIC,
         .usage = AUDIO_USAGE_MEDIA,
     };
-    auto soundPool = std::make_unique<SoundPool>(maxStreams, &aa);
+    auto soundPool = std::make_unique<SoundPool>(maxStreams, aa);
 
     gCallbackManager.setSoundPool(soundPool.get());
     soundPool->setCallback(StaticCallbackManager, &gCallbackManager);

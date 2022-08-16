@@ -24,14 +24,20 @@ import static com.android.server.attention.AttentionManagerService.KEY_STALE_AFT
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static junit.framework.Assert.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
+import android.attention.AttentionManagerInternal.ProximityUpdateCallbackInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
@@ -42,6 +48,7 @@ import android.os.RemoteException;
 import android.provider.DeviceConfig;
 import android.service.attention.IAttentionCallback;
 import android.service.attention.IAttentionService;
+import android.service.attention.IProximityUpdateCallback;
 
 import androidx.test.filters.SmallTest;
 
@@ -49,6 +56,7 @@ import com.android.server.attention.AttentionManagerService.AttentionCheck;
 import com.android.server.attention.AttentionManagerService.AttentionCheckCache;
 import com.android.server.attention.AttentionManagerService.AttentionCheckCacheBuffer;
 import com.android.server.attention.AttentionManagerService.AttentionHandler;
+import com.android.server.attention.AttentionManagerService.ProximityUpdate;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,10 +67,13 @@ import org.mockito.MockitoAnnotations;
 /**
  * Tests for {@link com.android.server.attention.AttentionManagerService}
  */
+@SuppressWarnings("GuardedBy")
 @SmallTest
 public class AttentionManagerServiceTest {
+    private static final double PROXIMITY_SUCCESS_STATE = 1.0;
     private AttentionManagerService mSpyAttentionManager;
     private final int mTimeout = 1000;
+    private final Object mLock = new Object();
     @Mock
     private AttentionCallbackInternal mMockAttentionCallbackInternal;
     @Mock
@@ -73,6 +84,8 @@ public class AttentionManagerServiceTest {
     private IThermalService mMockIThermalService;
     @Mock
     Context mContext;
+    @Mock
+    private ProximityUpdateCallbackInternal mMockProximityUpdateCallbackInternal;
 
     @Before
     public void setUp() throws RemoteException {
@@ -84,7 +97,6 @@ public class AttentionManagerServiceTest {
         doReturn(true).when(mMockIPowerManager).isInteractive();
         mPowerManager = new PowerManager(mContext, mMockIPowerManager, mMockIThermalService, null);
 
-        Object mLock = new Object();
         // setup a spy on attention manager
         AttentionManagerService attentionManager = new AttentionManagerService(
                 mContext,
@@ -100,6 +112,125 @@ public class AttentionManagerServiceTest {
                 mSpyAttentionManager);
         mSpyAttentionManager.mCurrentAttentionCheck = attentionCheck;
         mSpyAttentionManager.mService = new MockIAttentionService();
+        doNothing().when(mSpyAttentionManager).freeIfInactiveLocked();
+    }
+
+    @Test
+    public void testRegisterProximityUpdates_returnFalseWhenServiceDisabled() {
+        mSpyAttentionManager.mIsServiceEnabled = false;
+
+        assertThat(mSpyAttentionManager.onStartProximityUpdates(
+                mMockProximityUpdateCallbackInternal))
+                .isFalse();
+    }
+
+    @Test
+    public void testRegisterProximityUpdates_returnFalseWhenServiceUnavailable() {
+        mSpyAttentionManager.mIsServiceEnabled = true;
+        doReturn(false).when(mSpyAttentionManager).isServiceAvailable();
+
+        assertThat(mSpyAttentionManager.onStartProximityUpdates(
+                mMockProximityUpdateCallbackInternal))
+                .isFalse();
+    }
+
+    @Test
+    public void testRegisterProximityUpdates_returnFalseWhenPowerManagerNotInteract()
+            throws RemoteException {
+        mSpyAttentionManager.mIsServiceEnabled = true;
+        doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
+        doReturn(false).when(mMockIPowerManager).isInteractive();
+
+        assertThat(mSpyAttentionManager.onStartProximityUpdates(
+                mMockProximityUpdateCallbackInternal))
+                .isFalse();
+    }
+
+    @Test
+    public void testRegisterProximityUpdates_callOnSuccess() throws RemoteException {
+        mSpyAttentionManager.mIsServiceEnabled = true;
+        doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
+        doReturn(true).when(mMockIPowerManager).isInteractive();
+
+        assertThat(mSpyAttentionManager.onStartProximityUpdates(
+                mMockProximityUpdateCallbackInternal))
+                .isTrue();
+        verify(mMockProximityUpdateCallbackInternal, times(1))
+                .onProximityUpdate(PROXIMITY_SUCCESS_STATE);
+    }
+
+    @Test
+    public void testRegisterProximityUpdates_callOnSuccessTwiceInARow() throws RemoteException {
+        mSpyAttentionManager.mIsServiceEnabled = true;
+        doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
+        doReturn(true).when(mMockIPowerManager).isInteractive();
+
+        assertThat(mSpyAttentionManager.onStartProximityUpdates(
+                mMockProximityUpdateCallbackInternal))
+                .isTrue();
+
+        ProximityUpdate prevProximityUpdate = mSpyAttentionManager.mCurrentProximityUpdate;
+        assertThat(mSpyAttentionManager.onStartProximityUpdates(
+                mMockProximityUpdateCallbackInternal))
+                .isTrue();
+        assertThat(mSpyAttentionManager.mCurrentProximityUpdate).isEqualTo(prevProximityUpdate);
+        verify(mMockProximityUpdateCallbackInternal, times(1))
+                .onProximityUpdate(PROXIMITY_SUCCESS_STATE);
+    }
+
+    @Test
+    public void testUnregisterProximityUpdates_noCrashWhenNoCallbackIsRegistered() {
+        mSpyAttentionManager.onStopProximityUpdates(mMockProximityUpdateCallbackInternal);
+        verifyZeroInteractions(mMockProximityUpdateCallbackInternal);
+    }
+
+    @Test
+    public void testUnregisterProximityUpdates_noCrashWhenCallbackMismatched()
+            throws RemoteException {
+        mSpyAttentionManager.mIsServiceEnabled = true;
+        doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
+        doReturn(true).when(mMockIPowerManager).isInteractive();
+        mSpyAttentionManager.onStartProximityUpdates(mMockProximityUpdateCallbackInternal);
+        verify(mMockProximityUpdateCallbackInternal, times(1))
+                .onProximityUpdate(PROXIMITY_SUCCESS_STATE);
+
+        ProximityUpdateCallbackInternal mismatchedCallback = new ProximityUpdateCallbackInternal() {
+            @Override
+            public void onProximityUpdate(double distance) {
+                fail("Callback shouldn't have responded.");
+            }
+        };
+        mSpyAttentionManager.onStopProximityUpdates(mismatchedCallback);
+
+        verifyNoMoreInteractions(mMockProximityUpdateCallbackInternal);
+    }
+
+    @Test
+    public void testUnregisterProximityUpdates_cancelRegistrationWhenMatched()
+            throws RemoteException {
+        mSpyAttentionManager.mIsServiceEnabled = true;
+        doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
+        doReturn(true).when(mMockIPowerManager).isInteractive();
+        mSpyAttentionManager.onStartProximityUpdates(mMockProximityUpdateCallbackInternal);
+        mSpyAttentionManager.onStopProximityUpdates(mMockProximityUpdateCallbackInternal);
+
+        assertThat(mSpyAttentionManager.mCurrentProximityUpdate).isNull();
+    }
+
+    @Test
+    public void testUnregisterProximityUpdates_noCrashWhenTwiceInARow() throws RemoteException {
+        // Attention Service registers proximity updates.
+        mSpyAttentionManager.mIsServiceEnabled = true;
+        doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
+        doReturn(true).when(mMockIPowerManager).isInteractive();
+        mSpyAttentionManager.onStartProximityUpdates(mMockProximityUpdateCallbackInternal);
+        verify(mMockProximityUpdateCallbackInternal, times(1))
+                .onProximityUpdate(PROXIMITY_SUCCESS_STATE);
+
+        // Attention Service unregisters the proximity update twice in a row.
+        mSpyAttentionManager.onStopProximityUpdates(mMockProximityUpdateCallbackInternal);
+        mSpyAttentionManager.onStopProximityUpdates(mMockProximityUpdateCallbackInternal);
+        verifyNoMoreInteractions(mMockProximityUpdateCallbackInternal);
     }
 
     @Test
@@ -127,7 +258,6 @@ public class AttentionManagerServiceTest {
         mSpyAttentionManager.mIsServiceEnabled = true;
         doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
         doReturn(true).when(mMockIPowerManager).isInteractive();
-        doNothing().when(mSpyAttentionManager).freeIfInactiveLocked();
         mSpyAttentionManager.mCurrentAttentionCheck = null;
 
         AttentionCallbackInternal callback = Mockito.mock(AttentionCallbackInternal.class);
@@ -211,6 +341,14 @@ public class AttentionManagerServiceTest {
         }
 
         public void cancelAttentionCheck(IAttentionCallback callback) {
+        }
+
+        public void onStartProximityUpdates(IProximityUpdateCallback callback)
+                throws RemoteException {
+            callback.onProximityUpdate(PROXIMITY_SUCCESS_STATE);
+        }
+
+        public void onStopProximityUpdates() throws RemoteException {
         }
 
         public IBinder asBinder() {

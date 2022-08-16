@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * The Paint class holds the style and color information about how to draw
@@ -2131,6 +2132,120 @@ public class Paint {
     }
 
     /**
+     * Returns the font metrics value for the given text.
+     *
+     * If the text is rendered with multiple font files, this function returns the large ascent and
+     * descent that are enough for drawing all font files.
+     *
+     * The context range is used for shaping context. Some script, e.g. Arabic or Devanagari,
+     * changes letter shape based on its location or surrounding characters.
+     *
+     * @param text a text to be measured.
+     * @param start a starting offset in the text.
+     * @param count a length of the text to be measured.
+     * @param contextStart a context starting offset in the text.
+     * @param contextCount a length of the context to be used.
+     * @param isRtl true if measuring on RTL context, otherwise false.
+     * @param outMetrics the output font metrics.
+     */
+    public void getFontMetricsInt(
+            @NonNull CharSequence text,
+            @IntRange(from = 0) int start, @IntRange(from = 0) int count,
+            @IntRange(from = 0) int contextStart, @IntRange(from = 0) int contextCount,
+            boolean isRtl,
+            @NonNull FontMetricsInt outMetrics) {
+
+        if (text == null) {
+            throw new IllegalArgumentException("text must not be null");
+        }
+        if (start < 0 || start >= text.length()) {
+            throw new IllegalArgumentException("start argument is out of bounds.");
+        }
+        if (count < 0 || start + count > text.length()) {
+            throw new IllegalArgumentException("count argument is out of bounds.");
+        }
+        if (contextStart < 0 || contextStart >= text.length()) {
+            throw new IllegalArgumentException("ctxStart argument is out of bounds.");
+        }
+        if (contextCount < 0 || contextStart + contextCount > text.length()) {
+            throw new IllegalArgumentException("ctxCount argument is out of bounds.");
+        }
+        if (outMetrics == null) {
+            throw new IllegalArgumentException("outMetrics must not be null.");
+        }
+
+        if (count == 0) {
+            getFontMetricsInt(outMetrics);
+            return;
+        }
+
+        if (text instanceof String) {
+            nGetFontMetricsIntForText(mNativePaint, (String) text, start, count, contextStart,
+                    contextCount, isRtl, outMetrics);
+        } else {
+            char[] buf = TemporaryBuffer.obtain(contextCount);
+            try {
+                TextUtils.getChars(text, contextStart, contextStart + contextCount, buf, 0);
+                nGetFontMetricsIntForText(mNativePaint, buf, start - contextStart, count, 0,
+                        contextCount, isRtl, outMetrics);
+            } finally {
+                TemporaryBuffer.recycle(buf);
+            }
+        }
+
+    }
+
+    /**
+     * Returns the font metrics value for the given text.
+     *
+     * If the text is rendered with multiple font files, this function returns the large ascent and
+     * descent that are enough for drawing all font files.
+     *
+     * The context range is used for shaping context. Some script, e.g. Arabic or Devanagari,
+     * changes letter shape based on its location or surrounding characters.
+     *
+     * @param text a text to be measured.
+     * @param start a starting offset in the text.
+     * @param count a length of the text to be measured.
+     * @param contextStart a context starting offset in the text.
+     * @param contextCount a length of the context to be used.
+     * @param isRtl true if measuring on RTL context, otherwise false.
+     * @param outMetrics the output font metrics.
+     */
+    public void getFontMetricsInt(@NonNull char[] text,
+            @IntRange(from = 0) int start, @IntRange(from = 0) int count,
+            @IntRange(from = 0) int contextStart, @IntRange(from = 0) int contextCount,
+            boolean isRtl,
+            @NonNull FontMetricsInt outMetrics) {
+        if (text == null) {
+            throw new IllegalArgumentException("text must not be null");
+        }
+        if (start < 0 || start >= text.length) {
+            throw new IllegalArgumentException("start argument is out of bounds.");
+        }
+        if (count < 0 || start + count > text.length) {
+            throw new IllegalArgumentException("count argument is out of bounds.");
+        }
+        if (contextStart < 0 || contextStart >= text.length) {
+            throw new IllegalArgumentException("ctxStart argument is out of bounds.");
+        }
+        if (contextCount < 0 || contextStart + contextCount > text.length) {
+            throw new IllegalArgumentException("ctxCount argument is out of bounds.");
+        }
+        if (outMetrics == null) {
+            throw new IllegalArgumentException("outMetrics must not be null.");
+        }
+
+        if (count == 0) {
+            getFontMetricsInt(outMetrics);
+            return;
+        }
+
+        nGetFontMetricsIntForText(mNativePaint, text, start, count, contextStart, contextCount,
+                isRtl, outMetrics);
+    }
+
+    /**
      * Convenience method for callers that want to have FontMetrics values as
      * integers.
      */
@@ -2162,6 +2277,23 @@ public class Paint {
             return "FontMetricsInt: top=" + top + " ascent=" + ascent +
                     " descent=" + descent + " bottom=" + bottom +
                     " leading=" + leading;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof FontMetricsInt)) return false;
+            FontMetricsInt that = (FontMetricsInt) o;
+            return top == that.top
+                    && ascent == that.ascent
+                    && descent == that.descent
+                    && bottom == that.bottom
+                    && leading == that.leading;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(top, ascent, descent, bottom, leading);
         }
     }
 
@@ -3117,6 +3249,13 @@ public class Paint {
             int contextStart, int contextEnd, boolean isRtl, int offset);
     private static native int nGetOffsetForAdvance(long paintPtr, char[] text, int start, int end,
             int contextStart, int contextEnd, boolean isRtl, float advance);
+    private static native void nGetFontMetricsIntForText(long paintPtr, char[] text,
+            int start, int count, int ctxStart, int ctxCount, boolean isRtl,
+            FontMetricsInt outMetrics);
+    private static native void nGetFontMetricsIntForText(long paintPtr, String text,
+            int start, int count, int ctxStart, int ctxCount, boolean isRtl,
+            FontMetricsInt outMetrics);
+
 
 
     // ---------------- @FastNative ------------------------
@@ -3129,7 +3268,6 @@ public class Paint {
     private static native float nGetFontMetrics(long paintPtr, FontMetrics metrics);
     @FastNative
     private static native int nGetFontMetricsInt(long paintPtr, FontMetricsInt fmi);
-
 
     // ---------------- @CriticalNative ------------------------
 

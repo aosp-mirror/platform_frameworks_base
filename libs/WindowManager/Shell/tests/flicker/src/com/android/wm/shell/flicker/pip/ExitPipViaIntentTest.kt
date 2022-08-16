@@ -16,14 +16,19 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import org.junit.Assume
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -56,7 +61,7 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
     /**
      * Defines the transition used to run the test
      */
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition(eachRun = true) {
             setup {
                 eachRun {
@@ -66,11 +71,31 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
             }
             transitions {
                 // This will bring PipApp to fullscreen
-                pipApp.launchViaIntent(wmHelper)
+                pipApp.exitPipToFullScreenViaIntent(wmHelper)
                 // Wait until the other app is no longer visible
-                wmHelper.waitForSurfaceAppeared(testApp.component.toWindowName())
+                wmHelper.waitForWindowSurfaceDisappeared(testApp.component)
             }
         }
+
+    /** {@inheritDoc}  */
+    @FlakyTest(bugId = 206753786)
+    @Test
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+
+    /** {@inheritDoc}  */
+    @FlakyTest(bugId = 197726610)
+    @Test
+    override fun pipLayerExpands() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        super.pipLayerExpands()
+    }
+
+    @Presubmit
+    @Test
+    fun pipLayerExpands_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        super.pipLayerExpands()
+    }
 
     companion object {
         /**
@@ -83,7 +108,7 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0), repetitions = 5)
+                supportedRotations = listOf(Surface.ROTATION_0), repetitions = 3)
         }
     }
 }

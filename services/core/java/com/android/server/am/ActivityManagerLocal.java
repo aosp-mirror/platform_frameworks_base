@@ -17,7 +17,12 @@
 package com.android.server.am;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.RemoteException;
 
 /**
  * Interface for in-process calls into
@@ -58,4 +63,33 @@ public interface ActivityManagerLocal {
      * @hide
      */
     void tempAllowWhileInUsePermissionInFgs(int uid, long durationMs);
+
+    /**
+     * Binds to a sdk sandbox service, creating it if needed. You can through the arguments
+     * here have the system bring up multiple concurrent processes hosting their own instance of
+     * that service. The {@code processName} you provide here identifies the different instances.
+     *
+     * @param service Identifies the sdk sandbox process service to connect to. The Intent must
+     *        specify an explicit component name. This value cannot be null.
+     * @param conn Receives information as the service is started and stopped.
+     *        This must be a valid ServiceConnection object; it must not be null.
+     * @param clientAppUid Uid of the app for which the sdk sandbox process needs to be spawned.
+     * @param clientAppPackage Package of the app for which the sdk sandbox process needs to
+     *        be spawned. This package must belong to the clientAppUid.
+     * @param processName Unique identifier for the service instance. Each unique name here will
+     *        result in a different service instance being created. Identifiers must only contain
+     *        ASCII letters, digits, underscores, and periods.
+     * @param flags Operation options provided by Context class for the binding.
+     * @return {@code true} if the system is in the process of bringing up a
+     *         service that your client has permission to bind to; {@code false}
+     *         if the system couldn't find the service or if your client doesn't
+     *         have permission to bind to it.
+     * @throws RemoteException If the service could not be brought up.
+     * @see Context#bindService(Intent, ServiceConnection, int)
+     */
+    @SuppressLint("RethrowRemoteException")
+    boolean bindSdkSandboxService(@NonNull Intent service, @NonNull ServiceConnection conn,
+            int clientAppUid, @NonNull String clientAppPackage, @NonNull String processName,
+            @Context.BindServiceFlags int flags)
+            throws RemoteException;
 }

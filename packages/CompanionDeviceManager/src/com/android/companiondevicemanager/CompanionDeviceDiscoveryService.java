@@ -16,18 +16,19 @@
 
 package com.android.companiondevicemanager;
 
-import static android.companion.BluetoothDeviceFilterUtils.getDeviceDisplayNameInternal;
-import static android.companion.BluetoothDeviceFilterUtils.getDeviceMacAddress;
-
+import static com.android.companiondevicemanager.Utils.runOnMainThread;
 import static com.android.internal.util.ArrayUtils.isEmpty;
-import static com.android.internal.util.CollectionUtils.emptyIfNull;
-import static com.android.internal.util.CollectionUtils.size;
-import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+import static com.android.internal.util.CollectionUtils.filter;
+import static com.android.internal.util.CollectionUtils.find;
+import static com.android.internal.util.CollectionUtils.map;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.util.Objects.requireNonNull;
 
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -38,13 +39,10 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.companion.Association;
 import android.companion.AssociationRequest;
 import android.companion.BluetoothDeviceFilter;
 import android.companion.BluetoothLeDeviceFilter;
 import android.companion.DeviceFilter;
-import android.companion.ICompanionDeviceDiscoveryService;
-import android.companion.IFindDeviceCallback;
 import android.companion.WifiDeviceFilter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -54,419 +52,451 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
-import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.internal.infra.AndroidFuture;
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.CollectionUtils;
-import com.android.internal.util.Preconditions;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ *  A CompanionDevice service response for scanning nearby devices
+ */
 public class CompanionDeviceDiscoveryService extends Service {
-
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = CompanionDeviceDiscoveryService.class.getSimpleName();
+    private static final String TAG = CompanionDeviceDiscoveryService.class.getSimpleName();
 
-    private static final long SCAN_TIMEOUT = 20000;
+    private static final String SYS_PROP_DEBUG_TIMEOUT = "debug.cdm.discovery_timeout";
+    private static final long TIMEOUT_DEFAULT = 20_000L; // 20 seconds
+    private static final long TIMEOUT_MIN = 1_000L; // 1 sec
+    private static final long TIMEOUT_MAX = 60_000L; // 1 min
 
-    static CompanionDeviceDiscoveryService sInstance;
+    private static final String ACTION_START_DISCOVERY =
+            "com.android.companiondevicemanager.action.START_DISCOVERY";
+    private static final String ACTION_STOP_DISCOVERY =
+            "com.android.companiondevicemanager.action.ACTION_STOP_DISCOVERY";
+    private static final String EXTRA_ASSOCIATION_REQUEST = "association_request";
 
-    private BluetoothManager mBluetoothManager;
-    private BluetoothAdapter mBluetoothAdapter;
+    private static MutableLiveData<List<DeviceFilterPair<?>>> sScanResultsLiveData =
+            new MutableLiveData<>(Collections.emptyList());
+    private static MutableLiveData<DiscoveryState> sStateLiveData =
+            new MutableLiveData<>(DiscoveryState.NOT_STARTED);
+
+    private BluetoothManager mBtManager;
+    private BluetoothAdapter mBtAdapter;
     private WifiManager mWifiManager;
-    @Nullable private BluetoothLeScanner mBLEScanner;
-    private ScanSettings mDefaultScanSettings = new ScanSettings.Builder()
-            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-            .build();
+    private BluetoothLeScanner mBleScanner;
 
-    private List<DeviceFilter<?>> mFilters;
-    private List<BluetoothLeDeviceFilter> mBLEFilters;
-    private List<BluetoothDeviceFilter> mBluetoothFilters;
-    private List<WifiDeviceFilter> mWifiFilters;
-    private List<ScanFilter> mBLEScanFilters;
+    private ScanCallback mBleScanCallback;
+    private BluetoothBroadcastReceiver mBtReceiver;
+    private WifiBroadcastReceiver mWifiReceiver;
 
-    AssociationRequest mRequest;
-    List<DeviceFilterPair> mDevicesFound;
-    DeviceFilterPair mSelectedDevice;
-    IFindDeviceCallback mFindCallback;
+    private boolean mDiscoveryStarted = false;
+    private boolean mDiscoveryStopped = false;
+    private final List<DeviceFilterPair<?>> mDevicesFound = new ArrayList<>();
 
-    AndroidFuture<Association> mServiceCallback;
-    boolean mIsScanning = false;
-    @Nullable
-    CompanionDeviceActivity mActivity = null;
+    private final Runnable mTimeoutRunnable = this::timeout;
 
-    private final ICompanionDeviceDiscoveryService mBinder =
-            new ICompanionDeviceDiscoveryService.Stub() {
-        @Override
-        public void startDiscovery(AssociationRequest request,
-                String callingPackage,
-                IFindDeviceCallback findCallback,
-                AndroidFuture serviceCallback) {
-            Log.i(LOG_TAG,
-                    "startDiscovery() called with: filter = [" + request
-                            + "], findCallback = [" + findCallback + "]"
-                            + "], serviceCallback = [" + serviceCallback + "]");
-            mFindCallback = findCallback;
-            mServiceCallback = serviceCallback;
-            Handler.getMain().sendMessage(obtainMessage(
-                    CompanionDeviceDiscoveryService::startDiscovery,
-                    CompanionDeviceDiscoveryService.this, request));
-        }
+    private boolean mStopAfterFirstMatch;;
 
-        @Override
-        public void onAssociationCreated() {
-            Handler.getMain().post(CompanionDeviceDiscoveryService.this::onAssociationCreated);
-        }
-    };
+    /**
+     * A state enum for devices' discovery.
+     */
+    enum DiscoveryState {
+        NOT_STARTED,
+        STARTING,
+        DISCOVERY_IN_PROGRESS,
+        FINISHED_STOPPED,
+        FINISHED_TIMEOUT
+    }
 
-    private ScanCallback mBLEScanCallback;
-    private BluetoothBroadcastReceiver mBluetoothBroadcastReceiver;
-    private WifiBroadcastReceiver mWifiBroadcastReceiver;
+    static void startForRequest(
+            @NonNull Context context, @NonNull AssociationRequest associationRequest) {
+        requireNonNull(associationRequest);
+        final Intent intent = new Intent(context, CompanionDeviceDiscoveryService.class);
+        intent.setAction(ACTION_START_DISCOVERY);
+        intent.putExtra(EXTRA_ASSOCIATION_REQUEST, associationRequest);
+        sStateLiveData.setValue(DiscoveryState.STARTING);
+        sScanResultsLiveData.setValue(Collections.emptyList());
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        Log.i(LOG_TAG, "onBind(" + intent + ")");
-        return mBinder.asBinder();
+        context.startService(intent);
+    }
+
+    static void stop(@NonNull Context context) {
+        final Intent intent = new Intent(context, CompanionDeviceDiscoveryService.class);
+        intent.setAction(ACTION_STOP_DISCOVERY);
+        context.startService(intent);
+    }
+
+    static LiveData<List<DeviceFilterPair<?>>> getScanResult() {
+        return sScanResultsLiveData;
+    }
+
+    static LiveData<DiscoveryState> getDiscoveryState() {
+        return sStateLiveData;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        if (DEBUG) Log.d(TAG, "onCreate()");
 
-        Log.i(LOG_TAG, "onCreate()");
-
-        mBluetoothManager = getSystemService(BluetoothManager.class);
-        mBluetoothAdapter = mBluetoothManager.getAdapter();
-        mBLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
+        mBtManager = getSystemService(BluetoothManager.class);
+        mBtAdapter = mBtManager.getAdapter();
+        mBleScanner = mBtAdapter.getBluetoothLeScanner();
         mWifiManager = getSystemService(WifiManager.class);
-
-        mDevicesFound = new ArrayList<>();
-
-        sInstance = this;
-    }
-
-    @MainThread
-    private void startDiscovery(AssociationRequest request) {
-        if (!request.equals(mRequest)) {
-            mRequest = request;
-
-            mFilters = request.getDeviceFilters();
-            mWifiFilters = CollectionUtils.filter(mFilters, WifiDeviceFilter.class);
-            mBluetoothFilters = CollectionUtils.filter(mFilters, BluetoothDeviceFilter.class);
-            mBLEFilters = CollectionUtils.filter(mFilters, BluetoothLeDeviceFilter.class);
-            mBLEScanFilters
-                    = CollectionUtils.map(mBLEFilters, BluetoothLeDeviceFilter::getScanFilter);
-
-            reset();
-        } else {
-            Log.i(LOG_TAG, "startDiscovery: duplicate request: " + request);
-        }
-
-        if (!ArrayUtils.isEmpty(mDevicesFound)) {
-            onReadyToShowUI();
-        }
-
-        // If filtering to get single device by mac address, also search in the set of already
-        // bonded devices to allow linking those directly
-        String singleMacAddressFilter = null;
-        if (mRequest.isSingleDevice()) {
-            int numFilters = size(mBluetoothFilters);
-            for (int i = 0; i < numFilters; i++) {
-                BluetoothDeviceFilter filter = mBluetoothFilters.get(i);
-                if (!TextUtils.isEmpty(filter.getAddress())) {
-                    singleMacAddressFilter = filter.getAddress();
-                    break;
-                }
-            }
-        }
-        if (singleMacAddressFilter != null) {
-            for (BluetoothDevice dev : emptyIfNull(mBluetoothAdapter.getBondedDevices())) {
-                onDeviceFound(DeviceFilterPair.findMatch(dev, mBluetoothFilters));
-            }
-            for (BluetoothDevice dev : emptyIfNull(
-                    mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT))) {
-                onDeviceFound(DeviceFilterPair.findMatch(dev, mBluetoothFilters));
-            }
-            for (BluetoothDevice dev : emptyIfNull(
-                    mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER))) {
-                onDeviceFound(DeviceFilterPair.findMatch(dev, mBluetoothFilters));
-            }
-        }
-
-        if (shouldScan(mBluetoothFilters)) {
-            final IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
-
-            Log.i(LOG_TAG, "registerReceiver(BluetoothDevice.ACTION_FOUND)");
-            mBluetoothBroadcastReceiver = new BluetoothBroadcastReceiver();
-            registerReceiver(mBluetoothBroadcastReceiver, intentFilter);
-            mBluetoothAdapter.startDiscovery();
-        }
-
-        if (shouldScan(mBLEFilters) && mBLEScanner != null) {
-            Log.i(LOG_TAG, "BLEScanner.startScan");
-            mBLEScanCallback = new BLEScanCallback();
-            mBLEScanner.startScan(mBLEScanFilters, mDefaultScanSettings, mBLEScanCallback);
-        }
-
-        if (shouldScan(mWifiFilters)) {
-            Log.i(LOG_TAG, "registerReceiver(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)");
-            mWifiBroadcastReceiver = new WifiBroadcastReceiver();
-            registerReceiver(mWifiBroadcastReceiver,
-                    new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-            mWifiManager.startScan();
-        }
-        mIsScanning = true;
-        Handler.getMain().sendMessageDelayed(
-                obtainMessage(CompanionDeviceDiscoveryService::stopScan, this),
-                SCAN_TIMEOUT);
-    }
-
-    @MainThread
-    private void onAssociationCreated() {
-        mActivity.setResultAndFinish();
-    }
-
-    private boolean shouldScan(List<? extends DeviceFilter> mediumSpecificFilters) {
-        return !isEmpty(mediumSpecificFilters) || isEmpty(mFilters);
-    }
-
-    @MainThread
-    private void reset() {
-        Log.i(LOG_TAG, "reset()");
-        stopScan();
-        mDevicesFound.clear();
-        mSelectedDevice = null;
-        CompanionDeviceActivity.notifyDevicesChanged();
     }
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        Log.i(LOG_TAG, "onUnbind(intent = " + intent + ")");
-        stopScan();
-        return super.onUnbind(intent);
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        final String action = intent.getAction();
+        if (DEBUG) Log.d(TAG, "onStartCommand() action=" + action);
+
+        switch (action) {
+            case ACTION_START_DISCOVERY:
+                final AssociationRequest request =
+                        intent.getParcelableExtra(EXTRA_ASSOCIATION_REQUEST);
+                startDiscovery(request);
+                break;
+
+            case ACTION_STOP_DISCOVERY:
+                stopDiscoveryAndFinish(/* timeout */ false);
+                break;
+        }
+        return START_NOT_STICKY;
     }
 
-    private void stopScan() {
-        Log.i(LOG_TAG, "stopScan()");
-
-        if (!mIsScanning) return;
-        mIsScanning = false;
-
-        if (mActivity != null && mActivity.mDeviceListView != null) {
-            mActivity.mDeviceListView.removeFooterView(mActivity.mLoadingIndicator);
-        }
-
-        mBluetoothAdapter.cancelDiscovery();
-        if (mBluetoothBroadcastReceiver != null) {
-            unregisterReceiver(mBluetoothBroadcastReceiver);
-            mBluetoothBroadcastReceiver = null;
-        }
-        if (mBLEScanner != null) mBLEScanner.stopScan(mBLEScanCallback);
-        if (mWifiBroadcastReceiver != null) {
-            unregisterReceiver(mWifiBroadcastReceiver);
-            mWifiBroadcastReceiver = null;
-        }
-    }
-
-    private void onDeviceFound(@Nullable DeviceFilterPair device) {
-        if (device == null) return;
-
-        Handler.getMain().sendMessage(obtainMessage(
-                CompanionDeviceDiscoveryService::onDeviceFoundMainThread, this, device));
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (DEBUG) Log.d(TAG, "onDestroy()");
     }
 
     @MainThread
-    void onDeviceFoundMainThread(@NonNull DeviceFilterPair device) {
-        if (mDevicesFound.contains(device)) {
-            Log.i(LOG_TAG, "Skipping device " + device + " - already among found devices");
-            return;
-        }
+    private void startDiscovery(@NonNull AssociationRequest request) {
+        if (DEBUG) Log.i(TAG, "startDiscovery() request=" + request);
+        requireNonNull(request);
 
-        Log.i(LOG_TAG, "Found device " + device);
+        if (mDiscoveryStarted) throw new RuntimeException("Discovery in progress.");
+        mStopAfterFirstMatch = request.isSingleDevice();
+        mDiscoveryStarted = true;
+        sStateLiveData.setValue(DiscoveryState.DISCOVERY_IN_PROGRESS);
 
-        if (mDevicesFound.isEmpty()) {
-            onReadyToShowUI();
-        }
-        mDevicesFound.add(device);
-        CompanionDeviceActivity.notifyDevicesChanged();
-    }
+        final List<DeviceFilter<?>> allFilters = request.getDeviceFilters();
+        final List<BluetoothDeviceFilter> btFilters =
+                filter(allFilters, BluetoothDeviceFilter.class);
+        final List<BluetoothLeDeviceFilter> bleFilters =
+                filter(allFilters, BluetoothLeDeviceFilter.class);
+        final List<WifiDeviceFilter> wifiFilters = filter(allFilters, WifiDeviceFilter.class);
 
-    //TODO also, on timeout -> call onFailure
-    private void onReadyToShowUI() {
-        try {
-            mFindCallback.onSuccess(PendingIntent.getActivity(
-                    this, 0,
-                    new Intent(this, CompanionDeviceActivity.class),
-                    PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT
-                            | PendingIntent.FLAG_IMMUTABLE));
-        } catch (RemoteException e) {
-            throw new RuntimeException(e);
-        }
-    }
+        checkBoundDevicesIfNeeded(request, btFilters);
 
-    private void onDeviceLost(@Nullable DeviceFilterPair device) {
-        Log.i(LOG_TAG, "Lost device " + device.getDisplayName());
-        Handler.getMain().sendMessage(obtainMessage(
-                CompanionDeviceDiscoveryService::onDeviceLostMainThread, this, device));
+        // If no filters are specified: look for everything.
+        final boolean forceStartScanningAll = isEmpty(allFilters);
+        // Start BT scanning (if needed)
+        mBtReceiver = startBtScanningIfNeeded(btFilters, forceStartScanningAll);
+        // Start Wi-Fi scanning (if needed)
+        mWifiReceiver = startWifiScanningIfNeeded(wifiFilters, forceStartScanningAll);
+        // Start BLE scanning (if needed)
+        mBleScanCallback = startBleScanningIfNeeded(bleFilters, forceStartScanningAll);
+
+        scheduleTimeout();
     }
 
     @MainThread
-    void onDeviceLostMainThread(@Nullable DeviceFilterPair device) {
-        mDevicesFound.remove(device);
-        CompanionDeviceActivity.notifyDevicesChanged();
-    }
+    private void stopDiscoveryAndFinish(boolean timeout) {
+        if (DEBUG) Log.i(TAG, "stopDiscovery()");
 
-    void onDeviceSelected(String callingPackage, String deviceAddress) {
-        if (callingPackage == null || deviceAddress == null) {
+        if (!mDiscoveryStarted) {
+            stopSelf();
             return;
         }
-        mServiceCallback.complete(new Association(
-                getUserId(), deviceAddress, callingPackage, mRequest.getDeviceProfile(), false,
-                System.currentTimeMillis()));
-    }
 
-    void onCancel() {
-        if (DEBUG) Log.i(LOG_TAG, "onCancel()");
-        mActivity = null;
-        mServiceCallback.cancel(true);
-    }
+        if (mDiscoveryStopped) return;
+        mDiscoveryStopped = true;
 
-    /**
-     * A pair of device and a filter that matched this device if any.
-     *
-     * @param <T> device type
-     */
-    static class DeviceFilterPair<T extends Parcelable> {
-        public final T device;
-        @Nullable
-        public final DeviceFilter<T> filter;
-
-        private DeviceFilterPair(T device, @Nullable DeviceFilter<T> filter) {
-            this.device = device;
-            this.filter = filter;
+        // Stop BT discovery.
+        if (mBtReceiver != null) {
+            // Cancel discovery.
+            mBtAdapter.cancelDiscovery();
+            // Unregister receiver.
+            unregisterReceiver(mBtReceiver);
+            mBtReceiver = null;
         }
 
-        /**
-         * {@code (device, null)} if the filters list is empty or null
-         * {@code null} if none of the provided filters match the device
-         * {@code (device, filter)} where filter is among the list of filters and matches the device
-         */
-        @Nullable
-        public static <T extends Parcelable> DeviceFilterPair<T> findMatch(
-                T dev, @Nullable List<? extends DeviceFilter<T>> filters) {
-            if (isEmpty(filters)) return new DeviceFilterPair<>(dev, null);
-            final DeviceFilter<T> matchingFilter
-                    = CollectionUtils.find(filters, f -> f.matches(dev));
-
-            DeviceFilterPair<T> result = matchingFilter != null
-                    ? new DeviceFilterPair<>(dev, matchingFilter)
-                    : null;
-            if (DEBUG) Log.i(LOG_TAG, "findMatch(dev = " + dev + ", filters = " + filters +
-                    ") -> " + result);
-            return result;
+        // Stop Wi-Fi scanning.
+        if (mWifiReceiver != null) {
+            // TODO: need to stop scan?
+            // Unregister receiver.
+            unregisterReceiver(mWifiReceiver);
+            mWifiReceiver = null;
         }
 
-        public String getDisplayName() {
-            if (filter == null) {
-                Preconditions.checkNotNull(device);
-                if (device instanceof BluetoothDevice) {
-                    return getDeviceDisplayNameInternal((BluetoothDevice) device);
-                } else if (device instanceof android.net.wifi.ScanResult) {
-                    return getDeviceDisplayNameInternal((android.net.wifi.ScanResult) device);
-                } else if (device instanceof ScanResult) {
-                    return getDeviceDisplayNameInternal(((ScanResult) device).getDevice());
-                } else {
-                    throw new IllegalArgumentException("Unknown device type: " + device.getClass());
-                }
+        // Stop BLE scanning.
+        if (mBleScanCallback != null) {
+            mBleScanner.stopScan(mBleScanCallback);
+        }
+
+        Handler.getMain().removeCallbacks(mTimeoutRunnable);
+
+        if (timeout) {
+            sStateLiveData.setValue(DiscoveryState.FINISHED_TIMEOUT);
+        } else {
+            sStateLiveData.setValue(DiscoveryState.FINISHED_STOPPED);
+        }
+
+        // "Finish".
+        stopSelf();
+    }
+
+    private void checkBoundDevicesIfNeeded(@NonNull AssociationRequest request,
+            @NonNull List<BluetoothDeviceFilter> btFilters) {
+        // If filtering to get single device by mac address, also search in the set of already
+        // bonded devices to allow linking those directly
+        if (btFilters.isEmpty() || !request.isSingleDevice()) return;
+
+        final BluetoothDeviceFilter singleMacAddressFilter =
+                find(btFilters, filter -> !TextUtils.isEmpty(filter.getAddress()));
+
+        if (singleMacAddressFilter == null) return;
+
+        findAndReportMatches(mBtAdapter.getBondedDevices(), btFilters);
+        findAndReportMatches(mBtManager.getConnectedDevices(BluetoothProfile.GATT), btFilters);
+        findAndReportMatches(
+                mBtManager.getConnectedDevices(BluetoothProfile.GATT_SERVER), btFilters);
+    }
+
+    private void findAndReportMatches(@Nullable Collection<BluetoothDevice> devices,
+            @NonNull List<BluetoothDeviceFilter> filters) {
+        if (devices == null) return;
+
+        for (BluetoothDevice device : devices) {
+            final DeviceFilterPair<BluetoothDevice> match = findMatch(device, filters);
+            if (match != null) {
+                onDeviceFound(match);
             }
-            return filter.getDeviceDisplayName(device);
+        }
+    }
+
+    private BluetoothBroadcastReceiver startBtScanningIfNeeded(
+            List<BluetoothDeviceFilter> filters, boolean force) {
+        if (isEmpty(filters) && !force) return null;
+        if (DEBUG) Log.d(TAG, "registerReceiver(BluetoothDevice.ACTION_FOUND)");
+
+        final BluetoothBroadcastReceiver receiver = new BluetoothBroadcastReceiver(filters);
+
+        final IntentFilter intentFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(receiver, intentFilter);
+
+        mBtAdapter.startDiscovery();
+
+        return receiver;
+    }
+
+    private WifiBroadcastReceiver startWifiScanningIfNeeded(
+            List<WifiDeviceFilter> filters, boolean force) {
+        if (isEmpty(filters) && !force) return null;
+        if (DEBUG) Log.d(TAG, "registerReceiver(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)");
+
+        final WifiBroadcastReceiver receiver = new WifiBroadcastReceiver(filters);
+
+        final IntentFilter intentFilter = new IntentFilter(
+                WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        registerReceiver(receiver, intentFilter);
+
+        mWifiManager.startScan();
+
+        return receiver;
+    }
+
+    private ScanCallback startBleScanningIfNeeded(
+            List<BluetoothLeDeviceFilter> filters, boolean force) {
+        if (isEmpty(filters) && !force) return null;
+        if (DEBUG) Log.d(TAG, "BLEScanner.startScan");
+
+        if (mBleScanner == null) {
+            Log.w(TAG, "BLE Scanner is not available.");
+            return null;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            DeviceFilterPair<?> that = (DeviceFilterPair<?>) o;
-            return Objects.equals(getDeviceMacAddress(device), getDeviceMacAddress(that.device));
+        final BLEScanCallback callback = new BLEScanCallback(filters);
+
+        final List<ScanFilter> scanFilters = map(
+                filters, BluetoothLeDeviceFilter::getScanFilter);
+        final ScanSettings scanSettings = new ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .build();
+        mBleScanner.startScan(scanFilters, scanSettings, callback);
+
+        return callback;
+    }
+
+    private void onDeviceFound(@NonNull DeviceFilterPair<?> device) {
+        runOnMainThread(() -> {
+            if (DEBUG) Log.v(TAG, "onDeviceFound() " + device);
+            if (mDiscoveryStopped) return;
+            if (mDevicesFound.contains(device)) {
+                // TODO: update the device instead of ignoring (new found device may contain
+                //  additional/updated info, eg. name of the device).
+                if (DEBUG) {
+                    Log.d(TAG, "onDeviceFound() " + device.toShortString()
+                            + " - Already seen: ignore.");
+                }
+                return;
+            }
+            if (DEBUG) Log.i(TAG, "onDeviceFound() " + device.toShortString() + " - New device.");
+
+            // First: make change.
+            mDevicesFound.add(device);
+            // Then: notify observers.
+            sScanResultsLiveData.setValue(mDevicesFound);
+            // Stop discovery when there's one device found for singleDevice.
+            if (mStopAfterFirstMatch) {
+                stopDiscoveryAndFinish(/* timeout */ false);
+            }
+        });
+    }
+
+    private void onDeviceLost(@Nullable DeviceFilterPair<?> device) {
+        runOnMainThread(() -> {
+            if (DEBUG) Log.i(TAG, "onDeviceLost(), device=" + device.toShortString());
+
+            // First: make change.
+            mDevicesFound.remove(device);
+            // Then: notify observers.
+            sScanResultsLiveData.setValue(mDevicesFound);
+        });
+    }
+
+    private void scheduleTimeout() {
+        long timeout = SystemProperties.getLong(SYS_PROP_DEBUG_TIMEOUT, -1);
+        if (timeout <= 0) {
+            // 0 or negative values indicate that the sysprop was never set or should be ignored.
+            timeout = TIMEOUT_DEFAULT;
+        } else {
+            timeout = min(timeout, TIMEOUT_MAX); // should be <= 1 min (TIMEOUT_MAX)
+            timeout = max(timeout, TIMEOUT_MIN); // should be >= 1 sec (TIMEOUT_MIN)
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(getDeviceMacAddress(device));
-        }
+        if (DEBUG) Log.d(TAG, "scheduleTimeout(), timeout=" + timeout);
 
-        @Override
-        public String toString() {
-            return "DeviceFilterPair{"
-                    + "device=" + device + " " + getDisplayName()
-                    + ", filter=" + filter
-                    + '}';
-        }
+        Handler.getMain().postDelayed(mTimeoutRunnable, timeout);
+    }
+
+    private void timeout() {
+        if (DEBUG) Log.i(TAG, "timeout()");
+        stopDiscoveryAndFinish(/* timeout */ true);
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
     private class BLEScanCallback extends ScanCallback {
+        final List<BluetoothLeDeviceFilter> mFilters;
 
-        public BLEScanCallback() {
-            if (DEBUG) Log.i(LOG_TAG, "new BLEScanCallback() -> " + this);
+        BLEScanCallback(List<BluetoothLeDeviceFilter> filters) {
+            mFilters = filters;
         }
 
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             if (DEBUG) {
-                Log.i(LOG_TAG,
-                        "BLE.onScanResult(callbackType = " + callbackType + ", result = " + result
-                                + ")");
+                Log.v(TAG, "BLE.onScanResult() callback=" + callbackType + ", result=" + result);
             }
-            final DeviceFilterPair<ScanResult> deviceFilterPair
-                    = DeviceFilterPair.findMatch(result, mBLEFilters);
-            if (deviceFilterPair == null) return;
+
+            final DeviceFilterPair<ScanResult> match = findMatch(result, mFilters);
+            if (match == null) return;
+
             if (callbackType == ScanSettings.CALLBACK_TYPE_MATCH_LOST) {
-                onDeviceLost(deviceFilterPair);
+                onDeviceLost(match);
             } else {
-                onDeviceFound(deviceFilterPair);
+                // TODO: check this logic.
+                onDeviceFound(match);
             }
         }
     }
 
     private class BluetoothBroadcastReceiver extends BroadcastReceiver {
+        final List<BluetoothDeviceFilter> mFilters;
+
+        BluetoothBroadcastReceiver(List<BluetoothDeviceFilter> filters) {
+            this.mFilters = filters;
+        }
+
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (DEBUG) {
-                Log.i(LOG_TAG,
-                        "BL.onReceive(context = " + context + ", intent = " + intent + ")");
-            }
+            final String action = intent.getAction();
             final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            final DeviceFilterPair<BluetoothDevice> deviceFilterPair
-                    = DeviceFilterPair.findMatch(device, mBluetoothFilters);
-            if (deviceFilterPair == null) return;
-            if (intent.getAction().equals(BluetoothDevice.ACTION_FOUND)) {
-                onDeviceFound(deviceFilterPair);
+
+            if (DEBUG) Log.v(TAG, action + ", device=" + device);
+
+            if (action == null) return;
+
+            final DeviceFilterPair<BluetoothDevice> match = findMatch(device, mFilters);
+            if (match == null) return;
+
+            if (action.equals(BluetoothDevice.ACTION_FOUND)) {
+                onDeviceFound(match);
             } else {
-                onDeviceLost(deviceFilterPair);
+                // TODO: check this logic.
+                onDeviceLost(match);
             }
         }
     }
 
     private class WifiBroadcastReceiver extends BroadcastReceiver {
+        final List<WifiDeviceFilter> mFilters;
+
+        private WifiBroadcastReceiver(List<WifiDeviceFilter> filters) {
+            this.mFilters = filters;
+        }
+
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
-                List<android.net.wifi.ScanResult> scanResults = mWifiManager.getScanResults();
+            if (!Objects.equals(intent.getAction(), WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+                return;
+            }
 
-                if (DEBUG) {
-                    Log.i(LOG_TAG, "Wifi scan results: " + TextUtils.join("\n", scanResults));
-                }
+            final List<android.net.wifi.ScanResult> scanResults = mWifiManager.getScanResults();
+            if (DEBUG) {
+                Log.v(TAG, "WifiManager.SCAN_RESULTS_AVAILABLE_ACTION, results:\n  "
+                        + TextUtils.join("\n  ", scanResults));
+            }
 
-                for (int i = 0; i < scanResults.size(); i++) {
-                    onDeviceFound(DeviceFilterPair.findMatch(scanResults.get(i), mWifiFilters));
+            for (int i = 0; i < scanResults.size(); i++) {
+                final android.net.wifi.ScanResult scanResult = scanResults.get(i);
+                final DeviceFilterPair<?> match = findMatch(scanResult, mFilters);
+                if (match != null) {
+                    onDeviceFound(match);
                 }
             }
         }
+    }
+
+    /**
+     * {@code (device, null)} if the filters list is empty or null
+     * {@code null} if none of the provided filters match the device
+     * {@code (device, filter)} where filter is among the list of filters and matches the device
+     */
+    @Nullable
+    public static <T extends Parcelable> DeviceFilterPair<T> findMatch(
+            T dev, @Nullable List<? extends DeviceFilter<T>> filters) {
+        if (isEmpty(filters)) return new DeviceFilterPair<>(dev, null);
+        final DeviceFilter<T> matchingFilter = find(filters, f -> f.matches(dev));
+
+        DeviceFilterPair<T> result = matchingFilter != null
+                ? new DeviceFilterPair<>(dev, matchingFilter) : null;
+        if (DEBUG) {
+            Log.v(TAG, "findMatch(dev=" + dev + ", filters=" + filters + ") -> " + result);
+        }
+        return result;
     }
 }

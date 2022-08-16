@@ -33,8 +33,6 @@ import com.android.server.wm.flicker.helpers.NewTasksAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.repetitions
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.flicker.testapp.ActivityOptions.LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME
@@ -65,14 +63,16 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
 class TaskTransitionTest(val testSpec: FlickerTestParameter) {
-    val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val mTestApp: NewTasksAppHelper = NewTasksAppHelper(instrumentation)
+    private val mWallpaper by lazy {
+        getWallpaperPackage(InstrumentationRegistry.getInstrumentation())
+            ?: error("Unable to obtain wallpaper")
+    }
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            withTestName { testSpec.name }
-            repeat { testSpec.config.repetitions }
             setup {
                 eachRun {
                     mTestApp.launchViaIntent(wmHelper)
@@ -101,7 +101,7 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     @Test
     fun wallpaperWindowIsNeverVisible() {
         testSpec.assertWm {
-            this.isNonAppWindowInvisible(WALLPAPER)
+            this.isNonAppWindowInvisible(mWallpaper)
         }
     }
 
@@ -113,7 +113,7 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     @Test
     fun wallpaperLayerIsNeverVisible() {
         testSpec.assertLayers {
-            this.isInvisible(WALLPAPER)
+            this.isInvisible(mWallpaper)
             this.isInvisible(WALLPAPER_BBQ_WRAPPER)
         }
     }
@@ -149,25 +149,31 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     @Test
     fun colorLayerIsVisibleDuringTransition() {
         val bgColorLayer = FlickerComponentName("", "colorBackgroundLayer")
-        val displayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
+        val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
 
         testSpec.assertLayers {
-            this.coversExactly(displayBounds, LAUNCH_NEW_TASK_ACTIVITY)
+            this.invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {
+                    it.visibleRegion(LAUNCH_NEW_TASK_ACTIVITY).coversExactly(displayBounds)
+                }
                 .isInvisible(bgColorLayer)
                 .then()
                 // Transitioning
                 .isVisible(bgColorLayer)
                 .then()
                 // Fully transitioned to simple SIMPLE_ACTIVITY
-                .coversExactly(displayBounds, SIMPLE_ACTIVITY)
+                .invoke("SIMPLE_ACTIVITY coversExactly displayBounds") {
+                    it.visibleRegion(SIMPLE_ACTIVITY).coversExactly(displayBounds)
+                }
                 .isInvisible(bgColorLayer)
                 .then()
                 // Transitioning back
                 .isVisible(bgColorLayer)
                 .then()
                 // Fully transitioned back to LAUNCH_NEW_TASK_ACTIVITY
+                .invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {
+                    it.visibleRegion(LAUNCH_NEW_TASK_ACTIVITY).coversExactly(displayBounds)
+                }
                 .isInvisible(bgColorLayer)
-                .coversExactly(displayBounds, LAUNCH_NEW_TASK_ACTIVITY)
         }
     }
 
@@ -227,22 +233,21 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
     companion object {
-        private val WALLPAPER = getWallpaperPackage(InstrumentationRegistry.getInstrumentation())
         private val LAUNCH_NEW_TASK_ACTIVITY =
                 LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME.toFlickerComponent()
         private val SIMPLE_ACTIVITY = SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME.toFlickerComponent()
 
-        private fun getWallpaperPackage(instrumentation: Instrumentation): FlickerComponentName {
+        private fun getWallpaperPackage(instrumentation: Instrumentation): FlickerComponentName? {
             val wallpaperManager = WallpaperManager.getInstance(instrumentation.targetContext)
 
-            return wallpaperManager.wallpaperInfo.component.toFlickerComponent()
+            return wallpaperManager.wallpaperInfo?.component?.toFlickerComponent()
         }
 
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(repetitions = 5)
+                    .getConfigNonRotationTests(repetitions = 3)
         }
     }
 }

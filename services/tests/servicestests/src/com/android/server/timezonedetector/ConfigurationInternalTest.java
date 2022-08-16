@@ -21,6 +21,10 @@ import static android.app.time.Capabilities.CAPABILITY_NOT_APPLICABLE;
 import static android.app.time.Capabilities.CAPABILITY_NOT_SUPPORTED;
 import static android.app.time.Capabilities.CAPABILITY_POSSESSED;
 
+import static com.android.server.timezonedetector.ConfigurationInternal.DETECTION_MODE_GEO;
+import static com.android.server.timezonedetector.ConfigurationInternal.DETECTION_MODE_MANUAL;
+import static com.android.server.timezonedetector.ConfigurationInternal.DETECTION_MODE_TELEPHONY;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -48,18 +52,22 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(true)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
-                .setAutoDetectionEnabled(true)
-                .setLocationEnabled(true)
-                .setGeoDetectionEnabled(true)
+                .setGeoDetectionRunInBackgroundEnabled(false)
+                .setTelephonyFallbackSupported(false)
+                .setEnhancedMetricsCollectionEnabled(false)
+                .setAutoDetectionEnabledSetting(true)
+                .setLocationEnabledSetting(true)
+                .setGeoDetectionEnabledSetting(true)
                 .build();
         {
             ConfigurationInternal autoOnConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(true)
+                    .setAutoDetectionEnabledSetting(true)
                     .build();
             assertTrue(autoOnConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOnConfig.getGeoDetectionEnabledSetting());
             assertTrue(autoOnConfig.getAutoDetectionEnabledBehavior());
-            assertTrue(autoOnConfig.getGeoDetectionEnabledBehavior());
+            assertTrue(autoOnConfig.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_GEO, autoOnConfig.getDetectionMode());
 
             TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
                     autoOnConfig.createCapabilitiesAndConfig();
@@ -79,12 +87,13 @@ public class ConfigurationInternalTest {
 
         {
             ConfigurationInternal autoOffConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(false)
+                    .setAutoDetectionEnabledSetting(false)
                     .build();
             assertFalse(autoOffConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOffConfig.getGeoDetectionEnabledSetting());
             assertFalse(autoOffConfig.getAutoDetectionEnabledBehavior());
-            assertFalse(autoOffConfig.getGeoDetectionEnabledBehavior());
+            assertFalse(autoOffConfig.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_MANUAL, autoOffConfig.getDetectionMode());
 
             TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
                     autoOffConfig.createCapabilitiesAndConfig();
@@ -110,18 +119,22 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(false)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
-                .setAutoDetectionEnabled(true)
-                .setLocationEnabled(true)
-                .setGeoDetectionEnabled(true)
+                .setTelephonyFallbackSupported(false)
+                .setGeoDetectionRunInBackgroundEnabled(false)
+                .setEnhancedMetricsCollectionEnabled(false)
+                .setAutoDetectionEnabledSetting(true)
+                .setLocationEnabledSetting(true)
+                .setGeoDetectionEnabledSetting(true)
                 .build();
         {
             ConfigurationInternal autoOnConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(true)
+                    .setAutoDetectionEnabledSetting(true)
                     .build();
             assertTrue(autoOnConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOnConfig.getGeoDetectionEnabledSetting());
             assertTrue(autoOnConfig.getAutoDetectionEnabledBehavior());
-            assertTrue(autoOnConfig.getGeoDetectionEnabledBehavior());
+            assertTrue(autoOnConfig.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_GEO, autoOnConfig.getDetectionMode());
 
             TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
                     autoOnConfig.createCapabilitiesAndConfig();
@@ -142,12 +155,13 @@ public class ConfigurationInternalTest {
 
         {
             ConfigurationInternal autoOffConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(false)
+                    .setAutoDetectionEnabledSetting(false)
                     .build();
             assertFalse(autoOffConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOffConfig.getGeoDetectionEnabledSetting());
             assertFalse(autoOffConfig.getAutoDetectionEnabledBehavior());
-            assertFalse(autoOffConfig.getGeoDetectionEnabledBehavior());
+            assertFalse(autoOffConfig.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_MANUAL, autoOffConfig.getDetectionMode());
 
             TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
                     autoOffConfig.createCapabilitiesAndConfig();
@@ -174,18 +188,22 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(true)
                 .setTelephonyDetectionFeatureSupported(false)
                 .setGeoDetectionFeatureSupported(false)
-                .setAutoDetectionEnabled(true)
-                .setLocationEnabled(true)
-                .setGeoDetectionEnabled(true)
+                .setGeoDetectionRunInBackgroundEnabled(false)
+                .setTelephonyFallbackSupported(false)
+                .setEnhancedMetricsCollectionEnabled(false)
+                .setAutoDetectionEnabledSetting(true)
+                .setLocationEnabledSetting(true)
+                .setGeoDetectionEnabledSetting(true)
                 .build();
         {
             ConfigurationInternal autoOnConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(true)
+                    .setAutoDetectionEnabledSetting(true)
                     .build();
             assertTrue(autoOnConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOnConfig.getGeoDetectionEnabledSetting());
             assertFalse(autoOnConfig.getAutoDetectionEnabledBehavior());
-            assertFalse(autoOnConfig.getGeoDetectionEnabledBehavior());
+            assertFalse(autoOnConfig.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_MANUAL, autoOnConfig.getDetectionMode());
 
             TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
                     autoOnConfig.createCapabilitiesAndConfig();
@@ -203,12 +221,13 @@ public class ConfigurationInternalTest {
         }
         {
             ConfigurationInternal autoOffConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(false)
+                    .setAutoDetectionEnabledSetting(false)
                     .build();
             assertFalse(autoOffConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOffConfig.getGeoDetectionEnabledSetting());
             assertFalse(autoOffConfig.getAutoDetectionEnabledBehavior());
-            assertFalse(autoOffConfig.getGeoDetectionEnabledBehavior());
+            assertFalse(autoOffConfig.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_MANUAL, autoOffConfig.getDetectionMode());
 
             TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
                     autoOffConfig.createCapabilitiesAndConfig();
@@ -236,18 +255,22 @@ public class ConfigurationInternalTest {
                 .setUserConfigAllowed(true)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(false)
-                .setAutoDetectionEnabled(true)
-                .setLocationEnabled(true)
-                .setGeoDetectionEnabled(true)
+                .setGeoDetectionRunInBackgroundEnabled(false)
+                .setTelephonyFallbackSupported(false)
+                .setEnhancedMetricsCollectionEnabled(false)
+                .setAutoDetectionEnabledSetting(true)
+                .setLocationEnabledSetting(true)
+                .setGeoDetectionEnabledSetting(true)
                 .build();
         {
             ConfigurationInternal autoOnConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(true)
+                    .setAutoDetectionEnabledSetting(true)
                     .build();
             assertTrue(autoOnConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOnConfig.getGeoDetectionEnabledSetting());
             assertTrue(autoOnConfig.getAutoDetectionEnabledBehavior());
-            assertFalse(autoOnConfig.getGeoDetectionEnabledBehavior());
+            assertFalse(autoOnConfig.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_TELEPHONY, autoOnConfig.getDetectionMode());
 
             TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
                     autoOnConfig.createCapabilitiesAndConfig();
@@ -266,12 +289,13 @@ public class ConfigurationInternalTest {
         }
         {
             ConfigurationInternal autoOffConfig = new ConfigurationInternal.Builder(baseConfig)
-                    .setAutoDetectionEnabled(false)
+                    .setAutoDetectionEnabledSetting(false)
                     .build();
             assertFalse(autoOffConfig.getAutoDetectionEnabledSetting());
             assertTrue(autoOffConfig.getGeoDetectionEnabledSetting());
             assertFalse(autoOffConfig.getAutoDetectionEnabledBehavior());
-            assertFalse(autoOffConfig.getGeoDetectionEnabledBehavior());
+            assertFalse(autoOffConfig.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_MANUAL, autoOffConfig.getDetectionMode());
 
             TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
                     autoOffConfig.createCapabilitiesAndConfig();
@@ -286,6 +310,82 @@ public class ConfigurationInternalTest {
             TimeZoneConfiguration configuration = capabilitiesAndConfig.getConfiguration();
             assertFalse(configuration.isAutoDetectionEnabled());
             assertTrue(configuration.isGeoDetectionEnabled());
+        }
+    }
+
+    @Test
+    public void test_telephonyFallbackSupported() {
+        ConfigurationInternal config = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
+                .setUserConfigAllowed(true)
+                .setTelephonyDetectionFeatureSupported(true)
+                .setGeoDetectionFeatureSupported(false)
+                .setTelephonyFallbackSupported(true)
+                .setAutoDetectionEnabledSetting(true)
+                .setLocationEnabledSetting(true)
+                .setGeoDetectionEnabledSetting(true)
+                .build();
+        assertTrue(config.isTelephonyFallbackSupported());
+    }
+
+    /** Tests when {@link ConfigurationInternal#getGeoDetectionRunInBackgroundEnabled()} is true. */
+    @Test
+    public void test_geoDetectionRunInBackgroundEnabled() {
+        ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
+                .setUserConfigAllowed(true)
+                .setTelephonyDetectionFeatureSupported(true)
+                .setGeoDetectionFeatureSupported(true)
+                .setGeoDetectionRunInBackgroundEnabled(true)
+                .setEnhancedMetricsCollectionEnabled(false)
+                .setAutoDetectionEnabledSetting(true)
+                .setLocationEnabledSetting(true)
+                .setGeoDetectionEnabledSetting(true)
+                .build();
+        {
+            ConfigurationInternal config = baseConfig;
+            assertTrue(config.getAutoDetectionEnabledBehavior());
+            assertTrue(config.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_GEO, config.getDetectionMode());
+        }
+        {
+            ConfigurationInternal config = new ConfigurationInternal.Builder(baseConfig)
+                    .setGeoDetectionFeatureSupported(false)
+                    .build();
+            assertTrue(config.getAutoDetectionEnabledBehavior());
+            assertFalse(config.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_TELEPHONY, config.getDetectionMode());
+        }
+        {
+            ConfigurationInternal config = new ConfigurationInternal.Builder(baseConfig)
+                    .setTelephonyDetectionFeatureSupported(false)
+                    .setGeoDetectionFeatureSupported(false)
+                    .build();
+            assertFalse(config.getAutoDetectionEnabledBehavior());
+            assertFalse(config.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_MANUAL, config.getDetectionMode());
+        }
+        {
+            ConfigurationInternal config = new ConfigurationInternal.Builder(baseConfig)
+                    .setGeoDetectionEnabledSetting(false)
+                    .build();
+            assertTrue(config.getAutoDetectionEnabledBehavior());
+            assertTrue(config.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_TELEPHONY, config.getDetectionMode());
+        }
+        {
+            ConfigurationInternal config = new ConfigurationInternal.Builder(baseConfig)
+                    .setLocationEnabledSetting(false)
+                    .build();
+            assertTrue(config.getAutoDetectionEnabledBehavior());
+            assertFalse(config.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_TELEPHONY, config.getDetectionMode());
+        }
+        {
+            ConfigurationInternal config = new ConfigurationInternal.Builder(baseConfig)
+                    .setAutoDetectionEnabledSetting(false)
+                    .build();
+            assertFalse(config.getAutoDetectionEnabledBehavior());
+            assertTrue(config.isGeoDetectionExecutionEnabled());
+            assertEquals(DETECTION_MODE_MANUAL, config.getDetectionMode());
         }
     }
 }

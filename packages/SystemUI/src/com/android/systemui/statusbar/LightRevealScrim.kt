@@ -11,11 +11,13 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.PorterDuffXfermode
 import android.graphics.RadialGradient
 import android.graphics.Shader
+import android.os.Trace
 import android.util.AttributeSet
 import android.util.MathUtils.lerp
 import android.view.View
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.statusbar.LightRevealEffect.Companion.getPercentPastThreshold
+import com.android.systemui.util.getColorWithAlpha
 import java.util.function.Consumer
 
 /**
@@ -92,6 +94,8 @@ class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevealEffe
     override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
         val interpolatedAmount = INTERPOLATOR.getInterpolation(amount)
 
+        scrim.interpolatedRevealAmount = interpolatedAmount
+
         scrim.startColorAlpha =
             getPercentPastThreshold(1 - interpolatedAmount,
                 threshold = 1 - START_COLOR_REVEAL_PERCENTAGE)
@@ -152,6 +156,7 @@ class CircleReveal(
         // non-interpolated amount
         val fadeAmount = getPercentPastThreshold(amount, 0.5f)
         val radius = startRadius + ((endRadius - startRadius) * amount)
+        scrim.interpolatedRevealAmount = amount
         scrim.revealGradientEndColorAlpha = 1f - fadeAmount
         scrim.setRevealGradientBounds(
             centerX - radius /* left */,
@@ -182,6 +187,7 @@ class PowerButtonReveal(
 
         with(scrim) {
             revealGradientEndColorAlpha = 1f - fadeAmount
+            interpolatedRevealAmount = interpolatedAmount
             setRevealGradientBounds(
                     width * (1f + OFF_SCREEN_START_AMOUNT) -
                             width * WIDTH_INCREASE_MULTIPLIER * interpolatedAmount,
@@ -218,6 +224,8 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
 
                 revealEffect.setRevealAmountOnScrim(value, this)
                 updateScrimOpaque()
+                Trace.traceCounter(Trace.TRACE_TAG_APP, "light_reveal_amount",
+                        (field * 100).toInt())
                 invalidate()
             }
         }
@@ -284,6 +292,14 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
             }
         }
 
+    var interpolatedRevealAmount: Float = 1f
+
+    val isScrimAlmostOccludes: Boolean
+        get() {
+            // if the interpolatedRevealAmount less than 0.1, over 90% of the screen is black.
+            return interpolatedRevealAmount < 0.1f
+        }
+
     private fun updateScrimOpaque() {
         isScrimOpaque = revealAmount == 0.0f && alpha == 1.0f && visibility == VISIBLE
     }
@@ -343,7 +359,8 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
     }
 
     override fun onDraw(canvas: Canvas?) {
-        if (canvas == null || revealGradientWidth <= 0 || revealGradientHeight <= 0) {
+        if (canvas == null || revealGradientWidth <= 0 || revealGradientHeight <= 0 ||
+            revealAmount == 0f) {
             if (revealAmount < 1f) {
                 canvas?.drawColor(revealGradientEndColor)
             }
@@ -351,7 +368,7 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
         }
 
         if (startColorAlpha > 0f) {
-            canvas.drawColor(updateColorAlpha(revealGradientEndColor, startColorAlpha))
+            canvas.drawColor(getColorWithAlpha(revealGradientEndColor, startColorAlpha))
         }
 
         with(shaderGradientMatrix) {
@@ -367,15 +384,7 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
 
     private fun setPaintColorFilter() {
         gradientPaint.colorFilter = PorterDuffColorFilter(
-            updateColorAlpha(revealGradientEndColor, revealGradientEndColorAlpha),
+            getColorWithAlpha(revealGradientEndColor, revealGradientEndColorAlpha),
             PorterDuff.Mode.MULTIPLY)
     }
-
-    private fun updateColorAlpha(color: Int, alpha: Float): Int =
-        Color.argb(
-            (alpha * 255).toInt(),
-            Color.red(color),
-            Color.green(color),
-            Color.blue(color)
-        )
 }

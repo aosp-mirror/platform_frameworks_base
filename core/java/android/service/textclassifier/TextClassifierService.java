@@ -49,10 +49,9 @@ import android.view.textclassifier.TextLanguage;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -127,8 +126,8 @@ public abstract class TextClassifierService extends Service {
         public void onSuggestSelection(
                 TextClassificationSessionId sessionId,
                 TextSelection.Request request, ITextClassifierCallback callback) {
-            Preconditions.checkNotNull(request);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(request);
+            Objects.requireNonNull(callback);
             mMainThreadHandler.post(() -> TextClassifierService.this.onSuggestSelection(
                     sessionId, request, mCancellationSignal, new ProxyCallback<>(callback)));
 
@@ -138,8 +137,8 @@ public abstract class TextClassifierService extends Service {
         public void onClassifyText(
                 TextClassificationSessionId sessionId,
                 TextClassification.Request request, ITextClassifierCallback callback) {
-            Preconditions.checkNotNull(request);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(request);
+            Objects.requireNonNull(callback);
             mMainThreadHandler.post(() -> TextClassifierService.this.onClassifyText(
                     sessionId, request, mCancellationSignal, new ProxyCallback<>(callback)));
         }
@@ -148,8 +147,8 @@ public abstract class TextClassifierService extends Service {
         public void onGenerateLinks(
                 TextClassificationSessionId sessionId,
                 TextLinks.Request request, ITextClassifierCallback callback) {
-            Preconditions.checkNotNull(request);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(request);
+            Objects.requireNonNull(callback);
             mMainThreadHandler.post(() -> TextClassifierService.this.onGenerateLinks(
                     sessionId, request, mCancellationSignal, new ProxyCallback<>(callback)));
         }
@@ -158,7 +157,7 @@ public abstract class TextClassifierService extends Service {
         public void onSelectionEvent(
                 TextClassificationSessionId sessionId,
                 SelectionEvent event) {
-            Preconditions.checkNotNull(event);
+            Objects.requireNonNull(event);
             mMainThreadHandler.post(
                     () -> TextClassifierService.this.onSelectionEvent(sessionId, event));
         }
@@ -167,7 +166,7 @@ public abstract class TextClassifierService extends Service {
         public void onTextClassifierEvent(
                 TextClassificationSessionId sessionId,
                 TextClassifierEvent event) {
-            Preconditions.checkNotNull(event);
+            Objects.requireNonNull(event);
             mMainThreadHandler.post(
                     () -> TextClassifierService.this.onTextClassifierEvent(sessionId, event));
         }
@@ -177,8 +176,8 @@ public abstract class TextClassifierService extends Service {
                 TextClassificationSessionId sessionId,
                 TextLanguage.Request request,
                 ITextClassifierCallback callback) {
-            Preconditions.checkNotNull(request);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(request);
+            Objects.requireNonNull(callback);
             mMainThreadHandler.post(() -> TextClassifierService.this.onDetectLanguage(
                     sessionId, request, mCancellationSignal, new ProxyCallback<>(callback)));
         }
@@ -188,8 +187,8 @@ public abstract class TextClassifierService extends Service {
                 TextClassificationSessionId sessionId,
                 ConversationActions.Request request,
                 ITextClassifierCallback callback) {
-            Preconditions.checkNotNull(request);
-            Preconditions.checkNotNull(callback);
+            Objects.requireNonNull(request);
+            Objects.requireNonNull(callback);
             mMainThreadHandler.post(() -> TextClassifierService.this.onSuggestConversationActions(
                     sessionId, request, mCancellationSignal, new ProxyCallback<>(callback)));
         }
@@ -197,8 +196,8 @@ public abstract class TextClassifierService extends Service {
         @Override
         public void onCreateTextClassificationSession(
                 TextClassificationContext context, TextClassificationSessionId sessionId) {
-            Preconditions.checkNotNull(context);
-            Preconditions.checkNotNull(sessionId);
+            Objects.requireNonNull(context);
+            Objects.requireNonNull(sessionId);
             mMainThreadHandler.post(
                     () -> TextClassifierService.this.onCreateTextClassificationSession(
                             context, sessionId));
@@ -487,7 +486,7 @@ public abstract class TextClassifierService extends Service {
         private ITextClassifierCallback mTextClassifierCallback;
 
         private ProxyCallback(ITextClassifierCallback textClassifierCallback) {
-            mTextClassifierCallback = Preconditions.checkNotNull(textClassifierCallback);
+            mTextClassifierCallback = Objects.requireNonNull(textClassifierCallback);
         }
 
         @Override

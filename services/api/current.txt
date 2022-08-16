@@ -38,7 +38,18 @@ package com.android.server {
 package com.android.server.am {
 
   public interface ActivityManagerLocal {
+    method public boolean bindSdkSandboxService(@NonNull android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull String, @NonNull String, int) throws android.os.RemoteException;
     method public boolean canStartForegroundService(int, int, @NonNull String);
+  }
+
+}
+
+package com.android.server.pm {
+
+  public interface PackageManagerLocal {
+    method public void reconcileSdkData(@Nullable String, @NonNull String, @NonNull java.util.List<java.lang.String>, int, int, int, @NonNull String, int) throws java.io.IOException;
+    field public static final int FLAG_STORAGE_CE = 2; // 0x2
+    field public static final int FLAG_STORAGE_DE = 1; // 0x1
   }
 
 }

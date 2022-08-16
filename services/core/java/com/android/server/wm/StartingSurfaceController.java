@@ -17,27 +17,33 @@
 package com.android.server.wm;
 
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_DRAWN;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
-import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN;
 
+import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_TYPE_SNAPSHOT;
+import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityOptions;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.pm.ApplicationInfo;
-import android.content.res.CompatibilityInfo;
-import android.content.res.Configuration;
-import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.Slog;
+import android.window.SplashScreenView;
 import android.window.TaskSnapshot;
 
-import com.android.server.policy.WindowManagerPolicy.StartingSurface;
-
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 /**
@@ -46,31 +52,39 @@ import java.util.function.Supplier;
 public class StartingSurfaceController {
     private static final String TAG = TAG_WITH_CLASS_NAME
             ? StartingSurfaceController.class.getSimpleName() : TAG_WM;
-    /** Set to {@code true} to enable shell starting surface drawer. */
-    static final boolean DEBUG_ENABLE_SHELL_DRAWER =
-            SystemProperties.getBoolean("persist.debug.shell_starting_surface", true);
+    /**
+     * Application is allowed to receive the
+     * {@link
+     * android.window.SplashScreen.OnExitAnimationListener#onSplashScreenExit(SplashScreenView)}
+     * callback, even when the splash screen only shows a solid color.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.TIRAMISU)
+    private static final long ALLOW_COPY_SOLID_COLOR_VIEW = 205907456L;
+
     private final WindowManagerService mService;
     private final SplashScreenExceptionList mSplashScreenExceptionsList;
+
+    // Cache status while deferring add starting window
+    boolean mInitProcessRunning;
+    boolean mInitNewTask;
+    boolean mInitTaskSwitch;
+    private final ArrayList<DeferringStartingWindowRecord> mDeferringAddStartActivities =
+            new ArrayList<>();
+    private boolean mDeferringAddStartingWindow;
 
     public StartingSurfaceController(WindowManagerService wm) {
         mService = wm;
         mSplashScreenExceptionsList = new SplashScreenExceptionList(wm.mContext.getMainExecutor());
     }
 
-    StartingSurface createSplashScreenStartingSurface(ActivityRecord activity, String packageName,
-            int theme, CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
-            int icon, int logo, int windowFlags, Configuration overrideConfig, int displayId) {
-        if (!DEBUG_ENABLE_SHELL_DRAWER) {
-            return mService.mPolicy.addSplashScreen(activity.token, activity.mUserId, packageName,
-                    theme, compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
-                    overrideConfig, displayId);
-        }
+    StartingSurface createSplashScreenStartingSurface(ActivityRecord activity, int theme) {
 
         synchronized (mService.mGlobalLock) {
             final Task task = activity.getTask();
             if (task != null && mService.mAtmService.mTaskOrganizerController.addStartingWindow(
                     task, activity, theme, null /* taskSnapshot */)) {
-                return new ShellStartingSurface(task);
+                return new StartingSurface(task);
             }
         }
         return null;
@@ -84,9 +98,10 @@ public class StartingSurfaceController {
         return mSplashScreenExceptionsList.isException(packageName, targetSdk, infoProvider);
     }
 
-    int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
+    static int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
             boolean processRunning, boolean allowTaskSnapshot, boolean activityCreated,
-            boolean useEmpty, boolean useLegacy) {
+            boolean isSolidColor, boolean useLegacy, boolean activityDrawn, int startingWindowType,
+            String packageName, int userId) {
         int parameter = 0;
         if (newTask) {
             parameter |= TYPE_PARAMETER_NEW_TASK;
@@ -100,14 +115,22 @@ public class StartingSurfaceController {
         if (allowTaskSnapshot) {
             parameter |= TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
         }
-        if (activityCreated) {
+        if (activityCreated || startingWindowType == STARTING_WINDOW_TYPE_SNAPSHOT) {
             parameter |= TYPE_PARAMETER_ACTIVITY_CREATED;
         }
-        if (useEmpty) {
-            parameter |= TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN;
+        if (isSolidColor) {
+            parameter |= TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN;
         }
         if (useLegacy) {
             parameter |= TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
+        }
+        if (activityDrawn) {
+            parameter |= TYPE_PARAMETER_ACTIVITY_DRAWN;
+        }
+        if (startingWindowType == STARTING_WINDOW_TYPE_SPLASH_SCREEN
+                && CompatChanges.isChangeEnabled(ALLOW_COPY_SOLID_COLOR_VIEW, packageName,
+                UserHandle.of(userId))) {
+            parameter |= TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN;
         }
         return parameter;
     }
@@ -116,7 +139,6 @@ public class StartingSurfaceController {
         final WindowState topFullscreenOpaqueWindow;
         final Task task;
         synchronized (mService.mGlobalLock) {
-            final WindowState mainWindow = activity.findMainWindow();
             task = activity.getTask();
             if (task == null) {
                 Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find task for activity="
@@ -131,40 +153,114 @@ public class StartingSurfaceController {
                 return null;
             }
             topFullscreenOpaqueWindow = topFullscreenActivity.getTopFullscreenOpaqueWindow();
-            if (mainWindow == null || topFullscreenOpaqueWindow == null) {
-                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find main window for activity="
-                        + activity);
+            if (topFullscreenOpaqueWindow == null) {
+                Slog.w(TAG, "TaskSnapshotSurface.create: no opaque window in "
+                        + topFullscreenActivity);
                 return null;
             }
-            if (topFullscreenActivity.getWindowConfiguration().getRotation()
-                    != taskSnapshot.getRotation()
-                    // Use normal rotation to avoid flickering of IME window in old orientation.
-                    && !taskSnapshot.hasImeSurface()) {
+            if (activity.mDisplayContent.getRotation() != taskSnapshot.getRotation()) {
                 // The snapshot should have been checked by ActivityRecord#isSnapshotCompatible
                 // that the activity will be updated to the same rotation as the snapshot. Since
                 // the transition is not started yet, fixed rotation transform needs to be applied
                 // earlier to make the snapshot show in a rotated container.
                 activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
-                        topFullscreenActivity, false /* checkOpening */);
+                        activity, false /* checkOpening */);
             }
-            if (DEBUG_ENABLE_SHELL_DRAWER) {
                 mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
                         activity, 0 /* launchTheme */, taskSnapshot);
-                return new ShellStartingSurface(task);
-            }
+            return new StartingSurface(task);
         }
-        return mService.mTaskSnapshotController.createStartingSurface(activity, taskSnapshot);
     }
 
+    private static final class DeferringStartingWindowRecord {
+        final ActivityRecord mDeferring;
+        final ActivityRecord mPrev;
+        final ActivityRecord mSource;
 
-    private final class ShellStartingSurface implements StartingSurface {
+        DeferringStartingWindowRecord(ActivityRecord deferring, ActivityRecord prev,
+                ActivityRecord source) {
+            mDeferring = deferring;
+            mPrev = prev;
+            mSource = source;
+        }
+    }
+
+    /**
+     * Shows a starting window while starting a new activity. Do not use this method to create a
+     * starting window for an existing activity.
+     */
+    void showStartingWindow(ActivityRecord target, ActivityRecord prev,
+            boolean newTask, boolean isTaskSwitch, ActivityRecord source) {
+        if (mDeferringAddStartingWindow) {
+            addDeferringRecord(target, prev, newTask, isTaskSwitch, source);
+        } else {
+            target.showStartingWindow(prev, newTask, isTaskSwitch, true /* startActivity */,
+                    source);
+        }
+    }
+
+    /**
+     * Queueing the starting activity status while deferring add starting window.
+     * @see Task#startActivityLocked
+     */
+    private void addDeferringRecord(ActivityRecord deferring, ActivityRecord prev,
+            boolean newTask, boolean isTaskSwitch, ActivityRecord source) {
+        // Set newTask, taskSwitch, processRunning form first activity because those can change
+        // after first activity started.
+        if (mDeferringAddStartActivities.isEmpty()) {
+            mInitProcessRunning = deferring.isProcessRunning();
+            mInitNewTask = newTask;
+            mInitTaskSwitch = isTaskSwitch;
+        }
+        mDeferringAddStartActivities.add(new DeferringStartingWindowRecord(
+                deferring, prev, source));
+    }
+
+    private void showStartingWindowFromDeferringActivities(ActivityOptions topOptions) {
+        // Attempt to add starting window from the top-most activity.
+        for (int i = mDeferringAddStartActivities.size() - 1; i >= 0; --i) {
+            final DeferringStartingWindowRecord next = mDeferringAddStartActivities.get(i);
+            next.mDeferring.showStartingWindow(next.mPrev, mInitNewTask, mInitTaskSwitch,
+                    mInitProcessRunning, true /* startActivity */, next.mSource, topOptions);
+            // If one succeeds, it is done.
+            if (next.mDeferring.mStartingData != null) {
+                break;
+            }
+        }
+        mDeferringAddStartActivities.clear();
+    }
+
+    /**
+     * Begin deferring add starting window in one pass.
+     * This is used to deferring add starting window while starting multiples activities because
+     * system only need to provide a starting window to the top-visible activity.
+     * Most call {@link #endDeferAddStartingWindow} when starting activities process finished.
+     * @see #endDeferAddStartingWindow()
+     */
+    void beginDeferAddStartingWindow() {
+        mDeferringAddStartingWindow = true;
+    }
+
+    /**
+     * End deferring add starting window.
+     */
+    void endDeferAddStartingWindow(ActivityOptions topOptions) {
+        mDeferringAddStartingWindow = false;
+        showStartingWindowFromDeferringActivities(topOptions);
+    }
+
+    final class StartingSurface {
         private final Task mTask;
 
-        ShellStartingSurface(Task task) {
+        StartingSurface(Task task) {
             mTask = task;
         }
 
-        @Override
+        /**
+         * Removes the starting window surface. Do not hold the window manager lock when calling
+         * this method!
+         * @param animate Whether need to play the default exit animation for starting window.
+         */
         public void remove(boolean animate) {
             synchronized (mService.mGlobalLock) {
                 mService.mAtmService.mTaskOrganizerController.removeStartingWindow(mTask, animate);

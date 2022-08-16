@@ -22,6 +22,13 @@ option java_outer_classname = "SensorPrivacyServiceProto";
 
 import "frameworks/base/core/proto/android/privacy.proto";
 
+message AllSensorPrivacyServiceDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Is global sensor privacy enabled
+    optional bool is_enabled = 1;
+}
+
 message SensorPrivacyServiceDumpProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -35,6 +42,9 @@ message SensorPrivacyServiceDumpProto {
 
     // Per user settings for sensor privacy
     repeated SensorPrivacyUserProto user = 3;
+
+    // Implementation
+    optional string storage_implementation = 4;
 }
 
 message SensorPrivacyUserProto {
@@ -43,16 +53,47 @@ message SensorPrivacyUserProto {
     // User id
     optional int32 user_id = 1;
 
+    // DEPRECATED
     // Is global sensor privacy enabled
     optional bool is_enabled = 2;
 
     // Per sensor privacy enabled
+    // DEPRECATED
     repeated SensorPrivacyIndividualEnabledSensorProto individual_enabled_sensor = 3;
+
+    // Per toggle type sensor privacy
+    repeated SensorPrivacySensorProto sensors = 4;
+}
+
+message SensorPrivacySensorProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum Sensor {
+        UNKNOWN = 0;
+
+        MICROPHONE = 1;
+        CAMERA = 2;
+    }
+
+    optional int32 sensor = 1;
+
+    repeated SensorPrivacyIndividualEnabledSensorProto toggles = 2;
 }
 
 message SensorPrivacyIndividualEnabledSensorProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    enum ToggleType {
+        SOFTWARE = 1;
+        HARDWARE = 2;
+    }
+
+    enum StateType {
+        ENABLED = 1;
+        DISABLED = 2;
+    }
+
+    // DEPRECATED
     enum Sensor {
         UNKNOWN = 0;
 
@@ -63,8 +104,17 @@ message SensorPrivacyIndividualEnabledSensorProto {
     // Sensor for which privacy might be enabled
     optional Sensor sensor = 1;
 
-    // If sensor privacy is enabled for this sensor
+    // DEPRECATED
     optional bool is_enabled = 2;
+
+    // Timestamp of the last time the sensor was changed
+    optional int64 last_change = 3;
+
+    // The toggle type for this state
+    optional ToggleType toggle_type = 4;
+
+    // If sensor privacy state for this sensor
+    optional StateType state_type = 5;
 }
 
 message SensorPrivacyToggleSourceProto {
@@ -78,6 +128,7 @@ message SensorPrivacyToggleSourceProto {
         DIALOG = 3;
         SHELL = 4;
         OTHER = 5;
+        SAFETY_CENTER = 6;
     }
 
     // Source for which sensor privacy was toggled.

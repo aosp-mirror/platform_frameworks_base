@@ -389,9 +389,15 @@ class SecurityLogMonitor implements Runnable {
             mCriticalLevelLogged = false;
             Slog.i(TAG, "Pending logs buffer full. Discarding old logs.");
         }
-        if (DEBUG) Slog.d(TAG, mPendingLogs.size() + " pending events in the buffer after merging,"
-                + " with ids " + mPendingLogs.get(0).getId()
-                + " to " + mPendingLogs.get(mPendingLogs.size() - 1).getId());
+        if (DEBUG) {
+            if (mPendingLogs.size() > 0) {
+                Slog.d(TAG, mPendingLogs.size() + " pending events in the buffer after merging,"
+                        + " with ids " + mPendingLogs.get(0).getId()
+                        + " to " + mPendingLogs.get(mPendingLogs.size() - 1).getId());
+            } else {
+                Slog.d(TAG, "0 pending events in the buffer after merging");
+            }
+        }
     }
 
     @GuardedBy("mLock")

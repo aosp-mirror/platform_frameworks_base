@@ -29,7 +29,6 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Vnesite geslo za šifriranje naprave spodaj. Uporabljeno bo tudi za šifriranje arhiva varnostnih kopij."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Vnesite geslo za šifriranje podatkov popolnega varnostnega kopiranja. Če to pustite prazno, bo uporabljeno trenutno geslo za varnostno kopiranje:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Če želite šifrirati vse varnostno kopirane podatke, spodaj vnesite geslo:"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"Vaša naprava je šifrirana, zato morate šifrirati varnostno kopirane podatke. Spodaj vnesite geslo:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Če so podatki za obnovitev šifrirani, spodaj vnesite geslo:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Varnostno kopiranje se začenja ..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Varnostno kopiranje končano"</string>

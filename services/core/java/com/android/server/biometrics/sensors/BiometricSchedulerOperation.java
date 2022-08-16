@@ -20,14 +20,18 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.biometrics.BiometricConstants;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.function.BooleanSupplier;
 
 /**
  * Contains all the necessary information for a HAL operation.
@@ -65,7 +69,7 @@ public class BiometricSchedulerOperation {
     protected static final int STATE_WAITING_FOR_COOKIE = 4;
 
     /**
-     * The {@link BaseClientMonitor.Callback} has been invoked and the client is finished.
+     * The {@link ClientMonitorCallback} has been invoked and the client is finished.
      */
     protected static final int STATE_FINISHED = 5;
 
@@ -83,7 +87,11 @@ public class BiometricSchedulerOperation {
     @NonNull
     private final BaseClientMonitor mClientMonitor;
     @Nullable
-    private final BaseClientMonitor.Callback mClientCallback;
+    private final ClientMonitorCallback mClientCallback;
+    @NonNull
+    private final BooleanSupplier mIsDebuggable;
+    @Nullable
+    private ClientMonitorCallback mOnStartCallback;
     @OperationState
     private int mState;
     @VisibleForTesting
@@ -92,23 +100,43 @@ public class BiometricSchedulerOperation {
 
     BiometricSchedulerOperation(
             @NonNull BaseClientMonitor clientMonitor,
-            @Nullable BaseClientMonitor.Callback callback
+            @Nullable ClientMonitorCallback callback
     ) {
         this(clientMonitor, callback, STATE_WAITING_IN_QUEUE);
     }
 
+    @VisibleForTesting
+    BiometricSchedulerOperation(
+            @NonNull BaseClientMonitor clientMonitor,
+            @Nullable ClientMonitorCallback callback,
+            @NonNull BooleanSupplier isDebuggable
+    ) {
+        this(clientMonitor, callback, STATE_WAITING_IN_QUEUE, isDebuggable);
+    }
+
     protected BiometricSchedulerOperation(
             @NonNull BaseClientMonitor clientMonitor,
-            @Nullable BaseClientMonitor.Callback callback,
+            @Nullable ClientMonitorCallback callback,
             @OperationState int state
+    ) {
+        this(clientMonitor, callback, state, Build::isDebuggable);
+    }
+
+    private BiometricSchedulerOperation(
+            @NonNull BaseClientMonitor clientMonitor,
+            @Nullable ClientMonitorCallback callback,
+            @OperationState int state,
+            @NonNull BooleanSupplier isDebuggable
     ) {
         mClientMonitor = clientMonitor;
         mClientCallback = callback;
         mState = state;
+        mIsDebuggable = isDebuggable;
         mCancelWatchdog = () -> {
             if (!isFinished()) {
                 Slog.e(TAG, "[Watchdog Triggered]: " + this);
-                getWrappedCallback().onClientFinished(mClientMonitor, false /* success */);
+                getWrappedCallback(mOnStartCallback)
+                        .onClientFinished(mClientMonitor, false /* success */);
             }
         };
     }
@@ -120,11 +148,12 @@ public class BiometricSchedulerOperation {
      *
      * @return cookie or 0 if ready/started
      */
-    public int isReadyToStart() {
+    public int isReadyToStart(@NonNull ClientMonitorCallback callback) {
         if (mState == STATE_WAITING_FOR_COOKIE || mState == STATE_WAITING_IN_QUEUE) {
             final int cookie = mClientMonitor.getCookie();
             if (cookie != 0) {
                 mState = STATE_WAITING_FOR_COOKIE;
+                mClientMonitor.waitForCookie(getWrappedCallback(callback));
             }
             return cookie;
         }
@@ -134,19 +163,25 @@ public class BiometricSchedulerOperation {
 
     /**
      * Start this operation without waiting for a cookie
-     * (i.e. {@link #isReadyToStart() returns zero}
+     * (i.e. {@link #isReadyToStart(ClientMonitorCallback)}  returns zero}
      *
      * @param callback lifecycle callback
      * @return if this operation started
      */
-    public boolean start(@NonNull BaseClientMonitor.Callback callback) {
-        checkInState("start",
+    public boolean start(@NonNull ClientMonitorCallback callback) {
+        if (errorWhenNoneOf("start",
                 STATE_WAITING_IN_QUEUE,
                 STATE_WAITING_FOR_COOKIE,
-                STATE_WAITING_IN_QUEUE_CANCELING);
+                STATE_WAITING_IN_QUEUE_CANCELING)) {
+            return false;
+        }
 
         if (mClientMonitor.getCookie() != 0) {
-            throw new IllegalStateException("operation requires cookie");
+            String err = "operation requires cookie";
+            if (mIsDebuggable.getAsBoolean()) {
+                throw new IllegalStateException(err);
+            }
+            Slog.e(TAG, err);
         }
 
         return doStart(callback);
@@ -159,22 +194,25 @@ public class BiometricSchedulerOperation {
      * @param cookie   cookie indicting the operation should begin
      * @return if this operation started
      */
-    public boolean startWithCookie(@NonNull BaseClientMonitor.Callback callback, int cookie) {
-        checkInState("start",
-                STATE_WAITING_IN_QUEUE,
-                STATE_WAITING_FOR_COOKIE,
-                STATE_WAITING_IN_QUEUE_CANCELING);
-
+    public boolean startWithCookie(@NonNull ClientMonitorCallback callback, int cookie) {
         if (mClientMonitor.getCookie() != cookie) {
             Slog.e(TAG, "Mismatched cookie for operation: " + this + ", received: " + cookie);
+            return false;
+        }
+
+        if (errorWhenNoneOf("start",
+                STATE_WAITING_IN_QUEUE,
+                STATE_WAITING_FOR_COOKIE,
+                STATE_WAITING_IN_QUEUE_CANCELING)) {
             return false;
         }
 
         return doStart(callback);
     }
 
-    private boolean doStart(@NonNull BaseClientMonitor.Callback callback) {
-        final BaseClientMonitor.Callback cb = getWrappedCallback(callback);
+    private boolean doStart(@NonNull ClientMonitorCallback callback) {
+        mOnStartCallback = callback;
+        final ClientMonitorCallback cb = getWrappedCallback(callback);
 
         if (mState == STATE_WAITING_IN_QUEUE_CANCELING) {
             Slog.d(TAG, "Operation marked for cancellation, cancelling now: " + this);
@@ -212,10 +250,12 @@ public class BiometricSchedulerOperation {
      * immediately abort the operation and notify the client that it has finished unsuccessfully.
      */
     public void abort() {
-        checkInState("cannot abort a non-pending operation",
+        if (errorWhenNoneOf("abort",
                 STATE_WAITING_IN_QUEUE,
                 STATE_WAITING_FOR_COOKIE,
-                STATE_WAITING_IN_QUEUE_CANCELING);
+                STATE_WAITING_IN_QUEUE_CANCELING)) {
+            return;
+        }
 
         if (isHalOperation()) {
             ((HalClientMonitor<?>) mClientMonitor).unableToStart();
@@ -239,10 +279,12 @@ public class BiometricSchedulerOperation {
      *
      * @param handler handler to use for the cancellation watchdog
      * @param callback lifecycle callback (only used if this operation hasn't started, otherwise
-     *                 the callback used from {@link #start(BaseClientMonitor.Callback)} is used)
+     *                 the callback used from {@link #start(ClientMonitorCallback)} is used)
      */
-    public void cancel(@NonNull Handler handler, @NonNull BaseClientMonitor.Callback callback) {
-        checkNotInState("cancel", STATE_FINISHED);
+    public void cancel(@NonNull Handler handler, @NonNull ClientMonitorCallback callback) {
+        if (errorWhenOneOf("cancel", STATE_FINISHED)) {
+            return;
+        }
 
         final int currentState = mState;
         if (!isInterruptable()) {
@@ -270,14 +312,14 @@ public class BiometricSchedulerOperation {
     }
 
     @NonNull
-    private BaseClientMonitor.Callback getWrappedCallback() {
+    private ClientMonitorCallback getWrappedCallback() {
         return getWrappedCallback(null);
     }
 
     @NonNull
-    private BaseClientMonitor.Callback getWrappedCallback(
-            @Nullable BaseClientMonitor.Callback callback) {
-        final BaseClientMonitor.Callback destroyCallback = new BaseClientMonitor.Callback() {
+    private ClientMonitorCallback getWrappedCallback(
+            @Nullable ClientMonitorCallback callback) {
+        final ClientMonitorCallback destroyCallback = new ClientMonitorCallback() {
             @Override
             public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                     boolean success) {
@@ -286,7 +328,7 @@ public class BiometricSchedulerOperation {
                 mState = STATE_FINISHED;
             }
         };
-        return new BaseClientMonitor.CompositeCallback(destroyCallback, callback, mClientCallback);
+        return new ClientMonitorCompositeCallback(destroyCallback, callback, mClientCallback);
     }
 
     /** {@link BaseClientMonitor#getSensorId()}. */
@@ -397,21 +439,28 @@ public class BiometricSchedulerOperation {
         return mClientMonitor;
     }
 
-    private void checkNotInState(String message, @OperationState int... states) {
-        for (int state : states) {
-            if (mState == state) {
-                throw new IllegalStateException(message + ": illegal state= " + state);
+    private boolean errorWhenOneOf(String op, @OperationState int... states) {
+        final boolean isError = ArrayUtils.contains(states, mState);
+        if (isError) {
+            String err = op + ": mState must not be " + mState;
+            if (mIsDebuggable.getAsBoolean()) {
+                throw new IllegalStateException(err);
             }
+            Slog.e(TAG, err);
         }
+        return isError;
     }
 
-    private void checkInState(String message, @OperationState int... states) {
-        for (int state : states) {
-            if (mState == state) {
-                return;
+    private boolean errorWhenNoneOf(String op, @OperationState int... states) {
+        final boolean isError = !ArrayUtils.contains(states, mState);
+        if (isError) {
+            String err = op + ": mState=" + mState + " must be one of " + Arrays.toString(states);
+            if (mIsDebuggable.getAsBoolean()) {
+                throw new IllegalStateException(err);
             }
+            Slog.e(TAG, err);
         }
-        throw new IllegalStateException(message + ": illegal state= " + mState);
+        return isError;
     }
 
     @Override

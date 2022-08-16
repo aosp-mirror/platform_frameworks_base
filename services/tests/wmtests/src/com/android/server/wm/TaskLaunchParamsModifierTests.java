@@ -643,7 +643,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         final TestDisplayContent fullscreenDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FULLSCREEN);
         final ActivityRecord source = createSourceActivity(fullscreenDisplay);
-        source.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        source.getTask().setWindowingMode(WINDOWING_MODE_FREEFORM);
 
         assertEquals(RESULT_CONTINUE,
                 new CalculateRequestBuilder().setSource(source).calculate());
@@ -1019,7 +1019,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         final TestDisplayContent fullscreenDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FULLSCREEN);
         final ActivityRecord source = createSourceActivity(fullscreenDisplay);
-        source.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        source.getTask().setWindowingMode(WINDOWING_MODE_FREEFORM);
 
         final ActivityOptions options = ActivityOptions.makeBasic();
         final Rect expected = new Rect(0, 0, 150, 150);

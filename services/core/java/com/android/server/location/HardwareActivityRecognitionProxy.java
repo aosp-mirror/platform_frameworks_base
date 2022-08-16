@@ -73,8 +73,8 @@ public class HardwareActivityRecognitionProxy implements ServiceListener<BoundSe
 
         mServiceWatcher = ServiceWatcher.create(context,
                 "HardwareActivityRecognitionProxy",
-                new CurrentUserServiceSupplier(context, SERVICE_ACTION, useOverlayResId,
-                        nonOverlayPackageResId),
+                CurrentUserServiceSupplier.createFromConfig(context, SERVICE_ACTION,
+                        useOverlayResId, nonOverlayPackageResId),
                 this);
     }
 

@@ -23,6 +23,8 @@
 #include <math.h>
 #include <system/graphics.h>
 
+#include <optional>
+
 struct ANativeWindow_Buffer;
 struct AHardwareBuffer_Desc;
 
@@ -127,6 +129,7 @@ struct Lab {
 Lab sRGBToLab(SkColor color);
 SkColor LabToSRGB(const Lab& lab, SkAlpha alpha);
 skcms_TransferFunction GetPQSkTransferFunction(float sdr_white_level = 0.f);
+std::optional<skcms_TransferFunction> GetHLGScaleTransferFunction();
 
 } /* namespace uirenderer */
 } /* namespace android */

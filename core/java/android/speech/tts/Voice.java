@@ -84,7 +84,7 @@ public class Voice implements Parcelable {
 
     private Voice(Parcel in) {
         this.mName = in.readString();
-        this.mLocale = (Locale)in.readSerializable();
+        this.mLocale = (Locale)in.readSerializable(java.util.Locale.class.getClassLoader(), java.util.Locale.class);
         this.mQuality = in.readInt();
         this.mLatency = in.readInt();
         this.mRequiresNetworkConnection = (in.readByte() == 1);

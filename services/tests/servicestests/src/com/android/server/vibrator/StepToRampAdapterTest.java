@@ -44,6 +44,13 @@ import java.util.stream.IntStream;
  */
 @Presubmit
 public class StepToRampAdapterTest {
+    private static final float[] TEST_AMPLITUDE_MAP = new float[]{
+            /* 50Hz= */ 0.1f, 0.2f, 0.4f, 0.8f, /* 150Hz= */ 1f, 0.9f, /* 200Hz= */ 0.8f};
+    private static final VibratorInfo.FrequencyProfile TEST_FREQUENCY_PROFILE =
+            new VibratorInfo.FrequencyProfile(
+                    /* resonantFrequencyHz= */ 150f, /* minFrequencyHz= */ 50f,
+                    /* frequencyResolutionHz= */ 25f, TEST_AMPLITUDE_MAP);
+
     private StepToRampAdapter mAdapter;
 
     @Before
@@ -55,7 +62,7 @@ public class StepToRampAdapterTest {
     public void testRampAndPrebakedAndPrimitiveSegments_returnsOriginalSegments() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
                 new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 0.2f,
-                        /* startFrequency= */ -4, /* endFrequency= */ 2, /* duration= */ 10),
+                        /* startFrequencyHz= */ 40f, /* endFrequencyHz= */ 20f, /* duration= */ 10),
                 new PrebakedSegment(
                         VibrationEffect.EFFECT_CLICK, false, VibrationEffect.EFFECT_STRENGTH_LIGHT),
                 new PrimitiveSegment(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 10)));
@@ -71,27 +78,28 @@ public class StepToRampAdapterTest {
     public void testRampSegments_withPwleDurationLimit_splitsLongRamps() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
                 new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
+                        /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 10, /* duration= */ 10),
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 0, /* endFrequency= */ -1, /* duration= */ 25),
+                        /* startFrequencyHz= */ 0, /* endFrequencyHz= */ 50, /* duration= */ 25),
                 new RampSegment(/* startAmplitude= */ 1, /* endAmplitude*/ 1,
-                        /* startFrequency= */ 0, /* endFrequency= */ 1, /* duration= */ 5)));
+                        /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 20, /* duration= */ 5)));
         List<VibrationEffectSegment> expectedSegments = Arrays.asList(
                 new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
+                        /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 10, /* duration= */ 10),
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 0.32f,
-                        /* startFrequency= */ 0, /* endFrequency= */ -0.32f, /* duration= */ 8),
+                        /* startFrequencyHz= */ 150, /* endFrequencyHz= */ 118f, /* duration= */ 8),
                 new RampSegment(/* startAmplitude= */ 0.32f, /* endAmplitude= */ 0.64f,
-                        /* startFrequency= */ -0.32f, /* endFrequency= */ -0.64f,
+                        /* startFrequencyHz= */ 118f, /* endFrequencyHz= */ 86f,
                         /* duration= */ 8),
                 new RampSegment(/* startAmplitude= */ 0.64f, /* endAmplitude= */ 1,
-                        /* startFrequency= */ -0.64f, /* endFrequency= */ -1, /* duration= */ 9),
+                        /* startFrequencyHz= */ 86f, /* endFrequencyHz= */ 50f, /* duration= */ 9),
                 new RampSegment(/* startAmplitude= */ 1, /* endAmplitude*/ 1,
-                        /* startFrequency= */ 0, /* endFrequency= */ 1, /* duration= */ 5));
+                        /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 20, /* duration= */ 5));
 
         VibratorInfo vibratorInfo = new VibratorInfo.Builder(0)
                 .setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)
                 .setPwlePrimitiveDurationMax(10)
+                .setFrequencyProfile(TEST_FREQUENCY_PROFILE)
                 .build();
 
         // Update repeat index to skip the ramp splits.
@@ -102,9 +110,9 @@ public class StepToRampAdapterTest {
     @Test
     public void testStepAndRampSegments_withoutPwleCapability_keepsListUnchanged() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 1, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 1, /* duration= */ 10),
                 new RampSegment(/* startAmplitude= */ 0.8f, /* endAmplitude= */ 0.2f,
-                        /* startFrequency= */ 10, /* endFrequency= */ -5, /* duration= */ 20)));
+                        /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 50, /* duration= */ 20)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
         assertEquals(-1, mAdapter.apply(segments, -1, createVibratorInfo()));
@@ -116,13 +124,13 @@ public class StepToRampAdapterTest {
     @Test
     public void testStepAndRampSegments_withPwleCapabilityAndNoFrequency_keepsOriginalSteps() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 0, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ 0, /* duration= */ 100),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 100),
                 new PrimitiveSegment(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 10),
                 new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ -4, /* endFrequency= */ 2, /* duration= */ 50),
+                        /* startFrequencyHz= */ 40, /* endFrequencyHz= */ 200, /* duration= */ 50),
                 new RampSegment(/* startAmplitude= */ 0.8f, /* endAmplitude= */ 0.2f,
-                        /* startFrequency= */ 10, /* endFrequency= */ -5, /* duration= */ 20)));
+                        /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 1, /* duration= */ 20)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
         VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
@@ -135,25 +143,25 @@ public class StepToRampAdapterTest {
     @Test
     public void testStepAndRampSegments_withPwleCapabilityAndStepNextToRamp_convertsStepsToRamps() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 1, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ 0, /* duration= */ 100),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 200, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 150, /* duration= */ 60),
                 new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ -4, /* endFrequency= */ 2, /* duration= */ 50),
+                        /* startFrequencyHz= */ 1, /* endFrequencyHz= */ 300, /* duration= */ 50),
                 new RampSegment(/* startAmplitude= */ 0.8f, /* endAmplitude= */ 0.2f,
-                        /* startFrequency= */ 10, /* endFrequency= */ -5, /* duration= */ 20),
-                new StepSegment(/* amplitude= */ 0.8f, /* frequency= */ -1, /* duration= */ 60)));
+                        /* startFrequencyHz= */ 1000, /* endFrequencyHz= */ 1, /* duration= */ 20),
+                new StepSegment(/* amplitude= */ 0.8f, /* frequencyHz= */ 10, /* duration= */ 60)));
 
         List<VibrationEffectSegment> expectedSegments = Arrays.asList(
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude*/ 0,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 10),
+                        /* startFrequencyHz= */ 200, /* endFrequencyHz= */ 200, /* duration= */ 10),
                 new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude= */ 0.5f,
-                        /* startFrequency= */ 0, /* endFrequency= */ 0, /* duration= */ 100),
+                        /* startFrequencyHz= */ 150, /* endFrequencyHz= */ 150, /* duration= */ 60),
                 new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ -4, /* endFrequency= */ 2, /* duration= */ 50),
+                        /* startFrequencyHz= */ 1, /* endFrequencyHz= */ 300, /* duration= */ 50),
                 new RampSegment(/* startAmplitude= */ 0.8f, /* endAmplitude= */ 0.2f,
-                        /* startFrequency= */ 10, /* endFrequency= */ -5, /* duration= */ 20),
+                        /* startFrequencyHz= */ 1000, /* endFrequencyHz= */ 1, /* duration= */ 20),
                 new RampSegment(/* startAmplitude= */ 0.8f, /* endAmplitude= */ 0.8f,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 60));
+                        /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 10, /* duration= */ 60));
 
         VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
         assertEquals(-1, mAdapter.apply(segments, -1, vibratorInfo));
@@ -165,13 +173,13 @@ public class StepToRampAdapterTest {
     @Test
     public void testStepSegments_withPwleCapabilityAndFrequency_convertsStepsToRamps() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ -1, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ 1, /* duration= */ 100)));
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 100, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 6)));
         List<VibrationEffectSegment> expectedSegments = Arrays.asList(
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude*/ 0,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
+                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 100, /* duration= */ 10),
                 new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude= */ 0.5f,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 100));
+                        /* startFrequencyHz= */ 150, /* endFrequencyHz= */ 150, /* duration= */ 6));
 
         VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
         assertEquals(-1, mAdapter.apply(segments, -1, vibratorInfo));
@@ -183,6 +191,7 @@ public class StepToRampAdapterTest {
     private static VibratorInfo createVibratorInfo(int... capabilities) {
         return new VibratorInfo.Builder(0)
                 .setCapabilities(IntStream.of(capabilities).reduce((a, b) -> a | b).orElse(0))
+                .setFrequencyProfile(TEST_FREQUENCY_PROFILE)
                 .build();
     }
 }

@@ -18,6 +18,7 @@ package com.android.server.devicepolicy;
 import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
+import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -37,8 +38,12 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
      */
     private final Object mLock = new Object();
 
+    /**
+     * Indicates which user is screen capture disallowed on. Can be {@link UserHandle#USER_NULL},
+     * {@link UserHandle#USER_ALL} or a concrete user ID.
+     */
     @GuardedBy("mLock")
-    private final SparseBooleanArray mScreenCaptureDisabled = new SparseBooleanArray();
+    private int mScreenCaptureDisallowedUser = UserHandle.USER_NULL;
 
     @GuardedBy("mLock")
     private final SparseIntArray mPasswordQuality = new SparseIntArray();
@@ -57,7 +62,6 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
 
     public void onUserRemoved(int userHandle) {
         synchronized (mLock) {
-            mScreenCaptureDisabled.delete(userHandle);
             mPasswordQuality.delete(userHandle);
             mPermissionPolicy.delete(userHandle);
             mCanGrantSensorsPermissions.delete(userHandle);
@@ -65,15 +69,22 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     }
 
     @Override
-    public boolean isScreenCaptureAllowed(int userHandle, boolean ownerCanAddInternalSystemWindow) {
+    public boolean isScreenCaptureAllowed(int userHandle) {
         synchronized (mLock) {
-            return !mScreenCaptureDisabled.get(userHandle) || ownerCanAddInternalSystemWindow;
+            return mScreenCaptureDisallowedUser != UserHandle.USER_ALL
+                    && mScreenCaptureDisallowedUser != userHandle;
         }
     }
 
-    public void setScreenCaptureAllowed(int userHandle, boolean allowed) {
+    public int getScreenCaptureDisallowedUser() {
         synchronized (mLock) {
-            mScreenCaptureDisabled.put(userHandle, !allowed);
+            return mScreenCaptureDisallowedUser;
+        }
+    }
+
+    public void setScreenCaptureDisallowedUser(int userHandle) {
+        synchronized (mLock) {
+            mScreenCaptureDisallowedUser = userHandle;
         }
     }
 
@@ -125,7 +136,7 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     public void dump(IndentingPrintWriter pw) {
         pw.println("Device policy cache:");
         pw.increaseIndent();
-        pw.println("Screen capture disabled: " + mScreenCaptureDisabled.toString());
+        pw.println("Screen capture disallowed user: " + mScreenCaptureDisallowedUser);
         pw.println("Password quality: " + mPasswordQuality.toString());
         pw.println("Permission policy: " + mPermissionPolicy.toString());
         pw.println("Admin can grant sensors permission: "

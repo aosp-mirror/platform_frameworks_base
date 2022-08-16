@@ -84,7 +84,8 @@ public final class SensorOverlays {
                     };
 
             try {
-                mUdfpsOverlayController.get().showUdfpsOverlay(sensorId, reason, callback);
+                mUdfpsOverlayController.get().showUdfpsOverlay(
+                        client.getRequestId(), sensorId, reason, callback);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception when showing the UDFPS overlay", e);
             }

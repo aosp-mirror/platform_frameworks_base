@@ -16,6 +16,7 @@
 
 package com.android.settingslib.animation;
 
+import android.animation.AnimatorListenerAdapter;
 import android.view.animation.Interpolator;
 
 /**
@@ -23,7 +24,17 @@ import android.view.animation.Interpolator;
  * {@link AppearAnimationUtils}
  */
 public interface AppearAnimationCreator<T> {
-     void createAnimation(T animatedObject, long delay, long duration,
-             float translationY, boolean appearing, Interpolator interpolator,
-             Runnable finishListener);
+    /**
+     * Create the appear / disappear animation.
+     */
+    void createAnimation(T animatedObject, long delay, long duration,
+            float translationY, boolean appearing, Interpolator interpolator,
+            Runnable endRunnable);
+
+    /**
+     * Create the animation with {@link AnimatorListenerAdapter}.
+     */
+    default void createAnimation(T animatedObject, long delay, long duration,
+            float translationY, boolean appearing, Interpolator interpolator,
+            Runnable endRunnable, AnimatorListenerAdapter animatorListener) {}
 }

@@ -22,7 +22,6 @@ import android.service.notification.NotificationListenerService.REASON_CLICK
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.NotificationRemoteInputManager
@@ -32,11 +31,11 @@ import com.android.systemui.statusbar.RemoteInputNotificationRebuilder
 import com.android.systemui.statusbar.SmartReplyController
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import com.android.systemui.statusbar.notification.collection.notifcollection.SelfTrackingLifetimeExtender
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.notifcollection.InternalNotifUpdater
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender
-import java.io.FileDescriptor
+import com.android.systemui.statusbar.notification.collection.notifcollection.SelfTrackingLifetimeExtender
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -61,7 +60,7 @@ private const val REMOTE_INPUT_EXTENDER_RELEASE_DELAY: Long = 200
 /** Whether this class should print spammy debug logs */
 private val DEBUG: Boolean by lazy { Log.isLoggable(TAG, Log.DEBUG) }
 
-@SysUISingleton
+@CoordinatorScope
 class RemoteInputCoordinator @Inject constructor(
     dumpManager: DumpManager,
     private val mRebuilder: RemoteInputNotificationRebuilder,
@@ -121,8 +120,8 @@ class RemoteInputCoordinator @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
-        mRemoteInputLifetimeExtenders.forEach { it.dump(fd, pw, args) }
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        mRemoteInputLifetimeExtenders.forEach { it.dump(pw, args) }
     }
 
     override fun onRemoteInputSent(entry: NotificationEntry) {

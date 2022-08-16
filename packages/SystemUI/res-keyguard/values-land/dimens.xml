@@ -19,11 +19,13 @@
 -->
 <resources>
     <dimen name="num_pad_row_margin_bottom">3dp</dimen>
-    <dimen name="keyguard_eca_top_margin">2dp</dimen>
+    <dimen name="keyguard_eca_top_margin">0dp</dimen>
     <dimen name="keyguard_eca_bottom_margin">2dp</dimen>
     <dimen name="keyguard_password_height">26dp</dimen>
     <dimen name="num_pad_entry_row_margin_bottom">0dp</dimen>
 
     <!-- The size of PIN text in the PIN unlock method. -->
     <integer name="scaled_password_text_size">26</integer>
+
+    <dimen name="bouncer_user_switcher_y_trans">@dimen/status_bar_height</dimen>
 </resources>

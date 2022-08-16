@@ -48,9 +48,16 @@ private const val TAG = "ActivityLaunchAnimator"
  * nicely into the starting window.
  */
 class ActivityLaunchAnimator(
-    private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS)
+    /** The animator used when animating a View into an app. */
+    private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS),
+
+    /** The animator used when animating a Dialog into an app. */
+    // TODO(b/218989950): Remove this animator and instead set the duration of the dim fade out to
+    // TIMINGS.contentBeforeFadeOutDuration.
+    private val dialogToAppAnimator: LaunchAnimator = LaunchAnimator(DIALOG_TIMINGS, INTERPOLATORS)
 ) {
     companion object {
+        /** The timings when animating a View into an app. */
         @JvmField
         val TIMINGS = LaunchAnimator.Timings(
             totalDuration = 500L,
@@ -60,6 +67,17 @@ class ActivityLaunchAnimator(
             contentAfterFadeInDuration = 183L
         )
 
+        /**
+         * The timings when animating a Dialog into an app. We need to wait at least 200ms before
+         * showing the app (which is under the dialog window) so that the dialog window dim is fully
+         * faded out, to avoid flicker.
+         */
+        val DIALOG_TIMINGS = TIMINGS.copy(
+            contentBeforeFadeOutDuration = 200L,
+            contentAfterFadeInDelay = 200L
+        )
+
+        /** The interpolators when animating a View or a dialog into an app. */
         val INTERPOLATORS = LaunchAnimator.Interpolators(
             positionInterpolator = Interpolators.EMPHASIZED,
             positionXInterpolator = createPositionXInterpolator(),
@@ -94,6 +112,9 @@ class ActivityLaunchAnimator(
      * [start(Pending)IntentWithAnimation].
      */
     var callback: Callback? = null
+
+    /** The set of [Listener] that should be notified of any animation started by this animator. */
+    private val listeners = LinkedHashSet<Listener>()
 
     /**
      * Start an intent and animate the opening window. The intent will be started by running
@@ -214,6 +235,16 @@ class ActivityLaunchAnimator(
         }
     }
 
+    /** Add a [Listener] that can listen to launch animations. */
+    fun addListener(listener: Listener) {
+        listeners.add(listener)
+    }
+
+    /** Remove a [Listener]. */
+    fun removeListener(listener: Listener) {
+        listeners.remove(listener)
+    }
+
     /** Create a new animation [Runner] controlled by [controller]. */
     @VisibleForTesting
     fun createRunner(controller: Controller): Runner = Runner(controller)
@@ -234,11 +265,25 @@ class ActivityLaunchAnimator(
         /** Hide the keyguard and animate using [runner]. */
         fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner)
 
-        /** Enable/disable window blur so they don't overlap with the window launch animation **/
-        fun setBlursDisabledForAppLaunch(disabled: Boolean)
-
         /* Get the background color of [task]. */
         fun getBackgroundColor(task: TaskInfo): Int
+    }
+
+    interface Listener {
+        /** Called when an activity launch animation started. */
+        @JvmDefault
+        fun onLaunchAnimationStart() {}
+
+        /**
+         * Called when an activity launch animation is finished. This will be called if and only if
+         * [onLaunchAnimationStart] was called earlier.
+         */
+        @JvmDefault
+        fun onLaunchAnimationEnd() {}
+
+        /** Called when an activity launch animation made progress. */
+        @JvmDefault
+        fun onLaunchAnimationProgress(linearProgress: Float) {}
     }
 
     /**
@@ -253,6 +298,9 @@ class ActivityLaunchAnimator(
              *
              * Important: The view must be attached to a [ViewGroup] when calling this function and
              * during the animation. For safety, this method will return null when it is not.
+             *
+             * Note: The background of [view] should be a (rounded) rectangle so that it can be
+             * properly animated.
              */
             @JvmStatic
             fun fromView(view: View, cujType: Int? = null): Controller? {
@@ -269,6 +317,14 @@ class ActivityLaunchAnimator(
                 return GhostedViewLaunchAnimatorController(view, cujType)
             }
         }
+
+        /**
+         * Whether this controller is controlling a dialog launch. This will be used to adapt the
+         * timings, making sure we don't show the app until the dialog dim had the time to fade out.
+         */
+        // TODO(b/218989950): Remove this.
+        val isDialogLaunch: Boolean
+            get() = false
 
         /**
          * The intent was started. If [willAnimate] is false, nothing else will happen and the
@@ -288,7 +344,9 @@ class ActivityLaunchAnimator(
     inner class Runner(private val controller: Controller) : IRemoteAnimationRunner.Stub() {
         private val launchContainer = controller.launchContainer
         private val context = launchContainer.context
-        private val transactionApplier = SyncRtSurfaceTransactionApplier(launchContainer)
+        private val transactionApplierView =
+            controller.openingWindowSyncView ?: controller.launchContainer
+        private val transactionApplier = SyncRtSurfaceTransactionApplier(transactionApplierView)
 
         private val matrix = Matrix()
         private val invertMatrix = Matrix()
@@ -374,7 +432,15 @@ class ActivityLaunchAnimator(
                 right = windowBounds.right
             )
             val callback = this@ActivityLaunchAnimator.callback!!
-            val windowBackgroundColor = callback.getBackgroundColor(window.taskInfo)
+            val windowBackgroundColor = window.taskInfo?.let { callback.getBackgroundColor(it) }
+                    ?: window.backgroundColor
+
+            // Make sure we use the modified timings when animating a dialog into an app.
+            val launchAnimator = if (controller.isDialogLaunch) {
+                dialogToAppAnimator
+            } else {
+                launchAnimator
+            }
 
             // TODO(b/184121838): We should somehow get the top and bottom radius of the window
             // instead of recomputing isExpandingFullyAbove here.
@@ -396,12 +462,12 @@ class ActivityLaunchAnimator(
             val delegate = this.controller
             val controller = object : LaunchAnimator.Controller by delegate {
                 override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-                    callback.setBlursDisabledForAppLaunch(true)
+                    listeners.forEach { it.onLaunchAnimationStart() }
                     delegate.onLaunchAnimationStart(isExpandingFullyAbove)
                 }
 
                 override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                    callback.setBlursDisabledForAppLaunch(false)
+                    listeners.forEach { it.onLaunchAnimationEnd() }
                     iCallback?.invoke()
                     delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
                 }
@@ -411,18 +477,29 @@ class ActivityLaunchAnimator(
                     progress: Float,
                     linearProgress: Float
                 ) {
-                    applyStateToWindow(window, state)
+                    // Apply the state to the window only if it is visible, i.e. when the expanding
+                    // view is *not* visible.
+                    if (!state.visible) {
+                        applyStateToWindow(window, state)
+                    }
                     navigationBar?.let { applyStateToNavigationBar(it, state, linearProgress) }
+
+                    listeners.forEach { it.onLaunchAnimationProgress(linearProgress) }
                     delegate.onLaunchAnimationProgress(state, progress, linearProgress)
                 }
             }
 
-            // We draw a hole when the additional layer is fading out to reveal the opening window.
             animation = launchAnimator.startAnimation(
                 controller, endState, windowBackgroundColor, drawHole = true)
         }
 
         private fun applyStateToWindow(window: RemoteAnimationTarget, state: LaunchAnimator.State) {
+            if (transactionApplierView.viewRootImpl == null) {
+                // If the view root we synchronize with was detached, don't apply any transaction
+                // (as [SyncRtSurfaceTransactionApplier.scheduleApply] would otherwise throw).
+                return
+            }
+
             val screenBounds = window.screenSpaceBounds
             val centerX = (screenBounds.left + screenBounds.right) / 2f
             val centerY = (screenBounds.top + screenBounds.bottom) / 2f
@@ -480,6 +557,12 @@ class ActivityLaunchAnimator(
             state: LaunchAnimator.State,
             linearProgress: Float
         ) {
+            if (transactionApplierView.viewRootImpl == null) {
+                // If the view root we synchronize with was detached, don't apply any transaction
+                // (as [SyncRtSurfaceTransactionApplier.scheduleApply] would otherwise throw).
+                return
+            }
+
             val fadeInProgress = LaunchAnimator.getProgress(TIMINGS, linearProgress,
                 ANIMATION_DELAY_NAV_FADE_IN, ANIMATION_DURATION_NAV_FADE_OUT)
 
@@ -513,7 +596,7 @@ class ActivityLaunchAnimator(
             controller.onLaunchAnimationCancelled()
         }
 
-        override fun onAnimationCancelled() {
+        override fun onAnimationCancelled(isKeyguardOccluded: Boolean) {
             if (timedOut) {
                 return
             }

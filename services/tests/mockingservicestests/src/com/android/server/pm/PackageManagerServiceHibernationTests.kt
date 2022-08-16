@@ -107,7 +107,7 @@ class PackageManagerServiceHibernationTests {
         whenever(appHibernationManager.isHibernatingForUser(TEST_PACKAGE_NAME, TEST_USER_ID))
             .thenReturn(true)
 
-        pm.setPackageStoppedState(TEST_PACKAGE_NAME, false, TEST_USER_ID)
+        pm.setPackageStoppedState(pm.snapshotComputer(), TEST_PACKAGE_NAME, false, TEST_USER_ID)
 
         TestableLooper.get(this).processAllMessages()
 
@@ -133,7 +133,8 @@ class PackageManagerServiceHibernationTests {
             .thenReturn(true)
 
         try {
-            pm.setPackageStoppedState(TEST_PACKAGE_NAME, false, TEST_USER_ID)
+            pm.setPackageStoppedState(pm.snapshotComputer(), TEST_PACKAGE_NAME, false,
+                TEST_USER_ID)
             TestableLooper.get(this).processAllMessages()
         } catch (e: Exception) {
             Assert.fail("Method throws exception when AppHibernationManager is not ready.\n$e")
@@ -156,7 +157,7 @@ class PackageManagerServiceHibernationTests {
         rule.system().validateFinalState()
         whenever(appHibernationManager.isHibernatingGlobally(TEST_PACKAGE_2_NAME)).thenReturn(true)
 
-        val optimizablePkgs = pm.optimizablePackages
+        val optimizablePkgs = DexOptHelper(pm).getOptimizablePackages(pm.snapshotComputer())
 
         assertTrue(optimizablePkgs.contains(TEST_PACKAGE_NAME))
         assertFalse(optimizablePkgs.contains(TEST_PACKAGE_2_NAME))

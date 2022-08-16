@@ -37,6 +37,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.FileUtils;
 import android.os.GraphicsEnvironment;
 import android.os.Handler;
@@ -160,6 +161,13 @@ public final class LoadedApk {
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mUnboundServices
         = new ArrayMap<>();
     private AppComponentFactory mAppComponentFactory;
+
+    /**
+     * We cache the instantiated application object for each package on this process here.
+     */
+    @GuardedBy("sApplications")
+    private static final ArrayMap<String, Application> sApplications = new ArrayMap<>(4);
+
     private final Object mLock = new Object();
 
     Application getApplication() {
@@ -392,7 +400,8 @@ public final class LoadedApk {
         mLibDir = aInfo.nativeLibraryDir;
         mDataDirFile = FileUtils.newFileOrNull(aInfo.dataDir);
         mDeviceProtectedDataDirFile = FileUtils.newFileOrNull(aInfo.deviceProtectedDataDir);
-        mCredentialProtectedDataDirFile = FileUtils.newFileOrNull(aInfo.credentialProtectedDataDir);
+        mCredentialProtectedDataDirFile = FileUtils.newFileOrNull(
+                aInfo.credentialProtectedDataDir);
 
         mSplitNames = aInfo.splitNames;
         mSplitAppDirs = aInfo.splitSourceDirs;
@@ -402,6 +411,28 @@ public final class LoadedApk {
         if (aInfo.requestsIsolatedSplitLoading() && !ArrayUtils.isEmpty(mSplitNames)) {
             mSplitLoader = new SplitDependencyLoaderImpl(aInfo.splitDependencies);
         }
+    }
+
+    void setSdkSandboxStorage(@Nullable String sdkSandboxClientAppVolumeUuid,
+            String sdkSandboxClientAppPackage) {
+        int userId = UserHandle.myUserId();
+        mDeviceProtectedDataDirFile = Environment
+                .getDataMiscDeSharedSdkSandboxDirectory(sdkSandboxClientAppVolumeUuid, userId,
+                        sdkSandboxClientAppPackage)
+                .getAbsoluteFile();
+        mCredentialProtectedDataDirFile = Environment
+                .getDataMiscCeSharedSdkSandboxDirectory(sdkSandboxClientAppVolumeUuid, userId,
+                        sdkSandboxClientAppPackage)
+                .getAbsoluteFile();
+
+        if ((mApplicationInfo.privateFlags
+                & ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) != 0
+                && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
+            mDataDirFile = mDeviceProtectedDataDirFile;
+        } else {
+            mDataDirFile = mCredentialProtectedDataDirFile;
+        }
+        mDataDir = mDataDirFile.getAbsolutePath();
     }
 
     public static void makePaths(ActivityThread activityThread,
@@ -744,6 +775,10 @@ public final class LoadedApk {
                 // Native shared lib doesn't contribute to the native lib search path. Its name is
                 // sent to libnativeloader and then the native shared lib is exported from the
                 // default linker namespace.
+                continue;
+            }
+            if (info.isSdk()) {
+                // SDKs are not loaded automatically.
                 continue;
             }
             if (libsToLoadAfter.contains(info.getName())) {
@@ -1341,18 +1376,56 @@ public final class LoadedApk {
         return mResources;
     }
 
+    /**
+     * This is for 3p apps accessing this hidden API directly... in which case, we don't return
+     * the cached Application instance.
+     */
     @UnsupportedAppUsage
     public Application makeApplication(boolean forceDefaultAppClass,
             Instrumentation instrumentation) {
+        return makeApplicationInner(forceDefaultAppClass, instrumentation,
+                /* allowDuplicateInstances= */ true);
+    }
+
+    /**
+     * This is for all the (internal) callers, for which we do return the cached instance.
+     */
+    public Application makeApplicationInner(boolean forceDefaultAppClass,
+            Instrumentation instrumentation) {
+        return makeApplicationInner(forceDefaultAppClass, instrumentation,
+                /* allowDuplicateInstances= */ false);
+    }
+
+    private Application makeApplicationInner(boolean forceDefaultAppClass,
+            Instrumentation instrumentation, boolean allowDuplicateInstances) {
         if (mApplication != null) {
             return mApplication;
         }
-
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "makeApplication");
+
+        synchronized (sApplications) {
+            final Application cached = sApplications.get(mPackageName);
+            if (cached != null) {
+                // Looks like this is always happening for the system server, because
+                // the LoadedApk created in systemMain() -> attach() isn't cached properly?
+                if (!"android".equals(mPackageName)) {
+                    Slog.wtfStack(TAG, "App instance already created for package=" + mPackageName
+                            + " instance=" + cached);
+                }
+                if (!allowDuplicateInstances) {
+                    mApplication = cached;
+                    return cached;
+                }
+                // Some apps intentionally call makeApplication() to create a new Application
+                // instance... Sigh...
+            }
+        }
 
         Application app = null;
 
-        String appClass = mApplicationInfo.className;
+        final String myProcessName = Process.myProcessName();
+        String appClass = mApplicationInfo.getCustomApplicationClassNameForProcess(
+                myProcessName);
         if (forceDefaultAppClass || (appClass == null)) {
             appClass = "android.app.Application";
         }
@@ -1395,6 +1468,11 @@ public final class LoadedApk {
         }
         mActivityThread.mAllApplications.add(app);
         mApplication = app;
+        if (!allowDuplicateInstances) {
+            synchronized (sApplications) {
+                sApplications.put(mPackageName, app);
+            }
+        }
 
         if (instrumentation != null) {
             try {
@@ -1695,7 +1773,11 @@ public final class LoadedApk {
                         return;
                     }
 
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastReceiveReg");
+                    if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                                "broadcastReceiveReg: " + intent.getAction());
+                    }
+
                     try {
                         ClassLoader cl = mReceiver.getClass().getClassLoader();
                         intent.setExtrasClassLoader(cl);

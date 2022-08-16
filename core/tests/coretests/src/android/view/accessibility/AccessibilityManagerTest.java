@@ -17,7 +17,6 @@
 package android.view.accessibility;
 
 import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertSame;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -185,17 +184,6 @@ public class AccessibilityManagerTest {
         manager.getClient().setState(0);
         mHandler.sendAllMessages();
         assertFalse("Must be disabled since the mock service is disabled", manager.isEnabled());
-    }
-
-    @Test
-    public void testSendAccessibilityEvent_AccessibilityEnabled() throws Exception {
-        AccessibilityEvent sentEvent = AccessibilityEvent.obtain(
-                AccessibilityEvent.TYPE_ANNOUNCEMENT);
-
-        AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
-        manager.sendAccessibilityEvent(sentEvent);
-
-        assertSame("The event should be recycled.", sentEvent, AccessibilityEvent.obtain());
     }
 
     @Test

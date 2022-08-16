@@ -340,7 +340,7 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
 
     private int runMarkProfileOwnerOnOrganizationOwnedDevice(PrintWriter pw) {
         parseArgs(/* canHaveName= */ false);
-        mService.markProfileOwnerOnOrganizationOwnedDevice(mComponent, mUserId);
+        mService.setProfileOwnerOnOrganizationOwnedDevice(mComponent, mUserId, true);
         pw.printf("Success\n");
         return 0;
     }

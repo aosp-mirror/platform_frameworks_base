@@ -16,10 +16,13 @@
 
 package com.android.server.notification;
 
+import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -115,5 +118,16 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
         assertEquals(
                 SmallHash.hash(group.hashCode()),
                 p.getGroupIdHash());
+    }
+
+    @Test
+    public void testIsForegroundService() {
+        NotificationRecordLogger.NotificationRecordPair p = getNotificationRecordPair(
+                0, null);
+        assertFalse(NotificationRecordLogger.isForegroundService(p.r));
+
+        // Set foreground service
+        p.r.getSbn().getNotification().flags |= FLAG_FOREGROUND_SERVICE;
+        assertTrue(NotificationRecordLogger.isForegroundService(p.r));
     }
 }

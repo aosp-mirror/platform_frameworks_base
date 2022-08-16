@@ -31,7 +31,6 @@
 #include "ValueTransformer.h"
 #include "io/File.h"
 #include "text/Printer.h"
-#include "util/Maybe.h"
 
 namespace aapt {
 
@@ -159,8 +158,8 @@ struct Reference : public TransformableItem<Reference, BaseItem<Reference>> {
     kAttribute,
   };
 
-  Maybe<ResourceName> name;
-  Maybe<ResourceId> id;
+  std::optional<ResourceName> name;
+  std::optional<ResourceId> id;
   std::optional<uint32_t> type_flags;
   Reference::Type reference_type;
   bool private_reference = false;
@@ -327,7 +326,7 @@ struct Style : public TransformableValue<Style, BaseValue<Style>> {
     friend std::ostream& operator<<(std::ostream& out, const Entry& entry);
   };
 
-  Maybe<Reference> parent;
+  std::optional<Reference> parent;
 
   // If set to true, the parent was auto inferred from the style's name.
   bool parent_inferred = false;

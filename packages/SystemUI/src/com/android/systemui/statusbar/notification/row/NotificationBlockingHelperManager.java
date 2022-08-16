@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
+import com.android.systemui.util.Compile;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -43,8 +44,9 @@ import java.util.Set;
  */
 public class NotificationBlockingHelperManager {
     /** Enables debug logging and always makes the blocking helper show up after a dismiss. */
-    private static final boolean DEBUG = false;
     private static final String TAG = "BlockingHelper";
+    private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG_ALWAYS_SHOW = false;
 
     private final Context mContext;
     private final NotificationGutsManager mNotificationGutsManager;
@@ -98,7 +100,7 @@ public class NotificationBlockingHelperManager {
         // - The dismissed row is a valid group (>1 or 0 children from the same channel)
         // or the only child in the group
         final NotificationEntry entry = row.getEntry();
-        if ((entry.getUserSentiment() == USER_SENTIMENT_NEGATIVE || DEBUG)
+        if ((entry.getUserSentiment() == USER_SENTIMENT_NEGATIVE || DEBUG_ALWAYS_SHOW)
                 && mIsShadeExpanded
                 && !row.getIsNonblockable()
                 && ((!row.isChildInGroup() || mGroupMembershipManager.isOnlyChildInGroup(entry))

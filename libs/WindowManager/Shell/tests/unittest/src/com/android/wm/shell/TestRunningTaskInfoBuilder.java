@@ -18,6 +18,7 @@ package com.android.wm.shell;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -36,6 +37,7 @@ public final class TestRunningTaskInfoBuilder {
     private WindowContainerToken mToken = createMockWCToken();
     private int mParentTaskId = INVALID_TASK_ID;
     private @WindowConfiguration.ActivityType int mActivityType = ACTIVITY_TYPE_STANDARD;
+    private @WindowConfiguration.WindowingMode int mWindowingMode = WINDOWING_MODE_UNDEFINED;
 
     public static WindowContainerToken createMockWCToken() {
         final IWindowContainerToken itoken = mock(IWindowContainerToken.class);
@@ -60,6 +62,12 @@ public final class TestRunningTaskInfoBuilder {
         return this;
     }
 
+    public TestRunningTaskInfoBuilder setWindowingMode(
+            @WindowConfiguration.WindowingMode int windowingMode) {
+        mWindowingMode = windowingMode;
+        return this;
+    }
+
     public ActivityManager.RunningTaskInfo build() {
         final ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
         info.parentTaskId = INVALID_TASK_ID;
@@ -67,6 +75,7 @@ public final class TestRunningTaskInfoBuilder {
         info.parentTaskId = mParentTaskId;
         info.configuration.windowConfiguration.setBounds(mBounds);
         info.configuration.windowConfiguration.setActivityType(mActivityType);
+        info.configuration.windowConfiguration.setWindowingMode(mWindowingMode);
         info.token = mToken;
         info.isResizeable = true;
         info.supportsMultiWindow = true;

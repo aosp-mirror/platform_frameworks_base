@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -79,19 +78,6 @@ public class InsetsPolicyTest extends WindowTestsBase {
         // The app can control both system bars.
         assertNotNull(controls);
         assertEquals(2, controls.length);
-    }
-
-    @Test
-    public void testControlsForDispatch_dockedTaskVisible() {
-        addWindow(TYPE_STATUS_BAR, "statusBar");
-        addWindow(TYPE_NAVIGATION_BAR, "navBar");
-
-        final WindowState win = createWindow(null, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
-                ACTIVITY_TYPE_STANDARD, TYPE_APPLICATION, mDisplayContent, "app");
-        final InsetsSourceControl[] controls = addWindowAndGetControlsForDispatch(win);
-
-        // The app must not control any system bars.
-        assertNull(controls);
     }
 
     @Test

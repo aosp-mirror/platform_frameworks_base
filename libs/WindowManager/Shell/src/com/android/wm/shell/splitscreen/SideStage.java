@@ -45,9 +45,6 @@ class SideStage extends StageTaskListener {
     }
 
     boolean removeAllTasks(WindowContainerTransaction wct, boolean toTop) {
-        // No matter if the root task is empty or not, moving the root to bottom because it no
-        // longer preserves visible child task.
-        wct.reorder(mRootTaskInfo.token, false /* onTop */);
         if (mChildrenTaskInfo.size() == 0) return false;
         wct.reparentTasks(
                 mRootTaskInfo.token,

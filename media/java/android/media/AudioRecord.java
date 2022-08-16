@@ -32,6 +32,7 @@ import android.content.AttributionSource.ScopedParcelState;
 import android.content.Context;
 import android.media.MediaRecorder.Source;
 import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioMixingRule;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.metrics.LogSessionId;
 import android.media.projection.MediaProjection;
@@ -58,6 +59,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -185,22 +187,14 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      */
     @SuppressWarnings("unused")
     @UnsupportedAppUsage
-    private long mNativeRecorderInJavaObj;
+    private long mNativeAudioRecordHandle;
 
     /**
      * Accessed by native methods: provides access to the callback data.
      */
     @SuppressWarnings("unused")
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private long mNativeCallbackCookie;
-
-    /**
-     * Accessed by native methods: provides access to the JNIDeviceCallback instance.
-     */
-    @SuppressWarnings("unused")
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private long mNativeDeviceCallback;
-
+    private long mNativeJNIDataHandle;
 
     //---------------------------------------------------------
     // Member variables
@@ -404,7 +398,9 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
 
         // is this AudioRecord using REMOTE_SUBMIX at full volume?
         if (attributes.getCapturePreset() == MediaRecorder.AudioSource.REMOTE_SUBMIX) {
-            final AudioAttributes.Builder filteredAttr = new AudioAttributes.Builder();
+            final AudioAttributes.Builder ab =
+                    new AudioAttributes.Builder(attributes);
+            HashSet<String> filteredTags = new HashSet<String>();
             final Iterator<String> tagsIter = attributes.getTags().iterator();
             while (tagsIter.hasNext()) {
                 final String tag = tagsIter.next();
@@ -412,14 +408,14 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
                     mIsSubmixFullVolume = true;
                     Log.v(TAG, "Will record from REMOTE_SUBMIX at full fixed volume");
                 } else { // SUBMIX_FIXED_VOLUME: is not to be propagated to the native layers
-                    filteredAttr.addTag(tag);
+                    filteredTags.add(tag);
                 }
             }
-            filteredAttr.setInternalCapturePreset(attributes.getCapturePreset());
-            mAudioAttributes = filteredAttr.build();
-        } else {
-            mAudioAttributes = attributes;
+            ab.replaceTags(filteredTags);
+            attributes = ab.build();
         }
+
+        mAudioAttributes = attributes;
 
         int rate = format.getSampleRate();
         if (rate == AudioFormat.SAMPLE_RATE_UNSPECIFIED) {
@@ -432,7 +428,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
             encoding = format.getEncoding();
         }
 
-        audioParamCheck(attributes.getCapturePreset(), rate, encoding);
+        audioParamCheck(mAudioAttributes.getCapturePreset(), rate, encoding);
 
         if ((format.getPropertySetMask()
                 & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_INDEX_MASK) != 0) {
@@ -488,9 +484,8 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      * value here as no error checking is or can be done.
      */
     /*package*/ AudioRecord(long nativeRecordInJavaObj) {
-        mNativeRecorderInJavaObj = 0;
-        mNativeCallbackCookie = 0;
-        mNativeDeviceCallback = 0;
+        mNativeAudioRecordHandle = 0;
+        mNativeJNIDataHandle = 0;
 
         // other initialization...
         if (nativeRecordInJavaObj != 0) {
@@ -595,6 +590,8 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
         private int mPrivacySensitive = PRIVACY_SENSITIVE_DEFAULT;
         private int mMaxSharedAudioHistoryMs = 0;
+        private int mCallRedirectionMode = AudioManager.CALL_REDIRECT_NONE;
+
         private static final int PRIVACY_SENSITIVE_DEFAULT = -1;
         private static final int PRIVACY_SENSITIVE_DISABLED = 0;
         private static final int PRIVACY_SENSITIVE_ENABLED = 1;
@@ -791,6 +788,65 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
 
         /**
          * @hide
+         * Sets the {@link AudioRecord} call redirection mode.
+         * Used when creating an AudioRecord to extract audio from call downlink path. The mode
+         * indicates if the call is a PSTN call or a VoIP call in which case a dynamic audio
+         * policy is created to forward all playback with voice communication usage this record.
+         *
+         * @param callRedirectionMode one of
+         * {@link AudioManager#CALL_REDIRECT_NONE},
+         * {@link AudioManager#CALL_REDIRECT_PSTN},
+         * or {@link AAudioManager#CALL_REDIRECT_VOIP}.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException if {@code callRedirectionMode} is not valid.
+         */
+        public @NonNull Builder setCallRedirectionMode(
+                @AudioManager.CallRedirectionMode int callRedirectionMode) {
+            switch (callRedirectionMode) {
+                case AudioManager.CALL_REDIRECT_NONE:
+                case AudioManager.CALL_REDIRECT_PSTN:
+                case AudioManager.CALL_REDIRECT_VOIP:
+                    mCallRedirectionMode = callRedirectionMode;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Invalid call redirection mode " + callRedirectionMode);
+            }
+            return this;
+        }
+
+        private @NonNull AudioRecord buildCallExtractionRecord() {
+            AudioMixingRule audioMixingRule = new AudioMixingRule.Builder()
+                    .addMixRule(AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE,
+                            new AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                                .setForCallRedirection()
+                                .build())
+                    .addMixRule(AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE,
+                            new AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING)
+                                .setForCallRedirection()
+                                .build())
+                    .setTargetMixRole(AudioMixingRule.MIX_ROLE_PLAYERS)
+                    .build();
+            AudioMix audioMix = new AudioMix.Builder(audioMixingRule)
+                    .setFormat(mFormat)
+                    .setRouteFlags(AudioMix.ROUTE_FLAG_LOOP_BACK)
+                    .build();
+            AudioPolicy audioPolicy = new AudioPolicy.Builder(null).addMix(audioMix).build();
+            if (AudioManager.registerAudioPolicyStatic(audioPolicy) != 0) {
+                throw new UnsupportedOperationException("Error: could not register audio policy");
+            }
+            AudioRecord record = audioPolicy.createAudioRecordSink(audioMix);
+            if (record == null) {
+                throw new UnsupportedOperationException("Cannot create extraction AudioRecord");
+            }
+            record.unregisterAudioPolicyOnRelease(audioPolicy);
+            return record;
+        }
+
+        /**
+         * @hide
          * Specifies the maximum duration in the past of the this AudioRecord's capture buffer
          * that can be shared with another app by calling
          * {@link AudioRecord#shareAudioHistory(String, long)}.
@@ -897,6 +953,14 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
                         .build();
             }
 
+            if (mCallRedirectionMode == AudioManager.CALL_REDIRECT_VOIP) {
+                return buildCallExtractionRecord();
+            } else if (mCallRedirectionMode == AudioManager.CALL_REDIRECT_PSTN) {
+                mAttributes = new AudioAttributes.Builder(mAttributes)
+                        .setForCallRedirection()
+                        .build();
+            }
+
             try {
                 // If the buffer size is not specified,
                 // use a single frame for the buffer size and let the
@@ -960,11 +1024,12 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
 
         //--------------
         // audio source
-        if ( (audioSource < MediaRecorder.AudioSource.DEFAULT) ||
-             ((audioSource > MediaRecorder.getAudioSourceMax()) &&
-              (audioSource != MediaRecorder.AudioSource.RADIO_TUNER) &&
-              (audioSource != MediaRecorder.AudioSource.ECHO_REFERENCE) &&
-              (audioSource != MediaRecorder.AudioSource.HOTWORD)) )  {
+        if ((audioSource < MediaRecorder.AudioSource.DEFAULT)
+                || ((audioSource > MediaRecorder.getAudioSourceMax())
+                    && (audioSource != MediaRecorder.AudioSource.RADIO_TUNER)
+                    && (audioSource != MediaRecorder.AudioSource.ECHO_REFERENCE)
+                    && (audioSource != MediaRecorder.AudioSource.HOTWORD)
+                    && (audioSource != MediaRecorder.AudioSource.ULTRASOUND))) {
             throw new IllegalArgumentException("Invalid audio source " + audioSource);
         }
         mRecordSource = audioSource;
@@ -2057,7 +2122,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      * @hide
      */
     public int getPortId() {
-        if (mNativeRecorderInJavaObj == 0) {
+        if (mNativeAudioRecordHandle == 0) {
             return 0;
         }
         try {

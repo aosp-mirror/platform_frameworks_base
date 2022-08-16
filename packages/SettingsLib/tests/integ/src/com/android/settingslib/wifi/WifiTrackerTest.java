@@ -124,7 +124,7 @@ public class WifiTrackerTest {
     private static final int CONNECTED_RSSI = -50;
     private static final WifiInfo CONNECTED_AP_1_INFO = new WifiInfo();
     static {
-        CONNECTED_AP_1_INFO.setSSID(WifiSsid.createFromAsciiEncoded(SSID_1));
+        CONNECTED_AP_1_INFO.setSSID(WifiSsid.fromUtf8Text(SSID_1));
         CONNECTED_AP_1_INFO.setBSSID(BSSID_1);
         CONNECTED_AP_1_INFO.setNetworkId(NETWORK_ID_1);
         CONNECTED_AP_1_INFO.setRssi(CONNECTED_RSSI);
@@ -246,7 +246,7 @@ public class WifiTrackerTest {
 
     private static ScanResult buildScanResult1() {
         return new ScanResult(
-                WifiSsid.createFromAsciiEncoded(SSID_1),
+                WifiSsid.fromUtf8Text(SSID_1),
                 BSSID_1,
                 0, // hessid
                 0, //anqpDomainId
@@ -259,7 +259,7 @@ public class WifiTrackerTest {
 
     private static ScanResult buildScanResult2() {
         return new ScanResult(
-                WifiSsid.createFromAsciiEncoded(SSID_2),
+                WifiSsid.fromUtf8Text(SSID_2),
                 BSSID_2,
                 0, // hessid
                 0, //anqpDomainId
@@ -272,7 +272,7 @@ public class WifiTrackerTest {
 
     private static ScanResult buildScanResultWithTimestamp(long timestampMillis) {
         return new ScanResult(
-                WifiSsid.createFromAsciiEncoded(SSID_3),
+                WifiSsid.fromUtf8Text(SSID_3),
                 BSSID_3,
                 0, // hessid
                 0, //anqpDomainId
@@ -444,7 +444,7 @@ public class WifiTrackerTest {
         networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTING, "connecting", "test");
 
         WifiInfo info = new WifiInfo();
-        info.setSSID(WifiSsid.createFromAsciiEncoded(SSID_2));
+        info.setSSID(WifiSsid.fromUtf8Text(SSID_2));
         info.setBSSID(BSSID_2);
         info.setRssi(CONNECTED_RSSI);
         info.setNetworkId(NETWORK_ID_2);
@@ -671,7 +671,7 @@ public class WifiTrackerTest {
         String ssid = "ssid3";
         String bssid = "00:00:00:00:00:00";
         ScanResult newResult = new ScanResult(
-                WifiSsid.createFromAsciiEncoded(ssid),
+                WifiSsid.fromUtf8Text(ssid),
                 bssid,
                 0, // hessid
                 0, //anqpDomainId
@@ -720,7 +720,7 @@ public class WifiTrackerTest {
         // Add a Passpoint AP to the scan results.
         List<ScanResult> results = new ArrayList<>();
         ScanResult passpointAp = new ScanResult(
-                WifiSsid.createFromAsciiEncoded(SSID_1),
+                WifiSsid.fromUtf8Text(SSID_1),
                 BSSID_1,
                 0, // hessid
                 0, //anqpDomainId

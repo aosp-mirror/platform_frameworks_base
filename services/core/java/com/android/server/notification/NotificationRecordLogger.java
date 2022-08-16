@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.service.notification.NotificationListenerService.REASON_ASSISTANT_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 import static android.service.notification.NotificationListenerService.REASON_TIMEOUT;
@@ -180,7 +181,9 @@ public interface NotificationRecordLogger {
                 + " shade.")
         NOTIFICATION_CANCEL_USER_SHADE(192),
         @UiEvent(doc = "Notification was canceled due to user dismissal from the lockscreen")
-        NOTIFICATION_CANCEL_USER_LOCKSCREEN(193);
+        NOTIFICATION_CANCEL_USER_LOCKSCREEN(193),
+        @UiEvent(doc = "Notification was canceled due to an assistant adjustment update.")
+        NOTIFICATION_CANCEL_ASSISTANT(906);
 
         private final int mId;
         NotificationCancelledEvent(int id) {
@@ -205,6 +208,9 @@ public interface NotificationRecordLogger {
             if (surface == NotificationStats.DISMISSAL_OTHER) {
                 if ((REASON_CLICK <= reason) && (reason <= REASON_TIMEOUT)) {
                     return NotificationCancelledEvent.values()[reason];
+                }
+                if (reason == REASON_ASSISTANT_CANCEL) {
+                    return NotificationCancelledEvent.NOTIFICATION_CANCEL_ASSISTANT;
                 }
                 if (NotificationManagerService.DBG) {
                     throw new IllegalArgumentException("Unexpected cancel reason " + reason);
@@ -446,4 +452,14 @@ public interface NotificationRecordLogger {
         return NotificationChannelLogger.getLoggingImportance(channel, importance);
     }
 
+    /**
+     * @param r NotificationRecord
+     * @return Whether the notification is a foreground service notification.
+     */
+    static boolean isForegroundService(@NonNull NotificationRecord r) {
+        if (r.getSbn() == null || r.getSbn().getNotification() == null) {
+            return false;
+        }
+        return (r.getSbn().getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
+    }
 }

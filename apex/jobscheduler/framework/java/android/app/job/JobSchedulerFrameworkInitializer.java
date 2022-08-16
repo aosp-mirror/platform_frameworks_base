@@ -19,6 +19,7 @@ package android.app.job;
 import android.annotation.SystemApi;
 import android.app.JobSchedulerImpl;
 import android.app.SystemServiceRegistry;
+import android.app.tare.EconomyManager;
 import android.content.Context;
 import android.os.DeviceIdleManager;
 import android.os.IDeviceIdleController;
@@ -56,5 +57,7 @@ public class JobSchedulerFrameworkInitializer {
         SystemServiceRegistry.registerContextAwareService(
                 Context.POWER_EXEMPTION_SERVICE, PowerExemptionManager.class,
                 PowerExemptionManager::new);
+        SystemServiceRegistry.registerStaticService(
+                Context.RESOURCE_ECONOMY_SERVICE, EconomyManager.class, EconomyManager::new);
     }
 }

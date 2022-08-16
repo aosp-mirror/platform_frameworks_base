@@ -18,6 +18,7 @@ package com.android.systemui.power;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 
+import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -54,25 +55,31 @@ import android.view.WindowManager;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.utils.PowerUtil;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
+import com.android.systemui.SystemUIApplication;
+import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.volume.Events;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Objects;
 
 import javax.inject.Inject;
+
+import dagger.Lazy;
 
 /**
  */
@@ -98,7 +105,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         "SHOWING_AUTO_SAVER_SUGGESTION",
     };
 
-    private static final String ACTION_SHOW_BATTERY_SETTINGS = "PNW.batterySettings";
+    private static final String ACTION_SHOW_BATTERY_SAVER_SETTINGS = "PNW.batterySaverSettings";
     private static final String ACTION_START_SAVER = "PNW.startSaver";
     private static final String ACTION_DISMISSED_WARNING = "PNW.dismissedWarning";
     private static final String ACTION_CLICKED_TEMP_WARNING = "PNW.clickedTempWarning";
@@ -119,8 +126,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String ACTION_AUTO_SAVER_NO_THANKS =
             "PNW.autoSaverNoThanks";
 
-    private static final String SETTINGS_ACTION_OPEN_BATTERY_SAVER_SETTING =
-            "android.settings.BATTERY_SAVER_SETTINGS";
+    private static final String ACTION_ENABLE_SEVERE_BATTERY_DIALOG = "PNW.enableSevereDialog";
+    private static final String EXTRA_SCHEDULED_BY_PERCENTAGE =
+            "extra_scheduled_by_percentage";
     public static final String BATTERY_SAVER_SCHEDULE_SCREEN_INTENT_ACTION =
             "com.android.settings.BATTERY_SAVER_SCHEDULE_SETTINGS";
 
@@ -139,6 +147,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Receiver mReceiver = new Receiver();
     private final Intent mOpenBatterySettings = settings(Intent.ACTION_POWER_USAGE_SUMMARY);
+    private final Intent mOpenBatterySaverSettings =
+            settings(Settings.ACTION_BATTERY_SAVER_SETTINGS);
+    private final boolean mUseSevereDialog;
 
     private int mBatteryLevel;
     private int mBucket;
@@ -158,17 +169,29 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     @VisibleForTesting SystemUIDialog mUsbHighTempDialog;
     private BatteryStateSnapshot mCurrentBatterySnapshot;
     private ActivityStarter mActivityStarter;
+    private final BroadcastSender mBroadcastSender;
+    private final UiEventLogger mUiEventLogger;
+
+    private final Lazy<BatteryController> mBatteryControllerLazy;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
 
     /**
      */
     @Inject
-    public PowerNotificationWarnings(Context context, ActivityStarter activityStarter) {
+    public PowerNotificationWarnings(Context context, ActivityStarter activityStarter,
+            BroadcastSender broadcastSender, Lazy<BatteryController> batteryControllerLazy,
+            DialogLaunchAnimator dialogLaunchAnimator, UiEventLogger uiEventLogger) {
         mContext = context;
         mNoMan = mContext.getSystemService(NotificationManager.class);
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mKeyguard = mContext.getSystemService(KeyguardManager.class);
         mReceiver.init();
         mActivityStarter = activityStarter;
+        mBroadcastSender = broadcastSender;
+        mBatteryControllerLazy = batteryControllerLazy;
+        mDialogLaunchAnimator = dialogLaunchAnimator;
+        mUseSevereDialog = mContext.getResources().getBoolean(R.bool.config_severe_battery_dialog);
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
@@ -247,26 +270,33 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setContentText(mContext.getString(R.string.invalid_charger_text))
                         .setColor(mContext.getColor(
                                 com.android.internal.R.color.system_notification_accent_color));
-        SystemUI.overrideNotificationAppName(mContext, nb, false);
+        SystemUIApplication.overrideNotificationAppName(mContext, nb, false);
         final Notification n = nb.build();
         mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, UserHandle.ALL);
         mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, n, UserHandle.ALL);
     }
 
     protected void showWarningNotification() {
+        if (showSevereLowBatteryDialog()) {
+            mBroadcastSender.sendBroadcast(new Intent(ACTION_ENABLE_SEVERE_BATTERY_DIALOG)
+                    .setPackage(mContext.getPackageName())
+                    .putExtra(EXTRA_SCHEDULED_BY_PERCENTAGE, isScheduledByPercentage())
+                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                            | Intent.FLAG_RECEIVER_FOREGROUND));
+            // Reset the state once dialog been enabled
+            dismissLowBatteryNotification();
+            mPlaySound = false;
+            return;
+        }
+        if (isScheduledByPercentage()) {
+            return;
+        }
+
         final String percentage = NumberFormat.getPercentInstance()
                 .format((double) mCurrentBatterySnapshot.getBatteryLevel() / 100.0);
-
-        // get shared standard notification copy
-        String title = mContext.getString(R.string.battery_low_title);
-        String contentText;
-
-        // get correct content text if notification is hybrid or not
-        if (mCurrentBatterySnapshot.isHybrid()) {
-            contentText = getHybridContentString(percentage);
-        } else {
-            contentText = mContext.getString(R.string.battery_low_percent_format, percentage);
-        }
+        final String title = mContext.getString(R.string.battery_low_title);
+        final String contentText = mContext.getString(
+                R.string.battery_low_description, percentage);
 
         final Notification.Builder nb =
                 new Notification.Builder(mContext, NotificationChannels.BATTERY)
@@ -281,27 +311,49 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setStyle(new Notification.BigTextStyle().bigText(contentText))
                         .setVisibility(Notification.VISIBILITY_PUBLIC);
         if (hasBatterySettings()) {
-            nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SETTINGS));
+            nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SAVER_SETTINGS));
         }
         // Make the notification red if the percentage goes below a certain amount or the time
         // remaining estimate is disabled
-        if (!mCurrentBatterySnapshot.isHybrid() || mBucket < 0
+        if (!mCurrentBatterySnapshot.isHybrid() || mBucket < -1
                 || mCurrentBatterySnapshot.getTimeRemainingMillis()
                         < mCurrentBatterySnapshot.getSevereThresholdMillis()) {
             nb.setColor(Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorError));
         }
 
         if (!mPowerMan.isPowerSaveMode()) {
+            nb.addAction(0, mContext.getString(R.string.battery_saver_dismiss_action),
+                    pendingBroadcast(ACTION_DISMISSED_WARNING));
             nb.addAction(0,
                     mContext.getString(R.string.battery_saver_start_action),
                     pendingBroadcast(ACTION_START_SAVER));
         }
         nb.setOnlyAlertOnce(!mPlaySound);
         mPlaySound = false;
-        SystemUI.overrideNotificationAppName(mContext, nb, false);
+        SystemUIApplication.overrideNotificationAppName(mContext, nb, false);
         final Notification n = nb.build();
         mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, UserHandle.ALL);
         mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, n, UserHandle.ALL);
+    }
+
+    private boolean showSevereLowBatteryDialog() {
+        return mBucket < -1 && mUseSevereDialog;
+    }
+
+    /**
+     * Checking battery saver schedule mode is set as "Based on percentage" or not.
+     *
+     * return {@code true} if scheduled by percentage.
+     */
+    private boolean isScheduledByPercentage() {
+        final ContentResolver resolver = mContext.getContentResolver();
+        final int mode = Settings.Global.getInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
+                PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
+
+        // Return false if battery saver mode trigger percentage is less than 0, which means it is
+        // set as "Based on routine" mode, otherwise it will be "Based on percentage" mode.
+        return mode == PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE
+                && Settings.Global.getInt(resolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0) > 0;
     }
 
     private void showAutoSaverSuggestionNotification() {
@@ -320,7 +372,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 mContext.getString(R.string.no_auto_saver_action),
                 pendingBroadcast(ACTION_AUTO_SAVER_NO_THANKS));
 
-        SystemUI.overrideNotificationAppName(mContext, nb, false);
+        SystemUIApplication.overrideNotificationAppName(mContext, nb, false);
 
         final Notification n = nb.build();
         mNoMan.notifyAsUser(
@@ -397,7 +449,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_TEMP_WARNING))
                         .setColor(Utils.getColorAttrDefaultColor(mContext,
                                 android.R.attr.colorError));
-        SystemUI.overrideNotificationAppName(mContext, nb, false);
+        SystemUIApplication.overrideNotificationAppName(mContext, nb, false);
         final Notification n = nb.build();
         mNoMan.notifyAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_HIGH_TEMP, n, UserHandle.ALL);
     }
@@ -421,7 +473,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                                     new Intent(Intent.ACTION_VIEW)
                                             .setData(Uri.parse(url))
                                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            Dependency.get(ActivityStarter.class).startActivity(helpIntent,
+                            mActivityStarter.startActivity(helpIntent,
                                     true /* dismissShade */, resultCode -> {
                                         mHighTempDialog = null;
                                     });
@@ -456,7 +508,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                                     new Intent(Intent.ACTION_VIEW)
                                             .setData(Uri.parse(url))
                                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            Dependency.get(ActivityStarter.class).startActivity(helpIntent,
+                            mActivityStarter.startActivity(helpIntent,
                                     true /* dismissShade */, resultCode -> {
                                         mThermalShutdownDialog = null;
                                     });
@@ -484,7 +536,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                                 pendingBroadcast(ACTION_DISMISSED_THERMAL_SHUTDOWN_WARNING))
                         .setColor(Utils.getColorAttrDefaultColor(mContext,
                                 android.R.attr.colorError));
-        SystemUI.overrideNotificationAppName(mContext, nb, false);
+        SystemUIApplication.overrideNotificationAppName(mContext, nb, false);
         final Notification n = nb.build();
         mNoMan.notifyAsUser(
                 TAG_TEMPERATURE, SystemMessage.NOTE_THERMAL_SHUTDOWN, n, UserHandle.ALL);
@@ -516,7 +568,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                     helpIntent.setClassName("com.android.settings",
                             "com.android.settings.HelpTrampoline");
                     helpIntent.putExtra(Intent.EXTRA_TEXT, contextString);
-                    Dependency.get(ActivityStarter.class).startActivity(helpIntent,
+                    mActivityStarter.startActivity(helpIntent,
                             true /* dismissShade */, resultCode -> {
                                 mUsbHighTempDialog = null;
                             });
@@ -563,6 +615,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         Slog.i(TAG,
                 "show low battery warning: level=" + mBatteryLevel
                         + " [" + mBucket + "] playSound=" + playSound);
+        logEvent(BatteryWarningEvents.LowBatteryWarningEvent.LOW_BATTERY_NOTIFICATION);
         mPlaySound = playSound;
         mWarning = true;
         updateNotification();
@@ -640,13 +693,32 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         } else {
             d.setTitle(R.string.battery_saver_confirmation_title);
             d.setPositiveButton(R.string.battery_saver_confirmation_ok,
-                    (dialog, which) -> setSaverMode(true, false));
-            d.setNegativeButton(android.R.string.cancel, null);
+                    (dialog, which) -> {
+                        setSaverMode(true, false);
+                        logEvent(BatteryWarningEvents.LowBatteryWarningEvent.SAVER_CONFIRM_OK);
+                    });
+            d.setNegativeButton(android.R.string.cancel, (dialog, which) ->
+                    logEvent(BatteryWarningEvents.LowBatteryWarningEvent.SAVER_CONFIRM_CANCEL));
         }
         d.setShowForAllUsers(true);
-        d.setOnDismissListener((dialog) -> mSaverConfirmation = null);
-        d.show();
+        d.setOnDismissListener((dialog) -> {
+            mSaverConfirmation = null;
+            logEvent(BatteryWarningEvents.LowBatteryWarningEvent.SAVER_CONFIRM_DISMISS);
+        });
+        WeakReference<View> ref = mBatteryControllerLazy.get().getLastPowerSaverStartView();
+        if (ref != null && ref.get() != null && ref.get().isAggregatedVisible()) {
+            mDialogLaunchAnimator.showFromView(d, ref.get());
+        } else {
+            d.show();
+        }
+        logEvent(BatteryWarningEvents.LowBatteryWarningEvent.SAVER_CONFIRM_DIALOG);
         mSaverConfirmation = d;
+        mBatteryControllerLazy.get().clearLastPowerSaverStartView();
+    }
+
+    @VisibleForTesting
+    Dialog getSaverConfirmationDialog() {
+        return mSaverConfirmation;
     }
 
     private boolean isEnglishLocale() {
@@ -663,8 +735,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
         // If there's no link, use the string with no "learn more".
         if (TextUtils.isEmpty(learnMoreUrl)) {
-            return mContext.getText(
-                    com.android.internal.R.string.battery_saver_description);
+            return mContext.getText(R.string.battery_low_intro);
         }
 
         // If we have a link, use the string with the "learn more" link.
@@ -702,9 +773,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         mSaverConfirmation.dismiss();
                     }
                     // Also close the notification shade, if it's open.
-                    mContext.sendBroadcast(
+                    mBroadcastSender.sendBroadcast(
                             new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-                            .setFlags(Intent.FLAG_RECEIVER_FOREGROUND));
+                                    .setFlags(Intent.FLAG_RECEIVER_FOREGROUND));
 
                     final Uri uri = Uri.parse(getURL());
                     Context context = widget.getContext();
@@ -732,11 +803,17 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mActivityStarter.startActivity(intent, true /* dismissShade */);
     }
 
+    private void logEvent(BatteryWarningEvents.LowBatteryWarningEvent event) {
+        if (mUiEventLogger != null) {
+            mUiEventLogger.log(event);
+        }
+    }
+
     private final class Receiver extends BroadcastReceiver {
 
         public void init() {
             IntentFilter filter = new IntentFilter();
-            filter.addAction(ACTION_SHOW_BATTERY_SETTINGS);
+            filter.addAction(ACTION_SHOW_BATTERY_SAVER_SETTINGS);
             filter.addAction(ACTION_START_SAVER);
             filter.addAction(ACTION_DISMISSED_WARNING);
             filter.addAction(ACTION_CLICKED_TEMP_WARNING);
@@ -749,23 +826,29 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             filter.addAction(ACTION_AUTO_SAVER_NO_THANKS);
             filter.addAction(ACTION_DISMISS_AUTO_SAVER_SUGGESTION);
             mContext.registerReceiverAsUser(this, UserHandle.ALL, filter,
-                    android.Manifest.permission.DEVICE_POWER, mHandler);
+                    android.Manifest.permission.DEVICE_POWER, mHandler, Context.RECEIVER_EXPORTED);
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             Slog.i(TAG, "Received " + action);
-            if (action.equals(ACTION_SHOW_BATTERY_SETTINGS)) {
+            if (action.equals(ACTION_SHOW_BATTERY_SAVER_SETTINGS)) {
+                logEvent(BatteryWarningEvents
+                        .LowBatteryWarningEvent.LOW_BATTERY_NOTIFICATION_SETTINGS);
                 dismissLowBatteryNotification();
-                mContext.startActivityAsUser(mOpenBatterySettings, UserHandle.CURRENT);
+                mContext.startActivityAsUser(mOpenBatterySaverSettings, UserHandle.CURRENT);
             } else if (action.equals(ACTION_START_SAVER)) {
+                logEvent(BatteryWarningEvents
+                        .LowBatteryWarningEvent.LOW_BATTERY_NOTIFICATION_TURN_ON);
                 setSaverMode(true, true);
                 dismissLowBatteryNotification();
             } else if (action.equals(ACTION_SHOW_START_SAVER_CONFIRMATION)) {
                 dismissLowBatteryNotification();
                 showStartSaverConfirmation(intent.getExtras());
             } else if (action.equals(ACTION_DISMISSED_WARNING)) {
+                logEvent(BatteryWarningEvents
+                        .LowBatteryWarningEvent.LOW_BATTERY_NOTIFICATION_CANCEL);
                 dismissLowBatteryWarning();
             } else if (ACTION_CLICKED_TEMP_WARNING.equals(action)) {
                 dismissHighTemperatureWarningInternal();

@@ -29,7 +29,6 @@ import android.view.View;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 
 /**
  * A view that can be used for both the dimmed and normal background of an notification.
@@ -39,15 +38,17 @@ public class NotificationBackgroundView extends View {
     private final boolean mDontModifyCorners;
     private Drawable mBackground;
     private int mClipTopAmount;
-    private int mActualHeight;
     private int mClipBottomAmount;
     private int mTintColor;
     private final float[] mCornerRadii = new float[8];
     private boolean mBottomIsRounded;
     private int mBackgroundTop;
     private boolean mBottomAmountClips = true;
+    private int mActualHeight = -1;
+    private int mActualWidth = -1;
     private boolean mExpandAnimationRunning;
-    private float mActualWidth;
+    private int mExpandAnimationWidth = -1;
+    private int mExpandAnimationHeight = -1;
     private int mDrawableAlpha = 255;
     private boolean mIsPressedAllowed;
 
@@ -59,11 +60,12 @@ public class NotificationBackgroundView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mClipTopAmount + mClipBottomAmount < mActualHeight - mBackgroundTop
+        if (mClipTopAmount + mClipBottomAmount < getActualHeight() - mBackgroundTop
                 || mExpandAnimationRunning) {
             canvas.save();
             if (!mExpandAnimationRunning) {
-                canvas.clipRect(0, mClipTopAmount, getWidth(), mActualHeight - mClipBottomAmount);
+                canvas.clipRect(0, mClipTopAmount, getWidth(),
+                        getActualHeight() - mClipBottomAmount);
             }
             draw(canvas, mBackground);
             canvas.restore();
@@ -73,17 +75,23 @@ public class NotificationBackgroundView extends View {
     private void draw(Canvas canvas, Drawable drawable) {
         if (drawable != null) {
             int top = mBackgroundTop;
-            int bottom = mActualHeight;
+            int bottom = getActualHeight();
             if (mBottomIsRounded
                     && mBottomAmountClips
                     && !mExpandAnimationRunning) {
                 bottom -= mClipBottomAmount;
             }
-            int left = 0;
-            int right = getWidth();
+            final boolean isRtl = isLayoutRtl();
+            final int width = getWidth();
+            final int actualWidth = getActualWidth();
+
+            int left = isRtl ? width - actualWidth : 0;
+            int right = isRtl ? width : actualWidth;
+
             if (mExpandAnimationRunning) {
-                left = (int) ((getWidth() - mActualWidth) / 2.0f);
-                right = (int) (left + mActualWidth);
+                // Horizontally center this background view inside of the container
+                left = (int) ((width - actualWidth) / 2.0f);
+                right = (int) (left + actualWidth);
             }
             drawable.setBounds(left, top, right, bottom);
             drawable.draw(canvas);
@@ -152,8 +160,26 @@ public class NotificationBackgroundView extends View {
         invalidate();
     }
 
-    public int getActualHeight() {
-        return mActualHeight;
+    private int getActualHeight() {
+        if (mExpandAnimationRunning && mExpandAnimationHeight > -1) {
+            return mExpandAnimationHeight;
+        } else if (mActualHeight > -1) {
+            return mActualHeight;
+        }
+        return getHeight();
+    }
+
+    public void setActualWidth(int actualWidth) {
+        mActualWidth = actualWidth;
+    }
+
+    private int getActualWidth() {
+        if (mExpandAnimationRunning && mExpandAnimationWidth > -1) {
+            return mExpandAnimationWidth;
+        } else if (mActualWidth > -1) {
+            return mActualWidth;
+        }
+        return getWidth();
     }
 
     public void setClipTopAmount(int clipTopAmount) {
@@ -241,9 +267,9 @@ public class NotificationBackgroundView extends View {
     }
 
     /** Set the current expand animation size. */
-    public void setExpandAnimationSize(int actualWidth, int actualHeight) {
-        mActualHeight = actualHeight;
-        mActualWidth = actualWidth;
+    public void setExpandAnimationSize(int width, int height) {
+        mExpandAnimationHeight = height;
+        mExpandAnimationWidth = width;
         invalidate();
     }
 

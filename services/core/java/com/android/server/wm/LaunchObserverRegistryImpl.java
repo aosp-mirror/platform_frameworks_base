@@ -16,12 +16,11 @@
 
 package com.android.server.wm;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.util.ArrayList;
@@ -39,8 +38,8 @@ import java.util.ArrayList;
  *
  * @see ActivityTaskManagerInternal#getLaunchObserverRegistry()
  */
-class LaunchObserverRegistryImpl implements
-        ActivityMetricsLaunchObserverRegistry, ActivityMetricsLaunchObserver {
+class LaunchObserverRegistryImpl extends ActivityMetricsLaunchObserver implements
+        ActivityMetricsLaunchObserverRegistry {
     private final ArrayList<ActivityMetricsLaunchObserver> mList = new ArrayList<>();
 
     /**
@@ -79,45 +78,36 @@ class LaunchObserverRegistryImpl implements
     }
 
     @Override
-    public void onIntentFailed() {
+    public void onIntentFailed(long id) {
         mHandler.sendMessage(PooledLambda.obtainMessage(
-                LaunchObserverRegistryImpl::handleOnIntentFailed, this));
+                LaunchObserverRegistryImpl::handleOnIntentFailed, this, id));
     }
 
     @Override
-    public void onActivityLaunched(
-            @ActivityRecordProto byte[] activity,
-            int temperature) {
+    public void onActivityLaunched(long id, ComponentName name, int temperature) {
         mHandler.sendMessage(PooledLambda.obtainMessage(
                 LaunchObserverRegistryImpl::handleOnActivityLaunched,
-                this, activity, temperature));
+                this, id, name, temperature));
     }
 
     @Override
-    public void onActivityLaunchCancelled(
-        @ActivityRecordProto byte[] activity) {
+    public void onActivityLaunchCancelled(long id) {
         mHandler.sendMessage(PooledLambda.obtainMessage(
-                LaunchObserverRegistryImpl::handleOnActivityLaunchCancelled, this, activity));
+                LaunchObserverRegistryImpl::handleOnActivityLaunchCancelled, this, id));
     }
 
     @Override
-    public void onActivityLaunchFinished(
-        @ActivityRecordProto byte[] activity,
-        long timestampNs) {
+    public void onActivityLaunchFinished(long id, ComponentName name, long timestampNs) {
         mHandler.sendMessage(PooledLambda.obtainMessage(
-            LaunchObserverRegistryImpl::handleOnActivityLaunchFinished,
-            this,
-            activity,
-            timestampNs));
+                LaunchObserverRegistryImpl::handleOnActivityLaunchFinished,
+                this, id, name, timestampNs));
     }
 
     @Override
-    public void onReportFullyDrawn(@ActivityRecordProto byte[] activity, long timestampNs) {
+    public void onReportFullyDrawn(long id, long timestampNs) {
         mHandler.sendMessage(PooledLambda.obtainMessage(
-            LaunchObserverRegistryImpl::handleOnReportFullyDrawn,
-            this,
-            activity,
-            timestampNs));
+                LaunchObserverRegistryImpl::handleOnReportFullyDrawn,
+                this, id, timestampNs));
     }
 
     // Use PooledLambda.obtainMessage to invoke below methods. Every method reference must be
@@ -135,53 +125,43 @@ class LaunchObserverRegistryImpl implements
     private void handleOnIntentStarted(Intent intent, long timestampNs) {
         // Traverse start-to-end to meet the registerLaunchObserver multi-cast order guarantee.
         for (int i = 0; i < mList.size(); i++) {
-             ActivityMetricsLaunchObserver o = mList.get(i);
-             o.onIntentStarted(intent, timestampNs);
+            mList.get(i).onIntentStarted(intent, timestampNs);
         }
     }
 
-    private void handleOnIntentFailed() {
+    private void handleOnIntentFailed(long id) {
         // Traverse start-to-end to meet the registerLaunchObserver multi-cast order guarantee.
         for (int i = 0; i < mList.size(); i++) {
-             ActivityMetricsLaunchObserver o = mList.get(i);
-             o.onIntentFailed();
+            mList.get(i).onIntentFailed(id);
         }
     }
 
-    private void handleOnActivityLaunched(
-            @ActivityRecordProto byte[] activity,
+    private void handleOnActivityLaunched(long id, ComponentName name,
             @Temperature int temperature) {
         // Traverse start-to-end to meet the registerLaunchObserver multi-cast order guarantee.
         for (int i = 0; i < mList.size(); i++) {
-             ActivityMetricsLaunchObserver o = mList.get(i);
-             o.onActivityLaunched(activity, temperature);
+            mList.get(i).onActivityLaunched(id, name, temperature);
         }
     }
 
-    private void handleOnActivityLaunchCancelled(
-            @ActivityRecordProto byte[] activity) {
+    private void handleOnActivityLaunchCancelled(long id) {
         // Traverse start-to-end to meet the registerLaunchObserver multi-cast order guarantee.
         for (int i = 0; i < mList.size(); i++) {
-             ActivityMetricsLaunchObserver o = mList.get(i);
-             o.onActivityLaunchCancelled(activity);
+            mList.get(i).onActivityLaunchCancelled(id);
         }
     }
 
-    private void handleOnActivityLaunchFinished(
-            @ActivityRecordProto byte[] activity, long timestampNs) {
+    private void handleOnActivityLaunchFinished(long id, ComponentName name, long timestampNs) {
         // Traverse start-to-end to meet the registerLaunchObserver multi-cast order guarantee.
         for (int i = 0; i < mList.size(); i++) {
-            ActivityMetricsLaunchObserver o = mList.get(i);
-            o.onActivityLaunchFinished(activity, timestampNs);
+            mList.get(i).onActivityLaunchFinished(id, name, timestampNs);
         }
     }
 
-    private void handleOnReportFullyDrawn(
-            @ActivityRecordProto byte[] activity, long timestampNs) {
+    private void handleOnReportFullyDrawn(long id, long timestampNs) {
         // Traverse start-to-end to meet the registerLaunchObserver multi-cast order guarantee.
         for (int i = 0; i < mList.size(); i++) {
-            ActivityMetricsLaunchObserver o = mList.get(i);
-            o.onReportFullyDrawn(activity, timestampNs);
+            mList.get(i).onReportFullyDrawn(id, timestampNs);
         }
     }
 }

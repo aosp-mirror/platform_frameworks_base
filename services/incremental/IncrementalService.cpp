@@ -111,6 +111,11 @@ static bool getAlwaysEnableReadTimeoutsForSystemDataLoaders() {
                             true);
 }
 
+static bool getEnableReadTimeoutsAfterInstall() {
+    return android::base::GetBoolProperty("debug.incremental.enable_read_timeouts_after_install",
+                                          true);
+}
+
 static bool getEnforceReadLogsMaxIntervalForSystemDataLoaders() {
     return android::base::GetBoolProperty("debug.incremental.enforce_readlogs_max_interval_for_"
                                           "system_dataloaders",
@@ -853,7 +858,7 @@ void IncrementalService::onInstallationComplete(StorageId storage) {
 
     // Always enable long read timeouts after installation is complete.
     std::unique_lock l(ifs->lock);
-    ifs->setReadTimeoutsRequested(true);
+    ifs->setReadTimeoutsRequested(getEnableReadTimeoutsAfterInstall());
     applyStorageParamsLocked(*ifs);
 }
 

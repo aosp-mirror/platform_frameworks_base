@@ -24,6 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.telephony.UiccPortInfo;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.GsmAlphabet;
@@ -931,6 +932,13 @@ public class IccUtils {
             return s;
         }
         return s == null ? null : s.replaceAll("(?i)f*$", "");
+    }
+
+    /**
+     * Strip all the trailing 'F' characters of a string if exists and compare.
+     */
+    public static boolean compareIgnoreTrailingFs(String a, String b) {
+        return TextUtils.equals(a, b) || TextUtils.equals(stripTrailingFs(a), stripTrailingFs(b));
     }
 
     /**

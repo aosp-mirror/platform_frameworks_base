@@ -30,15 +30,15 @@ using ::testing::Pointee;
 namespace aapt {
 
 TEST(ResourceUtilsTest, ParseBool) {
-  EXPECT_THAT(ResourceUtils::ParseBool("true"), Eq(Maybe<bool>(true)));
-  EXPECT_THAT(ResourceUtils::ParseBool("TRUE"), Eq(Maybe<bool>(true)));
-  EXPECT_THAT(ResourceUtils::ParseBool("True"), Eq(Maybe<bool>(true)));
+  EXPECT_THAT(ResourceUtils::ParseBool("true"), Eq(std::optional<bool>(true)));
+  EXPECT_THAT(ResourceUtils::ParseBool("TRUE"), Eq(std::optional<bool>(true)));
+  EXPECT_THAT(ResourceUtils::ParseBool("True"), Eq(std::optional<bool>(true)));
 
-  EXPECT_THAT(ResourceUtils::ParseBool("false"), Eq(Maybe<bool>(false)));
-  EXPECT_THAT(ResourceUtils::ParseBool("FALSE"), Eq(Maybe<bool>(false)));
-  EXPECT_THAT(ResourceUtils::ParseBool("False"), Eq(Maybe<bool>(false)));
+  EXPECT_THAT(ResourceUtils::ParseBool("false"), Eq(std::optional<bool>(false)));
+  EXPECT_THAT(ResourceUtils::ParseBool("FALSE"), Eq(std::optional<bool>(false)));
+  EXPECT_THAT(ResourceUtils::ParseBool("False"), Eq(std::optional<bool>(false)));
 
-  EXPECT_THAT(ResourceUtils::ParseBool(" False\n "), Eq(Maybe<bool>(false)));
+  EXPECT_THAT(ResourceUtils::ParseBool(" False\n "), Eq(std::optional<bool>(false)));
 }
 
 TEST(ResourceUtilsTest, ParseResourceName) {
@@ -155,41 +155,42 @@ TEST(ResourceUtilsTest, ParseStyleParentReference) {
   const ResourceName kStyleFooName({}, ResourceType::kStyle, "foo");
 
   std::string err_str;
-  Maybe<Reference> ref = ResourceUtils::ParseStyleParentReference("@android:style/foo", &err_str);
+  std::optional<Reference> ref =
+      ResourceUtils::ParseStyleParentReference("@android:style/foo", &err_str);
   ASSERT_TRUE(ref);
-  EXPECT_THAT(ref.value().name, Eq(make_value(kAndroidStyleFooName)));
+  EXPECT_THAT(ref.value().name, Eq(kAndroidStyleFooName));
 
   ref = ResourceUtils::ParseStyleParentReference("@style/foo", &err_str);
   ASSERT_TRUE(ref);
-  EXPECT_THAT(ref.value().name, Eq(make_value(kStyleFooName)));
+  EXPECT_THAT(ref.value().name, Eq(kStyleFooName));
 
   ref = ResourceUtils::ParseStyleParentReference("?android:style/foo", &err_str);
   ASSERT_TRUE(ref);
-  EXPECT_THAT(ref.value().name, Eq(make_value(kAndroidStyleFooName)));
+  EXPECT_THAT(ref.value().name, Eq(kAndroidStyleFooName));
 
   ref = ResourceUtils::ParseStyleParentReference("?style/foo", &err_str);
   ASSERT_TRUE(ref);
-  EXPECT_THAT(ref.value().name, Eq(make_value(kStyleFooName)));
+  EXPECT_THAT(ref.value().name, Eq(kStyleFooName));
 
   ref = ResourceUtils::ParseStyleParentReference("android:style/foo", &err_str);
   ASSERT_TRUE(ref);
-  EXPECT_THAT(ref.value().name, Eq(make_value(kAndroidStyleFooName)));
+  EXPECT_THAT(ref.value().name, Eq(kAndroidStyleFooName));
 
   ref = ResourceUtils::ParseStyleParentReference("android:foo", &err_str);
   ASSERT_TRUE(ref);
-  EXPECT_THAT(ref.value().name, Eq(make_value(kAndroidStyleFooName)));
+  EXPECT_THAT(ref.value().name, Eq(kAndroidStyleFooName));
 
   ref = ResourceUtils::ParseStyleParentReference("@android:foo", &err_str);
   ASSERT_TRUE(ref);
-  EXPECT_THAT(ref.value().name, Eq(make_value(kAndroidStyleFooName)));
+  EXPECT_THAT(ref.value().name, Eq(kAndroidStyleFooName));
 
   ref = ResourceUtils::ParseStyleParentReference("foo", &err_str);
   ASSERT_TRUE(ref);
-  EXPECT_THAT(ref.value().name, Eq(make_value(kStyleFooName)));
+  EXPECT_THAT(ref.value().name, Eq(kStyleFooName));
 
   ref = ResourceUtils::ParseStyleParentReference("*android:style/foo", &err_str);
   ASSERT_TRUE(ref);
-  EXPECT_THAT(ref.value().name, Eq(make_value(kAndroidStyleFooName)));
+  EXPECT_THAT(ref.value().name, Eq(kAndroidStyleFooName));
   EXPECT_TRUE(ref.value().private_reference);
 }
 
@@ -228,15 +229,11 @@ TEST(ResourceUtilsTest, ItemsWithWhitespaceAreParsedCorrectly) {
 }
 
 TEST(ResourceUtilsTest, ParseSdkVersionWithCodename) {
-  EXPECT_THAT(ResourceUtils::ParseSdkVersion("Q"), Eq(Maybe<int>(10000)));
-  EXPECT_THAT(
-      ResourceUtils::ParseSdkVersion("Q.fingerprint"),
-      Eq(Maybe<int>(10000)));
+  EXPECT_THAT(ResourceUtils::ParseSdkVersion("Q"), Eq(std::optional<int>(10000)));
+  EXPECT_THAT(ResourceUtils::ParseSdkVersion("Q.fingerprint"), Eq(std::optional<int>(10000)));
 
-  EXPECT_THAT(ResourceUtils::ParseSdkVersion("R"), Eq(Maybe<int>(10000)));
-  EXPECT_THAT(
-      ResourceUtils::ParseSdkVersion("R.fingerprint"),
-      Eq(Maybe<int>(10000)));
+  EXPECT_THAT(ResourceUtils::ParseSdkVersion("R"), Eq(std::optional<int>(10000)));
+  EXPECT_THAT(ResourceUtils::ParseSdkVersion("R.fingerprint"), Eq(std::optional<int>(10000)));
 }
 
 TEST(ResourceUtilsTest, StringBuilderWhitespaceRemoval) {

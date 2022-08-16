@@ -16,7 +16,10 @@
 
 package android.app.usage;
 
+import android.Manifest;
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -25,6 +28,7 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserHandleAware;
 import android.app.Activity;
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -319,6 +323,17 @@ public final class UsageStatsManager {
      * @hide
      */
     public static final int REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY = 1 << 2;
+    /**
+     * The app was moved to restricted bucket due to user interaction, i.e., toggling FAS.
+     *
+     * <p>
+     * Note: This should be coming from the more end-user facing UX, not from developer
+     * options nor adb command.
+     </p>
+     *
+     * @hide
+     */
+    public static final int REASON_SUB_FORCED_USER_FLAG_INTERACTION = 1 << 1;
 
 
     /** @hide */
@@ -335,14 +350,15 @@ public final class UsageStatsManager {
     public @interface StandbyBuckets {}
 
     /** @hide */
-    @IntDef(flag = true, prefix = {"REASON_SUB_FORCED_SYSTEM_FLAG_FLAG_"}, value = {
+    @IntDef(flag = true, prefix = {"REASON_SUB_FORCED_"}, value = {
             REASON_SUB_FORCED_SYSTEM_FLAG_UNDEFINED,
             REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE,
             REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE,
             REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY,
+            REASON_SUB_FORCED_USER_FLAG_INTERACTION,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface SystemForcedReasons {
+    public @interface ForcedReasons {
     }
 
     /**
@@ -772,6 +788,91 @@ public final class UsageStatsManager {
     }
 
     /**
+     * Return the lowest bucket this app can ever enter.
+     *
+     * @param packageName the package for which to fetch the minimum allowed standby bucket.
+     * {@hide}
+     */
+    @StandbyBuckets
+    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    public int getAppMinStandbyBucket(String packageName) {
+        try {
+            return mService.getAppMinStandbyBucket(packageName, mContext.getOpPackageName(),
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Changes an app's estimated launch time. An app is considered "launched" when a user opens
+     * one of its {@link android.app.Activity Activities}. The provided time is persisted across
+     * reboots and is used unless 1) the time is more than a week in the future and the platform
+     * thinks the app will be launched sooner, 2) the estimated time has passed. Passing in
+     * {@link Long#MAX_VALUE} effectively clears the previously set launch time for the app.
+     *
+     * @param packageName               The package name of the app to set the bucket for.
+     * @param estimatedLaunchTimeMillis The next time the app is expected to be launched. Units are
+     *                                  in milliseconds since epoch (the same as
+     *                                  {@link System#currentTimeMillis()}).
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE)
+    public void setEstimatedLaunchTimeMillis(@NonNull String packageName,
+            @CurrentTimeMillisLong long estimatedLaunchTimeMillis) {
+        if (packageName == null) {
+            throw new NullPointerException("package name cannot be null");
+        }
+        if (estimatedLaunchTimeMillis <= 0) {
+            throw new IllegalArgumentException("estimated launch time must be positive");
+        }
+        try {
+            mService.setEstimatedLaunchTime(
+                    packageName, estimatedLaunchTimeMillis, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Changes the estimated launch times for multiple apps at once. The map is keyed by the
+     * package name and the value is the estimated launch time.
+     *
+     * @param estimatedLaunchTimesMillis A map of package name to estimated launch time.
+     * @see #setEstimatedLaunchTimeMillis(String, long)
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE)
+    public void setEstimatedLaunchTimesMillis(
+            @NonNull Map<String, Long> estimatedLaunchTimesMillis) {
+        if (estimatedLaunchTimesMillis == null) {
+            throw new NullPointerException("estimatedLaunchTimesMillis cannot be null");
+        }
+        final List<AppLaunchEstimateInfo> estimateList =
+                new ArrayList<>(estimatedLaunchTimesMillis.size());
+        for (Map.Entry<String, Long> estimateEntry : estimatedLaunchTimesMillis.entrySet()) {
+            final String pkgName = estimateEntry.getKey();
+            if (pkgName == null) {
+                throw new NullPointerException("package name cannot be null");
+            }
+            final Long estimatedLaunchTime = estimateEntry.getValue();
+            if (estimatedLaunchTime == null || estimatedLaunchTime <= 0) {
+                throw new IllegalArgumentException("estimated launch time must be positive");
+            }
+            estimateList.add(new AppLaunchEstimateInfo(pkgName, estimatedLaunchTime));
+        }
+        final ParceledListSlice<AppLaunchEstimateInfo> slice =
+                new ParceledListSlice<>(estimateList);
+        try {
+            mService.setEstimatedLaunchTimes(slice, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide
      * Register an app usage limit observer that receives a callback on the provided intent when
      * the sum of usages of apps and tokens in the {@code observed} array exceeds the
@@ -1119,11 +1220,6 @@ public final class UsageStatsManager {
             case REASON_MAIN_FORCED_BY_USER:
                 sb.append("f");
                 if (subReason > 0) {
-                    // Although not expected and shouldn't happen, this could potentially have a
-                    // sub-reason if the system tries to give a reason when applying the
-                    // FORCED_BY_USER reason. The sub-reason is undefined (though most likely a
-                    // REASON_SUB_FORCED_SYSTEM_FLAG_ sub-reason), but it's better to note it in the
-                    // log than to exclude it altogether.
                     sb.append("-").append(Integer.toBinaryString(subReason));
                 }
                 break;
@@ -1208,6 +1304,28 @@ public final class UsageStatsManager {
         }
     }
 
+    /** @hide */
+    public static String standbyBucketToString(int standbyBucket) {
+        switch (standbyBucket) {
+            case STANDBY_BUCKET_EXEMPTED:
+                return "EXEMPTED";
+            case STANDBY_BUCKET_ACTIVE:
+                return "ACTIVE";
+            case STANDBY_BUCKET_WORKING_SET:
+                return "WORKING_SET";
+            case STANDBY_BUCKET_FREQUENT:
+                return "FREQUENT";
+            case STANDBY_BUCKET_RARE:
+                return "RARE";
+            case STANDBY_BUCKET_RESTRICTED:
+                return "RESTRICTED";
+            case STANDBY_BUCKET_NEVER:
+                return "NEVER";
+            default:
+                return String.valueOf(standbyBucket);
+        }
+    }
+
     /**
      * {@hide}
      * Temporarily allowlist the specified app for a short duration. This is to allow an app
@@ -1288,6 +1406,113 @@ public final class UsageStatsManager {
     public long getLastTimeAnyComponentUsed(@NonNull String packageName) {
         try {
             return mService.getLastTimeAnyComponentUsed(packageName, mContext.getOpPackageName());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the broadcast response stats since the last boot corresponding to
+     * {@code packageName} and {@code id}.
+     *
+     * <p> Broadcast response stats will include the aggregated data of what actions an app took
+     * upon receiving a broadcast. This data will consider the broadcasts that the caller sent to
+     * {@code packageName} and explicitly requested to record the response events using
+     * {@link BroadcastOptions#recordResponseEventWhileInBackground(long)}.
+     *
+     * <p> The returned list could one or more {@link BroadcastResponseStats} objects or be empty
+     * depending on the {@code packageName} and {@code id} and whether there is any data
+     * corresponding to these. If the {@code packageName} is not {@code null} and {@code id} is
+     * {@code > 0}, then the returned list would contain at most one {@link BroadcastResponseStats}
+     * object. Otherwise, the returned list could contain more than one
+     * {@link BroadcastResponseStats} object in no particular order.
+     *
+     * <p> Note: It is possible that same {@code id} was used for broadcasts sent to different
+     * packages. So, callers can query the data corresponding to
+     * all broadcasts with a particular {@code id} by passing {@code packageName} as {@code null}.
+     *
+     * @param packageName The name of the package that the caller wants to query for
+     *                    or {@code null} to indicate that data corresponding to all packages
+     *                    should be returned.
+     * @param id The ID corresponding to the broadcasts that the caller wants to query for, or
+     *           {@code 0} to indicate that data corresponding to all IDs should be returned.
+     *           This is the ID the caller specifies when requesting a broadcast response event
+     *           to be recorded using
+     *           {@link BroadcastOptions#recordResponseEventWhileInBackground(long)}.
+     *
+     * @return the list of broadcast response stats corresponding to {@code packageName}
+     *         and {@code id}.
+     *
+     * @see #clearBroadcastResponseStats(String, long)
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
+    @UserHandleAware
+    @NonNull
+    public List<BroadcastResponseStats> queryBroadcastResponseStats(
+            @Nullable String packageName, @IntRange(from = 0) long id) {
+        try {
+            return mService.queryBroadcastResponseStats(packageName, id,
+                    mContext.getOpPackageName(), mContext.getUserId()).getList();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears the broadcast response stats corresponding to {@code packageName} and {@code id}.
+     *
+     * <p> When a caller uses this API, stats related to the events occurring till that point will
+     * be cleared and subsequent calls to {@link #queryBroadcastResponseStats(String, long)} will
+     * return stats related to events occurring after this.
+     *
+     * @param packageName The name of the package that the caller wants to clear the data for or
+     *                    {@code null} to indicate that data corresponding to all packages should
+     *                    be cleared.
+     * @param id The ID corresponding to the broadcasts that the caller wants to clear the data
+     *           for, or {code 0} to indicate that data corresponding to all IDs should be deleted.
+     *           This is the ID the caller specifies when requesting a broadcast response event
+     *           to be recorded using
+     *           {@link BroadcastOptions#recordResponseEventWhileInBackground(long)}.
+     *
+     * @see #queryBroadcastResponseStats(String, long)
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
+    @UserHandleAware
+    public void clearBroadcastResponseStats(@Nullable String packageName,
+            @IntRange(from = 0) long id) {
+        try {
+            mService.clearBroadcastResponseStats(packageName, id,
+                    mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears the broadcast events that were sent by the caller uid.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
+    @UserHandleAware
+    public void clearBroadcastEvents() {
+        try {
+            mService.clearBroadcastEvents(mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+    @Nullable
+    public String getAppStandbyConstant(@NonNull String key) {
+        try {
+            return mService.getAppStandbyConstant(key);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

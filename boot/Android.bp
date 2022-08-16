@@ -48,12 +48,20 @@ platform_bootclasspath {
     // bootclasspath.
     fragments: [
         {
+            apex: "com.android.adservices",
+            module: "com.android.adservices-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.appsearch",
             module: "com.android.appsearch-bootclasspath-fragment",
         },
         {
             apex: "com.android.art",
             module: "art-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.btservices",
+            module: "com.android.btservices-bootclasspath-fragment",
         },
         {
             apex: "com.android.conscrypt",
@@ -76,6 +84,10 @@ platform_bootclasspath {
             module: "com.android.mediaprovider-bootclasspath-fragment",
         },
         {
+            apex: "com.android.ondevicepersonalization",
+            module: "com.android.ondevicepersonalization-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.os.statsd",
             module: "com.android.os.statsd-bootclasspath-fragment",
         },
@@ -96,8 +108,17 @@ platform_bootclasspath {
             module: "com.android.tethering-bootclasspath-fragment",
         },
         {
+            apex: "com.android.uwb",
+            module: "com.android.uwb-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.wifi",
             module: "com.android.wifi-bootclasspath-fragment",
+        },
+        // only used for auto
+        {
+            apex: "com.android.car.framework",
+            module: "com.android.car.framework-bootclasspath-fragment",
         },
     ],
 

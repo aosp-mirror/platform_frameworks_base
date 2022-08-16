@@ -162,6 +162,52 @@ internal class MobileState(
         builder.append("displayInfo=$telephonyDisplayInfo")
     }
 
+    override fun tableColumns(): List<String> {
+        val columns = listOf("dataSim",
+            "networkName",
+            "networkNameData",
+            "dataConnected",
+            "roaming",
+            "isDefault",
+            "isEmergency",
+            "airplaneMode",
+            "carrierNetworkChangeMode",
+            "userSetup",
+            "dataState",
+            "defaultDataOff",
+            "showQuickSettingsRatIcon",
+            "voiceServiceState",
+            "isInService",
+            "serviceState",
+            "signalStrength",
+            "displayInfo")
+
+        return super.tableColumns() + columns
+    }
+
+    override fun tableData(): List<String> {
+        val columns = listOf(dataSim,
+                networkName,
+                networkNameData,
+                dataConnected,
+                roaming,
+                isDefault,
+                isEmergency,
+                airplaneMode,
+                carrierNetworkChangeMode,
+                userSetup,
+                dataState,
+                defaultDataOff,
+                showQuickSettingsRatIcon(),
+                getVoiceServiceState(),
+                isInService(),
+                serviceState?.minLog() ?: "(null)",
+                signalStrength?.minLog() ?: "(null)",
+                telephonyDisplayInfo).map { it.toString() }
+
+        return super.tableData() + columns
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

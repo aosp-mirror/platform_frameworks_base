@@ -48,9 +48,9 @@ class EnterSplitScreenFromDetachedRecentTask(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
-            cleanSetup(this, configuration)
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            cleanSetup(this)
             setup {
                 eachRun {
                     splitScreenApp.launchViaIntent(wmHelper)

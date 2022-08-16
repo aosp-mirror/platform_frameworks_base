@@ -46,7 +46,7 @@ public final class InstantAppIntentFilter implements Parcelable {
 
     InstantAppIntentFilter(Parcel in) {
         mSplitName = in.readString();
-        in.readList(mFilters, null /*loader*/);
+        in.readList(mFilters, getClass().getClassLoader(), android.content.IntentFilter.class);
     }
 
     public String getSplitName() {

@@ -101,12 +101,15 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     public static final int FEATURE_IME_PLACEHOLDER = FEATURE_SYSTEM_FIRST + 7;
 
     /**
-     * Display area for one handed background layer, which preventing when user
-     * turning the Dark theme on, they can not clearly identify the screen has entered
-     * one handed mode.
-     * @hide
+     * Display area hosting IME window tokens (@see ImeContainer). By default, IMEs are parented
+     * to FEATURE_IME_PLACEHOLDER but can be reparented under other RootDisplayArea.
+     *
+     * This feature can register organizers in order to disable the reparenting logic and manage
+     * the position and settings of the container manually. This is useful for foldable devices
+     * which require custom UX rules for the IME position (e.g. IME on one screen and the focused
+     * app on another screen).
      */
-    public static final int FEATURE_ONE_HANDED_BACKGROUND_PANEL = FEATURE_SYSTEM_FIRST + 8;
+    public static final int FEATURE_IME = FEATURE_SYSTEM_FIRST + 8;
 
     /**
      * The last boundary of display area for system features

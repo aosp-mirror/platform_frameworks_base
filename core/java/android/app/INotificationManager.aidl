@@ -57,12 +57,14 @@ interface INotificationManager
     @UnsupportedAppUsage
     void cancelNotificationWithTag(String pkg, String opPkg, String tag, int id, int userId);
 
+    boolean isInCall(String pkg, int uid);
     void setShowBadge(String pkg, int uid, boolean showBadge);
     boolean canShowBadge(String pkg, int uid);
     boolean hasSentValidMsg(String pkg, int uid);
     boolean isInInvalidMsgState(String pkg, int uid);
     boolean hasUserDemotedInvalidMsgApp(String pkg, int uid);
     void setInvalidMsgAppDemoted(String pkg, int uid, boolean isDemoted);
+    boolean hasSentValidBubble(String pkg, int uid);
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
     /**
      * Updates the notification's enabled state. Additionally locks importance for all of the
@@ -75,6 +77,7 @@ interface INotificationManager
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
     boolean areNotificationsEnabled(String pkg);
     int getPackageImportance(String pkg);
+    boolean isImportanceLocked(String pkg, int uid);
 
     List<String> getAllowedAssistantAdjustments(String pkg);
     void allowAssistantAdjustment(String adjustmentType);
@@ -114,12 +117,11 @@ interface INotificationManager
     NotificationChannelGroup getNotificationChannelGroup(String pkg, String channelGroupId);
     ParceledListSlice getNotificationChannelGroups(String pkg);
     boolean onlyHasDefaultChannel(String pkg, int uid);
-    int getBlockedAppCount(int userId);
     boolean areChannelsBypassingDnd();
-    int getAppsBypassingDndCount(int uid);
-    ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int userId);
+    ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int uid);
     boolean isPackagePaused(String pkg);
     void deleteNotificationHistoryItem(String pkg, int uid, long postedTime);
+    boolean isPermissionFixed(String pkg, int userId);
 
     void silenceNotificationSound();
 
@@ -175,6 +177,7 @@ interface INotificationManager
 
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);
+    void cleanUpCallersAfter(long timeThreshold);
     boolean isSystemConditionProviderEnabled(String path);
 
     boolean isNotificationListenerAccessGranted(in ComponentName listener);

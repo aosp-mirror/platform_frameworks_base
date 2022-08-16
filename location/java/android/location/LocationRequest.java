@@ -16,6 +16,8 @@
 
 package android.location;
 
+import static android.Manifest.permission.LOCATION_BYPASS;
+
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -25,11 +27,12 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
-import android.compat.annotation.UnsupportedAppUsage;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -180,13 +183,9 @@ public final class LocationRequest implements Parcelable {
     private static final long IMPLICIT_MIN_UPDATE_INTERVAL = -1;
     private static final double IMPLICIT_MIN_UPDATE_INTERVAL_FACTOR = 1D / 6D;
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "Use {@link "
-            + "LocationManager} methods to provide the provider explicitly.")
-    @Nullable private String mProvider;
+    private @Nullable String mProvider;
     private @Quality int mQuality;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "Use {@link "
-            + "LocationRequest} instead.")
-    private long mInterval;
+    private long mIntervalMillis;
     private long mMinUpdateIntervalMillis;
     private long mExpireAtRealtimeMillis;
     private long mDurationMillis;
@@ -195,7 +194,7 @@ public final class LocationRequest implements Parcelable {
     private final long mMaxUpdateDelayMillis;
     private boolean mHideFromAppOps;
     private final boolean mAdasGnssBypass;
-    private boolean mLocationSettingsIgnored;
+    private boolean mBypass;
     private boolean mLowPower;
     private @Nullable WorkSource mWorkSource;
 
@@ -208,9 +207,7 @@ public final class LocationRequest implements Parcelable {
     @NonNull
     public static LocationRequest create() {
         // 60 minutes is the default legacy interval
-        return new LocationRequest.Builder(60 * 60 * 1000)
-                .setQuality(QUALITY_LOW_POWER)
-                .build();
+        return new LocationRequest.Builder(60 * 60 * 1000).build();
     }
 
     /**
@@ -239,7 +236,7 @@ public final class LocationRequest implements Parcelable {
         } else if (LocationManager.GPS_PROVIDER.equals(provider)) {
             quality = QUALITY_HIGH_ACCURACY;
         } else {
-            quality = POWER_LOW;
+            quality = QUALITY_BALANCED_POWER_ACCURACY;
         }
 
         return new LocationRequest.Builder(intervalMillis)
@@ -291,11 +288,11 @@ public final class LocationRequest implements Parcelable {
             long maxUpdateDelayMillis,
             boolean hiddenFromAppOps,
             boolean adasGnssBypass,
-            boolean locationSettingsIgnored,
+            boolean bypass,
             boolean lowPower,
             WorkSource workSource) {
         mProvider = provider;
-        mInterval = intervalMillis;
+        mIntervalMillis = intervalMillis;
         mQuality = quality;
         mMinUpdateIntervalMillis = minUpdateIntervalMillis;
         mExpireAtRealtimeMillis = expireAtRealtimeMillis;
@@ -305,7 +302,7 @@ public final class LocationRequest implements Parcelable {
         mMaxUpdateDelayMillis = maxUpdateDelayMillis;
         mHideFromAppOps = hiddenFromAppOps;
         mAdasGnssBypass = adasGnssBypass;
-        mLocationSettingsIgnored = locationSettingsIgnored;
+        mBypass = bypass;
         mLowPower = lowPower;
         mWorkSource = Objects.requireNonNull(workSource);
     }
@@ -354,7 +351,7 @@ public final class LocationRequest implements Parcelable {
                 mQuality = QUALITY_LOW_POWER;
                 break;
             case POWER_NONE:
-                mInterval = PASSIVE_INTERVAL;
+                mIntervalMillis = PASSIVE_INTERVAL;
                 break;
             default:
                 throw new IllegalArgumentException("invalid quality: " + quality);
@@ -388,9 +385,9 @@ public final class LocationRequest implements Parcelable {
             millis = Long.MAX_VALUE - 1;
         }
 
-        mInterval = millis;
-        if (mMinUpdateIntervalMillis > mInterval) {
-            mMinUpdateIntervalMillis = mInterval;
+        mIntervalMillis = millis;
+        if (mMinUpdateIntervalMillis > mIntervalMillis) {
+            mMinUpdateIntervalMillis = mIntervalMillis;
         }
         return this;
     }
@@ -418,7 +415,7 @@ public final class LocationRequest implements Parcelable {
      * @return the desired interval of location updates
      */
     public @IntRange(from = 0) long getIntervalMillis() {
-        return mInterval;
+        return mIntervalMillis;
     }
 
     /**
@@ -556,11 +553,11 @@ public final class LocationRequest implements Parcelable {
      */
     public @IntRange(from = 0) long getMinUpdateIntervalMillis() {
         if (mMinUpdateIntervalMillis == IMPLICIT_MIN_UPDATE_INTERVAL) {
-            return (long) (mInterval * IMPLICIT_MIN_UPDATE_INTERVAL_FACTOR);
+            return (long) (mIntervalMillis * IMPLICIT_MIN_UPDATE_INTERVAL_FACTOR);
         } else {
             // the min is only necessary in case someone use a deprecated function to mess with the
             // interval or min update interval
-            return min(mMinUpdateIntervalMillis, mInterval);
+            return min(mMinUpdateIntervalMillis, mIntervalMillis);
         }
     }
 
@@ -660,7 +657,7 @@ public final class LocationRequest implements Parcelable {
      *
      * @hide
      */
-    // TODO: @SystemApi
+    @SystemApi
     public boolean isAdasGnssBypass() {
         return mAdasGnssBypass;
     }
@@ -671,9 +668,9 @@ public final class LocationRequest implements Parcelable {
      */
     @SystemApi
     @Deprecated
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @RequiresPermission(LOCATION_BYPASS)
     public @NonNull LocationRequest setLocationSettingsIgnored(boolean locationSettingsIgnored) {
-        mLocationSettingsIgnored = locationSettingsIgnored;
+        mBypass = locationSettingsIgnored;
         return this;
     }
 
@@ -687,7 +684,7 @@ public final class LocationRequest implements Parcelable {
      */
     @SystemApi
     public boolean isLocationSettingsIgnored() {
-        return mLocationSettingsIgnored;
+        return mBypass;
     }
 
     /**
@@ -696,7 +693,7 @@ public final class LocationRequest implements Parcelable {
      * @hide
      */
     public boolean isBypass() {
-        return mAdasGnssBypass || mLocationSettingsIgnored;
+        return mAdasGnssBypass || mBypass;
     }
 
     /**
@@ -796,7 +793,7 @@ public final class LocationRequest implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeString(mProvider);
-        parcel.writeLong(mInterval);
+        parcel.writeLong(mIntervalMillis);
         parcel.writeInt(mQuality);
         parcel.writeLong(mExpireAtRealtimeMillis);
         parcel.writeLong(mDurationMillis);
@@ -806,7 +803,7 @@ public final class LocationRequest implements Parcelable {
         parcel.writeLong(mMaxUpdateDelayMillis);
         parcel.writeBoolean(mHideFromAppOps);
         parcel.writeBoolean(mAdasGnssBypass);
-        parcel.writeBoolean(mLocationSettingsIgnored);
+        parcel.writeBoolean(mBypass);
         parcel.writeBoolean(mLowPower);
         parcel.writeTypedObject(mWorkSource, 0);
     }
@@ -821,7 +818,7 @@ public final class LocationRequest implements Parcelable {
         }
 
         LocationRequest that = (LocationRequest) o;
-        return mInterval == that.mInterval
+        return mIntervalMillis == that.mIntervalMillis
                 && mQuality == that.mQuality
                 && mExpireAtRealtimeMillis == that.mExpireAtRealtimeMillis
                 && mDurationMillis == that.mDurationMillis
@@ -831,7 +828,7 @@ public final class LocationRequest implements Parcelable {
                 && mMaxUpdateDelayMillis == that.mMaxUpdateDelayMillis
                 && mHideFromAppOps == that.mHideFromAppOps
                 && mAdasGnssBypass == that.mAdasGnssBypass
-                && mLocationSettingsIgnored == that.mLocationSettingsIgnored
+                && mBypass == that.mBypass
                 && mLowPower == that.mLowPower
                 && Objects.equals(mProvider, that.mProvider)
                 && Objects.equals(mWorkSource, that.mWorkSource);
@@ -839,7 +836,7 @@ public final class LocationRequest implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mProvider, mInterval, mWorkSource);
+        return Objects.hash(mProvider, mIntervalMillis, mWorkSource);
     }
 
     @NonNull
@@ -850,9 +847,9 @@ public final class LocationRequest implements Parcelable {
         if (mProvider != null) {
             s.append(mProvider).append(" ");
         }
-        if (mInterval != PASSIVE_INTERVAL) {
+        if (mIntervalMillis != PASSIVE_INTERVAL) {
             s.append("@");
-            TimeUtils.formatDuration(mInterval, s);
+            TimeUtils.formatDuration(mIntervalMillis, s);
 
             switch (mQuality) {
                 case QUALITY_HIGH_ACCURACY:
@@ -879,14 +876,14 @@ public final class LocationRequest implements Parcelable {
             s.append(", maxUpdates=").append(mMaxUpdates);
         }
         if (mMinUpdateIntervalMillis != IMPLICIT_MIN_UPDATE_INTERVAL
-                && mMinUpdateIntervalMillis < mInterval) {
+                && mMinUpdateIntervalMillis < mIntervalMillis) {
             s.append(", minUpdateInterval=");
             TimeUtils.formatDuration(mMinUpdateIntervalMillis, s);
         }
         if (mMinUpdateDistanceMeters > 0.0) {
             s.append(", minUpdateDistance=").append(mMinUpdateDistanceMeters);
         }
-        if (mMaxUpdateDelayMillis / 2 > mInterval) {
+        if (mMaxUpdateDelayMillis / 2 > mIntervalMillis) {
             s.append(", maxUpdateDelay=");
             TimeUtils.formatDuration(mMaxUpdateDelayMillis, s);
         }
@@ -899,8 +896,8 @@ public final class LocationRequest implements Parcelable {
         if (mAdasGnssBypass) {
             s.append(", adasGnssBypass");
         }
-        if (mLocationSettingsIgnored) {
-            s.append(", settingsBypass");
+        if (mBypass) {
+            s.append(", bypass");
         }
         if (mWorkSource != null && !mWorkSource.isEmpty()) {
             s.append(", ").append(mWorkSource);
@@ -923,7 +920,7 @@ public final class LocationRequest implements Parcelable {
         private long mMaxUpdateDelayMillis;
         private boolean mHiddenFromAppOps;
         private boolean mAdasGnssBypass;
-        private boolean mLocationSettingsIgnored;
+        private boolean mBypass;
         private boolean mLowPower;
         @Nullable private WorkSource mWorkSource;
 
@@ -943,7 +940,7 @@ public final class LocationRequest implements Parcelable {
             mMaxUpdateDelayMillis = 0;
             mHiddenFromAppOps = false;
             mAdasGnssBypass = false;
-            mLocationSettingsIgnored = false;
+            mBypass = false;
             mLowPower = false;
             mWorkSource = null;
         }
@@ -952,7 +949,7 @@ public final class LocationRequest implements Parcelable {
          * Creates a new Builder with all parameters copied from the given location request.
          */
         public Builder(@NonNull LocationRequest locationRequest) {
-            mIntervalMillis = locationRequest.mInterval;
+            mIntervalMillis = locationRequest.mIntervalMillis;
             mQuality = locationRequest.mQuality;
             mDurationMillis = locationRequest.mDurationMillis;
             mMaxUpdates = locationRequest.mMaxUpdates;
@@ -961,7 +958,7 @@ public final class LocationRequest implements Parcelable {
             mMaxUpdateDelayMillis = locationRequest.mMaxUpdateDelayMillis;
             mHiddenFromAppOps = locationRequest.mHideFromAppOps;
             mAdasGnssBypass = locationRequest.mAdasGnssBypass;
-            mLocationSettingsIgnored = locationRequest.mLocationSettingsIgnored;
+            mBypass = locationRequest.mBypass;
             mLowPower = locationRequest.mLowPower;
             mWorkSource = locationRequest.mWorkSource;
 
@@ -1139,8 +1136,9 @@ public final class LocationRequest implements Parcelable {
          *
          * @hide
          */
-        // TODO: @SystemApi
-        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        @SystemApi
+        @RequiresPermission(LOCATION_BYPASS)
+        @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
         public @NonNull Builder setAdasGnssBypass(boolean adasGnssBypass) {
             mAdasGnssBypass = adasGnssBypass;
             return this;
@@ -1158,16 +1156,17 @@ public final class LocationRequest implements Parcelable {
          * @hide
          */
         @SystemApi
-        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        @RequiresPermission(LOCATION_BYPASS)
         public @NonNull Builder setLocationSettingsIgnored(boolean locationSettingsIgnored) {
-            mLocationSettingsIgnored = locationSettingsIgnored;
+            mBypass = locationSettingsIgnored;
             return this;
         }
 
         /**
          * It set to true, indicates that extreme trade-offs should be made if possible to save
          * power for this request. This usually involves specialized hardware modes which can
-         * greatly affect the quality of locations. Defaults to false.
+         * greatly affect the quality of locations. Not all devices may support this. Defaults to
+         * false.
          *
          * <p>Permissions enforcement occurs when resulting location request is actually used, not
          * when this method is invoked.
@@ -1227,7 +1226,7 @@ public final class LocationRequest implements Parcelable {
                     mMaxUpdateDelayMillis,
                     mHiddenFromAppOps,
                     mAdasGnssBypass,
-                    mLocationSettingsIgnored,
+                    mBypass,
                     mLowPower,
                     new WorkSource(mWorkSource));
         }

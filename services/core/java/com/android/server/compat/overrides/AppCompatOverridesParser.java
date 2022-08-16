@@ -16,18 +16,23 @@
 
 package com.android.server.compat.overrides;
 
+import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 
+import android.annotation.Nullable;
 import android.app.compat.PackageOverride;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.KeyValueListParser;
+import android.util.Pair;
 import android.util.Slog;
+
+import libcore.util.HexEncoding;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -178,7 +183,9 @@ final class AppCompatOverridesParser {
      * overrides, and returns a map from change ID to {@link PackageOverride} instances to add.
      *
      * <p>Each change override is in the following format:
-     * '<change-id>:<min-version-code?>:<max-version-code?>:<enabled>'.
+     * '<signature?>~<change-id>:<min-version-code?>:<max-version-code?>:<enabled>'.
+     *
+     * <p>The signature is optional, and will only be enforced if included.
      *
      * <p>If there are multiple overrides that should be added with the same change ID, the one
      * that best fits the given {@code versionCode} is added.
@@ -187,14 +194,27 @@ final class AppCompatOverridesParser {
      *
      * <p>If a change override entry in {@code configStr} is invalid, it will be ignored.
      */
-    static Map<Long, PackageOverride> parsePackageOverrides(String configStr, long versionCode,
+    Map<Long, PackageOverride> parsePackageOverrides(String configStr, String packageName,
+            long versionCode,
             Set<Long> changeIdsToSkip) {
         if (configStr.isEmpty()) {
             return emptyMap();
         }
         PackageOverrideComparator comparator = new PackageOverrideComparator(versionCode);
         Map<Long, PackageOverride> overridesToAdd = new ArrayMap<>();
-        for (String overrideEntryString : configStr.split(",")) {
+
+        Pair<String, String> signatureAndConfig = extractSignatureFromConfig(configStr);
+        if (signatureAndConfig == null) {
+            return emptyMap();
+        }
+        final String signature = signatureAndConfig.first;
+        final String overridesConfig = signatureAndConfig.second;
+
+        if (!verifySignature(packageName, signature)) {
+            return emptyMap();
+        }
+
+        for (String overrideEntryString : overridesConfig.split(",")) {
             List<String> changeIdAndVersions = Arrays.asList(overrideEntryString.split(":", 4));
             if (changeIdAndVersions.size() != 4) {
                 Slog.w(TAG, "Invalid change override entry: " + overrideEntryString);
@@ -249,6 +269,51 @@ final class AppCompatOverridesParser {
         }
 
         return overridesToAdd;
+    }
+
+    /**
+     * Extracts the signature from the config string if one exists.
+     *
+     * @param configStr String in the form of <signature?>~<overrideConfig>
+     */
+    @Nullable
+    private static Pair<String, String> extractSignatureFromConfig(String configStr) {
+        final List<String> signatureAndConfig = Arrays.asList(configStr.split("~"));
+
+        if (signatureAndConfig.size() == 1) {
+            // The config string doesn't contain a signature.
+            return Pair.create("", configStr);
+        }
+
+        if (signatureAndConfig.size() > 2) {
+            Slog.w(TAG, "Only one signature per config is supported. Config: " + configStr);
+            return null;
+        }
+
+        return Pair.create(signatureAndConfig.get(0), signatureAndConfig.get(1));
+    }
+
+    /**
+     * Verifies that the specified package was signed with a particular signature.
+     *
+     * @param packageName The package to check.
+     * @param signature   The optional signature to verify. If empty, we return true.
+     * @return Whether the package is signed with that signature.
+     */
+    private boolean verifySignature(String packageName, String signature) {
+        try {
+            final boolean signatureValid = signature.isEmpty()
+                    || mPackageManager.hasSigningCertificate(packageName,
+                    HexEncoding.decode(signature), CERT_INPUT_SHA256);
+
+            if (!signatureValid) {
+                Slog.w(TAG, packageName + " did not have expected signature: " + signature);
+            }
+            return signatureValid;
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, "Unable to verify signature " + signature + " for " + packageName, e);
+            return false;
+        }
     }
 
     /**

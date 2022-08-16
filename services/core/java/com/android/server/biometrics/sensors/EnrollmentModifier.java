@@ -23,7 +23,7 @@ public interface EnrollmentModifier {
 
     /**
      * Callers should typically check this after
-     * {@link BaseClientMonitor.Callback#onClientFinished(BaseClientMonitor, boolean)}
+     * {@link ClientMonitorCallback#onClientFinished(BaseClientMonitor, boolean)}
      *
      * @return true if the user has gone from:
      *      1) none-enrolled --> enrolled

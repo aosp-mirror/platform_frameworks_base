@@ -19,12 +19,15 @@ package com.android.systemui.privacy
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.ResolveInfoFlags
+import android.content.pm.ResolveInfo
 import android.content.pm.UserInfo
 import android.os.Process.SYSTEM_UID
 import android.os.UserHandle
-import android.permission.PermGroupUsage
+import android.permission.PermissionGroupUsage
 import android.permission.PermissionManager
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
@@ -68,7 +71,8 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         private const val ENT_USER_ID = 10
 
         private const val TEST_PACKAGE_NAME = "test package name"
-        private const val TEST_ATTRIBUTION = "test attribution"
+        private const val TEST_ATTRIBUTION_TAG = "test attribution tag"
+        private const val TEST_PROXY_LABEL = "test proxy label"
 
         private const val PERM_CAMERA = android.Manifest.permission_group.CAMERA
         private const val PERM_MICROPHONE = android.Manifest.permission_group.MICROPHONE
@@ -109,12 +113,12 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
 
     private val dialogProvider = object : PrivacyDialogController.DialogProvider {
         var list: List<PrivacyDialog.PrivacyElement>? = null
-        var starter: ((String, Int) -> Unit)? = null
+        var starter: ((String, Int, CharSequence?, Intent?) -> Unit)? = null
 
         override fun makeDialog(
             context: Context,
             list: List<PrivacyDialog.PrivacyElement>,
-            starter: (String, Int) -> Unit
+            starter: (String, Int, CharSequence?, Intent?) -> Unit
         ): PrivacyDialog {
             this.list = list
             this.starter = starter
@@ -125,13 +129,11 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
         nextUid = 0
-
         setUpDefaultMockResponses()
 
         controller = PrivacyDialogController(
-            permissionManager,
+                permissionManager,
                 packageManager,
                 privacyItemController,
                 userTracker,
@@ -248,40 +250,54 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         val usage = createMockPermGroupUsage(
                 packageName = TEST_PACKAGE_NAME,
                 uid = generateUidForUser(USER_ID),
-                permGroupName = PERM_CAMERA,
-                lastAccess = 5L,
+                permissionGroupName = PERM_CAMERA,
+                lastAccessTimeMillis = 5L,
                 isActive = true,
                 isPhoneCall = false,
-                attribution = TEST_ATTRIBUTION
+                attributionTag = null,
+                proxyLabel = TEST_PROXY_LABEL
         )
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
 
         controller.showDialog(context)
         exhaustExecutors()
 
-        val expected = PrivacyDialog.PrivacyElement(
-                type = PrivacyType.TYPE_CAMERA,
-                packageName = TEST_PACKAGE_NAME,
-                userId = USER_ID,
-                applicationName = TEST_PACKAGE_NAME,
-                attribution = TEST_ATTRIBUTION,
-                lastActiveTimestamp = 5L,
-                active = true,
-                phoneCall = false,
-                enterprise = false
-        )
-        assertThat(dialogProvider.list).containsExactly(expected)
+        dialogProvider.list?.let { list ->
+            assertThat(list.get(0).type).isEqualTo(PrivacyType.TYPE_CAMERA)
+            assertThat(list.get(0).packageName).isEqualTo(TEST_PACKAGE_NAME)
+            assertThat(list.get(0).userId).isEqualTo(USER_ID)
+            assertThat(list.get(0).applicationName).isEqualTo(TEST_PACKAGE_NAME)
+            assertThat(list.get(0).attributionTag).isNull()
+            assertThat(list.get(0).attributionLabel).isNull()
+            assertThat(list.get(0).proxyLabel).isEqualTo(TEST_PROXY_LABEL)
+            assertThat(list.get(0).lastActiveTimestamp).isEqualTo(5L)
+            assertThat(list.get(0).active).isTrue()
+            assertThat(list.get(0).phoneCall).isFalse()
+            assertThat(list.get(0).enterprise).isFalse()
+            assertThat(list.get(0).permGroupName).isEqualTo(PERM_CAMERA)
+            assertThat(isIntentEqual(list.get(0).navigationIntent!!,
+                    controller.getDefaultManageAppPermissionsIntent(TEST_PACKAGE_NAME, USER_ID)))
+                    .isTrue()
+        }
+    }
+
+    private fun isIntentEqual(actual: Intent, expected: Intent): Boolean {
+        return actual.action == expected.action &&
+                actual.getStringExtra(Intent.EXTRA_PACKAGE_NAME) ==
+                expected.getStringExtra(Intent.EXTRA_PACKAGE_NAME) &&
+                actual.getParcelableExtra(Intent.EXTRA_USER) as? UserHandle ==
+                expected.getParcelableExtra(Intent.EXTRA_USER) as? UserHandle
     }
 
     @Test
     fun testTwoElementsDifferentType_sorted() {
         val usage_camera = createMockPermGroupUsage(
                 packageName = "${TEST_PACKAGE_NAME}_camera",
-                permGroupName = PERM_CAMERA
+                permissionGroupName = PERM_CAMERA
         )
         val usage_microphone = createMockPermGroupUsage(
                 packageName = "${TEST_PACKAGE_NAME}_microphone",
-                permGroupName = PERM_MICROPHONE
+                permissionGroupName = PERM_MICROPHONE
         )
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(
                 listOf(usage_microphone, usage_camera)
@@ -322,12 +338,12 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         val usage_active = createMockPermGroupUsage(
                 packageName = "${TEST_PACKAGE_NAME}_active",
                 isActive = true,
-                lastAccess = 0L
+                lastAccessTimeMillis = 0L
         )
         val usage_active_moreRecent = createMockPermGroupUsage(
                 packageName = "${TEST_PACKAGE_NAME}_active_recent",
                 isActive = true,
-                lastAccess = 1L
+                lastAccessTimeMillis = 1L
         )
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(
                 listOf(usage_active, usage_active_moreRecent)
@@ -344,17 +360,17 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         val usage_recent = createMockPermGroupUsage(
                 packageName = "${TEST_PACKAGE_NAME}_recent",
                 isActive = false,
-                lastAccess = 0L
+                lastAccessTimeMillis = 0L
         )
         val usage_moreRecent = createMockPermGroupUsage(
                 packageName = "${TEST_PACKAGE_NAME}_moreRecent",
                 isActive = false,
-                lastAccess = 1L
+                lastAccessTimeMillis = 1L
         )
         val usage_mostRecent = createMockPermGroupUsage(
                 packageName = "${TEST_PACKAGE_NAME}_mostRecent",
                 isActive = false,
-                lastAccess = 2L
+                lastAccessTimeMillis = 2L
         )
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(
                 listOf(usage_recent, usage_mostRecent, usage_moreRecent)
@@ -370,13 +386,13 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
     @Test
     fun testMicAndCameraDisabled() {
         val usage_camera = createMockPermGroupUsage(
-                permGroupName = PERM_CAMERA
+                permissionGroupName = PERM_CAMERA
         )
         val usage_microphone = createMockPermGroupUsage(
-                permGroupName = PERM_MICROPHONE
+                permissionGroupName = PERM_MICROPHONE
         )
         val usage_location = createMockPermGroupUsage(
-                permGroupName = PERM_LOCATION
+                permissionGroupName = PERM_LOCATION
         )
 
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(
@@ -394,13 +410,13 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
     @Test
     fun testLocationDisabled() {
         val usage_camera = createMockPermGroupUsage(
-                permGroupName = PERM_CAMERA
+                permissionGroupName = PERM_CAMERA
         )
         val usage_microphone = createMockPermGroupUsage(
-                permGroupName = PERM_MICROPHONE
+                permissionGroupName = PERM_MICROPHONE
         )
         val usage_location = createMockPermGroupUsage(
-                permGroupName = PERM_LOCATION
+                permissionGroupName = PERM_LOCATION
         )
 
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(
@@ -420,13 +436,13 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
     @Test
     fun testAllIndicatorsAvailable() {
         val usage_camera = createMockPermGroupUsage(
-                permGroupName = PERM_CAMERA
+                permissionGroupName = PERM_CAMERA
         )
         val usage_microphone = createMockPermGroupUsage(
-                permGroupName = PERM_MICROPHONE
+                permissionGroupName = PERM_MICROPHONE
         )
         val usage_location = createMockPermGroupUsage(
-                permGroupName = PERM_LOCATION
+                permissionGroupName = PERM_LOCATION
         )
 
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(
@@ -444,13 +460,13 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
     @Test
     fun testNoIndicatorsAvailable() {
         val usage_camera = createMockPermGroupUsage(
-                permGroupName = PERM_CAMERA
+                permissionGroupName = PERM_CAMERA
         )
         val usage_microphone = createMockPermGroupUsage(
-                permGroupName = PERM_MICROPHONE
+                permissionGroupName = PERM_MICROPHONE
         )
         val usage_location = createMockPermGroupUsage(
-                permGroupName = PERM_LOCATION
+                permissionGroupName = PERM_LOCATION
         )
 
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(
@@ -500,7 +516,7 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         controller.showDialog(context)
         exhaustExecutors()
 
-        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID)
+        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID, null, null)
         verify(activityStarter)
                 .startActivity(capture(intentCaptor), eq(true), any<ActivityStarter.Callback>())
 
@@ -518,7 +534,7 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         controller.showDialog(context)
         exhaustExecutors()
 
-        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, ENT_USER_ID)
+        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, ENT_USER_ID, null, null)
         verify(activityStarter)
                 .startActivity(capture(intentCaptor), eq(true), any<ActivityStarter.Callback>())
 
@@ -533,7 +549,7 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         controller.showDialog(context)
         exhaustExecutors()
 
-        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID)
+        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID, null, null)
         verify(activityStarter).startActivity(any(), eq(true), capture(activityStartedCaptor))
 
         activityStartedCaptor.value.onActivityStarted(ActivityManager.START_DELIVERED_TO_TOP)
@@ -548,7 +564,7 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         controller.showDialog(context)
         exhaustExecutors()
 
-        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID)
+        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID, null, null)
         verify(activityStarter).startActivity(any(), eq(true), capture(activityStartedCaptor))
 
         activityStartedCaptor.value.onActivityStarted(ActivityManager.START_ABORTED)
@@ -578,7 +594,7 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         controller.showDialog(context)
         exhaustExecutors()
 
-        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID)
+        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID, null, null)
         verify(uiEventLogger).log(PrivacyDialogEvent.PRIVACY_DIALOG_ITEM_CLICKED_TO_APP_SETTINGS,
                 USER_ID, TEST_PACKAGE_NAME)
     }
@@ -599,6 +615,113 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         verify(uiEventLogger, times(1)).log(PrivacyDialogEvent.PRIVACY_DIALOG_DISMISSED)
     }
 
+    @Test
+    fun testInvalidAttributionTag() {
+        val usage = createMockPermGroupUsage(
+                packageName = TEST_PACKAGE_NAME,
+                uid = generateUidForUser(USER_ID),
+                permissionGroupName = PERM_CAMERA,
+                lastAccessTimeMillis = 5L,
+                isActive = true,
+                isPhoneCall = false,
+                attributionTag = "INVALID_ATTRIBUTION_TAG",
+                proxyLabel = TEST_PROXY_LABEL
+        )
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.list?.let { list ->
+            assertThat(list.get(0).type).isEqualTo(PrivacyType.TYPE_CAMERA)
+            assertThat(list.get(0).packageName).isEqualTo(TEST_PACKAGE_NAME)
+            assertThat(list.get(0).userId).isEqualTo(USER_ID)
+            assertThat(list.get(0).applicationName).isEqualTo(TEST_PACKAGE_NAME)
+            assertThat(list.get(0).attributionTag).isEqualTo("INVALID_ATTRIBUTION_TAG")
+            assertThat(list.get(0).attributionLabel).isNull()
+            assertThat(list.get(0).proxyLabel).isEqualTo(TEST_PROXY_LABEL)
+            assertThat(list.get(0).lastActiveTimestamp).isEqualTo(5L)
+            assertThat(list.get(0).active).isTrue()
+            assertThat(list.get(0).phoneCall).isFalse()
+            assertThat(list.get(0).enterprise).isFalse()
+            assertThat(list.get(0).permGroupName).isEqualTo(PERM_CAMERA)
+            assertThat(isIntentEqual(list.get(0).navigationIntent!!,
+                    controller.getDefaultManageAppPermissionsIntent(TEST_PACKAGE_NAME, USER_ID)))
+                    .isTrue()
+        }
+    }
+
+    @Test
+    fun testCorrectIntentSubAttribution() {
+        val usage = createMockPermGroupUsage(
+                attributionTag = TEST_ATTRIBUTION_TAG,
+                attributionLabel = "TEST_LABEL"
+        )
+
+        val activityInfo = createMockActivityInfo()
+        val resolveInfo = createMockResolveInfo(activityInfo)
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+        `when`(packageManager.resolveActivity(any(), any<ResolveInfoFlags>()))
+                .thenAnswer { resolveInfo }
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.list?.let { list ->
+            val navigationIntent = list.get(0).navigationIntent!!
+            assertThat(navigationIntent.action).isEqualTo(Intent.ACTION_MANAGE_PERMISSION_USAGE)
+            assertThat(navigationIntent.getStringExtra(Intent.EXTRA_PERMISSION_GROUP_NAME))
+                    .isEqualTo(PERM_CAMERA)
+            assertThat(navigationIntent.getStringArrayExtra(Intent.EXTRA_ATTRIBUTION_TAGS))
+                    .isEqualTo(arrayOf(TEST_ATTRIBUTION_TAG.toString()))
+            assertThat(navigationIntent.getBooleanExtra(Intent.EXTRA_SHOWING_ATTRIBUTION, false))
+                    .isTrue()
+        }
+    }
+
+    @Test
+    fun testDefaultIntentOnMissingAttributionLabel() {
+        val usage = createMockPermGroupUsage(
+                attributionTag = TEST_ATTRIBUTION_TAG
+        )
+
+        val activityInfo = createMockActivityInfo()
+        val resolveInfo = createMockResolveInfo(activityInfo)
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+        `when`(packageManager.resolveActivity(any(), any<ResolveInfoFlags>()))
+                .thenAnswer { resolveInfo }
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.list?.let { list ->
+            assertThat(isIntentEqual(list.get(0).navigationIntent!!,
+                    controller.getDefaultManageAppPermissionsIntent(TEST_PACKAGE_NAME, USER_ID)))
+                    .isTrue()
+        }
+    }
+
+    @Test
+    fun testDefaultIntentOnIncorrectPermission() {
+        val usage = createMockPermGroupUsage(
+                attributionTag = TEST_ATTRIBUTION_TAG
+        )
+
+        val activityInfo = createMockActivityInfo(
+                permission = "INCORRECT_PERMISSION"
+        )
+        val resolveInfo = createMockResolveInfo(activityInfo)
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+        `when`(packageManager.resolveActivity(any(), any<ResolveInfoFlags>()))
+                .thenAnswer { resolveInfo }
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.list?.let { list ->
+            assertThat(isIntentEqual(list.get(0).navigationIntent!!,
+                    controller.getDefaultManageAppPermissionsIntent(TEST_PACKAGE_NAME, USER_ID)))
+                    .isTrue()
+        }
+    }
+
     private fun exhaustExecutors() {
         FakeExecutor.exhaustExecutors(backgroundExecutor, uiExecutor)
     }
@@ -608,9 +731,7 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         `when`(appOpsController.isMicMuted).thenReturn(false)
 
         `when`(packageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
-                .thenAnswer {
-                    FakeApplicationInfo(it.getArgument(0))
-                }
+                .thenAnswer { FakeApplicationInfo(it.getArgument(0)) }
 
         `when`(privacyItemController.locationAvailable).thenReturn(true)
         `when`(privacyItemController.micCameraAvailable).thenReturn(true)
@@ -633,24 +754,45 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         return user * UserHandle.PER_USER_RANGE + nextUid++
     }
 
+    private fun createMockResolveInfo(
+        activityInfo: ActivityInfo? = null
+    ): ResolveInfo {
+        val resolveInfo = mock(ResolveInfo::class.java)
+        resolveInfo.activityInfo = activityInfo
+        return resolveInfo
+    }
+
+    private fun createMockActivityInfo(
+        permission: String = android.Manifest.permission.START_VIEW_PERMISSION_USAGE,
+        className: String = "TEST_CLASS_NAME"
+    ): ActivityInfo {
+        val activityInfo = mock(ActivityInfo::class.java)
+        activityInfo.permission = permission
+        activityInfo.name = className
+        return activityInfo
+    }
+
     private fun createMockPermGroupUsage(
         packageName: String = TEST_PACKAGE_NAME,
         uid: Int = generateUidForUser(USER_ID),
-        permGroupName: String = PERM_CAMERA,
-        lastAccess: Long = 0L,
+        permissionGroupName: String = PERM_CAMERA,
+        lastAccessTimeMillis: Long = 0L,
         isActive: Boolean = false,
         isPhoneCall: Boolean = false,
-        attribution: CharSequence? = null
-    ): PermGroupUsage {
-        val usage = mock(PermGroupUsage::class.java)
+        attributionTag: CharSequence? = null,
+        attributionLabel: CharSequence? = null,
+        proxyLabel: CharSequence? = null
+    ): PermissionGroupUsage {
+        val usage = mock(PermissionGroupUsage::class.java)
         `when`(usage.packageName).thenReturn(packageName)
         `when`(usage.uid).thenReturn(uid)
-        `when`(usage.permGroupName).thenReturn(permGroupName)
-        `when`(usage.lastAccess).thenReturn(lastAccess)
+        `when`(usage.permissionGroupName).thenReturn(permissionGroupName)
+        `when`(usage.lastAccessTimeMillis).thenReturn(lastAccessTimeMillis)
         `when`(usage.isActive).thenReturn(isActive)
         `when`(usage.isPhoneCall).thenReturn(isPhoneCall)
-        `when`(usage.attribution).thenReturn(attribution)
-
+        `when`(usage.attributionTag).thenReturn(attributionTag)
+        `when`(usage.attributionLabel).thenReturn(attributionLabel)
+        `when`(usage.proxyLabel).thenReturn(proxyLabel)
         return usage
     }
 }

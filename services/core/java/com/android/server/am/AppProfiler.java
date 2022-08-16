@@ -58,7 +58,6 @@ import android.content.ComponentCallbacks2;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Binder;
@@ -395,6 +394,7 @@ public class AppProfiler {
         static final int COLLECT_PSS_BG_MSG = 1;
         static final int DEFER_PSS_MSG = 2;
         static final int STOP_DEFERRING_PSS_MSG = 3;
+        static final int MEMORY_PRESSURE_CHANGED = 4;
         BgHandler(Looper looper) {
             super(looper);
         }
@@ -410,6 +410,11 @@ public class AppProfiler {
                     break;
                 case STOP_DEFERRING_PSS_MSG:
                     stopDeferPss();
+                    break;
+                case MEMORY_PRESSURE_CHANGED:
+                    synchronized (mService) {
+                        handleMemoryPressureChangedLocked(msg.arg1, msg.arg2);
+                    }
                     break;
             }
         }
@@ -568,7 +573,9 @@ public class AppProfiler {
                     holder.state.getPackage(),
                     pss, uss, rss,
                     statType, pssDuration,
-                    holder.appVersion);
+                    holder.appVersion,
+                    profile.getCurrentHostingComponentTypes(),
+                    profile.getHistoricalHostingComponentTypes());
         });
         if (DEBUG_PSS) {
             Slog.d(TAG_PSS,
@@ -602,13 +609,7 @@ public class AppProfiler {
         if (check != null) {
             if ((pss * 1024) >= check && profile.getThread() != null
                     && mMemWatchDumpProcName == null) {
-                boolean isDebuggable = Build.IS_DEBUGGABLE;
-                if (!isDebuggable) {
-                    if ((proc.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                        isDebuggable = true;
-                    }
-                }
-                if (isDebuggable) {
+                if (Build.IS_DEBUGGABLE || proc.isDebuggable()) {
                     Slog.w(TAG, "Process " + proc + " exceeded pss limit " + check + "; reporting");
                     startHeapDumpLPf(profile, false);
                 } else {
@@ -914,12 +915,18 @@ public class AppProfiler {
     }
 
     @GuardedBy("mService")
-    int getLastMemoryLevelLocked() {
+    @MemFactor int getLastMemoryLevelLocked() {
+        if (mMemFactorOverride != ADJ_MEM_FACTOR_NOTHING) {
+            return mMemFactorOverride;
+        }
         return mLastMemoryLevel;
     }
 
     @GuardedBy("mService")
     boolean isLastMemoryLevelNormal() {
+        if (mMemFactorOverride != ADJ_MEM_FACTOR_NOTHING) {
+            return mMemFactorOverride <= ADJ_MEM_FACTOR_NORMAL;
+        }
         return mLastMemoryLevel <= ADJ_MEM_FACTOR_NORMAL;
     }
 
@@ -943,7 +950,6 @@ public class AppProfiler {
 
     @GuardedBy({"mService", "mProcLock"})
     boolean updateLowMemStateLSP(int numCached, int numEmpty, int numTrimming) {
-        final long now = SystemClock.uptimeMillis();
         int memFactor;
         if (mLowMemDetector != null && mLowMemDetector.isAvailable()) {
             memFactor = mLowMemDetector.getMemFactor();
@@ -991,12 +997,16 @@ public class AppProfiler {
         if (memFactor != mLastMemoryLevel) {
             EventLogTags.writeAmMemFactor(memFactor, mLastMemoryLevel);
             FrameworkStatsLog.write(FrameworkStatsLog.MEMORY_FACTOR_STATE_CHANGED, memFactor);
+            mBgHandler.obtainMessage(BgHandler.MEMORY_PRESSURE_CHANGED, mLastMemoryLevel, memFactor)
+                    .sendToTarget();
         }
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
         boolean allChanged;
         int trackerMemFactor;
+        final long now;
         synchronized (mService.mProcessStats.mLock) {
+            now = SystemClock.uptimeMillis();
             allChanged = mService.mProcessStats.setMemFactorLocked(memFactor,
                     mService.mAtmInternal == null || !mService.mAtmInternal.isSleeping(), now);
             trackerMemFactor = mService.mProcessStats.getMemFactorLocked();
@@ -1032,7 +1042,7 @@ public class AppProfiler {
                 final int curProcState = state.getCurProcState();
                 IApplicationThread thread;
                 if (allChanged || state.hasProcStateChanged()) {
-                    mService.setProcessTrackerStateLOSP(app, trackerMemFactor, now);
+                    mService.setProcessTrackerStateLOSP(app, trackerMemFactor);
                     state.setProcStateChanged(false);
                 }
                 trimMemoryUiHiddenIfNecessaryLSP(app);
@@ -1101,7 +1111,7 @@ public class AppProfiler {
                 final IApplicationThread thread;
                 final ProcessStateRecord state = app.mState;
                 if (allChanged || state.hasProcStateChanged()) {
-                    mService.setProcessTrackerStateLOSP(app, trackerMemFactor, now);
+                    mService.setProcessTrackerStateLOSP(app, trackerMemFactor);
                     state.setProcStateChanged(false);
                 }
                 trimMemoryUiHiddenIfNecessaryLSP(app);
@@ -1629,6 +1639,13 @@ public class AppProfiler {
         }
     }
 
+    @GuardedBy("mService")
+    private void handleMemoryPressureChangedLocked(@MemFactor int oldMemFactor,
+            @MemFactor int newMemFactor) {
+        mService.mServices.rescheduleServiceRestartOnMemoryPressureIfNeededLocked(
+                oldMemFactor, newMemFactor, "mem-pressure-event", SystemClock.uptimeMillis());
+    }
+
     @GuardedBy("mProfilerLock")
     private void stopProfilerLPf(ProcessRecord proc, int profileType) {
         if (proc == null || proc == mProfileData.getProfileProc()) {
@@ -1680,7 +1697,8 @@ public class AppProfiler {
         try {
             if (start) {
                 stopProfilerLPf(null, 0);
-                mService.setProfileApp(proc.info, proc.processName, profilerInfo);
+                mService.setProfileApp(proc.info, proc.processName, profilerInfo,
+                        proc.isSdkSandbox ? proc.getClientInfoForSdkSandbox() : null);
                 mProfileData.setProfileProc(proc);
                 mProfileType = profileType;
                 ParcelFileDescriptor fd = profilerInfo.profileFd;
@@ -1864,8 +1882,7 @@ public class AppProfiler {
                                     BatteryStatsImpl.Uid.Proc ps = st.batteryStats;
                                     if (ps == null || !ps.isActive()) {
                                         st.batteryStats = ps = bstats.getProcessStatsLocked(
-                                                bstats.mapUid(st.uid), st.name,
-                                                elapsedRealtime, uptime);
+                                                st.uid, st.name, elapsedRealtime, uptime);
                                     }
                                     ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
                                 }
@@ -2054,7 +2071,7 @@ public class AppProfiler {
             if (mAppAgentMap != null && mAppAgentMap.containsKey(processName)) {
                 // We need to do a debuggable check here. See setAgentApp for why the check is
                 // postponed to here.
-                if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                if (app.isDebuggable()) {
                     String agent = mAppAgentMap.get(processName);
                     // Do not overwrite already requested agent.
                     if (profilerInfo == null) {
@@ -2111,7 +2128,7 @@ public class AppProfiler {
         if (preBindAgent != null) {
             thread.attachAgent(preBindAgent);
         }
-        if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+        if (app.isDebuggable()) {
             thread.attachStartupAgents(app.info.dataDir);
         }
         return profilerInfo;
@@ -2311,6 +2328,27 @@ public class AppProfiler {
         synchronized (mProcessCpuTracker) {
             report.append(mProcessCpuTracker.printCurrentState(time));
         }
+    }
+
+    Pair<String, String> getAppProfileStatsForDebugging(long time, int linesOfStats) {
+        String cpuLoad = null;
+        String stats = null;
+        synchronized (mProcessCpuTracker) {
+            updateCpuStatsNow();
+            cpuLoad = mProcessCpuTracker.printCurrentLoad();
+            stats = mProcessCpuTracker.printCurrentState(time);
+        }
+        // Only return linesOfStats lines of Cpu stats.
+        int toIndex = 0;
+        for (int i = 0; i <= linesOfStats; i++) {
+            int nextIndex = stats.indexOf('\n', toIndex);
+            if (nextIndex == -1) {
+                toIndex = stats.length();
+                break;
+            }
+            toIndex = nextIndex + 1;
+        }
+        return new Pair(cpuLoad, stats.substring(0, toIndex));
     }
 
     @GuardedBy("mProfilerLock")

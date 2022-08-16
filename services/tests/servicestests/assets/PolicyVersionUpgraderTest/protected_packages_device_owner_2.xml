@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<root>
+  <device-owner package="com.android.frameworks.servicestests" name="" component="com.android.frameworks.servicestests/com.android.server.devicepolicy.DummyDeviceAdmins$Admin1" userRestrictionsMigrated="true" isPoOrganizationOwnedDevice="true" />
+  <device-owner-context userId="0" />
+  <device-owner-protected-packages package="com.android.frameworks.servicestests" size="2" name0="com.some.app" name1="foo.bar.baz" />
+</root>

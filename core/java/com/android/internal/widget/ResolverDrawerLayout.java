@@ -929,7 +929,7 @@ public class ResolverDrawerLayout extends ViewGroup {
         // Single-use layout; just ignore the mode and use available space.
         // Clamp to maxWidth.
         if (mMaxWidth >= 0) {
-            widthSize = Math.min(widthSize, mMaxWidth);
+            widthSize = Math.min(widthSize, mMaxWidth + getPaddingLeft() + getPaddingRight());
         }
 
         final int widthSpec = MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.EXACTLY);
@@ -1008,8 +1008,9 @@ public class ResolverDrawerLayout extends ViewGroup {
         View indicatorHost = null;
 
         int ypos = mTopOffset;
-        int leftEdge = getPaddingLeft();
-        int rightEdge = width - getPaddingRight();
+        final int leftEdge = getPaddingLeft();
+        final int rightEdge = width - getPaddingRight();
+        final int widthAvailable = rightEdge - leftEdge;
 
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -1030,7 +1031,6 @@ public class ResolverDrawerLayout extends ViewGroup {
             final int bottom = top + child.getMeasuredHeight();
 
             final int childWidth = child.getMeasuredWidth();
-            final int widthAvailable = rightEdge - leftEdge;
             final int left = leftEdge + (widthAvailable - childWidth) / 2;
             final int right = left + childWidth;
 

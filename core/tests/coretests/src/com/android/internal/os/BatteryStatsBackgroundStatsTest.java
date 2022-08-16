@@ -38,7 +38,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
     /** Test that BatteryStatsImpl.Uid.mOnBatteryBackgroundTimeBase works correctly. */
     @SmallTest
     public void testBgTimeBase() throws Exception {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         long cur = 0; // realtime in us
 
@@ -106,7 +106,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
     /** Test that BatteryStatsImpl.Uid.mOnBatteryScreenOffBackgroundTimeBase works correctly. */
     @SmallTest
     public void testScreenOffBgTimeBase() throws Exception {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         long cur = 0; // realtime in us
 
@@ -154,7 +154,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
     @SmallTest
     public void testWifiScan() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         long curr = 0; // realtime in us
 
@@ -207,7 +207,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
     }
 
     private void doTestAppBluetoothScanInternal(WorkSource ws) throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         long curr = 0; // realtime in us
 
@@ -276,7 +276,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
     @SmallTest
     public void testJob() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         final String jobName = "job_name";
         long curr = 0; // realtime in us
@@ -337,7 +337,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
     @SmallTest
     public void testSyncs() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         final String syncName = "sync_name";
         long curr = 0; // realtime in us

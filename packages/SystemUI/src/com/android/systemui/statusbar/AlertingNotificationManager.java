@@ -23,12 +23,12 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
+import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 
 import java.util.stream.Stream;
 
@@ -41,6 +41,11 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
     private static final String TAG = "AlertNotifManager";
     protected final Clock mClock = new Clock();
     protected final ArrayMap<String, AlertEntry> mAlertEntries = new ArrayMap<>();
+    protected final HeadsUpManagerLogger mLogger;
+
+    public AlertingNotificationManager(HeadsUpManagerLogger logger) {
+        mLogger = logger;
+    }
 
     /**
      * This is the list of entries that have already been removed from the
@@ -61,9 +66,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      * @param entry entry to show
      */
     public void showNotification(@NonNull NotificationEntry entry) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "showNotification");
-        }
+        mLogger.logShowNotification(entry.getKey());
         addAlertEntry(entry);
         updateNotification(entry.getKey(), true /* alert */);
         entry.setInterruption();
@@ -77,9 +80,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      * @return true if notification is removed, false otherwise
      */
     public boolean removeNotification(@NonNull String key, boolean releaseImmediately) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "removeNotification");
-        }
+        mLogger.logRemoveNotification(key, releaseImmediately);
         AlertEntry alertEntry = mAlertEntries.get(key);
         if (alertEntry == null) {
             return true;
@@ -100,11 +101,8 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      *              removal time
      */
     public void updateNotification(@NonNull String key, boolean alert) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "updateNotification");
-        }
-
         AlertEntry alertEntry = mAlertEntries.get(key);
+        mLogger.logUpdateNotification(key, alert, alertEntry != null);
         if (alertEntry == null) {
             // the entry was released before this update (i.e by a listener) This can happen
             // with the groupmanager
@@ -121,9 +119,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      * Clears all managed notifications.
      */
     public void releaseAllImmediately() {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "releaseAllImmediately");
-        }
+        mLogger.logReleaseAllImmediately();
         // A copy is necessary here as we are changing the underlying map.  This would cause
         // undefined behavior if we iterated over the key set directly.
         ArraySet<String> keysToRemove = new ArraySet<>(mAlertEntries.keySet());
@@ -242,7 +238,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      * @param key the key to check if removable
      * @return true if the alert entry can be removed
      */
-    protected boolean canRemoveImmediately(String key) {
+    public boolean canRemoveImmediately(String key) {
         AlertEntry alertEntry = mAlertEntries.get(key);
         return alertEntry == null || alertEntry.wasShownLongEnough()
                 || alertEntry.mEntry.isRowDismissed();
@@ -259,6 +255,30 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
     @Override
     public boolean shouldExtendLifetime(NotificationEntry entry) {
         return !canRemoveImmediately(entry.getKey());
+    }
+
+    /**
+     * @param key
+     * @return true if the entry is pinned
+     */
+    public boolean isSticky(String key) {
+        AlertEntry alerting = mAlertEntries.get(key);
+        if (alerting != null) {
+            return alerting.isSticky();
+        }
+        return false;
+    }
+
+    /**
+     * @param key
+     * @return When a HUN entry should be removed in milliseconds from now
+     */
+    public long getEarliestRemovalTime(String key) {
+        AlertEntry alerting = mAlertEntries.get(key);
+        if (alerting != null) {
+            return Math.max(0, alerting.mEarliestRemovaltime - mClock.currentTimeMillis());
+        }
+        return 0;
     }
 
     @Override
@@ -300,9 +320,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
          * @param updatePostTime whether or not to refresh the post time
          */
         public void updateEntry(boolean updatePostTime) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "updateEntry");
-            }
+            mLogger.logUpdateEntry(mEntry.getKey(), updatePostTime);
 
             long currentTime = mClock.currentTimeMillis();
             mEarliestRemovaltime = currentTime + mMinimumDisplayTime;

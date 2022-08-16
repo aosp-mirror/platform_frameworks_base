@@ -347,6 +347,7 @@ public class ControlProviderServiceTest {
                 && Objects.equals(c1.getCustomColor(), c2.getCustomColor())
                 && c1.getStatus() == c2.getStatus()
                 && Objects.equals(c1.getControlTemplate(), c2.getControlTemplate())
+                && Objects.equals(c1.isAuthRequired(), c2.isAuthRequired())
                 && Objects.equals(c1.getStatusText(), c2.getStatusText());
     }
 

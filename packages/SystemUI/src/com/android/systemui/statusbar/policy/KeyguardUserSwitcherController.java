@@ -51,7 +51,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.util.ViewController;
 
 import java.util.ArrayList;
@@ -161,7 +161,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
             SysuiStatusBarStateController statusBarStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             DozeParameters dozeParameters,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+            ScreenOffAnimationController screenOffAnimationController) {
         super(keyguardUserSwitcherView);
         if (DEBUG) Log.d(TAG, "New KeyguardUserSwitcherController");
         mContext = context;
@@ -174,7 +174,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
                 mUserSwitcherController, this);
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
                 keyguardStateController, dozeParameters,
-                unlockedScreenOffAnimationController, /* animateYPos= */ false);
+                screenOffAnimationController, /* animateYPos= */ false);
         mBackground = new KeyguardUserSwitcherScrim(context);
     }
 
@@ -540,7 +540,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
             }
             drawable.setTint(mResources.getColor(iconColorRes, mContext.getTheme()));
 
-            Drawable bg = mContext.getDrawable(R.drawable.kg_bg_avatar);
+            Drawable bg = mContext.getDrawable(R.drawable.user_avatar_bg);
             drawable = new LayerDrawable(new Drawable[]{bg, drawable});
             return drawable;
         }

@@ -46,6 +46,34 @@ open class ConnectivityState {
         }
     }
 
+    protected open fun tableColumns(): List<String> {
+        return listOf(
+            "connected",
+            "enabled",
+            "activityIn",
+            "activityOut",
+            "level",
+            "iconGroup",
+            "inetCondition",
+            "rssi",
+            "time")
+    }
+
+    protected open fun tableData(): List<String> {
+        return listOf(
+            connected,
+            enabled,
+            activityIn,
+            activityOut,
+            level,
+            iconGroup,
+            inetCondition,
+            rssi,
+            sSDF.format(time)).map {
+                it.toString()
+        }
+    }
+
     protected open fun copyFrom(other: ConnectivityState) {
         connected = other.connected
         enabled = other.enabled

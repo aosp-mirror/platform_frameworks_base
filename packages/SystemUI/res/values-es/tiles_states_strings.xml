@@ -59,12 +59,12 @@
   <string-array name="tile_states_flashlight">
     <item msgid="3465257127433353857">"No disponible"</item>
     <item msgid="5044688398303285224">"Desactivada"</item>
-    <item msgid="8527389108867454098">"Activada"</item>
+    <item msgid="8527389108867454098">"Activado"</item>
   </string-array>
   <string-array name="tile_states_rotation">
     <item msgid="4578491772376121579">"No disponible"</item>
     <item msgid="5776427577477729185">"Desactivada"</item>
-    <item msgid="7105052717007227415">"Activada"</item>
+    <item msgid="7105052717007227415">"Activado"</item>
   </string-array>
   <string-array name="tile_states_bt">
     <item msgid="5330252067413512277">"No disponible"</item>
@@ -85,6 +85,11 @@
     <item msgid="3145597331197351214">"No disponible"</item>
     <item msgid="5715725170633593906">"Desactivado"</item>
     <item msgid="2075645297847971154">"Activado"</item>
+  </string-array>
+  <string-array name="tile_states_color_correction">
+    <item msgid="2840507878437297682">"No disponible"</item>
+    <item msgid="1909756493418256167">"Desactivado"</item>
+    <item msgid="4531508423703413340">"Activado"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"No disponible"</item>
@@ -151,9 +156,19 @@
     <item msgid="7571394439974244289">"Desactivado"</item>
     <item msgid="6866424167599381915">"Activado"</item>
   </string-array>
+  <string-array name="tile_states_qr_code_scanner">
+    <item msgid="7435143266149257618">"No disponible"</item>
+    <item msgid="3301403109049256043">"Desactivado"</item>
+    <item msgid="8878684975184010135">"Activado"</item>
+  </string-array>
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"No disponible"</item>
     <item msgid="2710157085538036590">"Desactivado"</item>
     <item msgid="7809470840976856149">"Activado"</item>
+  </string-array>
+  <string-array name="tile_states_onehanded">
+    <item msgid="8189342855739930015">"No disponible"</item>
+    <item msgid="146088982397753810">"Desactivado"</item>
+    <item msgid="460891964396502657">"Activado"</item>
   </string-array>
 </resources>

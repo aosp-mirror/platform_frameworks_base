@@ -1,0 +1,8 @@
+{
+  "presubmit": [
+    {
+      "name": "PackageManagerComponentOverrideTests"
+    }
+  ]
+}
+

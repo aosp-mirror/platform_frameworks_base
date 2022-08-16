@@ -30,7 +30,6 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -544,7 +543,7 @@ public class AccessibilityWindowManagerTest {
                 mWindowInfos.get(Display.DEFAULT_DISPLAY).get(DEFAULT_FOCUSED_INDEX + 1).token;
         final int eventWindowId = mA11yWindowManager.findWindowIdLocked(
                 USER_SYSTEM_ID, eventWindowToken);
-        when(mMockWindowManagerInternal.getFocusedWindowToken())
+        when(mMockWindowManagerInternal.getFocusedWindowTokenFromWindowStates())
                 .thenReturn(eventWindowToken);
 
         final int noUse = 0;
@@ -680,7 +679,7 @@ public class AccessibilityWindowManagerTest {
                 mWindowInfos.get(Display.DEFAULT_DISPLAY).get(DEFAULT_FOCUSED_INDEX).token;
         final int defaultFocusWindowId = mA11yWindowManager.findWindowIdLocked(
                 USER_SYSTEM_ID, defaultFocusWinToken);
-        when(mMockWindowManagerInternal.getFocusedWindowToken())
+        when(mMockWindowManagerInternal.getFocusedWindowTokenFromWindowStates())
                 .thenReturn(defaultFocusWinToken);
         final int newFocusWindowId = getWindowIdFromWindowInfosForDisplay(Display.DEFAULT_DISPLAY,
                 DEFAULT_FOCUSED_INDEX + 1);
@@ -836,19 +835,6 @@ public class AccessibilityWindowManagerTest {
         assertNull(token);
     }
 
-    @Test
-    public void onDisplayReparented_shouldRemoveObserver() throws RemoteException {
-        // Starts tracking window of second display.
-        startTrackingPerDisplay(SECONDARY_DISPLAY_ID);
-        assertTrue(mA11yWindowManager.isTrackingWindowsLocked(SECONDARY_DISPLAY_ID));
-        // Notifies the second display is an embedded one of the default display.
-        final WindowsForAccessibilityCallback callbacks =
-                mCallbackOfWindows.get(Display.DEFAULT_DISPLAY);
-        callbacks.onDisplayReparented(SECONDARY_DISPLAY_ID);
-        // Makes sure the observer of the second display is removed.
-        assertFalse(mA11yWindowManager.isTrackingWindowsLocked(SECONDARY_DISPLAY_ID));
-    }
-
     private void registerLeashedTokenAndWindowId() {
         mA11yWindowManager.registerIdLocked(mMockHostToken, HOST_WINDOW_ID);
         mA11yWindowManager.registerIdLocked(mMockEmbeddedToken, EMBEDDED_WINDOW_ID);
@@ -878,8 +864,6 @@ public class AccessibilityWindowManagerTest {
             windowInfosForDisplay.get(DEFAULT_FOCUSED_INDEX).focused = true;
         }
         // Turns on windows tracking, and update window info.
-        when(mMockWindowManagerInternal.setWindowsForAccessibilityCallback(eq(displayId), any()))
-                .thenReturn(true);
         mA11yWindowManager.startTrackingWindows(displayId);
         // Puts window lists into array.
         mWindowInfos.put(displayId, windowInfosForDisplay);

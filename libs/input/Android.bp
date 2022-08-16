@@ -55,6 +55,7 @@ cc_library_shared {
         "-Wall",
         "-Wextra",
         "-Werror",
+        "-Wthread-safety",
     ],
 
 }

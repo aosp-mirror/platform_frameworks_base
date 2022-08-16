@@ -18,17 +18,16 @@ package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.LocaleList;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -663,8 +662,9 @@ final class InputMethodUtils {
         return !subtype.isAuxiliary();
     }
 
-    static void setNonSelectedSystemImesDisabledUntilUsed(IPackageManager packageManager,
-            List<InputMethodInfo> enabledImis, @UserIdInt int userId, String callingPackage) {
+    @UserHandleAware
+    static void setNonSelectedSystemImesDisabledUntilUsed(PackageManager packageManagerForUser,
+            List<InputMethodInfo> enabledImis) {
         if (DEBUG) {
             Slog.d(TAG, "setNonSelectedSystemImesDisabledUntilUsed");
         }
@@ -675,7 +675,8 @@ final class InputMethodUtils {
         }
         // Only the current spell checker should be treated as an enabled one.
         final SpellCheckerInfo currentSpellChecker =
-                TextServicesManagerInternal.get().getCurrentSpellCheckerForUser(userId);
+                TextServicesManagerInternal.get().getCurrentSpellCheckerForUser(
+                        packageManagerForUser.getUserId());
         for (final String packageName : systemImesDisabledUntilUsed) {
             if (DEBUG) {
                 Slog.d(TAG, "check " + packageName);
@@ -702,11 +703,12 @@ final class InputMethodUtils {
             }
             ApplicationInfo ai = null;
             try {
-                ai = packageManager.getApplicationInfo(packageName,
-                        PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS, userId);
-            } catch (RemoteException e) {
+                ai = packageManagerForUser.getApplicationInfo(packageName,
+                        PackageManager.ApplicationInfoFlags.of(
+                                PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS));
+            } catch (PackageManager.NameNotFoundException e) {
                 Slog.w(TAG, "getApplicationInfo failed. packageName=" + packageName
-                        + " userId=" + userId, e);
+                        + " userId=" + packageManagerForUser.getUserId(), e);
                 continue;
             }
             if (ai == null) {
@@ -717,18 +719,18 @@ final class InputMethodUtils {
             if (!isSystemPackage) {
                 continue;
             }
-            setDisabledUntilUsed(packageManager, packageName, userId, callingPackage);
+            setDisabledUntilUsed(packageManagerForUser, packageName);
         }
     }
 
-    private static void setDisabledUntilUsed(IPackageManager packageManager, String packageName,
-            int userId, String callingPackage) {
+    private static void setDisabledUntilUsed(PackageManager packageManagerForUser,
+            String packageName) {
         final int state;
         try {
-            state = packageManager.getApplicationEnabledSetting(packageName, userId);
-        } catch (RemoteException e) {
+            state = packageManagerForUser.getApplicationEnabledSetting(packageName);
+        } catch (IllegalArgumentException e) {
             Slog.w(TAG, "getApplicationEnabledSetting failed. packageName=" + packageName
-                    + " userId=" + userId, e);
+                    + " userId=" + packageManagerForUser.getUserId(), e);
             return;
         }
         if (state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
@@ -737,12 +739,12 @@ final class InputMethodUtils {
                 Slog.d(TAG, "Update state(" + packageName + "): DISABLED_UNTIL_USED");
             }
             try {
-                packageManager.setApplicationEnabledSetting(packageName,
+                packageManagerForUser.setApplicationEnabledSetting(packageName,
                         PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED,
-                        0 /* newState */, userId, callingPackage);
-            } catch (RemoteException e) {
+                        0 /* newState */);
+            } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "setApplicationEnabledSetting failed. packageName=" + packageName
-                        + " userId=" + userId + " callingPackage=" + callingPackage, e);
+                        + " userId=" + packageManagerForUser.getUserId(), e);
                 return;
             }
         } else {

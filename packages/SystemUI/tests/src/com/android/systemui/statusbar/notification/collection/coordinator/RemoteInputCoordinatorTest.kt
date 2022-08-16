@@ -101,27 +101,27 @@ class RemoteInputCoordinatorTest : SysuiTestCase() {
     @Test
     fun testRemoteInputActive() {
         `when`(remoteInputManager.isRemoteInputActive(entry1)).thenReturn(true)
-        assertThat(remoteInputActiveExtender.shouldExtendLifetime(entry1, 0)).isTrue()
-        assertThat(remoteInputHistoryExtender.shouldExtendLifetime(entry1, 0)).isFalse()
-        assertThat(smartReplyHistoryExtender.shouldExtendLifetime(entry1, 0)).isFalse()
+        assertThat(remoteInputActiveExtender.maybeExtendLifetime(entry1, 0)).isTrue()
+        assertThat(remoteInputHistoryExtender.maybeExtendLifetime(entry1, 0)).isFalse()
+        assertThat(smartReplyHistoryExtender.maybeExtendLifetime(entry1, 0)).isFalse()
         assertThat(listener.isNotificationKeptForRemoteInputHistory(entry1.key)).isFalse()
     }
 
     @Test
     fun testRemoteInputHistory() {
         `when`(remoteInputManager.shouldKeepForRemoteInputHistory(entry1)).thenReturn(true)
-        assertThat(remoteInputActiveExtender.shouldExtendLifetime(entry1, 0)).isFalse()
-        assertThat(remoteInputHistoryExtender.shouldExtendLifetime(entry1, 0)).isTrue()
-        assertThat(smartReplyHistoryExtender.shouldExtendLifetime(entry1, 0)).isFalse()
+        assertThat(remoteInputActiveExtender.maybeExtendLifetime(entry1, 0)).isFalse()
+        assertThat(remoteInputHistoryExtender.maybeExtendLifetime(entry1, 0)).isTrue()
+        assertThat(smartReplyHistoryExtender.maybeExtendLifetime(entry1, 0)).isFalse()
         assertThat(listener.isNotificationKeptForRemoteInputHistory(entry1.key)).isTrue()
     }
 
     @Test
     fun testSmartReplyHistory() {
         `when`(remoteInputManager.shouldKeepForSmartReplyHistory(entry1)).thenReturn(true)
-        assertThat(remoteInputActiveExtender.shouldExtendLifetime(entry1, 0)).isFalse()
-        assertThat(remoteInputHistoryExtender.shouldExtendLifetime(entry1, 0)).isFalse()
-        assertThat(smartReplyHistoryExtender.shouldExtendLifetime(entry1, 0)).isTrue()
+        assertThat(remoteInputActiveExtender.maybeExtendLifetime(entry1, 0)).isFalse()
+        assertThat(remoteInputHistoryExtender.maybeExtendLifetime(entry1, 0)).isFalse()
+        assertThat(smartReplyHistoryExtender.maybeExtendLifetime(entry1, 0)).isTrue()
         assertThat(listener.isNotificationKeptForRemoteInputHistory(entry1.key)).isTrue()
     }
 
@@ -136,7 +136,7 @@ class RemoteInputCoordinatorTest : SysuiTestCase() {
         verify(lifetimeExtensionCallback, never()).onEndLifetimeExtension(any(), any())
 
         // Start extending lifetime & validate that the extension is ended
-        assertThat(remoteInputActiveExtender.shouldExtendLifetime(entry1, 0)).isTrue()
+        assertThat(remoteInputActiveExtender.maybeExtendLifetime(entry1, 0)).isTrue()
         assertThat(remoteInputActiveExtender.isExtending(entry1.key)).isTrue()
         listener.onPanelCollapsed()
         verify(lifetimeExtensionCallback).onEndLifetimeExtension(remoteInputActiveExtender, entry1)

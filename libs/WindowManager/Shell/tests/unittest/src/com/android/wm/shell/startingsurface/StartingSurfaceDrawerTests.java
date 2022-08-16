@@ -24,6 +24,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.wm.shell.startingsurface.StartingSurfaceDrawer.MAX_ANIMATION_DURATION;
+import static com.android.wm.shell.startingsurface.StartingSurfaceDrawer.MINIMAL_ANIMATION_DURATION;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -295,6 +297,56 @@ public class StartingSurfaceDrawerTests {
         waitHandlerIdle(mTestHandler);
         verify(mStartingSurfaceDrawer).removeWindowSynced(any(), eq(true));
         assertEquals(mStartingSurfaceDrawer.mStartingWindowRecords.size(), 0);
+    }
+
+    @Test
+    public void testMinimumAnimationDuration() {
+        final long maxDuration = MAX_ANIMATION_DURATION;
+        final long minDuration = MINIMAL_ANIMATION_DURATION;
+
+        final long shortDuration = minDuration - 1;
+        final long medianShortDuration = minDuration + 1;
+        final long medianLongDuration = maxDuration - 1;
+        final long longAppDuration = maxDuration + 1;
+
+        // static icon
+        assertEquals(shortDuration, SplashscreenContentDrawer.getShowingDuration(
+                0, shortDuration));
+        // median launch + static icon
+        assertEquals(medianShortDuration, SplashscreenContentDrawer.getShowingDuration(
+                0, medianShortDuration));
+        // long launch + static icon
+        assertEquals(longAppDuration, SplashscreenContentDrawer.getShowingDuration(
+                0, longAppDuration));
+
+        // fast launch + animatable icon
+        assertEquals(shortDuration, SplashscreenContentDrawer.getShowingDuration(
+                shortDuration, shortDuration));
+        assertEquals(minDuration, SplashscreenContentDrawer.getShowingDuration(
+                medianShortDuration, shortDuration));
+        assertEquals(minDuration, SplashscreenContentDrawer.getShowingDuration(
+                longAppDuration, shortDuration));
+
+        // median launch + animatable icon
+        assertEquals(medianShortDuration, SplashscreenContentDrawer.getShowingDuration(
+                shortDuration, medianShortDuration));
+        assertEquals(medianShortDuration, SplashscreenContentDrawer.getShowingDuration(
+                medianShortDuration, medianShortDuration));
+        assertEquals(minDuration, SplashscreenContentDrawer.getShowingDuration(
+                longAppDuration, medianShortDuration));
+        // between min < max launch + animatable icon
+        assertEquals(medianLongDuration, SplashscreenContentDrawer.getShowingDuration(
+                medianShortDuration, medianLongDuration));
+        assertEquals(maxDuration, SplashscreenContentDrawer.getShowingDuration(
+                medianLongDuration, medianShortDuration));
+
+        // long launch + animatable icon
+        assertEquals(longAppDuration, SplashscreenContentDrawer.getShowingDuration(
+                shortDuration, longAppDuration));
+        assertEquals(longAppDuration, SplashscreenContentDrawer.getShowingDuration(
+                medianShortDuration, longAppDuration));
+        assertEquals(longAppDuration, SplashscreenContentDrawer.getShowingDuration(
+                longAppDuration, longAppDuration));
     }
 
     private StartingWindowInfo createWindowInfo(int taskId, int themeResId) {

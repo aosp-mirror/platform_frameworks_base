@@ -23,6 +23,7 @@ import static com.android.systemui.statusbar.notification.NotificationUtils.inte
 import android.content.res.Resources;
 import android.util.MathUtils;
 
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -147,7 +148,7 @@ public class KeyguardClockPositionAlgorithm {
         mStatusViewBottomMargin = res.getDimensionPixelSize(
                 R.dimen.keyguard_status_view_bottom_margin);
         mSplitShadeTopNotificationsMargin =
-                res.getDimensionPixelSize(R.dimen.split_shade_header_height);
+                res.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
         mSplitShadeTargetTopMargin =
                 res.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin);
 
@@ -169,7 +170,8 @@ public class KeyguardClockPositionAlgorithm {
             boolean isSplitShade, float udfpsTop, float clockBottom, boolean isClockTopAligned) {
         mMinTopMargin = keyguardStatusBarHeaderHeight + Math.max(mContainerTopPadding,
                 userSwitchHeight);
-        mPanelExpansion = panelExpansion;
+        mPanelExpansion = BouncerPanelExpansionCalculator
+                .getKeyguardClockScaledExpansion(panelExpansion);
         mKeyguardStatusHeight = keyguardStatusHeight + mStatusViewBottomMargin;
         mUserSwitchHeight = userSwitchHeight;
         mUserSwitchPreferredY = userSwitchPreferredY;
@@ -218,7 +220,7 @@ public class KeyguardClockPositionAlgorithm {
         }
     }
 
-    public float getMinStackScrollerPadding() {
+    public float getLockscreenMinStackScrollerPadding() {
         if (mBypassEnabled) {
             return mUnlockedStackScrollerPadding;
         } else if (mIsSplitShade) {

@@ -35,6 +35,7 @@ import android.os.Messenger;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -449,17 +450,22 @@ public class SettingsInjector {
             if (setting == null) {
                 return;
             }
-            final Preference preference = setting.preference;
             Bundle bundle = msg.getData();
-            boolean enabled = bundle.getBoolean(SettingInjectorService.ENABLED_KEY, true);
-            String summary = bundle.getString(SettingInjectorService.SUMMARY_KEY, null);
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, setting + ": received " + msg + ", bundle: " + bundle);
             }
-            preference.setSummary(summary);
+            boolean enabled = bundle.getBoolean(SettingInjectorService.ENABLED_KEY, true);
+            String summary = bundle.getString(SettingInjectorService.SUMMARY_KEY);
+            final Preference preference = setting.preference;
+            if (TextUtils.isEmpty(summary)) {
+                // Set a placeholder summary when received empty summary from injected service.
+                // This is necessary to avoid preference height change.
+                preference.setSummary(R.string.summary_placeholder);
+            } else {
+                preference.setSummary(summary);
+            }
             preference.setEnabled(enabled);
-            mHandler.sendMessage(
-                    mHandler.obtainMessage(WHAT_RECEIVED_STATUS, setting));
+            mHandler.sendMessage(mHandler.obtainMessage(WHAT_RECEIVED_STATUS, setting));
         }
     }
 

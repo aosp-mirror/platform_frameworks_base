@@ -63,7 +63,7 @@ public final class DelegateRequest implements Parcelable {
      */
     private DelegateRequest(Parcel in) {
         mFeatureTags = new ArrayList<>();
-        in.readList(mFeatureTags, null /*classLoader*/);
+        in.readList(mFeatureTags, null /*classLoader*/, java.lang.String.class);
     }
 
     @Override

@@ -17,6 +17,7 @@
 package com.android.server.usb;
 
 import android.annotation.NonNull;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.os.RemoteException;
@@ -41,6 +42,7 @@ public final class UsbAlsaDevice {
 
     private final boolean mIsInputHeadset;
     private final boolean mIsOutputHeadset;
+    private final boolean mIsDock;
 
     private boolean mSelected = false;
     private int mOutputState;
@@ -53,7 +55,7 @@ public final class UsbAlsaDevice {
 
     public UsbAlsaDevice(IAudioService audioService, int card, int device, String deviceAddress,
             boolean hasOutput, boolean hasInput,
-            boolean isInputHeadset, boolean isOutputHeadset) {
+            boolean isInputHeadset, boolean isOutputHeadset, boolean isDock) {
         mAudioService = audioService;
         mCardNum = card;
         mDeviceNum = device;
@@ -62,31 +64,32 @@ public final class UsbAlsaDevice {
         mHasInput = hasInput;
         mIsInputHeadset = isInputHeadset;
         mIsOutputHeadset = isOutputHeadset;
+        mIsDock = isDock;
     }
 
     /**
-     * @returns the ALSA card number associated with this peripheral.
+     * @return the ALSA card number associated with this peripheral.
      */
     public int getCardNum() {
         return mCardNum;
     }
 
     /**
-     * @returns the ALSA device number associated with this peripheral.
+     * @return the ALSA device number associated with this peripheral.
      */
     public int getDeviceNum() {
         return mDeviceNum;
     }
 
     /**
-     * @returns the USB device device address associated with this peripheral.
+     * @return the USB device device address associated with this peripheral.
      */
     public String getDeviceAddress() {
         return mDeviceAddress;
     }
 
     /**
-     * @returns the ALSA card/device address string.
+     * @return the ALSA card/device address string.
      */
     public String getAlsaCardDeviceString() {
         if (mCardNum < 0 || mDeviceNum < 0) {
@@ -98,35 +101,42 @@ public final class UsbAlsaDevice {
     }
 
     /**
-     * @returns true if the device supports output.
+     * @return true if the device supports output.
      */
     public boolean hasOutput() {
         return mHasOutput;
     }
 
     /**
-     * @returns true if the device supports input (recording).
+     * @return true if the device supports input (recording).
      */
     public boolean hasInput() {
         return mHasInput;
     }
 
     /**
-     * @returns true if the device is a headset for purposes of input.
+     * @return true if the device is a headset for purposes of input.
      */
     public boolean isInputHeadset() {
         return mIsInputHeadset;
     }
 
     /**
-     * @returns true if the device is a headset for purposes of output.
+     * @return true if the device is a headset for purposes of output.
      */
     public boolean isOutputHeadset() {
         return mIsOutputHeadset;
     }
 
     /**
-     * @returns true if input jack is detected or jack detection is not supported.
+     * @return true if the device is a USB dock.
+     */
+    public boolean isDock() {
+        return mIsDock;
+    }
+
+    /**
+     * @return true if input jack is detected or jack detection is not supported.
      */
     private synchronized boolean isInputJackConnected() {
         if (mJackDetector == null) {
@@ -136,7 +146,7 @@ public final class UsbAlsaDevice {
     }
 
     /**
-     * @returns true if input jack is detected or jack detection is not supported.
+     * @return true if input jack is detected or jack detection is not supported.
      */
     private synchronized boolean isOutputJackConnected() {
         if (mJackDetector == null) {
@@ -190,9 +200,10 @@ public final class UsbAlsaDevice {
         try {
             // Output Device
             if (mHasOutput) {
-                int device = mIsOutputHeadset
-                        ? AudioSystem.DEVICE_OUT_USB_HEADSET
-                        : AudioSystem.DEVICE_OUT_USB_DEVICE;
+                int device = mIsDock ? AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET
+                        : (mIsOutputHeadset
+                            ? AudioSystem.DEVICE_OUT_USB_HEADSET
+                            : AudioSystem.DEVICE_OUT_USB_DEVICE);
                 if (DEBUG) {
                     Slog.d(TAG, "pre-call device:0x" + Integer.toHexString(device)
                             + " addr:" + alsaCardDeviceString
@@ -203,24 +214,25 @@ public final class UsbAlsaDevice {
                 int outputState = (enable && connected) ? 1 : 0;
                 if (outputState != mOutputState) {
                     mOutputState = outputState;
-                    mAudioService.setWiredDeviceConnectionState(device, outputState,
-                                                                alsaCardDeviceString,
-                                                                mDeviceName, TAG);
+                    AudioDeviceAttributes attributes = new AudioDeviceAttributes(device,
+                            alsaCardDeviceString, mDeviceName);
+                    mAudioService.setWiredDeviceConnectionState(attributes, outputState, TAG);
                 }
             }
 
             // Input Device
             if (mHasInput) {
-                int device = mIsInputHeadset ? AudioSystem.DEVICE_IN_USB_HEADSET
+                int device = mIsInputHeadset
+                        ? AudioSystem.DEVICE_IN_USB_HEADSET
                         : AudioSystem.DEVICE_IN_USB_DEVICE;
                 boolean connected = isInputJackConnected();
                 Slog.i(TAG, "INPUT JACK connected: " + connected);
                 int inputState = (enable && connected) ? 1 : 0;
                 if (inputState != mInputState) {
                     mInputState = inputState;
-                    mAudioService.setWiredDeviceConnectionState(
-                            device, inputState, alsaCardDeviceString,
-                            mDeviceName, TAG);
+                    AudioDeviceAttributes attributes = new AudioDeviceAttributes(device,
+                            alsaCardDeviceString, mDeviceName);
+                    mAudioService.setWiredDeviceConnectionState(attributes, inputState, TAG);
                 }
             }
         } catch (RemoteException e) {
@@ -231,7 +243,7 @@ public final class UsbAlsaDevice {
 
     /**
      * @Override
-     * @returns a string representation of the object.
+     * @return a string representation of the object.
      */
     public synchronized String toString() {
         return "UsbAlsaDevice: [card: " + mCardNum
@@ -273,7 +285,7 @@ public final class UsbAlsaDevice {
 
     /**
      * @Override
-     * @returns true if the objects are equivalent.
+     * @return true if the objects are equivalent.
      */
     public boolean equals(Object obj) {
         if (!(obj instanceof UsbAlsaDevice)) {
@@ -285,12 +297,13 @@ public final class UsbAlsaDevice {
                 && mHasOutput == other.mHasOutput
                 && mHasInput == other.mHasInput
                 && mIsInputHeadset == other.mIsInputHeadset
-                && mIsOutputHeadset == other.mIsOutputHeadset);
+                && mIsOutputHeadset == other.mIsOutputHeadset
+                && mIsDock == other.mIsDock);
     }
 
     /**
      * @Override
-     * @returns a hash code generated from the object contents.
+     * @return a hash code generated from the object contents.
      */
     public int hashCode() {
         final int prime = 31;
@@ -301,6 +314,7 @@ public final class UsbAlsaDevice {
         result = prime * result + (mHasInput ? 0 : 1);
         result = prime * result + (mIsInputHeadset ? 0 : 1);
         result = prime * result + (mIsOutputHeadset ? 0 : 1);
+        result = prime * result + (mIsDock ? 0 : 1);
 
         return result;
     }

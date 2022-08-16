@@ -16,15 +16,21 @@
 
 package com.android.server.wm;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Pair;
+import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IRemoteAnimationFinishedCallback;
@@ -32,6 +38,8 @@ import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationTarget;
+import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.WindowInfo;
 import android.view.WindowManager.DisplayImePolicy;
 
@@ -39,6 +47,7 @@ import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
 
+import java.lang.annotation.Retention;
 import java.util.List;
 import java.util.Set;
 
@@ -77,7 +86,7 @@ public abstract class WindowManagerInternal {
          *        through the tracing file.
          * @param loggingTypeFlags The flags for the logging types this log entry belongs to.
          * @param callingParams The parameters for the method to be logged.
-         * @param a11yDump The proto byte array for a11y state when the entry is generated.
+         * @param a11yDump The proto byte array for a11y state when the entry is generated
          * @param callingUid The calling uid.
          * @param stackTrace The stack trace, null if not needed.
          * @param ignoreStackEntries The stack entries can be removed
@@ -104,6 +113,32 @@ public abstract class WindowManagerInternal {
         void logTrace(String where, long loggingTypeFlags, String callingParams,
                 byte[] a11yDump, int callingUid, StackTraceElement[] callStack, long timeStamp,
                 int processId, long threadId, Set<String> ignoreStackEntries);
+
+        /**
+         * Set by the accessibility related modules which want to listen the event dispatched from
+         * window manager. Accessibility modules can use these callbacks to handle some display
+         * manipulations.
+         * @param callbacks The callbacks to invoke.
+         */
+        void setUiChangesForAccessibilityCallbacks(UiChangesForAccessibilityCallbacks callbacks);
+
+        /**
+         * This interface is used by window manager to dispatch some ui change events which may
+         * affect the screen accessibility features.
+         */
+        interface UiChangesForAccessibilityCallbacks {
+            /**
+             * Called when an application requests a rectangle focus on the screen.
+             *
+             * @param displayId The logical display id
+             * @param left The rectangle left.
+             * @param top The rectangle top.
+             * @param right The rectangle right.
+             * @param bottom The rectangle bottom.
+             */
+            void onRectangleOnScreenRequested(int displayId, int left, int top, int right,
+                    int bottom);
+        }
     }
 
     /**
@@ -122,16 +157,6 @@ public abstract class WindowManagerInternal {
          */
         void onWindowsForAccessibilityChanged(boolean forceSend, int topFocusedDisplayId,
                 IBinder topFocusedWindowToken, @NonNull List<WindowInfo> windows);
-
-        /**
-         * Called when the display is reparented and becomes an embedded
-         * display. The {@link WindowsForAccessibilityCallback} with the given embedded
-         * display will be replaced by the {@link WindowsForAccessibilityCallback}
-         * associated with its parent display at the same time.
-         *
-         * @param embeddedDisplayId The embedded display Id.
-         */
-        void onDisplayReparented(int embeddedDisplayId);
     }
 
     /**
@@ -234,6 +259,25 @@ public abstract class WindowManagerInternal {
     }
 
     /**
+     * An interface to be notified when the system bars for a task change.
+     */
+    public interface TaskSystemBarsListener {
+
+        /**
+         * Called when the visibility of the system bars of a task change.
+         *
+         * @param taskId the identifier of the task.
+         * @param visible if the transient system bars are visible.
+         * @param wereRevealedFromSwipeOnSystemBar if the transient bars were revealed due to a
+         *                                         swipe gesture on a system bar.
+         */
+        void onTransientSystemBarsVisibilityChanged(
+                int taskId,
+                boolean visible,
+                boolean wereRevealedFromSwipeOnSystemBar);
+    }
+
+    /**
      * An interface to be notified when keyguard exit animation should start.
      */
     public interface KeyguardExitAnimationStartListener {
@@ -300,6 +344,16 @@ public abstract class WindowManagerInternal {
          * Called when drag operation was cancelled.
          */
         default void postCancelDragAndDrop() {}
+
+        /**
+         * Called when it has entered a View that is willing to accept the drop.
+         */
+        default void dragRecipientEntered(IWindow window) {}
+
+        /**
+         * Called when it has exited a View that is willing to accept the drop.
+         */
+        default void dragRecipientExited(IWindow window) {}
     }
 
     /**
@@ -357,29 +411,13 @@ public abstract class WindowManagerInternal {
     public abstract void getMagnificationRegion(int displayId, @NonNull Region magnificationRegion);
 
     /**
-     * Gets the magnification and translation applied to a window given its token.
-     * Not all windows are magnified and the window manager policy determines which
-     * windows are magnified. The returned result also takes into account the compat
-     * scale if necessary.
-     *
-     * @param windowToken The window's token.
-     *
-     * @return The magnification spec for the window.
-     *
-     * @see #setMagnificationCallbacks(int, MagnificationCallbacks)
-     */
-    public abstract MagnificationSpec getCompatibleMagnificationSpecForWindow(
-            IBinder windowToken);
-
-    /**
      * Sets a callback for observing which windows are touchable for the purposes
      * of accessibility on specified display.
      *
      * @param displayId The logical display id.
      * @param callback The callback.
-     * @return {@code false} if display id is not valid.
      */
-    public abstract boolean setWindowsForAccessibilityCallback(int displayId,
+    public abstract void setWindowsForAccessibilityCallback(int displayId,
             WindowsForAccessibilityCallback callback);
 
     /**
@@ -395,6 +433,14 @@ public abstract class WindowManagerInternal {
      * @return The token.
      */
     public abstract IBinder getFocusedWindowToken();
+
+    /**
+     * Gets the token of the window that has input focus. It is from the focused
+     * {@link WindowState}.
+     *
+     * @return The token.
+     */
+    public abstract IBinder getFocusedWindowTokenFromWindowStates();
 
     /**
      * @return Whether the keyguard is engaged.
@@ -413,6 +459,17 @@ public abstract class WindowManagerInternal {
      * @param outBounds The frame to populate.
      */
     public abstract void getWindowFrame(IBinder token, Rect outBounds);
+
+    /**
+     * Get the transformation matrix and MagnificationSpec given its token.
+     *
+     * @param token The token.
+     * @return The pair of the transformation matrix and magnification spec.
+     */
+    // TODO (b/231663133): Long term solution for tracking window when the
+    //                     FLAG_RETRIEVE_INTERACTIVE_WINDOWS is unset.
+    public abstract Pair<Matrix, MagnificationSpec>
+            getWindowTransformationMatrixAndMagnificationSpec(IBinder token);
 
     /**
      * Opens the global actions dialog.
@@ -486,6 +543,20 @@ public abstract class WindowManagerInternal {
      * @param listener The listener to register.
      */
     public abstract void registerAppTransitionListener(AppTransitionListener listener);
+
+    /**
+     * Registers a listener to be notified to when the system bars of a task changes.
+     *
+     * @param listener The listener to register.
+     */
+    public abstract void registerTaskSystemBarsListener(TaskSystemBarsListener listener);
+
+    /**
+     * Registers a listener to be notified to when the system bars of a task changes.
+     *
+     * @param listener The listener to unregister.
+     */
+    public abstract void unregisterTaskSystemBarsListener(TaskSystemBarsListener listener);
 
     /**
      * Registers a listener to be notified to start the keyguard exit animation.
@@ -583,6 +654,7 @@ public abstract class WindowManagerInternal {
     /**
      * Checks whether the specified IME client has IME focus or not.
      *
+     * @param windowToken The window token of the input method client
      * @param uid UID of the process to be queried
      * @param pid PID of the process to be queried
      * @param displayId Display ID reported from the client. Note that this method also verifies
@@ -590,7 +662,22 @@ public abstract class WindowManagerInternal {
      * @return {@code true} if the IME client specified with {@code uid}, {@code pid}, and
      *         {@code displayId} has IME focus
      */
-    public abstract boolean isInputMethodClientFocus(int uid, int pid, int displayId);
+    public abstract @ImeClientFocusResult int hasInputMethodClientFocus(IBinder windowToken,
+            int uid, int pid, int displayId);
+
+    @Retention(SOURCE)
+    @IntDef({
+            ImeClientFocusResult.HAS_IME_FOCUS,
+            ImeClientFocusResult.NOT_IME_TARGET_WINDOW,
+            ImeClientFocusResult.DISPLAY_ID_MISMATCH,
+            ImeClientFocusResult.INVALID_DISPLAY_ID
+    })
+    public @interface ImeClientFocusResult {
+        int HAS_IME_FOCUS = 0;
+        int NOT_IME_TARGET_WINDOW = -1;
+        int DISPLAY_ID_MISMATCH = -2;
+        int INVALID_DISPLAY_ID = -3;
+    }
 
     /**
      * Checks whether the given {@code uid} is allowed to use the given {@code displayId} or not.
@@ -645,17 +732,18 @@ public abstract class WindowManagerInternal {
     public abstract void hideIme(IBinder imeTargetWindowToken, int displayId);
 
     /**
-     * Tell window manager about a package that should not be running with high refresh rate
-     * setting until removeNonHighRefreshRatePackage is called for the same package.
+     * Tell window manager about a package that should be running with a restricted range of
+     * refresh rate setting until removeRefreshRateRangeForPackage is called for the same package.
      *
      * This must not be called again for the same package.
      */
-    public abstract void addNonHighRefreshRatePackage(@NonNull String packageName);
+    public abstract void addRefreshRateRangeForPackage(@NonNull String packageName,
+            float minRefreshRate, float maxRefreshRate);
 
     /**
      * Tell window manager to stop constraining refresh rate for the given package.
      */
-    public abstract void removeNonHighRefreshRatePackage(@NonNull String packageName);
+    public abstract void removeRefreshRateRangeForPackage(@NonNull String packageName);
 
     /**
      * Checks if the device supports touch or faketouch.
@@ -742,4 +830,56 @@ public abstract class WindowManagerInternal {
      *         {@code false} otherwise.
      */
     public abstract boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken);
+
+    /**
+     * Internal methods for other parts of SystemServer to manage
+     * SurfacePackage based overlays on tasks.
+     *
+     * Since these overlays will overlay application content, they exist
+     * in a container with setTrustedOverlay(true). This means its imperative
+     * that this overlay feature only be used with UI completely under the control
+     * of the system, without 3rd party content.
+     *
+     * Callers prepare a view hierarchy with SurfaceControlViewHost
+     * and send the package to WM here. The remote view hierarchy will receive
+     * configuration change, lifecycle events, etc, forwarded over the
+     * ISurfaceControlViewHost interface inside the SurfacePackage. Embedded
+     * hierarchies will receive inset changes, including transient inset changes
+     * (to avoid the status bar in immersive mode).
+     *
+     * The embedded hierarchy exists in a coordinate space relative to the task
+     * bounds.
+     */
+    public abstract void addTrustedTaskOverlay(int taskId,
+            SurfaceControlViewHost.SurfacePackage overlay);
+    public abstract void removeTrustedTaskOverlay(int taskId,
+            SurfaceControlViewHost.SurfacePackage overlay);
+
+    /**
+     * Get a SurfaceControl that is the container layer that should be used to receive input to
+     * support handwriting (Scribe) by the IME.
+     */
+    public abstract SurfaceControl getHandwritingSurfaceForDisplay(int displayId);
+
+    /**
+     * Returns {@code true} if the given point is within the window bounds of the given window.
+     *
+     * @param windowToken the window whose bounds should be used for the hit test.
+     * @param displayX the x coordinate of the test point in the display's coordinate space.
+     * @param displayY the y coordinate of the test point in the display's coordinate space.
+     */
+    public abstract boolean isPointInsideWindow(
+            @NonNull IBinder windowToken, int displayId, float displayX, float displayY);
+
+    /**
+     * Updates the content recording session. If a different session is already in progress, then
+     * the pre-existing session is stopped, and the new incoming session takes over.
+     *
+     * The DisplayContent for the new session will begin recording when
+     * {@link RootWindowContainer#onDisplayChanged} is invoked for the new {@link VirtualDisplay}.
+     * Must be invoked for a valid MediaProjection session.
+     *
+     * @param incomingSession the nullable incoming content recording session
+     */
+    public abstract void setContentRecordingSession(ContentRecordingSession incomingSession);
 }

@@ -23,6 +23,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -49,6 +50,7 @@ import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Helper class to run app animations in a remote process.
@@ -73,6 +75,8 @@ class RemoteAnimationController implements DeathRecipient {
     private FinishedCallback mFinishedCallback;
     private boolean mCanceled;
     private boolean mLinkedToDeathOfRunner;
+    @Nullable
+    private Runnable mOnRemoteAnimationReady;
 
     RemoteAnimationController(WindowManagerService service, DisplayContent displayContent,
             RemoteAnimationAdapter remoteAnimationAdapter, Handler handler) {
@@ -102,6 +106,11 @@ class RemoteAnimationController implements DeathRecipient {
         return adapters;
     }
 
+    /** Sets callback to run before starting remote animation. */
+    void setOnRemoteAnimationReady(@Nullable Runnable onRemoteAnimationReady) {
+        mOnRemoteAnimationReady = onRemoteAnimationReady;
+    }
+
     /**
      * Called when the transition is ready to be started, and all leashes have been set up.
      */
@@ -111,7 +120,7 @@ class RemoteAnimationController implements DeathRecipient {
             ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS,
                     "goodToGo(): Animation canceled already");
             onAnimationFinished();
-            invokeAnimationCancelled();
+            invokeAnimationCancelled("already_cancelled");
             return;
         }
 
@@ -130,8 +139,13 @@ class RemoteAnimationController implements DeathRecipient {
                     "goodToGo(): No apps to animate, mPendingAnimations=%d",
                     mPendingAnimations.size());
             onAnimationFinished();
-            invokeAnimationCancelled();
+            invokeAnimationCancelled("no_app_targets");
             return;
+        }
+
+        if (mOnRemoteAnimationReady != null) {
+            mOnRemoteAnimationReady.run();
+            mOnRemoteAnimationReady = null;
         }
 
         // Create the remote wallpaper animation targets (if any)
@@ -170,7 +184,7 @@ class RemoteAnimationController implements DeathRecipient {
             mCanceled = true;
         }
         onAnimationFinished();
-        invokeAnimationCancelled();
+        invokeAnimationCancelled(reason);
     }
 
     private void writeStartDebugStatement() {
@@ -295,16 +309,24 @@ class RemoteAnimationController implements DeathRecipient {
                 mIsFinishing = false;
             }
         }
+        // Reset input for all activities when the remote animation is finished.
+        final Consumer<ActivityRecord> updateActivities =
+                activity -> activity.setDropInputForAnimation(false);
+        mDisplayContent.forAllActivities(updateActivities);
         setRunningRemoteAnimation(false);
         ProtoLog.i(WM_DEBUG_REMOTE_ANIMATIONS, "Finishing remote animation");
     }
 
-    private void invokeAnimationCancelled() {
+    private void invokeAnimationCancelled(String reason) {
+        ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "cancelAnimation(): reason=%s", reason);
+        final boolean isKeyguardOccluded = mDisplayContent.isKeyguardOccluded();
+
         try {
-            mRemoteAnimationAdapter.getRunner().onAnimationCancelled();
+            mRemoteAnimationAdapter.getRunner().onAnimationCancelled(isKeyguardOccluded);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to notify cancel", e);
         }
+        mOnRemoteAnimationReady = null;
     }
 
     private void releaseFinishedCallback() {

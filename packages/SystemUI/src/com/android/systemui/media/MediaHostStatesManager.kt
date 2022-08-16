@@ -18,6 +18,7 @@ package com.android.systemui.media
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.animation.MeasurementOutput
+import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
 /**
@@ -46,7 +47,10 @@ class MediaHostStatesManager @Inject constructor() {
      * Notify that a media state for a given location has changed. Should only be called from
      * Media hosts themselves.
      */
-    fun updateHostState(@MediaLocation location: Int, hostState: MediaHostState) {
+    fun updateHostState(
+        @MediaLocation location: Int,
+        hostState: MediaHostState
+    ) = traceSection("MediaHostStatesManager#updateHostState") {
         val currentState = mediaHostStates.get(location)
         if (!hostState.equals(currentState)) {
             val newState = hostState.copy()
@@ -71,7 +75,7 @@ class MediaHostStatesManager @Inject constructor() {
     fun updateCarouselDimensions(
         @MediaLocation location: Int,
         hostState: MediaHostState
-    ): MeasurementOutput {
+    ): MeasurementOutput = traceSection("MediaHostStatesManager#updateCarouselDimensions") {
         val result = MeasurementOutput(0, 0)
         for (controller in controllers) {
             val measurement = controller.getMeasurementsForState(hostState)

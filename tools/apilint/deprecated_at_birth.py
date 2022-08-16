@@ -44,6 +44,7 @@ def ident(raw):
     can be used to identify members across API levels."""
     raw = raw.replace(" deprecated ", " ")
     raw = raw.replace(" synchronized ", " ")
+    raw = raw.replace(" abstract ", " ")
     raw = raw.replace(" final ", " ")
     raw = re.sub("<.+?>", "", raw)
     raw = re.sub("@[A-Za-z]+ ", "", raw)

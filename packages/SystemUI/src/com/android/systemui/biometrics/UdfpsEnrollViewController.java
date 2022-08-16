@@ -56,17 +56,18 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
             @NonNull StatusBarStateController statusBarStateController,
             @NonNull PanelExpansionStateManager panelExpansionStateManager,
             @NonNull SystemUIDialogManager systemUIDialogManager,
-            @NonNull DumpManager dumpManager) {
+            @NonNull DumpManager dumpManager,
+            float scaleFactor) {
         super(view, statusBarStateController, panelExpansionStateManager, systemUIDialogManager,
                 dumpManager);
-        mEnrollProgressBarRadius = getContext().getResources()
-                .getInteger(R.integer.config_udfpsEnrollProgressBar);
+        mEnrollProgressBarRadius = (int) (scaleFactor * getContext().getResources().getInteger(
+                R.integer.config_udfpsEnrollProgressBar));
         mEnrollHelper = enrollHelper;
         mView.setEnrollHelper(mEnrollHelper);
     }
 
     @Override
-    @NonNull String getTag() {
+    @NonNull protected String getTag() {
         return "UdfpsEnrollViewController";
     }
 
@@ -98,4 +99,10 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
     public int getPaddingY() {
         return mEnrollProgressBarRadius;
     }
+
+    @Override
+    public void doAnnounceForAccessibility(String str) {
+        mView.announceForAccessibility(str);
+    }
+
 }

@@ -1329,6 +1329,11 @@
              dictionary-based word suggestions.  Corresponds to
              {@link android.text.InputType#TYPE_TEXT_FLAG_NO_SUGGESTIONS}. -->
         <flag name="textNoSuggestions" value="0x00080001" />
+        <!-- Can be combined with <var>text</var> and its variations to
+             indicate that if there is extra information, the IME should provide
+             {@link android.view.inputmethod.TextAttribute}.  Corresponds to
+             {@link android.text.InputType#TYPE_TEXT_FLAG_ENABLE_TEXT_CONVERSION_SUGGESTIONS}. -->
+        <flag name="textEnableTextConversionSuggestions" value="0x00100001" />
         <!-- Text that will be used as a URI.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_URI}. -->
@@ -2317,7 +2322,9 @@
         <attr name="windowSplashScreenAnimatedIcon" format="reference"/>
         <!-- The duration, in milliseconds, of the window splash screen icon animation duration
              when playing the splash screen starting window. The maximum animation duration should
-             be limited below 1000ms. -->
+             be limited below 1000ms.
+              @deprecated Not used by framework starting from API level 33. The system estimates the
+               duration of the vector animation automatically. -->
         <attr name="windowSplashScreenAnimationDuration" format="integer"/>
 
         <!-- Place an drawable image in the bottom of the starting window, it can be used to
@@ -2327,6 +2334,17 @@
              contrast between the window background and the icon. Note the shape would also be
              masking like an icon. -->
         <attr name="windowSplashScreenIconBackgroundColor" format="color"/>
+
+        <!-- Specify whether this application always wants the icon to be displayed on the splash
+             screen. -->
+        <attr name="windowSplashScreenBehavior">
+            <!-- The icon is shown when the launching activity sets the splashScreenStyle to
+                 SPLASH_SCREEN_STYLE_ICON. If the launching activity does not specify any style,
+                 follow the system behavior. -->
+            <enum name="default" value="0" />
+            <!-- The icon is shown unless the launching app specified SPLASH_SCREEN_STYLE_EMPTY -->
+            <enum name="icon_preferred" value="1" />
+        </attr>
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -2880,7 +2898,7 @@
              <code>public void sayHello(View v)</code> method of your context
              (typically, your Activity).
              {@deprecated View actually traverses the Context
-             hierarchy looking for the relevant method, which is fragile (an intermediate 
+             hierarchy looking for the relevant method, which is fragile (an intermediate
              ContextWrapper adding a same-named method would change behavior) and restricts
              bytecode optimizers such as R8. Instead, use View.setOnClickListener.}-->
         <attr name="onClick" format="string" />
@@ -3342,6 +3360,22 @@
              <p>Note that this flag will only be respected if the View's Outline returns true from
              {@link android.graphics.Outline#canClip()}. -->
         <attr name="clipToOutline" format="boolean" />
+
+        <!-- <p> Sets a preference to keep the bounds of this view clear from floating windows
+            above this view's window. This informs the system that the view is considered a vital
+            area for the user and that ideally it should not be covered. Setting this is only
+            appropriate for UI where the user would likely take action to uncover it.
+            <p>The system will try to respect this, but when not possible will ignore it.
+            <p>This is equivalent to {@link android.view.View#setPreferKeepClear}.-->
+        <attr name="preferKeepClear" format="boolean" />
+
+        <!-- <p>Whether or not the auto handwriting initiation is enabled in this View.
+             <p>For a view with active {@link android.view.inputmethod.InputConnection},
+             if auto handwriting initiation is enabled stylus movement within its view boundary
+             will automatically trigger the handwriting mode.
+             <p>This is true by default.
+             See {@link android.view.View#setAutoHandwritingEnabled}. -->
+        <attr name="autoHandwritingEnabled" format="boolean" />
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
@@ -3612,6 +3646,14 @@
         <attr name="__removed2" format="boolean" />
         <!-- Specifies whether the IME supports showing inline suggestions. -->
         <attr name="supportsInlineSuggestions" format="boolean" />
+        <!-- Specifies whether the IME supports showing inline suggestions when touch
+             exploration is enabled. This does nothing if supportsInlineSuggestions is false.
+             The default value is false and most IMEs should not set this
+             to true since the older menu-style Autofill works better with touch exploration.
+             This attribute should be set to true in special situations, such as if this is an
+             accessibility-focused IME which blocks user interaction with the app window while the
+             IME is displayed. -->
+        <attr name="supportsInlineSuggestionsWithTouchExploration" format="boolean" />
         <!-- Specifies whether the IME suppresses system spell checker.
              The default value is false. If an IME sets this attribute to true,
              the system spell checker will be disabled while the IME has an
@@ -3633,6 +3675,24 @@
              to re-retrieve all resources (including view layouts, drawables, etc)
              to correctly handle any configuration change.-->
         <attr name="configChanges" />
+        <!-- Specifies whether the IME supports Handwriting using stylus. Defaults to false.
+            When IME implements support for stylus handwriting, on every ACTION_DOWN with stylus
+            on an editor,
+            {@link android.inputmethodservice.InputMethodService#onStartStylusHandwriting()}
+            is called.
+            If IME is ready for stylus input, it must return {@code true} for Handwriting sessions
+            to start. IME should attach it's View that renders Ink on screen to stylus handwriting
+            inking window
+            {@link android.inputmethodservice.InputMethodService#getStylusHandwritingWindow()}.
+            IME will then receive Stylus MotionEvent(s) on DecorView i.e. the Inking view
+            {@link android.view.View#onTouchEvent(MotionEvent)} attached by IME to Ink window.
+            Handwriting mode can be finished by calling
+            {@link android.inputmethodservice.InputMethodService#finishStylusHandwriting()} or will
+            be finished by framework on next
+            {@link android.inputmethodservice.InputMethodService#onFinishInput()}.
+        -->
+        <attr name="supportsStylusHandwriting" format="boolean" />
+
     </declare-styleable>
 
     <!-- This is the subtype of InputMethod. Subtype can describe locales (for example, en_US and
@@ -3871,10 +3931,17 @@
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_MULTI_FINGER_GESTURES}. -->
             <flag name="flagRequestMultiFingerGestures" value="0x00001000" />
             <flag name="flagSendMotionEvents" value="0x0004000" />
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_INPUT_METHOD_EDITOR}. -->
+            <flag name="flagInputMethodEditor" value="0x0008000" />
         </attr>
-        <!-- Component name of an activity that allows the user to modify
-             the settings for this service. This setting cannot be changed at runtime. -->
+        <!-- Fully qualified class name of an activity that allows the user to modify the settings
+             for this service. This setting cannot be changed at runtime. -->
         <attr name="settingsActivity" />
+        <!-- Fully qualified class name of {@link android.service.quicksettings.TileService} is
+             associated with this accessibility service for one to one mapping. It is used by system
+             settings to remind users this accessibility service has a
+             {@link android.service.quicksettings.TileService}. -->
+        <attr name="tileService" format="string" />
         <!-- Attribute whether the accessibility service wants to be able to retrieve the
              active window content. This setting cannot be changed at runtime.
              <p>
@@ -3932,35 +3999,45 @@
         <attr name="isAccessibilityTool" format="boolean" />
 
         <!-- Animated image of the accessibility service purpose or behavior, to help users
-             understand how the service can help them.-->
+             understand how the service can help them. -->
         <attr name="animatedImageDrawable" format="reference"/>
-        <!-- Html description of the accessibility service, to help users understand
-             how the service can help them.-->
+        <!-- Html description of the accessibility service usage, availability, or limitations (e.g.
+             isn't supported by all apps). -->
         <attr name="htmlDescription" format="reference"/>
-
-        <!-- Short description of the accessibility service purpose or behavior.-->
+        <!-- Description of the accessibility service usage, availability, or limitations (e.g.
+             isn't supported by all apps). -->
         <attr name="description" />
         <!-- Brief summary of the accessibility service purpose or behavior. -->
         <attr name="summary" />
+        <!-- Detailed intro of the accessibility service purpose or behavior. -->
+        <attr name="intro" format="reference" />
     </declare-styleable>
 
     <!-- Use <code>accessibility-shortcut-target</code> as the root tag of the XML resource that
          describes an activity, which is referenced from the
          <code>android.accessibilityshortcut.target</code> meta-data entry. -->
     <declare-styleable name="AccessibilityShortcutTarget">
-        <!-- Short description of the target of accessibility shortcut purpose or behavior.-->
+        <!-- Description of the target of accessibility shortcut usage, availability, or limitations
+             (e.g. isn't supported by all apps). -->
         <attr name="description" />
         <!-- Brief summary of the target of accessibility shortcut purpose or behavior. -->
         <attr name="summary" />
         <!-- Animated image of the target of accessibility shortcut purpose or behavior, to help
              users understand how the target of accessibility shortcut can help them.-->
         <attr name="animatedImageDrawable" format="reference"/>
-        <!-- Html description of the target of accessibility shortcut purpose or behavior, to help
-             users understand how the target of accessibility shortcut can help them. -->
+        <!-- Html description of the target of accessibility shortcut usage, availability, or
+             limitations (e.g. isn't supported by all apps). -->
         <attr name="htmlDescription" format="reference"/>
-        <!-- Component name of an activity that allows the user to modify the settings for this
-             target of accessibility shortcut. -->
+        <!-- Fully qualified class name of an activity that allows the user to modify the settings
+             for this target of accessibility shortcut. -->
         <attr name="settingsActivity" />
+        <!-- Fully qualified class name of {@link android.service.quicksettings.TileService} is
+             associated with this accessibility shortcut target for one to one mapping. It is used
+             by system settings to remind users this accessibility service has a
+             {@link android.service.quicksettings.TileService}. -->
+        <attr name="tileService" format="string" />
+        <!-- Detailed intro of the target of accessibility shortcut purpose or behavior. -->
+        <attr name="intro" format="reference" />
     </declare-styleable>
 
     <!-- Use <code>print-service</code> as the root tag of the XML resource that
@@ -5007,6 +5084,10 @@
         <attr name="fontFeatureSettings" format="string" />
         <!-- Font variation settings. -->
         <attr name="fontVariationSettings" format="string"/>
+        <!-- Specifies the strictness of line-breaking rules applied within an element. -->
+        <attr name="lineBreakStyle" />
+        <!-- Specifies the phrase-based breaking opportunities. -->
+        <attr name="lineBreakWordStyle" />
     </declare-styleable>
     <declare-styleable name="TextClock">
         <!-- Specifies the formatting pattern used to show the time and/or date
@@ -5383,6 +5464,34 @@
             <!-- Standard amount of hyphenation, useful for running text and for
             screens with limited space for text. -->
             <enum name="full" value="2" />
+
+            <!-- Same to hyphenationFrequency="normal" but using faster algorithm for measuring
+            hyphenation break points. To make text rendering faster with hyphenation, this algorithm
+             ignores some hyphen character related typographic features, e.g. kerning. -->
+            <enum name="normalFast" value="3" />
+
+            <!-- Same to hyphenationFrequency="full" but using faster algorithm for measuring
+            hyphenation break points. To make text rendering faster with hyphenation, this algorithm
+             ignores some hyphen character related typographic features, e.g. kerning. -->
+            <enum name="fullFast" value="4" />
+        </attr>
+        <!-- Indicates the line break strategies can be used when calculating the text wrapping. -->
+        <attr name="lineBreakStyle">
+            <!-- No line break style specific. -->
+            <enum name="none" value="0" />
+            <!-- Use the least restrictive rule for line-breaking. -->
+            <enum name="loose" value="1" />
+            <!-- Indicates breaking text with the most comment set of line-breaking rules. -->
+            <enum name="normal" value="2" />
+            <!-- Indicates breaking text with the most strictest line-breaking rules. -->
+            <enum name="strict" value="3" />
+        </attr>
+        <!-- Specify the phrase-based line break can be used when calculating the text wrapping.-->
+        <attr name="lineBreakWordStyle">
+            <!-- No line break word style specific. -->
+            <enum name="none" value="0" />
+            <!-- Specify the phrase based breaking. -->
+            <enum name="phrase" value="1" />
         </attr>
         <!-- Specify the type of auto-size. Note that this feature is not supported by EditText,
         works only for TextView. -->
@@ -6851,6 +6960,13 @@
         <!-- Special option for window animations: whether window should have rounded corners.
              @see ScreenDecorationsUtils#getWindowCornerRadius(Resources) -->
         <attr name="hasRoundedCorners" format="boolean" />
+        <!-- Special option for window animations: whether to show a background behind the animating
+             windows. By default the window's background is used unless overridden by the
+             animation. -->
+        <attr name="showBackdrop" format="boolean" />
+        <!-- Special option for window animations: whether the window's background should be used as
+             a background to the animation. -->
+        <attr name="backdropColor" format="color" />
     </declare-styleable>
 
     <declare-styleable name="AnimationSet">
@@ -6879,10 +6995,10 @@
     </declare-styleable>
 
     <declare-styleable name="TranslateAnimation">
-        <attr name="fromXDelta" format="float|fraction" />
-        <attr name="toXDelta" format="float|fraction" />
-        <attr name="fromYDelta" format="float|fraction" />
-        <attr name="toYDelta" format="float|fraction" />
+        <attr name="fromXDelta" format="float|fraction|dimension" />
+        <attr name="toXDelta" format="float|fraction|dimension" />
+        <attr name="fromYDelta" format="float|fraction|dimension" />
+        <attr name="toYDelta" format="float|fraction|dimension" />
     </declare-styleable>
 
     <declare-styleable name="AlphaAnimation">
@@ -6899,6 +7015,46 @@
         <attr name="toTop" format="fraction" />
         <attr name="toRight" format="fraction" />
         <attr name="toBottom" format="fraction" />
+    </declare-styleable>
+
+    <!-- Defines the ExtendAnimation used to extend windows during animations -->
+    <declare-styleable name="ExtendAnimation">
+        <!-- Defines the amount a window should be extended outward from the left at the start of
+             the animation in an absolute dimension (interpreted as pixels if no dimension unit is
+             provided) or as a percentage of the animation target's width. -->
+        <attr name="fromExtendLeft" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the top at the start of
+             the animation in an absolute dimension (interpreted as pixels if no dimension unit is
+             provided) or as a percentage of the animation target's height. -->
+        <attr name="fromExtendTop" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the right at the start of
+             the animation in an absolute dimension (interpreted as pixels if no dimension unit is
+             provided) or as a percentage of the animation target's width. -->
+        <attr name="fromExtendRight" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the bottom at the start of
+             the animation in an absolute dimension (interpreted as pixels if no dimension unit is
+             provided) or as a percentage of the animation target's height. -->
+        <attr name="fromExtendBottom" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the left by the end of the
+             animation by transitioning from the fromExtendLeft amount in an absolute dimension
+             (interpreted as pixels if no dimension unit is provided) or as a percentage of the
+             animation target's width. -->
+        <attr name="toExtendLeft" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the top by the end of the
+             animation by transitioning from the fromExtendTop amount in an absolute dimension
+             (interpreted as pixels if no dimension unit is provided) or as a percentage of the
+             animation target's height. -->
+        <attr name="toExtendTop" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the right by the end of
+             the animation by transitioning from the fromExtendRight amount in an absolute
+             dimension (interpreted as pixels if no dimension unit is provided) or as a percentage
+             of the animation target's width. -->
+        <attr name="toExtendRight" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the bottom by the end of
+             the animation by transitioning from the fromExtendBottom amount in an absolute
+             dimension (interpreted as pixels if no dimension unit is provided) or as a percentage
+             of the animation target's height. -->
+        <attr name="toExtendBottom" format="float|fraction|dimension" />
     </declare-styleable>
 
     <declare-styleable name="LayoutAnimation">
@@ -7753,7 +7909,7 @@
 
         <!-- Name of a method on the Context used to inflate the menu that will be
              called when the item is clicked.
-             {@deprecated Menu actually traverses the Context hierarchy looking for the 
+             {@deprecated Menu actually traverses the Context hierarchy looking for the
              relevant method, which is fragile (an intermediate ContextWrapper adding a
              same-named method would change behavior) and restricts bytecode optimizers
              such as R8. Instead, use MenuItem.setOnMenuItemClickListener.} -->
@@ -8422,6 +8578,11 @@
         <!-- Component name of an activity that allows the user to modify
              the settings for this dream. -->
         <attr name="settingsActivity" />
+        <!-- A preview, in a drawable resource id, of what the Dream will look like. -->
+        <attr name="previewImage" format="reference" />
+        <!-- Whether to show clock and other complications such as weather in the overlay. Default
+             to true. Note that the overlay on dreams is currently only supported on tablets. -->
+        <attr name="showClockAndComplications" format="boolean" />
     </declare-styleable>
 
     <!--  Use <code>trust-agent</code> as the root tag of the XML resource that
@@ -8687,6 +8848,8 @@
         <attr name="successColor" format="color|reference"/>
         <!-- The dot color -->
         <attr name="dotColor" format="color|reference"/>
+        <!-- Color of the dot when it's activated -->
+        <attr name="dotActivatedColor" format="color|reference"/>
 
     </declare-styleable>
 
@@ -8712,7 +8875,6 @@
         <attr name="shortcutLongLabel"/>
         <!-- Text shown on the button that takes users to the wallet application -->
         <attr name="shortcutShortLabel"/>
-
     </declare-styleable>
 
     <!-- Use <code>recognition-service</code> as the root tag of the XML resource that
@@ -8756,6 +8918,30 @@
         <!-- The service that provides {@link android.service.voice.HotwordDetectionService}.
              @hide @SystemApi -->
         <attr name="hotwordDetectionService" format="string" />
+    </declare-styleable>
+
+    <!-- Use <code>game-service</code> as the root tag of the XML resource that
+         describes a GameService.
+         Described here are the attributes that can be included in that tag. -->
+    <declare-styleable name="GameService">
+        <!-- The service that hosts active game sessions.  This is required. -->
+        <attr name="gameSessionService" format="string" />
+    </declare-styleable>
+
+    <!-- Use <code>game-mode-config</code> as the root tag of the XML resource that
+         describes a GameModeConfig.
+         Described here are the attributes that can be included in that tag. -->
+    <declare-styleable name="GameModeConfig">
+        <!-- Set true to opt in BATTERY mode. -->
+        <attr name="supportsBatteryGameMode" format="boolean" />
+        <!-- Set true to opt in PERFORMANCE mode. -->
+        <attr name="supportsPerformanceGameMode" format="boolean" />
+        <!-- Set true to enable ANGLE. -->
+        <attr name="allowGameAngleDriver" format="boolean" />
+        <!-- Set true to allow resolution downscaling intervention. -->
+        <attr name="allowGameDownscaling" format="boolean" />
+        <!-- Set true to allow FPS override intervention. -->
+        <attr name="allowGameFpsOverride" format="boolean" />
     </declare-styleable>
 
     <!-- Use <code>voice-enrollment-application</code>
@@ -9314,6 +9500,19 @@
         <attr name="canPauseRecording" format="boolean" />
     </declare-styleable>
 
+    <!-- Use <code>tv-interactive-app</code> as the root tag of the XML resource that describes a
+         {@link android.media.tv.interactive.TvInteractiveAppService}, which is referenced
+         from its
+         {@link android.media.tv.interactive.TvInteractiveAppService#SERVICE_META_DATA}
+         meta-data entry. Described here are the attributes that can be included in that tag. -->
+    <declare-styleable name="TvInteractiveAppService">
+        <!-- The interactive app types that the TV interactive app service supports.
+             Reference to a string array resource that describes the supported types,
+             e.g. HbbTv, Ginga. -->
+        <attr name="supportedTypes" format="reference" />
+    </declare-styleable>
+
+
     <!-- Attributes that can be used with <code>rating-system-definition</code> tags inside of the
          XML resource that describes TV content rating of a {@link android.media.tv.TvInputService},
          which is referenced from its
@@ -9605,4 +9804,19 @@
     <attr name="iconfactoryBadgeSize" format="dimension"/>
     <!-- Perceptual luminance of a color, in accessibility friendly color space. From 0 to 100. -->
     <attr name="lStar" format="float"/>
-</resources>
+
+    <!-- The attributes of the {@code <locale>} tag within {@code <locale-config>}. -->
+    <declare-styleable name="LocaleConfig_Locale">
+        <!-- The <a href="https://www.rfc-editor.org/rfc/bcp/bcp47.txt">IETF BCP47 language tag</a>
+        of the supported locale. {@link android.app.LocaleConfig} -->
+        <attr name="name" />
+    </declare-styleable>
+
+    <!-- @hide -->
+    <declare-styleable name="CachingIconView">
+        <!-- Maximum width of displayed drawable. Drawables exceeding this size will be downsampled. -->
+        <attr name="maxDrawableWidth" format="dimension"/>
+        <!-- Maximum width of height drawable. Drawables exceeding this size will be downsampled. -->
+        <attr name="maxDrawableHeight" format="dimension"/>
+    </declare-styleable>
+    </resources>

@@ -16,7 +16,9 @@
 
 package android.animation;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ConstantState;
@@ -61,6 +63,49 @@ public abstract class Animator implements Cloneable {
      * ConstantState will not be garbage collected until this animator is collected
      */
     private AnimatorConstantState mConstantState;
+
+    /**
+     * backing field for backgroundPauseDelay property. This could be simply a hardcoded
+     * value in AnimationHandler, but it is useful to be able to change the value in tests.
+     */
+    private static long sBackgroundPauseDelay = 10000;
+
+    /**
+     * Sets the duration for delaying pausing animators when apps go into the background.
+     * Used by AnimationHandler when requested to pause animators.
+     *
+     * @hide
+     */
+    @TestApi
+    public static void setBackgroundPauseDelay(long value) {
+        sBackgroundPauseDelay = value;
+    }
+
+    /**
+     * Gets the duration for delaying pausing animators when apps go into the background.
+     * Used by AnimationHandler when requested to pause animators.
+     *
+     * @hide
+     */
+    @TestApi
+    public static long getBackgroundPauseDelay() {
+        return sBackgroundPauseDelay;
+    }
+
+    /**
+     * Sets the behavior of animator pausing when apps go into the background.
+     * This is exposed as a test API for verification, but is intended for use by internal/
+     * platform code, potentially for use by a system property that could disable it
+     * system wide.
+     *
+     * @param enable Enable (default behavior) or disable background pausing behavior.
+     * @hide
+     */
+    @TestApi
+    public static void setAnimatorPausingEnabled(boolean enable) {
+        AnimationHandler.setAnimatorPausingEnabled(enable);
+        AnimationHandler.setOverrideAnimatorPausingSystemProperty(!enable);
+    }
 
     /**
      * Starts this animation. If the animation has a nonzero startDelay, the animation will start
@@ -535,7 +580,7 @@ public abstract class Animator implements Cloneable {
          * @param animation The started animation.
          * @param isReverse Whether the animation is playing in reverse.
          */
-        default void onAnimationStart(Animator animation, boolean isReverse) {
+        default void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
             onAnimationStart(animation);
         }
 
@@ -551,7 +596,7 @@ public abstract class Animator implements Cloneable {
          * @param animation The animation which reached its end.
          * @param isReverse Whether the animation is playing in reverse.
          */
-        default void onAnimationEnd(Animator animation, boolean isReverse) {
+        default void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
             onAnimationEnd(animation);
         }
 
@@ -560,7 +605,7 @@ public abstract class Animator implements Cloneable {
          *
          * @param animation The started animation.
          */
-        void onAnimationStart(Animator animation);
+        void onAnimationStart(@NonNull Animator animation);
 
         /**
          * <p>Notifies the end of the animation. This callback is not invoked
@@ -568,7 +613,7 @@ public abstract class Animator implements Cloneable {
          *
          * @param animation The animation which reached its end.
          */
-        void onAnimationEnd(Animator animation);
+        void onAnimationEnd(@NonNull Animator animation);
 
         /**
          * <p>Notifies the cancellation of the animation. This callback is not invoked
@@ -576,14 +621,14 @@ public abstract class Animator implements Cloneable {
          *
          * @param animation The animation which was canceled.
          */
-        void onAnimationCancel(Animator animation);
+        void onAnimationCancel(@NonNull Animator animation);
 
         /**
          * <p>Notifies the repetition of the animation.</p>
          *
          * @param animation The animation which was repeated.
          */
-        void onAnimationRepeat(Animator animation);
+        void onAnimationRepeat(@NonNull Animator animation);
     }
 
     /**
@@ -599,7 +644,7 @@ public abstract class Animator implements Cloneable {
          * @param animation The animaton being paused.
          * @see #pause()
          */
-        void onAnimationPause(Animator animation);
+        void onAnimationPause(@NonNull Animator animation);
 
         /**
          * <p>Notifies that the animation was resumed, after being
@@ -608,7 +653,7 @@ public abstract class Animator implements Cloneable {
          * @param animation The animation being resumed.
          * @see #resume()
          */
-        void onAnimationResume(Animator animation);
+        void onAnimationResume(@NonNull Animator animation);
     }
 
     /**

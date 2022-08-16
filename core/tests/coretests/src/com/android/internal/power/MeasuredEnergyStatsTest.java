@@ -19,9 +19,12 @@ package com.android.internal.power;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
 import static com.android.internal.power.MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS;
+import static com.android.internal.power.MeasuredEnergyStats.POWER_BUCKET_BLUETOOTH;
+import static com.android.internal.power.MeasuredEnergyStats.POWER_BUCKET_CPU;
 import static com.android.internal.power.MeasuredEnergyStats.POWER_BUCKET_SCREEN_DOZE;
 import static com.android.internal.power.MeasuredEnergyStats.POWER_BUCKET_SCREEN_ON;
 import static com.android.internal.power.MeasuredEnergyStats.POWER_BUCKET_SCREEN_OTHER;
+import static com.android.internal.power.MeasuredEnergyStats.POWER_BUCKET_WIFI;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -56,55 +59,32 @@ public class MeasuredEnergyStatsTest {
         supportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = false;
         supportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = true;
 
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
+        final MeasuredEnergyStats.Config config =
+                new MeasuredEnergyStats.Config(supportedStandardBuckets, customBucketNames,
+                        new int[]{POWER_BUCKET_SCREEN_ON, POWER_BUCKET_WIFI},
+                        new String[]{"state0", "state1", "state3"});
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
 
-        for (int i = 0; i < NUMBER_STANDARD_POWER_BUCKETS; i++) {
-            if (supportedStandardBuckets[i]) {
-                assertTrue(stats.isStandardBucketSupported(i));
-                assertEquals(0L, stats.getAccumulatedStandardBucketCharge(i));
+        for (int bucket = 0; bucket < NUMBER_STANDARD_POWER_BUCKETS; bucket++) {
+            if (supportedStandardBuckets[bucket]) {
+                assertTrue(stats.isStandardBucketSupported(bucket));
+                assertEquals(0L, stats.getAccumulatedStandardBucketCharge(bucket));
             } else {
-                assertFalse(stats.isStandardBucketSupported(i));
-                assertEquals(POWER_DATA_UNAVAILABLE, stats.getAccumulatedStandardBucketCharge(i));
+                assertFalse(stats.isStandardBucketSupported(bucket));
+                assertEquals(POWER_DATA_UNAVAILABLE,
+                        stats.getAccumulatedStandardBucketCharge(bucket));
+            }
+            if (bucket == POWER_BUCKET_SCREEN_ON) {
+                assertThat(config.isSupportedMultiStateBucket(bucket)).isTrue();
+            } else {
+                assertThat(config.isSupportedMultiStateBucket(bucket)).isFalse();
             }
         }
         for (int i = 0; i < customBucketNames.length; i++) {
             assertEquals(0L, stats.getAccumulatedCustomBucketCharge(i));
         }
-        assertThat(stats.getCustomBucketNames()).asList().containsExactly("A", "B");
-    }
-
-    @Test
-    public void testCreateFromTemplate() {
-        final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
-        final String[] customBucketNames = {"A", "B"};
-        supportedStandardBuckets[POWER_BUCKET_SCREEN_ON] = true;
-        supportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = false;
-        supportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = true;
-
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 5);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 40);
-        stats.updateCustomBucket(0, 50);
-        stats.updateCustomBucket(1, 60);
-
-        final MeasuredEnergyStats newStats = MeasuredEnergyStats.createFromTemplate(stats);
-
-        for (int i = 0; i < NUMBER_STANDARD_POWER_BUCKETS; i++) {
-            if (supportedStandardBuckets[i]) {
-                assertTrue(newStats.isStandardBucketSupported(i));
-                assertEquals(0L, newStats.getAccumulatedStandardBucketCharge(i));
-            } else {
-                assertFalse(newStats.isStandardBucketSupported(i));
-                assertEquals(POWER_DATA_UNAVAILABLE,
-                        newStats.getAccumulatedStandardBucketCharge(i));
-            }
-        }
-        for (int i = 0; i < customBucketNames.length; i++) {
-            assertEquals(0L, newStats.getAccumulatedCustomBucketCharge(i));
-        }
+        assertThat(config.getCustomBucketNames()).asList().containsExactly("A", "B");
+        assertThat(config.getStateNames()).asList().containsExactly("state0", "state1", "state3");
     }
 
     @Test
@@ -115,23 +95,32 @@ public class MeasuredEnergyStatsTest {
         supportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = false;
         supportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = true;
 
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 5);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 40);
-        stats.updateCustomBucket(0, 50);
-        stats.updateCustomBucket(1, 60);
+        final MeasuredEnergyStats.Config config =
+                new MeasuredEnergyStats.Config(supportedStandardBuckets, customBucketNames,
+                        new int[]{POWER_BUCKET_SCREEN_ON}, new String[]{"s0", "s1"});
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
+
+        stats.setState(0, 1000);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10, 2000);
+        stats.setState(1, 3000);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 5, 4000);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 40, 5000);
+        stats.updateCustomBucket(0, 50, 6000);
+        stats.updateCustomBucket(1, 60, 7000);
 
         final Parcel parcel = Parcel.obtain();
         stats.writeToParcel(parcel);
 
         parcel.setDataPosition(0);
-        MeasuredEnergyStats newStats = new MeasuredEnergyStats(parcel);
+        MeasuredEnergyStats newStats = new MeasuredEnergyStats(config, parcel);
 
-        for (int i = 0; i < NUMBER_STANDARD_POWER_BUCKETS; i++) {
-            assertEquals(stats.getAccumulatedStandardBucketCharge(i),
-                    newStats.getAccumulatedStandardBucketCharge(i));
+        for (int bucket = 0; bucket < NUMBER_STANDARD_POWER_BUCKETS; bucket++) {
+            assertEquals(stats.getAccumulatedStandardBucketCharge(bucket),
+                    newStats.getAccumulatedStandardBucketCharge(bucket));
+            for (int state = 0; state < 2; state++) {
+                assertEquals(stats.getAccumulatedStandardBucketCharge(bucket, state),
+                        newStats.getAccumulatedStandardBucketCharge(bucket, state));
+            }
         }
         for (int i = 0; i < customBucketNames.length; i++) {
             assertEquals(stats.getAccumulatedCustomBucketCharge(i),
@@ -143,6 +132,57 @@ public class MeasuredEnergyStatsTest {
     }
 
     @Test
+    public void testCreateAndReadConfigFromParcel() {
+        final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
+        final String[] customBucketNames = {"A", "B"};
+        supportedStandardBuckets[POWER_BUCKET_SCREEN_ON] = true;
+        supportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = false;
+        supportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = true;
+
+        final MeasuredEnergyStats.Config config =
+                new MeasuredEnergyStats.Config(supportedStandardBuckets, customBucketNames,
+                        new int[]{POWER_BUCKET_SCREEN_ON, POWER_BUCKET_WIFI},
+                        new String[] {"state0", "state1", "state2"});
+
+        final Parcel parcel = Parcel.obtain();
+        MeasuredEnergyStats.Config.writeToParcel(config, parcel);
+
+        parcel.setDataPosition(0);
+
+        final MeasuredEnergyStats.Config newConfig = MeasuredEnergyStats.Config.createFromParcel(
+                parcel);
+
+        assertThat(newConfig).isNotNull();
+        for (int bucket = 0; bucket < NUMBER_STANDARD_POWER_BUCKETS; bucket++) {
+            if (bucket == POWER_BUCKET_SCREEN_ON || bucket == POWER_BUCKET_SCREEN_OTHER) {
+                assertThat(newConfig.isSupportedBucket(bucket)).isTrue();
+            } else {
+                assertThat(newConfig.isSupportedBucket(bucket)).isFalse();
+            }
+            if (bucket == POWER_BUCKET_SCREEN_ON) {
+                assertThat(newConfig.isSupportedMultiStateBucket(bucket)).isTrue();
+            } else {
+                assertThat(newConfig.isSupportedMultiStateBucket(bucket)).isFalse();
+            }
+        }
+        assertThat(newConfig.getCustomBucketNames()).isEqualTo(new String[]{"A", "B"});
+        assertThat(newConfig.getStateNames()).isEqualTo(new String[]{"state0", "state1", "state2"});
+    }
+
+    @Test
+    public void testCreateAndReadConfigFromParcel_nullConfig() {
+        final Parcel parcel = Parcel.obtain();
+        MeasuredEnergyStats.Config.writeToParcel(null, parcel);
+
+        parcel.setDataPosition(0);
+
+        final MeasuredEnergyStats.Config newConfig = MeasuredEnergyStats.Config.createFromParcel(
+                parcel);
+
+        assertThat(newConfig).isNull();
+    }
+
+    @Test
     public void testCreateAndReadSummaryFromParcel() {
         final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
         final String[] customBucketNames = {"A", "B"};
@@ -150,8 +190,11 @@ public class MeasuredEnergyStatsTest {
         supportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = false;
         supportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = true;
 
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
+        final MeasuredEnergyStats.Config config =
+                new MeasuredEnergyStats.Config(supportedStandardBuckets, customBucketNames,
+                        new int[0], new String[]{"s"});
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
+
         stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10);
         stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 5);
         stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 40);
@@ -159,9 +202,12 @@ public class MeasuredEnergyStatsTest {
         stats.updateCustomBucket(1, 60);
 
         final Parcel parcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false, false);
+        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel);
+
         parcel.setDataPosition(0);
-        MeasuredEnergyStats newStats = MeasuredEnergyStats.createAndReadSummaryFromParcel(parcel);
+
+        MeasuredEnergyStats newStats =
+                MeasuredEnergyStats.createAndReadSummaryFromParcel(config, parcel);
 
         for (int i = 0; i < NUMBER_STANDARD_POWER_BUCKETS; i++) {
             assertEquals(stats.isStandardBucketSupported(i),
@@ -175,48 +221,44 @@ public class MeasuredEnergyStatsTest {
         }
         assertEquals(POWER_DATA_UNAVAILABLE,
                 newStats.getAccumulatedCustomBucketCharge(customBucketNames.length + 1));
-        assertThat(newStats.getCustomBucketNames()).asList().containsExactly("A", "B");
         parcel.recycle();
     }
 
     @Test
-    public void testCreateAndReadSummaryFromParcel_existingTemplate() {
+    public void testCreateAndReadSummaryFromParcel_configChange() {
         final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
         final String[] customBucketNames = {"A", "B"};
         supportedStandardBuckets[POWER_BUCKET_SCREEN_ON] = true;
         supportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = false;
         supportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = true;
 
-        final MeasuredEnergyStats template =
-                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
-        template.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10);
-        template.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 5);
-        template.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 40);
-        template.updateCustomBucket(0, 50);
-
-        final MeasuredEnergyStats stats = MeasuredEnergyStats.createFromTemplate(template);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 200);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 7);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 63);
-        stats.updateCustomBucket(0, 315);
-        stats.updateCustomBucket(1, 316);
+        final MeasuredEnergyStats.Config config =
+                new MeasuredEnergyStats.Config(supportedStandardBuckets, customBucketNames,
+                        new int[0], new String[]{"s"});
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 5);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 40);
+        stats.updateCustomBucket(0, 50);
 
         final Parcel parcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false, true);
-
-        final boolean[] newsupportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
-        newsupportedStandardBuckets[POWER_BUCKET_SCREEN_ON] = true;
-        newsupportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = true; // switched false > true
-        newsupportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = false; // switched true > false
-        final MeasuredEnergyStats newTemplate =
-                new MeasuredEnergyStats(newsupportedStandardBuckets, customBucketNames);
+        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel);
         parcel.setDataPosition(0);
 
+        final boolean[] newSupportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
+        newSupportedStandardBuckets[POWER_BUCKET_SCREEN_ON] = true;
+        newSupportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = true; // switched false > true
+        newSupportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = false; // switched true > false
+
+        final MeasuredEnergyStats.Config newConfig =
+                new MeasuredEnergyStats.Config(newSupportedStandardBuckets, customBucketNames,
+                        new int[0], new String[]{"s"});
+
         final MeasuredEnergyStats newStats =
-                MeasuredEnergyStats.createAndReadSummaryFromParcel(parcel, newTemplate);
+                MeasuredEnergyStats.createAndReadSummaryFromParcel(newConfig, parcel);
 
         for (int i = 0; i < NUMBER_STANDARD_POWER_BUCKETS; i++) {
-            if (!newsupportedStandardBuckets[i]) {
+            if (!newSupportedStandardBuckets[i]) {
                 assertFalse(newStats.isStandardBucketSupported(i));
                 assertEquals(POWER_DATA_UNAVAILABLE,
                         newStats.getAccumulatedStandardBucketCharge(i));
@@ -235,81 +277,22 @@ public class MeasuredEnergyStatsTest {
         }
         assertEquals(POWER_DATA_UNAVAILABLE,
                 newStats.getAccumulatedCustomBucketCharge(customBucketNames.length + 1));
-        assertThat(newStats.getCustomBucketNames()).asList().containsExactly("A", "B");
         parcel.recycle();
     }
 
     @Test
-    public void testCreateAndReadSummaryFromParcel_skipZero() {
-        final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
-        final String[] customBucketNames = {"A", "B"};
-        Arrays.fill(supportedStandardBuckets, true);
-
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
-        // Accumulate charge in one bucket and one custom bucket, the rest should be zero
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 200);
-        stats.updateCustomBucket(1, 60);
-
-        // Let's try parcelling with including zeros
-        final Parcel includeZerosParcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, includeZerosParcel, false, false);
-        includeZerosParcel.setDataPosition(0);
-
-        MeasuredEnergyStats newStats = MeasuredEnergyStats.createAndReadSummaryFromParcel(
-                includeZerosParcel);
-
-        for (int i = 0; i < NUMBER_STANDARD_POWER_BUCKETS; i++) {
-            if (i == POWER_BUCKET_SCREEN_ON) {
-                assertEquals(stats.isStandardBucketSupported(i),
-                        newStats.isStandardBucketSupported(i));
-                assertEquals(stats.getAccumulatedStandardBucketCharge(i),
-                        newStats.getAccumulatedStandardBucketCharge(i));
-            } else {
-                assertTrue(newStats.isStandardBucketSupported(i));
-                assertEquals(0L, newStats.getAccumulatedStandardBucketCharge(i));
-            }
-        }
-        assertEquals(0L, newStats.getAccumulatedCustomBucketCharge(0));
-        assertEquals(stats.getAccumulatedCustomBucketCharge(1),
-                newStats.getAccumulatedCustomBucketCharge(1));
-        includeZerosParcel.recycle();
-
-        // Now let's try parcelling with skipping zeros
-        final Parcel skipZerosParcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, skipZerosParcel, true, false);
-        skipZerosParcel.setDataPosition(0);
-
-        newStats = MeasuredEnergyStats.createAndReadSummaryFromParcel(skipZerosParcel);
-
-        for (int i = 0; i < NUMBER_STANDARD_POWER_BUCKETS; i++) {
-            if (i == POWER_BUCKET_SCREEN_ON) {
-                assertEquals(stats.isStandardBucketSupported(i),
-                        newStats.isStandardBucketSupported(i));
-                assertEquals(stats.getAccumulatedStandardBucketCharge(i),
-                        newStats.getAccumulatedStandardBucketCharge(i));
-            } else {
-                assertFalse(newStats.isStandardBucketSupported(i));
-                assertEquals(POWER_DATA_UNAVAILABLE,
-                        newStats.getAccumulatedStandardBucketCharge(i));
-            }
-        }
-        assertEquals(0L, newStats.getAccumulatedCustomBucketCharge(0));
-        assertEquals(stats.getAccumulatedCustomBucketCharge(1),
-                newStats.getAccumulatedCustomBucketCharge(1));
-        skipZerosParcel.recycle();
-    }
-
-    @Test
-    public void testCreateAndReadSummaryFromParcel_nullTemplate() {
+    public void testCreateAndReadSummaryFromParcel_nullConfig() {
         final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
         final String[] customBucketNames = {"A", "B"};
         supportedStandardBuckets[POWER_BUCKET_SCREEN_ON] = true;
         supportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = false;
         supportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = true;
 
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
+        final MeasuredEnergyStats.Config config =
+                new MeasuredEnergyStats.Config(supportedStandardBuckets, customBucketNames,
+                        new int[0], new String[]{"s"});
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
+
         stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10);
         stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 5);
         stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 40);
@@ -317,11 +300,11 @@ public class MeasuredEnergyStatsTest {
         stats.updateCustomBucket(1, 60);
 
         final Parcel parcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false, true);
+        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel);
         parcel.setDataPosition(0);
 
         MeasuredEnergyStats newStats =
-                MeasuredEnergyStats.createAndReadSummaryFromParcel(parcel, null);
+                MeasuredEnergyStats.createAndReadSummaryFromParcel(null, parcel);
         assertNull(newStats);
         parcel.recycle();
     }
@@ -334,30 +317,30 @@ public class MeasuredEnergyStatsTest {
         supportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = false;
         supportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = true;
 
-        final MeasuredEnergyStats template =
-                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
-        template.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10);
-        template.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 5);
-        template.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 40);
-        template.updateCustomBucket(0, 50);
+        final MeasuredEnergyStats.Config config =
+                new MeasuredEnergyStats.Config(supportedStandardBuckets, customBucketNames,
+                        new int[0], new String[]{"s"});
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
 
-        final MeasuredEnergyStats stats = MeasuredEnergyStats.createFromTemplate(template);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 0L);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 7L);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 0);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 40);
 
         final Parcel parcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false, true);
+        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel);
 
         final boolean[] newSupportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
         newSupportedStandardBuckets[POWER_BUCKET_SCREEN_ON] = true;
         newSupportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = true; // switched false > true
         newSupportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = false; // switched true > false
-        final MeasuredEnergyStats newTemplate =
-                new MeasuredEnergyStats(newSupportedStandardBuckets, customBucketNames);
+        final MeasuredEnergyStats.Config newConfig =
+                new MeasuredEnergyStats.Config(newSupportedStandardBuckets, customBucketNames,
+                        new int[0], new String[]{"s"});
+
         parcel.setDataPosition(0);
 
         final MeasuredEnergyStats newStats =
-                MeasuredEnergyStats.createAndReadSummaryFromParcel(parcel, newTemplate);
+                MeasuredEnergyStats.createAndReadSummaryFromParcel(newConfig, parcel);
+
         // The only non-0 entry in stats is no longer supported, so now there's no interesting data.
         assertNull(newStats);
         assertEquals("Parcel was not properly consumed", 0, parcel.dataAvail());
@@ -372,30 +355,47 @@ public class MeasuredEnergyStatsTest {
         supportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = false;
         supportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = true;
 
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_DOZE, 30);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 40);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 5);
+        final MeasuredEnergyStats.Config config =
+                new MeasuredEnergyStats.Config(supportedStandardBuckets, customBucketNames,
+                        new int[]{POWER_BUCKET_SCREEN_ON, POWER_BUCKET_SCREEN_OTHER},
+                        new String[]{"s0", "s1"});
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
 
-        stats.updateCustomBucket(0, 50);
-        stats.updateCustomBucket(1, 60);
-        stats.updateCustomBucket(0, 3);
+        stats.setState(0, 1000);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10, 2000);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_DOZE, 30, 3000);
+        stats.setState(1,  4000);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 40, 5000);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 6, 6000);
 
-        assertEquals(15, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON));
+        stats.updateCustomBucket(0, 50, 7000);
+        stats.updateCustomBucket(1, 60, 8000);
+        stats.updateCustomBucket(0, 3, 9000);
+
+        assertEquals(16, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON));
         assertEquals(POWER_DATA_UNAVAILABLE,
                 stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_DOZE));
         assertEquals(40, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_OTHER));
         assertEquals(50 + 3, stats.getAccumulatedCustomBucketCharge(0));
         assertEquals(60, stats.getAccumulatedCustomBucketCharge(1));
+
+        // 10 + 6 * (4000-2000)/(6000-2000)
+        assertEquals(13, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 0));
+        // 6 * (6000-4000)/(6000-2000)
+        assertEquals(3, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 1));
+        // 40 * (4000-1000)/(5000-1000)
+        assertEquals(30, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_OTHER, 0));
+        // 40 * (5000-4000)/(5000-1000)
+        assertEquals(10, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_OTHER, 1));
     }
 
     @Test
     public void testIsValidCustomBucket() {
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_POWER_BUCKETS],
-                        new String[]{"A", "B", "C"});
+        final MeasuredEnergyStats.Config config =
+                new MeasuredEnergyStats.Config(new boolean[NUMBER_STANDARD_POWER_BUCKETS],
+                        new String[]{"A", "B", "C"},
+                        new int[0], new String[]{"s"});
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
         assertFalse(stats.isValidCustomBucket(-1));
         assertTrue(stats.isValidCustomBucket(0));
         assertTrue(stats.isValidCustomBucket(1));
@@ -403,8 +403,10 @@ public class MeasuredEnergyStatsTest {
         assertFalse(stats.isValidCustomBucket(3));
         assertFalse(stats.isValidCustomBucket(4));
 
-        final MeasuredEnergyStats boringStats =
-                new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_POWER_BUCKETS], new String[0]);
+        final MeasuredEnergyStats.Config boringConfig =
+                new MeasuredEnergyStats.Config(new boolean[NUMBER_STANDARD_POWER_BUCKETS],
+                        new String[0], new int[0], new String[]{"s"});
+        final MeasuredEnergyStats boringStats = new MeasuredEnergyStats(boringConfig);
         assertFalse(boringStats.isValidCustomBucket(-1));
         assertFalse(boringStats.isValidCustomBucket(0));
         assertFalse(boringStats.isValidCustomBucket(1));
@@ -412,9 +414,11 @@ public class MeasuredEnergyStatsTest {
 
     @Test
     public void testGetAccumulatedCustomBucketCharges() {
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_POWER_BUCKETS],
-                        new String[]{"A", "B", "C"});
+        final MeasuredEnergyStats.Config config =
+                new MeasuredEnergyStats.Config(new boolean[NUMBER_STANDARD_POWER_BUCKETS],
+                        new String[]{"A", "B", "C"},
+                        new int[0], new String[]{"s"});
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
         stats.updateCustomBucket(0, 50);
         stats.updateCustomBucket(1, 60);
         stats.updateCustomBucket(2, 13);
@@ -430,8 +434,10 @@ public class MeasuredEnergyStatsTest {
 
     @Test
     public void testGetAccumulatedCustomBucketCharges_empty() {
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_POWER_BUCKETS], new String[0]);
+        final MeasuredEnergyStats.Config config =
+                new MeasuredEnergyStats.Config(new boolean[NUMBER_STANDARD_POWER_BUCKETS],
+                        new String[0], new int[0], new String[]{"s"});
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
 
         final long[] output = stats.getAccumulatedCustomBucketCharges();
         assertEquals(0, output.length);
@@ -440,10 +446,15 @@ public class MeasuredEnergyStatsTest {
     @Test
     public void testGetNumberCustomChargeBuckets() {
         assertEquals(0,
-                new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_POWER_BUCKETS], new String[0])
+                new MeasuredEnergyStats(
+                        new MeasuredEnergyStats.Config(new boolean[NUMBER_STANDARD_POWER_BUCKETS],
+                                new String[0], new int[0], new String[]{"s"}))
                         .getNumberCustomPowerBuckets());
-        assertEquals(3, new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_POWER_BUCKETS],
-                new String[]{"A", "B", "C"}).getNumberCustomPowerBuckets());
+        assertEquals(3,
+                new MeasuredEnergyStats(
+                        new MeasuredEnergyStats.Config(new boolean[NUMBER_STANDARD_POWER_BUCKETS],
+                                new String[]{"A", "B", "C"}, new int[0], new String[]{"s"}))
+                        .getNumberCustomPowerBuckets());
     }
 
     @Test
@@ -454,13 +465,22 @@ public class MeasuredEnergyStatsTest {
         supportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = false;
         supportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = true;
 
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 5);
+        final int[] supportedMultiStateBuckets = new int[]{POWER_BUCKET_SCREEN_ON};
+        final MeasuredEnergyStats.Config config =
+                new MeasuredEnergyStats.Config(supportedStandardBuckets, customBucketNames,
+                        supportedMultiStateBuckets, new String[]{"s1", "s2"});
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
+        stats.setState(1, 0);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10, 1000);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 5, 2000);
         stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 40);
         stats.updateCustomBucket(0, 50);
         stats.updateCustomBucket(1, 60);
+
+        assertThat(stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 0))
+                .isEqualTo(0);
+        assertThat(stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 1))
+                .isEqualTo(15);
 
         MeasuredEnergyStats.resetIfNotNull(stats);
         // All charges should be reset to 0
@@ -472,7 +492,13 @@ public class MeasuredEnergyStatsTest {
                 assertFalse(stats.isStandardBucketSupported(i));
                 assertEquals(POWER_DATA_UNAVAILABLE, stats.getAccumulatedStandardBucketCharge(i));
             }
+
         }
+        assertThat(stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 0))
+                .isEqualTo(0);
+        assertThat(stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 1))
+                .isEqualTo(0);
+
         for (int i = 0; i < customBucketNames.length; i++) {
             assertEquals(0, stats.getAccumulatedCustomBucketCharge(i));
         }
@@ -500,83 +526,62 @@ public class MeasuredEnergyStatsTest {
         assertEquals(exp, MeasuredEnergyStats.getDisplayPowerBucket(Display.STATE_DOZE_SUSPEND));
     }
 
-    /** Test MeasuredEnergyStats#isSupportEqualTo */
     @Test
-    public void testIsSupportEqualTo() {
+    public void testConfig_isCompatible() {
         final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
         Arrays.fill(supportedStandardBuckets, true);
         final String[] customBucketNames = {"A", "B"};
+        final int[] supportedMultiStateBuckets = {POWER_BUCKET_CPU, POWER_BUCKET_WIFI};
+        final String[] stateNames = {"s"};
 
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(supportedStandardBuckets.clone(),
-                        customBucketNames.clone());
-
+        final MeasuredEnergyStats.Config config = new MeasuredEnergyStats.Config(
+                supportedStandardBuckets,
+                customBucketNames,
+                supportedMultiStateBuckets,
+                stateNames);
         assertTrue(
                 "All standard and custom bucket supports match",
-                stats.isSupportEqualTo(supportedStandardBuckets, customBucketNames));
+                config.isCompatible(
+                        new MeasuredEnergyStats.Config(
+                                supportedStandardBuckets,
+                                customBucketNames,
+                                supportedMultiStateBuckets,
+                                stateNames)));
 
         boolean[] differentSupportedStandardBuckets = supportedStandardBuckets.clone();
         differentSupportedStandardBuckets[0] = !differentSupportedStandardBuckets[0];
+
         assertFalse(
                 "Standard bucket support mismatch",
-                stats.isSupportEqualTo(differentSupportedStandardBuckets, customBucketNames));
-
+                config.isCompatible(
+                        new MeasuredEnergyStats.Config(
+                                differentSupportedStandardBuckets,
+                                customBucketNames,
+                                supportedMultiStateBuckets,
+                                stateNames)));
         assertFalse(
                 "Custom bucket support mismatch",
-                stats.isSupportEqualTo(supportedStandardBuckets, new String[]{"C", "B"}));
-
+                config.isCompatible(
+                        new MeasuredEnergyStats.Config(
+                                supportedStandardBuckets,
+                                new String[]{"C", "B"},
+                                supportedMultiStateBuckets,
+                                stateNames)));
         assertFalse(
-                "Fewer custom buckets supported",
-                stats.isSupportEqualTo(supportedStandardBuckets, new String[]{"A"}));
-
+                "Multi-state bucket mismatch",
+                config.isCompatible(
+                        new MeasuredEnergyStats.Config(
+                                supportedStandardBuckets,
+                                new String[]{"A"},
+                                new int[] {POWER_BUCKET_CPU, POWER_BUCKET_BLUETOOTH},
+                                stateNames)));
         assertFalse(
-                "More custom bucket supported",
-                stats.isSupportEqualTo(supportedStandardBuckets, new String[]{"A", "B", "C"}));
-
-        assertFalse(
-                "Custom bucket support order changed",
-                stats.isSupportEqualTo(supportedStandardBuckets, new String[]{"B", "A"}));
-    }
-
-    /** Test MeasuredEnergyStats#isSupportEqualTo when holding a null array of custom buckets */
-    @Test
-    public void testIsSupportEqualTo_nullCustomBuckets() {
-        final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
-
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(supportedStandardBuckets.clone(), null);
-
-        assertTrue(
-                "Null custom bucket name lists should match",
-                stats.isSupportEqualTo(supportedStandardBuckets, null));
-
-        assertTrue(
-                "Null and empty custom buckets should match",
-                stats.isSupportEqualTo(supportedStandardBuckets, new String[0]));
-
-        assertFalse(
-                "Null custom buckets should not match populated list",
-                stats.isSupportEqualTo(supportedStandardBuckets, new String[]{"A", "B"}));
-    }
-
-    /** Test MeasuredEnergyStats#isSupportEqualTo when holding an empty array of custom buckets */
-    @Test
-    public void testIsSupportEqualTo_emptyCustomBuckets() {
-        final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_POWER_BUCKETS];
-
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(supportedStandardBuckets.clone(), new String[0]);
-
-        assertTrue(
-                "Empty custom buckets should match",
-                stats.isSupportEqualTo(supportedStandardBuckets, new String[0]));
-
-        assertTrue(
-                "Empty and null custom buckets should match",
-                stats.isSupportEqualTo(supportedStandardBuckets, null));
-
-        assertFalse(
-                "Empty custom buckets should not match populated list",
-                stats.isSupportEqualTo(supportedStandardBuckets, new String[]{"A", "B"}));
+                "Multi-state bucket state list mismatch",
+                config.isCompatible(
+                        new MeasuredEnergyStats.Config(
+                                supportedStandardBuckets,
+                                new String[]{"A"},
+                                supportedMultiStateBuckets,
+                                new String[]{"s1", "s2"})));
     }
 }

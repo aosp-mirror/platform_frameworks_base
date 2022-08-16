@@ -54,31 +54,14 @@ oneway interface IWindow {
     void executeCommand(String command, String parameters, in ParcelFileDescriptor descriptor);
 
     void resized(in ClientWindowFrames frames, boolean reportDraw,
-            in MergedConfiguration newMergedConfiguration,
-            boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId);
-
-    /**
-     * Called when the window location in parent display has changed. The offset will only be a
-     * nonzero value if the window is on an embedded display that is re-parented to another window.
-     */
-    void locationInParentDisplayChanged(in Point offset);
-
-    /**
-     * Called when the window insets configuration has changed.
-     *
-     * @param willMove The window frame will be moved soon.
-     * @param willResize The window frame will be resized soon.
-     */
-    void insetsChanged(in InsetsState insetsState, in boolean willMove, in boolean willResize);
+            in MergedConfiguration newMergedConfiguration, in InsetsState insetsState,
+            boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
+            int syncSeqId, int resizeMode);
 
     /**
      * Called when this window retrieved control over a specified set of insets sources.
-     *
-     * @param willMove The window frame will be moved soon.
-     * @param willResize The window frame will be resized soon.
      */
-    void insetsControlChanged(in InsetsState insetsState, in InsetsSourceControl[] activeControls,
-            in boolean willMove, in boolean willResize);
+    void insetsControlChanged(in InsetsState insetsState, in InsetsSourceControl[] activeControls);
 
     /**
      * Called when a set of insets source window should be shown by policy.
@@ -99,12 +82,6 @@ oneway interface IWindow {
     void moved(int newX, int newY);
     void dispatchAppVisibility(boolean visible);
     void dispatchGetNewSurface();
-
-    /**
-     * Tell the window that it is either gaining or losing focus.  Keep it up
-     * to date on the current state showing navigational focus (touch mode) too.
-     */
-    void windowFocusChanged(boolean hasFocus, boolean inTouchMode);
 
     void closeSystemDialogs(String reason);
 

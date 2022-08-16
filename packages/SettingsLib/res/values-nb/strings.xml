@@ -21,7 +21,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Kan ikke søke etter nettverk"</string>
+    <string name="wifi_security_short_wep" msgid="7939809393561636237">"WEP"</string>
+    <string name="wifi_security_short_wpa" msgid="6998160832497442533">"WPA"</string>
+    <string name="wifi_security_short_wpa2" msgid="7697856994856831026">"WPA2"</string>
+    <string name="wifi_security_short_wpa_wpa2" msgid="2399839645955520093">"WPA/WPA2"</string>
+    <string name="wifi_security_short_eap" msgid="5029688687205212985">"802.1x"</string>
+    <string name="wifi_security_short_eap_wpa" msgid="8510772177310043426">"WPA-EAP"</string>
+    <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
+    <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
+    <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2/WPA3"</string>
+    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"Ingen/OWE"</string>
+    <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
+    <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Suite-B-192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Ingen"</string>
+    <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
+    <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
+    <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
+    <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
+    <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA2/WPA3-Enterprise"</string>
+    <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-Enterprise"</string>
+    <string name="wifi_security_passpoint" msgid="2209078477216565387">"Passpoint"</string>
+    <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
+    <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
+    <string name="wifi_security_none_owe" msgid="5241745828327404101">"Ingen / Enhanced Open"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
+    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise 192-bit"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Lagret"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Frakoblet"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Slått av"</string>
@@ -82,6 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktiv"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktiv, bare venstre"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktiv, bare høyre"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktiv, venstre og høyre"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Medielyd"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonsamtaler"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Filoverføring"</string>
@@ -95,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-lyd: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-lyd"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Høreapparater"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE-lyd"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Koblet til høreapparater"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Koblet til LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Koblet til LE-lyd"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Koblet til medielyd"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Koblet til telefonlyd"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Koblet til tjener for filoverføring"</string>
@@ -131,10 +161,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Øretelefoner"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Inndata fra ytre utstyrsenheter"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Tilkobler venstre høreapparat …"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Tilkobler høyre høreapparat …"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Venstre – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Høyre – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi er av."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi er frakoblet."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wi-Fi-signal med én stolpe."</string>
@@ -153,7 +179,6 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Internettdeling"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Nettdeling og trådløs sone"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Alle jobbapper"</string>
-    <string name="user_guest" msgid="6939192779649870792">"Gjest"</string>
     <string name="unknown" msgid="3544487229740637809">"Ukjent"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Bruker:<xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Noen standardvalg er angitt"</string>
@@ -255,7 +280,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Trådløs skjerm-sertifisering"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Slå på detaljert Wi-Fi-loggføring"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begrensning av Wi‑Fi-skanning"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Ikke-vedvarende tilfeldiggjøring av MAC-adresse for Wi‑Fi"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Ikke-vedvarende tilfeldiggjøring av MAC-adresse for Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobildata er alltid aktiv"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Maskinvareakselerasjon for internettdeling"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Vis Bluetooth-enheter uten navn"</string>
@@ -287,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vis alternativer for sertifisering av trådløs skjerm"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk nivået av Wi-Fi-logging – vis per SSID RSSI i Wi-Fi-velgeren"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduserer batteriforbruket og forbedrer nettverksytelsen"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Når denne modusen er slått på, kan MAC-adressen til denne enheten endres hver gang den kobler seg til et nettverk som har tilfeldiggjøring av MAC-adresse slått på."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Når denne modusen er slått på, kan MAC-adressen til denne enheten endres hver gang den kobler seg til et nettverk som har tilfeldiggjøring av MAC-adresse slått på."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Med datamåling"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Uten datamåling"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Bufferstørrelser for logg"</string>
@@ -423,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (rød-grønn)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (blå-gul)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Fargekorrigering"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Juster hvordan farger vises på enheten. Dette kan være nyttig når du vil&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;se farger mer nøyaktig&lt;/li&gt; &lt;li&gt;&amp;nbsp;fjerne farger for å gjøre det enklere å fokusere&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Fargekorrigering kan være nyttig når du vil&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;se farger mer nøyaktig&lt;/li&gt; &lt;li&gt;&amp;nbsp;fjerne farger for å gjøre det enklere å fokusere&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Overstyres av <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> igjen"</string>
@@ -460,7 +485,9 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Lader ikke"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Tilkoblet, lader ikke"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Ladet"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Fulladet"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrollert av administratoren"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Kontrollert av en begrenset innstilling"</string>
     <string name="disabled" msgid="8017887509554714950">"Slått av"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Tillatt"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Ikke tillatt"</string>
@@ -493,14 +520,12 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Ikke registrert"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Ikke tilgjengelig"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC velges tilfeldig"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="other">%1$d enheter er tilkoblet</item>
-      <item quantity="one">%1$d enhet er tilkoblet</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 enheter er tilkoblet}=1{1 enhet er tilkoblet}other{# enheter er tilkoblet}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mer tid."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mindre tid."</string>
     <string name="cancel" msgid="5665114069455378395">"Avbryt"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="done" msgid="381184316122520313">"Ferdig"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmer og påminnelser"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Tillat innstilling av alarmer og påminnelser"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmer og påminnelser"</string>
@@ -519,7 +544,8 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Spør hver gang"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Til du slår av"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Nå nettopp"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonhøyttaler"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Denne telefonen"</string>
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Dette nettbrettet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Denne telefonen"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Tilkoblingsproblemer. Slå enheten av og på igjen"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Lydenhet med kabel"</string>
@@ -559,18 +585,26 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Angi lås"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Bytt til <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Oppretter en ny bruker …"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Oppretter en ny gjest …"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Kunne ikke opprette noen ny bruker"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"Kunne ikke opprette en ny gjest"</string>
     <string name="user_nickname" msgid="262624187455825083">"Kallenavn"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Legg til bruker"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Legg til gjest"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Fjern gjesten"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Tilbakestill gjest"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"Gjest"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Vil du tilbakestille gjesten?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Vil du fjerne gjesten?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Tilbakestill"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Fjern"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Tilbakestiller gjesten …"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Ta et bilde"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Velg et bilde"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Velg et bilde"</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"For mange mislykkede forsøk. Dataene på denne enheten blir slettet."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"For mange mislykkede forsøk. Denne brukeren blir slettet."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"For mange mislykkede forsøk. Denne jobbprofilen og tilknyttede data blir slettet."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Lukk"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Standard for enheten"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Slått av"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Slått på"</string>
@@ -605,11 +639,24 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet er frakoblet."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Ingen ringing."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skann QR-koden"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"For å begynne å lytte, midtstill QR-koden nedenfor"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-koden er ikke i et gyldig format"</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Klokkeslett"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Dato"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Vær"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Luftkvalitet"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Castinformasjon"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Velg et profilbilde"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"Standard brukerikon"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"Fysisk tastatur"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Velg et tastaturoppsett"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Standard"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Slå på skjermen"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Tillat å slå på skjermen"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Tillat at en app slår på skjermen. Hvis tillatelsen gis, kan appen slå på skjermen når som helst uten din eksplisitte intensjon."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Vil du stoppe kringkastingen av <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Hvis du kringkaster <xliff:g id="SWITCHAPP">%1$s</xliff:g> eller endrer utgangen, stopper den nåværende kringkastingen din"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Kringkast <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Endre utgang"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Tilbake-animasjoner med forslag"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Slå på systemanimasjoner for tilbakebevegelser med forslag."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Denne innstillingen slår på systemanimasjoner for bevegelsesanimasjoner med forslag. Den krever at enableOnBackInvokedCallback settes til sann i manifestfilen for hver app."</string>
 </resources>

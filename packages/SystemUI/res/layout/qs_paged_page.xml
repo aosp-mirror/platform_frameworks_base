@@ -19,7 +19,7 @@
     android:id="@+id/tile_page"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingStart="@dimen/notification_side_paddings"
-    android:paddingEnd="@dimen/notification_side_paddings"
+    android:paddingStart="@dimen/qs_tiles_page_horizontal_margin"
+    android:paddingEnd="@dimen/qs_tiles_page_horizontal_margin"
     android:clipChildren="false"
     android:clipToPadding="false" />

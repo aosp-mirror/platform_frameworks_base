@@ -60,7 +60,7 @@ public class SensorPropertiesInternal implements Parcelable {
         sensorStrength = in.readInt();
         maxEnrollmentsPerUser = in.readInt();
         componentInfo = new ArrayList<>();
-        in.readList(componentInfo, ComponentInfoInternal.class.getClassLoader());
+        in.readList(componentInfo, ComponentInfoInternal.class.getClassLoader(), android.hardware.biometrics.ComponentInfoInternal.class);
         resetLockoutRequiresHardwareAuthToken = in.readBoolean();
         resetLockoutRequiresChallenge = in.readBoolean();
     }

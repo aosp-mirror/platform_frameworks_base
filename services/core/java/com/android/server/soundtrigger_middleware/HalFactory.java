@@ -16,16 +16,14 @@
 
 package com.android.server.soundtrigger_middleware;
 
-import android.hardware.soundtrigger.V2_0.ISoundTriggerHw;
-
 /**
- * A factory for creating instances of {@link ISoundTriggerHw}.
+ * A factory for creating instances of {@link ISoundTriggerHal}.
  *
  * @hide
  */
 public interface HalFactory {
     /**
-     * @return An instance of {@link ISoundTriggerHw}.
+     * @return An instance of {@link ISoundTriggerHal}.
      */
-    ISoundTriggerHw create();
+    ISoundTriggerHal create();
 }

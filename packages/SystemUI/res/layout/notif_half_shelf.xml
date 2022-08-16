@@ -27,7 +27,7 @@
 
     <LinearLayout
         android:id="@+id/half_shelf"
-        android:layout_width="@dimen/qs_panel_width"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="bottom"
@@ -78,12 +78,6 @@
                     android:layout_gravity="center_vertical"
                     android:padding="8dp" />
             </com.android.systemui.statusbar.notification.row.AppControlView>
-            <!-- divider view -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@*android:color/background_device_default_light"
-            />
 
             <!-- ChannelRows get added dynamically -->
 

@@ -21,7 +21,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Şəbəkə axtarmaq olmur"</string>
+    <string name="wifi_security_short_wep" msgid="7939809393561636237">"WEP"</string>
+    <string name="wifi_security_short_wpa" msgid="6998160832497442533">"WPA"</string>
+    <string name="wifi_security_short_wpa2" msgid="7697856994856831026">"WPA2"</string>
+    <string name="wifi_security_short_wpa_wpa2" msgid="2399839645955520093">"WPA/WPA2"</string>
+    <string name="wifi_security_short_eap" msgid="5029688687205212985">"802.1x"</string>
+    <string name="wifi_security_short_eap_wpa" msgid="8510772177310043426">"WPA-EAP"</string>
+    <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
+    <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
+    <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2/WPA3"</string>
+    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"Heç biri/OWE"</string>
+    <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
+    <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Dəst-B-192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Heç biri"</string>
+    <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
+    <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Şəxsi"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Şəxsi"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Şəxsi"</string>
+    <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Müəssisə"</string>
+    <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Müəssisə"</string>
+    <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Müəssisə"</string>
+    <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA2/WPA3-Müəssisə"</string>
+    <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-Müəssisə"</string>
+    <string name="wifi_security_passpoint" msgid="2209078477216565387">"Keçid nöqtəsi"</string>
+    <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Şəxsi"</string>
+    <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Şəxsi"</string>
+    <string name="wifi_security_none_owe" msgid="5241745828327404101">"Heç biri/Genişləndirilmiş Açılış"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Genişləndirilmiş Açılış"</string>
+    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Müəssisə 192-bit"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Yadda saxlanılan"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Bağlantı kəsildi"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Deaktiv"</string>
@@ -82,6 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batareya, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batareya"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktiv"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktiv, yalnız sol"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktiv, yalnız sağ"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktiv, sol və sağ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Media audio"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefon zəngləri"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Fayl transferi"</string>
@@ -95,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Eşitmə cihazları"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Eşitmə Aparatlarına qoşuldu"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO audiosuna qoşulub"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE audiosuna qoşulub"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Media audioya birləşdirilib"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Telefon audiosuna qoşulu"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Fayl transfer serverinə qoşulu"</string>
@@ -131,10 +161,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Qulaqlıq"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Daxiletmə periferiki"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Sol qulaqlıq birləşdirilir…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Sağ qulaqlıq birləşdirilir…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Sol - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Sağ - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wifi sönülüdür."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wifi bağlantı kəsildi."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wifi bir xətdir."</string>
@@ -153,7 +179,6 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Modem rejimi"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Modem rejimi"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Bütün iş tətbiqləri"</string>
-    <string name="user_guest" msgid="6939192779649870792">"Qonaq"</string>
     <string name="unknown" msgid="3544487229740637809">"Naməlum"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"İstifadəçi: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Bəzi susmaya görələr təyin edilib"</string>
@@ -255,7 +280,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Simsiz monitor sertifikatlaşması"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi Çoxsözlü Girişə icazə verin"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi axtarışının məhdudlaşdırılması"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi‑Fi müvəqqəti MAC randomizasiyası"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi müvəqqəti MAC randomizasiyası"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobil data həmişə aktiv"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Modem rejimində cihaz sürətləndiricisi"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth cihazları adsız göstərilsin"</string>
@@ -287,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Simsiz monitorların sertifikasiya parametrləri göstərilsin"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi giriş səviyyəsini qaldırın, Wi‑Fi seçəndə hər SSID RSSI üzrə göstərin"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Enerji sərfiyyatını azaldır və şəbəkənin işini yaxşılaşdırır"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Bu rejimdə şəbəkəyə hər dəfə qoşulanda cihaza təsadüfi MAC ünvanı verilə bilər."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Bu rejim aktiv edildikdə, bu cihaz hər dəfə MAC randomizasiyası aktiv olan şəbəkəyə qoşulanda onun MAC ünvanı dəyişə bilər."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Tarif sayğacılı"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Limitsiz"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Jurnal buferi ölçüsü"</string>
@@ -423,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaliya (qırmızı-yaşıl)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaliya (göy-sarı)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Rəng korreksiyası"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Ekranda rəngi korreksiya edə bilərsiniz. Mümkün olanlar:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;rəng ötürülməsinin yaxşılaşdırılması;&lt;/li&gt; &lt;li&gt;&amp;nbsp;rahat fokuslanmaq üçün ağ-qara rejimə keçid.&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Rəng korreksiyası bunları etmək istədikdə faydalı ola bilər:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Rəngləri daha dəqiq görmək&lt;/li&gt; &lt;li&gt;&amp;nbsp;Fokuslanmaq üçün rəngləri ləğv etmək&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> tərəfindən qəbul edilmir"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Təxminən <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qalıb"</string>
@@ -460,7 +485,9 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Doldurulmur"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Qoşulub, şarj edilmir"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Şarj edilib"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Tam şarj edilib"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Admin tərəfindən nəzarət olunur"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Məhdudlaşdırılmış Ayar ilə nəzarət edilir"</string>
     <string name="disabled" msgid="8017887509554714950">"Deaktiv"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"İcazə verilib"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"İcazə verilməyib"</string>
@@ -493,14 +520,12 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Qeydiyyatsız"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Əlçatmazdır"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC ixtiyari olaraq seçildi"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="other">%1$d cihaz qoşuludur</item>
-      <item quantity="one">%1$d cihaz qoşuludur</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 cihaz qoşulub}=1{1 cihaz qoşulub}other{# cihaz qoşulub}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Daha çox vaxt."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Daha az vaxt."</string>
     <string name="cancel" msgid="5665114069455378395">"Ləğv edin"</string>
     <string name="okay" msgid="949938843324579502">"Ok"</string>
+    <string name="done" msgid="381184316122520313">"Hazırdır"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Siqnallar və xatırladıcılar"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Siqnallar və xatırlatmaları ayarlamağa icazə verin"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Siqnallar və xatırlatmalar"</string>
@@ -519,7 +544,8 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Həmişə soruşulsun"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Deaktiv edilənə qədər"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"İndicə"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefon dinamiki"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Bu telefon"</string>
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Bu planşet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Bu telefon"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Qoşulmaqla bağlı problem. Cihazı deaktiv edin, sonra yenidən aktiv edin"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Simli audio cihaz"</string>
@@ -559,18 +585,26 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Kilid ayarlayın"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> adlı istifadəçiyə keçin"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Yeni istifadəçi yaradılır…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Yeni qonaq yaradılır…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Yeni istifadəçi yaratmaq alınmadı"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"Yeni qonaq yaratmaq alınmadı"</string>
     <string name="user_nickname" msgid="262624187455825083">"Ləqəb"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"İstifadəçi əlavə edin"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Qonaq əlavə edin"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Qonağı silin"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Qonaq sessiyasını sıfırlayın"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"Qonaq"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Qonaq məlumatı sıfırlansın?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Qonaq silinsin?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Sıfırlayın"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Silin"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Qonaq məlumatı sıfırlanır…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Foto çəkin"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Şəkil seçin"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Foto seçin"</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Həddindən artıq yanlış cəhd. Bu cihazın datası silinəcək."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Həddindən artıq yanlış cəhd. Bu istifadəçi silinəcək."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Həddindən artıq yanlış cəhd. Bu iş profili və datası silinəcək."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Qapadın"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Cihaz defoltu"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Deaktiv"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktiv"</string>
@@ -605,11 +639,24 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet bağlantısı kəsilib."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Zəng yoxdur."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR kodu skanlayın"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Dinləməyə başlamaq üçün aşağıda QR kodu mərkəzə yerləşdirin"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR kodu doğru formatda deyil"</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Vaxt"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Tarix"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Hava"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Havanın keyfiyyəti"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Yayım məlumatı"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Profil şəkli seçin"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"Defolt istifadəçi ikonası"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"Fiziki klaviatura"</string>
+    <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Klaviatura düzənini seçin"</string>
+    <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Defolt"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Ekranı aktiv etmək"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Ekranı aktiv etməyə icazə verin"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Tətbiqin ekranı aktiv etməsinə icazə verin. İcazə verilərsə, tətbiq istənilən vaxt sizə soruşmadan ekranı aktiv edə bilər."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> tətbiqinin yayımlanması dayandırılsın?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> tətbiqini yayımlasanız və ya nəticəni dəyişsəniz, cari yayımınız dayandırılacaq"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> tətbiqini yayımlayın"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Nəticəni dəyişdirin"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Proqnozlaşdırılan geri animasiyalar"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Proqnozlaşdırıcı geri jest üçün sistem animasiyalarını aktiv edin."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Bu ayar proqnozlaşdırıcı jest animasiyası üçün sistem animasiyalarını aktiv edir. Bu, manifest faylında hər bir tətbiq üçün enableOnBackInvokedCallback-in doğru kimi ayarlanmasını tələb edir."</string>
 </resources>

@@ -206,17 +206,9 @@ func createMergedSystemStubs(ctx android.LoadHookContext, modules []string) {
 func createMergedFrameworkImpl(ctx android.LoadHookContext, modules []string) {
 	// This module is for the "framework-all" module, which should not include the core libraries.
 	modules = removeAll(modules, core_libraries_modules)
-	// TODO(b/214988855): remove the line below when framework-bluetooth has an impl jar.
-	modules = remove(modules, "framework-bluetooth")
 	props := libraryProps{}
 	props.Name = proptools.StringPtr("all-framework-module-impl")
 	props.Static_libs = transformArray(modules, "", ".impl")
-	// Media module's impl jar is called "updatable-media"
-	for i, v := range props.Static_libs {
-		if v == "framework-media.impl" {
-			props.Static_libs[i] = "updatable-media"
-		}
-	}
 	props.Sdk_version = proptools.StringPtr("module_current")
 	props.Visibility = []string{"//frameworks/base"}
 	ctx.CreateModule(java.LibraryFactory, &props)

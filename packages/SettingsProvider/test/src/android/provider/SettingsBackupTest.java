@@ -102,7 +102,8 @@ public class SettingsBackupTest {
                     Settings.System.PEAK_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.SCREEN_BRIGHTNESS_FLOAT,
                     Settings.System.SCREEN_BRIGHTNESS_FOR_VR_FLOAT,
-                    Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
+                    Settings.System.MULTI_AUDIO_FOCUS_ENABLED, // form-factor/OEM specific
+                    Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED
                     );
 
     private static final Set<String> BACKUP_DENY_LIST_GLOBAL_SETTINGS =
@@ -133,7 +134,6 @@ public class SettingsBackupTest {
                     Settings.Global.ART_VERIFIER_VERIFY_DEBUGGABLE,
                     Settings.Global.ASSISTED_GPS_ENABLED,
                     Settings.Global.AUDIO_SAFE_VOLUME_STATE,
-                    Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
                     Settings.Global.AUTOFILL_LOGGING_LEVEL,
                     Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE,
                     Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
@@ -226,7 +226,6 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_FORCE_RTL,
                     Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
                     Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR,
-                    Settings.Global.DEVELOPMENT_USE_BLAST_ADAPTER_SV,
                     Settings.Global.DEVELOPMENT_USE_BLAST_ADAPTER_VR,
                     Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH,
                     Settings.Global.DEVICE_DEMO_MODE,
@@ -237,6 +236,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVICE_NAME,
                     Settings.Global.DEVICE_POLICY_CONSTANTS,
                     Settings.Global.DEVICE_PROVISIONED,
+                    Settings.Global.BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS,
                     Settings.Global.DEVICE_PROVISIONING_MOBILE_DATA_ENABLED,
                     Settings.Global.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
                     Settings.Global.DISPLAY_PANEL_LPM,
@@ -257,6 +257,7 @@ public class SettingsBackupTest {
                     Settings.Global.DROPBOX_TAG_PREFIX,
                     Settings.Global.EMERGENCY_AFFORDANCE_NEEDED,
                     Settings.Global.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS,
+                    Settings.Global.EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS,
                     Settings.Global.EMULATE_DISPLAY_CUTOUT,
                     Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
                     Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION,
@@ -265,10 +266,14 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_DISKSTATS_LOGGING,
                     Settings.Global.ENABLE_EPHEMERAL_FEATURE,
                     Settings.Global.ENABLE_RESTRICTED_BUCKET,
+                    Settings.Global.ENABLE_TARE,
+                    Settings.Global.ENABLE_TARE_ALARM_MANAGER,
+                    Settings.Global.ENABLE_TARE_JOB_SCHEDULER,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_ENABLED,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                     Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
                     Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
+                    Settings.Global.STYLUS_HANDWRITING_ENABLED,
                     Settings.Global.ENABLE_ADB_INCREMENTAL_INSTALL_DEFAULT,
                     Settings.Global.ENABLE_MULTI_SLOT_TIMEOUT_MILLIS,
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
@@ -295,13 +300,6 @@ public class SettingsBackupTest {
                     Settings.Global.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS,
                     Settings.Global.GNSS_SATELLITE_BLOCKLIST,
                     Settings.Global.GPRS_REGISTER_CHECK_PERIOD_MS,
-                    Settings.Global.HDMI_CEC_SWITCH_ENABLED,
-                    Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
-                    Settings.Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
-                    Settings.Global.HDMI_CONTROL_ENABLED,
-                    Settings.Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
-                    Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
-                    Settings.Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
                     Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                     Settings.Global.HIDDEN_API_POLICY,
                     Settings.Global.FORCE_NON_DEBUGGABLE_FINAL_BUILD_FOR_COMPAT,
@@ -330,6 +328,8 @@ public class SettingsBackupTest {
                     Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                     Settings.Global.LOW_POWER_MODE_STICKY,
                     Settings.Global.LOW_POWER_MODE_SUGGESTION_PARAMS,
+                    Settings.Global.LOW_POWER_STANDBY_ACTIVE_DURING_MAINTENANCE,
+                    Settings.Global.LOW_POWER_STANDBY_ENABLED,
                     Settings.Global.LTE_SERVICE_FORCED,
                     Settings.Global.LID_BEHAVIOR,
                     Settings.Global.MAX_ERROR_BYTES_PREFIX,
@@ -399,6 +399,7 @@ public class SettingsBackupTest {
                     Settings.Global.OTA_DISABLE_AUTOMATIC_UPDATE,
                     Settings.Global.OVERLAY_DISPLAY_DEVICES,
                     Settings.Global.PAC_CHANGE_DELAY,
+                    Settings.Global.PACKAGE_STREAMING_VERIFIER_TIMEOUT,
                     Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE,
                     Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB,
                     Settings.Global.PACKAGE_VERIFIER_SETTING_VISIBLE,
@@ -465,7 +466,6 @@ public class SettingsBackupTest {
                     Settings.Global.SYNC_MANAGER_CONSTANTS,
                     Settings.Global.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
                     Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL,
-                    Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES,
                     Settings.Global.SYS_STORAGE_CACHE_PERCENTAGE,
                     Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES,
                     Settings.Global.SYS_STORAGE_THRESHOLD_MAX_BYTES,
@@ -473,6 +473,8 @@ public class SettingsBackupTest {
                     Settings.Global.SYS_UIDCPUPOWER,
                     Settings.Global.SYS_TRACED,
                     Settings.Global.FPS_DEVISOR,
+                    Settings.Global.TARE_ALARM_MANAGER_CONSTANTS,
+                    Settings.Global.TARE_JOB_SCHEDULER_CONSTANTS,
                     Settings.Global.TCP_DEFAULT_INIT_RWND,
                     Settings.Global.TETHER_DUN_APN,
                     Settings.Global.TETHER_DUN_REQUIRED,
@@ -525,7 +527,6 @@ public class SettingsBackupTest {
                     Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT,
                     Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS,
                     Settings.Global.USER_SWITCHER_ENABLED,
-                    Settings.Global.NETWORK_ACCESS_TIMEOUT_MS,
                     Settings.Global.WARNING_TEMPERATURE,
                     Settings.Global.WEBVIEW_DATA_REDUCTION_PROXY_KEY,
                     Settings.Global.WEBVIEW_MULTIPROCESS,
@@ -592,7 +593,79 @@ public class SettingsBackupTest {
                     Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
                     Settings.Global.CACHED_APPS_FREEZER_ENABLED,
                     Settings.Global.APP_INTEGRITY_VERIFICATION_TIMEOUT,
-                    Settings.Global.KEY_CHORD_POWER_VOLUME_UP);
+                    Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
+                    Settings.Global.CLOCKWORK_HOME_READY,
+                    Settings.Global.WATCHDOG_TIMEOUT_MILLIS,
+                    Settings.Global.MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER,
+                    Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                    Settings.Global.ENABLE_BACK_ANIMATION, // Temporary for T, dev option only
+                    Settings.Global.Wearable.BATTERY_SAVER_MODE,
+                    Settings.Global.Wearable.COMBINED_LOCATION_ENABLED,
+                    Settings.Global.Wearable.HAS_PAY_TOKENS,
+                    Settings.Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN,
+                    Settings.Global.Wearable.HOTWORD_DETECTION_ENABLED,
+                    Settings.Global.Wearable.SMART_REPLIES_ENABLED,
+                    Settings.Global.Wearable.DEFAULT_VIBRATION,
+                    Settings.Global.Wearable.OBTAIN_PAIRED_DEVICE_LOCATION,
+                    Settings.Global.Wearable.RETAIL_MODE,
+                    Settings.Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY,
+                    Settings.Global.Wearable.BUG_REPORT,
+                    Settings.Global.Wearable.SMART_ILLUMINATE_ENABLED,
+                    Settings.Global.Wearable.CLOCKWORK_AUTO_TIME,
+                    Settings.Global.Wearable.CLOCKWORK_AUTO_TIME_ZONE,
+                    Settings.Global.Wearable.CLOCKWORK_24HR_TIME,
+                    Settings.Global.Wearable.AUTO_WIFI,
+                    Settings.Global.Wearable.WIFI_POWER_SAVE,
+                    Settings.Global.Wearable.ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS,
+                    Settings.Global.Wearable.SETUP_SKIPPED,
+                    Settings.Global.Wearable.LAST_CALL_FORWARD_ACTION,
+                    Settings.Global.Wearable.STEM_1_TYPE,
+                    Settings.Global.Wearable.STEM_1_DATA,
+                    Settings.Global.Wearable.STEM_1_DEFAULT_DATA,
+                    Settings.Global.Wearable.STEM_2_TYPE,
+                    Settings.Global.Wearable.STEM_2_DATA,
+                    Settings.Global.Wearable.STEM_2_DEFAULT_DATA,
+                    Settings.Global.Wearable.STEM_3_TYPE,
+                    Settings.Global.Wearable.STEM_3_DATA,
+                    Settings.Global.Wearable.STEM_3_DEFAULT_DATA,
+                    Settings.Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED,
+                    Settings.Global.Wearable.WEAR_OS_VERSION_STRING,
+                    Settings.Global.Wearable.CORNER_ROUNDNESS,
+                    Settings.Global.Wearable.BUTTON_SET,
+                    Settings.Global.Wearable.SIDE_BUTTON,
+                    Settings.Global.Wearable.ANDROID_WEAR_VERSION,
+                    Settings.Global.Wearable.SYSTEM_CAPABILITIES,
+                    Settings.Global.Wearable.SYSTEM_EDITION,
+                    Settings.Global.Wearable.WEAR_PLATFORM_MR_NUMBER,
+                    Settings.Global.Wearable.MOBILE_SIGNAL_DETECTOR,
+                    Settings.Global.Wearable.AMBIENT_ENABLED,
+                    Settings.Global.Wearable.AMBIENT_TILT_TO_WAKE,
+                    Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED_DEV,
+                    Settings.Global.Wearable.AMBIENT_TOUCH_TO_WAKE,
+                    Settings.Global.Wearable.AMBIENT_TILT_TO_BRIGHT,
+                    Settings.Global.Wearable.DECOMPOSABLE_WATCHFACE,
+                    Settings.Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED,
+                    Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,
+                    Settings.Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN,
+                    Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE,
+                    Settings.Global.Wearable.COMPANION_BLE_ROLE,
+                    Settings.Global.Wearable.COMPANION_NAME,
+                    Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,
+                    Settings.Global.Wearable.COMPANION_OS_VERSION,
+                    Settings.Global.Wearable.ENABLE_ALL_LANGUAGES,
+                    Settings.Global.Wearable.SETUP_LOCALE,
+                    Settings.Global.Wearable.OEM_SETUP_VERSION,
+                    Settings.Global.Wearable.MASTER_GESTURES_ENABLED,
+                    Settings.Global.Wearable.UNGAZE_ENABLED,
+                    Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS,
+                    Settings.Global.Wearable.BURN_IN_PROTECTION_ENABLED,
+                    Settings.Global.Wearable.WRIST_ORIENTATION_MODE,
+                    Settings.Global.Wearable.CLOCKWORK_SYSUI_PACKAGE,
+                    Settings.Global.Wearable.CLOCKWORK_SYSUI_MAIN_ACTIVITY,
+                    Settings.Global.Wearable.CLOCKWORK_LONG_PRESS_TO_ASSISTANT_ENABLED,
+                    Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_SET_BY_USER,
+                    Settings.Global.Wearable.WET_MODE_ON,
+                    Settings.Global.Wearable.COOLDOWN_MODE_ON);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
@@ -644,6 +717,7 @@ public class SettingsBackupTest {
                  Settings.Secure.DOCKED_CLOCK_FACE,
                  Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
+                 Settings.Secure.ENABLED_ACCESSIBILITY_AUDIO_DESCRIPTION_BY_DEFAULT,
                  Settings.Secure.ENABLED_INPUT_METHODS,  // Intentionally removed in P
                  Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,
                  Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
@@ -762,8 +836,10 @@ public class SettingsBackupTest {
 
     @Test
     public void globalSettingsBackedUpOrDenied() {
+        Set<String> candidateSettings = getCandidateSettings(Settings.Global.class);
+        candidateSettings.addAll(getCandidateSettings(Settings.Global.Wearable.class));
         checkSettingsBackedUpOrDenied(
-                getCandidateSettings(Settings.Global.class),
+                candidateSettings,
                 newHashSet(GlobalSettings.SETTINGS_TO_BACKUP),
                 BACKUP_DENY_LIST_GLOBAL_SETTINGS);
     }
@@ -791,8 +867,7 @@ public class SettingsBackupTest {
                 .that(intersect(settingsToBackup, denylist)).isEmpty();
     }
 
-    private static Set<String> getCandidateSettings(
-            Class<? extends Settings.NameValueTable> clazz) {
+    private static Set<String> getCandidateSettings(Class<?> clazz) {
         HashSet<String> result = new HashSet<String>();
         for (Field field : clazz.getDeclaredFields()) {
             if (looksLikeValidSetting(field)) {

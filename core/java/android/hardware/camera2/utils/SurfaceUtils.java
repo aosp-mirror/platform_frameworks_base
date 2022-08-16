@@ -78,7 +78,7 @@ public class SurfaceUtils {
     public static boolean isSurfaceForHwVideoEncoder(Surface surface) {
         checkNotNull(surface);
         long usageFlags = nativeDetectSurfaceUsageFlags(surface);
-        long disallowedFlags = HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | USAGE_HW_COMPOSER
+        long disallowedFlags = USAGE_HW_COMPOSER
                 | USAGE_RENDERSCRIPT | HardwareBuffer.USAGE_CPU_READ_OFTEN;
         long allowedFlags = HardwareBuffer.USAGE_VIDEO_ENCODE;
         boolean videoEncoderConsumer = ((usageFlags & disallowedFlags) == 0

@@ -16,45 +16,42 @@
 
 package com.android.systemui.keyguard.dagger;
 
-import android.annotation.Nullable;
 import android.app.trust.TrustManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.PowerManager;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardViewController;
+import com.android.keyguard.ViewMediatorCallback;
 import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
+import com.android.keyguard.mediator.ScreenOnCoordinator;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.KeyguardLiftController;
-import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.sensors.AsyncSensorManager;
 
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import dagger.Lazy;
@@ -62,7 +59,7 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Dagger Module providing {@link StatusBar}.
+ * Dagger Module providing keyguard.
  */
 @Module(subcomponents = {
         KeyguardQsUserSwitchComponent.class,
@@ -93,13 +90,16 @@ public class KeyguardModule {
             NavigationModeController navigationModeController,
             KeyguardDisplayManager keyguardDisplayManager,
             DozeParameters dozeParameters,
-            Optional<SysUIUnfoldComponent> unfoldComponent,
             SysuiStatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationController,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
+            ScreenOffAnimationController screenOffAnimationController,
             Lazy<NotificationShadeDepthController> notificationShadeDepthController,
-            Lazy<NotificationShadeWindowController> notificationShadeWindowController) {
+            ScreenOnCoordinator screenOnCoordinator,
+            InteractionJankMonitor interactionJankMonitor,
+            DreamOverlayStateController dreamOverlayStateController,
+            Lazy<NotificationShadeWindowController> notificationShadeWindowController,
+            Lazy<ActivityLaunchAnimator> activityLaunchAnimator) {
         return new KeyguardViewMediator(
                 context,
                 falsingCollector,
@@ -117,29 +117,21 @@ public class KeyguardModule {
                 navigationModeController,
                 keyguardDisplayManager,
                 dozeParameters,
-                unfoldComponent,
                 statusBarStateController,
                 keyguardStateController,
                 keyguardUnlockAnimationController,
-                unlockedScreenOffAnimationController,
+                screenOffAnimationController,
                 notificationShadeDepthController,
-                notificationShadeWindowController
-        );
+                screenOnCoordinator,
+                interactionJankMonitor,
+                dreamOverlayStateController,
+                notificationShadeWindowController,
+                activityLaunchAnimator);
     }
 
-    @SysUISingleton
+    /** */
     @Provides
-    @Nullable
-    static KeyguardLiftController provideKeyguardLiftController(
-            Context context,
-            StatusBarStateController statusBarStateController,
-            AsyncSensorManager asyncSensorManager,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DumpManager dumpManager) {
-        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
-            return null;
-        }
-        return new KeyguardLiftController(statusBarStateController, asyncSensorManager,
-                keyguardUpdateMonitor, dumpManager);
+    public ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
+        return viewMediator.getViewMediatorCallback();
     }
 }

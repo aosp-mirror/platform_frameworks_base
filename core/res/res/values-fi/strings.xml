@@ -175,10 +175,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Kellon tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV ‑laitteen laitetallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Puhelimen tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other">Varmenteen myöntäjiä on asennettu.</item>
-      <item quantity="one">Varmenteen myöntäjä on asennettu.</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Varmenteen myöntäjä on asennettu}other{Varmenteen myöntäjiä on asennettu}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Valvoja on tuntematon kolmas osapuoli."</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Valvoja: työprofiilin järjestelmänvalvoja"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Valvoja on <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>."</string>
@@ -198,6 +195,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Anturin ilmoituspalvelu"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight-palvelu"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS-ajanpäivityspalvelu"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"Laitekäytäntöjen hallintapalvelu"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Musiikintunnistuksen ylläpitopalvelu"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Laitteen tiedot poistetaan"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Hallintasovellusta ei voi käyttää. Laitteen tiedot pyyhitään.\n\nPyydä ohjeita järjestelmänvalvojaltasi."</string>
@@ -251,10 +249,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Valitse tämä vaihtoehto useimmissa tapauksissa. Voit seurata raportin etenemistä, antaa lisätietoja ongelmasta ja tallentaa kuvakaappauksia. Tämä vaihtoehto saattaa ohittaa joitakin harvoin käytettyjä osioita, joiden käsittely raportissa kestää kauan."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Koko raportti"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Valitse tämä, jos laitteesi ei ota komentoja vastaan, jos se toimii hitaasti tai tarvitset kaikkia raportin osioita. Raporttiin ei voi tallentaa lisätietoja tai useampia kuvakaappauksia."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">Virheraporttiin otetaan kuvakaappaus <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua.</item>
-      <item quantity="one">Virheraporttiin otetaan kuvakaappaus <xliff:g id="NUMBER_0">%d</xliff:g> sekunnin kuluttua.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Virheraporttiin otetaan kuvakaappaus # sekunnin kuluttua.}other{Virheraporttiin otetaan kuvakaappaus # sekunnin kuluttua.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Kuvakaappaus otettu virheraportin kanssa"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Kuvakaappauksen ottaminen virheraportin kanssa epäonnistui"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Äänetön tila"</string>
@@ -305,8 +300,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"käyttää kalenteria"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Tekstiviestit"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"lähettää ja tarkastella tekstiviestejä"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Tiedostot ja media"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"käyttää laitteellesi tallennettuja kuvia, mediatiedostoja ja muita tiedostoja"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Tiedostot"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"pääsy laitteen tiedostoihin"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musiikki ja audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"pääsy laitteen musiikkiin ja audioon"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Valokuvat ja videot"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"pääsy laitteen kuviin ja videoihin"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"tallentaa ääntä"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Liikkuminen"</string>
@@ -321,6 +320,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"soittaa ja hallinnoida puheluita"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Kehon anturit"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"käyttää anturitietoja elintoiminnoistasi"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Ilmoitukset"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"näyttää ilmoituksia"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Noutaa ikkunan sisältöä"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Tarkistaa käyttämäsi ikkunan sisältö."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Ottaa kosketuksella tutkimisen käyttöön"</string>
@@ -419,8 +420,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Antaa sovelluksen muokata tablet-laitteesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Antaa sovelluksen muokata Android TV ‑laitteen puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat tyhjentää puhelulokisi tai muokata sitä."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Antaa sovelluksen muokata puhelimesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"käyttää kehon antureita (kuten sykemittareita)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Antaa sovelluksen käyttää kehosi tilaa seuraavien anturien tietoja, esimerkiksi sykettä."</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"Pääsy kehoanturidataan, esim. sykkeeseen, kun käytössä"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Myöntää sovellukselle pääsyn kehoanturidataan, esim. sykkeeseen, lämpötilaan ja veren happipitoisuuteen, kun sovellusta käytetään."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Pääsy kehoanturidataan, esim. sykkeeseen, kun käynnissä taustalla"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Myöntää sovellukselle pääsyn kehoanturidataan, esim. sykkeeseen, lämpötilaan ja veren happipitoisuuteen, kun sovellus on käynnissä taustalla."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lue kalenterin tapahtumia ja tietoja"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Tämä sovellus voi lukea kaikkia tabletille tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Tämä sovellus voi lukea kaikkia Android TV ‑laitteeseen tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
@@ -548,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Antaa sovelluksen ottaa näppäinlukon ja siihen liittyvän salasanasuojauksen pois käytöstä. Esimerkki: puhelin poistaa näppäinlukon käytöstä puhelun saapuessa ja asettaa lukon takaisin käyttöön puhelun päättyessä."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"pyytää näytön lukituksen monimutkaisuutta"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Sovellus saa luvan selvittää näytön lukituksen monimutkaisuuden (korkea, keskitaso tai matala) eli sen pituusluokan ja tyypin. Sovellus voi myös ehdottaa käyttäjille näytön lukituksen vaihtamista tietylle tasolle, mutta he voivat ohittaa tämän ja poistua. Itse näytön lukitusta ei säilytetä tekstimuodossa, joten sovellus ei tiedä sitä tarkalleen."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"näyttää ilmoituksia"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Antaa sovelluksen näyttää ilmoituksia"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"käytä biometristä laitteistoa"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Sallii sovelluksen käyttää biometristä laitteistoa todennukseen"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"sormenjälkilaitteiston hallinnointi"</string>
@@ -575,10 +580,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Virhe todennuksessa"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Käytä näytön lukitusta"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jatka lisäämällä näytön lukituksen avaustapa"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Osittainen sormenjälki havaittu"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Paina anturia voimakkaasti"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Sormenjäljen prosessointi epäonnistui. Yritä uudelleen."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Puhdista anturi"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Jatka vielä hetki"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Puhdista sormenjälkitunnistin ja yritä uudelleen"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Puhdista anturi ja yritä uudelleen"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Paina anturia voimakkaasti"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Liikutit sormea liian hitaasti. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Kokeile toista sormenjälkeä"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Liian kirkas"</string>
@@ -586,6 +592,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Liikuta sormeasi hieman joka kerralla"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Sormenjälkeä ei tunnistettu"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Sormenjälkeä ei tunnistettu"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Sormenjälki tunnistettu"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Kasvot tunnistettu"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Kasvot tunnistettu, valitse Vahvista"</string>
@@ -672,6 +680,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Antaa sovelluksen lukea tilien synkronoinnin tilan sekä synkronoitujen tapahtumien historian ja kuinka paljon tietoja on synkronoitu."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"lukea jaetun tallennustilan sisällön"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Antaa sovelluksen lukea jaetun tallennustilan sisällön."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"lukulupa jaetun tallennustilan audiotiedostoihin"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Sallii sovelluksen lukea jaetun tallennustilan audiotiedostoja."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"lukulupa jaetun tallennustilan videotiedostoihin"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Sallii sovelluksen lukea jaetun tallennustilan videotiedostoja."</string>
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"lue jaetun tallennustilan kuvatiedostoja"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Sallii sovelluksen lukea jaetun tallennustilan kuvatiedostoja."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"muokata tai poistaa jaetun tallennustilan sisältöä"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Antaa sovelluksen kirjoittaa jaetun tallennustilan sisällön."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"soita/vastaanota SIP-puheluja"</string>
@@ -722,6 +736,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Sallii sovelluksen lukea ja muokata Älä häiritse -tilan asetuksia."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"aloita katseluoikeuksien käyttö"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Antaa luvanhaltijan käynnistää sovelluksen käyttöoikeuksien käytön. Ei tavallisten sovelluksien käyttöön."</string>
+    <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"aloita lupapäätösten tarkistaminen"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Antaa luvanhaltijan käynnistää näytön lupapäätösten tarkistamiseksi. Ei tavallisten sovellusten käyttöön."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"aloittaa sovellusominaisuuksien katselun"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Antaa luvanhaltijan aloittaa sovelluksen ominaisuustietojen katselun."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"saada pääsyn anturidataan suuremmalla näytteenottotaajuudella"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Sallii sovelluksen ottaa anturidatasta näytteitä yli 200 Hz:n taajuudella"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Asentaa salasanasäännöt"</string>
@@ -889,7 +907,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Poista lukitus tai soita hätäpuhelu painamalla Valikko-painiketta."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Poista lukitus painamalla Valikko-painiketta."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Poista lukitus piirtämällä kuvio"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Hätäpuhelu"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Hätäpuhelu"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Palaa puheluun"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Oikein!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Yritä uudelleen"</string>
@@ -1028,7 +1046,6 @@
     <string name="save_password_never" msgid="6776808375903410659">"Ei koskaan"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Ei lupaa avata tätä sivua."</string>
     <string name="text_copied" msgid="2531420577879738860">"Teksti kopioitu leikepöydälle."</string>
-    <string name="copied" msgid="4675902854553014676">"Kopioitu"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> liitetty täältä: <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> liitti leikepöydältäsi"</string>
     <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> on liittänyt kopioimasi tekstin"</string>
@@ -1057,10 +1074,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> haluaa ottaa Tutustu koskettamalla -ominaisuuden käyttöön. Kun Tutustu koskettamalla on käytössä, näet tai kuulet kuvauksen sormen alla olevista kohteista ja voit käyttää puhelinta sormieleiden avulla."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"kuukausi sitten"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Yli kuukausi sitten"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other">Edellisten <xliff:g id="COUNT_1">%d</xliff:g> päivän aikana</item>
-      <item quantity="one">Edellisen <xliff:g id="COUNT_0">%d</xliff:g> päivän aikana</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Edellinen # päivä}other{# viime päivää}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Viime kuussa"</string>
     <string name="older" msgid="1645159827884647400">"Vanhemmat"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"päivä: <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1079,70 +1093,22 @@
     <string name="year" msgid="5182610307741238982">"vuosi"</string>
     <string name="years" msgid="5797714729103773425">"vuotta"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"nyt"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> t</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> t</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> pv</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> pv</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> v</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> v</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min päästä</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min päästä</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> t päästä</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> t päästä</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> pv päästä</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> pv päästä</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> v päästä</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> v päästä</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> minuuttia sitten</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> minuutti sitten</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> tuntia sitten</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> tunti sitten</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> päivää sitten</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> päivä sitten</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> vuotta sitten</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> vuosi sitten</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> minuutin kuluttua</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> minuutin kuluttua</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> tunnin kuluttua</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> tunnin kuluttua</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> päivän kuluttua</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> päivän kuluttua</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> vuoden kuluttua</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> vuoden kuluttua</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> pv"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> v"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"<xliff:g id="COUNT">%d</xliff:g> min:n päästä"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> h:n päästä"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> pv:n päästä"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> v:n päästä"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minuutti sitten}other{# minuuttia sitten}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# tunti sitten}other{# tuntia sitten}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# päivä sitten}other{# päivää sitten}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# vuosi sitten}other{# vuotta sitten}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minuutti}other{# minuuttia}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# tunti}other{# tuntia}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# päivä}other{# päivää}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# vuosi}other{# vuotta}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Video-ongelma"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Tätä videota ei voi suoratoistaa tällä laitteella."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Videota ei voida toistaa."</string>
@@ -1172,6 +1138,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Poista"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Syöttötapa"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Tekstitoiminnot"</string>
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Takaisin"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Vaihda syöttötapaa"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Tallennustila loppumassa"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Kaikki järjestelmätoiminnot eivät välttämättä toimi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Tallennustila ei riitä. Varmista, että vapaata tilaa on 250 Mt, ja käynnistä uudelleen."</string>
@@ -1189,6 +1157,7 @@
     <string name="not_checked" msgid="7972320087569023342">"ei valittu"</string>
     <string name="selected" msgid="6614607926197755875">"valittu"</string>
     <string name="not_selected" msgid="410652016565864475">"ei valittu"</string>
+    <string name="in_progress" msgid="2149208189184319441">"käynnissä"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Tee toiminto käyttäen sovellusta"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Suorita sovelluksella %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Suorita toiminto"</string>
@@ -1267,10 +1236,14 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Valmistellaan: <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Käynnistetään sovelluksia."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Viimeistellään päivitystä."</string>
-    <string name="fp_enrollment_powerbutton_intent_title" msgid="3385634173366119903">"Sammutetaanko näyttö?"</string>
-    <string name="fp_enrollment_powerbutton_intent_message" msgid="6582149052513682522">"Painoit virtapainiketta ottaessasi sormenjäljen käyttöön.\n\nTämä saa yleensä näytön sammumaan."</string>
-    <string name="fp_enrollment_powerbutton_intent_positive_button" msgid="5963520983910436791">"Laita pois päältä"</string>
-    <string name="fp_enrollment_powerbutton_intent_negative_button" msgid="6465764183480190748">"Peru"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Haluatko jatkaa?"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Painoit virtapainiketta, mikä yleensä sammuttaa näytön.\n\nKosketa painiketta kevyesti tallentaessasi sormenjälkeä."</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Sammuta näyttö"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Jatka käyttöönottoa"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Jatketaanko sormenjäljen vahvistamista?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Painoit virtapainiketta, mikä yleensä sammuttaa näytön.\n\nVahvista sormenjälki koskettamalla painiketta kevyesti."</string>
+    <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Sammuta näyttö"</string>
+    <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Jatka"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> käynnissä"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Palaa peliin napauttamalla"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Valitse peli"</string>
@@ -1387,6 +1360,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Palauta tehdasasetukset, niin voit poistaa testikehystilan käytöstä."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Sarjakonsoli käytössä"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Tämä vaikuttaa suorituskykyyn. Jos haluat poistaa toiminnon käytöstä, tarkista käynnistysohjelma."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"Kokeellinen MTE käytössä"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"Tällä voi olla vaikutusta suorituskykyyn ja vakauteen. Poista laajennus käytöstä käynnistämällä laite uudelleen. Valitse asetukseksi ensin Ei mitään, jos laajennus on otettu käyttöön tällä: arm64.memtag.bootctl."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Nestettä tai likaa USB-portissa"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB-portti poistetaan käytöstä automaattisesti. Napauta nähdäksesi lisätietoja."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB-portin käyttö on sallittu"</string>
@@ -1521,10 +1496,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Ohita"</string>
     <string name="no_matches" msgid="6472699895759164599">"Ei tuloksia"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Etsi sivulta"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g>/<xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 tulos</item>
-    </plurals>
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# osuma}other{#/{total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Valmis"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Tyhjennetään jaettua tallennustilaa…"</string>
     <string name="share" msgid="4157615043345227321">"Jaa"</string>
@@ -1654,10 +1626,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Väärä kuvio"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Väärä salasana"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Väärä PIN-koodi"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other">Yritä uudelleen <xliff:g id="NUMBER">%d</xliff:g> sekunnin kuluttua.</item>
-      <item quantity="one">Yritä uudelleen 1 sekunnin kuluttua.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Piirrä kuvio"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Anna SIM-kortin PIN-koodi"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Anna PIN-koodi"</string>
@@ -1739,6 +1707,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Vaihdetaan käyttäjään <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> kirjautuu ulos…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Omistaja"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Vieras"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Virhe"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Järjestelmänvalvoja ei salli tätä muutosta."</string>
     <string name="app_not_found" msgid="3429506115332341800">"Tätä toimintoa käsittelevää sovellusta ei löydy"</string>
@@ -1853,10 +1822,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Luo uusi PIN-koodi rajoitusten muokkaamista varten"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN-koodit eivät vastaa toisiaan. Yritä uudelleen."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-koodi on liian lyhyt. Vähimmäispituus on neljä merkkiä."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other">Yritä uudelleen <xliff:g id="COUNT">%d</xliff:g> sekunnin kuluttua</item>
-      <item quantity="one">Yritä uudelleen 1 sekunnin kuluttua</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Yritä myöhemmin uudelleen"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Koko ruudun tilassa"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Sulje palkki pyyhkäisemällä alas ruudun ylälaidasta."</string>
@@ -1884,38 +1849,14 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Data Saver estää joitakin sovelluksia lähettämästä tai vastaanottamasta tietoja taustalla, jotta datan käyttöä voidaan vähentää. Käytössäsi oleva sovellus voi yhä käyttää dataa, mutta se saattaa tehdä niin tavallista harvemmin. Tämä voi tarkoittaa esimerkiksi sitä, että kuva ladataan vasta, kun kosketat sitä."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Otetaanko Data Saver käyttöön?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ota käyttöön"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other">%1$d minuutiksi (kunnes kello on <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Yhdeksi minuutiksi (kunnes kello on <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">%1$d minuutin ajan (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> asti)</item>
-      <item quantity="one">1 minuutin ajan (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> asti)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">%1$d tuntia (kunnes kello on <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">1 tunti (kunnes kello on <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">%1$d tunnin ajan (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> asti)</item>
-      <item quantity="one">1 tunnin ajan (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> asti)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">%d minuutiksi</item>
-      <item quantity="one">Minuutiksi</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">%d minuutin ajan</item>
-      <item quantity="one">1 minuutin ajan</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">%d tunniksi</item>
-      <item quantity="one">1 tunniksi</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">%d tunnin ajan</item>
-      <item quantity="one">1 tunnin ajan</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Yhdeksi minuutiksi ({formattedTime} asti)}other{# minuutiksi ({formattedTime} asti)}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Yhdeksi minuutiksi ({formattedTime} asti)}other{# minuutiksi ({formattedTime} asti)}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Yhdeksi tunniksi ({formattedTime} asti)}other{# tunniksi ({formattedTime} asti)}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Yhdeksi tunniksi ({formattedTime} asti)}other{# tunniksi ({formattedTime} asti)}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Yhdeksi minuutiksi}other{# minuutiksi}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Yhdeksi minuutiksi}other{# minuutiksi}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Yhdeksi tunniksi}other{# tunniksi}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Yhdeksi tunniksi}other{# tunniksi}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> asti"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Kunnes kello on <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> asti (seuraava hälytys)"</string>
@@ -1962,16 +1903,13 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Saapuva puhelu"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Käynnissä oleva puhelu"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Seulotaan saapuvaa puhelua"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> valittu</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> valittu</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Luokittelematon"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Voit valita näiden ilmoitusten tärkeyden."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Tämä on tärkeää siihen liittyvien ihmisten perusteella."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Oma sovellusilmoitus"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Saako <xliff:g id="APP">%1$s</xliff:g> luoda uuden käyttäjän (<xliff:g id="ACCOUNT">%2$s</xliff:g>) – tällä käyttäjällä on jo tili?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Saako <xliff:g id="APP">%1$s</xliff:g> luoda uuden käyttäjän (<xliff:g id="ACCOUNT">%2$s</xliff:g>)?"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"Lisää valvottu käyttäjä"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Lisää kieli"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Alueasetus"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Anna kielen nimi"</string>
@@ -1988,6 +1926,23 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Ota käyttöön"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Sovellus ei ole käytettävissä"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ei ole nyt käytettävissä."</string>
+    <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ei käytettävissä"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Edellyttää käyttöoikeutta"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera ei käytettävissä"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Jatka puhelimella"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofoni ei ole käytettävissä"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV:n asetukset eivät ole käytettävissä"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Tabletin asetukset eivät ole käytettävissä"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Puhelimen asetukset eivät ole käytettävissä"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"<xliff:g id="DEVICE">%1$s</xliff:g> ei saa pääsyä sovellukseen. Kokeile striimausta Android TV ‑laitteella."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"<xliff:g id="DEVICE">%1$s</xliff:g> ei saa pääsyä sovellukseen. Kokeile striimausta tabletilla."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"<xliff:g id="DEVICE">%1$s</xliff:g> ei saa pääsyä sovellukseen. Kokeile striimausta puhelimella."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"<xliff:g id="DEVICE">%1$s</xliff:g> ei tällä hetkellä saa pääsyä sovellukseen. Kokeile striimausta Android TV ‑laitteella."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"<xliff:g id="DEVICE">%1$s</xliff:g> ei tällä hetkellä saa pääsyä sovellukseen. Kokeile striimausta tabletilla."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"<xliff:g id="DEVICE">%1$s</xliff:g> ei tällä hetkellä saa pääsyä sovellukseen. Kokeile striimausta puhelimella."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Sovellus pyytää lisäsuojausta. Kokeile striimausta Android TV ‑laitteella."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Sovellus pyytää lisäsuojausta. Kokeile striimausta tabletilla."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Sovellus pyytää lisäsuojausta. Kokeile striimausta puhelimella."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Tämä sovellus on suunniteltu vanhemmalle Android-versiolle eikä välttämättä toimi oikein. Kokeile tarkistaa päivitykset tai ottaa yhteyttä kehittäjään."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Tarkista päivitykset"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Sinulle on uusia viestejä"</string>
@@ -2030,10 +1985,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Tallenna automaattista täyttöä varten"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Sisältöä ei voi täyttää automaattisesti."</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Ei automaattisen täytön ehdotuksia"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> automaattisen täytön ehdotusta</item>
-      <item quantity="one">Yksi automaattisen täytön ehdotus</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Yksi automaattisen täytön ehdotus}other{# automaattisen täytön ehdotusta}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Saako "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" tallentaa tämän?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Tallennetaanko <xliff:g id="TYPE">%1$s</xliff:g> ("<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>")?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Tallennetaanko <xliff:g id="TYPE_0">%1$s</xliff:g> ja <xliff:g id="TYPE_1">%2$s</xliff:g> ("<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>")?"</string>
@@ -2080,6 +2032,11 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"POISTA"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"AVAA SILTI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Haitallinen sovellus havaittu"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Saako <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> pääsyn kaikkiin laitelokeihin?"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Salli kertaluonteinen pääsy"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Älä salli"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Laitteen tapahtumat tallentuvat laitelokeihin. Niiden avulla sovellukset voivat löytää ja korjata ongelmia.\n\nJotkin lokit voivat sisältää arkaluontoista tietoa, joten salli pääsy kaikkiin laitelokeihin vain sovelluksille, joihin luotat. \n\nJos et salli tälle sovellukselle pääsyä kaikkiin laitelokeihin, sillä on kuitenkin pääsy sen omiin lokeihin. Laitteen valmistajalla voi olla pääsy joihinkin lokeihin tai tietoihin laitteella. Lue lisää"</string>
+    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Älä näytä uudelleen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> haluaa näyttää osia sovelluksesta <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Muokkaa"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Puhelut ja ilmoitukset värisevät"</string>
@@ -2090,6 +2047,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Napauta, jos haluat lukea lisää ja tehdä muutoksia."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Älä häiritse ‑tila muuttui"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Napauta niin näet, mitä on estetty."</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Tarkista ilmoitusasetukset"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Asentamasi sovellukset tarvitsevat sinulta luvan ilmoitusten lähettämiseen Android 13 ‑käyttöjärjestelmästä alkaen. Napauta muuttaaksesi nykyisten sovellusten lupia."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Muistuta myöhemmin"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Ohita"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Järjestelmä"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Asetukset"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
@@ -2134,10 +2095,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g>-esitys"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth pysyy päällä myös lentokonetilassa"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Ladataan"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> tiedostoa</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> tiedosto</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # tiedosto}other{{file_name} + # tiedostoa}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Ei suosituksia kenelle jakaa"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Sovellusluettelo"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Sovellus ei ole saanut tallennuslupaa mutta voi tallentaa ääntä tämän USB-laitteen avulla."</string>
@@ -2149,10 +2107,16 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Virran valintaikkuna"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Lukitusnäyttö"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Kuvakaappaus"</string>
+    <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Kuulokemikrofonin koukku"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Näytöllä näkyvä esteettömyyspainike"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Näytöllä näkyvän esteettömyyspainikkeen valitsin"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Saavutettavuuspainike"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Sulje ilmoitusalue"</string>
+    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Suuntanäppäimistö: ylös-painike"</string>
+    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Suuntanäppäimisto: alas-painike"</string>
+    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Suuntanäppäimistö: vasen painike"</string>
+    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Suuntanäppäimistö: oikea painike"</string>
+    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Suuntanäppäimistö: keskipainike"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Tekstityspalkki: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> on nyt rajoitettujen ryhmässä"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2173,8 +2137,8 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Laita päälle napauttamalla"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ei työsovelluksia"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ei henkilökohtaisia sovelluksia"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Avataanko <xliff:g id="APP">%s</xliff:g> henkilökohtaisessa profiilissa?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Avataanko <xliff:g id="APP">%s</xliff:g> työprofiilissa?"</string>
+    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Avataanko <xliff:g id="APP">%s</xliff:g> henkilökohtaisessa profiilissa?"</string>
+    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Avataanko <xliff:g id="APP">%s</xliff:g> työprofiilissa?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Käytä henkilökohtaista selainta"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Käytä työselainta"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM-kortin verkkoversion lukituksen avaamisen PIN-koodi"</string>
@@ -2304,4 +2268,13 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> voi nähdä ja ohjata näyttöäsi. Tarkista napauttamalla."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> käännettiin."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Viesti käännettiin kielestä <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> kielelle <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Taustatoiminta"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Sovellus kuluttaa akkua"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Sovellus on edelleen aktiivinen"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> on käynnissä taustalla. Hallitse akun käyttöä napauttamalla."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> saattaa vaikuttaa akunkestoon. Tarkista aktiiviset sovellukset napauttamalla."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Tarkista aktiiviset sovellukset"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> ei pääse puhelimen kameraan"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> ei pääse tabletin kameraan"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Järjestelmän oletusarvo"</string>
 </resources>

@@ -23,12 +23,15 @@ import static java.lang.Math.min;
 
 import android.annotation.NonNull;
 import android.graphics.Rect;
+import android.os.CancellationSignal;
 import android.webkit.WebView;
+
+import java.util.function.Consumer;
 
 /**
  * ScrollCapture for WebView.
  */
-class WebViewCaptureHelper implements ScrollCaptureViewHelper<WebView> {
+public class WebViewCaptureHelper implements ScrollCaptureViewHelper<WebView> {
     private static final String TAG = "WebViewScrollCapture";
 
     private final Rect mRequestWebViewLocal = new Rect();
@@ -51,8 +54,9 @@ class WebViewCaptureHelper implements ScrollCaptureViewHelper<WebView> {
 
     @NonNull
     @Override
-    public ScrollResult onScrollRequested(@NonNull WebView view, @NonNull Rect scrollBounds,
-            @NonNull Rect requestRect) {
+    public void onScrollRequested(@NonNull WebView view, @NonNull Rect scrollBounds,
+            @NonNull Rect requestRect, CancellationSignal cancellationSignal,
+            Consumer<ScrollResult> resultConsumer) {
 
         int scrollDelta = view.getScrollY() - mOriginScrollY;
 
@@ -64,7 +68,7 @@ class WebViewCaptureHelper implements ScrollCaptureViewHelper<WebView> {
         mWebViewBounds.set(0, 0, view.getWidth(), view.getHeight());
 
         if (!view.isVisibleToUser()) {
-            return result;
+            resultConsumer.accept(result);
         }
 
         // Map the request into local coordinates
@@ -88,7 +92,7 @@ class WebViewCaptureHelper implements ScrollCaptureViewHelper<WebView> {
             result.availableArea = new Rect(mRequestWebViewLocal);
             result.availableArea.offset(0, result.scrollDelta);
         }
-        return result;
+        resultConsumer.accept(result);
     }
 
     @Override

@@ -22,7 +22,6 @@ import android.view.MotionEvent;
 
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -112,7 +111,7 @@ public interface FalsingManager {
     boolean isReportingEnabled();
 
     /** From com.android.systemui.Dumpable. */
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args);
+    void dump(PrintWriter pw, String[] args);
 
     /**
      *  Don't call this. It's meant for internal use to allow switching between implementations.

@@ -84,6 +84,12 @@ public final class AccessibilityWindowInfo implements Parcelable {
      */
     public static final int TYPE_SPLIT_SCREEN_DIVIDER = 5;
 
+    /**
+     * Window type: A system window used to show the UI for the interaction with
+     * window-based magnification, which includes the magnified content and the option menu.
+     */
+    public static final int TYPE_MAGNIFICATION_OVERLAY = 6;
+
     /* Special values for window IDs */
     /** @hide */
     public static final int ACTIVE_WINDOW_ID = Integer.MAX_VALUE;
@@ -213,13 +219,27 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * @return The root node.
      */
     public AccessibilityNodeInfo getRoot() {
+        return getRoot(AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID);
+    }
+
+    /**
+     * Gets the root node in the window's hierarchy.
+     *
+     * @param prefetchingStrategy the prefetching strategy.
+     * @return The root node.
+     *
+     * @see AccessibilityNodeInfo#getParent(int) for a description of prefetching.
+     */
+    @Nullable
+    public AccessibilityNodeInfo getRoot(
+            @AccessibilityNodeInfo.PrefetchingStrategy int prefetchingStrategy) {
         if (mConnectionId == UNDEFINED_WINDOW_ID) {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
                 mId, AccessibilityNodeInfo.ROOT_NODE_ID,
-                true, AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS, null);
+                true, prefetchingStrategy, null);
     }
 
     /**
@@ -376,6 +396,14 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * Gets if this window is active. An active window is the one
      * the user is currently touching or the window has input focus
      * and the user is not touching any window.
+     * <p>
+     * This is defined as the window that most recently fired one
+     * of the following events:
+     * {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED},
+     * {@link AccessibilityEvent#TYPE_VIEW_HOVER_ENTER},
+     * {@link AccessibilityEvent#TYPE_VIEW_HOVER_EXIT}.
+     * In other words, the last window shown that also has input focus.
+     * </p>
      *
      * @return Whether this is the active window.
      */
@@ -801,6 +829,9 @@ public final class AccessibilityWindowInfo implements Parcelable {
             case TYPE_SPLIT_SCREEN_DIVIDER: {
                 return "TYPE_SPLIT_SCREEN_DIVIDER";
             }
+            case TYPE_MAGNIFICATION_OVERLAY: {
+                return "TYPE_MAGNIFICATION_OVERLAY";
+            }
             default:
                 return "<UNKNOWN:" + type + ">";
         }
@@ -908,7 +939,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
                 final int count = source.readInt();
                 for (int i = 0; i < count; i++) {
                     List<AccessibilityWindowInfo> windows = new ArrayList<>();
-                    source.readParcelableList(windows, loader);
+                    source.readParcelableList(windows, loader, android.view.accessibility.AccessibilityWindowInfo.class);
                     array.put(source.readInt(), windows);
                 }
                 return array;

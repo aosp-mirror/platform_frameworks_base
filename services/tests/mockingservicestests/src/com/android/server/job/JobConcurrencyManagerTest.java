@@ -16,6 +16,10 @@
 
 package com.android.server.job;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.job.JobConcurrencyManager.KEY_PKG_CONCURRENCY_LIMIT_EJ;
+import static com.android.server.job.JobConcurrencyManager.KEY_PKG_CONCURRENCY_LIMIT_REGULAR;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -30,6 +34,7 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -37,9 +42,11 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.R;
 import com.android.server.LocalServices;
 import com.android.server.job.JobConcurrencyManager.GracePeriodObserver;
+import com.android.server.job.JobConcurrencyManager.WorkTypeConfig;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.pm.UserManagerInternal;
 
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -54,9 +61,12 @@ public final class JobConcurrencyManagerTest {
     private UserManagerInternal mUserManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
     private int mNextUserId;
+    private int mDefaultUserId;
     private GracePeriodObserver mGracePeriodObserver;
     private Context mContext;
     private Resources mResources;
+    private PendingJobQueue mPendingJobQueue;
+    private DeviceConfig.Properties.Builder mConfigBuilder;
 
     @BeforeClass
     public static void setUpOnce() {
@@ -80,12 +90,222 @@ public final class JobConcurrencyManagerTest {
                 R.bool.config_jobSchedulerRestrictBackgroundUser);
         when(mContext.getResources()).thenReturn(mResources);
         doReturn(mContext).when(jobSchedulerService).getTestableContext();
+        mConfigBuilder = new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER);
+        mPendingJobQueue = new PendingJobQueue();
+        doReturn(mPendingJobQueue).when(jobSchedulerService).getPendingJobQueue();
         mJobConcurrencyManager = new JobConcurrencyManager(jobSchedulerService);
         mGracePeriodObserver = mock(GracePeriodObserver.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mDefaultUserId = mNextUserId;
+        createCurrentUser(true);
         mNextUserId = 10;
         mJobConcurrencyManager.mGracePeriodObserver = mGracePeriodObserver;
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        resetConfig();
+    }
+
+    @Test
+    public void testIsPkgConcurrencyLimited_top() {
+        final JobStatus topJob = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE, 0);
+        topJob.lastEvaluatedBias = JobInfo.BIAS_TOP_APP;
+
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(topJob));
+
+        // Pending jobs shouldn't affect TOP job's status.
+        for (int i = 1; i <= JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT; ++i) {
+            final JobStatus job = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE + i);
+            mPendingJobQueue.add(job);
+        }
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(topJob));
+
+        // Already running jobs shouldn't affect TOP job's status.
+        for (int i = 1; i <= JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT; ++i) {
+            final JobStatus job = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE, i);
+            mJobConcurrencyManager.addRunningJobForTesting(job);
+        }
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(topJob));
+
+        // Currently running or staged jobs shouldn't affect TOP job's status.
+        final JobConcurrencyManager.PackageStats packageStats =
+                mJobConcurrencyManager.getPackageStatsForTesting(
+                        topJob.getSourceUserId(), topJob.getSourcePackageName());
+        packageStats.numStagedEj = mJobConcurrencyManager.getPackageConcurrencyLimitEj();
+        packageStats.numStagedRegular = mJobConcurrencyManager.getPackageConcurrencyLimitRegular();
+        packageStats.numRunningEj = 0;
+        packageStats.numRunningRegular = 0;
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(topJob));
+
+        packageStats.numStagedEj = 0;
+        packageStats.numStagedRegular = 0;
+        packageStats.numRunningEj = mJobConcurrencyManager.getPackageConcurrencyLimitEj();
+        packageStats.numRunningRegular = mJobConcurrencyManager.getPackageConcurrencyLimitRegular();
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(topJob));
+    }
+
+    @Test
+    public void testIsPkgConcurrencyLimited_belowTotalLimit() throws Exception {
+        final JobStatus testJob = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE);
+
+        setConcurrencyConfig(8);
+
+        // Pending jobs below limit shouldn't affect job's status.
+        for (int i = 0; i < 5; ++i) {
+            final JobStatus job = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE + i);
+            mPendingJobQueue.add(job);
+        }
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testJob));
+
+        mPendingJobQueue.clear();
+
+        // Already running jobs below limit shouldn't affect job's status.
+        for (int i = 0; i < 4; ++i) {
+            final JobStatus job = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE + i);
+            mJobConcurrencyManager.addRunningJobForTesting(job);
+        }
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testJob));
+
+        // Mix of pending + running.
+        for (int i = 4; i < 8; ++i) {
+            final JobStatus job = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE + i);
+            mPendingJobQueue.add(job);
+        }
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testJob));
+    }
+
+    @Test
+    public void testIsPkgConcurrencyLimited() throws Exception {
+        final JobStatus testReg = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE, 0);
+        final JobStatus testEj = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE, 1);
+        spyOn(testEj);
+        doReturn(true).when(testEj).shouldTreatAsExpeditedJob();
+
+        setConcurrencyConfig(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT);
+
+        for (int i = 0; i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT; ++i) {
+            final JobStatus job = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE + i, i + 1);
+            mPendingJobQueue.add(job);
+        }
+
+        // App has no running jobs, so shouldn't be limited.
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        // Already running jobs shouldn't affect TOP job's status.
+        final JobConcurrencyManager.PackageStats packageStats =
+                mJobConcurrencyManager.getPackageStatsForTesting(
+                        testReg.getSourceUserId(), testReg.getSourcePackageName());
+
+        // Only running counts
+        packageStats.numStagedEj = 0;
+        packageStats.numStagedRegular = 0;
+        packageStats.numRunningEj = 4;
+        packageStats.numRunningRegular = 4;
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 8);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 8);
+        updateDeviceConfig();
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 8);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 4);
+        updateDeviceConfig();
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertTrue(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 8);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 3);
+        updateDeviceConfig();
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertTrue(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 4);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 8);
+        updateDeviceConfig();
+        assertTrue(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 3);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 8);
+        updateDeviceConfig();
+        assertTrue(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        // Only staged counts
+        packageStats.numStagedEj = 4;
+        packageStats.numStagedRegular = 4;
+        packageStats.numRunningEj = 0;
+        packageStats.numRunningRegular = 0;
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 8);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 8);
+        updateDeviceConfig();
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 8);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 4);
+        updateDeviceConfig();
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertTrue(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 8);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 3);
+        updateDeviceConfig();
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertTrue(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 4);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 8);
+        updateDeviceConfig();
+        assertTrue(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 3);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 8);
+        updateDeviceConfig();
+        assertTrue(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        // Running + staged counts
+        packageStats.numStagedEj = 2;
+        packageStats.numStagedRegular = 1;
+        packageStats.numRunningEj = 2;
+        packageStats.numRunningRegular = 3;
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 8);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 8);
+        updateDeviceConfig();
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 8);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 4);
+        updateDeviceConfig();
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertTrue(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 8);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 3);
+        updateDeviceConfig();
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertTrue(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 4);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 8);
+        updateDeviceConfig();
+        assertTrue(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
+
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, 3);
+        mConfigBuilder.setInt(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, 8);
+        updateDeviceConfig();
+        assertTrue(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testEj));
+        assertFalse(mJobConcurrencyManager.isPkgConcurrencyLimitedLocked(testReg));
     }
 
     @Test
@@ -179,10 +399,40 @@ public final class JobConcurrencyManagerTest {
     }
 
     private static JobStatus createJob(UserInfo userInfo) {
-        JobStatus jobStatus = JobStatus.createFromJobInfo(
-                new JobInfo.Builder(1, new ComponentName("foo", "bar")).build(),
-                userInfo.id * UserHandle.PER_USER_RANGE,
-                null, userInfo.id, "JobConcurrencyManagerTest");
-        return jobStatus;
+        return createJob(userInfo.id * UserHandle.PER_USER_RANGE);
+    }
+
+    private static JobStatus createJob(int uid) {
+        return createJob(uid, 1);
+    }
+
+    private static JobStatus createJob(int uid, int jobId) {
+        return JobStatus.createFromJobInfo(
+                new JobInfo.Builder(jobId, new ComponentName("foo", "bar")).build(), uid,
+                null, UserHandle.getUserId(uid), "JobConcurrencyManagerTest");
+    }
+
+    private void setConcurrencyConfig(int total) throws Exception {
+        // Set the values for all memory states so we don't have to worry about memory on the device
+        // during testing.
+        final String[] identifiers = {
+                "screen_on_normal", "screen_on_moderate", "screen_on_low", "screen_on_critical",
+                "screen_off_normal", "screen_off_moderate", "screen_off_low", "screen_off_critical"
+        };
+        for (String identifier : identifiers) {
+            mConfigBuilder
+                    .setInt(WorkTypeConfig.KEY_PREFIX_MAX_TOTAL + identifier, total);
+        }
+        updateDeviceConfig();
+    }
+
+    private void updateDeviceConfig() throws Exception {
+        DeviceConfig.setProperties(mConfigBuilder.build());
+        mJobConcurrencyManager.updateConfigLocked();
+    }
+
+    private void resetConfig() throws Exception {
+        mConfigBuilder = new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER);
+        updateDeviceConfig();
     }
 }

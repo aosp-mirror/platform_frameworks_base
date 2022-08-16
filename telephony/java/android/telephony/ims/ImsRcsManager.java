@@ -18,6 +18,7 @@ package android.telephony.ims;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
@@ -43,6 +44,8 @@ import android.util.Log;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.ITelephony;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -87,6 +90,46 @@ public class ImsRcsManager {
             "android.telephony.ims.action.SHOW_CAPABILITY_DISCOVERY_OPT_IN";
 
     /**
+     * This carrier supports User Capability Exchange as, defined by the framework using a
+     * presence server. If set, the RcsFeature should support capability exchange. If not set, this
+     * RcsFeature should not publish capabilities or service capability requests.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "CAPABILITY_TYPE_", flag = true, value = {
+            CAPABILITY_TYPE_NONE,
+            CAPABILITY_TYPE_OPTIONS_UCE,
+            CAPABILITY_TYPE_PRESENCE_UCE
+    })
+    public @interface RcsImsCapabilityFlag {}
+
+    /**
+     * Undefined capability type for initialization
+     */
+    public static final int CAPABILITY_TYPE_NONE = 0;
+
+    /**
+     * This carrier supports User Capability Exchange using SIP OPTIONS as defined by the
+     * framework. If set, the RcsFeature should support capability exchange using SIP OPTIONS.
+     * If not set, this RcsFeature should not service capability requests.
+     */
+    public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1 << 0;
+
+    /**
+     * This carrier supports User Capability Exchange using a presence server as defined by the
+     * framework. If set, the RcsFeature should support capability exchange using a presence
+     * server. If not set, this RcsFeature should not publish capabilities or service capability
+     * requests using presence.
+     */
+    public static final int CAPABILITY_TYPE_PRESENCE_UCE = 1 << 1;
+
+    /**
+     * This is used to check the upper range of RCS capability
+     * @hide
+     */
+    public static final int CAPABILITY_TYPE_MAX = CAPABILITY_TYPE_PRESENCE_UCE + 1;
+
+    /**
      * An application can use {@link #addOnAvailabilityChangedListener} to register a
      * {@link OnAvailabilityChangedListener}, which will notify the user when the RCS feature
      * availability status updates from the ImsService.
@@ -104,7 +147,7 @@ public class ImsRcsManager {
          *
          * @param capabilities The new availability of the capabilities.
          */
-        void onAvailabilityChanged(@RcsUceAdapter.RcsImsCapabilityFlag int capabilities);
+        void onAvailabilityChanged(@RcsImsCapabilityFlag int capabilities);
     }
 
     /**
@@ -486,7 +529,7 @@ public class ImsRcsManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isCapable(@RcsUceAdapter.RcsImsCapabilityFlag int capability,
+    public boolean isCapable(@RcsImsCapabilityFlag int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int radioTech) throws ImsException {
         IImsRcsController imsRcsController = getIImsRcsController();
         if (imsRcsController == null) {
@@ -522,7 +565,7 @@ public class ImsRcsManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isAvailable(@RcsUceAdapter.RcsImsCapabilityFlag int capability,
+    public boolean isAvailable(@RcsImsCapabilityFlag int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int radioTech)
             throws ImsException {
         IImsRcsController imsRcsController = getIImsRcsController();

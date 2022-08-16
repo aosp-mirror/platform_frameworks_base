@@ -56,6 +56,10 @@ public:
                                          size_t start, size_t count, size_t bufSize,
                                          float* advances);
 
+    static minikin::MinikinExtent getFontExtent(const Paint* paint, minikin::Bidi bidiFlags,
+                                                const Typeface* typeface, const uint16_t* buf,
+                                                size_t start, size_t count, size_t bufSize);
+
     static bool hasVariationSelector(const Typeface* typeface, uint32_t codepoint,
                                                  uint32_t vs);
 

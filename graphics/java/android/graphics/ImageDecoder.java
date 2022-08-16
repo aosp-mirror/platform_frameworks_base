@@ -368,7 +368,7 @@ public final class ImageDecoder implements AutoCloseable {
      * Further, unlike other Sources, this one is not reusable.
      */
     private static class InputStreamSource extends Source {
-        InputStreamSource(Resources res, InputStream is, int inputDensity) {
+        InputStreamSource(Resources res, @NonNull InputStream is, int inputDensity) {
             if (is == null) {
                 throw new IllegalArgumentException("The InputStream cannot be null");
             }
@@ -1020,7 +1020,7 @@ public final class ImageDecoder implements AutoCloseable {
      */
     @AnyThread
     @NonNull
-    public static Source createSource(Resources res, InputStream is) {
+    public static Source createSource(Resources res, @NonNull InputStream is) {
         return new InputStreamSource(res, is, Bitmap.getDefaultDensity());
     }
 
@@ -1034,7 +1034,7 @@ public final class ImageDecoder implements AutoCloseable {
     @AnyThread
     @TestApi
     @NonNull
-    public static Source createSource(Resources res, InputStream is, int density) {
+    public static Source createSource(Resources res, @NonNull InputStream is, int density) {
         return new InputStreamSource(res, is, density);
     }
 

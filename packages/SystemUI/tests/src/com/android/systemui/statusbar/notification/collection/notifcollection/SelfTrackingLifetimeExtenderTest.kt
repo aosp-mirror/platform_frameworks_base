@@ -77,7 +77,7 @@ class SelfTrackingLifetimeExtenderTest : SysuiTestCase() {
     @Test
     fun testNoExtend() {
         `when`(shouldExtend.test(entry1)).thenReturn(false)
-        assertThat(extender.shouldExtendLifetime(entry1, 0)).isFalse()
+        assertThat(extender.maybeExtendLifetime(entry1, 0)).isFalse()
         assertThat(extender.isExtending(entry1.key)).isFalse()
         verify(onStarted, never()).accept(entry1)
         verify(onCanceled, never()).accept(entry1)
@@ -86,7 +86,7 @@ class SelfTrackingLifetimeExtenderTest : SysuiTestCase() {
     @Test
     fun testExtendThenCancelForRepost() {
         `when`(shouldExtend.test(entry1)).thenReturn(true)
-        assertThat(extender.shouldExtendLifetime(entry1, 0)).isTrue()
+        assertThat(extender.maybeExtendLifetime(entry1, 0)).isTrue()
         verify(onStarted).accept(entry1)
         verify(onCanceled, never()).accept(entry1)
         assertThat(extender.isExtending(entry1.key)).isTrue()
@@ -108,7 +108,7 @@ class SelfTrackingLifetimeExtenderTest : SysuiTestCase() {
     @Test
     fun testExtendThenEnd() {
         `when`(shouldExtend.test(entry1)).thenReturn(true)
-        assertThat(extender.shouldExtendLifetime(entry1, 0)).isTrue()
+        assertThat(extender.maybeExtendLifetime(entry1, 0)).isTrue()
         verify(onStarted).accept(entry1)
         assertThat(extender.isExtending(entry1.key)).isTrue()
         extender.endLifetimeExtension(entry1.key)
@@ -119,7 +119,7 @@ class SelfTrackingLifetimeExtenderTest : SysuiTestCase() {
     @Test
     fun testExtendThenEndAfterDelay() {
         `when`(shouldExtend.test(entry1)).thenReturn(true)
-        assertThat(extender.shouldExtendLifetime(entry1, 0)).isTrue()
+        assertThat(extender.maybeExtendLifetime(entry1, 0)).isTrue()
         verify(onStarted).accept(entry1)
         assertThat(extender.isExtending(entry1.key)).isTrue()
 
@@ -142,11 +142,11 @@ class SelfTrackingLifetimeExtenderTest : SysuiTestCase() {
     fun testExtendThenEndAll() {
         `when`(shouldExtend.test(entry1)).thenReturn(true)
         `when`(shouldExtend.test(entry2)).thenReturn(true)
-        assertThat(extender.shouldExtendLifetime(entry1, 0)).isTrue()
+        assertThat(extender.maybeExtendLifetime(entry1, 0)).isTrue()
         verify(onStarted).accept(entry1)
         assertThat(extender.isExtending(entry1.key)).isTrue()
         assertThat(extender.isExtending(entry2.key)).isFalse()
-        assertThat(extender.shouldExtendLifetime(entry2, 0)).isTrue()
+        assertThat(extender.maybeExtendLifetime(entry2, 0)).isTrue()
         verify(onStarted).accept(entry2)
         assertThat(extender.isExtending(entry1.key)).isTrue()
         assertThat(extender.isExtending(entry2.key)).isTrue()
@@ -160,11 +160,11 @@ class SelfTrackingLifetimeExtenderTest : SysuiTestCase() {
     @Test
     fun testExtendWithinEndCanReExtend() {
         `when`(shouldExtend.test(entry1)).thenReturn(true)
-        assertThat(extender.shouldExtendLifetime(entry1, 0)).isTrue()
+        assertThat(extender.maybeExtendLifetime(entry1, 0)).isTrue()
         verify(onStarted, times(1)).accept(entry1)
 
         `when`(callback.onEndLifetimeExtension(extender, entry1)).thenAnswer {
-            assertThat(extender.shouldExtendLifetime(entry1, 0)).isTrue()
+            assertThat(extender.maybeExtendLifetime(entry1, 0)).isTrue()
         }
         extender.endLifetimeExtension(entry1.key)
         verify(onStarted, times(2)).accept(entry1)
@@ -174,11 +174,11 @@ class SelfTrackingLifetimeExtenderTest : SysuiTestCase() {
     @Test
     fun testExtendWithinEndCanNotReExtend() {
         `when`(shouldExtend.test(entry1)).thenReturn(true, false)
-        assertThat(extender.shouldExtendLifetime(entry1, 0)).isTrue()
+        assertThat(extender.maybeExtendLifetime(entry1, 0)).isTrue()
         verify(onStarted, times(1)).accept(entry1)
 
         `when`(callback.onEndLifetimeExtension(extender, entry1)).thenAnswer {
-            assertThat(extender.shouldExtendLifetime(entry1, 0)).isFalse()
+            assertThat(extender.maybeExtendLifetime(entry1, 0)).isFalse()
         }
         extender.endLifetimeExtension(entry1.key)
         verify(onStarted, times(1)).accept(entry1)
@@ -188,11 +188,11 @@ class SelfTrackingLifetimeExtenderTest : SysuiTestCase() {
     @Test
     fun testExtendWithinEndAllCanReExtend() {
         `when`(shouldExtend.test(entry1)).thenReturn(true)
-        assertThat(extender.shouldExtendLifetime(entry1, 0)).isTrue()
+        assertThat(extender.maybeExtendLifetime(entry1, 0)).isTrue()
         verify(onStarted, times(1)).accept(entry1)
 
         `when`(callback.onEndLifetimeExtension(extender, entry1)).thenAnswer {
-            assertThat(extender.shouldExtendLifetime(entry1, 0)).isTrue()
+            assertThat(extender.maybeExtendLifetime(entry1, 0)).isTrue()
         }
         extender.endAllLifetimeExtensions()
         verify(onStarted, times(2)).accept(entry1)
@@ -202,11 +202,11 @@ class SelfTrackingLifetimeExtenderTest : SysuiTestCase() {
     @Test
     fun testExtendWithinEndAllCanNotReExtend() {
         `when`(shouldExtend.test(entry1)).thenReturn(true, false)
-        assertThat(extender.shouldExtendLifetime(entry1, 0)).isTrue()
+        assertThat(extender.maybeExtendLifetime(entry1, 0)).isTrue()
         verify(onStarted, times(1)).accept(entry1)
 
         `when`(callback.onEndLifetimeExtension(extender, entry1)).thenAnswer {
-            assertThat(extender.shouldExtendLifetime(entry1, 0)).isFalse()
+            assertThat(extender.maybeExtendLifetime(entry1, 0)).isFalse()
         }
         extender.endAllLifetimeExtensions()
         verify(onStarted, times(1)).accept(entry1)

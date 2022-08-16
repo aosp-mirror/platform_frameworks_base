@@ -26,6 +26,7 @@ import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -38,6 +39,7 @@ import javax.inject.Inject;
 /**
  * @hide
  */
+@SysUISingleton
 public class ReduceBrightColorsController implements
         CallbackController<ReduceBrightColorsController.Listener> {
     private final ColorDisplayManager mManager;

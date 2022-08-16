@@ -16,6 +16,7 @@
 
 package com.google.errorprone.bugpatterns.android;
 
+import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.matchers.Matchers.allOf;
 import static com.google.errorprone.matchers.Matchers.anyOf;
@@ -59,6 +60,7 @@ import com.sun.source.tree.Tree.Kind;
 @BugPattern(
     name = "AndroidFrameworkTargetSdk",
     summary = "Verifies that all target SDK comparisons are sane",
+    linkType = NONE,
     severity = WARNING)
 public final class TargetSdkChecker extends BugChecker implements BinaryTreeMatcher {
     private static final Matcher<ExpressionTree> VERSION_CODE = FieldMatchers

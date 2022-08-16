@@ -20,9 +20,9 @@ import static android.Manifest.permission.CONTROL_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
 
+import static com.android.server.devicestate.DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
 import static com.android.server.devicestate.OverrideRequestController.STATUS_ACTIVE;
 import static com.android.server.devicestate.OverrideRequestController.STATUS_CANCELED;
-import static com.android.server.devicestate.OverrideRequestController.STATUS_SUSPENDED;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -31,6 +31,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.devicestate.DeviceStateManagerInternal;
 import android.hardware.devicestate.IDeviceStateManager;
 import android.hardware.devicestate.IDeviceStateManagerCallback;
 import android.os.Binder;
@@ -42,6 +43,7 @@ import android.os.ShellCallback;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
@@ -49,7 +51,6 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.policy.DeviceStatePolicyImpl;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowProcessController;
 
@@ -59,7 +60,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
@@ -139,8 +142,12 @@ public final class DeviceStateManagerService extends SystemService {
     @GuardedBy("mLock")
     private final SparseArray<ProcessRecord> mProcessRecords = new SparseArray<>();
 
+    private Set<Integer> mDeviceStatesAvailableForAppRequests;
+
     public DeviceStateManagerService(@NonNull Context context) {
-        this(context, new DeviceStatePolicyImpl(context));
+        this(context, DeviceStatePolicy.Provider
+                .fromResources(context.getResources())
+                .instantiate(context));
     }
 
     @VisibleForTesting
@@ -161,6 +168,11 @@ public final class DeviceStateManagerService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.DEVICE_STATE_SERVICE, mBinderService);
+        publishLocalService(DeviceStateManagerInternal.class, new LocalService());
+
+        synchronized (mLock) {
+            readStatesAvailableForRequestFromApps();
+        }
     }
 
     @VisibleForTesting
@@ -240,13 +252,6 @@ public final class DeviceStateManagerService extends SystemService {
     }
 
     /** Returns the list of currently supported device state identifiers. */
-    private int[] getSupportedStateIdentifiers() {
-        synchronized (mLock) {
-            return getSupportedStateIdentifiersLocked();
-        }
-    }
-
-    /** Returns the list of currently supported device state identifiers. */
     private int[] getSupportedStateIdentifiersLocked() {
         int[] supportedStates = new int[mDeviceStates.size()];
         for (int i = 0; i < supportedStates.length; i++) {
@@ -278,14 +283,14 @@ public final class DeviceStateManagerService extends SystemService {
         synchronized (mLock) {
             final int[] oldStateIdentifiers = getSupportedStateIdentifiersLocked();
 
-            // Whether or not at least one device state has the flag FLAG_CANCEL_STICKY_REQUESTS
+            // Whether or not at least one device state has the flag FLAG_CANCEL_OVERRIDE_REQUESTS
             // set. If set to true, the OverrideRequestController will be configured to allow sticky
             // requests.
             boolean hasTerminalDeviceState = false;
             mDeviceStates.clear();
             for (int i = 0; i < supportedDeviceStates.length; i++) {
                 DeviceState state = supportedDeviceStates[i];
-                if ((state.getFlags() & DeviceState.FLAG_CANCEL_STICKY_REQUESTS) != 0) {
+                if (state.hasFlag(FLAG_CANCEL_OVERRIDE_REQUESTS)) {
                     hasTerminalDeviceState = true;
                 }
                 mDeviceStates.put(state.getIdentifier(), state);
@@ -350,8 +355,8 @@ public final class DeviceStateManagerService extends SystemService {
             }
             mBaseState = Optional.of(baseState);
 
-            if ((baseState.getFlags() & DeviceState.FLAG_CANCEL_STICKY_REQUESTS) != 0) {
-                mOverrideRequestController.cancelStickyRequests();
+            if (baseState.hasFlag(FLAG_CANCEL_OVERRIDE_REQUESTS)) {
+                mOverrideRequestController.cancelOverrideRequest();
             }
             mOverrideRequestController.handleBaseStateChanged();
             updatePendingStateLocked();
@@ -506,7 +511,7 @@ public final class DeviceStateManagerService extends SystemService {
             @OverrideRequestController.RequestStatus int status) {
         if (status == STATUS_ACTIVE) {
             mActiveOverride = Optional.of(request);
-        } else if (status == STATUS_SUSPENDED || status == STATUS_CANCELED) {
+        } else if (status == STATUS_CANCELED) {
             if (mActiveOverride.isPresent() && mActiveOverride.get() == request) {
                 mActiveOverride = Optional.empty();
             }
@@ -531,8 +536,6 @@ public final class DeviceStateManagerService extends SystemService {
                 // Schedule the notification now.
                 processRecord.notifyRequestActiveAsync(request.getToken());
             }
-        } else if (status == STATUS_SUSPENDED) {
-            processRecord.notifyRequestSuspendedAsync(request.getToken());
         } else {
             processRecord.notifyRequestCanceledAsync(request.getToken());
         }
@@ -598,15 +601,14 @@ public final class DeviceStateManagerService extends SystemService {
         }
     }
 
-    private void cancelRequestInternal(int callingPid, @NonNull IBinder token) {
+    private void cancelStateRequestInternal(int callingPid) {
         synchronized (mLock) {
             final ProcessRecord processRecord = mProcessRecords.get(callingPid);
             if (processRecord == null) {
                 throw new IllegalStateException("Process " + callingPid
                         + " has no registered callback.");
             }
-
-            mOverrideRequestController.cancelRequest(token);
+            mActiveOverride.ifPresent(mOverrideRequestController::cancelRequest);
         }
     }
 
@@ -629,6 +631,80 @@ public final class DeviceStateManagerService extends SystemService {
 
             mOverrideRequestController.dumpInternal(pw);
         }
+    }
+
+    /**
+     * Allow top processes to request or cancel a device state change. If the calling process ID is
+     * not the top app, then check if this process holds the
+     * {@link android.Manifest.permission.CONTROL_DEVICE_STATE} permission. If the calling process
+     * is the top app, check to verify they are requesting a state we've deemed to be able to be
+     * available for an app process to request. States that can be requested are based around
+     * features that we've created that require specific device state overrides.
+     * @param callingPid Process ID that is requesting this state change
+     * @param state state that is being requested.
+     */
+    private void assertCanRequestDeviceState(int callingPid, int state) {
+        final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
+        if (topApp == null || topApp.getPid() != callingPid
+                || !isStateAvailableForAppRequests(state)) {
+            getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
+                    "Permission required to request device state, "
+                            + "or the call must come from the top app "
+                            + "and be a device state that is available for apps to request.");
+        }
+    }
+
+    /**
+     * Checks if the process can control the device state. If the calling process ID is
+     * not the top app, then check if this process holds the CONTROL_DEVICE_STATE permission.
+     *
+     * @param callingPid Process ID that is requesting this state change
+     */
+    private void assertCanControlDeviceState(int callingPid) {
+        final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
+        if (topApp == null || topApp.getPid() != callingPid) {
+            getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
+                    "Permission required to request device state, "
+                            + "or the call must come from the top app.");
+        }
+    }
+
+    private boolean isStateAvailableForAppRequests(int state) {
+        synchronized (mLock) {
+            return mDeviceStatesAvailableForAppRequests.contains(state);
+        }
+    }
+
+    /**
+     * Adds device state values that are available to be requested by the top level app.
+     */
+    @GuardedBy("mLock")
+    private void readStatesAvailableForRequestFromApps() {
+        mDeviceStatesAvailableForAppRequests = new HashSet<>();
+        String[] availableAppStatesConfigIdentifiers = getContext().getResources()
+                .getStringArray(R.array.config_deviceStatesAvailableForAppRequests);
+        for (int i = 0; i < availableAppStatesConfigIdentifiers.length; i++) {
+            String identifierToFetch = availableAppStatesConfigIdentifiers[i];
+            int configValueIdentifier = getContext().getResources()
+                    .getIdentifier(identifierToFetch, "integer", "android");
+            int state = getContext().getResources().getInteger(configValueIdentifier);
+            if (isValidState(state)) {
+                mDeviceStatesAvailableForAppRequests.add(state);
+            } else {
+                Slog.e(TAG, "Invalid device state was found in the configuration file. State id: "
+                        + state);
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private boolean isValidState(int state) {
+        for (int i = 0; i < mDeviceStates.size(); i++) {
+            if (state == mDeviceStates.valueAt(i).getIdentifier()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private final class DeviceStateProviderListener implements DeviceStateProvider.Listener {
@@ -719,24 +795,6 @@ public final class DeviceStateManagerService extends SystemService {
             });
         }
 
-        public void notifyRequestSuspendedAsync(IBinder token) {
-            @RequestStatus Integer lastStatus = mLastNotifiedStatus.get(token);
-            if (lastStatus != null
-                    && (lastStatus == STATUS_SUSPENDED || lastStatus == STATUS_CANCELED)) {
-                return;
-            }
-
-            mLastNotifiedStatus.put(token, STATUS_SUSPENDED);
-            mHandler.post(() -> {
-                try {
-                    mCallback.onRequestSuspended(token);
-                } catch (RemoteException ex) {
-                    Slog.w(TAG, "Failed to notify process " + mPid + " that request state changed.",
-                            ex);
-                }
-            });
-        }
-
         public void notifyRequestCanceledAsync(IBinder token) {
             @RequestStatus Integer lastStatus = mLastNotifiedStatus.get(token);
             if (lastStatus != null && lastStatus == STATUS_CANCELED) {
@@ -785,12 +843,7 @@ public final class DeviceStateManagerService extends SystemService {
             // Allow top processes to request a device state change
             // If the calling process ID is not the top app, then we check if this process
             // holds a permission to CONTROL_DEVICE_STATE
-            final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
-            if (topApp.getPid() != callingPid) {
-                getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
-                        "Permission required to request device state, "
-                                + "or the call must come from the top focused app.");
-            }
+            assertCanRequestDeviceState(callingPid, state);
 
             if (token == null) {
                 throw new IllegalArgumentException("Request token must not be null.");
@@ -805,25 +858,16 @@ public final class DeviceStateManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public void cancelRequest(IBinder token) {
+        public void cancelStateRequest() {
             final int callingPid = Binder.getCallingPid();
             // Allow top processes to cancel a device state change
             // If the calling process ID is not the top app, then we check if this process
             // holds a permission to CONTROL_DEVICE_STATE
-            final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
-            if (topApp.getPid() != callingPid) {
-                getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
-                        "Permission required to cancel device state, "
-                                + "or the call must come from the top focused app.");
-            }
-
-            if (token == null) {
-                throw new IllegalArgumentException("Request token must not be null.");
-            }
+            assertCanControlDeviceState(callingPid);
 
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                cancelRequestInternal(callingPid, token);
+                cancelStateRequestInternal(callingPid);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
@@ -845,6 +889,16 @@ public final class DeviceStateManagerService extends SystemService {
                 dumpInternal(pw);
             } finally {
                 Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
+
+    /** Implementation of {@link DeviceStateManagerInternal} published as a local service. */
+    private final class LocalService extends DeviceStateManagerInternal {
+        @Override
+        public int[] getSupportedStateIdentifiers() {
+            synchronized (mLock) {
+                return getSupportedStateIdentifiersLocked();
             }
         }
     }

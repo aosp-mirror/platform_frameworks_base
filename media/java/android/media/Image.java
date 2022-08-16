@@ -16,12 +16,18 @@
 
 package android.media;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
+import android.hardware.DataSpace;
+import android.hardware.DataSpace.NamedDataSpace;
 import android.hardware.HardwareBuffer;
+import android.hardware.SyncFence;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
@@ -220,12 +226,17 @@ public abstract class Image implements AutoCloseable {
     public abstract int getScalingMode();
 
     /**
-     * Get the fence file descriptor associated with this frame.
-     * @return The fence file descriptor for this frame.
-     * @hide
+     * Get the SyncFence object associated with this frame.
+     *
+     * <p>This function returns an invalid SyncFence after {@link #getPlanes()} on the image
+     * dequeued from {@link ImageWriter} via {@link ImageWriter#dequeueInputImage()}.</p>
+     *
+     * @return The SyncFence for this frame.
+     * @throws IOException if there is an error when a SyncFence object returns.
+     * @see android.hardware.SyncFence
      */
-    public int getFenceFd() {
-        return -1;
+    public @NonNull SyncFence getFence() throws IOException {
+        return SyncFence.createEmpty();
     }
 
     /**
@@ -278,6 +289,42 @@ public abstract class Image implements AutoCloseable {
     public void setTimestamp(long timestamp) {
         throwISEIfImageIsInvalid();
         return;
+    }
+
+    /**
+     * Set the fence file descriptor with this frame.
+     * @param fence The fence file descriptor to be set for this frame.
+     * @throws IOException if there is an error when setting a SyncFence.
+     * @see android.hardware.SyncFence
+     */
+    public void setFence(@NonNull SyncFence fence) throws IOException {
+        throwISEIfImageIsInvalid();
+        return;
+    }
+
+    private @NamedDataSpace int mDataSpace = DataSpace.DATASPACE_UNKNOWN;
+
+    /**
+     * Get the dataspace associated with this frame.
+     */
+    @SuppressLint("MethodNameUnits")
+    public @NamedDataSpace int getDataSpace() {
+        throwISEIfImageIsInvalid();
+        return mDataSpace;
+    }
+
+    /**
+     * Set the dataspace associated with this frame.
+     * <p>
+     * If dataspace for an image is not set, dataspace value depends on {@link android.view.Surface}
+     * that is provided in the {@link ImageWriter} constructor.
+     * </p>
+     *
+     * @param dataSpace The Dataspace to be set for this image
+     */
+    public void setDataSpace(@NamedDataSpace int dataSpace) {
+        throwISEIfImageIsInvalid();
+        mDataSpace = dataSpace;
     }
 
     private Rect mCropRect;
@@ -407,7 +454,7 @@ public abstract class Image implements AutoCloseable {
      * <p>The number and meaning of the planes in an Image are determined by the
      * format of the Image.</p>
      *
-     * <p>Once the Image has been closed, any access to the the plane's
+     * <p>Once the Image has been closed, any access to the plane's
      * ByteBuffer will fail.</p>
      *
      * @see #getFormat

@@ -18,7 +18,6 @@ package com.android.server.backup.fullbackup;
 
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
-import static com.android.server.backup.UserBackupManagerService.OP_TYPE_BACKUP_WAIT;
 
 import android.app.backup.IBackupManager;
 import android.content.ComponentName;
@@ -33,6 +32,7 @@ import android.util.Slog;
 
 import com.android.internal.backup.IObbBackupService;
 import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.OperationStorage.OpType;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.utils.FullBackupUtils;
 
@@ -83,7 +83,7 @@ public class FullBackupObbConnection implements ServiceConnection {
             long fullBackupAgentTimeoutMillis =
                     mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
             backupManagerService.prepareOperationTimeout(
-                    token, fullBackupAgentTimeoutMillis, null, OP_TYPE_BACKUP_WAIT);
+                    token, fullBackupAgentTimeoutMillis, null, OpType.BACKUP_WAIT);
             mService.backupObbs(pkg.packageName, pipes[1], token,
                     backupManagerService.getBackupManagerBinder());
             FullBackupUtils.routeSocketDataToOutput(pipes[0], out);

@@ -104,14 +104,15 @@ public final class DeviceIdleJobsController extends StateController {
                             Slog.d(TAG, "Got temp whitelist "
                                     + Arrays.toString(mPowerSaveTempWhitelistAppIds));
                         }
-                        boolean changed = false;
+                        final ArraySet<JobStatus> changedJobs = new ArraySet<>();
                         final long nowElapsed = sElapsedRealtimeClock.millis();
                         for (int i = 0; i < mAllowInIdleJobs.size(); i++) {
-                            changed |=
-                                    updateTaskStateLocked(mAllowInIdleJobs.valueAt(i), nowElapsed);
+                            if (updateTaskStateLocked(mAllowInIdleJobs.valueAt(i), nowElapsed)) {
+                                changedJobs.add(mAllowInIdleJobs.valueAt(i));
+                            }
                         }
-                        if (changed) {
-                            mStateChangedListener.onControllerStateChanged();
+                        if (changedJobs.size() > 0) {
+                            mStateChangedListener.onControllerStateChanged(changedJobs);
                         }
                     }
                     break;
@@ -184,8 +185,8 @@ public final class DeviceIdleJobsController extends StateController {
         mForegroundUids.put(uid, active);
         mDeviceIdleUpdateFunctor.prepare();
         mService.getJobStore().forEachJobForSourceUid(uid, mDeviceIdleUpdateFunctor);
-        if (mDeviceIdleUpdateFunctor.mChanged) {
-            mStateChangedListener.onControllerStateChanged();
+        if (mDeviceIdleUpdateFunctor.mChangedJobs.size() > 0) {
+            mStateChangedListener.onControllerStateChanged(mDeviceIdleUpdateFunctor.mChangedJobs);
         }
     }
 
@@ -245,7 +246,7 @@ public final class DeviceIdleJobsController extends StateController {
             pw.print((jobStatus.satisfiedConstraints
                     & JobStatus.CONSTRAINT_DEVICE_NOT_DOZING) != 0
                             ? " RUNNABLE" : " WAITING");
-            if (jobStatus.dozeWhitelisted) {
+            if (jobStatus.appHasDozeExemption) {
                 pw.print(" WHITELISTED");
             }
             if (mAllowInIdleJobs.contains(jobStatus)) {
@@ -272,7 +273,7 @@ public final class DeviceIdleJobsController extends StateController {
             proto.write(TrackedJob.SOURCE_PACKAGE_NAME, jobStatus.getSourcePackageName());
             proto.write(TrackedJob.ARE_CONSTRAINTS_SATISFIED,
                     (jobStatus.satisfiedConstraints & JobStatus.CONSTRAINT_DEVICE_NOT_DOZING) != 0);
-            proto.write(TrackedJob.IS_DOZE_WHITELISTED, jobStatus.dozeWhitelisted);
+            proto.write(TrackedJob.IS_DOZE_WHITELISTED, jobStatus.appHasDozeExemption);
             proto.write(TrackedJob.IS_ALLOWED_IN_DOZE, mAllowInIdleJobs.contains(jobStatus));
 
             proto.end(jsToken);
@@ -283,17 +284,19 @@ public final class DeviceIdleJobsController extends StateController {
     }
 
     final class DeviceIdleUpdateFunctor implements Consumer<JobStatus> {
-        boolean mChanged;
+        final ArraySet<JobStatus> mChangedJobs = new ArraySet<>();
         long mUpdateTimeElapsed = 0;
 
         void prepare() {
-            mChanged = false;
+            mChangedJobs.clear();
             mUpdateTimeElapsed = sElapsedRealtimeClock.millis();
         }
 
         @Override
         public void accept(JobStatus jobStatus) {
-            mChanged |= updateTaskStateLocked(jobStatus, mUpdateTimeElapsed);
+            if (updateTaskStateLocked(jobStatus, mUpdateTimeElapsed)) {
+                mChangedJobs.add(jobStatus);
+            }
         }
     }
 
@@ -310,8 +313,9 @@ public final class DeviceIdleJobsController extends StateController {
                     synchronized (mLock) {
                         mDeviceIdleUpdateFunctor.prepare();
                         mService.getJobStore().forEachJob(mDeviceIdleUpdateFunctor);
-                        if (mDeviceIdleUpdateFunctor.mChanged) {
-                            mStateChangedListener.onControllerStateChanged();
+                        if (mDeviceIdleUpdateFunctor.mChangedJobs.size() > 0) {
+                            mStateChangedListener.onControllerStateChanged(
+                                    mDeviceIdleUpdateFunctor.mChangedJobs);
                         }
                     }
                     break;

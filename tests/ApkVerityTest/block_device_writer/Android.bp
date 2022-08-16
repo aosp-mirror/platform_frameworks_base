@@ -38,7 +38,10 @@ cc_test {
         "-Wextra",
         "-g",
     ],
-    shared_libs: ["libbase", "libutils"],
+    shared_libs: [
+        "libbase",
+        "libutils",
+    ],
     // For some reasons, cuttlefish (x86) uses x86_64 test suites for testing. Unfortunately, when
     // the uploader does not pick up the executable from correct output location. The following
     // workaround allows the test to:
@@ -52,17 +55,23 @@ cc_test {
             suffix: "",
         },
         lib64: {
-            suffix: "64",  // not really used
+            suffix: "64", // not really used
         },
     },
 
     auto_gen_config: false,
-    test_suites: ["general-tests", "pts", "vts"],
+    test_suites: [
+        "general-tests",
+        "vts",
+    ],
     gtest: false,
 }
 
 java_library_host {
     name: "block_device_writer_jar",
     srcs: ["src/**/*.java"],
-    libs: ["tradefed", "junit"],
+    libs: [
+        "tradefed",
+        "junit",
+    ],
 }

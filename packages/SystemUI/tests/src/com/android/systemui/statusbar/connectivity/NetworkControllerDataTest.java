@@ -25,6 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.net.NetworkCapabilities;
+import android.os.Handler;
 import android.os.Looper;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
@@ -126,11 +127,14 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         mConfig.show4gForLte = true;
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm,
                 mTelephonyListenerManager, mMockWm,
-                mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
+                mMockSm, mConfig, Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class),
                 mock(DataUsageController.class), mMockSubDefaults,
                 mock(DeviceProvisionedController.class), mMockBd, mDemoModeController,
-                mock(CarrierConfigTracker.class), mFeatureFlags, mock(DumpManager.class));
+                mock(CarrierConfigTracker.class),
+                mWifiStatusTrackerFactory,
+                new Handler(TestableLooper.get(this).getLooper()),
+                mFeatureFlags, mock(DumpManager.class));
         setupNetworkController();
 
         setupDefaultSignal();

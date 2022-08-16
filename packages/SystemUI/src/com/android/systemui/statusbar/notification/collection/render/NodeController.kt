@@ -41,17 +41,29 @@ interface NodeController {
 
     fun getChildCount(): Int = 0
 
+    /** Called to add a child to this view */
     fun addChildAt(child: NodeController, index: Int) {
         throw RuntimeException("Not supported")
     }
 
+    /** Called to move one of this view's current children to a new position */
     fun moveChildTo(child: NodeController, index: Int) {
         throw RuntimeException("Not supported")
     }
 
+    /** Called to remove one of this view's current children */
     fun removeChild(child: NodeController, isTransfer: Boolean) {
         throw RuntimeException("Not supported")
     }
+
+    /** Called when this view has been added */
+    fun onViewAdded() {}
+
+    /** Called when this view has been moved */
+    fun onViewMoved() {}
+
+    /** Called when this view has been removed */
+    fun onViewRemoved() {}
 }
 
 /**

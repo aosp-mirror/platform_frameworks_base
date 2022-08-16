@@ -23,13 +23,16 @@ import static android.content.pm.PackageManager.MATCH_ANY_USER;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsArgAt;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.intThat;
+import static org.mockito.ArgumentMatchers.longThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -37,15 +40,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.IActivityManager;
+import android.app.usage.StorageStats;
+import android.app.usage.StorageStatsManager;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
+import android.apphibernation.HibernationStats;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
@@ -66,8 +73,12 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 
 /**
@@ -100,6 +111,8 @@ public final class AppHibernationServiceTest {
     @Mock
     private UserManager mUserManager;
     @Mock
+    private StorageStatsManager mStorageStatsManager;
+    @Mock
     private HibernationStateDiskStore<UserLevelState> mUserLevelDiskStore;
     @Mock
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
@@ -111,7 +124,7 @@ public final class AppHibernationServiceTest {
     private ArgumentCaptor<UsageEventListener> mUsageEventListenerCaptor;
 
     @Before
-    public void setUp() throws RemoteException {
+    public void setUp() throws RemoteException, PackageManager.NameNotFoundException, IOException {
         // Share class loader to allow access to package-private classes
         System.setProperty("dexmaker.share_classloader", "true");
         MockitoAnnotations.initMocks(this);
@@ -126,7 +139,7 @@ public final class AppHibernationServiceTest {
         mUsageEventListener = mUsageEventListenerCaptor.getValue();
 
         doReturn(mUserInfos).when(mUserManager).getUsers();
-
+        doReturn(true).when(mPackageManagerInternal).canQueryPackage(anyInt(), any());
         doAnswer(returnsArgAt(2)).when(mIActivityManager).handleIncomingUser(anyInt(), anyInt(),
                 anyInt(), anyBoolean(), anyBoolean(), any(), any());
 
@@ -135,7 +148,12 @@ public final class AppHibernationServiceTest {
         packages.add(makePackageInfo(PACKAGE_NAME_2));
         packages.add(makePackageInfo(PACKAGE_NAME_3));
         doReturn(new ParceledListSlice<>(packages)).when(mIPackageManager).getInstalledPackages(
-                intThat(arg -> (arg & MATCH_ANY_USER) != 0), anyInt());
+                longThat(arg -> (arg & MATCH_ANY_USER) != 0), anyInt());
+        doReturn(mock(ApplicationInfo.class)).when(mIPackageManager).getApplicationInfo(
+                any(), anyLong(), anyInt());
+        StorageStats storageStats = new StorageStats();
+        doReturn(storageStats).when(mStorageStatsManager).queryStatsForPackage(
+                (UUID) any(), anyString(), any());
         mAppHibernationService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
         UserInfo userInfo = addUser(USER_ID_1);
@@ -228,6 +246,29 @@ public final class AppHibernationServiceTest {
         assertEquals(2, hibernatingPackages.size());
         assertTrue(hibernatingPackages.contains(PACKAGE_NAME_1));
         assertTrue(hibernatingPackages.contains(PACKAGE_NAME_2));
+    }
+
+    @Test
+    public void testGetHibernatingPackagesForUser_doesNotReturnPackagesThatArentVisible()
+            throws RemoteException {
+        // GIVEN an unlocked user with all packages installed but only some are visible to the
+        // caller
+        UserInfo userInfo =
+                addUser(USER_ID_2, new String[]{PACKAGE_NAME_1, PACKAGE_NAME_2, PACKAGE_NAME_3});
+        doReturn(false).when(mPackageManagerInternal).canQueryPackage(anyInt(), eq(PACKAGE_NAME_2));
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
+
+        // WHEN packages are hibernated for the user
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_2, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_2, USER_ID_2, true);
+
+        // THEN the hibernating packages returned does not contain the package that was not visible
+        List<String> hibernatingPackages =
+                mAppHibernationService.getHibernatingPackagesForUser(USER_ID_2);
+        assertEquals(1, hibernatingPackages.size());
+        assertTrue(hibernatingPackages.contains(PACKAGE_NAME_1));
+        assertFalse(hibernatingPackages.contains(PACKAGE_NAME_2));
     }
 
     @Test
@@ -376,6 +417,71 @@ public final class AppHibernationServiceTest {
         assertFalse(mAppHibernationService.isHibernatingGlobally(PACKAGE_NAME_1));
     }
 
+    @Test
+    public void testGetHibernationStatsForUser_getsStatsForPackage()
+            throws PackageManager.NameNotFoundException, IOException, RemoteException {
+        // GIVEN a package is hibernating globally and for a user with some storage saved
+        final long cacheSavings = 1000;
+        StorageStats storageStats = new StorageStats();
+        storageStats.cacheBytes = cacheSavings;
+        doReturn(storageStats).when(mStorageStatsManager).queryStatsForPackage(
+                (UUID) any(), eq(PACKAGE_NAME_1), any());
+        final long oatDeletionSavings = 2000;
+        doReturn(oatDeletionSavings).when(mPackageManagerInternal).deleteOatArtifactsOfPackage(
+                PACKAGE_NAME_1);
+
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_1, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, true);
+
+        // WHEN we ask for the hibernation stats for the package
+        Map<String, HibernationStats> statsMap =
+                mAppHibernationService.getHibernationStatsForUser(
+                        Set.of(PACKAGE_NAME_1), USER_ID_1);
+
+        // THEN the stats exist for the package and add up to the OAT deletion and cache deletion
+        // savings
+        HibernationStats stats = statsMap.get(PACKAGE_NAME_1);
+        assertNotNull(stats);
+        assertEquals(cacheSavings + oatDeletionSavings, stats.getDiskBytesSaved());
+    }
+
+    @Test
+    public void testGetHibernationStatsForUser_noExceptionThrownWhenPackageDoesntExist() {
+        // WHEN we ask for the hibernation stats for a package that doesn't exist
+        Map<String, HibernationStats> stats =
+                mAppHibernationService.getHibernationStatsForUser(
+                        Set.of(PACKAGE_NAME_1), USER_ID_1);
+
+        // THEN no exception is thrown and empty stats are returned
+        assertNotNull(stats);
+    }
+
+    @Test
+    public void testGetHibernationStatsForUser_returnsAllIfNoPackagesSpecified()
+            throws RemoteException {
+        // GIVEN an unlocked user with all packages installed and they're all hibernating
+        UserInfo userInfo =
+                addUser(USER_ID_2, new String[]{PACKAGE_NAME_1, PACKAGE_NAME_2, PACKAGE_NAME_3});
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_1, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_2, true);
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_2, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_2, USER_ID_2, true);
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_3, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_3, USER_ID_2, true);
+
+        // WHEN we ask for the hibernation stats with no package specified
+        Map<String, HibernationStats> stats =
+                mAppHibernationService.getHibernationStatsForUser(
+                        null /* packageNames */, USER_ID_2);
+
+        // THEN all the package stats are returned
+        assertTrue(stats.containsKey(PACKAGE_NAME_1));
+        assertTrue(stats.containsKey(PACKAGE_NAME_2));
+        assertTrue(stats.containsKey(PACKAGE_NAME_3));
+    }
+
     /**
      * Mock a usage event occurring.
      *
@@ -412,7 +518,7 @@ public final class AppHibernationServiceTest {
         UserInfo userInfo = new UserInfo(userId, "user_" + userId, 0 /* flags */);
         mUserInfos.add(userInfo);
         doReturn(new ParceledListSlice<>(userPackages)).when(mIPackageManager)
-                .getInstalledPackages(intThat(arg -> (arg & MATCH_ANY_USER) == 0), eq(userId));
+                .getInstalledPackages(longThat(arg -> (arg & MATCH_ANY_USER) == 0), eq(userId));
         return userInfo;
     }
 
@@ -460,6 +566,11 @@ public final class AppHibernationServiceTest {
         @Override
         public UserManager getUserManager() {
             return mUserManager;
+        }
+
+        @Override
+        public StorageStatsManager getStorageStatsManager() {
+            return mStorageStatsManager;
         }
 
         @Override

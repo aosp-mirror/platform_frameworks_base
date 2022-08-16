@@ -76,6 +76,8 @@ per-file ContentInfo.java = file:/core/java/android/service/autofill/OWNERS
 per-file ContentInfo.java = file:/core/java/android/widget/OWNERS
 
 # WindowManager
+per-file ContentRecordingSession.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ContentRecordingSession.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file DisplayCutout.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file DisplayCutout.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IDisplay*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
@@ -84,6 +86,7 @@ per-file Inset*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IPinnedStackListener.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IRecents*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IRemote*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ISurfaceControlViewHost*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IWindow*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file RemoteAnimation*.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file RemoteAnimation*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
@@ -94,6 +97,7 @@ per-file SyncRtSurfaceTransactionApplier.java = file:/services/core/java/com/and
 per-file ViewRootInsetsControllerHost.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file Window*.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file Window*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file TransactionCommittedCallback.java = file:/services/core/java/com/android/server/wm/OWNERS
 
 # Scroll Capture
 per-file *ScrollCapture*.aidl = file:/packages/SystemUI/src/com/android/systemui/screenshot/OWNERS

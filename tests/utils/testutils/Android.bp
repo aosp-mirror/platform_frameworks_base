@@ -38,6 +38,6 @@ java_library {
         "android.test.runner",
         "android.test.base",
         "android.test.mock",
-        "mockito-target-minus-junit4",
+        "mockito-target-extended-minus-junit4",
     ],
 }

@@ -519,7 +519,7 @@ public class WindowManagerShellCommand extends ShellCommand {
                         : -1;
                 // Request dump from all windows parallelly before writing to disk.
                 mInternal.mRoot.forAllWindows(w -> {
-                    final boolean isRecents = (w.mSession.mUid == recentsComponentUid);
+                    final boolean isRecents = (w.getUid() == recentsComponentUid);
                     if (w.isVisible() || isRecents) {
                         ByteTransferPipe pipe = null;
                         try {

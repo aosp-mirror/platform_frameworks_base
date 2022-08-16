@@ -174,8 +174,8 @@ final class InputDeviceVibrator extends Vibrator {
      * @hide
      */
     @Override
-    public void vibrate(int uid, String opPkg, @NonNull VibrationEffect effect,
-            String reason, @NonNull VibrationAttributes attributes) {
+    public void vibrate(int uid, String opPkg, @NonNull VibrationEffect effect, String reason,
+            @NonNull VibrationAttributes attributes) {
         mInputManager.vibrate(mDeviceId, effect, mToken);
     }
 

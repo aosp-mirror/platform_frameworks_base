@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -25,6 +27,7 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
@@ -36,10 +39,13 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
@@ -47,7 +53,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 
 import android.graphics.Rect;
 import android.os.Binder;
@@ -375,7 +383,7 @@ public class AppTransitionTests extends WindowTestsBase {
         doReturn(false).when(dc).onDescendantOrientationChanged(any());
         final WindowState exitingAppWindow = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
                 dc, "exiting app");
-        final ActivityRecord exitingActivity= exitingAppWindow.mActivityRecord;
+        final ActivityRecord exitingActivity = exitingAppWindow.mActivityRecord;
         // Wait until everything in animation handler get executed to prevent the exiting window
         // from being removed during WindowSurfacePlacer Traversal.
         waitUntilHandlersIdle();
@@ -404,6 +412,53 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testExcludeLauncher() {
+        final DisplayContent dc = createNewDisplay(Display.STATE_ON);
+        doReturn(false).when(dc).onDescendantOrientationChanged(any());
+        final Task task = createTask(dc);
+
+        // Simulate activity1 launches activity2
+        final ActivityRecord activity1 = createActivityRecord(task);
+        activity1.setVisible(true);
+        activity1.mVisibleRequested = false;
+        activity1.allDrawn = true;
+        dc.mClosingApps.add(activity1);
+        final ActivityRecord activity2 = createActivityRecord(task);
+        activity2.setVisible(false);
+        activity2.mVisibleRequested = true;
+        activity2.allDrawn = true;
+        dc.mOpeningApps.add(activity2);
+        dc.prepareAppTransition(TRANSIT_OPEN);
+
+        // Simulate start recents
+        final ActivityRecord homeActivity = createActivityRecord(dc, WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_HOME);
+        homeActivity.setVisible(false);
+        homeActivity.mVisibleRequested = true;
+        homeActivity.allDrawn = true;
+        dc.mOpeningApps.add(homeActivity);
+        dc.prepareAppTransition(TRANSIT_NONE);
+        doReturn(true).when(task)
+                .isSelfAnimating(anyInt(), eq(ANIMATION_TYPE_RECENTS));
+
+        // Wait until everything in animation handler get executed to prevent the exiting window
+        // from being removed during WindowSurfacePlacer Traversal.
+        waitUntilHandlersIdle();
+
+        dc.mAppTransitionController.handleAppTransitionReady();
+
+        verify(activity1).commitVisibility(eq(false), anyBoolean(), anyBoolean());
+        verify(activity1).applyAnimation(any(), eq(TRANSIT_OLD_ACTIVITY_OPEN), eq(false),
+                anyBoolean(), any());
+        verify(activity2).commitVisibility(eq(true), anyBoolean(), anyBoolean());
+        verify(activity2).applyAnimation(any(), eq(TRANSIT_OLD_ACTIVITY_OPEN), eq(true),
+                anyBoolean(), any());
+        verify(homeActivity).commitVisibility(eq(true), anyBoolean(), anyBoolean());
+        verify(homeActivity, never()).applyAnimation(any(), anyInt(), anyBoolean(), anyBoolean(),
+                any());
+    }
+
+    @Test
     public void testGetAnimationStyleResId() {
         // Verify getAnimationStyleResId will return as LayoutParams.windowAnimations when without
         // specifying window type.
@@ -422,6 +477,7 @@ public class AppTransitionTests extends WindowTestsBase {
     public void testActivityRecordReparentToTaskFragment() {
         final ActivityRecord activity = createActivityRecord(mDc);
         final SurfaceControl activityLeash = mock(SurfaceControl.class);
+        doNothing().when(activity).setDropInputMode(anyInt());
         activity.setVisibility(true);
         activity.setSurfaceControl(activityLeash);
         final Task task = activity.getTask();
@@ -466,7 +522,7 @@ public class AppTransitionTests extends WindowTestsBase {
         }
 
         @Override
-        public void onAnimationCancelled() {
+        public void onAnimationCancelled(boolean isKeyguardOccluded) {
             mCancelled = true;
         }
 

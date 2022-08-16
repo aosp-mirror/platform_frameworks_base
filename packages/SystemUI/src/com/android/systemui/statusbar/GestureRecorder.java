@@ -23,7 +23,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import java.io.BufferedWriter;
-import java.io.FileDescriptor;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -246,7 +245,7 @@ public class GestureRecorder {
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         save();
         if (mLastSaveLen >= 0) {
             pw.println(String.valueOf(mLastSaveLen) + " gestures written to " + mLogfile);

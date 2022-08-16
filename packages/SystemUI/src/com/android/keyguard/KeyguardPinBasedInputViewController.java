@@ -133,4 +133,10 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     void resetState() {
         mView.setPasswordEntryEnabled(true);
     }
+
+    @Override
+    protected void startErrorAnimation() {
+        super.startErrorAnimation();
+        mView.startErrorAnimation();
+    }
 }

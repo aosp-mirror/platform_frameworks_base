@@ -24,8 +24,6 @@ import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
 
-import dalvik.annotation.optimization.FastNative;
-
 /**
  * Provides conversion from a text into glyph array.
  *
@@ -116,12 +114,10 @@ public class TextRunShaper {
         }
     }
 
-    @FastNative
     private static native long nativeShapeTextRun(
             char[] text, int start, int count, int contextStart, int contextCount,
             boolean isRtl, long nativePaint);
 
-    @FastNative
     private static native long nativeShapeTextRun(
             String text, int start, int count, int contextStart, int contextCount,
             boolean isRtl, long nativePaint);

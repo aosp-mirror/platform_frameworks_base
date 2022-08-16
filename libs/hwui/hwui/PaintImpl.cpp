@@ -15,6 +15,7 @@
  */
 
 #include "Paint.h"
+#include "BlurDrawLooper.h"
 
 namespace android {
 
@@ -43,6 +44,7 @@ Paint::Paint(const Paint& paint)
         , mHyphenEdit(paint.mHyphenEdit)
         , mTypeface(paint.mTypeface)
         , mAlign(paint.mAlign)
+        , mFilterBitmap(paint.mFilterBitmap)
         , mStrikeThru(paint.mStrikeThru)
         , mUnderline(paint.mUnderline)
         , mDevKern(paint.mDevKern) {}
@@ -62,6 +64,7 @@ Paint& Paint::operator=(const Paint& other) {
     mHyphenEdit = other.mHyphenEdit;
     mTypeface = other.mTypeface;
     mAlign = other.mAlign;
+    mFilterBitmap = other.mFilterBitmap;
     mStrikeThru = other.mStrikeThru;
     mUnderline = other.mUnderline;
     mDevKern = other.mDevKern;
@@ -77,6 +80,7 @@ bool operator==(const Paint& a, const Paint& b) {
            a.mMinikinLocaleListId == b.mMinikinLocaleListId &&
            a.mFamilyVariant == b.mFamilyVariant && a.mHyphenEdit == b.mHyphenEdit &&
            a.mTypeface == b.mTypeface && a.mAlign == b.mAlign &&
+           a.mFilterBitmap == b.mFilterBitmap &&
            a.mStrikeThru == b.mStrikeThru && a.mUnderline == b.mUnderline &&
            a.mDevKern == b.mDevKern;
 }
@@ -88,9 +92,14 @@ void Paint::reset() {
     mFont.setEdging(SkFont::Edging::kAlias);
     mLooper.reset();
 
+    mFilterBitmap = false;
     mStrikeThru = false;
     mUnderline = false;
     mDevKern = false;
+}
+
+void Paint::setLooper(sk_sp<BlurDrawLooper> looper) {
+    mLooper = std::move(looper);
 }
 
 void Paint::setAntiAlias(bool aa) {
@@ -131,9 +140,6 @@ static uint32_t paintToLegacyFlags(const SkPaint& paint) {
     uint32_t flags = 0;
     flags |= -(int)paint.isAntiAlias() & sAntiAliasFlag;
     flags |= -(int)paint.isDither()    & sDitherFlag;
-    if (paint.getFilterQuality() != kNone_SkFilterQuality) {
-        flags |= sFilterBitmapFlag;
-    }
     return flags;
 }
 
@@ -150,12 +156,6 @@ static uint32_t fontToLegacyFlags(const SkFont& font) {
 static void applyLegacyFlagsToPaint(uint32_t flags, SkPaint* paint) {
     paint->setAntiAlias((flags & sAntiAliasFlag) != 0);
     paint->setDither   ((flags & sDitherFlag) != 0);
-
-    if (flags & sFilterBitmapFlag) {
-        paint->setFilterQuality(kLow_SkFilterQuality);
-    } else {
-        paint->setFilterQuality(kNone_SkFilterQuality);
-    }
 }
 
 static void applyLegacyFlagsToFont(uint32_t flags, SkFont* font) {
@@ -182,18 +182,20 @@ void Paint::SetSkPaintJavaFlags(SkPaint* paint, uint32_t flags) {
 
 uint32_t Paint::getJavaFlags() const {
     uint32_t flags = paintToLegacyFlags(*this) | fontToLegacyFlags(mFont);
-    flags |= -(int)mStrikeThru & sStrikeThruFlag;
-    flags |= -(int)mUnderline  & sUnderlineFlag;
-    flags |= -(int)mDevKern    & sDevKernFlag;
+    flags |= -(int)mStrikeThru   & sStrikeThruFlag;
+    flags |= -(int)mUnderline    & sUnderlineFlag;
+    flags |= -(int)mDevKern      & sDevKernFlag;
+    flags |= -(int)mFilterBitmap & sFilterBitmapFlag;
     return flags;
 }
 
 void Paint::setJavaFlags(uint32_t flags) {
     applyLegacyFlagsToPaint(flags, this);
     applyLegacyFlagsToFont(flags, &mFont);
-    mStrikeThru = (flags & sStrikeThruFlag) != 0;
-    mUnderline  = (flags & sUnderlineFlag) != 0;
-    mDevKern    = (flags & sDevKernFlag) != 0;
+    mStrikeThru   = (flags & sStrikeThruFlag) != 0;
+    mUnderline    = (flags & sUnderlineFlag) != 0;
+    mDevKern      = (flags & sDevKernFlag) != 0;
+    mFilterBitmap = (flags & sFilterBitmapFlag) != 0;
 }
 
 }  // namespace android

@@ -28,8 +28,9 @@ import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.PackageSetting;
+import com.android.server.pm.Computer;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
@@ -101,8 +102,7 @@ class DomainVerificationSettings {
      */
     public void readSettings(@NonNull TypedXmlPullParser parser,
             @NonNull DomainVerificationStateMap<DomainVerificationPkgState> liveState,
-            @NonNull Function<String, PackageSetting> pkgSettingFunction)
-            throws IOException, XmlPullParserException {
+            @NonNull Computer snapshot) throws IOException, XmlPullParserException {
         DomainVerificationPersistence.ReadResult result =
                 DomainVerificationPersistence.readFromXml(parser);
         ArrayMap<String, DomainVerificationPkgState> active = result.active;
@@ -118,7 +118,7 @@ class DomainVerificationSettings {
                     // This branch should never be possible. Settings should be read from disk
                     // before any states are attached. But just in case, handle it.
                     if (!existingState.getId().equals(pkgState.getId())) {
-                        mergePkgState(existingState, pkgState, pkgSettingFunction);
+                        mergePkgState(existingState, pkgState, snapshot);
                     }
                 } else {
                     mPendingPkgStates.put(pkgName, pkgState);
@@ -139,8 +139,7 @@ class DomainVerificationSettings {
      */
     public void restoreSettings(@NonNull TypedXmlPullParser parser,
             @NonNull DomainVerificationStateMap<DomainVerificationPkgState> liveState,
-            @NonNull Function<String, PackageSetting> pkgSettingFunction)
-            throws IOException, XmlPullParserException {
+            @NonNull Computer snapshot) throws IOException, XmlPullParserException {
         // TODO(b/170746586): Restoration assumes user IDs match, which is probably not the case on
         //  a new device.
 
@@ -166,7 +165,7 @@ class DomainVerificationSettings {
                 }
 
                 if (existingState != null) {
-                    mergePkgState(existingState, newState, pkgSettingFunction);
+                    mergePkgState(existingState, newState, snapshot);
                 } else {
                     // If there's no existing state, that means the new state has to be transformed
                     // in preparation for attaching to brand new package that may eventually be
@@ -216,9 +215,9 @@ class DomainVerificationSettings {
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     public void mergePkgState(@NonNull DomainVerificationPkgState oldState,
-            @NonNull DomainVerificationPkgState newState,
-            @NonNull Function<String, PackageSetting> pkgSettingFunction) {
-        PackageSetting pkgSetting = pkgSettingFunction.apply(oldState.getPackageName());
+            @NonNull DomainVerificationPkgState newState, @NonNull Computer snapshot) {
+        PackageStateInternal pkgSetting =
+                snapshot.getPackageStateInternal(oldState.getPackageName());
         AndroidPackage pkg = pkgSetting == null ? null : pkgSetting.getPkg();
         Set<String> validDomains = pkg == null
                 ? Collections.emptySet() : mCollector.collectValidAutoVerifyDomains(pkg);

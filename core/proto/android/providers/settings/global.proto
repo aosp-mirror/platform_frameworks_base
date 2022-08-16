@@ -574,6 +574,12 @@ message GlobalSettingsProto {
 
     optional SettingProto lte_service_forced = 71 [ (android.privacy).dest = DEST_AUTOMATIC ];
     repeated SettingProto max_error_bytes = 151;
+
+    message ManagedDeviceProvisioning {
+        optional SettingProto managed_provisioning_defer_provisioning_to_role_holder = 1;
+    }
+    optional ManagedDeviceProvisioning managed_device_provisioning = 156;
+
     optional SettingProto mdc_initial_max_retry = 72 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Mhl {
@@ -601,7 +607,7 @@ message GlobalSettingsProto {
     // ringer mode.
     optional SettingProto mode_ringer = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-    optional SettingProto apply_ramping_ringer = 147 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    reserved 147; // Used to be apply_ramping_ringer
 
     message MultiSim {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -1077,5 +1083,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 156;
+    // Next tag = 157;
 }

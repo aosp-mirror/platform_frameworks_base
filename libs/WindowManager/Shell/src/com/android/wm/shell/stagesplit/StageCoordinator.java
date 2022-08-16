@@ -23,7 +23,6 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
-import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
 
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__APP_DOES_NOT_SUPPORT_MULTIWINDOW;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__APP_FINISHED;
@@ -266,7 +265,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mMainStage.activate(getMainStageBounds(), wct);
         mSideStage.addTask(task, getSideStageBounds(), wct);
         mSyncQueue.queue(wct);
-        mSyncQueue.runInSync(t -> updateSurfaceBounds(null /* layout */, t));
+        mSyncQueue.runInSync(
+                t -> updateSurfaceBounds(null /* layout */, t, false /* applyResizingOffset */));
         return true;
     }
 
@@ -345,9 +345,9 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
 
             @Override
-            public void onAnimationCancelled() {
+            public void onAnimationCancelled(boolean isKeyguardOccluded) {
                 try {
-                    adapter.getRunner().onAnimationCancelled();
+                    adapter.getRunner().onAnimationCancelled(isKeyguardOccluded);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error starting remote animation", e);
                 }
@@ -722,7 +722,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         if (mDividerVisible) {
             t.show(dividerLeash)
-                    .setLayer(dividerLeash, SPLIT_DIVIDER_LAYER)
+                    .setLayer(dividerLeash, Integer.MAX_VALUE)
                     .setPosition(dividerLeash,
                             mSplitLayout.getDividerBounds().left,
                             mSplitLayout.getDividerBounds().top);
@@ -738,7 +738,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         if (mDividerVisible) {
-            t.show(outlineLeash).setLayer(outlineLeash, SPLIT_DIVIDER_LAYER);
+            t.show(outlineLeash).setLayer(outlineLeash, Integer.MAX_VALUE);
         } else {
             t.hide(outlineLeash);
         }
@@ -802,12 +802,12 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     @Override
     public void onLayoutPositionChanging(SplitLayout layout) {
-        mSyncQueue.runInSync(t -> updateSurfaceBounds(layout, t));
+        mSyncQueue.runInSync(t -> updateSurfaceBounds(layout, t, true /* applyResizingOffset */));
     }
 
     @Override
     public void onLayoutSizeChanging(SplitLayout layout) {
-        mSyncQueue.runInSync(t -> updateSurfaceBounds(layout, t));
+        mSyncQueue.runInSync(t -> updateSurfaceBounds(layout, t, true /* applyResizingOffset */));
         mSideStage.setOutlineVisibility(false);
     }
 
@@ -817,7 +817,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         updateWindowBounds(layout, wct);
         updateUnfoldBounds();
         mSyncQueue.queue(wct);
-        mSyncQueue.runInSync(t -> updateSurfaceBounds(layout, t));
+        mSyncQueue.runInSync(t -> updateSurfaceBounds(layout, t, false /* applyResizingOffset */));
         mSideStage.setOutlineVisibility(true);
         mLogger.logResize(mSplitLayout.getDividerPositionAsFraction());
     }
@@ -841,13 +841,15 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         layout.applyTaskChanges(wct, topLeftStage.mRootTaskInfo, bottomRightStage.mRootTaskInfo);
     }
 
-    void updateSurfaceBounds(@Nullable SplitLayout layout, @NonNull SurfaceControl.Transaction t) {
+    void updateSurfaceBounds(@Nullable SplitLayout layout, @NonNull SurfaceControl.Transaction t,
+            boolean applyResizingOffset) {
         final StageTaskListener topLeftStage =
                 mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mSideStage : mMainStage;
         final StageTaskListener bottomRightStage =
                 mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mMainStage : mSideStage;
         (layout != null ? layout : mSplitLayout).applySurfaceChanges(t, topLeftStage.mRootLeash,
-                bottomRightStage.mRootLeash, topLeftStage.mDimLayer, bottomRightStage.mDimLayer);
+                bottomRightStage.mRootLeash, topLeftStage.mDimLayer, bottomRightStage.mDimLayer,
+                applyResizingOffset);
     }
 
     @Override
@@ -883,7 +885,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mSplitLayout == null) {
             mSplitLayout = new SplitLayout(TAG + "SplitDivider", mContext,
                     mDisplayAreaInfo.configuration, this, mParentContainerCallbacks,
-                    mDisplayImeController, mTaskOrganizer, true /* applyDismissingParallax */);
+                    mDisplayImeController, mTaskOrganizer, SplitLayout.PARALLAX_DISMISSING);
             mDisplayInsetsController.addInsetsChangedListener(mDisplayId, mSplitLayout);
 
             if (mMainUnfoldController != null && mSideUnfoldController != null) {
@@ -1190,7 +1192,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // Be default, make it visible. The remote animator can adjust alpha if it plans to animate.
         if (show) {
             t.setAlpha(leash, 1.f);
-            t.setLayer(leash, SPLIT_DIVIDER_LAYER);
+            t.setLayer(leash, Integer.MAX_VALUE);
             t.setPosition(leash, bounds.left, bounds.top);
             t.show(leash);
         }

@@ -23,10 +23,15 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.util.SparseArray;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Representation of a user on the device.
@@ -119,19 +124,46 @@ public final class UserHandle implements Parcelable {
     public static final int MIN_SECONDARY_USER_ID = 10;
 
     /**
-     * Arbitrary user handle cache size. We use the cache even when {@link #MU_ENABLED} is false
-     * anyway, so we can always assume in CTS that UserHandle.of(10) returns a cached instance
-     * even on non-multiuser devices.
+     * (Arbitrary) user handle cache size.
+     * {@link #CACHED_USER_HANDLES} caches user handles in the range of
+     * [{@link #MIN_SECONDARY_USER_ID}, {@link #MIN_SECONDARY_USER_ID} + {@link #NUM_CACHED_USERS}).
+     *
+     * For other users, we cache UserHandles in {link #sExtraUserHandleCache}.
+     *
+     * Normally, {@link #CACHED_USER_HANDLES} should cover all existing users, but use
+     * {link #sExtraUserHandleCache} to ensure {@link UserHandle#of} will not cause too many
+     * object allocations even if the device happens to have a secondary user with a large number
+     * (e.g. the user kept creating and removing the guest user?).
      */
-    private static final int NUM_CACHED_USERS = 4;
+    private static final int NUM_CACHED_USERS = MU_ENABLED ? 8 : 0;
 
-    private static final UserHandle[] CACHED_USER_INFOS = new UserHandle[NUM_CACHED_USERS];
+    /** @see #NUM_CACHED_USERS} */
+    private static final UserHandle[] CACHED_USER_HANDLES = new UserHandle[NUM_CACHED_USERS];
+
+    /**
+     * Extra cache for users beyond CACHED_USER_HANDLES.
+     *
+     * @see #NUM_CACHED_USERS
+     * @hide
+     */
+    @GuardedBy("sExtraUserHandleCache")
+    @VisibleForTesting
+    public static final SparseArray<UserHandle> sExtraUserHandleCache = new SparseArray<>(0);
+
+    /**
+     * Max size of {@link #sExtraUserHandleCache}. Once it reaches this size, we select
+     * an element to remove at random.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static final int MAX_EXTRA_USER_HANDLE_CACHE_SIZE = 32;
 
     static {
         // Not lazily initializing the cache, so that we can share them across processes.
         // (We'll create them in zygote.)
-        for (int i = 0; i < CACHED_USER_INFOS.length; i++) {
-            CACHED_USER_INFOS[i] = new UserHandle(MIN_SECONDARY_USER_ID + i);
+        for (int i = 0; i < CACHED_USER_HANDLES.length; i++) {
+            CACHED_USER_HANDLES[i] = new UserHandle(MIN_SECONDARY_USER_ID + i);
         }
     }
 
@@ -302,13 +334,31 @@ public final class UserHandle implements Parcelable {
                 return CURRENT_OR_SELF;
         }
         if (userId >= MIN_SECONDARY_USER_ID
-                && userId < (MIN_SECONDARY_USER_ID + CACHED_USER_INFOS.length)) {
-            return CACHED_USER_INFOS[userId - MIN_SECONDARY_USER_ID];
+                && userId < (MIN_SECONDARY_USER_ID + CACHED_USER_HANDLES.length)) {
+            return CACHED_USER_HANDLES[userId - MIN_SECONDARY_USER_ID];
         }
         if (userId == USER_NULL) { // Not common.
             return NULL;
         }
-        return new UserHandle(userId);
+        return getUserHandleFromExtraCache(userId);
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public static UserHandle getUserHandleFromExtraCache(@UserIdInt int userId) {
+        synchronized (sExtraUserHandleCache) {
+            final UserHandle extraCached = sExtraUserHandleCache.get(userId);
+            if (extraCached != null) {
+                return extraCached;
+            }
+            if (sExtraUserHandleCache.size() >= MAX_EXTRA_USER_HANDLE_CACHE_SIZE) {
+                sExtraUserHandleCache.removeAt(
+                        (new Random()).nextInt(MAX_EXTRA_USER_HANDLE_CACHE_SIZE));
+            }
+            final UserHandle newHandle = new UserHandle(userId);
+            sExtraUserHandleCache.put(userId, newHandle);
+            return newHandle;
+        }
     }
 
     /**

@@ -48,7 +48,7 @@
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginBottom="4dp"
-        android:tint="?android:attr/textColor"
+        android:tint="@color/media_paging_indicator"
         android:forceHasOverlappingRendering="false"
     />
 </FrameLayout>

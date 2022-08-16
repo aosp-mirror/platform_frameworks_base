@@ -690,6 +690,14 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         }
     }
 
+    /**
+     * Gets the total duration of the animation
+     * @hide
+     */
+    public long getTotalDuration() {
+        return mAnimatorSet.getTotalDuration();
+    }
+
     private static class AnimatedVectorDrawableState extends ConstantState {
         @Config int mChangingConfigurations;
         VectorDrawable mVectorDrawable;
@@ -1074,6 +1082,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         boolean isInfinite();
         void pause();
         void resume();
+        long getTotalDuration();
     }
 
     private static class VectorDrawableAnimatorUI implements VectorDrawableAnimator {
@@ -1085,6 +1094,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         // setup by init().
         private ArrayList<AnimatorListener> mListenerArray = null;
         private boolean mIsInfinite = false;
+        private long mTotalDuration;
 
         VectorDrawableAnimatorUI(@NonNull AnimatedVectorDrawable drawable) {
             mDrawable = drawable;
@@ -1100,7 +1110,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             // Keep a deep copy of the set, such that set can be still be constantly representing
             // the static content from XML file.
             mSet = set.clone();
-            mIsInfinite = mSet.getTotalDuration() == Animator.DURATION_INFINITE;
+            mTotalDuration = mSet.getTotalDuration();
+            mIsInfinite = mTotalDuration == Animator.DURATION_INFINITE;
 
             // If there are listeners added before calling init(), now they should be setup.
             if (mListenerArray != null && !mListenerArray.isEmpty()) {
@@ -1219,6 +1230,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         private void invalidateOwningView() {
             mDrawable.invalidateSelf();
         }
+
+        @Override
+        public long getTotalDuration() {
+            return mTotalDuration;
+        }
     }
 
     /**
@@ -1249,6 +1265,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         private int mLastListenerId = 0;
         private final IntArray mPendingAnimationActions = new IntArray();
         private final AnimatedVectorDrawable mDrawable;
+        private long mTotalDuration;
 
         VectorDrawableAnimatorRT(AnimatedVectorDrawable drawable) {
             mDrawable = drawable;
@@ -1270,7 +1287,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                     .getNativeTree();
             nSetVectorDrawableTarget(mSetPtr, vectorDrawableTreePtr);
             mInitialized = true;
-            mIsInfinite = set.getTotalDuration() == Animator.DURATION_INFINITE;
+            mTotalDuration = set.getTotalDuration();
+            mIsInfinite = mTotalDuration == Animator.DURATION_INFINITE;
 
             // Check reversible.
             mIsReversible = true;
@@ -1795,6 +1813,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                 }
             }
             mPendingAnimationActions.clear();
+        }
+
+        @Override
+        public long getTotalDuration() {
+            return mTotalDuration;
         }
     }
 

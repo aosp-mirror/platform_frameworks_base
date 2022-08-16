@@ -30,9 +30,13 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
@@ -48,6 +52,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -81,9 +86,15 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     @Mock
     HeadsUpManager mHeadsUpManager;
     @Mock
+    NotificationInterruptLogger mLogger;
+    @Mock
     BatteryController mBatteryController;
     @Mock
     Handler mMockHandler;
+    @Mock
+    NotifPipelineFlags mFlags;
+    @Mock
+    KeyguardNotificationVisibilityProvider mKeyguardNotificationVisibilityProvider;
 
     private NotificationInterruptStateProviderImpl mNotifInterruptionStateProvider;
 
@@ -101,8 +112,10 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                         mBatteryController,
                         mStatusBarStateController,
                         mHeadsUpManager,
-                        mMockHandler);
-
+                        mLogger,
+                        mMockHandler,
+                        mFlags,
+                        mKeyguardNotificationVisibilityProvider);
         mNotifInterruptionStateProvider.mUseHeadsUp = true;
     }
 
@@ -188,6 +201,16 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
 
         // THEN we shouldn't heads up this entry
         assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isFalse();
+    }
+
+    @Test
+    public void testDoNotRunFilterOnNewPipeline() {
+        when(mFlags.isNewPipelineEnabled()).thenReturn(true);
+        // WHEN this entry should be filtered out
+        NotificationEntry entry  = createNotification(IMPORTANCE_DEFAULT);
+        mNotifInterruptionStateProvider.shouldHeadsUp(entry);
+        verify(mFlags, times(1)).isNewPipelineEnabled();
+        verify(mNotificationFilter, times(0)).shouldFilterOut(eq(entry));
     }
 
     @Test
@@ -507,6 +530,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                 .setPkg("a")
                 .setOpPkg("a")
                 .setTag("a")
+                .setChannel(new NotificationChannel("a", null, importance))
                 .setNotification(n)
                 .setImportance(importance)
                 .build();

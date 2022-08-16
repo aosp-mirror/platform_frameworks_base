@@ -41,6 +41,7 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.app.PendingIntent;
+import android.app.PropertyInvalidatedCache;
 import android.app.role.RoleManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
@@ -48,6 +49,7 @@ import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContextParams;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -142,6 +144,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -323,8 +326,13 @@ public class TelephonyManager {
     public static final int UNINITIALIZED_CARD_ID = -2;
 
     /**
-     * Default port index for the UICC Card
-     * @hide
+     * Default port index for a UICC.
+     *
+     * On physical SIM cards the only available port is 0.
+     * See {@link android.telephony.UiccPortInfo} for more information on ports.
+     *
+     * See {@link android.telephony.euicc.EuiccManager#isSimPortAvailable(int)} for information on
+     * how portIndex is used on eUICCs.
      */
     public static final int DEFAULT_PORT_INDEX = 0;
 
@@ -353,6 +361,42 @@ public class TelephonyManager {
     private static ISms sISms;
     @GuardedBy("sCacheLock")
     private static final DeathRecipient sServiceDeath = new DeathRecipient();
+
+    /**
+     * Cache key for a {@link PropertyInvalidatedCache} which maps from {@link PhoneAccountHandle}
+     * to subscription Id.  The cache is initialized in {@code PhoneInterfaceManager}'s constructor
+     * when {@link PropertyInvalidatedCache#invalidateCache(String)} is called.
+     * The cache is cleared from {@code TelecomAccountRegistry#tearDown} when all phone accounts are
+     * removed from Telecom.
+     * @hide
+     */
+    public static final String CACHE_KEY_PHONE_ACCOUNT_TO_SUBID =
+            "cache_key.telephony.phone_account_to_subid";
+    private static final int CACHE_MAX_SIZE = 4;
+
+    /**
+     * A {@link PropertyInvalidatedCache} which lives in an app's {@link TelephonyManager} instance.
+     * Caches any queries for a mapping between {@link PhoneAccountHandle} and {@code subscription
+     * id}.  The cache may be invalidated from Telephony when phone account re-registration takes
+     * place.
+     */
+    private PropertyInvalidatedCache<PhoneAccountHandle, Integer> mPhoneAccountHandleToSubIdCache =
+            new PropertyInvalidatedCache<PhoneAccountHandle, Integer>(CACHE_MAX_SIZE,
+                    CACHE_KEY_PHONE_ACCOUNT_TO_SUBID) {
+                @Override
+                public Integer recompute(PhoneAccountHandle phoneAccountHandle) {
+                    try {
+                        ITelephony telephony = getITelephony();
+                        if (telephony != null) {
+                            return telephony.getSubIdForPhoneAccountHandle(phoneAccountHandle,
+                                    mContext.getOpPackageName(), mContext.getAttributionTag());
+                        }
+                    } catch (RemoteException e) {
+                        throw e.rethrowAsRuntimeException();
+                    }
+                    return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+                }
+            };
 
     /** Enum indicating multisim variants
      *  DSDS - Dual SIM Dual Standby
@@ -383,16 +427,8 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public TelephonyManager(Context context, int subId) {
         mSubId = subId;
-        Context appContext = context.getApplicationContext();
-        if (appContext != null) {
-            if (Objects.equals(context.getAttributionTag(), appContext.getAttributionTag())) {
-                mContext = appContext;
-            } else {
-                mContext = appContext.createAttributionContext(context.getAttributionTag());
-            }
-        } else {
-            mContext = context;
-        }
+        mContext = mergeAttributionAndRenouncedPermissions(context.getApplicationContext(),
+            context);
         mSubscriptionManager = SubscriptionManager.from(mContext);
     }
 
@@ -411,6 +447,34 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static TelephonyManager getDefault() {
         return sInstance;
+    }
+
+    // This method takes the Application context and adds the attributionTag
+    // and renouncedPermissions from the given context.
+    private Context mergeAttributionAndRenouncedPermissions(Context to, Context from) {
+        Context contextToReturn = from;
+        if (to != null) {
+            if (!Objects.equals(from.getAttributionTag(), to.getAttributionTag())) {
+                contextToReturn = to.createAttributionContext(from.getAttributionTag());
+            } else {
+                contextToReturn = to;
+            }
+
+            Set<String> renouncedPermissions =
+                    from.getAttributionSource().getRenouncedPermissions();
+            if (!renouncedPermissions.isEmpty()) {
+                if (to.getParams() != null) {
+                    contextToReturn = contextToReturn.createContext(
+                            new ContextParams.Builder(to.getParams())
+                                    .setRenouncedPermissions(renouncedPermissions).build());
+                } else {
+                    contextToReturn = contextToReturn.createContext(
+                            new ContextParams.Builder()
+                                    .setRenouncedPermissions(renouncedPermissions).build());
+                }
+            }
+        }
+        return contextToReturn;
     }
 
     private String getOpPackageName() {
@@ -441,6 +505,16 @@ public class TelephonyManager {
             return mContext.getAttributionTag();
         }
         return null;
+    }
+
+    private Set<String> getRenouncedPermissions() {
+        // For legacy reasons the TelephonyManager has API for getting
+        // a static instance with no context set preventing us from
+        // getting the attribution source.
+        if (mContext != null) {
+            return mContext.getAttributionSource().getRenouncedPermissions();
+        }
+        return Collections.emptySet();
     }
 
     /**
@@ -3510,7 +3584,8 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @Deprecated
     public @SimState int getSimCardState(int physicalSlotIndex) {
-        int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex, DEFAULT_PORT_INDEX));
+        int activePort = getFirstActivePortIndex(physicalSlotIndex);
+        int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex, activePort));
         return getSimCardStateFromSimState(simState);
     }
 
@@ -3616,9 +3691,10 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @Deprecated
     public @SimState int getSimApplicationState(int physicalSlotIndex) {
+        int activePort = getFirstActivePortIndex(physicalSlotIndex);
         int simState =
                 SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex,
-                        DEFAULT_PORT_INDEX));
+                        activePort));
         return getSimApplicationStateFromSimState(simState);
     }
 
@@ -4186,7 +4262,8 @@ public class TelephonyManager {
      * {@link UiccSlotMapping} which consist of both physical slot index and port index.
      * Logical slot is the slot that is seen by modem. Physical slot is the actual physical slot.
      * Port index is the index (enumerated value) for the associated port available on the SIM.
-     * Each physical slot can have multiple ports if multi-enabled profile(MEP) is supported.
+     * Each physical slot can have multiple ports if
+     * {@link PackageManager#FEATURE_TELEPHONY_EUICC_MEP} is supported.
      *
      * Example: no. of logical slots 1 and physical slots 2 do not support MEP, each physical slot
      * has one port:
@@ -4194,28 +4271,28 @@ public class TelephonyManager {
      * 0) or
      * second physical slot(value 1), port (index 0), while the other physical slot remains unmapped
      * and inactive.
-     * slotMapping[0] = UiccSlotMapping{0 //logical slot, 0 //physical slot//, 0 //port//}
-     * slotMapping[0] = UiccSlotMapping{1 // logical slot, 1 //physical slot//, 0 //port//}
+     * slotMapping[0] = UiccSlotMapping{0 //port index, 0 //physical slot, 0 //logical slot} or
+     * slotMapping[0] = UiccSlotMapping{0 //port index, 1 //physical slot, 0 //logical slot}
      *
      * Example no. of logical slots 2 and physical slots 2 supports MEP with 2 ports available:
      * Each logical slot must be mapped to a port (physical slot and port combination).
      * First logical slot (index 0) can be mapped to physical slot 1 and the second logical slot
      * can be mapped to either port from physical slot 2.
      *
-     * slotMapping[0] = UiccSlotMapping{0, 0, 0} and slotMapping[1] = UiccSlotMapping{1, 0, 0} or
+     * slotMapping[0] = UiccSlotMapping{0, 0, 0} and slotMapping[1] = UiccSlotMapping{0, 1, 1} or
      * slotMapping[0] = UiccSlotMapping{0, 0, 0} and slotMapping[1] = UiccSlotMapping{1, 1, 1}
      *
      * or the other way around, the second logical slot(index 1) can be mapped to physical slot 1
      * and the first logical slot can be mapped to either port from physical slot 2.
      *
-     * slotMapping[1] = UiccSlotMapping{0, 0, 0} and slotMapping[0] = UiccSlotMapping{1, 0, 0} or
+     * slotMapping[1] = UiccSlotMapping{0, 0, 0} and slotMapping[0] = UiccSlotMapping{0, 1, 1} or
      * slotMapping[1] = UiccSlotMapping{0, 0, 0} and slotMapping[0] = UiccSlotMapping{1, 1, 1}
      *
      * another possible mapping is each logical slot maps to each port of physical slot 2 and there
      * is no active logical modem mapped to physical slot 1.
      *
-     * slotMapping[0] = UiccSlotMapping{1, 0, 0} and slotMapping[1] = UiccSlotMapping{1, 1, 1} or
-     * slotMapping[0] = UiccSlotMapping{1, 1, 1} and slotMapping[1] = UiccSlotMapping{1, 0, 0}
+     * slotMapping[0] = UiccSlotMapping{0, 1, 0} and slotMapping[1] = UiccSlotMapping{1, 1, 1} or
+     * slotMapping[0] = UiccSlotMapping{1, 1, 0} and slotMapping[1] = UiccSlotMapping{0, 1, 1}
      *
      * @param slotMapping Logical to physical slot and port mapping.
      * @throws IllegalStateException if telephony service is null or slot mapping was sent when the
@@ -4282,11 +4359,11 @@ public class TelephonyManager {
     /**
      * Get the mapping from logical slots to physical sim slots and port indexes. Initially the
      * logical slot index was mapped to physical slot index, but with support for multi-enabled
-     * profile(MEP) logical slot is now mapped to port index.
+     * profile(MEP){@link PackageManager#FEATURE_TELEPHONY_EUICC_MEP},logical slot is now mapped to
+     * port index.
      *
      * @return a collection of {@link UiccSlotMapping} which indicates the mapping from logical
      *         slots to ports and physical slots.
-     *
      * @hide
      */
     @SystemApi
@@ -4294,7 +4371,7 @@ public class TelephonyManager {
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     @NonNull
     public Collection<UiccSlotMapping> getSimSlotMapping() {
-        List<UiccSlotMapping> slotMap = new ArrayList<>();
+        List<UiccSlotMapping> slotMap;
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -6304,8 +6381,14 @@ public class TelephonyManager {
                 (TelephonyRegistryManager)
                         mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
         if (telephonyRegistry != null) {
-            telephonyRegistry.listenFromListener(mSubId, getOpPackageName(),
-                    getAttributionTag(), listener, events, notifyNow);
+            Set<String> renouncedPermissions = getRenouncedPermissions();
+            boolean renounceFineLocationAccess = renouncedPermissions
+                    .contains(Manifest.permission.ACCESS_FINE_LOCATION);
+            boolean renounceCoarseLocationAccess = renouncedPermissions
+                    .contains(Manifest.permission.ACCESS_COARSE_LOCATION);
+            telephonyRegistry.listenFromListener(mSubId, renounceFineLocationAccess,
+                    renounceCoarseLocationAccess, getOpPackageName(), getAttributionTag(),
+                    listener, events, notifyNow);
         } else {
             Rlog.w(TAG, "telephony registry not ready.");
         }
@@ -6804,6 +6887,24 @@ public class TelephonyManager {
     }
 
     /**
+     * Get the first active portIndex from the corresponding physical slot index.
+     * @param physicalSlotIndex physical slot index
+     * @return first active port index or INVALID_PORT_INDEX if no port is active
+     */
+    private int getFirstActivePortIndex(int physicalSlotIndex) {
+        UiccSlotInfo[] slotInfos = getUiccSlotsInfo();
+        if (slotInfos != null && physicalSlotIndex >= 0 && physicalSlotIndex < slotInfos.length
+                && slotInfos[physicalSlotIndex] != null) {
+            Optional<UiccPortInfo> result =  slotInfos[physicalSlotIndex].getPorts().stream()
+                    .filter(portInfo -> portInfo.isActive()).findFirst();
+            if (result.isPresent()) {
+                return result.get().getPortIndex();
+            }
+        }
+        return INVALID_PORT_INDEX;
+    }
+
+    /**
      * Opens a logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
@@ -6849,7 +6950,8 @@ public class TelephonyManager {
      * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
      * @hide
-     * @deprecated instead use {@link #iccOpenLogicalChannelByPort(int, int, String, int)}
+     * @deprecated This API is not compatible on eUICC supporting Multiple Enabled Profile(MEP),
+     * instead use {@link #iccOpenLogicalChannelByPort(int, int, String, int)}
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
@@ -6863,6 +6965,7 @@ public class TelephonyManager {
             if (telephony != null) {
                 IccLogicalChannelRequest request = new IccLogicalChannelRequest();
                 request.slotIndex = slotIndex;
+                request.portIndex = getFirstActivePortIndex(slotIndex);
                 request.aid = aid;
                 request.p2 = p2;
                 request.callingPackage = getOpPackageName();
@@ -6944,6 +7047,11 @@ public class TelephonyManager {
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
+     * It is strongly recommended that callers of this should firstly create a new TelephonyManager
+     * instance by calling {@link TelephonyManager#createForSubscriptionId(int)}. Failure to do so
+     * can result in unpredictable and detrimental behavior like callers can end up talking to the
+     * wrong SIM card.
+     *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
@@ -7018,7 +7126,8 @@ public class TelephonyManager {
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      * @hide
-     * @deprecated instead use {@link #iccCloseLogicalChannelByPort(int, int, int)}
+     * @deprecated This API is not compatible on eUICC supporting Multiple Enabled Profile(MEP),
+     * instead use {@link #iccCloseLogicalChannelByPort(int, int, int)}
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
@@ -7030,11 +7139,14 @@ public class TelephonyManager {
             if (telephony != null) {
                 IccLogicalChannelRequest request = new IccLogicalChannelRequest();
                 request.slotIndex = slotIndex;
+                request.portIndex = getFirstActivePortIndex(slotIndex);
                 request.channel = channel;
                 return telephony.iccCloseLogicalChannel(request);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
+        } catch (IllegalStateException ex) {
+            Rlog.e(TAG, "iccCloseLogicalChannel IllegalStateException", ex);
         }
         return false;
     }
@@ -7082,6 +7194,10 @@ public class TelephonyManager {
      * Closes a previously opened logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHC command.
+     * It is strongly recommended that callers of this API should firstly create
+     * new TelephonyManager instance by calling
+     * {@link TelephonyManager#createForSubscriptionId(int)}. Failure to do so can result in
+     * unpredictable and detrimental behavior like callers can end up talking to the wrong SIM card.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
@@ -7090,10 +7206,16 @@ public class TelephonyManager {
      * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
+     * @throws IllegalArgumentException if input parameters are wrong. e.g., invalid channel
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public boolean iccCloseLogicalChannel(int channel) {
-        return iccCloseLogicalChannel(getSubId(), channel);
+        try {
+            return iccCloseLogicalChannel(getSubId(), channel);
+        } catch (IllegalStateException ex) {
+            Rlog.e(TAG, "iccCloseLogicalChannel IllegalStateException", ex);
+        }
+        return false;
     }
 
     /**
@@ -7122,6 +7244,8 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
+        } catch (IllegalStateException ex) {
+            Rlog.e(TAG, "iccCloseLogicalChannel IllegalStateException", ex);
         }
         return false;
     }
@@ -7150,7 +7274,8 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at the end, or null if
      * there is an issue connecting to the Telephony service.
      * @hide
-     * @deprecated instead use
+     * @deprecated This API is not compatible on eUICC supporting Multiple Enabled Profile(MEP),
+     * instead use
      * {@link #iccTransmitApduLogicalChannelByPort(int, int, int, int, int, int, int, int, String)}
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -7163,8 +7288,9 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.iccTransmitApduLogicalChannelByPort(slotIndex, DEFAULT_PORT_INDEX,
-                         channel, cla, instruction, p1, p2, p3, data);
+                return telephony.iccTransmitApduLogicalChannelByPort(slotIndex,
+                        getFirstActivePortIndex(slotIndex), channel, cla, instruction,
+                        p1, p2, p3, data);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -7220,6 +7346,11 @@ public class TelephonyManager {
      * Transmit an APDU to the ICC card over a logical channel.
      *
      * Input parameters equivalent to TS 27.007 AT+CGLA command.
+     *
+     * It is strongly recommended that callers of this API should firstly create a new
+     * TelephonyManager instance by calling
+     * {@link TelephonyManager#createForSubscriptionId(int)}. Failure to do so can result in
+     * unpredictable and detrimental behavior like callers can end up talking to the wrong SIM card.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
@@ -7302,7 +7433,8 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
-     * @deprecated instead use
+     * @deprecated This API is not compatible on eUICC supporting Multiple Enabled Profile(MEP),
+     * instead use
      * {@link #iccTransmitApduBasicChannelByPort(int, int, int, int, int, int, int, String)}
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -7315,8 +7447,9 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.iccTransmitApduBasicChannelByPort(slotIndex, DEFAULT_PORT_INDEX,
-                         getOpPackageName(), cla, instruction, p1, p2, p3, data);
+                return telephony.iccTransmitApduBasicChannelByPort(slotIndex,
+                        getFirstActivePortIndex(slotIndex), getOpPackageName(),
+                        cla, instruction, p1, p2, p3, data);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -7610,7 +7743,7 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * TODO: remove this one. use {@link #rebootRadio()} for reset type 1 and
+     * TODO: remove this one. use {@link #rebootModem()} for reset type 1 and
      * {@link #resetRadioConfig()} for reset type 3
      *
      * @param resetType reset type: 1: reload NV reset, 2: erase NV reset, 3: factory NV reset
@@ -7677,6 +7810,8 @@ public class TelephonyManager {
      *
      * @return {@code true} on success; {@code false} on any failure.
      *
+     * @deprecated  Using {@link #rebootModem()} instead.
+     *
      * @hide
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -7694,6 +7829,30 @@ public class TelephonyManager {
             Rlog.e(TAG, "rebootRadio NPE", ex);
         }
         return false;
+    }
+
+    /**
+     * Generate a radio modem reset. Used for device configuration by some carriers.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws RuntimeException
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
+    public void rebootModem() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                throw new IllegalStateException("telephony service is null.");
+            }
+            telephony.rebootModem(getSlotIndex());
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "rebootRadio RemoteException", ex);
+            throw ex.rethrowAsRuntimeException();
+        }
     }
 
     /**
@@ -8824,7 +8983,7 @@ public class TelephonyManager {
     public NetworkScan requestNetworkScan(
             NetworkScanRequest request, Executor executor,
             TelephonyScanManager.NetworkScanCallback callback) {
-        return requestNetworkScan(false, request, executor, callback);
+        return requestNetworkScan(INCLUDE_LOCATION_DATA_FINE, request, executor, callback);
     }
 
     /**
@@ -8849,9 +9008,8 @@ public class TelephonyManager {
      *     and MCC/MNC info.</li>
      * </ol>
      *
-     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
-     * location related information which will be sent if the caller already possess
-     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
+     * @param includeLocationData Specifies if the caller would like to receive
+     * location related information.
      * @param request Contains all the RAT with bands/channels that need to be scanned.
      * @param executor The executor through which the callback should be invoked. Since the scan
      *        request may trigger multiple callbacks and they must be invoked in the same order as
@@ -8866,7 +9024,8 @@ public class TelephonyManager {
             Manifest.permission.ACCESS_FINE_LOCATION
     })
     public @Nullable NetworkScan requestNetworkScan(
-            boolean renounceFineLocationAccess, @NonNull NetworkScanRequest request,
+            @IncludeLocationData int includeLocationData,
+            @NonNull NetworkScanRequest request,
             @NonNull Executor executor,
             @NonNull TelephonyScanManager.NetworkScanCallback callback) {
         synchronized (sCacheLock) {
@@ -8874,7 +9033,8 @@ public class TelephonyManager {
                 mTelephonyScanManager = new TelephonyScanManager();
             }
         }
-        return mTelephonyScanManager.requestNetworkScan(getSubId(), renounceFineLocationAccess,
+        return mTelephonyScanManager.requestNetworkScan(getSubId(),
+                includeLocationData != INCLUDE_LOCATION_DATA_FINE,
                 request, executor, callback,
                 getOpPackageName(), getAttributionTag());
     }
@@ -9015,13 +9175,13 @@ public class TelephonyManager {
 
     /**
      * Get the PLMN chosen for Manual Network Selection if active.
-     * Return null string if in automatic selection.
+     * Return empty string if in automatic selection.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
      * READ_PRECISE_PHONE_STATE} or that the calling app has carrier privileges
      * (see {@link #hasCarrierPrivileges})
      *
-     * @return manually selected network info on success or null string on failure
+     * @return manually selected network info on success or empty string on failure
      */
     @SuppressAutoDoc // No support carrier privileges (b/72967236).
     @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE)
@@ -9035,7 +9195,7 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getManualNetworkSelectionPlmn RemoteException", ex);
         }
-        return null;
+        return "";
     }
 
     /**
@@ -11738,14 +11898,10 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public int getSubIdForPhoneAccount(@Nullable PhoneAccount phoneAccount) {
         int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                retval = service.getSubIdForPhoneAccount(phoneAccount);
-            }
-        } catch (RemoteException e) {
+        if (phoneAccount != null
+                && phoneAccount.hasCapabilities(PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION)) {
+            retval = getSubscriptionId(phoneAccount.getAccountHandle());
         }
-
         return retval;
     }
 
@@ -11801,19 +11957,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public int getSubscriptionId(@NonNull PhoneAccountHandle phoneAccountHandle) {
-        int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                retval = service.getSubIdForPhoneAccountHandle(
-                        phoneAccountHandle, mContext.getOpPackageName(),
-                        mContext.getAttributionTag());
-            }
-        } catch (RemoteException ex) {
-            Log.e(TAG, "getSubscriptionId RemoteException", ex);
-            ex.rethrowAsRuntimeException();
-        }
-        return retval;
+        return mPhoneAccountHandleToSubIdCache.query(phoneAccountHandle);
     }
 
     /**
@@ -12067,7 +12211,7 @@ public class TelephonyManager {
     })
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
     public @Nullable ServiceState getServiceState() {
-        return getServiceState(false, false);
+        return getServiceState(getLocationData());
     }
 
     /**
@@ -12079,15 +12223,16 @@ public class TelephonyManager {
      * If you want continuous updates of service state info, register a {@link PhoneStateListener}
      * via {@link #listen} with the {@link PhoneStateListener#LISTEN_SERVICE_STATE} event.
      *
+     * There's another way to renounce permissions with a custom context
+     * {@code AttributionSource.Builder#setRenouncedPermissions(Set<String>)} but only for system
+     * apps. To avoid confusion, calling this method supersede renouncing permissions with a
+     * custom context.
+     *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges})
      * and {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
-     * location related information which will be sent if the caller already possess
-     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
-     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
-     * receive location related information which will be sent if the caller already possess
-     * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     * @param includeLocationData Specifies if the caller would like to receive
+     * location related information.
      * May return {@code null} when the subscription is inactive or when there was an error
      * communicating with the phone process.
      */
@@ -12096,10 +12241,10 @@ public class TelephonyManager {
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.ACCESS_COARSE_LOCATION
     })
-    public @Nullable ServiceState getServiceState(boolean renounceFineLocationAccess,
-            boolean renounceCoarseLocationAccess) {
-        return getServiceStateForSubscriber(getSubId(), renounceFineLocationAccess,
-                renounceCoarseLocationAccess);
+    public @Nullable ServiceState getServiceState(@IncludeLocationData int includeLocationData) {
+        return getServiceStateForSubscriber(getSubId(),
+                includeLocationData != INCLUDE_LOCATION_DATA_FINE,
+                includeLocationData == INCLUDE_LOCATION_DATA_NONE);
     }
 
     /**
@@ -12122,8 +12267,7 @@ public class TelephonyManager {
             ITelephony service = getITelephony();
             if (service != null) {
                 return service.getServiceStateForSubscriber(subId, renounceFineLocationAccess,
-                        renounceCoarseLocationAccess,
-                        getOpPackageName(), getAttributionTag());
+                        renounceCoarseLocationAccess, getOpPackageName(), getAttributionTag());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
@@ -15082,6 +15226,15 @@ public class TelephonyManager {
     public static final int CALL_WAITING_STATUS_NOT_SUPPORTED = 4;
 
     /**
+     * Indicates the call waiting status could not be set or queried because the Fixed Dialing
+     * Numbers (FDN) feature is enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CALL_WAITING_STATUS_FDN_CHECK_FAILURE = 5;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "CALL_WAITING_STATUS_" }, value = {
@@ -15089,6 +15242,7 @@ public class TelephonyManager {
             CALL_WAITING_STATUS_DISABLED,
             CALL_WAITING_STATUS_UNKNOWN_ERROR,
             CALL_WAITING_STATUS_NOT_SUPPORTED,
+            CALL_WAITING_STATUS_FDN_CHECK_FAILURE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CallWaitingStatus {
@@ -15109,6 +15263,7 @@ public class TelephonyManager {
      *                          <li>{@link #CALL_WAITING_STATUS_DISABLED}}</li>
      *                          <li>{@link #CALL_WAITING_STATUS_UNKNOWN_ERROR}}</li>
      *                          <li>{@link #CALL_WAITING_STATUS_NOT_SUPPORTED}}</li>
+     *                          <li>{@link #CALL_WAITING_STATUS_FDN_CHECK_FAILURE}}</li>
      *                       </ul>
      * @hide
      */
@@ -15158,7 +15313,8 @@ public class TelephonyManager {
      *                       {@link #CALL_WAITING_STATUS_ENABLED} or
      *                       {@link #CALL_WAITING_STATUS_DISABLED} if the operation succeeded and
      *                       {@link #CALL_WAITING_STATUS_NOT_SUPPORTED} or
-     *                       {@link #CALL_WAITING_STATUS_UNKNOWN_ERROR} if it failed.
+     *                       {@link #CALL_WAITING_STATUS_UNKNOWN_ERROR} or
+     *                       {@link #CALL_WAITING_STATUS_FDN_CHECK_FAILURE} if it failed.
      * @hide
      */
     @SystemApi
@@ -16057,8 +16213,60 @@ public class TelephonyManager {
      */
     public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull TelephonyCallback callback) {
-        registerTelephonyCallback(false, false, executor, callback);
+        registerTelephonyCallback(getLocationData(), executor, callback);
     }
+
+    private int getLocationData() {
+        boolean renounceCoarseLocation =
+                getRenouncedPermissions().contains(Manifest.permission.ACCESS_COARSE_LOCATION);
+        boolean renounceFineLocation =
+                getRenouncedPermissions().contains(Manifest.permission.ACCESS_FINE_LOCATION);
+        if (renounceCoarseLocation) {
+            return INCLUDE_LOCATION_DATA_NONE;
+        } else if (renounceFineLocation) {
+            return INCLUDE_LOCATION_DATA_COARSE;
+        } else {
+            return INCLUDE_LOCATION_DATA_FINE;
+        }
+    }
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"INCLUDE_LOCATION_DATA_"}, value = {
+            INCLUDE_LOCATION_DATA_NONE,
+            INCLUDE_LOCATION_DATA_COARSE,
+            INCLUDE_LOCATION_DATA_FINE})
+    public @interface IncludeLocationData {}
+
+    /**
+     * Specifies to not include any location related data.
+     *
+     * Indicates whether the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the
+     * permissions.
+     */
+    public static final int INCLUDE_LOCATION_DATA_NONE = 0;
+
+    /**
+     * Include coarse location data.
+     *
+     * Indicates whether the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the
+     * permissions.
+     */
+    public static final int INCLUDE_LOCATION_DATA_COARSE = 1;
+
+    /**
+     * Include fine location data.
+     *
+     * Indicates whether the caller would not like to receive
+     * location related information which will be sent if the caller already possess
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the
+     * permissions.
+     */
+    public static final int INCLUDE_LOCATION_DATA_FINE = 2;
 
     /**
      * Registers a callback object to receive notification of changes in specified telephony states.
@@ -16087,17 +16295,18 @@ public class TelephonyManager {
      * instability. If a process has registered too many callbacks without unregistering them, it
      * may encounter an {@link IllegalStateException} when trying to register more callbacks.
      *
-     * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
-     * location related information which will be sent if the caller already possess
-     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permissions.
-     * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
-     * receive location related information which will be sent if the caller already possess
-     * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     * <p>
+     * There's another way to renounce permissions with a custom context
+     * {@code AttributionSource.Builder#setRenouncedPermissions(Set<String>)} but only for system
+     * apps. To avoid confusion, calling this method supersede renouncing permissions with a
+     * custom context.
+     *
+     * @param includeLocationData Specifies if the caller would like to receive
+     * location related information.
      * @param executor The executor of where the callback will execute.
      * @param callback The {@link TelephonyCallback} object to register.
      */
-    public void registerTelephonyCallback(boolean renounceFineLocationAccess,
-            boolean renounceCoarseLocationAccess,
+    public void registerTelephonyCallback(@IncludeLocationData int includeLocationData,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull TelephonyCallback callback) {
         if (mContext == null) {
@@ -16110,8 +16319,10 @@ public class TelephonyManager {
         mTelephonyRegistryMgr = (TelephonyRegistryManager)
                 mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
         if (mTelephonyRegistryMgr != null) {
-            mTelephonyRegistryMgr.registerTelephonyCallback(renounceFineLocationAccess,
-                    renounceCoarseLocationAccess, executor, mSubId, getOpPackageName(),
+            mTelephonyRegistryMgr.registerTelephonyCallback(
+                    includeLocationData != INCLUDE_LOCATION_DATA_FINE,
+                    includeLocationData == INCLUDE_LOCATION_DATA_NONE,
+                    executor, mSubId, getOpPackageName(),
                     getAttributionTag(), callback, getITelephony() != null);
         } else {
             throw new IllegalStateException("telephony service is null.");
@@ -16715,6 +16926,39 @@ public class TelephonyManager {
     }
 
     /**
+     * Sets a voice service state override from telecom based on the current {@link PhoneAccount}s
+     * registered. See {@link PhoneAccount#CAPABILITY_VOICE_CALLING_AVAILABLE}.
+     *
+     * <p>Currently, this API is only called to indicate over-the-top voice calling capability of
+     * the SIM call manager, which will get merged into {@link ServiceState#getState} and propagated
+     * to interested callers via {@link #getServiceState} and {@link
+     * TelephonyCallback.ServiceStateListener}.
+     *
+     * <p>If callers are truly interested in the actual device <-> tower connection status and not
+     * an overall "device can make voice calls" boolean, they can use {@link
+     * ServiceState#getNetworkRegistrationInfo} to check CS registration state.
+     *
+     * <p>TODO(b/215240050) In the future, this API will be removed and replaced with a new superset
+     * API to disentangle the "true" {@link ServiceState} meaning of "this is the connection status
+     * to the tower" from IMS registration state and over-the-top voice calling capabilities.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.BIND_TELECOM_CONNECTION_SERVICE)
+    public void setVoiceServiceStateOverride(boolean hasService) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                throw new IllegalStateException("Telephony service is null");
+            }
+            telephony.setVoiceServiceStateOverride(getSubId(), hasService, getOpPackageName());
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
      * Registers a {@link CarrierPrivilegesCallback} on the given {@code logicalSlotIndex} to
      * receive callbacks when the set of packages with carrier privileges changes. The callback will
      * immediately be called with the latest state.
@@ -16764,35 +17008,39 @@ public class TelephonyManager {
     }
 
     /**
-     * Sets a voice service state override from telecom based on the current {@link PhoneAccount}s
-     * registered. See {@link PhoneAccount#CAPABILITY_VOICE_CALLING_AVAILABLE}.
-     *
-     * <p>Currently, this API is only called to indicate over-the-top voice calling capability of
-     * the SIM call manager, which will get merged into {@link ServiceState#getState} and propagated
-     * to interested callers via {@link #getServiceState} and {@link
-     * TelephonyCallback.ServiceStateListener}.
-     *
-     * <p>If callers are truly interested in the actual device <-> tower connection status and not
-     * an overall "device can make voice calls" boolean, they can use {@link
-     * ServiceState#getNetworkRegistrationInfo} to check CS registration state.
-     *
-     * <p>TODO(b/215240050) In the future, this API will be removed and replaced with a new superset
-     * API to disentangle the "true" {@link ServiceState} meaning of "this is the connection status
-     * to the tower" from IMS registration state and over-the-top voice calling capabilities.
+     * set removable eSIM as default eUICC.
      *
      * @hide
      */
-    @TestApi
-    @RequiresPermission(Manifest.permission.BIND_TELECOM_CONNECTION_SERVICE)
-    public void setVoiceServiceStateOverride(boolean hasService) {
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_EUICC)
+    public void setRemovableEsimAsDefaultEuicc(boolean isDefault) {
         try {
             ITelephony telephony = getITelephony();
-            if (telephony == null) {
-                throw new IllegalStateException("Telephony service is null");
+            if (telephony != null) {
+                telephony.setRemovableEsimAsDefaultEuicc(isDefault, getOpPackageName());
             }
-            telephony.setVoiceServiceStateOverride(getSubId(), hasService, getOpPackageName());
-        } catch (RemoteException ex) {
-            ex.rethrowAsRuntimeException();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in setRemovableEsimAsDefault: " + e);
         }
+    }
+
+    /**
+     * Returns whether the removable eSIM is default eUICC or not.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_EUICC)
+    public boolean isRemovableEsimDefaultEuicc() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isRemovableEsimDefaultEuicc(getOpPackageName());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in isRemovableEsimDefaultEuicc: " + e);
+        }
+        return false;
     }
 }

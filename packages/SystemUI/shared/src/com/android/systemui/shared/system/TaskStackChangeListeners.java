@@ -211,8 +211,8 @@ public class TaskStackChangeListeners {
         }
 
         @Override
-        public void onTaskProfileLocked(int taskId, int userId) {
-            mHandler.obtainMessage(ON_TASK_PROFILE_LOCKED, taskId, userId).sendToTarget();
+        public void onTaskProfileLocked(RunningTaskInfo taskInfo) {
+            mHandler.obtainMessage(ON_TASK_PROFILE_LOCKED, taskInfo).sendToTarget();
         }
 
         @Override
@@ -294,8 +294,17 @@ public class TaskStackChangeListeners {
                         Trace.beginSection("onTaskSnapshotChanged");
                         final TaskSnapshot snapshot = (TaskSnapshot) msg.obj;
                         final ThumbnailData thumbnail = new ThumbnailData(snapshot);
+                        boolean snapshotConsumed = false;
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onTaskSnapshotChanged(msg.arg1, thumbnail);
+                            boolean consumed = mTaskStackListeners.get(i).onTaskSnapshotChanged(
+                                    msg.arg1, thumbnail);
+                            snapshotConsumed |= consumed;
+                        }
+                        if (!snapshotConsumed) {
+                            thumbnail.recycleBitmap();
+                            if (snapshot.getHardwareBuffer() != null) {
+                                snapshot.getHardwareBuffer().close();
+                            }
                         }
                         Trace.endSection();
                         break;
@@ -357,8 +366,9 @@ public class TaskStackChangeListeners {
                         break;
                     }
                     case ON_TASK_PROFILE_LOCKED: {
+                        final RunningTaskInfo info = (RunningTaskInfo) msg.obj;
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onTaskProfileLocked(msg.arg1, msg.arg2);
+                            mTaskStackListeners.get(i).onTaskProfileLocked(info);
                         }
                         break;
                     }

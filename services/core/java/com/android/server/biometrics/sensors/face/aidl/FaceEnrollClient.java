@@ -20,16 +20,15 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricFaceConstants;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.face.EnrollmentType;
 import android.hardware.biometrics.face.Feature;
 import android.hardware.biometrics.face.IFace;
-import android.hardware.biometrics.face.ISession;
 import android.hardware.common.NativeHandle;
 import android.hardware.face.Face;
 import android.hardware.face.FaceEnrollFrame;
 import android.hardware.face.FaceManager;
+import android.hardware.keymaster.HardwareAuthToken;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -38,10 +37,14 @@ import android.view.Surface;
 import com.android.internal.R;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
+import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.face.FaceService;
 import com.android.server.biometrics.sensors.face.FaceUtils;
@@ -49,11 +52,12 @@ import com.android.server.biometrics.sensors.face.FaceUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Face-specific enroll client for the {@link IFace} AIDL HAL interface.
  */
-public class FaceEnrollClient extends EnrollClient<ISession> {
+public class FaceEnrollClient extends EnrollClient<AidlSession> {
 
     private static final String TAG = "FaceEnrollClient";
 
@@ -67,8 +71,8 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
     private final int mMaxTemplatesPerUser;
     private final boolean mDebugConsent;
 
-    private final BaseClientMonitor.Callback mPreviewHandleDeleterCallback =
-            new BaseClientMonitor.Callback() {
+    private final ClientMonitorCallback mPreviewHandleDeleterCallback =
+            new ClientMonitorCallback() {
                 @Override
                 public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
                 }
@@ -80,15 +84,15 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
                 }
             };
 
-    FaceEnrollClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
+    FaceEnrollClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String opPackageName, long requestId,
             @NonNull BiometricUtils<Face> utils, @NonNull int[] disabledFeatures, int timeoutSec,
-            @Nullable Surface previewSurface, int sensorId, int maxTemplatesPerUser,
-            boolean debugConsent) {
+            @Nullable Surface previewSurface, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            int maxTemplatesPerUser, boolean debugConsent) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, opPackageName, utils,
-                timeoutSec, BiometricsProtoEnums.MODALITY_FACE, sensorId,
-                false /* shouldVibrate */);
+                timeoutSec, sensorId, false /* shouldVibrate */, logger, biometricContext);
         setRequestId(requestId);
         mEnrollIgnoreList = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_enroll_ignorelist);
@@ -101,7 +105,7 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         BiometricNotificationUtils.cancelReEnrollNotification(getContext());
@@ -109,9 +113,9 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
 
     @NonNull
     @Override
-    protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(mPreviewHandleDeleterCallback,
-                createALSCallback(true /* startWithClient */), callback);
+    protected ClientMonitorCallback wrapCallbackForStart(@NonNull ClientMonitorCallback callback) {
+        return new ClientMonitorCompositeCallback(mPreviewHandleDeleterCallback,
+                getLogger().createALSCallback(true /* startWithClient */), callback);
     }
 
     @Override
@@ -175,18 +179,30 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
                 featureList.add(Feature.REQUIRE_DIVERSE_POSES);
             }
 
-            byte[] features = new byte[featureList.size()];
+            final byte[] features = new byte[featureList.size()];
             for (int i = 0; i < featureList.size(); i++) {
                 features[i] = featureList.get(i);
             }
 
-            mCancellationSignal = getFreshDaemon().enroll(
-                    HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken),
-                    EnrollmentType.DEFAULT, features, mHwPreviewHandle);
+            mCancellationSignal = doEnroll(features);
         } catch (RemoteException | IllegalArgumentException e) {
             Slog.e(TAG, "Exception when requesting enroll", e);
             onError(BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS, 0 /* vendorCode */);
             mCallback.onClientFinished(this, false /* success */);
+        }
+    }
+
+    private ICancellationSignal doEnroll(byte[] features) throws RemoteException {
+        final AidlSession session = getFreshDaemon();
+        final HardwareAuthToken hat =
+                HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken);
+
+        if (session.hasContextMethods()) {
+            return session.getSession().enrollWithContext(
+                    hat, EnrollmentType.DEFAULT, features, mHwPreviewHandle, getOperationContext());
+        } else {
+            return session.getSession().enroll(hat, EnrollmentType.DEFAULT, features,
+                    mHwPreviewHandle);
         }
     }
 

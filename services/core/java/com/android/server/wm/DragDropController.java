@@ -81,8 +81,8 @@ class DragDropController {
         return mDragState != null && !mDragState.isClosing();
     }
 
-    boolean dragSurfaceRelinquished() {
-        return mDragState != null && mDragState.mRelinquishDragSurface;
+    boolean dragSurfaceRelinquishedToDropTarget() {
+        return mDragState != null && mDragState.mRelinquishDragSurfaceToDropTarget;
     }
 
     void registerCallback(IDragDropCallback callback) {
@@ -179,11 +179,9 @@ class DragDropController {
 
                         final SurfaceControl.Transaction transaction = mDragState.mTransaction;
                         transaction.setAlpha(surfaceControl, mDragState.mOriginalAlpha);
-                        transaction.setPosition(
-                                surfaceControl, touchX - thumbCenterX, touchY - thumbCenterY);
                         transaction.show(surfaceControl);
                         displayContent.reparentToOverlay(transaction, surfaceControl);
-                        callingWin.scheduleAnimation();
+                        mDragState.updateDragSurfaceLocked(true, touchX, touchY);
                         if (SHOW_LIGHT_TRANSACTIONS) {
                             Slog.i(TAG_WM, "<<< CLOSE TRANSACTION performDrag");
                         }
@@ -245,7 +243,7 @@ class DragDropController {
                 }
 
                 mDragState.mDragResult = consumed;
-                mDragState.mRelinquishDragSurface = consumed
+                mDragState.mRelinquishDragSurfaceToDropTarget = consumed
                         && mDragState.targetInterceptsGlobalDrag(callingWin);
                 mDragState.endDragLocked();
             }
@@ -306,12 +304,14 @@ class DragDropController {
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "Drag into new candidate view @ " + window.asBinder());
         }
+        mCallback.get().dragRecipientEntered(window);
     }
 
     void dragRecipientExited(IWindow window) {
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "Drag from old candidate view @ " + window.asBinder());
         }
+        mCallback.get().dragRecipientExited(window);
     }
 
     /**
@@ -342,6 +342,11 @@ class DragDropController {
     }
 
     void reportDropWindow(IBinder token, float x, float y) {
+        if (mDragState == null) {
+            Slog.w(TAG_WM, "Drag state is closed.");
+            return;
+        }
+
         synchronized (mService.mGlobalLock) {
             mDragState.reportDropWindowLock(token, x, y);
         }
@@ -417,7 +422,7 @@ class DragDropController {
                     synchronized (mService.mGlobalLock) {
                         if (mDragState == null) {
                             Slog.wtf(TAG_WM, "mDragState unexpectedly became null while " +
-                                    "plyaing animation");
+                                    "playing animation");
                             return;
                         }
                         mDragState.closeLocked();

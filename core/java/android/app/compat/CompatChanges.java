@@ -20,14 +20,14 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.Compatibility;
-import android.content.Context;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 
 import com.android.internal.compat.CompatibilityOverrideConfig;
+import com.android.internal.compat.CompatibilityOverridesByPackageConfig;
+import com.android.internal.compat.CompatibilityOverridesToRemoveByPackageConfig;
 import com.android.internal.compat.CompatibilityOverridesToRemoveConfig;
-import com.android.internal.compat.IPlatformCompat;
 
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +41,7 @@ import java.util.Set;
 @SystemApi
 public final class CompatChanges {
     private static final ChangeIdStateCache QUERY_CACHE = new ChangeIdStateCache();
+
     private CompatChanges() {}
 
     /**
@@ -100,6 +101,31 @@ public final class CompatChanges {
     }
 
     /**
+     * Equivalent to calling {@link #putPackageOverrides(String, Map)} on each entry in {@code
+     * packageNameToOverrides}, but the state of the compat config will be updated only once
+     * instead of for each package.
+     *
+     * @param packageNameToOverrides A map from package name to a map from change ID to the
+     *                               override applied for that package name and change ID.
+     */
+    @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD)
+    public static void putAllPackageOverrides(
+            @NonNull Map<String, Map<Long, PackageOverride>> packageNameToOverrides) {
+        ArrayMap<String, CompatibilityOverrideConfig> packageNameToConfig = new ArrayMap<>();
+        for (String packageName : packageNameToOverrides.keySet()) {
+            packageNameToConfig.put(packageName,
+                    new CompatibilityOverrideConfig(packageNameToOverrides.get(packageName)));
+        }
+        CompatibilityOverridesByPackageConfig config = new CompatibilityOverridesByPackageConfig(
+                packageNameToConfig);
+        try {
+            QUERY_CACHE.getPlatformCompatService().putAllOverridesOnReleaseBuilds(config);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Associates app compat overrides with the given package and their respective change IDs.
      * This will check whether the caller is allowed to perform this operation on the given apk and
      * build. Only the installer package is allowed to set overrides on a non-debuggable final
@@ -115,11 +141,37 @@ public final class CompatChanges {
     @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD)
     public static void putPackageOverrides(@NonNull String packageName,
             @NonNull Map<Long, PackageOverride> overrides) {
-        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
-                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         CompatibilityOverrideConfig config = new CompatibilityOverrideConfig(overrides);
         try {
-            platformCompat.putOverridesOnReleaseBuilds(config, packageName);
+            QUERY_CACHE.getPlatformCompatService()
+                .putOverridesOnReleaseBuilds(config, packageName);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Equivalent to calling {@link #removePackageOverrides(String, Set)} on each entry in {@code
+     * packageNameToOverridesToRemove}, but the state of the compat config will be updated only once
+     * instead of for each package.
+     *
+     * @param packageNameToOverridesToRemove A map from package name to a set of change IDs for
+     *                                       which to remove overrides for that package name.
+     */
+    @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD)
+    public static void removeAllPackageOverrides(
+            @NonNull Map<String, Set<Long>> packageNameToOverridesToRemove) {
+        ArrayMap<String, CompatibilityOverridesToRemoveConfig> packageNameToConfig =
+                new ArrayMap<>();
+        for (String packageName : packageNameToOverridesToRemove.keySet()) {
+            packageNameToConfig.put(packageName,
+                    new CompatibilityOverridesToRemoveConfig(
+                            packageNameToOverridesToRemove.get(packageName)));
+        }
+        CompatibilityOverridesToRemoveByPackageConfig config =
+                new CompatibilityOverridesToRemoveByPackageConfig(packageNameToConfig);
+        try {
+            QUERY_CACHE.getPlatformCompatService().removeAllOverridesOnReleaseBuilds(config);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -139,12 +191,11 @@ public final class CompatChanges {
     @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD)
     public static void removePackageOverrides(@NonNull String packageName,
             @NonNull Set<Long> overridesToRemove) {
-        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
-                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         CompatibilityOverridesToRemoveConfig config = new CompatibilityOverridesToRemoveConfig(
                 overridesToRemove);
         try {
-            platformCompat.removeOverridesOnReleaseBuilds(config, packageName);
+            QUERY_CACHE.getPlatformCompatService()
+                .removeOverridesOnReleaseBuilds(config, packageName);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

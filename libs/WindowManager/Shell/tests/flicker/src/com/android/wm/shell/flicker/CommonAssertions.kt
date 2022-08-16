@@ -17,11 +17,11 @@
 @file:JvmName("CommonAssertions")
 package com.android.wm.shell.flicker
 
-import android.graphics.Region
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.region.Region
 
 fun FlickerTestParameter.appPairsDividerIsVisibleAtEnd() {
     assertLayersEnd {
@@ -118,10 +118,10 @@ fun FlickerTestParameter.dockedStackSecondaryBoundsIsVisibleAtEnd(
 fun getPrimaryRegion(dividerRegion: Region, rotation: Int): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
-        Region(0, 0, displayBounds.bounds.right,
+        Region.from(0, 0, displayBounds.bounds.right,
             dividerRegion.bounds.top + WindowUtils.dockedStackDividerInset)
     } else {
-        Region(0, 0, dividerRegion.bounds.left + WindowUtils.dockedStackDividerInset,
+        Region.from(0, 0, dividerRegion.bounds.left + WindowUtils.dockedStackDividerInset,
             displayBounds.bounds.bottom)
     }
 }
@@ -129,10 +129,10 @@ fun getPrimaryRegion(dividerRegion: Region, rotation: Int): Region {
 fun getSecondaryRegion(dividerRegion: Region, rotation: Int): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
-        Region(0, dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset,
+        Region.from(0, dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset,
             displayBounds.bounds.right, displayBounds.bounds.bottom)
     } else {
-        Region(dividerRegion.bounds.right - WindowUtils.dockedStackDividerInset, 0,
+        Region.from(dividerRegion.bounds.right - WindowUtils.dockedStackDividerInset, 0,
             displayBounds.bounds.right, displayBounds.bounds.bottom)
     }
 }

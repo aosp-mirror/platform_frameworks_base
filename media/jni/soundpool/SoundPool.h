@@ -31,7 +31,7 @@ namespace android {
  */
 class SoundPool {
 public:
-    SoundPool(int32_t maxStreams, const audio_attributes_t* attributes,
+    SoundPool(int32_t maxStreams, const audio_attributes_t& attributes,
             const std::string& opPackageName = {});
     ~SoundPool();
 

@@ -19,6 +19,7 @@ package android.window;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -94,13 +95,16 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     /**
      * Registers remote animations per transition type for the organizer. It will override the
      * animations if the transition only contains windows that belong to the organized
-     * TaskFragments.
+     * TaskFragments in the given Task.
+     *
+     * @param taskId overrides if the transition only contains windows belonging to this Task.
      * @hide
      */
     @CallSuper
-    public void registerRemoteAnimations(@NonNull RemoteAnimationDefinition definition) {
+    public void registerRemoteAnimations(int taskId,
+            @NonNull RemoteAnimationDefinition definition) {
         try {
-            getController().registerRemoteAnimations(mInterface, definition);
+            getController().registerRemoteAnimations(mInterface, taskId, definition);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -111,9 +115,9 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * @hide
      */
     @CallSuper
-    public void unregisterRemoteAnimations() {
+    public void unregisterRemoteAnimations(int taskId) {
         try {
-            getController().unregisterRemoteAnimations(mInterface);
+            getController().unregisterRemoteAnimations(mInterface, taskId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -150,6 +154,24 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      */
     public void onTaskFragmentError(
             @NonNull IBinder errorCallbackToken, @NonNull Throwable exception) {}
+
+    /**
+     * Called when an Activity is reparented to the Task with organized TaskFragment. For example,
+     * when an Activity enters and then exits Picture-in-picture, it will be reparented back to its
+     * orginial Task. In this case, we need to notify the organizer so that it can check if the
+     * Activity matches any split rule.
+     *
+     * @param taskId            The Task that the activity is reparented to.
+     * @param activityIntent    The intent that the activity is original launched with.
+     * @param activityToken     If the activity belongs to the same process as the organizer, this
+     *                          will be the actual activity token; if the activity belongs to a
+     *                          different process, the server will generate a temporary token that
+     *                          the organizer can use to reparent the activity through
+     *                          {@link WindowContainerTransaction} if needed.
+     * @hide
+     */
+    public void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
+            @NonNull IBinder activityToken) {}
 
     @Override
     public void applyTransaction(@NonNull WindowContainerTransaction t) {
@@ -199,6 +221,14 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
             mExecutor.execute(() -> TaskFragmentOrganizer.this.onTaskFragmentError(
                     errorCallbackToken,
                     (Throwable) exceptionBundle.getSerializable(KEY_ERROR_CALLBACK_EXCEPTION)));
+        }
+
+        @Override
+        public void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
+                @NonNull IBinder activityToken) {
+            mExecutor.execute(
+                    () -> TaskFragmentOrganizer.this.onActivityReparentToTask(
+                            taskId, activityIntent, activityToken));
         }
     };
 

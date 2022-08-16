@@ -103,7 +103,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider implements
 
         mContext = context;
         mServiceWatcher = ServiceWatcher.create(context, provider,
-                new CurrentUserServiceSupplier(context, action, enableOverlayResId,
+                CurrentUserServiceSupplier.createFromConfig(context, action, enableOverlayResId,
                         nonOverlayPackageResId), this);
         mName = provider;
 
@@ -208,7 +208,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider implements
             }
 
             @Override
-            public void onError() {
+            public void onError(Throwable t) {
                 synchronized (mLock) {
                     mFlushListeners.remove(callback);
                 }

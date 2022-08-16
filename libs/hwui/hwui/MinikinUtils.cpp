@@ -95,6 +95,16 @@ float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
                                         endHyphen, advances);
 }
 
+minikin::MinikinExtent MinikinUtils::getFontExtent(const Paint* paint, minikin::Bidi bidiFlags,
+                                                   const Typeface* typeface, const uint16_t* buf,
+                                                   size_t start, size_t count, size_t bufSize) {
+    minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
+    const minikin::U16StringPiece textBuf(buf, bufSize);
+    const minikin::Range range(start, start + count);
+
+    return minikin::getFontExtent(textBuf, range, bidiFlags, minikinPaint);
+}
+
 bool MinikinUtils::hasVariationSelector(const Typeface* typeface, uint32_t codepoint, uint32_t vs) {
     const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
     return resolvedFace->fFontCollection->hasVariationSelector(codepoint, vs);

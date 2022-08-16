@@ -25,12 +25,10 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.statusbar.dagger.StatusBarModule;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Set;
 
@@ -40,21 +38,21 @@ import java.util.Set;
  */
 public class SmartReplyController implements Dumpable {
     private final IStatusBarService mBarService;
-    private final NotificationEntryManager mEntryManager;
+    private final NotificationVisibilityProvider mVisibilityProvider;
     private final NotificationClickNotifier mClickNotifier;
     private final Set<String> mSendingKeys = new ArraySet<>();
     private Callback mCallback;
 
     /**
-     * Injected constructor. See {@link StatusBarModule}.
+     * Injected constructor. See {@link CentralSurfacesModule}.
      */
     public SmartReplyController(
             DumpManager dumpManager,
-            NotificationEntryManager entryManager,
+            NotificationVisibilityProvider visibilityProvider,
             IStatusBarService statusBarService,
             NotificationClickNotifier clickNotifier) {
         mBarService = statusBarService;
-        mEntryManager = entryManager;
+        mVisibilityProvider = visibilityProvider;
         mClickNotifier = clickNotifier;
         dumpManager.registerDumpable(this);
     }
@@ -84,13 +82,7 @@ public class SmartReplyController implements Dumpable {
     public void smartActionClicked(
             NotificationEntry entry, int actionIndex, Notification.Action action,
             boolean generatedByAssistant) {
-        // TODO(b/204183781): get this from the current pipeline
-        final int count = mEntryManager.getActiveNotificationsCount();
-        final int rank = entry.getRanking().getRank();
-        NotificationVisibility.NotificationLocation location =
-                NotificationLogger.getNotificationLocation(entry);
-        final NotificationVisibility nv = NotificationVisibility.obtain(
-                entry.getKey(), rank, count, true, location);
+        final NotificationVisibility nv = mVisibilityProvider.obtain(entry, true);
         mClickNotifier.onNotificationActionClick(
                 entry.getKey(), actionIndex, action, nv, generatedByAssistant);
     }
@@ -123,7 +115,7 @@ public class SmartReplyController implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("mSendingKeys: " + mSendingKeys.size());
         for (String key : mSendingKeys) {
             pw.println(" * " + key);

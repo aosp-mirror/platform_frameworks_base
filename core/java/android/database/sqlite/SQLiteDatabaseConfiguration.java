@@ -17,9 +17,9 @@
 package android.database.sqlite;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Pair;
-
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.function.BinaryOperator;
@@ -132,14 +132,16 @@ public final class SQLiteDatabaseConfiguration {
      * Journal mode to use when {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING} is not set.
      * <p>Default is returned by {@link SQLiteGlobal#getDefaultJournalMode()}
      */
-    public String journalMode;
+    public @SQLiteDatabase.JournalMode String journalMode;
 
     /**
      * Synchronous mode to use.
      * <p>Default is returned by {@link SQLiteGlobal#getDefaultSyncMode()}
      * or {@link SQLiteGlobal#getWALSyncMode()} depending on journal mode
      */
-    public String syncMode;
+    public @SQLiteDatabase.SyncMode String syncMode;
+
+    public boolean shouldTruncateWalFile;
 
     /**
      * Creates a database configuration with the required parameters for opening a
@@ -217,6 +219,10 @@ public final class SQLiteDatabaseConfiguration {
         return path.equalsIgnoreCase(MEMORY_DB_PATH);
     }
 
+    public boolean isReadOnlyDatabase() {
+        return (openFlags & SQLiteDatabase.OPEN_READONLY) != 0;
+    }
+
     boolean isLegacyCompatibilityWalEnabled() {
         return journalMode == null && syncMode == null
                 && (openFlags & SQLiteDatabase.ENABLE_LEGACY_COMPATIBILITY_WAL) != 0;
@@ -231,5 +237,82 @@ public final class SQLiteDatabaseConfiguration {
 
     boolean isLookasideConfigSet() {
         return lookasideSlotCount >= 0 && lookasideSlotSize >= 0;
+    }
+
+    /**
+     * Resolves the journal mode that should be used when opening a connection to the database.
+     *
+     * Note: assumes openFlags have already been set.
+     *
+     * @return Resolved journal mode that should be used for this database connection or an empty
+     * string if no journal mode should be set.
+     */
+    public @SQLiteDatabase.JournalMode String resolveJournalMode() {
+        if (isReadOnlyDatabase()) {
+            // No need to specify a journal mode when only reading.
+            return "";
+        }
+
+        if (isInMemoryDb()) {
+            if (journalMode != null
+                    && journalMode.equalsIgnoreCase(SQLiteDatabase.JOURNAL_MODE_OFF)) {
+                return SQLiteDatabase.JOURNAL_MODE_OFF;
+            }
+            return SQLiteDatabase.JOURNAL_MODE_MEMORY;
+        }
+
+        shouldTruncateWalFile = false;
+
+        if (isWalEnabledInternal()) {
+            shouldTruncateWalFile = true;
+            return SQLiteDatabase.JOURNAL_MODE_WAL;
+        } else {
+            // WAL is not explicitly set so use requested journal mode or platform default
+            return this.journalMode != null ? this.journalMode
+                                            : SQLiteGlobal.getDefaultJournalMode();
+        }
+    }
+
+    /**
+     * Resolves the sync mode that should be used when opening a connection to the database.
+     *
+     * Note: assumes openFlags have already been set.
+     * @return Resolved journal mode that should be used for this database connection or null
+     * if no journal mode should be set.
+     */
+    public @SQLiteDatabase.SyncMode String resolveSyncMode() {
+        if (isReadOnlyDatabase()) {
+            // No sync mode will be used since database will be only used for reading.
+            return "";
+        }
+
+        if (isInMemoryDb()) {
+            // No sync mode will be used since database will be in volatile memory
+            return "";
+        }
+
+        if (!TextUtils.isEmpty(syncMode)) {
+            return syncMode;
+        }
+
+        if (isWalEnabledInternal()) {
+            if (isLegacyCompatibilityWalEnabled()) {
+                return SQLiteCompatibilityWalFlags.getWALSyncMode();
+            } else {
+                return SQLiteGlobal.getDefaultSyncMode();
+            }
+        } else {
+            return SQLiteGlobal.getDefaultSyncMode();
+        }
+    }
+
+    private boolean isWalEnabledInternal() {
+        final boolean walEnabled = (openFlags & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0;
+        // Use compatibility WAL unless an app explicitly set journal/synchronous mode
+        // or DISABLE_COMPATIBILITY_WAL flag is set
+        final boolean isCompatibilityWalEnabled = isLegacyCompatibilityWalEnabled();
+        return walEnabled || isCompatibilityWalEnabled
+                || (journalMode != null
+                        && journalMode.equalsIgnoreCase(SQLiteDatabase.JOURNAL_MODE_WAL));
     }
 }

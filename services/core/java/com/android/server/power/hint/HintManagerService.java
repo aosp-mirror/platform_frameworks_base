@@ -27,6 +27,7 @@ import android.os.IHintSession;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -51,8 +52,13 @@ public final class HintManagerService extends SystemService {
     private static final boolean DEBUG = false;
     @VisibleForTesting final long mHintSessionPreferredRate;
 
+    // Multi-levle map storing all active AppHintSessions.
+    // First level is keyed by the UID of the client process creating the session.
+    // Second level is keyed by an IBinder passed from client process. This is used to observe
+    // when the process exits. The client generally uses the same IBinder object across multiple
+    // sessions, so the value is a set of AppHintSessions.
     @GuardedBy("mLock")
-    private final ArrayMap<Integer, ArrayMap<IBinder, AppHintSession>> mActiveSessions;
+    private final ArrayMap<Integer, ArrayMap<IBinder, ArraySet<AppHintSession>>> mActiveSessions;
 
     /** Lock to protect HAL handles and listen list. */
     private final Object mLock = new Object();
@@ -201,13 +207,16 @@ public final class HintManagerService extends SystemService {
         public void onUidGone(int uid, boolean disabled) {
             FgThread.getHandler().post(() -> {
                 synchronized (mLock) {
-                    ArrayMap<IBinder, AppHintSession> tokenMap = mActiveSessions.get(uid);
+                    ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap = mActiveSessions.get(uid);
                     if (tokenMap == null) {
                         return;
                     }
                     for (int i = tokenMap.size() - 1; i >= 0; i--) {
                         // Will remove the session from tokenMap
-                        tokenMap.valueAt(i).close();
+                        ArraySet<AppHintSession> sessionSet = tokenMap.valueAt(i);
+                        for (int j = sessionSet.size() - 1; j >= 0; j--) {
+                            sessionSet.valueAt(j).close();
+                        }
                     }
                     mProcStatesCache.delete(uid);
                 }
@@ -231,12 +240,14 @@ public final class HintManagerService extends SystemService {
             FgThread.getHandler().post(() -> {
                 synchronized (mLock) {
                     mProcStatesCache.put(uid, procState);
-                    ArrayMap<IBinder, AppHintSession> tokenMap = mActiveSessions.get(uid);
+                    ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap = mActiveSessions.get(uid);
                     if (tokenMap == null) {
                         return;
                     }
-                    for (AppHintSession s : tokenMap.values()) {
-                        s.onProcStateChanged();
+                    for (ArraySet<AppHintSession> sessionSet : tokenMap.values()) {
+                        for (AppHintSession s : sessionSet) {
+                            s.onProcStateChanged();
+                        }
                     }
                 }
             });
@@ -244,6 +255,10 @@ public final class HintManagerService extends SystemService {
 
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
+        }
+
+        @Override
+        public void onUidProcAdjChanged(int uid) {
         }
     }
 
@@ -305,17 +320,25 @@ public final class HintManagerService extends SystemService {
 
                 long halSessionPtr = mNativeWrapper.halCreateHintSession(callingTgid, callingUid,
                         tids, durationNanos);
-                if (halSessionPtr == 0) return null;
+                if (halSessionPtr == 0) {
+                    return null;
+                }
 
                 AppHintSession hs = new AppHintSession(callingUid, callingTgid, tids, token,
                         halSessionPtr, durationNanos);
                 synchronized (mLock) {
-                    ArrayMap<IBinder, AppHintSession> tokenMap = mActiveSessions.get(callingUid);
+                    ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap =
+                            mActiveSessions.get(callingUid);
                     if (tokenMap == null) {
                         tokenMap = new ArrayMap<>(1);
                         mActiveSessions.put(callingUid, tokenMap);
                     }
-                    tokenMap.put(token, hs);
+                    ArraySet<AppHintSession> sessionSet = tokenMap.get(token);
+                    if (sessionSet == null) {
+                        sessionSet = new ArraySet<>(1);
+                        tokenMap.put(token, sessionSet);
+                    }
+                    sessionSet.add(hs);
                     return hs;
                 }
             } finally {
@@ -339,10 +362,14 @@ public final class HintManagerService extends SystemService {
                 pw.println("Active Sessions:");
                 for (int i = 0; i < mActiveSessions.size(); i++) {
                     pw.println("Uid " + mActiveSessions.keyAt(i).toString() + ":");
-                    ArrayMap<IBinder, AppHintSession> tokenMap = mActiveSessions.valueAt(i);
+                    ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap =
+                            mActiveSessions.valueAt(i);
                     for (int j = 0; j < tokenMap.size(); j++) {
-                        pw.println("  Session " + j + ":");
-                        tokenMap.valueAt(j).dump(pw, "    ");
+                        ArraySet<AppHintSession> sessionSet = tokenMap.valueAt(j);
+                        for (int k = 0; k < sessionSet.size(); ++k) {
+                            pw.println("  Session:");
+                            sessionSet.valueAt(k).dump(pw, "    ");
+                        }
                     }
                 }
             }
@@ -432,11 +459,18 @@ public final class HintManagerService extends SystemService {
                 mNativeWrapper.halCloseHintSession(mHalSessionPtr);
                 mHalSessionPtr = 0;
                 mToken.unlinkToDeath(this, 0);
-                ArrayMap<IBinder, AppHintSession> tokenMap = mActiveSessions.get(mUid);
+                ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap = mActiveSessions.get(mUid);
                 if (tokenMap == null) {
-                    Slogf.w(TAG, "UID %d is note present in active session map", mUid);
+                    Slogf.w(TAG, "UID %d is not present in active session map", mUid);
+                    return;
                 }
-                tokenMap.remove(mToken);
+                ArraySet<AppHintSession> sessionSet = tokenMap.get(mToken);
+                if (sessionSet == null) {
+                    Slogf.w(TAG, "Token %s is not present in token map", mToken.toString());
+                    return;
+                }
+                sessionSet.remove(this);
+                if (sessionSet.isEmpty()) tokenMap.remove(mToken);
                 if (tokenMap.isEmpty()) mActiveSessions.remove(mUid);
             }
         }

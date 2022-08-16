@@ -16,7 +16,14 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:shareInterpolator="false" >
-    <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
-           android:interpolator="@interpolator/decelerate_cubic"
-           android:duration="@android:integer/config_activityShortDur" />
+    <alpha
+        android:fromAlpha="0.0"
+        android:toAlpha="1.0"
+        android:interpolator="@interpolator/standard"
+        android:duration="@android:integer/config_activityDefaultDur" />
+    <translate
+        android:fromYDelta="@android:dimen/popup_enter_animation_from_y_delta"
+        android:toYDelta="0"
+        android:interpolator="@interpolator/standard"
+        android:duration="@android:integer/config_activityDefaultDur" />
 </set>

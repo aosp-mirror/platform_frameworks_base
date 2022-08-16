@@ -20,16 +20,16 @@ import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 
-import java.io.IOException;
+import com.android.internal.R;
 
 /**
  * An ImageView used by BigPicture Notifications to correctly resolve the Uri in an Icon using the
@@ -41,22 +41,32 @@ public class BigPictureNotificationImageView extends ImageView {
 
     private static final String TAG = BigPictureNotificationImageView.class.getSimpleName();
 
+    private final int mMaximumDrawableWidth;
+    private final int mMaximumDrawableHeight;
+
     public BigPictureNotificationImageView(@NonNull Context context) {
-        super(context);
+        this(context, null, 0, 0);
     }
 
     public BigPictureNotificationImageView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0, 0);
     }
 
     public BigPictureNotificationImageView(@NonNull Context context, @Nullable AttributeSet attrs,
             @AttrRes int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public BigPictureNotificationImageView(@NonNull Context context, @Nullable AttributeSet attrs,
             @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
+        mMaximumDrawableWidth = context.getResources().getDimensionPixelSize(
+                isLowRam ? R.dimen.notification_big_picture_max_width_low_ram
+                        : R.dimen.notification_big_picture_max_width);
+        mMaximumDrawableHeight = context.getResources().getDimensionPixelSize(
+                isLowRam ? R.dimen.notification_big_picture_max_height_low_ram
+                        : R.dimen.notification_big_picture_max_height);
     }
 
     @Override
@@ -85,21 +95,17 @@ public class BigPictureNotificationImageView extends ImageView {
 
     private Drawable loadImage(Uri uri) {
         if (uri == null) return null;
-        try {
-            return LocalImageResolver.resolveImage(uri, mContext);
-        } catch (IOException ex) {
-            Log.d(TAG, "Resolve failed from " + uri, ex);
-            return null;
-        }
+        return LocalImageResolver.resolveImage(uri, mContext, mMaximumDrawableWidth,
+                mMaximumDrawableHeight);
     }
 
     private Drawable loadImage(Icon icon) {
         if (icon == null) return null;
-        try {
-            return LocalImageResolver.resolveImage(icon, mContext);
-        } catch (IOException ex) {
-            Log.d(TAG, "Resolve failed from " + icon, ex);
-            return null;
+        Drawable drawable = LocalImageResolver.resolveImage(icon, mContext, mMaximumDrawableWidth,
+                mMaximumDrawableHeight);
+        if (drawable == null) {
+            return icon.loadDrawable(mContext);
         }
+        return drawable;
     }
 }

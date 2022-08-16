@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTEN
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
+import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
+import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
@@ -55,7 +57,10 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.overlay.OverlayPaths;
-import android.content.pm.split.SplitAssetLoader;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.pm.permission.SplitPermissionInfoParcelable;
+import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
@@ -64,6 +69,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.FileUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -79,6 +85,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Base64;
+import android.util.DebugUtils;
 import android.util.DisplayMetrics;
 import android.util.IntArray;
 import android.util.Log;
@@ -124,6 +131,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -144,7 +152,7 @@ import java.util.UUID;
  * </ul>
  *
  * @deprecated This class is mostly unused and no new changes should be added to it. Use
- * {@link android.content.pm.parsing.ParsingPackageUtils} and related parsing v2 infrastructure in
+ * ParsingPackageUtils and related parsing v2 infrastructure in
  * the core/services parsing subpackages. Or for a quick parse of a provided APK, use
  * {@link PackageManager#getPackageArchiveInfo(String, int)}.
  *
@@ -640,24 +648,24 @@ public class PackageParser {
      * explicitly wanted all uninstalled and hidden packages as well.
      * @param appInfo The applicationInfo of the app being checked.
      */
-    private static boolean checkUseInstalledOrHidden(int flags, PackageUserState state,
+    private static boolean checkUseInstalledOrHidden(int flags, FrameworkPackageUserState state,
             ApplicationInfo appInfo) {
         // Returns false if the package is hidden system app until installed.
         if ((flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) == 0
-                && !state.installed
+                && !state.isInstalled()
                 && appInfo != null && appInfo.hiddenUntilInstalled) {
             return false;
         }
 
         // If available for the target user, or trying to match uninstalled packages and it's
         // a system app.
-        return state.isAvailable(flags)
+        return isAvailable(state, flags)
                 || (appInfo != null && appInfo.isSystemApp()
                         && ((flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0
                         || (flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) != 0));
     }
 
-    public static boolean isAvailable(PackageUserState state) {
+    public static boolean isAvailable(FrameworkPackageUserState state) {
         return checkUseInstalledOrHidden(0, state, null);
     }
 
@@ -670,7 +678,7 @@ public class PackageParser {
     @UnsupportedAppUsage
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int[] gids, int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state) {
+            Set<String> grantedPermissions, FrameworkPackageUserState state) {
 
         return generatePackageInfo(p, gids, flags, firstInstallTime, lastUpdateTime,
                 grantedPermissions, state, UserHandle.getCallingUserId());
@@ -679,7 +687,7 @@ public class PackageParser {
     @UnsupportedAppUsage
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int[] gids, int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state, int userId) {
+            Set<String> grantedPermissions, FrameworkPackageUserState state, int userId) {
 
         return generatePackageInfo(p, null, gids, flags, firstInstallTime, lastUpdateTime,
                 grantedPermissions, state, userId);
@@ -696,12 +704,12 @@ public class PackageParser {
     public static PackageInfo generatePackageInfo(
             PackageParser.Package pkg, ApexInfo apexInfo, int flags) {
         return generatePackageInfo(pkg, apexInfo, EmptyArray.INT, flags, 0, 0,
-                Collections.emptySet(), new PackageUserState(), UserHandle.getCallingUserId());
+                Collections.emptySet(), FrameworkPackageUserState.DEFAULT, UserHandle.getCallingUserId());
     }
 
     private static PackageInfo generatePackageInfo(PackageParser.Package p, ApexInfo apexInfo,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state, int userId) {
+            Set<String> grantedPermissions, FrameworkPackageUserState state, int userId) {
         if (!checkUseInstalledOrHidden(flags, state, p.applicationInfo) || !p.isMatch(flags)) {
             return null;
         }
@@ -761,7 +769,7 @@ public class PackageParser {
                 final ActivityInfo[] res = new ActivityInfo[N];
                 for (int i = 0; i < N; i++) {
                     final Activity a = p.activities.get(i);
-                    if (state.isMatch(a.info, flags)) {
+                    if (isMatch(state, a.info, flags)) {
                         if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(a.className)) {
                             continue;
                         }
@@ -778,7 +786,7 @@ public class PackageParser {
                 final ActivityInfo[] res = new ActivityInfo[N];
                 for (int i = 0; i < N; i++) {
                     final Activity a = p.receivers.get(i);
-                    if (state.isMatch(a.info, flags)) {
+                    if (isMatch(state, a.info, flags)) {
                         res[num++] = generateActivityInfo(a, flags, state, userId);
                     }
                 }
@@ -792,7 +800,7 @@ public class PackageParser {
                 final ServiceInfo[] res = new ServiceInfo[N];
                 for (int i = 0; i < N; i++) {
                     final Service s = p.services.get(i);
-                    if (state.isMatch(s.info, flags)) {
+                    if (isMatch(state, s.info, flags)) {
                         res[num++] = generateServiceInfo(s, flags, state, userId);
                     }
                 }
@@ -806,7 +814,7 @@ public class PackageParser {
                 final ProviderInfo[] res = new ProviderInfo[N];
                 for (int i = 0; i < N; i++) {
                     final Provider pr = p.providers.get(i);
-                    if (state.isMatch(pr.info, flags)) {
+                    if (isMatch(state, pr.info, flags)) {
                         res[num++] = generateProviderInfo(pr, flags, state, userId);
                     }
                 }
@@ -884,7 +892,11 @@ public class PackageParser {
         if ((flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0) {
             if (p.mSigningDetails != SigningDetails.UNKNOWN) {
                 // only return a valid SigningInfo if there is signing information to report
-                pi.signingInfo = new SigningInfo(p.mSigningDetails);
+                pi.signingInfo = new SigningInfo(
+                        new android.content.pm.SigningDetails(p.mSigningDetails.signatures,
+                                p.mSigningDetails.signatureSchemeVersion,
+                                p.mSigningDetails.publicKeys,
+                                p.mSigningDetails.pastSigningCertificates));
             } else {
                 pi.signingInfo = null;
             }
@@ -1399,24 +1411,32 @@ public class PackageParser {
             // must use v2 signing scheme
             minSignatureScheme = SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V2;
         }
-        SigningDetails verified;
+        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        final ParseResult<android.content.pm.SigningDetails> result;
         if (skipVerify) {
-            // systemDir APKs are already trusted, save time by not verifying; since the signature
-            // is not verified and some system apps can have their V2+ signatures stripped allow
-            // pulling the certs from the jar signature.
-            verified = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(
-                        apkPath, SigningDetails.SignatureSchemeVersion.JAR);
+            // systemDir APKs are already trusted, save time by not verifying
+            result = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(
+                    input, apkPath, minSignatureScheme);
         } else {
-            verified = ApkSignatureVerifier.verify(apkPath, minSignatureScheme);
+            result = ApkSignatureVerifier.verify(input, apkPath, minSignatureScheme);
+        }
+        if (result.isError()) {
+            throw new PackageParserException(result.getErrorCode(), result.getErrorMessage(),
+                    result.getException());
         }
 
         // Verify that entries are signed consistently with the first pkg
         // we encountered. Note that for splits, certificates may have
         // already been populated during an earlier parse of a base APK.
+        final android.content.pm.SigningDetails verified = result.getResult();
         if (pkg.mSigningDetails == SigningDetails.UNKNOWN) {
-            pkg.mSigningDetails = verified;
+            pkg.mSigningDetails = new SigningDetails(verified.getSignatures(),
+                    verified.getSignatureSchemeVersion(),
+                    verified.getPublicKeys(),
+                    verified.getPastSigningCertificates());
         } else {
-            if (!Signature.areExactMatch(pkg.mSigningDetails.signatures, verified.signatures)) {
+            if (!Signature.areExactMatch(pkg.mSigningDetails.signatures,
+                    verified.getSignatures())) {
                 throw new PackageParserException(
                         INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
                         apkPath + " has mismatched certificates");
@@ -1922,19 +1942,26 @@ public class PackageParser {
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifest);
 
-        String str = sa.getNonConfigurationString(
-                com.android.internal.R.styleable.AndroidManifest_sharedUserId, 0);
-        if (str != null && str.length() > 0) {
-            String nameError = validateName(str, true, true);
-            if (nameError != null && !"android".equals(pkg.packageName)) {
-                outError[0] = "<manifest> specifies bad sharedUserId name \""
-                    + str + "\": " + nameError;
-                mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID;
-                return null;
+        int maxSdkVersion = 0;
+        if (PackageManager.ENABLE_SHARED_UID_MIGRATION) {
+            maxSdkVersion = sa.getInteger(
+                    com.android.internal.R.styleable.AndroidManifest_sharedUserMaxSdkVersion, 0);
+        }
+        if (maxSdkVersion == 0 || maxSdkVersion >= Build.VERSION.RESOURCES_SDK_INT) {
+            String str = sa.getNonConfigurationString(
+                    com.android.internal.R.styleable.AndroidManifest_sharedUserId, 0);
+            if (str != null && str.length() > 0) {
+                String nameError = validateName(str, true, true);
+                if (nameError != null && !"android".equals(pkg.packageName)) {
+                    outError[0] = "<manifest> specifies bad sharedUserId name \""
+                            + str + "\": " + nameError;
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID;
+                    return null;
+                }
+                pkg.mSharedUserId = str.intern();
+                pkg.mSharedUserLabel = sa.getResourceId(
+                        com.android.internal.R.styleable.AndroidManifest_sharedUserLabel, 0);
             }
-            pkg.mSharedUserId = str.intern();
-            pkg.mSharedUserLabel = sa.getResourceId(
-                    com.android.internal.R.styleable.AndroidManifest_sharedUserLabel, 0);
         }
 
         pkg.installLocation = sa.getInteger(
@@ -2396,9 +2423,28 @@ public class PackageParser {
             Slog.i(TAG, newPermsMsg.toString());
         }
 
-        final List<PermissionManager.SplitPermissionInfo> splitPermissions =
-                ActivityThread.currentApplication().getSystemService(PermissionManager.class)
-                        .getSplitPermissions();
+        // Must build permission info manually for legacy code, which can be called before
+        // Appication is available through the app process, so the normal API doesn't work.
+        List<SplitPermissionInfoParcelable> splitPermissionParcelables;
+        try {
+            splitPermissionParcelables = ActivityThread.getPermissionManager()
+                    .getSplitPermissions();
+        } catch (RemoteException e) {
+            splitPermissionParcelables = Collections.emptyList();
+        }
+
+        int splitPermissionsSize = splitPermissionParcelables.size();
+        List<PermissionManager.SplitPermissionInfo> splitPermissions =
+                new ArrayList<>(splitPermissionsSize);
+        for (int index = 0; index < splitPermissionsSize; index++) {
+            SplitPermissionInfoParcelable splitPermissionParcelable =
+                    splitPermissionParcelables.get(index);
+            splitPermissions.add(new PermissionManager.SplitPermissionInfo(
+                    splitPermissionParcelable.getSplitPermission(),
+                    splitPermissionParcelable.getNewPermissions(),
+                    splitPermissionParcelable.getTargetSdk()
+            ));
+        }
 
         final int listSize = splitPermissions.size();
         for (int is = 0; is < listSize; is++) {
@@ -7279,7 +7325,7 @@ public class PackageParser {
             splitFlags = dest.createIntArray();
             splitPrivateFlags = dest.createIntArray();
             baseHardwareAccelerated = (dest.readInt() == 1);
-            applicationInfo = dest.readParcelable(boot);
+            applicationInfo = dest.readParcelable(boot, android.content.pm.ApplicationInfo.class);
             if (applicationInfo.permission != null) {
                 applicationInfo.permission = applicationInfo.permission.intern();
             }
@@ -7287,19 +7333,19 @@ public class PackageParser {
             // We don't serialize the "owner" package and the application info object for each of
             // these components, in order to save space and to avoid circular dependencies while
             // serialization. We need to fix them all up here.
-            dest.readParcelableList(permissions, boot);
+            dest.readParcelableList(permissions, boot, android.content.pm.PackageParser.Permission.class);
             fixupOwner(permissions);
-            dest.readParcelableList(permissionGroups, boot);
+            dest.readParcelableList(permissionGroups, boot, android.content.pm.PackageParser.PermissionGroup.class);
             fixupOwner(permissionGroups);
-            dest.readParcelableList(activities, boot);
+            dest.readParcelableList(activities, boot, android.content.pm.PackageParser.Activity.class);
             fixupOwner(activities);
-            dest.readParcelableList(receivers, boot);
+            dest.readParcelableList(receivers, boot, android.content.pm.PackageParser.Activity.class);
             fixupOwner(receivers);
-            dest.readParcelableList(providers, boot);
+            dest.readParcelableList(providers, boot, android.content.pm.PackageParser.Provider.class);
             fixupOwner(providers);
-            dest.readParcelableList(services, boot);
+            dest.readParcelableList(services, boot, android.content.pm.PackageParser.Service.class);
             fixupOwner(services);
-            dest.readParcelableList(instrumentation, boot);
+            dest.readParcelableList(instrumentation, boot, android.content.pm.PackageParser.Instrumentation.class);
             fixupOwner(instrumentation);
 
             dest.readStringList(requestedPermissions);
@@ -7309,10 +7355,10 @@ public class PackageParser {
             protectedBroadcasts = dest.createStringArrayList();
             internStringArrayList(protectedBroadcasts);
 
-            parentPackage = dest.readParcelable(boot);
+            parentPackage = dest.readParcelable(boot, android.content.pm.PackageParser.Package.class);
 
             childPackages = new ArrayList<>();
-            dest.readParcelableList(childPackages, boot);
+            dest.readParcelableList(childPackages, boot, android.content.pm.PackageParser.Package.class);
             if (childPackages.size() == 0) {
                 childPackages = null;
             }
@@ -7346,7 +7392,7 @@ public class PackageParser {
             }
 
             preferredActivityFilters = new ArrayList<>();
-            dest.readParcelableList(preferredActivityFilters, boot);
+            dest.readParcelableList(preferredActivityFilters, boot, android.content.pm.PackageParser.ActivityIntentInfo.class);
             if (preferredActivityFilters.size() == 0) {
                 preferredActivityFilters = null;
             }
@@ -7367,7 +7413,7 @@ public class PackageParser {
             }
             mSharedUserLabel = dest.readInt();
 
-            mSigningDetails = dest.readParcelable(boot);
+            mSigningDetails = dest.readParcelable(boot, android.content.pm.PackageParser.SigningDetails.class);
 
             mPreferredOrder = dest.readInt();
 
@@ -7379,19 +7425,19 @@ public class PackageParser {
 
 
             configPreferences = new ArrayList<>();
-            dest.readParcelableList(configPreferences, boot);
+            dest.readParcelableList(configPreferences, boot, android.content.pm.ConfigurationInfo.class);
             if (configPreferences.size() == 0) {
                 configPreferences = null;
             }
 
             reqFeatures = new ArrayList<>();
-            dest.readParcelableList(reqFeatures, boot);
+            dest.readParcelableList(reqFeatures, boot, android.content.pm.FeatureInfo.class);
             if (reqFeatures.size() == 0) {
                 reqFeatures = null;
             }
 
             featureGroups = new ArrayList<>();
-            dest.readParcelableList(featureGroups, boot);
+            dest.readParcelableList(featureGroups, boot, android.content.pm.FeatureGroupInfo.class);
             if (featureGroups.size() == 0) {
                 featureGroups = null;
             }
@@ -7541,66 +7587,6 @@ public class PackageParser {
             dest.writeInt(use32bitAbi ? 1 : 0);
             dest.writeByteArray(restrictUpdateHash);
             dest.writeInt(visibleToInstantApps ? 1 : 0);
-        }
-
-        /**
-         * Writes the keyset mapping to the provided package. {@code null} mappings are permitted.
-         */
-        private static void writeKeySetMapping(
-                Parcel dest, ArrayMap<String, ArraySet<PublicKey>> keySetMapping) {
-            if (keySetMapping == null) {
-                dest.writeInt(-1);
-                return;
-            }
-
-            final int N = keySetMapping.size();
-            dest.writeInt(N);
-
-            for (int i = 0; i < N; i++) {
-                dest.writeString(keySetMapping.keyAt(i));
-                ArraySet<PublicKey> keys = keySetMapping.valueAt(i);
-                if (keys == null) {
-                    dest.writeInt(-1);
-                    continue;
-                }
-
-                final int M = keys.size();
-                dest.writeInt(M);
-                for (int j = 0; j < M; j++) {
-                    dest.writeSerializable(keys.valueAt(j));
-                }
-            }
-        }
-
-        /**
-         * Reads a keyset mapping from the given parcel at the given data position. May return
-         * {@code null} if the serialized mapping was {@code null}.
-         */
-        private static ArrayMap<String, ArraySet<PublicKey>> readKeySetMapping(Parcel in) {
-            final int N = in.readInt();
-            if (N == -1) {
-                return null;
-            }
-
-            ArrayMap<String, ArraySet<PublicKey>> keySetMapping = new ArrayMap<>();
-            for (int i = 0; i < N; ++i) {
-                String key = in.readString();
-                final int M = in.readInt();
-                if (M == -1) {
-                    keySetMapping.put(key, null);
-                    continue;
-                }
-
-                ArraySet<PublicKey> keys = new ArraySet<>(M);
-                for (int j = 0; j < M; ++j) {
-                    PublicKey pk = (PublicKey) in.readSerializable();
-                    keys.add(pk);
-                }
-
-                keySetMapping.put(key, keys);
-            }
-
-            return keySetMapping;
         }
 
         public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Package>() {
@@ -7848,13 +7834,13 @@ public class PackageParser {
         private Permission(Parcel in) {
             super(in);
             final ClassLoader boot = Object.class.getClassLoader();
-            info = in.readParcelable(boot);
+            info = in.readParcelable(boot, android.content.pm.PermissionInfo.class);
             if (info.group != null) {
                 info.group = info.group.intern();
             }
 
             tree = (in.readInt() == 1);
-            group = in.readParcelable(boot);
+            group = in.readParcelable(boot, android.content.pm.PackageParser.PermissionGroup.class);
         }
 
         public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Permission>() {
@@ -7909,7 +7895,7 @@ public class PackageParser {
 
         private PermissionGroup(Parcel in) {
             super(in);
-            info = in.readParcelable(Object.class.getClassLoader());
+            info = in.readParcelable(Object.class.getClassLoader(), android.content.pm.PermissionGroupInfo.class);
         }
 
         public static final Parcelable.Creator CREATOR = new Parcelable.Creator<PermissionGroup>() {
@@ -7924,29 +7910,30 @@ public class PackageParser {
     }
 
     private static boolean copyNeeded(int flags, Package p,
-            PackageUserState state, Bundle metaData, int userId) {
+            FrameworkPackageUserState state, Bundle metaData, int userId) {
         if (userId != UserHandle.USER_SYSTEM) {
             // We always need to copy for other users, since we need
             // to fix up the uid.
             return true;
         }
-        if (state.enabled != PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
-            boolean enabled = state.enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+        if (state.getEnabledState() != PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
+            boolean enabled =
+                    state.getEnabledState() == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
             if (p.applicationInfo.enabled != enabled) {
                 return true;
             }
         }
         boolean suspended = (p.applicationInfo.flags & FLAG_SUSPENDED) != 0;
-        if (state.suspended != suspended) {
+        if (state.isSuspended() != suspended) {
             return true;
         }
-        if (!state.installed || state.hidden) {
+        if (!state.isInstalled() || state.isHidden()) {
             return true;
         }
-        if (state.stopped) {
+        if (state.isStopped()) {
             return true;
         }
-        if (state.instantApp != p.applicationInfo.isInstantApp()) {
+        if (state.isInstantApp() != p.applicationInfo.isInstantApp()) {
             return true;
         }
         if ((flags & PackageManager.GET_META_DATA) != 0
@@ -7969,57 +7956,56 @@ public class PackageParser {
 
     @UnsupportedAppUsage
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
-            PackageUserState state) {
+            FrameworkPackageUserState state) {
         return generateApplicationInfo(p, flags, state, UserHandle.getCallingUserId());
     }
 
     private static void updateApplicationInfo(ApplicationInfo ai, int flags,
-            PackageUserState state) {
+            FrameworkPackageUserState state) {
         // CompatibilityMode is global state.
         if (!sCompatibilityModeEnabled) {
             ai.disableCompatibilityMode();
         }
-        if (state.installed) {
+        if (state.isInstalled()) {
             ai.flags |= ApplicationInfo.FLAG_INSTALLED;
         } else {
             ai.flags &= ~ApplicationInfo.FLAG_INSTALLED;
         }
-        if (state.suspended) {
+        if (state.isSuspended()) {
             ai.flags |= ApplicationInfo.FLAG_SUSPENDED;
         } else {
             ai.flags &= ~ApplicationInfo.FLAG_SUSPENDED;
         }
-        if (state.instantApp) {
+        if (state.isInstantApp()) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_INSTANT;
         } else {
             ai.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_INSTANT;
         }
-        if (state.virtualPreload) {
+        if (state.isVirtualPreload()) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD;
         } else {
             ai.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD;
         }
-        if (state.hidden) {
+        if (state.isHidden()) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HIDDEN;
         } else {
             ai.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_HIDDEN;
         }
-        if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+        if (state.getEnabledState() == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             ai.enabled = true;
-        } else if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+        } else if (state.getEnabledState()
+                == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
             ai.enabled = (flags&PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS) != 0;
-        } else if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-                || state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
+        } else if (state.getEnabledState() == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                || state.getEnabledState()
+                == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
             ai.enabled = false;
         }
-        ai.enabledSetting = state.enabled;
-        if (ai.category == ApplicationInfo.CATEGORY_UNDEFINED) {
-            ai.category = state.categoryHint;
-        }
+        ai.enabledSetting = state.getEnabledState();
         if (ai.category == ApplicationInfo.CATEGORY_UNDEFINED) {
             ai.category = FallbackCategoryProvider.getFallbackCategory(ai.packageName);
         }
-        ai.seInfoUser = SELinuxUtil.assignSeinfoUser(state);
+        ai.seInfoUser = getSeinfoUser(state);
         final OverlayPaths overlayPaths = state.getAllOverlayPaths();
         if (overlayPaths != null) {
             ai.resourceDirs = overlayPaths.getResourceDirs().toArray(new String[0]);
@@ -8030,14 +8016,15 @@ public class PackageParser {
 
     @UnsupportedAppUsage
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
-            PackageUserState state, int userId) {
+            FrameworkPackageUserState state, int userId) {
         if (p == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, p.applicationInfo) || !p.isMatch(flags)) {
             return null;
         }
         if (!copyNeeded(flags, p, state, null, userId)
                 && ((flags&PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS) == 0
-                        || state.enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED)) {
+                        || state.getEnabledState()
+                                != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED)) {
             // In this case it is safe to directly modify the internal ApplicationInfo state:
             // - CompatibilityMode is global state, so will be the same for every call.
             // - We only come in to here if the app should reported as installed; this is the
@@ -8059,7 +8046,7 @@ public class PackageParser {
             ai.sharedLibraryFiles = p.usesLibraryFiles;
             ai.sharedLibraryInfos = p.usesLibraryInfos;
         }
-        if (state.stopped) {
+        if (state.isStopped()) {
             ai.flags |= ApplicationInfo.FLAG_STOPPED;
         } else {
             ai.flags &= ~ApplicationInfo.FLAG_STOPPED;
@@ -8069,7 +8056,7 @@ public class PackageParser {
     }
 
     public static ApplicationInfo generateApplicationInfo(ApplicationInfo ai, int flags,
-            PackageUserState state, int userId) {
+            FrameworkPackageUserState state, int userId) {
         if (ai == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, ai)) {
             return null;
@@ -8078,7 +8065,7 @@ public class PackageParser {
         // make a copy.
         ai = new ApplicationInfo(ai);
         ai.initForUser(userId);
-        if (state.stopped) {
+        if (state.isStopped()) {
             ai.flags |= ApplicationInfo.FLAG_STOPPED;
         } else {
             ai.flags &= ~ApplicationInfo.FLAG_STOPPED;
@@ -8201,7 +8188,7 @@ public class PackageParser {
 
         private Activity(Parcel in) {
             super(in);
-            info = in.readParcelable(Object.class.getClassLoader());
+            info = in.readParcelable(Object.class.getClassLoader(), android.content.pm.ActivityInfo.class);
             mHasMaxAspectRatio = in.readBoolean();
             mHasMinAspectRatio = in.readBoolean();
 
@@ -8228,7 +8215,7 @@ public class PackageParser {
 
     @UnsupportedAppUsage
     public static final ActivityInfo generateActivityInfo(Activity a, int flags,
-            PackageUserState state, int userId) {
+            FrameworkPackageUserState state, int userId) {
         if (a == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, a.owner.applicationInfo)) {
             return null;
@@ -8245,7 +8232,7 @@ public class PackageParser {
     }
 
     public static final ActivityInfo generateActivityInfo(ActivityInfo ai, int flags,
-            PackageUserState state, int userId) {
+            FrameworkPackageUserState state, int userId) {
         if (ai == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, ai.applicationInfo)) {
             return null;
@@ -8295,7 +8282,7 @@ public class PackageParser {
 
         private Service(Parcel in) {
             super(in);
-            info = in.readParcelable(Object.class.getClassLoader());
+            info = in.readParcelable(Object.class.getClassLoader(), android.content.pm.ServiceInfo.class);
 
             for (ServiceIntentInfo aii : intents) {
                 aii.service = this;
@@ -8320,7 +8307,7 @@ public class PackageParser {
 
     @UnsupportedAppUsage
     public static final ServiceInfo generateServiceInfo(Service s, int flags,
-            PackageUserState state, int userId) {
+            FrameworkPackageUserState state, int userId) {
         if (s == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, s.owner.applicationInfo)) {
             return null;
@@ -8385,7 +8372,7 @@ public class PackageParser {
 
         private Provider(Parcel in) {
             super(in);
-            info = in.readParcelable(Object.class.getClassLoader());
+            info = in.readParcelable(Object.class.getClassLoader(), android.content.pm.ProviderInfo.class);
             syncable = (in.readInt() == 1);
 
             for (ProviderIntentInfo aii : intents) {
@@ -8418,7 +8405,7 @@ public class PackageParser {
 
     @UnsupportedAppUsage
     public static final ProviderInfo generateProviderInfo(Provider p, int flags,
-            PackageUserState state, int userId) {
+            FrameworkPackageUserState state, int userId) {
         if (p == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, p.owner.applicationInfo)) {
             return null;
@@ -8477,7 +8464,7 @@ public class PackageParser {
 
         private Instrumentation(Parcel in) {
             super(in);
-            info = in.readParcelable(Object.class.getClassLoader());
+            info = in.readParcelable(Object.class.getClassLoader(), android.content.pm.InstrumentationInfo.class);
 
             if (info.targetPackage != null) {
                 info.targetPackage = info.targetPackage.intern();
@@ -8684,6 +8671,22 @@ public class PackageParser {
     // change the original one using new Package/ApkLite. The propose is that we don't want to
     // have two branches of methods in SplitAsset related classes so we can keep real classes
     // clean and move all the legacy code to one place.
+
+    /**
+     * Simple interface for loading base Assets and Splits. Used by PackageParser when parsing
+     * split APKs.
+     *
+     * @hide
+     * @deprecated Do not use. New changes should use
+     * {@link android.content.pm.split.SplitAssetLoader} instead.
+     */
+    @Deprecated
+    private interface SplitAssetLoader extends AutoCloseable {
+        AssetManager getBaseAssetManager() throws PackageParserException;
+        AssetManager getSplitAssetManager(int splitIdx) throws PackageParserException;
+
+        ApkAssets getBaseApkAssets();
+    }
 
     /**
      * A helper class that implements the dependency tree traversal for splits. Callbacks
@@ -9098,5 +9101,195 @@ public class PackageParser {
         public ApkAssets getBaseApkAssets() {
             return mCachedSplitApks[0][0];
         }
+    }
+
+
+
+    public static boolean isMatch(@NonNull FrameworkPackageUserState state,
+            ComponentInfo componentInfo, long flags) {
+        return isMatch(state, componentInfo.applicationInfo.isSystemApp(),
+                componentInfo.applicationInfo.enabled, componentInfo.enabled,
+                componentInfo.directBootAware, componentInfo.name, flags);
+    }
+
+    public static boolean isMatch(@NonNull FrameworkPackageUserState state, boolean isSystem,
+            boolean isPackageEnabled, ComponentInfo component, long flags) {
+        return isMatch(state, isSystem, isPackageEnabled, component.isEnabled(),
+                component.directBootAware, component.name, flags);
+    }
+
+    /**
+     * Test if the given component is considered installed, enabled and a match for the given
+     * flags.
+     *
+     * <p>
+     * Expects at least one of {@link PackageManager#MATCH_DIRECT_BOOT_AWARE} and {@link
+     * PackageManager#MATCH_DIRECT_BOOT_UNAWARE} are specified in {@code flags}.
+     * </p>
+     */
+    public static boolean isMatch(@NonNull FrameworkPackageUserState state, boolean isSystem,
+            boolean isPackageEnabled, boolean isComponentEnabled,
+            boolean isComponentDirectBootAware, String componentName, long flags) {
+        final boolean matchUninstalled = (flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0;
+        if (!isAvailable(state, flags) && !(isSystem && matchUninstalled)) {
+            return reportIfDebug(false, flags);
+        }
+
+        if (!isEnabled(state, isPackageEnabled, isComponentEnabled, componentName, flags)) {
+            return reportIfDebug(false, flags);
+        }
+
+        if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
+            if (!isSystem) {
+                return reportIfDebug(false, flags);
+            }
+        }
+
+        final boolean matchesUnaware = ((flags & PackageManager.MATCH_DIRECT_BOOT_UNAWARE) != 0)
+                && !isComponentDirectBootAware;
+        final boolean matchesAware = ((flags & PackageManager.MATCH_DIRECT_BOOT_AWARE) != 0)
+                && isComponentDirectBootAware;
+        return reportIfDebug(matchesUnaware || matchesAware, flags);
+    }
+
+    public static boolean isAvailable(@NonNull FrameworkPackageUserState state, long flags) {
+        // True if it is installed for this user and it is not hidden. If it is hidden,
+        // still return true if the caller requested MATCH_UNINSTALLED_PACKAGES
+        final boolean matchAnyUser = (flags & PackageManager.MATCH_ANY_USER) != 0;
+        final boolean matchUninstalled = (flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0;
+        return matchAnyUser
+                || (state.isInstalled()
+                && (!state.isHidden() || matchUninstalled));
+    }
+
+    public static boolean reportIfDebug(boolean result, long flags) {
+        if (DEBUG_PARSER && !result) {
+            Slog.i(TAG, "No match!; flags: "
+                    + DebugUtils.flagsToString(PackageManager.class, "MATCH_", flags) + " "
+                    + Debug.getCaller());
+        }
+        return result;
+    }
+
+    public static boolean isEnabled(@NonNull FrameworkPackageUserState state, ComponentInfo componentInfo,
+            long flags) {
+        return isEnabled(state, componentInfo.applicationInfo.enabled, componentInfo.enabled,
+                componentInfo.name, flags);
+    }
+
+    public static boolean isEnabled(@NonNull FrameworkPackageUserState state, boolean isPackageEnabled,
+            ComponentInfo parsedComponent, long flags) {
+        return isEnabled(state, isPackageEnabled, parsedComponent.isEnabled(),
+                parsedComponent.name, flags);
+    }
+
+    /**
+     * Test if the given component is considered enabled.
+     */
+    public static boolean isEnabled(@NonNull FrameworkPackageUserState state,
+            boolean isPackageEnabled, boolean isComponentEnabled, String componentName,
+            long flags) {
+        if ((flags & MATCH_DISABLED_COMPONENTS) != 0) {
+            return true;
+        }
+
+        // First check if the overall package is disabled; if the package is
+        // enabled then fall through to check specific component
+        switch (state.getEnabledState()) {
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+                return false;
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
+                if ((flags & MATCH_DISABLED_UNTIL_USED_COMPONENTS) == 0) {
+                    return false;
+                }
+                // fallthrough
+            case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
+                if (!isPackageEnabled) {
+                    return false;
+                }
+                // fallthrough
+            case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
+                break;
+        }
+
+        // Check if component has explicit state before falling through to
+        // the manifest default
+        if (state.isComponentEnabled(componentName)) {
+            return true;
+        } else if (state.isComponentDisabled(componentName)) {
+            return false;
+        }
+
+        return isComponentEnabled;
+    }
+
+    /**
+     * Writes the keyset mapping to the provided package. {@code null} mappings are permitted.
+     */
+    public static void writeKeySetMapping(@NonNull Parcel dest,
+            @NonNull Map<String, ArraySet<PublicKey>> keySetMapping) {
+        if (keySetMapping == null) {
+            dest.writeInt(-1);
+            return;
+        }
+
+        final int N = keySetMapping.size();
+        dest.writeInt(N);
+
+        for (String key : keySetMapping.keySet()) {
+            dest.writeString(key);
+            ArraySet<PublicKey> keys = keySetMapping.get(key);
+            if (keys == null) {
+                dest.writeInt(-1);
+                continue;
+            }
+
+            final int M = keys.size();
+            dest.writeInt(M);
+            for (int j = 0; j < M; j++) {
+                dest.writeSerializable(keys.valueAt(j));
+            }
+        }
+    }
+
+    /**
+     * Reads a keyset mapping from the given parcel at the given data position. May return
+     * {@code null} if the serialized mapping was {@code null}.
+     */
+    @NonNull
+    public static ArrayMap<String, ArraySet<PublicKey>> readKeySetMapping(@NonNull Parcel in) {
+        final int N = in.readInt();
+        if (N == -1) {
+            return null;
+        }
+
+        ArrayMap<String, ArraySet<PublicKey>> keySetMapping = new ArrayMap<>();
+        for (int i = 0; i < N; ++i) {
+            String key = in.readString();
+            final int M = in.readInt();
+            if (M == -1) {
+                keySetMapping.put(key, null);
+                continue;
+            }
+
+            ArraySet<PublicKey> keys = new ArraySet<>(M);
+            for (int j = 0; j < M; ++j) {
+                PublicKey pk =
+                        in.readSerializable(PublicKey.class.getClassLoader(), PublicKey.class);
+                keys.add(pk);
+            }
+
+            keySetMapping.put(key, keys);
+        }
+
+        return keySetMapping;
+    }
+
+    public static String getSeinfoUser(FrameworkPackageUserState userState) {
+        if (userState.isInstantApp()) {
+            return ":ephemeralapp:complete";
+        }
+        return ":complete";
     }
 }

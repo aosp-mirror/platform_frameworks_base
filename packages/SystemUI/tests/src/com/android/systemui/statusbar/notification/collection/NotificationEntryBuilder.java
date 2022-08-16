@@ -30,6 +30,7 @@ import android.service.notification.StatusBarNotification;
 import com.android.internal.logging.InstanceId;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SbnBuilder;
+import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import java.util.ArrayList;
@@ -53,9 +54,11 @@ public class NotificationEntryBuilder {
 
     /* ListEntry properties */
     private GroupEntry mParent;
+    private NotifSection mNotifSection;
 
     /* If set, use this creation time instead of mClock.uptimeMillis */
     private long mCreationTime = -1;
+    private int mStableIndex = -1;
 
     public NotificationEntryBuilder() {
         mSbnBuilder = new SbnBuilder();
@@ -68,6 +71,11 @@ public class NotificationEntryBuilder {
 
         mParent = source.getParent();
         mCreationTime = source.getCreationTime();
+    }
+
+    /** Update an the parent on an existing entry */
+    public static void setNewParent(NotificationEntry entry, GroupEntry parent) {
+        entry.setParent(parent);
     }
 
     /** Build a new instance of NotificationEntry */
@@ -102,6 +110,8 @@ public class NotificationEntryBuilder {
 
         /* ListEntry properties */
         entry.setParent(mParent);
+        entry.getAttachState().setSection(mNotifSection);
+        entry.getAttachState().setStableIndex(mStableIndex);
         return entry;
     }
 
@@ -114,11 +124,24 @@ public class NotificationEntryBuilder {
     }
 
     /**
+     * Sets the parent.
+     */
+    public NotificationEntryBuilder setSection(@Nullable NotifSection section) {
+        mNotifSection = section;
+        return this;
+    }
+
+    /**
      * Sets the SBN directly. If set, causes all calls to delegated SbnBuilder methods to be
      * ignored.
      */
     public NotificationEntryBuilder setSbn(@Nullable StatusBarNotification sbn) {
         mSbn = sbn;
+        return this;
+    }
+
+    public NotificationEntryBuilder setStableIndex(int index) {
+        mStableIndex = index;
         return this;
     }
 

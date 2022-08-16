@@ -103,6 +103,8 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.am.BatteryStatsService;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -651,102 +653,104 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private void onMultiSimConfigChanged() {
-        int oldNumPhones = mNumPhones;
-        mNumPhones = getTelephonyManager().getActiveModemCount();
-        if (oldNumPhones == mNumPhones) return;
+        synchronized (mRecords) {
+            int oldNumPhones = mNumPhones;
+            mNumPhones = getTelephonyManager().getActiveModemCount();
+            if (oldNumPhones == mNumPhones) return;
 
-        if (DBG) {
-            log("TelephonyRegistry: activeModemCount changed from " + oldNumPhones
-                    + " to " + mNumPhones);
-        }
-        mCallState = copyOf(mCallState, mNumPhones);
-        mDataActivity = copyOf(mCallState, mNumPhones);
-        mDataConnectionState = copyOf(mCallState, mNumPhones);
-        mDataConnectionNetworkType = copyOf(mCallState, mNumPhones);
-        mCallIncomingNumber = copyOf(mCallIncomingNumber, mNumPhones);
-        mServiceState = copyOf(mServiceState, mNumPhones);
-        mVoiceActivationState = copyOf(mVoiceActivationState, mNumPhones);
-        mDataActivationState = copyOf(mDataActivationState, mNumPhones);
-        mUserMobileDataState = copyOf(mUserMobileDataState, mNumPhones);
-        if (mSignalStrength != null) {
-            mSignalStrength = copyOf(mSignalStrength, mNumPhones);
-        } else {
-            mSignalStrength = new SignalStrength[mNumPhones];
-        }
-        mMessageWaiting = copyOf(mMessageWaiting, mNumPhones);
-        mCallForwarding = copyOf(mCallForwarding, mNumPhones);
-        mCellIdentity = copyOf(mCellIdentity, mNumPhones);
-        mSrvccState = copyOf(mSrvccState, mNumPhones);
-        mPreciseCallState = copyOf(mPreciseCallState, mNumPhones);
-        mForegroundCallState = copyOf(mForegroundCallState, mNumPhones);
-        mBackgroundCallState = copyOf(mBackgroundCallState, mNumPhones);
-        mRingingCallState = copyOf(mRingingCallState, mNumPhones);
-        mCallDisconnectCause = copyOf(mCallDisconnectCause, mNumPhones);
-        mCallPreciseDisconnectCause = copyOf(mCallPreciseDisconnectCause, mNumPhones);
-        mCallQuality = copyOf(mCallQuality, mNumPhones);
-        mCallNetworkType = copyOf(mCallNetworkType, mNumPhones);
-        mCallAttributes = copyOf(mCallAttributes, mNumPhones);
-        mOutgoingCallEmergencyNumber = copyOf(mOutgoingCallEmergencyNumber, mNumPhones);
-        mOutgoingSmsEmergencyNumber = copyOf(mOutgoingSmsEmergencyNumber, mNumPhones);
-        mTelephonyDisplayInfos = copyOf(mTelephonyDisplayInfos, mNumPhones);
-        mCarrierNetworkChangeState = copyOf(mCarrierNetworkChangeState, mNumPhones);
-        mIsDataEnabled= copyOf(mIsDataEnabled, mNumPhones);
-        mDataEnabledReason = copyOf(mDataEnabledReason, mNumPhones);
-        mAllowedNetworkTypeReason = copyOf(mAllowedNetworkTypeReason, mNumPhones);
-        mAllowedNetworkTypeValue = copyOf(mAllowedNetworkTypeValue, mNumPhones);
+            if (DBG) {
+                log("TelephonyRegistry: activeModemCount changed from " + oldNumPhones
+                        + " to " + mNumPhones);
+            }
+            mCallState = copyOf(mCallState, mNumPhones);
+            mDataActivity = copyOf(mCallState, mNumPhones);
+            mDataConnectionState = copyOf(mCallState, mNumPhones);
+            mDataConnectionNetworkType = copyOf(mCallState, mNumPhones);
+            mCallIncomingNumber = copyOf(mCallIncomingNumber, mNumPhones);
+            mServiceState = copyOf(mServiceState, mNumPhones);
+            mVoiceActivationState = copyOf(mVoiceActivationState, mNumPhones);
+            mDataActivationState = copyOf(mDataActivationState, mNumPhones);
+            mUserMobileDataState = copyOf(mUserMobileDataState, mNumPhones);
+            if (mSignalStrength != null) {
+                mSignalStrength = copyOf(mSignalStrength, mNumPhones);
+            } else {
+                mSignalStrength = new SignalStrength[mNumPhones];
+            }
+            mMessageWaiting = copyOf(mMessageWaiting, mNumPhones);
+            mCallForwarding = copyOf(mCallForwarding, mNumPhones);
+            mCellIdentity = copyOf(mCellIdentity, mNumPhones);
+            mSrvccState = copyOf(mSrvccState, mNumPhones);
+            mPreciseCallState = copyOf(mPreciseCallState, mNumPhones);
+            mForegroundCallState = copyOf(mForegroundCallState, mNumPhones);
+            mBackgroundCallState = copyOf(mBackgroundCallState, mNumPhones);
+            mRingingCallState = copyOf(mRingingCallState, mNumPhones);
+            mCallDisconnectCause = copyOf(mCallDisconnectCause, mNumPhones);
+            mCallPreciseDisconnectCause = copyOf(mCallPreciseDisconnectCause, mNumPhones);
+            mCallQuality = copyOf(mCallQuality, mNumPhones);
+            mCallNetworkType = copyOf(mCallNetworkType, mNumPhones);
+            mCallAttributes = copyOf(mCallAttributes, mNumPhones);
+            mOutgoingCallEmergencyNumber = copyOf(mOutgoingCallEmergencyNumber, mNumPhones);
+            mOutgoingSmsEmergencyNumber = copyOf(mOutgoingSmsEmergencyNumber, mNumPhones);
+            mTelephonyDisplayInfos = copyOf(mTelephonyDisplayInfos, mNumPhones);
+            mCarrierNetworkChangeState = copyOf(mCarrierNetworkChangeState, mNumPhones);
+            mIsDataEnabled = copyOf(mIsDataEnabled, mNumPhones);
+            mDataEnabledReason = copyOf(mDataEnabledReason, mNumPhones);
+            mAllowedNetworkTypeReason = copyOf(mAllowedNetworkTypeReason, mNumPhones);
+            mAllowedNetworkTypeValue = copyOf(mAllowedNetworkTypeValue, mNumPhones);
 
-        // ds -> ss switch.
-        if (mNumPhones < oldNumPhones) {
-            cutListToSize(mCellInfo, mNumPhones);
-            cutListToSize(mImsReasonInfo, mNumPhones);
-            cutListToSize(mPreciseDataConnectionStates, mNumPhones);
-            cutListToSize(mBarringInfo, mNumPhones);
-            cutListToSize(mPhysicalChannelConfigs, mNumPhones);
-            cutListToSize(mLinkCapacityEstimateLists, mNumPhones);
-            cutListToSize(mCarrierPrivilegeStates, mNumPhones);
-            cutListToSize(mCarrierServiceStates, mNumPhones);
-            return;
-        }
+            // ds -> ss switch.
+            if (mNumPhones < oldNumPhones) {
+                cutListToSize(mCellInfo, mNumPhones);
+                cutListToSize(mImsReasonInfo, mNumPhones);
+                cutListToSize(mPreciseDataConnectionStates, mNumPhones);
+                cutListToSize(mBarringInfo, mNumPhones);
+                cutListToSize(mPhysicalChannelConfigs, mNumPhones);
+                cutListToSize(mLinkCapacityEstimateLists, mNumPhones);
+                cutListToSize(mCarrierPrivilegeStates, mNumPhones);
+                cutListToSize(mCarrierServiceStates, mNumPhones);
+                return;
+            }
 
-        // mNumPhones > oldNumPhones: ss -> ds switch
-        for (int i = oldNumPhones; i < mNumPhones; i++) {
-            mCallState[i] = TelephonyManager.CALL_STATE_IDLE;
-            mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
-            mDataConnectionState[i] = TelephonyManager.DATA_UNKNOWN;
-            mVoiceActivationState[i] = TelephonyManager.SIM_ACTIVATION_STATE_UNKNOWN;
-            mDataActivationState[i] = TelephonyManager.SIM_ACTIVATION_STATE_UNKNOWN;
-            mCallIncomingNumber[i] = "";
-            mServiceState[i] = new ServiceState();
-            mSignalStrength[i] = null;
-            mUserMobileDataState[i] = false;
-            mMessageWaiting[i] = false;
-            mCallForwarding[i] = false;
-            mCellIdentity[i] = null;
-            mCellInfo.add(i, null);
-            mImsReasonInfo.add(i, null);
-            mSrvccState[i] = TelephonyManager.SRVCC_STATE_HANDOVER_NONE;
-            mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
-            mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
-            mCallQuality[i] = createCallQuality();
-            mCallAttributes[i] = new CallAttributes(createPreciseCallState(),
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN, createCallQuality());
-            mCallNetworkType[i] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-            mPreciseCallState[i] = createPreciseCallState();
-            mRingingCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
-            mForegroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
-            mBackgroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
-            mPreciseDataConnectionStates.add(new ArrayMap<>());
-            mBarringInfo.add(i, new BarringInfo());
-            mCarrierNetworkChangeState[i] = false;
-            mTelephonyDisplayInfos[i] = null;
-            mIsDataEnabled[i] = false;
-            mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
-            mPhysicalChannelConfigs.add(i, new ArrayList<>());
-            mAllowedNetworkTypeReason[i] = -1;
-            mAllowedNetworkTypeValue[i] = -1;
-            mLinkCapacityEstimateLists.add(i, INVALID_LCE_LIST);
-            mCarrierPrivilegeStates.add(i, new Pair<>(Collections.emptyList(), new int[0]));
-            mCarrierServiceStates.add(i, new Pair<>(null, Process.INVALID_UID));
+            // mNumPhones > oldNumPhones: ss -> ds switch
+            for (int i = oldNumPhones; i < mNumPhones; i++) {
+                mCallState[i] = TelephonyManager.CALL_STATE_IDLE;
+                mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
+                mDataConnectionState[i] = TelephonyManager.DATA_UNKNOWN;
+                mVoiceActivationState[i] = TelephonyManager.SIM_ACTIVATION_STATE_UNKNOWN;
+                mDataActivationState[i] = TelephonyManager.SIM_ACTIVATION_STATE_UNKNOWN;
+                mCallIncomingNumber[i] = "";
+                mServiceState[i] = new ServiceState();
+                mSignalStrength[i] = null;
+                mUserMobileDataState[i] = false;
+                mMessageWaiting[i] = false;
+                mCallForwarding[i] = false;
+                mCellIdentity[i] = null;
+                mCellInfo.add(i, null);
+                mImsReasonInfo.add(i, null);
+                mSrvccState[i] = TelephonyManager.SRVCC_STATE_HANDOVER_NONE;
+                mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
+                mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
+                mCallQuality[i] = createCallQuality();
+                mCallAttributes[i] = new CallAttributes(createPreciseCallState(),
+                        TelephonyManager.NETWORK_TYPE_UNKNOWN, createCallQuality());
+                mCallNetworkType[i] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+                mPreciseCallState[i] = createPreciseCallState();
+                mRingingCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+                mForegroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+                mBackgroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+                mPreciseDataConnectionStates.add(new ArrayMap<>());
+                mBarringInfo.add(i, new BarringInfo());
+                mCarrierNetworkChangeState[i] = false;
+                mTelephonyDisplayInfos[i] = null;
+                mIsDataEnabled[i] = false;
+                mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
+                mPhysicalChannelConfigs.add(i, new ArrayList<>());
+                mAllowedNetworkTypeReason[i] = -1;
+                mAllowedNetworkTypeValue[i] = -1;
+                mLinkCapacityEstimateLists.add(i, INVALID_LCE_LIST);
+                mCarrierPrivilegeStates.add(i, new Pair<>(Collections.emptyList(), new int[0]));
+                mCarrierServiceStates.add(i, new Pair<>(null, Process.INVALID_UID));
+            }
         }
     }
 
@@ -1030,12 +1034,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         Set<Integer> eventList = Arrays.stream(events).boxed().collect(Collectors.toSet());
         listen(renounceFineLocationAccess, renounceFineLocationAccess, callingPackage,
                 callingFeatureId, callback, eventList, notifyNow, subId);
-    }
-
-    private void listen(String callingPackage, @Nullable String callingFeatureId,
-            IPhoneStateListener callback, Set<Integer> events, boolean notifyNow, int subId) {
-        listen(false, false, callingPackage,
-                callingFeatureId, callback, events, notifyNow, subId);
     }
 
     private void listen(boolean renounceFineLocationAccess,
@@ -2803,9 +2801,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             + " callback=" + callback
                             + " callback.asBinder=" + callback.asBinder());
         }
-        if (!validatePhoneId(phoneId)) {
-            throw new IllegalArgumentException("Invalid slot index: " + phoneId);
-        }
 
         // In case this is triggered from the caller who has handled multiple SIM config change
         // firstly, we need to update the status (mNumPhone and mCarrierPrivilegeStates) firstly.
@@ -2813,6 +2808,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         onMultiSimConfigChanged();
 
         synchronized (mRecords) {
+            if (!validatePhoneId(phoneId)) {
+                throw new IllegalArgumentException("Invalid slot index: " + phoneId);
+            }
             Record r = add(
                     callback.asBinder(), Binder.getCallingUid(), Binder.getCallingPid(), false);
 
@@ -2865,7 +2863,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyCarrierPrivilegesChanged")) {
             return;
         }
-        if (!validatePhoneId(phoneId)) return;
         if (VDBG) {
             log(
                     "notifyCarrierPrivilegesChanged: phoneId=" + phoneId
@@ -2879,6 +2876,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         onMultiSimConfigChanged();
 
         synchronized (mRecords) {
+            if (!validatePhoneId(phoneId)) {
+                throw new IllegalArgumentException("Invalid slot index: " + phoneId);
+            }
             mCarrierPrivilegeStates.set(
                     phoneId, new Pair<>(privilegedPackageNames, privilegedUids));
             for (Record r : mRecords) {
@@ -2934,6 +2934,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");

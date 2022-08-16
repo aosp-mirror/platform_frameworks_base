@@ -32,6 +32,7 @@ import android.content.IntentFilter;
 import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.Handler;
@@ -64,7 +65,7 @@ public class PipMediaController {
      */
     public interface ActionListener {
         /**
-         * Called when the media actions changes.
+         * Called when the media actions changed.
          */
         void onMediaActionsChanged(List<RemoteAction> actions);
     }
@@ -74,9 +75,19 @@ public class PipMediaController {
      */
     public interface MetadataListener {
         /**
-         * Called when the media metadata changes.
+         * Called when the media metadata changed.
          */
         void onMediaMetadataChanged(MediaMetadata metadata);
+    }
+
+    /**
+     * A listener interface to receive notification on changes to the media session token.
+     */
+    public interface TokenListener {
+        /**
+         * Called when the media session token changed.
+         */
+        void onMediaSessionTokenChanged(MediaSession.Token token);
     }
 
     private final Context mContext;
@@ -133,6 +144,7 @@ public class PipMediaController {
 
     private final ArrayList<ActionListener> mActionListeners = new ArrayList<>();
     private final ArrayList<MetadataListener> mMetadataListeners = new ArrayList<>();
+    private final ArrayList<TokenListener> mTokenListeners = new ArrayList<>();
 
     public PipMediaController(Context context, Handler mainHandler) {
         mContext = context;
@@ -144,7 +156,7 @@ public class PipMediaController {
         mediaControlFilter.addAction(ACTION_NEXT);
         mediaControlFilter.addAction(ACTION_PREV);
         mContext.registerReceiverForAllUsers(mMediaActionReceiver, mediaControlFilter,
-                SYSTEMUI_PERMISSION, mainHandler);
+                SYSTEMUI_PERMISSION, mainHandler, Context.RECEIVER_EXPORTED);
 
         // Creates the standard media buttons that we may show.
         mPauseAction = getDefaultRemoteAction(R.string.pip_pause,
@@ -202,6 +214,31 @@ public class PipMediaController {
     public void removeMetadataListener(MetadataListener listener) {
         listener.onMediaMetadataChanged(null);
         mMetadataListeners.remove(listener);
+    }
+
+    /**
+     * Adds a new token listener.
+     */
+    public void addTokenListener(TokenListener listener) {
+        if (!mTokenListeners.contains(listener)) {
+            mTokenListeners.add(listener);
+            listener.onMediaSessionTokenChanged(getToken());
+        }
+    }
+
+    /**
+     * Removes a token listener.
+     */
+    public void removeTokenListener(TokenListener listener) {
+        listener.onMediaSessionTokenChanged(null);
+        mTokenListeners.remove(listener);
+    }
+
+    private MediaSession.Token getToken() {
+        if (mMediaController == null) {
+            return null;
+        }
+        return mMediaController.getSessionToken();
     }
 
     private MediaMetadata getMediaMetadata() {
@@ -294,6 +331,7 @@ public class PipMediaController {
             }
             notifyActionsChanged();
             notifyMetadataChanged(getMediaMetadata());
+            notifyTokenChanged(getToken());
 
             // TODO(winsonc): Consider if we want to close the PIP after a timeout (like on TV)
         }
@@ -315,6 +353,12 @@ public class PipMediaController {
     private void notifyMetadataChanged(MediaMetadata metadata) {
         if (!mMetadataListeners.isEmpty()) {
             mMetadataListeners.forEach(l -> l.onMediaMetadataChanged(metadata));
+        }
+    }
+
+    private void notifyTokenChanged(MediaSession.Token token) {
+        if (!mTokenListeners.isEmpty()) {
+            mTokenListeners.forEach(l -> l.onMediaSessionTokenChanged(token));
         }
     }
 }

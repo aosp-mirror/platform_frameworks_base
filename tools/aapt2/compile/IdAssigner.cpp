@@ -275,7 +275,7 @@ bool IdAssignerContext::ReserveId(const ResourceName& name, ResourceId id,
     return false;
   }
 
-  auto key = ResourceTypeKey{name.type, id.type_id()};
+  auto key = ResourceTypeKey{name.type.type, id.type_id()};
   auto type = types_.find(key);
   if (type == types_.end()) {
     // The type has not been assigned an id yet. Ensure that the specified id is not being used by
@@ -291,7 +291,7 @@ bool IdAssignerContext::ReserveId(const ResourceName& name, ResourceId id,
 
   if (!visibility.staged_api) {
     // Ensure that non-staged resources can only exist in one type ID.
-    auto non_staged_type = non_staged_type_ids_.emplace(name.type, id.type_id());
+    auto non_staged_type = non_staged_type_ids_.emplace(name.type.type, id.type_id());
     if (!non_staged_type.second && non_staged_type.first->second != id.type_id()) {
       diag->Error(DiagMessage() << "can't assign ID " << id << " to resource " << name
                                 << " because type already has ID " << std::hex
@@ -316,14 +316,14 @@ std::optional<ResourceId> IdAssignerContext::NextId(const ResourceName& name, ID
   CHECK(name.package.empty() || name.package == package_name_);
 
   // Find the type id for non-staged resources of this type.
-  auto non_staged_type = non_staged_type_ids_.find(name.type);
+  auto non_staged_type = non_staged_type_ids_.find(name.type.type);
   if (non_staged_type == non_staged_type_ids_.end()) {
     auto next_type_id = type_id_finder_.NextId();
     CHECK(next_type_id.has_value()) << "resource type IDs allocated have exceeded maximum (256)";
-    non_staged_type = non_staged_type_ids_.emplace(name.type, *next_type_id).first;
+    non_staged_type = non_staged_type_ids_.emplace(name.type.type, *next_type_id).first;
   }
 
-  ResourceTypeKey key{name.type, non_staged_type->second};
+  ResourceTypeKey key{name.type.type, non_staged_type->second};
   auto type = types_.find(key);
   if (type == types_.end()) {
     type = types_.emplace(key, TypeGroup(package_id_, key.id)).first;

@@ -19,6 +19,7 @@ package android {
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final String INSTALL_TEST_ONLY_PACKAGE = "android.permission.INSTALL_TEST_ONLY_PACKAGE";
     field public static final String KEEP_UNINSTALLED_PACKAGES = "android.permission.KEEP_UNINSTALLED_PACKAGES";
+    field public static final String MAKE_UID_VISIBLE = "android.permission.MAKE_UID_VISIBLE";
     field @Deprecated public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String MANAGE_ACTIVITY_TASKS = "android.permission.MANAGE_ACTIVITY_TASKS";
     field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
@@ -26,6 +27,7 @@ package android {
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
     field public static final String MANAGE_TOAST_RATE_LIMITING = "android.permission.MANAGE_TOAST_RATE_LIMITING";
     field public static final String MODIFY_REFRESH_RATE_SWITCHING_TYPE = "android.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE";
+    field public static final String MODIFY_USER_PREFERRED_DISPLAY_MODE = "android.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE";
     field public static final String NETWORK_SETTINGS = "android.permission.NETWORK_SETTINGS";
     field public static final String NETWORK_STACK = "android.permission.NETWORK_STACK";
     field public static final String OVERRIDE_DISPLAY_MODE_REQUESTS = "android.permission.OVERRIDE_DISPLAY_MODE_REQUESTS";
@@ -36,7 +38,10 @@ package android {
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String REQUEST_UNIQUE_ID_ATTESTATION = "android.permission.REQUEST_UNIQUE_ID_ATTESTATION";
     field public static final String RESET_APP_ERRORS = "android.permission.RESET_APP_ERRORS";
+    field public static final String REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL = "android.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL";
     field public static final String SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS = "android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS";
+    field public static final String SET_GAME_SERVICE = "android.permission.SET_GAME_SERVICE";
+    field public static final String SET_KEYBOARD_LAYOUT = "android.permission.SET_KEYBOARD_LAYOUT";
     field public static final String START_TASKS_FROM_RECENTS = "android.permission.START_TASKS_FROM_RECENTS";
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
     field public static final String TEST_BIOMETRIC = "android.permission.TEST_BIOMETRIC";
@@ -58,12 +63,14 @@ package android {
   public static final class R.bool {
     field public static final int config_assistantOnTopOfDream = 17891333; // 0x1110005
     field public static final int config_perDisplayFocusEnabled = 17891332; // 0x1110004
+    field public static final int config_preventImeStartupUnlessTextEditor = 17891335; // 0x1110007
     field public static final int config_remoteInsetsControllerControlsSystemBars = 17891334; // 0x1110006
   }
 
   public static final class R.string {
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultDialer = 17039395; // 0x1040023
+    field public static final int config_systemAutomotiveCalendarSyncManager = 17039423; // 0x104003f
     field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
     field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
     field public static final int config_systemGallery = 17039399; // 0x1040027
@@ -89,9 +96,14 @@ package android.accessibilityservice {
 
 package android.animation {
 
+  public abstract class Animator implements java.lang.Cloneable {
+    method public static long getBackgroundPauseDelay();
+    method public static void setAnimatorPausingEnabled(boolean);
+    method public static void setBackgroundPauseDelay(long);
+  }
+
   public class ValueAnimator extends android.animation.Animator {
-    method public static float getDurationScale();
-    method public static void setDurationScale(float);
+    method @MainThread public static void setDurationScale(@FloatRange(from=0) float);
   }
 
 }
@@ -99,15 +111,19 @@ package android.animation {
 package android.app {
 
   @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+    method public final boolean addDumpable(@NonNull android.util.Dumpable);
+    method public void dumpInternal(@NonNull String, @Nullable java.io.FileDescriptor, @NonNull java.io.PrintWriter, @Nullable String[]);
     method public void onMovedToDisplay(int, android.content.res.Configuration);
+    field public static final String DUMP_ARG_DUMP_DUMPABLE = "--dump-dumpable";
+    field public static final String DUMP_ARG_LIST_DUMPABLES = "--list-dumpables";
   }
 
   public class ActivityManager {
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
     method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
     method public long getTotalRam();
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidProcessCapabilities(int);
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidProcessState(int);
+    method @RequiresPermission(allOf={android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public int getUidProcessCapabilities(int);
+    method @RequiresPermission(allOf={android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public int getUidProcessState(int);
     method public void holdLock(android.os.IBinder, int);
     method public static boolean isHighEndGfx();
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
@@ -145,8 +161,10 @@ package android.app {
   }
 
   public class ActivityOptions {
-    method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
+    method public boolean isEligibleForLegacyPermissionPrompt();
+    method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS) public static android.app.ActivityOptions makeCustomTaskAnimation(@NonNull android.content.Context, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
+    method public void setEligibleForLegacyPermissionPrompt(boolean);
     method public static void setExitTransitionTimeout(long);
     method public void setLaunchActivityType(int);
     method public void setLaunchTaskDisplayAreaFeatureId(int);
@@ -157,11 +175,11 @@ package android.app {
   }
 
   public static interface ActivityOptions.OnAnimationFinishedListener {
-    method public void onAnimationFinished();
+    method public void onAnimationFinished(long);
   }
 
   public static interface ActivityOptions.OnAnimationStartedListener {
-    method public void onAnimationStarted();
+    method public void onAnimationStarted(long);
   }
 
   public class ActivityTaskManager {
@@ -247,12 +265,15 @@ package android.app {
 
   public class BroadcastOptions {
     ctor public BroadcastOptions(@NonNull android.os.Bundle);
-    method public int getMaxManifestReceiverApiLevel();
+    method @Deprecated public int getMaxManifestReceiverApiLevel();
     method public long getTemporaryAppAllowlistDuration();
     method @Nullable public String getTemporaryAppAllowlistReason();
     method public int getTemporaryAppAllowlistReasonCode();
     method public int getTemporaryAppAllowlistType();
-    method public void setMaxManifestReceiverApiLevel(int);
+    method @Deprecated public void setMaxManifestReceiverApiLevel(int);
+    method public boolean testRequireCompatChange(int);
+    field public static final long CHANGE_ALWAYS_DISABLED = 210856463L; // 0xc916a0fL
+    field public static final long CHANGE_ALWAYS_ENABLED = 209888056L; // 0xc82a338L
   }
 
   public class DownloadManager {
@@ -260,14 +281,20 @@ package android.app {
   }
 
   public class DreamManager {
+    method public boolean areDreamsSupported();
     method @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE) public boolean isDreaming();
-    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setActiveDream(@NonNull android.content.ComponentName);
+    method public boolean isScreensaverEnabled();
+    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setActiveDream(@Nullable android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setDreamOverlay(@Nullable android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setScreensaverEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void startDream(@NonNull android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void stopDream();
   }
 
   public final class GameManager {
-    method @RequiresPermission("android.permission.MANAGE_GAME_MODE") public void setGameMode(@NonNull String, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public int getGameMode(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public boolean isAngleEnabled(@NonNull String);
+    method public void setGameServiceProvider(@Nullable String);
   }
 
   public abstract class HomeVisibilityListener {
@@ -280,22 +307,26 @@ package android.app {
     method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"}) public boolean setLock(int, @Nullable byte[], int, @Nullable byte[]);
   }
 
+  public class LocaleManager {
+    method public void setSystemLocales(@NonNull android.os.LocaleList);
+  }
+
   public class Notification implements android.os.Parcelable {
     method public boolean shouldShowForegroundImmediately();
+    field public static final String EXTRA_MEDIA_REMOTE_DEVICE = "android.mediaRemoteDevice";
+    field public static final String EXTRA_MEDIA_REMOTE_ICON = "android.mediaRemoteIcon";
+    field public static final String EXTRA_MEDIA_REMOTE_INTENT = "android.mediaRemoteIntent";
   }
 
   public final class NotificationChannel implements android.os.Parcelable {
     method public int getOriginalImportance();
-    method public boolean isBlockable();
     method public boolean isImportanceLockedByCriticalDeviceFunction();
-    method public boolean isImportanceLockedByOEM();
     method public void lockFields(int);
     method public void setDeleted(boolean);
     method public void setDeletedTimeMs(long);
     method public void setDemoted(boolean);
     method public void setFgServiceShown(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);
-    method public void setImportanceLockedByOEM(boolean);
     method public void setImportantConversation(boolean);
     method public void setOriginalImportance(int);
   }
@@ -308,10 +339,10 @@ package android.app {
 
   public class NotificationManager {
     method public void allowAssistantAdjustment(String);
+    method public void cleanUpCallersAfter(long);
     method public void disallowAssistantAdjustment(String);
     method public android.content.ComponentName getEffectsSuppressor();
     method public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String);
-    method public boolean matchesCallFilter(android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING) public void setToastRateLimitingEnabled(boolean);
     method public void updateNotificationChannel(@NonNull String, int, @NonNull android.app.NotificationChannel);
@@ -330,17 +361,44 @@ package android.app {
   }
 
   public final class PictureInPictureParams implements android.os.Parcelable {
-    method public java.util.List<android.app.RemoteAction> getActions();
-    method public float getAspectRatio();
-    method public android.graphics.Rect getSourceRectHint();
-    method public boolean isSeamlessResizeEnabled();
+    method public float getAspectRatioFloat();
+    method public float getExpandedAspectRatioFloat();
   }
 
   public final class PictureInPictureUiState implements android.os.Parcelable {
     ctor public PictureInPictureUiState(boolean);
   }
 
+  public class PropertyInvalidatedCache<Query, Result> {
+    ctor public PropertyInvalidatedCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
+    method @NonNull public static String createPropertyName(@NonNull String, @NonNull String);
+    method public void disableForCurrentProcess();
+    method public static void disableForCurrentProcess(@NonNull String);
+    method public static void disableForTestMode();
+    method public final void disableInstance();
+    method public final void disableSystemWide();
+    method public final void forgetDisableLocal();
+    method public boolean getDisabledState();
+    method public void invalidateCache();
+    method public static void invalidateCache(@NonNull String, @NonNull String);
+    method public final boolean isDisabled();
+    method @Nullable public Result query(@NonNull Query);
+    method public static void setTestMode(boolean);
+    method public void testPropertyName();
+    field public static final String MODULE_BLUETOOTH = "bluetooth";
+    field public static final String MODULE_SYSTEM = "system_server";
+    field public static final String MODULE_TELEPHONY = "telephony";
+    field public static final String MODULE_TEST = "test";
+  }
+
+  public abstract static class PropertyInvalidatedCache.QueryHandler<Q, R> {
+    ctor public PropertyInvalidatedCache.QueryHandler();
+    method @Nullable public abstract R apply(@NonNull Q);
+    method public boolean shouldBypassCache(@NonNull Q);
+  }
+
   public class StatusBarManager {
+    method public void cancelRequestAddTile(@NonNull String);
     method public void clickNotification(@Nullable String, int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
     method public void expandNotificationsPanel();
@@ -348,6 +406,10 @@ package android.app {
     method public void sendNotificationFeedback(@Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void togglePanel();
+  }
+
+  public static final class StatusBarManager.DisableInfo {
+    method public boolean isRotationSuggestionDisabled();
   }
 
   public final class SyncNotedAppOp implements android.os.Parcelable {
@@ -361,6 +423,7 @@ package android.app {
     method @Nullable public android.app.PictureInPictureParams getPictureInPictureParams();
     method @NonNull public android.window.WindowContainerToken getToken();
     method public boolean hasParentTask();
+    method public boolean shouldDockBigOverlays();
   }
 
   public class TimePickerDialog extends android.app.AlertDialog implements android.content.DialogInterface.OnClickListener android.widget.TimePicker.OnTimeChangedListener {
@@ -406,6 +469,7 @@ package android.app {
     method @NonNull public android.graphics.Rect getMaxBounds();
     method public int getRotation();
     method public int getWindowingMode();
+    method public static boolean isFloating(int);
     method public void setActivityType(int);
     method public void setAppBounds(android.graphics.Rect);
     method public void setBounds(android.graphics.Rect);
@@ -435,51 +499,39 @@ package android.app {
 package android.app.admin {
 
   public class DevicePolicyManager {
-    method public int checkProvisioningPreCondition(@Nullable String, @NonNull String);
-    method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void clearOrganizationId();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void acknowledgeNewUserDisclaimer();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void clearOrganizationId();
     method @RequiresPermission(android.Manifest.permission.CLEAR_FREEZE_PERIOD) public void clearSystemUpdatePolicyFreezePeriodRecord();
-    method @Nullable public android.os.UserHandle createAndProvisionManagedProfile(@NonNull android.app.admin.ManagedProfileProvisioningParams) throws android.app.admin.ProvisioningException;
     method @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS) public long forceNetworkLogs();
-    method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void forceRemoveActiveAdmin(@NonNull android.content.ComponentName, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void forceRemoveActiveAdmin(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS) public long forceSecurityLogs();
     method public void forceUpdateUserSetupComplete(int);
     method @NonNull public java.util.Set<java.lang.String> getDefaultCrossProfilePackages();
+    method public int getDeviceOwnerType(@NonNull android.content.ComponentName);
+    method @Nullable public String getDevicePolicyManagementRoleHolderUpdaterPackage();
     method @NonNull public java.util.Set<java.lang.String> getDisallowedSystemApps(@NonNull android.content.ComponentName, int, @NonNull String);
     method public long getLastBugReportRequestTime();
     method public long getLastNetworkLogRetrievalTime();
     method public long getLastSecurityLogRetrievalTime();
     method public java.util.List<java.lang.String> getOwnerInstalledCaCerts(@NonNull android.os.UserHandle);
-    method @NonNull @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public java.util.Set<java.lang.String> getPolicyExemptApps();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public java.util.Set<java.lang.String> getPolicyExemptApps();
     method public boolean isCurrentInputMethodSetByOwner();
     method public boolean isFactoryResetProtectionPolicySupported();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public boolean isNewUserDisclaimerAcknowledged();
-    method @RequiresPermission(anyOf={"android.permission.MARK_DEVICE_ORGANIZATION_OWNED", "android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS"}, conditional=true) public void markProfileOwnerOnOrganizationOwnedDevice(@NonNull android.content.ComponentName);
+    method public boolean isRemovingAdmin(@NonNull android.content.ComponentName, int);
     method @NonNull public static String operationSafetyReasonToString(int);
     method @NonNull public static String operationToString(int);
-    method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void provisionFullyManagedDevice(@NonNull android.app.admin.FullyManagedDeviceProvisioningParams) throws android.app.admin.ProvisioningException;
-    method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void resetDefaultCrossProfileIntentFilters(int);
-    method @RequiresPermission(allOf={"android.permission.MANAGE_DEVICE_ADMINS", android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setActiveAdmin(@NonNull android.content.ComponentName, boolean, int);
-    method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public boolean setDeviceOwner(@NonNull android.content.ComponentName, @Nullable String, int);
-    method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public boolean setDeviceOwnerOnly(@NonNull android.content.ComponentName, @Nullable String, int);
-    method @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public void setNextOperationSafety(int, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void resetDefaultCrossProfileIntentFilters(int);
+    method @RequiresPermission(allOf={android.Manifest.permission.MANAGE_DEVICE_ADMINS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setActiveAdmin(@NonNull android.content.ComponentName, boolean, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean setDeviceOwner(@NonNull android.content.ComponentName, @Nullable String, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean setDeviceOwnerOnly(@NonNull android.content.ComponentName, @Nullable String, int);
+    method public void setDeviceOwnerType(@NonNull android.content.ComponentName, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public void setNextOperationSafety(int, int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}, conditional=true) public void setProfileOwnerOnOrganizationOwnedDevice(@NonNull android.content.ComponentName, boolean);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
     field public static final String ACTION_DEVICE_POLICY_CONSTANTS_CHANGED = "android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED";
-    field public static final int CODE_ACCOUNTS_NOT_EMPTY = 6; // 0x6
-    field public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11; // 0xb
-    field public static final int CODE_DEVICE_ADMIN_NOT_SUPPORTED = 13; // 0xd
-    field public static final int CODE_HAS_DEVICE_OWNER = 1; // 0x1
-    field public static final int CODE_HAS_PAIRED = 8; // 0x8
-    field public static final int CODE_MANAGED_USERS_NOT_SUPPORTED = 9; // 0x9
-    field public static final int CODE_NONSYSTEM_USER_EXISTS = 5; // 0x5
-    field public static final int CODE_NOT_SYSTEM_USER = 7; // 0x7
-    field @Deprecated public static final int CODE_NOT_SYSTEM_USER_SPLIT = 12; // 0xc
-    field public static final int CODE_OK = 0; // 0x0
-    field public static final int CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS = 15; // 0xf
-    field @Deprecated public static final int CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14; // 0xe
-    field public static final int CODE_SYSTEM_USER = 10; // 0xa
-    field public static final int CODE_USER_HAS_PROFILE_OWNER = 2; // 0x2
-    field public static final int CODE_USER_NOT_RUNNING = 3; // 0x3
-    field public static final int CODE_USER_SETUP_COMPLETED = 4; // 0x4
+    field public static final int DEVICE_OWNER_TYPE_DEFAULT = 0; // 0x0
+    field public static final int DEVICE_OWNER_TYPE_FINANCED = 1; // 0x1
     field public static final int OPERATION_CLEAR_APPLICATION_USER_DATA = 23; // 0x17
     field public static final int OPERATION_CREATE_AND_MANAGE_USER = 5; // 0x5
     field public static final int OPERATION_INSTALL_CA_CERT = 24; // 0x18
@@ -521,66 +573,7 @@ package android.app.admin {
     field public static final int OPERATION_SWITCH_USER = 2; // 0x2
     field public static final int OPERATION_UNINSTALL_CA_CERT = 40; // 0x28
     field public static final int OPERATION_WIPE_DATA = 8; // 0x8
-    field public static final int PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED = 3; // 0x3
-    field public static final int PROVISIONING_RESULT_PRE_CONDITION_FAILED = 1; // 0x1
-    field public static final int PROVISIONING_RESULT_PROFILE_CREATION_FAILED = 2; // 0x2
-    field public static final int PROVISIONING_RESULT_REMOVE_NON_REQUIRED_APPS_FAILED = 6; // 0x6
-    field public static final int PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED = 4; // 0x4
-    field public static final int PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED = 7; // 0x7
-    field public static final int PROVISIONING_RESULT_STARTING_PROFILE_FAILED = 5; // 0x5
-  }
-
-  public final class FullyManagedDeviceProvisioningParams implements android.os.Parcelable {
-    method public boolean canDeviceOwnerGrantSensorsPermissions();
-    method public int describeContents();
-    method @NonNull public android.content.ComponentName getDeviceAdminComponentName();
-    method public long getLocalTime();
-    method @Nullable public java.util.Locale getLocale();
-    method @NonNull public String getOwnerName();
-    method @Nullable public String getTimeZone();
-    method public boolean isLeaveAllSystemAppsEnabled();
-    method public void logParams(@NonNull String);
-    method public void writeToParcel(@NonNull android.os.Parcel, @Nullable int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.FullyManagedDeviceProvisioningParams> CREATOR;
-  }
-
-  public static final class FullyManagedDeviceProvisioningParams.Builder {
-    ctor public FullyManagedDeviceProvisioningParams.Builder(@NonNull android.content.ComponentName, @NonNull String);
-    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams build();
-    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setDeviceOwnerCanGrantSensorsPermissions(boolean);
-    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
-    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocalTime(long);
-    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocale(@Nullable java.util.Locale);
-    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setTimeZone(@Nullable String);
-  }
-
-  public final class ManagedProfileProvisioningParams implements android.os.Parcelable {
-    method public int describeContents();
-    method @Nullable public android.accounts.Account getAccountToMigrate();
-    method @NonNull public String getOwnerName();
-    method @NonNull public android.content.ComponentName getProfileAdminComponentName();
-    method @Nullable public String getProfileName();
-    method public boolean isKeepAccountMigrated();
-    method public boolean isLeaveAllSystemAppsEnabled();
-    method public boolean isOrganizationOwnedProvisioning();
-    method public void logParams(@NonNull String);
-    method public void writeToParcel(@NonNull android.os.Parcel, @Nullable int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.ManagedProfileProvisioningParams> CREATOR;
-  }
-
-  public static final class ManagedProfileProvisioningParams.Builder {
-    ctor public ManagedProfileProvisioningParams.Builder(@NonNull android.content.ComponentName, @NonNull String);
-    method @NonNull public android.app.admin.ManagedProfileProvisioningParams build();
-    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setAccountToMigrate(@Nullable android.accounts.Account);
-    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setKeepAccountMigrated(boolean);
-    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
-    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setOrganizationOwnedProvisioning(boolean);
-    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setProfileName(@Nullable String);
-  }
-
-  public class ProvisioningException extends android.util.AndroidException {
-    ctor public ProvisioningException(@NonNull Exception, int);
-    method public int getProvisioningResult();
+    field @Deprecated public static final int STATUS_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14; // 0xe
   }
 
   public static final class SecurityLog.SecurityEvent implements android.os.Parcelable {
@@ -596,9 +589,13 @@ package android.app.admin {
 
 package android.app.assist {
 
-  public class ActivityId {
+  public final class ActivityId implements android.os.Parcelable {
+    ctor public ActivityId(int, @Nullable android.os.IBinder);
+    method public int describeContents();
     method public int getTaskId();
     method @Nullable public android.os.IBinder getToken();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.assist.ActivityId> CREATOR;
   }
 
 }
@@ -619,6 +616,14 @@ package android.app.blob {
     method @NonNull public String getPackageName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.blob.LeaseInfo> CREATOR;
+  }
+
+}
+
+package android.app.cloudsearch {
+
+  public static final class SearchRequest.Builder {
+    method @NonNull public android.app.cloudsearch.SearchRequest.Builder setCallerPackageName(@NonNull String);
   }
 
 }
@@ -675,6 +680,14 @@ package android.appwidget {
 
   public class AppWidgetManager {
     method public void setBindAppWidgetPermission(@NonNull String, int, boolean);
+  }
+
+}
+
+package android.companion {
+
+  public abstract class CompanionDeviceService extends android.app.Service {
+    method public void onBindCompanionDeviceService(@NonNull android.content.Intent);
   }
 
 }
@@ -744,6 +757,7 @@ package android.content {
     field public static final String FONT_SERVICE = "font";
     field public static final String POWER_EXEMPTION_SERVICE = "power_exemption";
     field @Deprecated public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
+    field @Deprecated public static final int RECEIVER_EXPORTED_UNAUDITED = 2; // 0x2
     field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
 
@@ -791,6 +805,7 @@ package android.content.pm {
     method public boolean hasRequestForegroundServiceExemption();
     method public boolean isPrivilegedApp();
     method public boolean isSystemApp();
+    method public void setEnableOnBackInvokedCallback(boolean);
     field public static final int PRIVATE_FLAG_PRIVILEGED = 8; // 0x8
     field public int privateFlags;
   }
@@ -813,16 +828,20 @@ package android.content.pm {
     method @Nullable public String getDefaultTextClassifierPackageName();
     method @RequiresPermission(android.Manifest.permission.INJECT_EVENTS) public android.os.IBinder getHoldLockToken();
     method public abstract int getInstallReason(@NonNull String, @NonNull android.os.UserHandle);
-    method @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
+    method @Deprecated @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
+    method @NonNull public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(@NonNull android.content.pm.PackageManager.ApplicationInfoFlags, int);
     method @Nullable public abstract String[] getNamesForUids(int[]);
     method @NonNull public String getPermissionControllerPackageName();
+    method @NonNull public String getSdkSandboxPackageName();
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
     method @Nullable public String getSystemTextClassifierPackageName();
     method @Nullable public String getWellbeingPackageName();
     method public void holdLock(android.os.IBinder, int);
+    method @RequiresPermission(android.Manifest.permission.MAKE_UID_VISIBLE) public void makeUidVisible(int, int);
     method @RequiresPermission(android.Manifest.permission.KEEP_UNINSTALLED_PACKAGES) public void setKeepUninstalledPackages(@NonNull java.util.List<java.lang.String>);
     field public static final String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
+    field public static final String FEATURE_COMMUNAL_MODE = "android.software.communal_mode";
     field public static final String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
     field public static final String FEATURE_HDMI_CEC = "android.hardware.hdmi.cec";
     field public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED = 128; // 0x80
@@ -906,7 +925,7 @@ package android.content.pm {
     field public int id;
     field public String lastLoggedInFingerprint;
     field public long lastLoggedInTime;
-    field public String name;
+    field @Nullable public String name;
     field public boolean partial;
     field public boolean preCreated;
     field public int profileBadge;
@@ -999,7 +1018,7 @@ package android.database.sqlite {
 package android.graphics {
 
   public final class ImageDecoder implements java.lang.AutoCloseable {
-    method @AnyThread @NonNull public static android.graphics.ImageDecoder.Source createSource(android.content.res.Resources, java.io.InputStream, int);
+    method @AnyThread @NonNull public static android.graphics.ImageDecoder.Source createSource(android.content.res.Resources, @NonNull java.io.InputStream, int);
   }
 
   public final class Rect implements android.os.Parcelable {
@@ -1055,13 +1074,13 @@ package android.hardware {
 
   public final class SensorPrivacyManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, int, boolean);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacyForProfileGroup(int, int, boolean);
   }
 
   public static class SensorPrivacyManager.Sources {
     field public static final int DIALOG = 3; // 0x3
     field public static final int OTHER = 5; // 0x5
     field public static final int QS_TILE = 1; // 0x1
+    field public static final int SAFETY_CENTER = 6; // 0x6
     field public static final int SETTINGS = 2; // 0x2
     field public static final int SHELL = 4; // 0x4
   }
@@ -1137,7 +1156,7 @@ package android.hardware.camera2 {
 package android.hardware.devicestate {
 
   public final class DeviceStateManager {
-    method @RequiresPermission(value=android.Manifest.permission.CONTROL_DEVICE_STATE, conditional=true) public void cancelRequest(@NonNull android.hardware.devicestate.DeviceStateRequest);
+    method @RequiresPermission(value=android.Manifest.permission.CONTROL_DEVICE_STATE, conditional=true) public void cancelStateRequest();
     method @NonNull public int[] getSupportedStates();
     method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateCallback);
     method @RequiresPermission(value=android.Manifest.permission.CONTROL_DEVICE_STATE, conditional=true) public void requestState(@NonNull android.hardware.devicestate.DeviceStateRequest, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.devicestate.DeviceStateRequest.Callback);
@@ -1179,13 +1198,19 @@ package android.hardware.display {
     method public boolean alwaysOnAvailable();
     method public boolean alwaysOnAvailableForUser(int);
     method public boolean alwaysOnEnabled(int);
+    method public void disableDozeSettings(int);
+    method public void disableDozeSettings(boolean, int);
+    method public void restoreDozeSettings(int);
   }
 
   public final class DisplayManager {
     method public boolean areUserDisabledHdrTypesAllowed();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void clearGlobalUserPreferredDisplayMode();
+    method @Nullable public android.view.Display.Mode getGlobalUserPreferredDisplayMode();
     method @NonNull public int[] getUserDisabledHdrTypes();
     method public boolean isMinimalPostProcessingRequested(int);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setAreUserDisabledHdrTypesAllowed(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void setGlobalUserPreferredDisplayMode(@NonNull android.view.Display.Mode);
     method @RequiresPermission(android.Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE) public void setRefreshRateSwitchingType(int);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public void setShouldAlwaysRespectAppRequestedMode(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setUserDisabledHdrTypes(@NonNull int[]);
@@ -1194,7 +1219,6 @@ package android.hardware.display {
     field public static final int SWITCHING_TYPE_NONE = 0; // 0x0
     field public static final int SWITCHING_TYPE_WITHIN_GROUPS = 1; // 0x1
     field public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 512; // 0x200
-    field public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1024; // 0x400
   }
 
 }
@@ -1222,9 +1246,23 @@ package android.hardware.hdmi {
 
 package android.hardware.input {
 
+  public final class InputDeviceIdentifier implements android.os.Parcelable {
+    ctor public InputDeviceIdentifier(@NonNull String, int, int);
+    method public int describeContents();
+    method @NonNull public String getDescriptor();
+    method public int getProductId();
+    method public int getVendorId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.InputDeviceIdentifier> CREATOR;
+  }
+
   public final class InputManager {
     method public int getBlockUntrustedTouchesMode(@NonNull android.content.Context);
+    method @Nullable public String getCurrentKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier);
+    method @NonNull public java.util.List<java.lang.String> getKeyboardLayoutDescriptorsForInputDevice(@NonNull android.view.InputDevice);
+    method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void removeKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setBlockUntrustedTouchesMode(@NonNull android.content.Context, int);
+    method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void setCurrentKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setMaximumObscuringOpacityForTouch(@FloatRange(from=0, to=1) float);
     field public static final long BLOCK_UNTRUSTED_TOUCHES = 158002302L; // 0x96aec7eL
   }
@@ -1267,6 +1305,10 @@ package android.hardware.soundtrigger {
     method public boolean supportsPhrase(@Nullable String);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.KeyphraseMetadata> CREATOR;
+  }
+
+  public static final class SoundTrigger.KeyphraseRecognitionExtra implements android.os.Parcelable {
+    ctor public SoundTrigger.KeyphraseRecognitionExtra(int, int, int);
   }
 
   public static final class SoundTrigger.ModelParamRange implements android.os.Parcelable {
@@ -1352,7 +1394,7 @@ package android.location {
     method public void setAccumulatedDeltaRangeMeters(double);
     method public void setAccumulatedDeltaRangeState(int);
     method public void setAccumulatedDeltaRangeUncertaintyMeters(double);
-    method public void setAutomaticGainControlLevelInDb(double);
+    method @Deprecated public void setAutomaticGainControlLevelInDb(double);
     method public void setBasebandCn0DbHz(double);
     method @Deprecated public void setCarrierCycles(long);
     method public void setCarrierFrequencyHz(float);
@@ -1379,10 +1421,6 @@ package android.location {
     field public static final int ADR_STATE_ALL = 31; // 0x1f
   }
 
-  public final class GnssMeasurementsEvent implements android.os.Parcelable {
-    ctor public GnssMeasurementsEvent(android.location.GnssClock, android.location.GnssMeasurement[]);
-  }
-
   public final class GnssNavigationMessage implements android.os.Parcelable {
     ctor public GnssNavigationMessage();
     method public void reset();
@@ -1407,6 +1445,7 @@ package android.location {
 package android.media {
 
   public final class AudioAttributes implements android.os.Parcelable {
+    method public static int[] getSdkUsages();
     method @NonNull public static String usageToXsdString(int);
     method public static int xsdStringToUsage(@NonNull String);
   }
@@ -1429,13 +1468,21 @@ package android.media {
 
   public class AudioManager {
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int abandonAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioRecord getCallDownlinkExtractionAudioRecord(@NonNull android.media.AudioFormat);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioTrack getCallUplinkInjectionAudioTrack(@NonNull android.media.AudioFormat);
     method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
     method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFadeOutDurationOnFocusLossMillis(@NonNull android.media.AudioAttributes);
+    method @Nullable public static String getHalVersion();
+    method public static final int[] getPublicStreamTypes();
     method @NonNull public java.util.List<java.lang.Integer> getReportedSurroundFormats();
+    method public int getStreamMinVolumeInt(int);
     method @NonNull public java.util.Map<java.lang.Integer,java.lang.Boolean> getSurroundFormats();
     method public boolean hasRegisteredDynamicPolicy();
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE}) public boolean isFullVolumeDevice();
+    method @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public boolean isPstnCallAudioInterceptable();
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int requestAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String, int, int);
+    method public void setRampingRingerEnabled(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setTestDeviceConnectionState(@NonNull android.media.AudioDeviceAttributes, boolean);
   }
 
   public static final class AudioRecord.MetricsConstants {
@@ -1456,9 +1503,13 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS) public static float getMasterBalance();
     method public static final int getNumStreamTypes();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS) public static int setMasterBalance(float);
+    method @NonNull public static String streamToString(int);
     field public static final int DEVICE_ROLE_DISABLED = 2; // 0x2
     field public static final int DEVICE_ROLE_NONE = 0; // 0x0
     field public static final int DEVICE_ROLE_PREFERRED = 1; // 0x1
+    field public static final int DIRECT_BITSTREAM_SUPPORTED = 4; // 0x4
+    field public static final int DIRECT_OFFLOAD_GAPLESS_SUPPORTED = 3; // 0x3
+    field public static final int DIRECT_OFFLOAD_SUPPORTED = 1; // 0x1
     field public static final int OFFLOAD_GAPLESS_SUPPORTED = 2; // 0x2
     field public static final int OFFLOAD_SUPPORTED = 1; // 0x1
     field public static final int STREAM_DEFAULT = -1; // 0xffffffff
@@ -1551,6 +1602,13 @@ package android.media.audiopolicy {
 
   public static class AudioPolicy.Builder {
     method @NonNull public android.media.audiopolicy.AudioPolicy.Builder setIsTestFocusPolicy(boolean);
+  }
+
+  public final class AudioProductStrategy implements android.os.Parcelable {
+    method @NonNull public static android.media.AudioAttributes getDefaultAttributes();
+    method public int getLegacyStreamTypeForAudioAttributes(@NonNull android.media.AudioAttributes);
+    method public int getVolumeGroupIdForAudioAttributes(@NonNull android.media.AudioAttributes);
+    method public int getVolumeGroupIdForLegacyStreamType(int);
   }
 
 }
@@ -1675,9 +1733,26 @@ package android.os {
     method @NonNull public static byte[] digest(@NonNull java.io.InputStream, @NonNull String) throws java.io.IOException, java.security.NoSuchAlgorithmException;
   }
 
+  public class IpcDataCache<Query, Result> extends android.app.PropertyInvalidatedCache<Query,Result> {
+    ctor public IpcDataCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.os.IpcDataCache.QueryHandler<Query,Result>);
+    method public static void disableForCurrentProcess(@NonNull String);
+    method public static void invalidateCache(@NonNull String, @NonNull String);
+    field public static final String MODULE_BLUETOOTH = "bluetooth";
+    field public static final String MODULE_SYSTEM = "system_server";
+    field public static final String MODULE_TEST = "test";
+  }
+
+  public abstract static class IpcDataCache.QueryHandler<Q, R> extends android.app.PropertyInvalidatedCache.QueryHandler<Q,R> {
+    ctor public IpcDataCache.QueryHandler();
+  }
+
   public final class MessageQueue {
     method public int postSyncBarrier();
     method public void removeSyncBarrier(int);
+  }
+
+  public final class NewUserResponse {
+    ctor public NewUserResponse(@Nullable android.os.UserHandle, int);
   }
 
   public final class PackageTagsList implements android.os.Parcelable {
@@ -1716,7 +1791,9 @@ package android.os {
   }
 
   public final class PowerManager {
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public void forceLowPowerStandbyActive(boolean);
     field public static final String ACTION_ENHANCED_DISCHARGE_PREDICTION_CHANGED = "android.os.action.ENHANCED_DISCHARGE_PREDICTION_CHANGED";
+    field @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public static final int SYSTEM_WAKELOCK = -2147483648; // 0x80000000
   }
 
   public class Process {
@@ -1730,6 +1807,7 @@ package android.os {
     field public static final int LAST_ISOLATED_UID = 99999; // 0x1869f
     field public static final int NFC_UID = 1027; // 0x403
     field public static final int NUM_UIDS_PER_APP_ZYGOTE = 100; // 0x64
+    field public static final int SDK_SANDBOX_VIRTUAL_UID = 1090; // 0x442
   }
 
   public final class StrictMode {
@@ -1783,7 +1861,7 @@ package android.os {
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.content.pm.UserInfo createRestrictedProfile(@Nullable String);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.content.pm.UserInfo createUser(@Nullable String, @NonNull String, int);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.Set<java.lang.String> getPreInstallableSystemPackages(@NonNull String);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public String getUserType();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public String getUserType();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.List<android.content.pm.UserInfo> getUsers(boolean, boolean, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean hasBaseUserRestriction(@NonNull String, @NonNull android.os.UserHandle);
     method public static boolean isGuestUserEphemeral();
@@ -1795,16 +1873,14 @@ package android.os {
     method public int getAudioUsage();
   }
 
-  public static final class VibrationAttributes.Builder {
-    ctor public VibrationAttributes.Builder(@NonNull android.media.AudioAttributes, @Nullable android.os.VibrationEffect);
-  }
-
   public abstract class VibrationEffect implements android.os.Parcelable {
     method public static android.os.VibrationEffect get(int);
     method public static android.os.VibrationEffect get(int, boolean);
     method @Nullable public static android.os.VibrationEffect get(android.net.Uri, android.content.Context);
     method public abstract long getDuration();
     method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform();
+    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform(@NonNull android.os.VibrationEffect.VibrationParameter);
+    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform(@NonNull android.os.VibrationEffect.VibrationParameter, @NonNull android.os.VibrationEffect.VibrationParameter);
     field public static final int EFFECT_POP = 4; // 0x4
     field public static final int EFFECT_STRENGTH_LIGHT = 0; // 0x0
     field public static final int EFFECT_STRENGTH_MEDIUM = 1; // 0x1
@@ -1815,29 +1891,44 @@ package android.os {
   }
 
   public static final class VibrationEffect.Composed extends android.os.VibrationEffect {
-    method @NonNull public android.os.VibrationEffect.Composed applyEffectStrength(int);
     method public long getDuration();
     method public int getRepeatIndex();
     method @NonNull public java.util.List<android.os.vibrator.VibrationEffectSegment> getSegments();
-    method @NonNull public android.os.VibrationEffect.Composed resolve(int);
-    method @NonNull public android.os.VibrationEffect.Composed scale(float);
-    method public void validate();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Composed> CREATOR;
   }
 
   public static final class VibrationEffect.Composition {
     method @NonNull public android.os.VibrationEffect.Composition addEffect(@NonNull android.os.VibrationEffect);
-    method @NonNull public android.os.VibrationEffect.Composition addEffect(@NonNull android.os.VibrationEffect, @IntRange(from=0) int);
+    method @NonNull public android.os.VibrationEffect.Composition addOffDuration(@NonNull java.time.Duration);
+    method @NonNull public android.os.VibrationEffect.Composition repeatEffectIndefinitely(@NonNull android.os.VibrationEffect);
+  }
+
+  public static final class VibrationEffect.Composition.UnreachableAfterRepeatingIndefinitelyException extends java.lang.IllegalStateException {
+  }
+
+  public static class VibrationEffect.VibrationParameter {
+    method @NonNull public static android.os.VibrationEffect.VibrationParameter targetAmplitude(@FloatRange(from=0, to=1) float);
+    method @NonNull public static android.os.VibrationEffect.VibrationParameter targetFrequency(@FloatRange(from=1) float);
   }
 
   public static final class VibrationEffect.WaveformBuilder {
-    method @NonNull public android.os.VibrationEffect.WaveformBuilder addRamp(@FloatRange(from=0.0f, to=1.0f) float, @IntRange(from=0) int);
-    method @NonNull public android.os.VibrationEffect.WaveformBuilder addRamp(@FloatRange(from=0.0f, to=1.0f) float, @FloatRange(from=-1.0F, to=1.0f) float, @IntRange(from=0) int);
-    method @NonNull public android.os.VibrationEffect.WaveformBuilder addStep(@FloatRange(from=0.0f, to=1.0f) float, @IntRange(from=0) int);
-    method @NonNull public android.os.VibrationEffect.WaveformBuilder addStep(@FloatRange(from=0.0f, to=1.0f) float, @FloatRange(from=-1.0F, to=1.0f) float, @IntRange(from=0) int);
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addSustain(@NonNull java.time.Duration);
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addTransition(@NonNull java.time.Duration, @NonNull android.os.VibrationEffect.VibrationParameter);
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addTransition(@NonNull java.time.Duration, @NonNull android.os.VibrationEffect.VibrationParameter, @NonNull android.os.VibrationEffect.VibrationParameter);
     method @NonNull public android.os.VibrationEffect build();
-    method @NonNull public android.os.VibrationEffect build(int);
+  }
+
+  public abstract class Vibrator {
+    method public int getDefaultVibrationIntensity(int);
+    method @Nullable public android.os.vibrator.VibratorFrequencyProfile getFrequencyProfile();
+    method public float getQFactor();
+    method public float getResonantFrequency();
+    method public boolean hasFrequencyControl();
+    field public static final int VIBRATION_INTENSITY_HIGH = 3; // 0x3
+    field public static final int VIBRATION_INTENSITY_LOW = 1; // 0x1
+    field public static final int VIBRATION_INTENSITY_MEDIUM = 2; // 0x2
+    field public static final int VIBRATION_INTENSITY_OFF = 0; // 0x0
   }
 
   public class VintfObject {
@@ -1937,10 +2028,15 @@ package android.os.storage {
   }
 
   public class StorageManager {
+    method public long computeStorageCacheBytes(@NonNull java.io.File);
     method @NonNull public static java.util.UUID convert(@NonNull String);
     method @NonNull public static String convert(@NonNull java.util.UUID);
+    method @Nullable public String getCloudMediaProvider();
     method public boolean isAppIoBlocked(@NonNull java.util.UUID, int, int, int);
     method public static boolean isUserKeyUnlocked(int);
+    field public static final String CACHE_RESERVE_PERCENT_HIGH_KEY = "cache_reserve_percent_high";
+    field public static final String CACHE_RESERVE_PERCENT_LOW_KEY = "cache_reserve_percent_low";
+    field public static final String STORAGE_THRESHOLD_PERCENT_HIGH_KEY = "storage_threshold_percent_high";
   }
 
   public final class StorageVolume implements android.os.Parcelable {
@@ -1969,89 +2065,60 @@ package android.os.strictmode {
 package android.os.vibrator {
 
   public final class PrebakedSegment extends android.os.vibrator.VibrationEffectSegment {
-    method @NonNull public android.os.vibrator.PrebakedSegment applyEffectStrength(int);
     method public int describeContents();
     method public long getDuration();
     method public int getEffectId();
     method public int getEffectStrength();
-    method public boolean hasNonZeroAmplitude();
-    method @NonNull public android.os.vibrator.PrebakedSegment resolve(int);
-    method @NonNull public android.os.vibrator.PrebakedSegment scale(float);
     method public boolean shouldFallback();
-    method public void validate();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.PrebakedSegment> CREATOR;
   }
 
   public final class PrimitiveSegment extends android.os.vibrator.VibrationEffectSegment {
-    method @NonNull public android.os.vibrator.PrimitiveSegment applyEffectStrength(int);
     method public int describeContents();
     method public int getDelay();
     method public long getDuration();
     method public int getPrimitiveId();
     method public float getScale();
-    method public boolean hasNonZeroAmplitude();
-    method @NonNull public android.os.vibrator.PrimitiveSegment resolve(int);
-    method @NonNull public android.os.vibrator.PrimitiveSegment scale(float);
-    method public void validate();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.PrimitiveSegment> CREATOR;
   }
 
   public final class RampSegment extends android.os.vibrator.VibrationEffectSegment {
-    method @NonNull public android.os.vibrator.RampSegment applyEffectStrength(int);
     method public int describeContents();
     method public long getDuration();
     method public float getEndAmplitude();
-    method public float getEndFrequency();
+    method public float getEndFrequencyHz();
     method public float getStartAmplitude();
-    method public float getStartFrequency();
-    method public boolean hasNonZeroAmplitude();
-    method @NonNull public android.os.vibrator.RampSegment resolve(int);
-    method @NonNull public android.os.vibrator.RampSegment scale(float);
-    method public void validate();
+    method public float getStartFrequencyHz();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.RampSegment> CREATOR;
   }
 
   public final class StepSegment extends android.os.vibrator.VibrationEffectSegment {
-    method @NonNull public android.os.vibrator.StepSegment applyEffectStrength(int);
     method public int describeContents();
     method public float getAmplitude();
     method public long getDuration();
-    method public float getFrequency();
-    method public boolean hasNonZeroAmplitude();
-    method @NonNull public android.os.vibrator.StepSegment resolve(int);
-    method @NonNull public android.os.vibrator.StepSegment scale(float);
-    method public void validate();
+    method public float getFrequencyHz();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.StepSegment> CREATOR;
   }
 
   public abstract class VibrationEffectSegment implements android.os.Parcelable {
-    method @NonNull public abstract <T extends android.os.vibrator.VibrationEffectSegment> T applyEffectStrength(int);
     method public abstract long getDuration();
-    method public abstract boolean hasNonZeroAmplitude();
-    method @NonNull public abstract <T extends android.os.vibrator.VibrationEffectSegment> T resolve(int);
-    method @NonNull public abstract <T extends android.os.vibrator.VibrationEffectSegment> T scale(float);
-    method public abstract void validate();
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.VibrationEffectSegment> CREATOR;
+  }
+
+  public final class VibratorFrequencyProfile {
+    method public float getMaxAmplitudeMeasurementInterval();
+    method @FloatRange(from=0, to=1) @NonNull public float[] getMaxAmplitudeMeasurements();
+    method public float getMaxFrequency();
+    method public float getMinFrequency();
   }
 
 }
 
 package android.permission {
-
-  public final class PermGroupUsage {
-    ctor public PermGroupUsage(@NonNull String, int, @NonNull String, long, boolean, boolean, @Nullable CharSequence);
-    method @Nullable public CharSequence getAttribution();
-    method public long getLastAccess();
-    method @NonNull public String getPackageName();
-    method @NonNull public String getPermGroupName();
-    method public int getUid();
-    method public boolean isActive();
-    method public boolean isPhoneCall();
-  }
 
   public final class PermissionControllerManager {
     method @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public void countPermissionApps(@NonNull java.util.List<java.lang.String>, int, @NonNull android.permission.PermissionControllerManager.OnCountPermissionAppsResultCallback, @Nullable android.os.Handler);
@@ -2068,9 +2135,10 @@ package android.permission {
   }
 
   public final class PermissionManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData();
-    method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermissionGroupUsage> getIndicatorAppOpUsageData();
+    method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermissionGroupUsage> getIndicatorAppOpUsageData(boolean);
     method @NonNull public android.content.AttributionSource registerAttributionSource(@NonNull android.content.AttributionSource);
+    method @RequiresPermission(android.Manifest.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL) public void revokePostNotificationPermissionWithoutKillForTest(@NonNull String, int);
   }
 
 }
@@ -2126,6 +2194,7 @@ package android.provider {
     field public static final String NAMESPACE_CONSTRAIN_DISPLAY_APIS = "constrain_display_apis";
     field public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
     field public static final String NAMESPACE_JOB_SCHEDULER = "jobscheduler";
+    field public static final String NAMESPACE_SELECTION_TOOLBAR = "selection_toolbar";
   }
 
   public final class Settings {
@@ -2150,8 +2219,12 @@ package android.provider {
     field @Deprecated public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
     field public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
     field public static final String SHOW_FIRST_CRASH_DIALOG = "show_first_crash_dialog";
+    field public static final String STYLUS_HANDWRITING_ENABLED = "stylus_handwriting_enabled";
     field public static final String USER_DISABLED_HDR_FORMATS = "user_disabled_hdr_formats";
-    field public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
+    field public static final String USER_PREFERRED_REFRESH_RATE = "user_preferred_refresh_rate";
+    field public static final String USER_PREFERRED_RESOLUTION_HEIGHT = "user_preferred_resolution_height";
+    field public static final String USER_PREFERRED_RESOLUTION_WIDTH = "user_preferred_resolution_width";
+    field @Deprecated public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
   }
 
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
@@ -2333,6 +2406,18 @@ package android.service.autofill.augmented {
 
 }
 
+package android.service.dreams {
+
+  public abstract class DreamOverlayService extends android.app.Service {
+    ctor public DreamOverlayService();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onStartDream(@NonNull android.view.WindowManager.LayoutParams);
+    method public final void requestExit();
+    method public final boolean shouldShowComplications();
+  }
+
+}
+
 package android.service.notification {
 
   @Deprecated public abstract class ConditionProviderService extends android.app.Service {
@@ -2352,6 +2437,7 @@ package android.service.quickaccesswallet {
     method public void disconnect();
     method public void getWalletCards(@NonNull android.service.quickaccesswallet.GetWalletCardsRequest, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.OnWalletCardsRetrievedCallback);
     method public void getWalletCards(@NonNull java.util.concurrent.Executor, @NonNull android.service.quickaccesswallet.GetWalletCardsRequest, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.OnWalletCardsRetrievedCallback);
+    method public void getWalletPendingIntent(@NonNull java.util.concurrent.Executor, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.WalletPendingIntentCallback);
     method public boolean isWalletFeatureAvailable();
     method public boolean isWalletFeatureAvailableWhenDeviceLocked();
     method public boolean isWalletServiceAvailable();
@@ -2363,6 +2449,10 @@ package android.service.quickaccesswallet {
   public static interface QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
     method public void onWalletCardRetrievalError(@NonNull android.service.quickaccesswallet.GetWalletCardsError);
     method public void onWalletCardsRetrieved(@NonNull android.service.quickaccesswallet.GetWalletCardsResponse);
+  }
+
+  public static interface QuickAccessWalletClient.WalletPendingIntentCallback {
+    method public void onWalletPendingIntentRetrieved(@Nullable android.app.PendingIntent);
   }
 
   public static interface QuickAccessWalletClient.WalletServiceEventListener {
@@ -2382,7 +2472,20 @@ package android.service.quicksettings {
 package android.service.voice {
 
   public class AlwaysOnHotwordDetector implements android.service.voice.HotwordDetector {
-    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[]);
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[], @NonNull java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
+  }
+
+  public static final class AlwaysOnHotwordDetector.EventPayload.Builder {
+    ctor public AlwaysOnHotwordDetector.EventPayload.Builder();
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload build();
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setAudioStream(@NonNull android.os.ParcelFileDescriptor);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setCaptureAudioFormat(@NonNull android.media.AudioFormat);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setCaptureAvailable(boolean);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setCaptureSession(int);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setData(@NonNull byte[]);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setDataFormat(int);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setHotwordDetectedResult(@NonNull android.service.voice.HotwordDetectedResult);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setKeyphraseRecognitionExtras(@NonNull java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
   }
 
   public final class VisibleActivityInfo implements android.os.Parcelable {
@@ -2722,10 +2825,15 @@ package android.view {
   }
 
   public final class Display {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void clearUserPreferredDisplayMode();
+    method @NonNull public android.view.Display.Mode getDefaultMode();
     method @NonNull public int[] getReportedHdrTypes();
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
+    method @Nullable public android.view.Display.Mode getSystemPreferredDisplayMode();
     method public int getType();
+    method @Nullable public android.view.Display.Mode getUserPreferredDisplayMode();
     method public boolean hasAccess(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void setUserPreferredDisplayMode(@NonNull android.view.Display.Mode);
     field public static final int FLAG_TRUSTED = 128; // 0x80
     field public static final int TYPE_EXTERNAL = 2; // 0x2
     field public static final int TYPE_INTERNAL = 1; // 0x1
@@ -2735,6 +2843,18 @@ package android.view {
     field public static final int TYPE_WIFI = 3; // 0x3
   }
 
+  public static final class Display.Mode implements android.os.Parcelable {
+    ctor public Display.Mode(int, int, float);
+    method public boolean matches(int, int, float);
+  }
+
+  public static final class Display.Mode.Builder {
+    ctor public Display.Mode.Builder();
+    method @NonNull public android.view.Display.Mode build();
+    method @NonNull public android.view.Display.Mode.Builder setRefreshRate(float);
+    method @NonNull public android.view.Display.Mode.Builder setResolution(int, int);
+  }
+
   public class FocusFinder {
     method public static void sort(android.view.View[], int, int, android.view.ViewGroup, boolean);
   }
@@ -2742,6 +2862,7 @@ package android.view {
   public final class InputDevice implements android.os.Parcelable {
     method @RequiresPermission("android.permission.DISABLE_INPUT_DEVICE") public void disable();
     method @RequiresPermission("android.permission.DISABLE_INPUT_DEVICE") public void enable();
+    method @NonNull public android.hardware.input.InputDeviceIdentifier getIdentifier();
   }
 
   public class KeyEvent extends android.view.InputEvent implements android.os.Parcelable {
@@ -2774,11 +2895,9 @@ package android.view {
 
   public final class SurfaceControl implements android.os.Parcelable {
     ctor public SurfaceControl(@NonNull android.view.SurfaceControl, @NonNull String);
-    method public static long acquireFrameRateFlexibilityToken();
     method @NonNull public static android.os.IBinder getInternalDisplayToken();
     method public boolean isSameSurface(@NonNull android.view.SurfaceControl);
     method public static void overrideHdrTypes(@NonNull android.os.IBinder, @NonNull int[]);
-    method public static void releaseFrameRateFlexibilityToken(long);
   }
 
   public class SurfaceControlViewHost {
@@ -2811,6 +2930,7 @@ package android.view {
     method public static int getHoverTooltipHideTimeout();
     method public static int getHoverTooltipShowTimeout();
     method public static int getLongPressTooltipHideTimeout();
+    method public boolean isPreferKeepClearForFocusEnabled();
   }
 
   public class ViewDebug {
@@ -2831,6 +2951,7 @@ package android.view {
     method public default void setShouldShowSystemDecors(int, boolean);
     method public default void setShouldShowWithInsecureKeyguard(int, boolean);
     method public default boolean shouldShowSystemDecors(int);
+    method @Nullable public default android.graphics.Bitmap snapshotTaskForRecents(@IntRange(from=0) int);
     field public static final int DISPLAY_IME_POLICY_FALLBACK_DISPLAY = 1; // 0x1
     field public static final int DISPLAY_IME_POLICY_HIDE = 2; // 0x2
     field public static final int DISPLAY_IME_POLICY_LOCAL = 0; // 0x0
@@ -2840,6 +2961,7 @@ package android.view {
     method @Nullable public final android.os.IBinder getWindowContextToken();
     method public final void setWindowContextToken(@NonNull android.os.IBinder);
     field public static final int ACCESSIBILITY_TITLE_CHANGED = 33554432; // 0x2000000
+    field public static final int FLAG_SLIPPERY = 536870912; // 0x20000000
     field public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 64; // 0x40
     field public CharSequence accessibilityTitle;
     field public int privateFlags;
@@ -2850,25 +2972,22 @@ package android.view {
 package android.view.accessibility {
 
   public final class AccessibilityManager {
-    method public void addAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener, @Nullable android.os.Handler);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public java.util.List<java.lang.String> getAccessibilityShortcutTargets(int);
-    method public void removeAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
-  }
-
-  public static interface AccessibilityManager.AccessibilityServicesStateChangeListener {
-    method public void onAccessibilityServicesStateChanged(android.view.accessibility.AccessibilityManager);
   }
 
   public class AccessibilityNodeInfo implements android.os.Parcelable {
     method public void addChild(@NonNull android.os.IBinder);
     method public long getSourceNodeId();
     method public void setLeashedParent(@Nullable android.os.IBinder, int);
-    method public static void setNumInstancesInUseCounter(java.util.concurrent.atomic.AtomicInteger);
     method public void writeToParcelNoRecycle(android.os.Parcel, int);
   }
 
   public static final class AccessibilityNodeInfo.TouchDelegateInfo implements android.os.Parcelable {
     method public long getAccessibilityIdForRegion(@NonNull android.graphics.Region);
+  }
+
+  public class AccessibilityRecord {
+    method public void setDisplayId(int);
   }
 
   public final class AccessibilityWindowInfo implements android.os.Parcelable {
@@ -2899,6 +3018,8 @@ package android.view.autofill {
   }
 
   public final class AutofillManager {
+    field public static final String DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "compat_mode_allowed_packages";
+    field public static final String DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED = "autofill_dialog_enabled";
     field public static final String DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES = "smart_suggestion_supported_modes";
     field public static final int FLAG_SMART_SUGGESTION_OFF = 0; // 0x0
     field public static final int FLAG_SMART_SUGGESTION_SYSTEM = 1; // 0x1
@@ -2919,6 +3040,7 @@ package android.view.contentcapture {
     field public static final String DEVICE_CONFIG_PROPERTY_MAX_BUFFER_SIZE = "max_buffer_size";
     field public static final String DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED = "service_explicitly_enabled";
     field public static final String DEVICE_CONFIG_PROPERTY_TEXT_CHANGE_FLUSH_FREQUENCY = "text_change_flush_frequency";
+    field public static final String DUMPABLE_NAME = "ContentCaptureManager";
     field public static final int LOGGING_LEVEL_DEBUG = 1; // 0x1
     field public static final int LOGGING_LEVEL_OFF = 0; // 0x0
     field public static final int LOGGING_LEVEL_VERBOSE = 2; // 0x2
@@ -3020,6 +3142,7 @@ package android.view.inputmethod {
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public java.util.List<android.view.inputmethod.InputMethodInfo> getInputMethodListAsUser(int);
     method public boolean hasActiveInputConnection(@Nullable android.view.View);
     method public boolean isInputMethodPickerShown();
+    field public static final long CLEAR_SHOW_FORCED_FLAG_WHEN_LEAVING = 214016041L; // 0xcc1a029L
   }
 
 }
@@ -3170,6 +3293,7 @@ package android.window {
     method public void onDisplayAreaVanished(@NonNull android.window.DisplayAreaInfo);
     method @CallSuper @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.window.DisplayAreaAppearedInfo> registerOrganizer(int);
     field public static final int FEATURE_DEFAULT_TASK_CONTAINER = 1; // 0x1
+    field public static final int FEATURE_IME = 8; // 0x8
     field public static final int FEATURE_ONE_HANDED = 3; // 0x3
     field public static final int FEATURE_ROOT = 0; // 0x0
     field public static final int FEATURE_SYSTEM_FIRST = 0; // 0x0
@@ -3268,6 +3392,7 @@ package android.window {
 
   public final class WindowContainerTransaction implements android.os.Parcelable {
     ctor public WindowContainerTransaction();
+    method @NonNull public android.window.WindowContainerTransaction clearLaunchAdjacentFlagRoot(@NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction createTaskFragment(@NonNull android.window.TaskFragmentCreationParams);
     method @NonNull public android.window.WindowContainerTransaction deleteTaskFragment(@NonNull android.window.WindowContainerToken);
     method public int describeContents();
@@ -3286,6 +3411,7 @@ package android.window {
     method @NonNull public android.window.WindowContainerTransaction setErrorCallbackToken(@NonNull android.os.IBinder);
     method @NonNull public android.window.WindowContainerTransaction setFocusable(@NonNull android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction setHidden(@NonNull android.window.WindowContainerToken, boolean);
+    method @NonNull public android.window.WindowContainerTransaction setLaunchAdjacentFlagRoot(@NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction setLaunchRoot(@NonNull android.window.WindowContainerToken, @Nullable int[], @Nullable int[]);
     method @NonNull public android.window.WindowContainerTransaction setScreenSizeDp(@NonNull android.window.WindowContainerToken, int, int);
     method @NonNull public android.window.WindowContainerTransaction setSmallestScreenWidthDp(@NonNull android.window.WindowContainerToken, int);

@@ -16,6 +16,7 @@
 
 package com.google.errorprone.bugpatterns.android;
 
+import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.matchers.Matchers.allOf;
 import static com.google.errorprone.matchers.Matchers.anyOf;
@@ -79,6 +80,7 @@ import javax.lang.model.element.Name;
 @BugPattern(
     name = "AndroidFrameworkRequiresPermission",
     summary = "Verifies that @RequiresPermission annotations are consistent across AIDL",
+    linkType = NONE,
     severity = WARNING)
 public final class RequiresPermissionChecker extends BugChecker
         implements MethodTreeMatcher, MethodInvocationTreeMatcher {

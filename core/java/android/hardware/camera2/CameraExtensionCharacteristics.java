@@ -15,12 +15,13 @@
  */
 package android.hardware.camera2;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.extension.IAdvancedExtenderImpl;
 import android.hardware.camera2.extension.ICameraExtensionsProxyService;
@@ -29,30 +30,30 @@ import android.hardware.camera2.extension.IInitializeSessionCallback;
 import android.hardware.camera2.extension.IPreviewExtenderImpl;
 import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.SizeList;
+import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.ConditionVariable;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.annotation.IntDef;
-import android.annotation.NonNull;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
 import android.util.Size;
 
-import java.util.HashSet;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * <p>Allows clients to query availability and supported resolutions of camera extensions.</p>
@@ -96,7 +97,15 @@ public final class CameraExtensionCharacteristics {
      * Device-specific extension implementation which tends to smooth the skin and apply other
      * cosmetic effects to people's faces.
      */
-    public static final int EXTENSION_BEAUTY = 1;
+    public static final int EXTENSION_FACE_RETOUCH = 1;
+
+    /**
+     * Device-specific extension implementation which tends to smooth the skin and apply other
+     * cosmetic effects to people's faces.
+     *
+     * @deprecated Use {@link #EXTENSION_FACE_RETOUCH} instead.
+     */
+    public @Deprecated static final int EXTENSION_BEAUTY = EXTENSION_FACE_RETOUCH;
 
     /**
      * Device-specific extension implementation which can blur certain regions of the final image
@@ -121,7 +130,7 @@ public final class CameraExtensionCharacteristics {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {EXTENSION_AUTOMATIC,
-                EXTENSION_BEAUTY,
+                EXTENSION_FACE_RETOUCH,
                 EXTENSION_BOKEH,
                 EXTENSION_HDR,
                 EXTENSION_NIGHT})
@@ -145,7 +154,7 @@ public final class CameraExtensionCharacteristics {
     private static final @Extension
     int[] EXTENSION_LIST = new int[]{
             EXTENSION_AUTOMATIC,
-            EXTENSION_BEAUTY,
+            EXTENSION_FACE_RETOUCH,
             EXTENSION_BOKEH,
             EXTENSION_HDR,
             EXTENSION_NIGHT};
@@ -778,8 +787,8 @@ public final class CameraExtensionCharacteristics {
                 if (latencyRange != null) {
                     return new Range(latencyRange.min, latencyRange.max);
                 }
-        }
-    } catch (RemoteException e) {
+            }
+        } catch (RemoteException e) {
             Log.e(TAG, "Failed to query the extension capture latency! Extension service does"
                     + " not respond!");
         } finally {
@@ -787,5 +796,158 @@ public final class CameraExtensionCharacteristics {
         }
 
         return null;
+    }
+
+    /**
+     * Returns the set of keys supported by a {@link CaptureRequest} submitted in a
+     * {@link CameraExtensionSession} with a given extension type.
+     *
+     * <p>The set returned is not modifiable, so any attempts to modify it will throw
+     * a {@code UnsupportedOperationException}.</p>
+     *
+     * @param extension the extension type
+     *
+     * @return non-modifiable set of capture keys supported by camera extension session initialized
+     *         with the given extension type.
+     * @throws IllegalArgumentException in case of unsupported extension.
+     */
+    @NonNull
+    public Set<CaptureRequest.Key> getAvailableCaptureRequestKeys(@Extension int extension) {
+        long clientId = registerClient(mContext);
+        if (clientId < 0) {
+            throw new IllegalArgumentException("Unsupported extensions");
+        }
+
+        HashSet<CaptureRequest.Key> ret = new HashSet<>();
+
+        try {
+            if (!isExtensionSupported(mCameraId, extension, mChars)) {
+                throw new IllegalArgumentException("Unsupported extension");
+            }
+
+            CameraMetadataNative captureRequestMeta = null;
+            if (areAdvancedExtensionsSupported()) {
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                extender.init(mCameraId);
+                captureRequestMeta = extender.getAvailableCaptureRequestKeys(mCameraId);
+            } else {
+                Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
+                        initializeExtension(extension);
+                extenders.second.onInit(mCameraId, mChars.getNativeMetadata());
+                extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                captureRequestMeta = extenders.second.getAvailableCaptureRequestKeys();
+                extenders.second.onDeInit();
+            }
+
+            if (captureRequestMeta != null) {
+                int[] requestKeys = captureRequestMeta.get(
+                        CameraCharacteristics.REQUEST_AVAILABLE_REQUEST_KEYS);
+                if (requestKeys == null) {
+                    throw new AssertionError(
+                            "android.request.availableRequestKeys must be non-null"
+                                    + " in the characteristics");
+                }
+                CameraCharacteristics requestChars = new CameraCharacteristics(
+                        captureRequestMeta);
+
+                Object crKey = CaptureRequest.Key.class;
+                Class<CaptureRequest.Key<?>> crKeyTyped = (Class<CaptureRequest.Key<?>>) crKey;
+
+                ret.addAll(requestChars.getAvailableKeyList(CaptureRequest.class, crKeyTyped,
+                        requestKeys, /*includeSynthetic*/ true));
+            }
+
+            // Jpeg quality and orientation must always be supported
+            if (!ret.contains(CaptureRequest.JPEG_QUALITY)) {
+                ret.add(CaptureRequest.JPEG_QUALITY);
+            }
+            if (!ret.contains(CaptureRequest.JPEG_ORIENTATION)) {
+                ret.add(CaptureRequest.JPEG_ORIENTATION);
+            }
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Failed to query the available capture request keys!");
+        } finally {
+            unregisterClient(clientId);
+        }
+
+        return Collections.unmodifiableSet(ret);
+    }
+
+    /**
+     * Returns the set of keys supported by a {@link CaptureResult} passed as an argument to
+     * {@link CameraExtensionSession.ExtensionCaptureCallback#onCaptureResultAvailable}.
+     *
+     * <p>The set returned is not modifiable, so any attempts to modify it will throw
+     * a {@code UnsupportedOperationException}.</p>
+     *
+     * <p>In case the set is empty, then the extension is not able to support any capture results
+     * and the {@link CameraExtensionSession.ExtensionCaptureCallback#onCaptureResultAvailable}
+     * callback will not be fired.</p>
+     *
+     * @param extension the extension type
+     *
+     * @return non-modifiable set of capture result keys supported by camera extension session
+     *         initialized with the given extension type.
+     * @throws IllegalArgumentException in case of unsupported extension.
+     */
+    @NonNull
+    public Set<CaptureResult.Key> getAvailableCaptureResultKeys(@Extension int extension) {
+        long clientId = registerClient(mContext);
+        if (clientId < 0) {
+            throw new IllegalArgumentException("Unsupported extensions");
+        }
+
+        HashSet<CaptureResult.Key> ret = new HashSet<>();
+        try {
+            if (!isExtensionSupported(mCameraId, extension, mChars)) {
+                throw new IllegalArgumentException("Unsupported extension");
+            }
+
+            CameraMetadataNative captureResultMeta = null;
+            if (areAdvancedExtensionsSupported()) {
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                extender.init(mCameraId);
+                captureResultMeta = extender.getAvailableCaptureResultKeys(mCameraId);
+            } else {
+                Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
+                        initializeExtension(extension);
+                extenders.second.onInit(mCameraId, mChars.getNativeMetadata());
+                extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                captureResultMeta = extenders.second.getAvailableCaptureResultKeys();
+                extenders.second.onDeInit();
+            }
+
+            if (captureResultMeta != null) {
+                int[] resultKeys = captureResultMeta.get(
+                        CameraCharacteristics.REQUEST_AVAILABLE_RESULT_KEYS);
+                if (resultKeys == null) {
+                    throw new AssertionError("android.request.availableResultKeys must be non-null "
+                            + "in the characteristics");
+                }
+                CameraCharacteristics resultChars = new CameraCharacteristics(captureResultMeta);
+                Object crKey = CaptureResult.Key.class;
+                Class<CaptureResult.Key<?>> crKeyTyped = (Class<CaptureResult.Key<?>>)crKey;
+
+                ret.addAll(resultChars.getAvailableKeyList(CaptureResult.class, crKeyTyped,
+                        resultKeys, /*includeSynthetic*/ true));
+
+                // Jpeg quality, orientation and sensor timestamp must always be supported
+                if (!ret.contains(CaptureResult.JPEG_QUALITY)) {
+                    ret.add(CaptureResult.JPEG_QUALITY);
+                }
+                if (!ret.contains(CaptureResult.JPEG_ORIENTATION)) {
+                    ret.add(CaptureResult.JPEG_ORIENTATION);
+                }
+                if (!ret.contains(CaptureResult.SENSOR_TIMESTAMP)) {
+                    ret.add(CaptureResult.SENSOR_TIMESTAMP);
+                }
+            }
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Failed to query the available capture result keys!");
+        } finally {
+            unregisterClient(clientId);
+        }
+
+        return Collections.unmodifiableSet(ret);
     }
 }

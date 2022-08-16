@@ -26,23 +26,27 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.BluetoothProfileConnectionInfo;
+import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioModeDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioServerStateDispatcher;
 import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.ICommunicationDeviceDispatcher;
+import android.media.IDeviceVolumeBehaviorDispatcher;
+import android.media.IMuteAwaitConnectionCallback;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.ISpatializerCallback;
+import android.media.ISpatializerHeadTrackerAvailableCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
 import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.ISpatializerOutputCallback;
 import android.media.IVolumeController;
-import android.media.IVolumeController;
 import android.media.PlayerBase;
+import android.media.VolumeInfo;
 import android.media.VolumePolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.AudioProductStrategy;
@@ -83,14 +87,16 @@ interface IAudioService {
     oneway void playerSessionId(in int piid, in int sessionId);
 
     // Java-only methods below.
-
-    oneway void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
-            String callingPackage, String caller);
-
     void adjustStreamVolume(int streamType, int direction, int flags, String callingPackage);
+
+    void adjustStreamVolumeWithAttribution(int streamType, int direction, int flags,
+            in String callingPackage, in String attributionTag);
 
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setStreamVolume(int streamType, int index, int flags, String callingPackage);
+
+    void setStreamVolumeWithAttribution(int streamType, int index, int flags,
+            in String callingPackage, in String attributionTag);
 
     oneway void handleVolumeKey(in KeyEvent event, boolean isOnTv,
             String callingPackage, String caller);
@@ -101,7 +107,8 @@ interface IAudioService {
 
     boolean isMasterMute();
 
-    void setMasterMute(boolean mute, int flags, String callingPackage, int userId);
+    void setMasterMute(boolean mute, int flags, String callingPackage, int userId,
+            in String attributionTag);
 
     @UnsupportedAppUsage
     int getStreamVolume(int streamType);
@@ -113,7 +120,8 @@ interface IAudioService {
 
     List<AudioVolumeGroup> getAudioVolumeGroups();
 
-    void setVolumeIndexForAttributes(in AudioAttributes aa, int index, int flags, String callingPackage);
+    void setVolumeIndexForAttributes(in AudioAttributes aa, int index, int flags,
+            String callingPackage, in String attributionTag);
 
     int getVolumeIndexForAttributes(in AudioAttributes aa);
 
@@ -131,7 +139,9 @@ interface IAudioService {
 
     boolean isMicrophoneMuted();
 
-    void setMicrophoneMute(boolean on, String callingPackage, int userId);
+    boolean isUltrasoundSupported();
+
+    void setMicrophoneMute(boolean on, String callingPackage, int userId, in String attributionTag);
 
     oneway void setMicrophoneMuteFromSwitch(boolean on);
 
@@ -155,7 +165,7 @@ interface IAudioService {
 
     int getMode();
 
-    oneway void playSoundEffect(int effectType);
+    oneway void playSoundEffect(int effectType, int userId);
 
     oneway void playSoundEffectVolume(int effectType, float volume);
 
@@ -190,8 +200,8 @@ interface IAudioService {
     boolean isBluetoothA2dpOn();
 
     int requestAudioFocus(in AudioAttributes aa, int durationHint, IBinder cb,
-            IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
-            IAudioPolicyCallback pcb, int sdk);
+            IAudioFocusDispatcher fd, in String clientId, in String callingPackageName,
+            in String attributionTag, int flags, IAudioPolicyCallback pcb, int sdk);
 
     int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, in AudioAttributes aa,
             in String callingPackageName);
@@ -210,8 +220,7 @@ interface IAudioService {
     IRingtonePlayer getRingtonePlayer();
     int getUiSoundsStreamType();
 
-    void setWiredDeviceConnectionState(int type, int state, String address, String name,
-            String caller);
+    void setWiredDeviceConnectionState(in AudioDeviceAttributes aa, int state, String caller);
 
     @UnsupportedAppUsage
     AudioRoutesInfo startWatchingRoutes(in IAudioRoutesObserver observer);
@@ -263,8 +272,6 @@ interface IAudioService {
 
     List<AudioPlaybackConfiguration> getActivePlaybackConfigurations();
 
-    void disableRingtoneSync(in int userId);
-
     int getFocusRampTimeMs(in int focusGain, in AudioAttributes attr);
 
     int dispatchFocusChange(in AudioFocusInfo afi, in int focusChange,
@@ -304,6 +311,8 @@ interface IAudioService {
     List<AudioDeviceAttributes> getPreferredDevicesForStrategy(in int strategy);
 
     List<AudioDeviceAttributes> getDevicesForAttributes(in AudioAttributes attributes);
+
+    List<AudioDeviceAttributes> getDevicesForAttributesUnprotected(in AudioAttributes attributes);
 
     int setAllowedCapturePolicy(in int capturePolicy);
 
@@ -352,7 +361,7 @@ interface IAudioService {
 
     boolean isMusicActive(in boolean remotely);
 
-    int getDevicesForStream(in int streamType);
+    int getDeviceMaskForStream(in int streamType);
 
     int[] getAvailableCommunicationDeviceIds();
 
@@ -381,7 +390,7 @@ interface IAudioService {
 
     int requestAudioFocusForTest(in AudioAttributes aa, int durationHint, IBinder cb,
             in IAudioFocusDispatcher fd, in String clientId, in String callingPackageName,
-            int uid, int sdk);
+            int flags, int uid, int sdk);
 
     int abandonAudioFocusForTest(in IAudioFocusDispatcher fd, in String clientId,
             in AudioAttributes aa, in String callingPackageName);
@@ -397,6 +406,19 @@ interface IAudioService {
     boolean isSpatializerEnabled();
 
     boolean isSpatializerAvailable();
+
+    boolean isSpatializerAvailableForDevice(in AudioDeviceAttributes device);
+
+    boolean hasHeadTracker(in AudioDeviceAttributes device);
+
+    void setHeadTrackerEnabled(boolean enabled, in AudioDeviceAttributes device);
+
+    boolean isHeadTrackerEnabled(in AudioDeviceAttributes device);
+
+    boolean isHeadTrackerAvailable();
+
+    void registerSpatializerHeadTrackerAvailableCallback(
+            in ISpatializerHeadTrackerAvailableCallback cb, boolean register);
 
     void setSpatializerEnabled(boolean enabled);
 
@@ -441,4 +463,54 @@ interface IAudioService {
     void registerSpatializerOutputCallback(in ISpatializerOutputCallback cb);
 
     void unregisterSpatializerOutputCallback(in ISpatializerOutputCallback cb);
+
+    boolean isVolumeFixed();
+
+    VolumeInfo getDefaultVolumeInfo();
+
+    boolean isPstnCallAudioInterceptable();
+
+    oneway void muteAwaitConnection(in int[] usagesToMute, in AudioDeviceAttributes dev,
+            long timeOutMs);
+
+    oneway void cancelMuteAwaitConnection(in AudioDeviceAttributes dev);
+
+    AudioDeviceAttributes getMutingExpectedDevice();
+
+    void registerMuteAwaitConnectionDispatcher(in IMuteAwaitConnectionCallback cb,
+            boolean register);
+
+    void setTestDeviceConnectionState(in AudioDeviceAttributes device, boolean connected);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING,android.Manifest.permission.QUERY_AUDIO_STATE})")
+    void registerDeviceVolumeBehaviorDispatcher(boolean register,
+            in IDeviceVolumeBehaviorDispatcher dispatcher);
+
+    List<AudioFocusInfo> getFocusStack();
+
+    boolean sendFocusLoss(in AudioFocusInfo focusLoser, in IAudioPolicyCallback apcb);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    void addAssistantServicesUids(in int[] assistantUID);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    void removeAssistantServicesUids(in int[] assistantUID);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    void setActiveAssistantServiceUids(in int[] activeUids);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    int[] getAssistantServicesUids();
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    int[] getActiveAssistantServiceUids();
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    void registerDeviceVolumeDispatcherForAbsoluteVolume(boolean register,
+            in IAudioDeviceVolumeDispatcher cb,
+            in String packageName,
+            in AudioDeviceAttributes device, in List<VolumeInfo> volumes,
+            boolean handlesvolumeAdjustment);
+
+    String getHalVersion();
 }

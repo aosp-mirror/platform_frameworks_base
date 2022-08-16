@@ -27,12 +27,12 @@ import android.service.dreams.IDreamManager
 import android.util.Log
 import android.util.MathUtils
 import android.view.GhostView
-import android.view.SurfaceControl
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewRootImpl
+import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
 import android.widget.FrameLayout
 import kotlin.math.roundToInt
 
@@ -41,11 +41,17 @@ private const val TAG = "DialogLaunchAnimator"
 /**
  * A class that allows dialogs to be started in a seamless way from a view that is transforming
  * nicely into the starting dialog.
+ *
+ * This animator also allows to easily animate a dialog into an activity.
+ *
+ * @see showFromView
+ * @see showFromDialog
+ * @see createActivityLaunchController
  */
 class DialogLaunchAnimator @JvmOverloads constructor(
     private val dreamManager: IDreamManager,
     private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS),
-    private var isForTesting: Boolean = false
+    private val isForTesting: Boolean = false
 ) {
     private companion object {
         private val TIMINGS = ActivityLaunchAnimator.TIMINGS
@@ -56,7 +62,7 @@ class DialogLaunchAnimator @JvmOverloads constructor(
             positionXInterpolator = ActivityLaunchAnimator.INTERPOLATORS.positionInterpolator
         )
 
-        private val TAG_LAUNCH_ANIMATION_RUNNING = R.id.launch_animation_running
+        private val TAG_LAUNCH_ANIMATION_RUNNING = R.id.tag_launch_animation_running
     }
 
     /**
@@ -72,6 +78,9 @@ class DialogLaunchAnimator @JvmOverloads constructor(
      *
      * If [animateBackgroundBoundsChange] is true, then the background of the dialog will be
      * animated when the dialog bounds change.
+     *
+     * Note: The background of [view] should be a (rounded) rectangle so that it can be properly
+     * animated.
      *
      * Caveats: When calling this function and [dialog] is not a fullscreen dialog, then it will be
      * made fullscreen and 2 views will be inserted between the dialog DecorView and its children.
@@ -139,6 +148,103 @@ class DialogLaunchAnimator @JvmOverloads constructor(
     }
 
     /**
+     * Create an [ActivityLaunchAnimator.Controller] that can be used to launch an activity from the
+     * dialog that contains [View]. Note that the dialog must have been show using [showFromView]
+     * and be currently showing, otherwise this will return null.
+     *
+     * The returned controller will take care of dismissing the dialog at the right time after the
+     * activity started, when the dialog to app animation is done (or when it is cancelled). If this
+     * method returns null, then the dialog won't be dismissed.
+     *
+     * Note: The background of [view] should be a (rounded) rectangle so that it can be properly
+     * animated.
+     *
+     * @param view any view inside the dialog to animate.
+     */
+    @JvmOverloads
+    fun createActivityLaunchController(
+        view: View,
+        cujType: Int? = null
+    ): ActivityLaunchAnimator.Controller? {
+        val animatedDialog = openedDialogs
+            .firstOrNull { it.dialog.window.decorView.viewRootImpl == view.viewRootImpl }
+            ?: return null
+
+        // At this point, we know that the intent of the caller is to dismiss the dialog to show
+        // an app, so we disable the exit animation into the touch surface because we will never
+        // want to run it anyways.
+        animatedDialog.exitAnimationDisabled = true
+
+        val dialog = animatedDialog.dialog
+
+        // Don't animate if the dialog is not showing.
+        if (!dialog.isShowing) {
+            return null
+        }
+
+        val dialogContentWithBackground = animatedDialog.dialogContentWithBackground ?: return null
+        val controller =
+            ActivityLaunchAnimator.Controller.fromView(dialogContentWithBackground, cujType)
+                ?: return null
+
+        // Wrap the controller into one that will instantly dismiss the dialog when the animation is
+        // done or dismiss it normally (fading it out) if the animation is cancelled.
+        return object : ActivityLaunchAnimator.Controller by controller {
+            override val isDialogLaunch = true
+
+            override fun onIntentStarted(willAnimate: Boolean) {
+                controller.onIntentStarted(willAnimate)
+
+                if (!willAnimate) {
+                    dialog.dismiss()
+                }
+            }
+
+            override fun onLaunchAnimationCancelled() {
+                controller.onLaunchAnimationCancelled()
+                enableDialogDismiss()
+                dialog.dismiss()
+            }
+
+            override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
+                controller.onLaunchAnimationStart(isExpandingFullyAbove)
+
+                // Make sure the dialog is not dismissed during the animation.
+                disableDialogDismiss()
+
+                // If this dialog was shown from a cascade of other dialogs, make sure those ones
+                // are dismissed too.
+                animatedDialog.touchSurface = animatedDialog.prepareForStackDismiss()
+
+                // Remove the dim.
+                dialog.window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            }
+
+            override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+                controller.onLaunchAnimationEnd(isExpandingFullyAbove)
+
+                // Hide the dialog then dismiss it to instantly dismiss it without playing the
+                // animation.
+                dialog.hide()
+                enableDialogDismiss()
+                dialog.dismiss()
+            }
+
+            private fun disableDialogDismiss() {
+                dialog.setDismissOverride { /* Do nothing */ }
+            }
+
+            private fun enableDialogDismiss() {
+                // We don't set the override to null given that [AnimatedDialog.OnDialogDismissed]
+                // will still properly dismiss the dialog but will also make sure to clean up
+                // everything (like making sure that the touched view that triggered the dialog is
+                // made VISIBLE again).
+                dialog.setDismissOverride(animatedDialog::onDialogDismissed)
+            }
+        }
+    }
+
+    /**
      * Ensure that all dialogs currently shown won't animate into their touch surface when
      * dismissed.
      *
@@ -187,10 +293,9 @@ private class AnimatedDialog(
     private val parentAnimatedDialog: AnimatedDialog? = null,
 
     /**
-     * Whether we are currently running in a test, in which case we need to disable
-     * synchronization.
+     * Whether synchronization should be disabled, which can be useful if we are running in a test.
      */
-    private val isForTesting: Boolean
+    private val forceDisableSynchronization: Boolean
 ) {
     /**
      * The DecorView of this dialog window.
@@ -342,6 +447,7 @@ private class AnimatedDialog(
             dialogContentWithBackground
         }
         this.dialogContentWithBackground = dialogContentWithBackground
+        dialogContentWithBackground.setTag(R.id.tag_dialog_background, true)
 
         val background = dialogContentWithBackground.background
         originalDialogBackgroundColor =
@@ -356,6 +462,21 @@ private class AnimatedDialog(
 
         // Make sure the dialog is visible instantly and does not do any window animation.
         window.attributes.windowAnimations = R.style.Animation_LaunchAnimation
+
+        // Ensure that the animation is not clipped by the display cut-out when animating this
+        // dialog into an app.
+        window.attributes.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        window.attributes = window.attributes
+
+        // We apply the insets ourselves to make sure that the paddings are set on the correct
+        // View.
+        window.setDecorFitsSystemWindows(false)
+        val viewWithInsets = (dialogContentWithBackground.parent as ViewGroup)
+        viewWithInsets.setOnApplyWindowInsetsListener { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsets.Type.displayCutout())
+            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            WindowInsets.CONSUMED
+        }
 
         // Start the animation once the background view is properly laid out.
         dialogContentWithBackground.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
@@ -420,44 +541,12 @@ private class AnimatedDialog(
      * (or inversely, removed from the UI when the touch surface is made visible).
      */
     private fun synchronizeNextDraw(then: () -> Unit) {
-        if (isForTesting || !touchSurface.isAttachedToWindow || touchSurface.viewRootImpl == null ||
-            !decorView.isAttachedToWindow || decorView.viewRootImpl == null) {
-            // No need to synchronize if either the touch surface or dialog view is not attached
-            // to a window.
+        if (forceDisableSynchronization) {
             then()
             return
         }
 
-        // Consume the next frames of both view roots to make sure the ghost view is drawn at
-        // exactly the same time as when the touch surface is made invisible.
-        var remainingTransactions = 0
-        val mergedTransactions = SurfaceControl.Transaction()
-
-        fun onTransaction(transaction: SurfaceControl.Transaction?) {
-            remainingTransactions--
-            transaction?.let { mergedTransactions.merge(it) }
-
-            if (remainingTransactions == 0) {
-                mergedTransactions.apply()
-                then()
-            }
-        }
-
-        fun consumeNextDraw(viewRootImpl: ViewRootImpl) {
-            if (viewRootImpl.consumeNextDraw(::onTransaction)) {
-                remainingTransactions++
-
-                // Make sure we trigger a traversal.
-                viewRootImpl.view.invalidate()
-            }
-        }
-
-        consumeNextDraw(touchSurface.viewRootImpl)
-        consumeNextDraw(decorView.viewRootImpl)
-
-        if (remainingTransactions == 0) {
-            then()
-        }
+        ViewRootSync.synchronizeNextDraw(touchSurface, decorView, then)
     }
 
     private fun findFirstViewGroupWithBackground(view: View): ViewGroup? {
@@ -496,7 +585,7 @@ private class AnimatedDialog(
                 GhostView.removeGhost(touchSurface)
             },
             onLaunchAnimationEnd = {
-                touchSurface.setTag(R.id.launch_animation_running, null)
+                touchSurface.setTag(R.id.tag_launch_animation_running, null)
 
                 // We hide the touch surface when the dialog is showing. We will make this
                 // view visible again when dismissing the dialog.
@@ -521,7 +610,7 @@ private class AnimatedDialog(
         )
     }
 
-    private fun onDialogDismissed() {
+    fun onDialogDismissed() {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             dialog.context.mainExecutor.execute { onDialogDismissed() }
             return

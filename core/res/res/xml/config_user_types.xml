@@ -62,6 +62,10 @@ and the PROFILE user android.os.usertype.profile.MANAGED) and creates a new PROF
         <default-restrictions no_sms="true" no_outgoing_calls="true" />
     </profile-type>
 
+    <full-type
+        name="android.os.usertype.full.RESTRICTED"
+        enabled='0' />
+
     <profile-type
         name="com.example.profilename"
         max-allowed-per-parent="2" />
@@ -78,6 +82,7 @@ Mandatory attributes:
 Supported optional properties (to be used as shown in the example above) are as follows.
 For profile and full users:
     default-restrictions (with values defined in UserRestrictionUtils.USER_RESTRICTIONS)
+    enabled
 For profile users only:
     max-allowed-per-parent
     icon-badge
@@ -97,6 +102,9 @@ ignored and will instead obey this configuration.
 If this file is updated, the properties of any pre-existing user types will be updated too.
 Note, however, that default-restrictions refers to the restrictions applied at the time of user
 creation; therefore, the active restrictions of any pre-existing users will not be updated.
+
+If a user type is disabled, by setting enabled='0', then no further users of that type may be
+created; however, any pre-existing users of that type will remain.
 
 The 'change-user-type' tag should be used in conjunction with the 'version' property of
 'user-types'. It defines a type change for all pre-existing users of 'from' type to the new 'to'

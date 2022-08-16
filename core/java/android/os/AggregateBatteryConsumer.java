@@ -31,18 +31,23 @@ import java.io.PrintWriter;
  *
  * {@hide}
  */
-public final class AggregateBatteryConsumer extends BatteryConsumer implements Parcelable {
+public final class AggregateBatteryConsumer extends BatteryConsumer {
+    static final int CONSUMER_TYPE_AGGREGATE = 0;
 
-    private final double mConsumedPowerMah;
+    static final int COLUMN_INDEX_SCOPE = BatteryConsumer.COLUMN_COUNT;
+    static final int COLUMN_INDEX_CONSUMED_POWER = COLUMN_INDEX_SCOPE + 1;
+    static final int COLUMN_COUNT = BatteryConsumer.COLUMN_COUNT + 2;
 
-    public AggregateBatteryConsumer(@NonNull Builder builder) {
-        super(builder.mPowerComponentsBuilder.build());
-        mConsumedPowerMah = builder.mConsumedPowerMah;
+    AggregateBatteryConsumer(BatteryConsumerData data) {
+        super(data);
     }
 
-    private AggregateBatteryConsumer(@NonNull Parcel source) {
-        super(new PowerComponents(source));
-        mConsumedPowerMah = source.readDouble();
+    private AggregateBatteryConsumer(@NonNull Builder builder) {
+        super(builder.mData, builder.mPowerComponentsBuilder.build());
+    }
+
+    int getScope() {
+        return mData.getInt(COLUMN_INDEX_SCOPE);
     }
 
     @Override
@@ -51,31 +56,8 @@ public final class AggregateBatteryConsumer extends BatteryConsumer implements P
     }
 
     @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeDouble(mConsumedPowerMah);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @NonNull
-    public static final Creator<AggregateBatteryConsumer> CREATOR =
-            new Creator<AggregateBatteryConsumer>() {
-                public AggregateBatteryConsumer createFromParcel(@NonNull Parcel source) {
-                    return new AggregateBatteryConsumer(source);
-                }
-
-                public AggregateBatteryConsumer[] newArray(int size) {
-                    return new AggregateBatteryConsumer[size];
-                }
-            };
-
-    @Override
     public double getConsumedPower() {
-        return mConsumedPowerMah;
+        return mData.getDouble(COLUMN_INDEX_CONSUMED_POWER);
     }
 
     /** Serializes this object to XML */
@@ -83,7 +65,7 @@ public final class AggregateBatteryConsumer extends BatteryConsumer implements P
             @BatteryUsageStats.AggregateBatteryConsumerScope int scope) throws IOException {
         serializer.startTag(null, BatteryUsageStats.XML_TAG_AGGREGATE);
         serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_SCOPE, scope);
-        serializer.attributeDouble(null, BatteryUsageStats.XML_ATTR_POWER, mConsumedPowerMah);
+        serializer.attributeDouble(null, BatteryUsageStats.XML_ATTR_POWER, getConsumedPower());
         mPowerComponents.writeToXml(serializer);
         serializer.endTag(null, BatteryUsageStats.XML_TAG_AGGREGATE);
     }
@@ -119,17 +101,16 @@ public final class AggregateBatteryConsumer extends BatteryConsumer implements P
      * Builder for DeviceBatteryConsumer.
      */
     public static final class Builder extends BaseBuilder<AggregateBatteryConsumer.Builder> {
-        private double mConsumedPowerMah;
-
-        public Builder(@NonNull String[] customPowerComponentNames, boolean includePowerModels) {
-            super(customPowerComponentNames, includePowerModels);
+        public Builder(BatteryConsumer.BatteryConsumerData data, int scope) {
+            super(data, CONSUMER_TYPE_AGGREGATE);
+            data.putInt(COLUMN_INDEX_SCOPE, scope);
         }
 
         /**
          * Sets the total power included in this aggregate.
          */
         public Builder setConsumedPower(double consumedPowerMah) {
-            mConsumedPowerMah = consumedPowerMah;
+            mData.putDouble(COLUMN_INDEX_CONSUMED_POWER, consumedPowerMah);
             return this;
         }
 
@@ -137,7 +118,8 @@ public final class AggregateBatteryConsumer extends BatteryConsumer implements P
          * Adds power and usage duration from the supplied AggregateBatteryConsumer.
          */
         public void add(AggregateBatteryConsumer aggregateBatteryConsumer) {
-            mConsumedPowerMah += aggregateBatteryConsumer.mConsumedPowerMah;
+            setConsumedPower(mData.getDouble(COLUMN_INDEX_CONSUMED_POWER)
+                    + aggregateBatteryConsumer.getConsumedPower());
             mPowerComponentsBuilder.addPowerAndDuration(aggregateBatteryConsumer.mPowerComponents);
         }
 

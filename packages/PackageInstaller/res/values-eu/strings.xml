@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Aplikazioa desinstalatu nahi duzu?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Erabiltzaile "<b>"guztiei"</b>" desinstalatu nahi diezu aplikazioa? Aplikazioa eta haren datu guztiak ezabatuko zaizkie gailuko erabiltzaile "<b>"guztiei"</b>"."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> erabiltzaileari desinstalatu nahi diozu aplikazioa?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Aplikazioa laneko profiletik desinstalatu nahi duzu?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Aplikazio hau jatorrizko bertsioarekin ordeztu nahi duzu? Datu guztiak ezabatuko dira."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Aplikazio hau jatorrizko bertsioarekin ordeztu nahi duzu? Datu guztiak ezabatuko dira. Gailuaren erabiltzaile guztiengan izango du eragina, laneko profilak dituztenak barne."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Mantendu aplikazioetako datuen <xliff:g id="SIZE">%1$s</xliff:g>."</string>

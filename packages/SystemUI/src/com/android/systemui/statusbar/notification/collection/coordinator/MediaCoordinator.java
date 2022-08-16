@@ -18,11 +18,19 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import static com.android.systemui.media.MediaDataManagerKt.isMediaNotification;
 
+import android.os.RemoteException;
+import android.service.notification.StatusBarNotification;
+import android.util.ArrayMap;
+
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.media.MediaFeatureFlag;
+import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.icon.IconManager;
 
 import javax.inject.Inject;
 
@@ -34,21 +42,102 @@ public class MediaCoordinator implements Coordinator {
     private static final String TAG = "MediaCoordinator";
 
     private final Boolean mIsMediaFeatureEnabled;
+    private final IStatusBarService mStatusBarService;
+    private final IconManager mIconManager;
+
+    private static final int STATE_ICONS_UNINFLATED = 0;
+    private static final int STATE_ICONS_INFLATED = 1;
+    private static final int STATE_ICONS_ERROR = 2;
+
+    private final ArrayMap<NotificationEntry, Integer> mIconsState = new ArrayMap<>();
 
     private final NotifFilter mMediaFilter = new NotifFilter(TAG) {
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
-            return mIsMediaFeatureEnabled && isMediaNotification(entry.getSbn());
+            if (!mIsMediaFeatureEnabled || !isMediaNotification(entry.getSbn())) {
+                return false;
+            }
+
+            switch (mIconsState.getOrDefault(entry, STATE_ICONS_UNINFLATED)) {
+                case STATE_ICONS_UNINFLATED:
+                    try {
+                        mIconManager.createIcons(entry);
+                        mIconsState.put(entry, STATE_ICONS_INFLATED);
+                    } catch (InflationException e) {
+                        reportInflationError(entry, e);
+                        mIconsState.put(entry, STATE_ICONS_ERROR);
+                    }
+                    break;
+                case STATE_ICONS_INFLATED:
+                    try {
+                        mIconManager.updateIcons(entry);
+                    } catch (InflationException e) {
+                        reportInflationError(entry, e);
+                        mIconsState.put(entry, STATE_ICONS_ERROR);
+                    }
+                    break;
+                case STATE_ICONS_ERROR:
+                    // do nothing
+                    break;
+            }
+
+            return true;
         }
     };
 
+    private final NotifCollectionListener mCollectionListener = new NotifCollectionListener() {
+        @Override
+        public void onEntryInit(NotificationEntry entry) {
+            mIconsState.put(entry, STATE_ICONS_UNINFLATED);
+        }
+
+        @Override
+        public void onEntryUpdated(NotificationEntry entry) {
+            if (mIconsState.getOrDefault(entry, STATE_ICONS_UNINFLATED) == STATE_ICONS_ERROR) {
+                // The update may have fixed the inflation error, so give it another chance.
+                mIconsState.put(entry, STATE_ICONS_UNINFLATED);
+            }
+        }
+
+        @Override
+        public void onEntryCleanUp(NotificationEntry entry) {
+            mIconsState.remove(entry);
+        }
+    };
+
+    private void reportInflationError(NotificationEntry entry, Exception e) {
+        // This is the same logic as in PreparationCoordinator; it doesn't handle media
+        // notifications when the media feature is enabled since they aren't displayed in the shade,
+        // so we have to handle inflating the icons (for AOD, at the very least) and reporting any
+        // errors ourselves.
+        try {
+            final StatusBarNotification sbn = entry.getSbn();
+            // report notification inflation errors back up
+            // to notification delegates
+            mStatusBarService.onNotificationError(
+                    sbn.getPackageName(),
+                    sbn.getTag(),
+                    sbn.getId(),
+                    sbn.getUid(),
+                    sbn.getInitialPid(),
+                    e.getMessage(),
+                    sbn.getUser().getIdentifier());
+        } catch (RemoteException ex) {
+            // System server is dead, nothing to do about that
+        }
+    }
+
     @Inject
-    public MediaCoordinator(MediaFeatureFlag featureFlag) {
+    public MediaCoordinator(MediaFeatureFlag featureFlag, IStatusBarService statusBarService,
+            IconManager iconManager) {
         mIsMediaFeatureEnabled = featureFlag.getEnabled();
+        mStatusBarService = statusBarService;
+        mIconManager = iconManager;
     }
 
     @Override
     public void attach(NotifPipeline pipeline) {
-        pipeline.addFinalizeFilter(mMediaFilter);
+        pipeline.addPreGroupFilter(mMediaFilter);
+        pipeline.addCollectionListener(mCollectionListener);
     }
 }

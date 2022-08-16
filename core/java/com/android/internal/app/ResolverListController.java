@@ -181,6 +181,7 @@ public class ResolverListController {
                 final ResolverActivity.ResolvedComponentInfo rci =
                         new ResolverActivity.ResolvedComponentInfo(name, intent, newInfo);
                 rci.setPinned(isComponentPinned(name));
+                rci.setFixedAtTop(isFixedAtTop(name));
                 into.add(rci);
             }
         }
@@ -192,6 +193,14 @@ public class ResolverListController {
      * Chooser.
      */
     public boolean isComponentPinned(ComponentName name) {
+        return false;
+    }
+
+    /**
+     * Whether this component is fixed at top in the ranked apps list. Always false for Resolver;
+     * overridden in Chooser.
+     */
+    public boolean isFixedAtTop(ComponentName name) {
         return false;
     }
 
@@ -382,14 +391,6 @@ public class ResolverListController {
      */
     public float getScore(ComponentName componentName) {
         return mResolverComparator.getScore(componentName);
-    }
-
-    /**
-     * Returns the list of top K component names which have highest
-     * {@link #getScore(DisplayResolveInfo)}
-     */
-    public List<ComponentName> getTopComponentNames(int topK) {
-        return mResolverComparator.getTopComponentNames(topK);
     }
 
     public void updateModel(ComponentName componentName) {

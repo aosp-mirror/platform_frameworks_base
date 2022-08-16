@@ -101,6 +101,13 @@ public final class AudioAttributes implements Parcelable {
      * or short Foley sounds.
      */
     public final static int CONTENT_TYPE_SONIFICATION = 4;
+    /**
+     * @hide
+     * Content type value to use when the content type is ultrasound.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_ULTRASOUND)
+    public static final int CONTENT_TYPE_ULTRASOUND = 1997;
 
     /**
      * Invalid value, only ever used for an uninitialized usage value
@@ -141,17 +148,26 @@ public final class AudioAttributes implements Parcelable {
     /**
      * Usage value to use when the usage is a request to enter/end a
      * communication, such as a VoIP communication or video-conference.
+     * @deprecated Use {@link #USAGE_NOTIFICATION} which is handled
+     *             the same way as this usage by the audio framework
      */
+    @Deprecated
     public final static int USAGE_NOTIFICATION_COMMUNICATION_REQUEST = 7;
     /**
      * Usage value to use when the usage is notification for an "instant"
      * communication such as a chat, or SMS.
+     * @deprecated Use {@link #USAGE_NOTIFICATION} which is handled
+     *             the same way as this usage by the audio framework
      */
+    @Deprecated
     public final static int USAGE_NOTIFICATION_COMMUNICATION_INSTANT = 8;
     /**
      * Usage value to use when the usage is notification for a
      * non-immediate type of communication such as e-mail.
+     * @deprecated Use {@link #USAGE_NOTIFICATION} which is handled
+     *             the same way as this usage by the audio framework
      */
+    @Deprecated
     public final static int USAGE_NOTIFICATION_COMMUNICATION_DELAYED = 9;
     /**
      * Usage value to use when the usage is to attract the user's attention,
@@ -334,6 +350,14 @@ public final class AudioAttributes implements Parcelable {
     };
 
     /**
+     * @hide
+     */
+    @TestApi
+    public static int[] getSdkUsages() {
+        return SDK_USAGES;
+    }
+
+    /**
      * Flag defining a behavior where the audibility of the sound will be ensured by the system.
      * To ensure sound audibility, the system only uses built-in speakers or wired headphones
      * and specifically excludes wireless audio devices.
@@ -464,13 +488,20 @@ public final class AudioAttributes implements Parcelable {
      */
     public static final int FLAG_NEVER_SPATIALIZE = 0x1 << 15;
 
+    /**
+     * @hide
+     * Flag indicating the audio is part of a call redirection.
+     * Valid for playback and capture.
+     */
+    public static final int FLAG_CALL_REDIRECTION = 0x1 << 16;
+
     // Note that even though FLAG_MUTE_HAPTIC is stored as a flag bit, it is not here since
     // it is known as a boolean value outside of AudioAttributes.
     private static final int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO
             | FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY
             | FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER | FLAG_NO_MEDIA_PROJECTION
             | FLAG_NO_SYSTEM_CAPTURE | FLAG_CAPTURE_PRIVATE | FLAG_CONTENT_SPATIALIZED
-            | FLAG_NEVER_SPATIALIZE;
+            | FLAG_NEVER_SPATIALIZE | FLAG_CALL_REDIRECTION;
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
             FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
     /* mask of flags that can be set by SDK and System APIs through the Builder */
@@ -690,6 +721,14 @@ public final class AudioAttributes implements Parcelable {
         return ALLOW_CAPTURE_BY_ALL;
     }
 
+    /**
+     * @hide
+     * Indicates if the audio is used for call redirection
+     * @return true if used for call redirection, false otherwise.
+     */
+    public boolean isForCallRedirection() {
+        return (mFlags & FLAG_CALL_REDIRECTION) == FLAG_CALL_REDIRECTION;
+    }
 
     /**
      * Builder class for {@link AudioAttributes} objects.
@@ -746,11 +785,15 @@ public final class AudioAttributes implements Parcelable {
         public Builder(AudioAttributes aa) {
             mUsage = aa.mUsage;
             mContentType = aa.mContentType;
+            mSource = aa.mSource;
             mFlags = aa.getAllFlags();
             mTags = (HashSet<String>) aa.mTags.clone();
             mMuteHapticChannels = aa.areHapticChannelsMuted();
             mIsContentSpatialized = aa.isContentSpatialized();
             mSpatializationBehavior = aa.getSpatializationBehavior();
+            if ((mFlags & FLAG_CAPTURE_PRIVATE) != 0) {
+                mPrivacySensitive = PRIVACY_SENSITIVE_ENABLED;
+            }
         }
 
         /**
@@ -776,6 +819,17 @@ public final class AudioAttributes implements Parcelable {
                     throw new IllegalArgumentException(
                             "Cannot set both usage and system usage on same builder");
                 }
+            }
+
+            // handle deprecation of notification usages by remapping to USAGE_NOTIFICATION
+            switch (aa.mUsage) {
+                case USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
+                case USAGE_NOTIFICATION_COMMUNICATION_INSTANT:
+                case USAGE_NOTIFICATION_COMMUNICATION_DELAYED:
+                    aa.mUsage = USAGE_NOTIFICATION;
+                    break;
+                default:
+                    break;
             }
 
             aa.mSource = mSource;
@@ -815,7 +869,6 @@ public final class AudioAttributes implements Parcelable {
                     && (mFlags & FLAG_HW_HOTWORD) == FLAG_HW_HOTWORD) {
                 aa.mFlags &= ~FLAG_HW_HOTWORD;
             }
-
             return aa;
         }
 
@@ -828,9 +881,6 @@ public final class AudioAttributes implements Parcelable {
          *     {@link AttributeSdkUsage#USAGE_VOICE_COMMUNICATION_SIGNALLING},
          *     {@link AttributeSdkUsage#USAGE_ALARM}, {@link AudioAttributes#USAGE_NOTIFICATION},
          *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_RINGTONE},
-         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_COMMUNICATION_REQUEST},
-         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_COMMUNICATION_INSTANT},
-         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_COMMUNICATION_DELAYED},
          *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_EVENT},
          *     {@link AttributeSdkUsage#USAGE_ASSISTANT},
          *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_ACCESSIBILITY},
@@ -910,6 +960,26 @@ public final class AudioAttributes implements Parcelable {
                     break;
                 default:
                     throw new IllegalArgumentException("Invalid content type " + contentType);
+            }
+            return this;
+        }
+
+        /**
+         * @hide
+         * Sets the attribute describing the content type of the audio signal, such as speech,
+         * , music or ultrasound.
+         * @param contentType the content type values.
+         * @return the same Builder instance.
+         */
+        @SystemApi
+        public @NonNull Builder setInternalContentType(@AttrInternalContentType int contentType) {
+            switch (contentType) {
+                case CONTENT_TYPE_ULTRASOUND:
+                    mContentType = contentType;
+                    break;
+                default:
+                    setContentType(contentType);
+                    break;
             }
             return this;
         }
@@ -1047,6 +1117,17 @@ public final class AudioAttributes implements Parcelable {
         }
 
         /**
+         * @hide
+         * Replace all custom tags
+         * @param tags
+         * @return the same Builder instance.
+         */
+        public Builder replaceTags(HashSet<String> tags) {
+            mTags = (HashSet<String>) tags.clone();
+            return this;
+        }
+
+        /**
          * Sets attributes as inferred from the legacy stream types.
          * Warning: do not use this method in combination with setting any other attributes such as
          * usage, content type, flags or haptic control, as this method will overwrite (the more
@@ -1133,6 +1214,9 @@ public final class AudioAttributes implements Parcelable {
                     case AudioSystem.STREAM_ACCESSIBILITY:
                         mContentType = CONTENT_TYPE_SPEECH;
                         break;
+                    case AudioSystem.STREAM_ASSISTANT:
+                        mContentType = CONTENT_TYPE_SPEECH;
+                        break;
                     default:
                         Log.e(TAG, "Invalid stream type " + streamType + " for AudioAttributes");
                 }
@@ -1177,7 +1261,8 @@ public final class AudioAttributes implements Parcelable {
         /**
          * @hide
          * Same as {@link #setCapturePreset(int)} but authorizes the use of HOTWORD,
-         * REMOTE_SUBMIX, RADIO_TUNER, VOICE_DOWNLINK, VOICE_UPLINK, VOICE_CALL and ECHO_REFERENCE.
+         * REMOTE_SUBMIX, RADIO_TUNER, VOICE_DOWNLINK, VOICE_UPLINK, VOICE_CALL, ECHO_REFERENCE
+         * and ULTRASOUND
          * @param preset
          * @return the same Builder instance.
          */
@@ -1189,7 +1274,8 @@ public final class AudioAttributes implements Parcelable {
                     || (preset == MediaRecorder.AudioSource.VOICE_DOWNLINK)
                     || (preset == MediaRecorder.AudioSource.VOICE_UPLINK)
                     || (preset == MediaRecorder.AudioSource.VOICE_CALL)
-                    || (preset == MediaRecorder.AudioSource.ECHO_REFERENCE)) {
+                    || (preset == MediaRecorder.AudioSource.ECHO_REFERENCE)
+                    || (preset == MediaRecorder.AudioSource.ULTRASOUND)) {
                 mSource = preset;
             } else {
                 setCapturePreset(preset);
@@ -1221,6 +1307,16 @@ public final class AudioAttributes implements Parcelable {
         public @NonNull Builder setPrivacySensitive(boolean privacySensitive) {
             mPrivacySensitive =
                 privacySensitive ? PRIVACY_SENSITIVE_ENABLED : PRIVACY_SENSITIVE_DISABLED;
+            return this;
+        }
+
+        /**
+         * @hide
+         * Designates the audio to be used for call redirection
+         * @return the same Builder instance.
+         */
+        public Builder setForCallRedirection() {
+            mFlags |= FLAG_CALL_REDIRECTION;
             return this;
         }
     };
@@ -1524,6 +1620,7 @@ public final class AudioAttributes implements Parcelable {
             case CONTENT_TYPE_MUSIC: return new String("CONTENT_TYPE_MUSIC");
             case CONTENT_TYPE_MOVIE: return new String("CONTENT_TYPE_MOVIE");
             case CONTENT_TYPE_SONIFICATION: return new String("CONTENT_TYPE_SONIFICATION");
+            case CONTENT_TYPE_ULTRASOUND: return new String("CONTENT_TYPE_ULTRASOUND");
             default: return new String("unknown content type " + mContentType);
         }
     }
@@ -1549,6 +1646,8 @@ public final class AudioAttributes implements Parcelable {
                 return USAGE_VOICE_COMMUNICATION_SIGNALLING;
             case AudioSystem.STREAM_ACCESSIBILITY:
                 return USAGE_ASSISTANCE_ACCESSIBILITY;
+            case AudioSystem.STREAM_ASSISTANT:
+                return USAGE_ASSISTANT;
             case AudioSystem.STREAM_TTS:
             default:
                 return USAGE_UNKNOWN;
@@ -1756,4 +1855,16 @@ public final class AudioAttributes implements Parcelable {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AttributeContentType {}
+
+    /** @hide */
+    @IntDef({
+        CONTENT_TYPE_UNKNOWN,
+        CONTENT_TYPE_SPEECH,
+        CONTENT_TYPE_MUSIC,
+        CONTENT_TYPE_MOVIE,
+        CONTENT_TYPE_SONIFICATION,
+        CONTENT_TYPE_ULTRASOUND
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AttrInternalContentType {}
 }

@@ -19,11 +19,13 @@ package com.android.server.pm.dex;
 import static com.android.server.pm.dex.PackageDynamicCodeLoading.FILE_TYPE_DEX;
 import static com.android.server.pm.dex.PackageDynamicCodeLoading.FILE_TYPE_NATIVE;
 
+import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.os.FileUtils;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.util.EventLog;
@@ -58,20 +60,30 @@ public class DynamicCodeLogger {
     private static final String DCL_DEX_SUBTAG = "dcl";
     private static final String DCL_NATIVE_SUBTAG = "dcln";
 
-    private final IPackageManager mPackageManager;
+    private IPackageManager mPackageManager;
     private final PackageDynamicCodeLoading mPackageDynamicCodeLoading;
     private final Installer mInstaller;
 
-    DynamicCodeLogger(IPackageManager pms, Installer installer) {
-        this(pms, installer, new PackageDynamicCodeLoading());
+    DynamicCodeLogger(Installer installer) {
+        mInstaller = installer;
+        mPackageDynamicCodeLoading = new PackageDynamicCodeLoading();
     }
 
     @VisibleForTesting
-    DynamicCodeLogger(IPackageManager pms, Installer installer,
-            PackageDynamicCodeLoading packageDynamicCodeLoading) {
-        mPackageManager = pms;
-        mPackageDynamicCodeLoading = packageDynamicCodeLoading;
+    DynamicCodeLogger(@NonNull IPackageManager packageManager, @NonNull Installer installer,
+            @NonNull PackageDynamicCodeLoading packageDynamicCodeLoading) {
+        mPackageManager = packageManager;
         mInstaller = installer;
+        mPackageDynamicCodeLoading = packageDynamicCodeLoading;
+    }
+
+    @NonNull
+    private IPackageManager getPackageManager() {
+        if (mPackageManager == null) {
+            mPackageManager = IPackageManager.Stub.asInterface(
+                    ServiceManager.getService("package"));
+        }
+        return mPackageManager;
     }
 
     public Set<String> getAllPackagesWithDynamicCodeLoading() {
@@ -104,7 +116,7 @@ public class DynamicCodeLogger {
 
                 try {
                     PackageInfo ownerInfo =
-                            mPackageManager.getPackageInfo(packageName, /*flags*/ 0, userId);
+                            getPackageManager().getPackageInfo(packageName, /*flags*/ 0, userId);
                     appInfo = ownerInfo == null ? null : ownerInfo.applicationInfo;
                 } catch (RemoteException ignored) {
                     // Can't happen, we're local.
@@ -167,7 +179,7 @@ public class DynamicCodeLogger {
                     loadingUid = appInfo.uid;
                 } else {
                     try {
-                        loadingUid = mPackageManager.getPackageUid(loadingPackageName, /*flags*/ 0,
+                        loadingUid =  getPackageManager().getPackageUid(loadingPackageName, /*flags*/ 0,
                                 userId);
                     } catch (RemoteException ignored) {
                         // Can't happen, we're local.
@@ -223,7 +235,7 @@ public class DynamicCodeLogger {
     public void recordNative(int loadingUid, String path) {
         String[] packages;
         try {
-            packages = mPackageManager.getPackagesForUid(loadingUid);
+            packages =  getPackageManager().getPackagesForUid(loadingUid);
             if (packages == null || packages.length == 0) {
                 return;
             }

@@ -93,6 +93,41 @@
                         android:id="@+id/screenrecord_audio_switch"
                         style="@style/ScreenRecord.Switch"/>
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="@dimen/screenrecord_option_padding">
+                    <ImageView
+                        android:layout_width="@dimen/screenrecord_option_icon_size"
+                        android:layout_height="@dimen/screenrecord_option_icon_size"
+                        android:layout_weight="0"
+                        android:src="@drawable/ic_touch"
+                        android:tint="?android:attr/textColorSecondary"
+                        android:layout_gravity="center"
+                        android:layout_marginRight="@dimen/screenrecord_option_padding"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:layout_weight="1"
+                        android:layout_gravity="fill_vertical"
+                        android:gravity="center_vertical"
+                        android:text="@string/screenrecord_taps_label"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:fontFamily="@*android:string/config_headlineFontFamily"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:importantForAccessibility="no"/>
+                    <Switch
+                        android:layout_width="wrap_content"
+                        android:minWidth="48dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="0"
+                        android:id="@+id/screenrecord_taps_switch"
+                        android:contentDescription="@string/screenrecord_taps_label"
+                        style="@style/ScreenRecord.Switch"/>
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Buttons -->

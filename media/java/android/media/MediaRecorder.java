@@ -171,7 +171,11 @@ public class MediaRecorder implements AudioRouting,
     }
 
     /**
+     *
      * Sets the {@link LogSessionId} for MediaRecorder.
+     *
+     * <p>The log session ID is a random 32-byte hexadecimal string that is used for monitoring the
+     * MediaRecorder performance.</p>
      *
      * @param id the global ID for monitoring the MediaRecorder performance
      */
@@ -361,6 +365,7 @@ public class MediaRecorder implements AudioRouting,
          */
         public static final int VOICE_PERFORMANCE = 10;
 
+
         /**
          * Source for an echo canceller to capture the reference signal to be cancelled.
          * <p>
@@ -404,6 +409,15 @@ public class MediaRecorder implements AudioRouting,
         @SystemApi
         @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD)
         public static final int HOTWORD = 1999;
+
+        /** Microphone audio source for ultrasound sound if available, behaves like
+         *  {@link #DEFAULT} otherwise.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.ACCESS_ULTRASOUND)
+        public static final int ULTRASOUND = 2000;
+
     }
 
     /** @hide */
@@ -438,6 +452,7 @@ public class MediaRecorder implements AudioRouting,
         AudioSource.ECHO_REFERENCE,
         AudioSource.RADIO_TUNER,
         AudioSource.HOTWORD,
+        AudioSource.ULTRASOUND,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SystemSource {}
@@ -450,20 +465,20 @@ public class MediaRecorder implements AudioRouting,
      */
     public static boolean isSystemOnlyAudioSource(int source) {
         switch(source) {
-        case AudioSource.DEFAULT:
-        case AudioSource.MIC:
-        case AudioSource.VOICE_UPLINK:
-        case AudioSource.VOICE_DOWNLINK:
-        case AudioSource.VOICE_CALL:
-        case AudioSource.CAMCORDER:
-        case AudioSource.VOICE_RECOGNITION:
-        case AudioSource.VOICE_COMMUNICATION:
-        //case REMOTE_SUBMIX:  considered "system" as it requires system permissions
-        case AudioSource.UNPROCESSED:
-        case AudioSource.VOICE_PERFORMANCE:
-            return false;
-        default:
-            return true;
+            case AudioSource.DEFAULT:
+            case AudioSource.MIC:
+            case AudioSource.VOICE_UPLINK:
+            case AudioSource.VOICE_DOWNLINK:
+            case AudioSource.VOICE_CALL:
+            case AudioSource.CAMCORDER:
+            case AudioSource.VOICE_RECOGNITION:
+            case AudioSource.VOICE_COMMUNICATION:
+            //case REMOTE_SUBMIX:  considered "system" as it requires system permissions
+            case AudioSource.UNPROCESSED:
+            case AudioSource.VOICE_PERFORMANCE:
+                return false;
+            default:
+                return true;
         }
     }
 
@@ -487,6 +502,7 @@ public class MediaRecorder implements AudioRouting,
             case AudioSource.ECHO_REFERENCE:
             case AudioSource.RADIO_TUNER:
             case AudioSource.HOTWORD:
+            case AudioSource.ULTRASOUND:
                 return true;
             default:
                 return false;
@@ -496,38 +512,40 @@ public class MediaRecorder implements AudioRouting,
     /** @hide */
     public static final String toLogFriendlyAudioSource(int source) {
         switch(source) {
-        case AudioSource.DEFAULT:
-            return "DEFAULT";
-        case AudioSource.MIC:
-            return "MIC";
-        case AudioSource.VOICE_UPLINK:
-            return "VOICE_UPLINK";
-        case AudioSource.VOICE_DOWNLINK:
-            return "VOICE_DOWNLINK";
-        case AudioSource.VOICE_CALL:
-            return "VOICE_CALL";
-        case AudioSource.CAMCORDER:
-            return "CAMCORDER";
-        case AudioSource.VOICE_RECOGNITION:
-            return "VOICE_RECOGNITION";
-        case AudioSource.VOICE_COMMUNICATION:
-            return "VOICE_COMMUNICATION";
-        case AudioSource.REMOTE_SUBMIX:
-            return "REMOTE_SUBMIX";
-        case AudioSource.UNPROCESSED:
-            return "UNPROCESSED";
-        case AudioSource.ECHO_REFERENCE:
-            return "ECHO_REFERENCE";
-        case AudioSource.VOICE_PERFORMANCE:
-            return "VOICE_PERFORMANCE";
-        case AudioSource.RADIO_TUNER:
-            return "RADIO_TUNER";
-        case AudioSource.HOTWORD:
-            return "HOTWORD";
-        case AudioSource.AUDIO_SOURCE_INVALID:
-            return "AUDIO_SOURCE_INVALID";
-        default:
-            return "unknown source " + source;
+            case AudioSource.DEFAULT:
+                return "DEFAULT";
+            case AudioSource.MIC:
+                return "MIC";
+            case AudioSource.VOICE_UPLINK:
+                return "VOICE_UPLINK";
+            case AudioSource.VOICE_DOWNLINK:
+                return "VOICE_DOWNLINK";
+            case AudioSource.VOICE_CALL:
+                return "VOICE_CALL";
+            case AudioSource.CAMCORDER:
+                return "CAMCORDER";
+            case AudioSource.VOICE_RECOGNITION:
+                return "VOICE_RECOGNITION";
+            case AudioSource.VOICE_COMMUNICATION:
+                return "VOICE_COMMUNICATION";
+            case AudioSource.REMOTE_SUBMIX:
+                return "REMOTE_SUBMIX";
+            case AudioSource.UNPROCESSED:
+                return "UNPROCESSED";
+            case AudioSource.ECHO_REFERENCE:
+                return "ECHO_REFERENCE";
+            case AudioSource.VOICE_PERFORMANCE:
+                return "VOICE_PERFORMANCE";
+            case AudioSource.RADIO_TUNER:
+                return "RADIO_TUNER";
+            case AudioSource.HOTWORD:
+                return "HOTWORD";
+            case AudioSource.ULTRASOUND:
+                return "ULTRASOUND";
+            case AudioSource.AUDIO_SOURCE_INVALID:
+                return "AUDIO_SOURCE_INVALID";
+            default:
+                return "unknown source " + source;
         }
     }
 
@@ -687,6 +705,9 @@ public class MediaRecorder implements AudioRouting,
         public static final int MPEG_4_SP = 3;
         public static final int VP8 = 4;
         public static final int HEVC = 5;
+        public static final int VP9 = 6;
+        public static final int DOLBY_VISION = 7;
+        public static final int AV1 = 8;
     }
 
     /**
@@ -699,6 +720,9 @@ public class MediaRecorder implements AudioRouting,
         VideoEncoder.MPEG_4_SP,
         VideoEncoder.VP8,
         VideoEncoder.HEVC,
+        VideoEncoder.VP9,
+        VideoEncoder.DOLBY_VISION,
+        VideoEncoder.AV1,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface VideoEncoderValues {}

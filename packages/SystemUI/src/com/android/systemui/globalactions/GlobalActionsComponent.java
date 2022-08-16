@@ -19,7 +19,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
@@ -33,10 +33,11 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 /**
- * Manages power menu plugins and communicates power menu actions to the StatusBar.
+ * Manages power menu plugins and communicates power menu actions to the CentralSurfaces.
  */
 @SysUISingleton
-public class GlobalActionsComponent extends SystemUI implements Callbacks, GlobalActionsManager {
+public class GlobalActionsComponent extends CoreStartable
+        implements Callbacks, GlobalActionsManager {
 
     private final CommandQueue mCommandQueue;
     private final ExtensionController mExtensionController;

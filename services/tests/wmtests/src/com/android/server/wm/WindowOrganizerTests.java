@@ -24,14 +24,13 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
+import static android.view.InsetsState.ITYPE_LOCAL_NAVIGATION_BAR_1;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -248,6 +247,42 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoveWithOrganizerRemovesTask() throws RemoteException {
+        final ITaskOrganizer organizer = registerMockOrganizer();
+        final Task rootTask = createRootTask();
+        final Task task = createTask(rootTask);
+        rootTask.mRemoveWithTaskOrganizer = true;
+
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        verify(organizer).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
+        assertTrue(rootTask.isOrganized());
+
+        spyOn(mWm.mAtmService);
+        rootTask.setTaskOrganizer(null);
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+
+        verify(mWm.mAtmService).removeTask(eq(rootTask.mTaskId));
+    }
+
+    @Test
+    public void testNoRemoveWithOrganizerNoRemoveTask() throws RemoteException {
+        final ITaskOrganizer organizer = registerMockOrganizer();
+        final Task rootTask = createRootTask();
+        final Task task = createTask(rootTask);
+        rootTask.mRemoveWithTaskOrganizer = false;
+
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        verify(organizer).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
+        assertTrue(rootTask.isOrganized());
+
+        spyOn(mWm.mAtmService);
+        rootTask.setTaskOrganizer(null);
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+
+        verify(mWm.mAtmService, never()).removeTask(eq(rootTask.mTaskId));
+    }
+
+    @Test
     public void testUnregisterOrganizer() throws RemoteException {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
@@ -302,6 +337,104 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // Now we unregister the second one, the first one should automatically be reregistered
         // so we verify that it's now seeing changes.
         mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer2);
+        // Ensure events dispatch to organizer.
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        verify(organizer, times(3))
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
+        assertTaskVanished(organizer2, true /* expectVanished */, rootTask, rootTask2, rootTask3);
+    }
+
+    @Test
+    public void testUnregisterOrganizer_removesTasksCreatedByIt() throws RemoteException {
+        final Task rootTask = createRootTask();
+        final Task task = createTask(rootTask);
+        final Task rootTask2 = createRootTask();
+        rootTask2.mCreatedByOrganizer = true;
+        final Task task2 = createTask(rootTask2);
+        final ArrayList<TaskAppearedInfo> existingTasks = new ArrayList<>();
+        final ITaskOrganizer organizer = registerMockOrganizer(existingTasks);
+        // Ensure events dispatch to organizer.
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+
+        // verify that tasks are returned and taskAppeared is called only for rootTask2 since it
+        // is the one created by this organizer.
+        assertContainsTasks(existingTasks, rootTask);
+        verify(organizer, times(1)).onTaskAppeared(any(RunningTaskInfo.class),
+                any(SurfaceControl.class));
+        verify(organizer, times(0)).onTaskVanished(any());
+        assertTrue(rootTask.isOrganized());
+
+        // Now we replace the registration and verify the new organizer receives existing tasks
+        final ArrayList<TaskAppearedInfo> existingTasks2 = new ArrayList<>();
+        final ITaskOrganizer organizer2 = registerMockOrganizer(existingTasks2);
+        // Ensure events dispatch to organizer.
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        assertContainsTasks(existingTasks2, rootTask);
+        verify(organizer2, never()).onTaskAppeared(any(RunningTaskInfo.class),
+                any(SurfaceControl.class));
+        verify(organizer2, times(0)).onTaskVanished(any());
+        // The non-CreatedByOrganizer task is removed from the original organizer.
+        assertTaskVanished(organizer, true /* expectVanished */, rootTask);
+        assertEquals(organizer2, rootTask.mTaskOrganizer);
+        // The CreatedByOrganizer task should be still organized by the original organizer.
+        assertEquals(organizer, rootTask2.mTaskOrganizer);
+
+        clearInvocations(organizer);
+        // Now we unregister the second one, the first one should automatically be reregistered
+        // so we verify that it's now seeing changes.
+        mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer2);
+        // Ensure events dispatch to organizer.
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+
+        verify(organizer, times(2))
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
+
+        // Unregister the first one. The CreatedByOrganizer task created by it must be removed.
+        mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer);
+        assertFalse(rootTask2.isAttached());
+        assertFalse(task2.isAttached());
+        // Normal task should keep.
+        assertTrue(task.isAttached());
+    }
+
+    @Test
+    public void testOrganizerDeathReturnsRegistrationToPrevious() throws RemoteException {
+        final Task rootTask = createRootTask();
+        final Task task = createTask(rootTask);
+        final Task rootTask2 = createRootTask();
+        final Task task2 = createTask(rootTask2);
+        final Task rootTask3 = createRootTask();
+        final Task task3 = createTask(rootTask3);
+        final ArrayList<TaskAppearedInfo> existingTasks = new ArrayList<>();
+        final ITaskOrganizer organizer = registerMockOrganizer(existingTasks);
+        // Ensure events dispatch to organizer.
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+
+        // verify that tasks are returned and taskAppeared is not called
+        assertContainsTasks(existingTasks, rootTask, rootTask2, rootTask3);
+        verify(organizer, times(0)).onTaskAppeared(any(RunningTaskInfo.class),
+                any(SurfaceControl.class));
+        verify(organizer, times(0)).onTaskVanished(any());
+        assertTrue(rootTask.isOrganized());
+
+        // Now we replace the registration and verify the new organizer receives existing tasks
+        final ArrayList<TaskAppearedInfo> existingTasks2 = new ArrayList<>();
+        final ITaskOrganizer organizer2 = registerMockOrganizer(existingTasks2);
+        // Ensure events dispatch to organizer.
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        assertContainsTasks(existingTasks2, rootTask, rootTask2, rootTask3);
+        verify(organizer2, times(0)).onTaskAppeared(any(RunningTaskInfo.class),
+                any(SurfaceControl.class));
+        verify(organizer2, times(0)).onTaskVanished(any());
+        // Removed tasks from the original organizer
+        assertTaskVanished(organizer, true /* expectVanished */, rootTask, rootTask2, rootTask3);
+        assertTrue(rootTask2.isOrganized());
+
+        // Trigger binderDied for second one, the first one should automatically be reregistered
+        // so we verify that it's now seeing changes.
+        mWm.mAtmService.mTaskOrganizerController.getTaskOrganizerState(organizer2.asBinder())
+                .getDeathRecipient().binderDied();
+
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         verify(organizer, times(3))
@@ -520,16 +653,16 @@ public class WindowOrganizerTests extends WindowTestsBase {
         DisplayContent dc = mWm.mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
 
         Task task1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                dc, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+                dc, WINDOWING_MODE_FULLSCREEN, null);
         RunningTaskInfo info1 = task1.getTaskInfo();
-        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
+        assertEquals(WINDOWING_MODE_FULLSCREEN,
                 info1.configuration.windowConfiguration.getWindowingMode());
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info1.topActivityType);
 
         Task task2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                dc, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
+                dc, WINDOWING_MODE_MULTI_WINDOW, null);
         RunningTaskInfo info2 = task2.getTaskInfo();
-        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW,
                 info2.configuration.windowConfiguration.getWindowingMode());
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info2.topActivityType);
 
@@ -539,7 +672,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertTrue(mWm.mAtmService.mTaskOrganizerController.deleteRootTask(info1.token));
         infos = getTasksCreatedByOrganizer(dc);
         assertEquals(1, infos.size());
-        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, infos.get(0).getWindowingMode());
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, infos.get(0).getWindowingMode());
     }
 
     @Test
@@ -577,7 +710,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final StubOrganizer listener = new StubOrganizer();
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
         Task task = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, null);
         RunningTaskInfo info1 = task.getTaskInfo();
 
         final Task rootTask = createTask(
@@ -612,6 +745,50 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info1.topActivityType);
     }
 
+    @Test
+    public void testAddRectInsetsProvider() {
+        final Task rootTask = createTask(mDisplayContent);
+
+        final Task navigationBarInsetsReceiverTask = createTaskInRootTask(rootTask, 0);
+        navigationBarInsetsReceiverTask.getConfiguration().windowConfiguration.setBounds(new Rect(
+                0, 200, 1080, 700));
+
+        final Rect navigationBarInsetsProviderRect = new Rect(0, 0, 1080, 200);
+
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.addRectInsetsProvider(navigationBarInsetsReceiverTask.mRemoteToken
+                        .toWindowContainerToken(), navigationBarInsetsProviderRect,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+
+        assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSourceProviders
+                .valueAt(0).getSource().getType()).isEqualTo(ITYPE_LOCAL_NAVIGATION_BAR_1);
+    }
+
+    @Test
+    public void testRemoveInsetsProvider() {
+        final Task rootTask = createTask(mDisplayContent);
+
+        final Task navigationBarInsetsReceiverTask = createTaskInRootTask(rootTask, 0);
+        navigationBarInsetsReceiverTask.getConfiguration().windowConfiguration.setBounds(new Rect(
+                0, 200, 1080, 700));
+
+        final Rect navigationBarInsetsProviderRect = new Rect(0, 0, 1080, 200);
+
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.addRectInsetsProvider(navigationBarInsetsReceiverTask.mRemoteToken
+                        .toWindowContainerToken(), navigationBarInsetsProviderRect,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+
+        final WindowContainerTransaction wct2 = new WindowContainerTransaction();
+        wct2.removeInsetsProvider(navigationBarInsetsReceiverTask.mRemoteToken
+                .toWindowContainerToken(), new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct2);
+
+        assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSourceProviders.size()).isEqualTo(0);
+    }
+
     @UseTestDisplay
     @Test
     public void testTaskInfoCallback() {
@@ -626,7 +803,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
         Task task = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, null);
         RunningTaskInfo info1 = task.getTaskInfo();
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -684,10 +861,10 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener);
 
         Task task1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, null);
         RunningTaskInfo info1 = task1.getTaskInfo();
         Task task2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, null);
         RunningTaskInfo info2 = task2.getTaskInfo();
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -889,7 +1066,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         assertNotNull(o.mChangedInfo);
         assertNotNull(o.mChangedInfo.pictureInPictureParams);
-        final Rational ratio = o.mChangedInfo.pictureInPictureParams.getAspectRatioRational();
+        final Rational ratio = o.mChangedInfo.pictureInPictureParams.getAspectRatio();
         assertEquals(3, ratio.getNumerator());
         assertEquals(4, ratio.getDenominator());
     }
@@ -1056,7 +1233,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     public void testReparentToOrganizedTask() {
         final ITaskOrganizer organizer = registerMockOrganizer();
         Task rootTask = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, null);
         final Task task1 = createRootTask();
         final Task task2 = createTask(rootTask, false /* fakeDraw */);
         WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -1223,7 +1400,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final Task rootTask = activity.getRootTask();
         rootTask.setResizeMode(activity.info.resizeMode);
         final Task splitPrimaryRootTask = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, null);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.reparent(rootTask.mRemoteToken.toWindowContainerToken(),
                 splitPrimaryRootTask.mRemoteToken.toWindowContainerToken(), true /* onTop */);

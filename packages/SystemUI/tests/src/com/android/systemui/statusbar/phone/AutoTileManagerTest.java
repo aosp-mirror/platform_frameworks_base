@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
@@ -51,12 +52,14 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
-import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DeviceControlsController;
 import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.SafetyController;
 import com.android.systemui.statusbar.policy.WalletController;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
@@ -68,7 +71,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.util.Collections;
 import java.util.List;
@@ -85,6 +90,10 @@ public class AutoTileManagerTest extends SysuiTestCase {
     private static final String TEST_SETTING_COMPONENT = "setting_component";
     private static final String TEST_COMPONENT = "test_pkg/test_cls";
     private static final String TEST_CUSTOM_SPEC = "custom(" + TEST_COMPONENT + ")";
+    private static final String TEST_CUSTOM_SAFETY_CLASS = "safety_cls";
+    private static final String TEST_CUSTOM_SAFETY_PKG = "safety_pkg";
+    private static final String TEST_CUSTOM_SAFETY_SPEC = CustomTile.toSpec(new ComponentName(
+            TEST_CUSTOM_SAFETY_PKG, TEST_CUSTOM_SAFETY_CLASS));
     private static final String SEPARATOR = AutoTileManager.SETTING_SEPARATOR;
 
     private static final int USER = 0;
@@ -99,9 +108,11 @@ public class AutoTileManagerTest extends SysuiTestCase {
     @Mock private ReduceBrightColorsController mReduceBrightColorsController;
     @Mock private DeviceControlsController mDeviceControlsController;
     @Mock private WalletController mWalletController;
+    @Mock private SafetyController mSafetyController;
     @Mock(answer = Answers.RETURNS_SELF)
     private AutoAddTracker.Builder mAutoAddTrackerBuilder;
     @Mock private Context mUserContext;
+    @Spy private PackageManager mPackageManager;
     private final boolean mIsReduceBrightColorsAvailable = true;
 
     private AutoTileManager mAutoTileManager;
@@ -121,12 +132,19 @@ public class AutoTileManagerTest extends SysuiTestCase {
         );
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_nightDisplayAvailable, true);
+        mContext.getOrCreateTestableResources().addOverride(
+                R.string.safety_quick_settings_tile_class, TEST_CUSTOM_SAFETY_CLASS);
 
         when(mAutoAddTrackerBuilder.build()).thenReturn(mAutoAddTracker);
         when(mQsTileHost.getUserContext()).thenReturn(mUserContext);
         when(mUserContext.getUser()).thenReturn(UserHandle.of(USER));
+        mPackageManager = Mockito.spy(mContext.getPackageManager());
+        when(mPackageManager.getPermissionControllerPackageName())
+                .thenReturn(TEST_CUSTOM_SAFETY_PKG);
+        Context context = Mockito.spy(mContext);
+        when(context.getPackageManager()).thenReturn(mPackageManager);
 
-        mAutoTileManager = createAutoTileManager(mContext);
+        mAutoTileManager = createAutoTileManager(context);
         mAutoTileManager.init();
     }
 
@@ -146,6 +164,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
             ReduceBrightColorsController reduceBrightColorsController,
             DeviceControlsController deviceControlsController,
             WalletController walletController,
+            SafetyController safetyController,
             @Named(RBC_AVAILABLE) boolean isReduceBrightColorsAvailable) {
         return new AutoTileManager(context, autoAddTrackerBuilder, mQsTileHost,
                 Handler.createAsync(TestableLooper.get(this).getLooper()),
@@ -158,6 +177,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
                 reduceBrightColorsController,
                 deviceControlsController,
                 walletController,
+                safetyController,
                 isReduceBrightColorsAvailable);
     }
 
@@ -165,7 +185,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         return createAutoTileManager(context, mAutoAddTrackerBuilder, mHotspotController,
                 mDataSaverController, mManagedProfileController, mNightDisplayListener,
                 mCastController, mReduceBrightColorsController, mDeviceControlsController,
-                mWalletController, mIsReduceBrightColorsAvailable);
+                mWalletController, mSafetyController, mIsReduceBrightColorsAvailable);
     }
 
     @Test
@@ -181,10 +201,11 @@ public class AutoTileManagerTest extends SysuiTestCase {
         ReduceBrightColorsController rBC = mock(ReduceBrightColorsController.class);
         DeviceControlsController dCC = mock(DeviceControlsController.class);
         WalletController wC = mock(WalletController.class);
+        SafetyController sC = mock(SafetyController.class);
 
         AutoTileManager manager =
                 createAutoTileManager(mock(Context.class), builder, hC, dSC, mPC, nDS, cC, rBC,
-                        dCC, wC, true);
+                        dCC, wC, sC, true);
 
         verify(tracker, never()).initialize();
         verify(hC, never()).addCallback(any());
@@ -195,6 +216,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         verify(rBC, never()).addCallback(any());
         verify(dCC, never()).setCallback(any());
         verify(wC, never()).getWalletPosition();
+        verify(sC, never()).addCallback(any());
         assertNull(manager.getSecureSettingForKey(TEST_SETTING));
         assertNull(manager.getSecureSettingForKey(TEST_SETTING_COMPONENT));
     }
@@ -249,7 +271,11 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
         verify(mWalletController, times(2)).getWalletPosition();
 
-        SecureSetting setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
+        InOrder inOrderSafety = inOrder(mSafetyController);
+        inOrderSafety.verify(mSafetyController).removeCallback(any());
+        inOrderSafety.verify(mSafetyController).addCallback(any());
+
+        SettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
         assertEquals(USER + 1, setting.getCurrentUser());
         assertTrue(setting.isListening());
     }
@@ -299,7 +325,11 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
         verify(mWalletController, times(2)).getWalletPosition();
 
-        SecureSetting setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
+        InOrder inOrderSafety = inOrder(mSafetyController);
+        inOrderSafety.verify(mSafetyController).removeCallback(any());
+        inOrderSafety.verify(mSafetyController).addCallback(any());
+
+        SettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
         assertEquals(USER + 1, setting.getCurrentUser());
         assertFalse(setting.isListening());
     }
@@ -432,6 +462,45 @@ public class AutoTileManagerTest extends SysuiTestCase {
         changeValue(TEST_SETTING, 1);
         verify(mAutoAddTracker, never()).setTileAdded(TEST_SPEC);
         verify(mQsTileHost, never()).addTile(TEST_SPEC);
+    }
+
+    @Test
+    public void testSafetyTileNotAdded_ifPreviouslyAdded() {
+        ComponentName safetyComponent = CustomTile.getComponentFromSpec(TEST_CUSTOM_SAFETY_SPEC);
+        mAutoTileManager.init();
+        verify(mQsTileHost, times(1)).addTile(safetyComponent, true);
+        when(mAutoAddTracker.isAdded(TEST_CUSTOM_SAFETY_SPEC)).thenReturn(true);
+        mAutoTileManager.init();
+        verify(mQsTileHost, times(1)).addTile(safetyComponent, true);
+    }
+
+    @Test
+    public void testSafetyTileAdded_onUserChange() {
+        ComponentName safetyComponent = CustomTile.getComponentFromSpec(TEST_CUSTOM_SAFETY_SPEC);
+        mAutoTileManager.init();
+        verify(mQsTileHost, times(1)).addTile(safetyComponent, true);
+        when(mAutoAddTracker.isAdded(TEST_CUSTOM_SAFETY_SPEC)).thenReturn(false);
+        mAutoTileManager.changeUser(UserHandle.of(USER + 1));
+        verify(mQsTileHost, times(2)).addTile(safetyComponent, true);
+    }
+
+    @Test
+    public void testSafetyTileRemoved_onSafetyCenterDisable() {
+        ComponentName safetyComponent = CustomTile.getComponentFromSpec(TEST_CUSTOM_SAFETY_SPEC);
+        mAutoTileManager.init();
+        when(mAutoAddTracker.isAdded(TEST_CUSTOM_SAFETY_SPEC)).thenReturn(true);
+        mAutoTileManager.mSafetyCallback.onSafetyCenterEnableChanged(false);
+        verify(mQsTileHost, times(1)).removeTile(safetyComponent);
+    }
+
+    @Test
+    public void testSafetyTileAdded_onSafetyCenterEnable() {
+        ComponentName safetyComponent = CustomTile.getComponentFromSpec(TEST_CUSTOM_SAFETY_SPEC);
+        mAutoTileManager.init();
+        verify(mQsTileHost, times(1)).addTile(safetyComponent, true);
+        mAutoTileManager.mSafetyCallback.onSafetyCenterEnableChanged(false);
+        mAutoTileManager.mSafetyCallback.onSafetyCenterEnableChanged(true);
+        verify(mQsTileHost, times(2)).addTile(safetyComponent, true);
     }
 
     @Test

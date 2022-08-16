@@ -26,9 +26,38 @@
     <!-- Picture-in-Picture (PIP) menu -->
     <eat-comment />
     <!-- Button to close picture-in-picture (PIP) in PIP menu [CHAR LIMIT=30] -->
-    <string name="pip_close">Close PIP</string>
+    <string name="pip_close">Close</string>
 
     <!-- Button to move picture-in-picture (PIP) screen to the fullscreen in PIP menu [CHAR LIMIT=30] -->
     <string name="pip_fullscreen">Full screen</string>
+
+    <!-- Button to move picture-in-picture (PIP) via DPAD in the PIP menu [CHAR LIMIT=30] -->
+    <string name="pip_move">Move</string>
+
+    <!-- Button to expand the picture-in-picture (PIP) window [CHAR LIMIT=30] -->
+    <string name="pip_expand">Expand</string>
+
+    <!-- Button to collapse/shrink the picture-in-picture (PIP) window [CHAR LIMIT=30] -->
+    <string name="pip_collapse">Collapse</string>
+
+    <!-- Educative text instructing the user to double press the HOME button to access the pip
+        controls menu [CHAR LIMIT=50] -->
+    <string name="pip_edu_text"> Double press <annotation icon="home_icon"> HOME </annotation> for
+        controls </string>
+
+    <!-- Accessibility announcement when opening the PiP menu. [CHAR LIMIT=NONE] -->
+    <string name="a11y_pip_menu_entered">Picture-in-Picture menu.</string>
+
+    <!-- Accessibility action: move the PiP window to the left [CHAR LIMIT=30] -->
+    <string name="a11y_action_pip_move_left">Move left</string>
+    <!-- Accessibility action: move the PiP window to the right [CHAR LIMIT=30] -->
+    <string name="a11y_action_pip_move_right">Move right</string>
+    <!-- Accessibility action: move the PiP window up [CHAR LIMIT=30] -->
+    <string name="a11y_action_pip_move_up">Move up</string>
+    <!-- Accessibility action: move the PiP window down [CHAR LIMIT=30] -->
+    <string name="a11y_action_pip_move_down">Move down</string>
+    <!-- Accessibility action: done with moving the PiP [CHAR LIMIT=30] -->
+    <string name="a11y_action_pip_move_done">Done</string>
+
 </resources>
 

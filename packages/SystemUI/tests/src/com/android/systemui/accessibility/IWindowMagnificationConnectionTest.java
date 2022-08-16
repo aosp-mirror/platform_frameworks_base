@@ -64,7 +64,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     @Mock
     private IWindowMagnificationConnectionCallback mConnectionCallback;
     @Mock
-    private WindowMagnificationAnimationController mWindowMagnificationAnimationController;
+    private WindowMagnificationController mWindowMagnificationController;
     @Mock
     private ModeSwitchesController mModeSwitchesController;
     @Mock
@@ -89,7 +89,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         mWindowMagnification = new WindowMagnification(getContext(),
                 getContext().getMainThreadHandler(), mCommandQueue,
                 mModeSwitchesController, mSysUiState, mOverviewProxyService);
-        mWindowMagnification.mAnimationControllerSupplier = new FakeAnimationControllerSupplier(
+        mWindowMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class));
 
         mWindowMagnification.requestWindowMagnificationConnection(true);
@@ -100,11 +100,11 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     @Test
     public void enableWindowMagnification_passThrough() throws RemoteException {
         mIWindowMagnificationConnection.enableWindowMagnification(TEST_DISPLAY, 3.0f, Float.NaN,
-                Float.NaN, mAnimationCallback);
+                Float.NaN, 0f, 0f, mAnimationCallback);
         waitForIdleSync();
 
-        verify(mWindowMagnificationAnimationController).enableWindowMagnification(eq(3.0f),
-                eq(Float.NaN), eq(Float.NaN), eq(mAnimationCallback));
+        verify(mWindowMagnificationController).enableWindowMagnification(eq(3.0f),
+                eq(Float.NaN), eq(Float.NaN), eq(0f), eq(0f), eq(mAnimationCallback));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
                 mAnimationCallback);
         waitForIdleSync();
 
-        verify(mWindowMagnificationAnimationController).deleteWindowMagnification(
+        verify(mWindowMagnificationController).deleteWindowMagnification(
                 mAnimationCallback);
     }
 
@@ -122,7 +122,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         mIWindowMagnificationConnection.setScale(TEST_DISPLAY, 3.0f);
         waitForIdleSync();
 
-        verify(mWindowMagnificationAnimationController).setScale(3.0f);
+        verify(mWindowMagnificationController).setScale(3.0f);
     }
 
     @Test
@@ -130,7 +130,17 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         mIWindowMagnificationConnection.moveWindowMagnifier(TEST_DISPLAY, 100f, 200f);
         waitForIdleSync();
 
-        verify(mWindowMagnificationAnimationController).moveWindowMagnifier(100f, 200f);
+        verify(mWindowMagnificationController).moveWindowMagnifier(100f, 200f);
+    }
+
+    @Test
+    public void moveWindowMagnifierToPosition() throws RemoteException {
+        mIWindowMagnificationConnection.moveWindowMagnifierToPosition(TEST_DISPLAY,
+                100f, 200f, mAnimationCallback);
+        waitForIdleSync();
+
+        verify(mWindowMagnificationController).moveWindowMagnifierToPosition(
+                eq(100f), eq(200f), any(IRemoteMagnificationAnimationCallback.class));
     }
 
     @Test
@@ -151,16 +161,16 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         verify(mModeSwitchesController).removeButton(TEST_DISPLAY);
     }
 
-    private class FakeAnimationControllerSupplier extends
-            DisplayIdIndexSupplier<WindowMagnificationAnimationController> {
+    private class FakeControllerSupplier extends
+            DisplayIdIndexSupplier<WindowMagnificationController> {
 
-        FakeAnimationControllerSupplier(DisplayManager displayManager) {
+        FakeControllerSupplier(DisplayManager displayManager) {
             super(displayManager);
         }
 
         @Override
-        protected WindowMagnificationAnimationController createInstance(Display display) {
-            return mWindowMagnificationAnimationController;
+        protected WindowMagnificationController createInstance(Display display) {
+            return mWindowMagnificationController;
         }
     }
 }

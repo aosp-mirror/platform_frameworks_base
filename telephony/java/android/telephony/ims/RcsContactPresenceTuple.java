@@ -439,13 +439,13 @@ public final class RcsContactPresenceTuple implements Parcelable {
     }
 
     private RcsContactPresenceTuple(Parcel in) {
-        mContactUri = in.readParcelable(Uri.class.getClassLoader());
+        mContactUri = in.readParcelable(Uri.class.getClassLoader(), android.net.Uri.class);
         mTimestamp = convertStringFormatTimeToInstant(in.readString());
         mStatus = in.readString();
         mServiceId = in.readString();
         mServiceVersion = in.readString();
         mServiceDescription = in.readString();
-        mServiceCapabilities = in.readParcelable(ServiceCapabilities.class.getClassLoader());
+        mServiceCapabilities = in.readParcelable(ServiceCapabilities.class.getClassLoader(), android.telephony.ims.RcsContactPresenceTuple.ServiceCapabilities.class);
     }
 
     @Override

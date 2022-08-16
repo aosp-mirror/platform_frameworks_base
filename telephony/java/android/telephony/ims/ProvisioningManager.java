@@ -38,7 +38,6 @@ import android.telephony.ims.aidl.IFeatureProvisioningCallback;
 import android.telephony.ims.aidl.IImsConfigCallback;
 import android.telephony.ims.aidl.IRcsConfigCallback;
 import android.telephony.ims.feature.MmTelFeature;
-import android.telephony.ims.feature.RcsFeature;
 import android.telephony.ims.stub.ImsConfigImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 
@@ -970,7 +969,7 @@ public class ProvisioningManager {
     /**
      * Callback for IMS provisioning feature changes.
      */
-    public static class FeatureProvisioningCallback {
+    public abstract static class FeatureProvisioningCallback {
 
         private static class CallbackBinder extends IFeatureProvisioningCallback.Stub {
 
@@ -1024,12 +1023,10 @@ public class ProvisioningManager {
          * specified, or {@code false} if the capability is not provisioned for the technology
          * specified.
          */
-        public void onFeatureProvisioningChanged(
+        public abstract void onFeatureProvisioningChanged(
                 @MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
                 @ImsRegistrationImplBase.ImsRegistrationTech int tech,
-                boolean isProvisioned) {
-            // Base Implementation
-        }
+                boolean isProvisioned);
 
         /**
          * The IMS RCS provisioning has changed for a specific capability and IMS
@@ -1041,12 +1038,10 @@ public class ProvisioningManager {
          * specified, or {@code false} if the capability is not provisioned for the technology
          * specified.
          */
-        public void onRcsFeatureProvisioningChanged(
-                @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
+        public abstract void onRcsFeatureProvisioningChanged(
+                @ImsRcsManager.RcsImsCapabilityFlag int capability,
                 @ImsRegistrationImplBase.ImsRegistrationTech int tech,
-                boolean isProvisioned) {
-            // Base Implementation
-        }
+                boolean isProvisioned);
 
         /**@hide*/
         public final IFeatureProvisioningCallback getBinder() {
@@ -1505,8 +1500,8 @@ public class ProvisioningManager {
      * Get the provisioning status for the IMS RCS capability specified.
      *
      * If provisioning is not required for the queried
-     * {@link RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag} this method will always return
-     * {@code true}.
+     * {@link ImsRcsManager.RcsImsCapabilityFlag} or if the device does not support IMS
+     * this method will always return {@code true}.
      *
      * @see CarrierConfigManager.Ims#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL
      * @return true if the device is provisioned for the capability or does not require
@@ -1522,7 +1517,7 @@ public class ProvisioningManager {
     @WorkerThread
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean getRcsProvisioningStatusForCapability(
-            @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability) {
+            @ImsRcsManager.RcsImsCapabilityFlag int capability) {
         try {
             return getITelephony().getRcsProvisioningStatusForCapability(mSubId, capability,
             ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
@@ -1535,8 +1530,8 @@ public class ProvisioningManager {
      * Get the provisioning status for the IMS RCS capability specified.
      *
      * If provisioning is not required for the queried
-     * {@link RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag} this method
-     * will always return {@code true}.
+     * {@link ImsRcsManager.RcsImsCapabilityFlag} or if the device does not support IMS
+     * this method will always return {@code true}.
      *
      * <p> Requires Permission:
      * <ul>
@@ -1553,7 +1548,7 @@ public class ProvisioningManager {
     @WorkerThread
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public boolean getRcsProvisioningStatusForCapability(
-            @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
+            @ImsRcsManager.RcsImsCapabilityFlag int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int tech) {
         try {
             return getITelephony().getRcsProvisioningStatusForCapability(mSubId, capability, tech);
@@ -1590,7 +1585,7 @@ public class ProvisioningManager {
     @WorkerThread
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setRcsProvisioningStatusForCapability(
-            @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
+            @ImsRcsManager.RcsImsCapabilityFlag int capability,
             boolean isProvisioned) {
         try {
             getITelephony().setRcsProvisioningStatusForCapability(mSubId, capability,
@@ -1622,7 +1617,7 @@ public class ProvisioningManager {
     @WorkerThread
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setRcsProvisioningStatusForCapability(
-            @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
+            @ImsRcsManager.RcsImsCapabilityFlag int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int tech, boolean isProvisioned) {
         try {
             getITelephony().setRcsProvisioningStatusForCapability(mSubId, capability,
@@ -1645,7 +1640,8 @@ public class ProvisioningManager {
      * </ul>
      *
      * @return true if provisioning is required for the MMTEL capability and IMS
-     * registration technology specified, false if it is not required.
+     * registration technology specified, false if it is not required or if the device does not
+     * support IMS.
      */
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public boolean isProvisioningRequiredForCapability(
@@ -1672,11 +1668,12 @@ public class ProvisioningManager {
      * </ul>
      *
      * @return true if provisioning is required for the RCS capability and IMS
-     * registration technology specified, false if it is not required.
+     * registration technology specified, false if it is not required or if the device does not
+     * support IMS.
      */
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public boolean isRcsProvisioningRequiredForCapability(
-            @RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
+            @ImsRcsManager.RcsImsCapabilityFlag int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int tech) {
         try {
             return getITelephony().isRcsProvisioningRequiredForCapability(mSubId, capability, tech);

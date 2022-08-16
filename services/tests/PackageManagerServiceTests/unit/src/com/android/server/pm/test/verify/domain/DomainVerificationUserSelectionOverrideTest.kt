@@ -18,9 +18,8 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.PackageUserState
-import android.content.pm.parsing.component.ParsedActivity
-import android.content.pm.parsing.component.ParsedIntentInfo
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationState
 import android.content.pm.verify.domain.DomainVerificationUserState
@@ -28,9 +27,10 @@ import android.os.Build
 import android.os.PatternMatcher
 import android.os.Process
 import android.util.ArraySet
-import com.android.server.pm.PackageSetting
+import android.util.SparseArray
 import com.android.server.pm.parsing.pkg.AndroidPackage
-import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
+import com.android.server.pm.pkg.PackageStateInternal
+import com.android.server.pm.pkg.PackageUserStateInternal
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
@@ -60,8 +60,8 @@ class DomainVerificationUserStateOverrideTest {
         private const val USER_ID = 0
     }
 
-    private val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE)
-    private val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO)
+    private val pkg1 = mockPkgState(PKG_ONE, UUID_ONE)
+    private val pkg2 = mockPkgState(PKG_TWO, UUID_TWO)
 
     fun makeService() =
         DomainVerificationService(mockThrowOnUnmocked {
@@ -84,11 +84,15 @@ class DomainVerificationUserStateOverrideTest {
                 // Need to provide an internal UID so some permission checks are ignored
                 whenever(callingUid) { Process.ROOT_UID }
                 whenever(callingUserId) { 0 }
-                mockPackageSettings {
-                    when (it) {
-                        PKG_ONE -> pkg1
-                        PKG_TWO -> pkg2
-                        else -> null
+                whenever(snapshot()) {
+                    mockThrowOnUnmocked {
+                        whenever(getPackageStateInternal(anyString())) {
+                            when (getArgument<String>(0)) {
+                                PKG_ONE -> pkg1
+                                PKG_TWO -> pkg2
+                                else -> null
+                            }
+                        }
                     }
                 }
             })
@@ -101,52 +105,63 @@ class DomainVerificationUserStateOverrideTest {
             assertThat(stateFor(PKG_ONE, DOMAIN_ONE)).isEqualTo(STATE_SELECTED)
         }
 
-    fun mockPkgSetting(pkgName: String, domainSetId: UUID) = mockThrowOnUnmocked<PackageSetting> {
-        val pkg = mockThrowOnUnmocked<AndroidPackage> {
+    fun mockPkgState(pkgName: String, domainSetId: UUID) =
+        mockThrowOnUnmocked<PackageStateInternal> {
+            val pkg = mockThrowOnUnmocked<AndroidPackage> {
+                whenever(packageName) { pkgName }
+                whenever(targetSdkVersion) { Build.VERSION_CODES.S }
+                whenever(isEnabled) { true }
+
+                val activityList = listOf(
+                    ParsedActivityImpl().apply {
+                        addIntent(
+                            ParsedIntentInfoImpl()
+                                .apply {
+                                intentFilter.apply {
+                                    autoVerify = true
+                                    addAction(Intent.ACTION_VIEW)
+                                    addCategory(Intent.CATEGORY_BROWSABLE)
+                                    addCategory(Intent.CATEGORY_DEFAULT)
+                                    addDataScheme("http")
+                                    addDataScheme("https")
+                                    addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
+                                    addDataAuthority(DOMAIN_ONE, null)
+                                }
+                            }
+                        )
+                        addIntent(
+                            ParsedIntentInfoImpl()
+                                .apply {
+                                intentFilter.apply {
+                                    autoVerify = true
+                                    addAction(Intent.ACTION_VIEW)
+                                    addCategory(Intent.CATEGORY_BROWSABLE)
+                                    addCategory(Intent.CATEGORY_DEFAULT)
+                                    addDataScheme("http")
+                                    addDataPath("/sub2", PatternMatcher.PATTERN_LITERAL)
+                                    addDataAuthority("example2.com", null)
+                                }
+                            }
+                        )
+                    },
+                )
+
+                whenever(activities) { activityList }
+            }
+
+            whenever(this.pkg) { pkg }
             whenever(packageName) { pkgName }
-            whenever(targetSdkVersion) { Build.VERSION_CODES.S }
-            whenever(isEnabled) { true }
-
-            val activityList = listOf(
-                ParsedActivity().apply {
-                    addIntent(
-                        ParsedIntentInfo().apply {
-                            autoVerify = true
-                            addAction(Intent.ACTION_VIEW)
-                            addCategory(Intent.CATEGORY_BROWSABLE)
-                            addCategory(Intent.CATEGORY_DEFAULT)
-                            addDataScheme("http")
-                            addDataScheme("https")
-                            addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
-                            addDataAuthority(DOMAIN_ONE, null)
-                        }
-                    )
-                    addIntent(
-                        ParsedIntentInfo().apply {
-                            autoVerify = true
-                            addAction(Intent.ACTION_VIEW)
-                            addCategory(Intent.CATEGORY_BROWSABLE)
-                            addCategory(Intent.CATEGORY_DEFAULT)
-                            addDataScheme("http")
-                            addDataPath("/sub2", PatternMatcher.PATTERN_LITERAL)
-                            addDataAuthority("example2.com", null)
-                        }
-                    )
-                },
-            )
-
-            whenever(activities) { activityList }
+            whenever(this.domainSetId) { domainSetId }
+            whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
+            whenever(getUserStateOrDefault(1)) { PackageUserStateInternal.DEFAULT }
+            whenever(userStates) {
+                SparseArray<PackageUserStateInternal>().apply {
+                    this[0] = PackageUserStateInternal.DEFAULT
+                    this[1] = PackageUserStateInternal.DEFAULT
+                }
+            }
+            whenever(isSystem) { false }
         }
-
-        whenever(getPkg()) { pkg }
-        whenever(getName()) { pkgName }
-        whenever(this.domainSetId) { domainSetId }
-        whenever(getInstantApp(anyInt())) { false }
-        whenever(firstInstallTime) { 0L }
-        whenever(readUserState(0)) { PackageUserState() }
-        whenever(readUserState(1)) { PackageUserState() }
-        whenever(isSystem()) { false }
-    }
 
     @Test
     fun anotherPackageTakeoverSuccess() {

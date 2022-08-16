@@ -26,6 +26,7 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Неважечка картичка."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Полна"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Се полни безжично"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Се полни на док"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Се полни"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Брзо полнење"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Бавно полнење"</string>
@@ -52,10 +53,7 @@
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Погрешна шема"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Погрешна лозинка"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Погрешен PIN"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
-      <item quantity="one">Обидете се повторно за <xliff:g id="NUMBER">%d</xliff:g> секунда.</item>
-      <item quantity="other">Обидете се повторно за <xliff:g id="NUMBER">%d</xliff:g> секунди.</item>
-    </plurals>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Обидете се повторно по # секунда.}one{Обидете се повторно по # секунда.}other{Обидете се повторно по # секунди.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Внесете PIN на SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Внесете PIN на SIM за „<xliff:g id="CARRIER">%1$s</xliff:g>“."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Оневозможете ја eSIM-картичката за да го користите уредот без мобилна услуга."</string>
@@ -91,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Потребна е лозинка за дополнителна безбедност"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Уредот е заклучен од администраторот"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Уредот е заклучен рачно"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Непознат"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Непознат"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"За да користите „Отклучување со лик“, вклучете "<b>"Пристап до камерата"</b>" во „Поставки &gt; Приватност“"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

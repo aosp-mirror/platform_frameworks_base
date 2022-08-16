@@ -253,8 +253,8 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
     }
 
     @Test
-    public void switchingToBigClock_makesSmallClockDisappear() {
-        mKeyguardClockSwitch.switchToClock(LARGE);
+    public void switchingToBigClockWithAnimation_makesSmallClockDisappear() {
+        mKeyguardClockSwitch.switchToClock(LARGE, /* animate */ true);
 
         mKeyguardClockSwitch.mClockInAnim.end();
         mKeyguardClockSwitch.mClockOutAnim.end();
@@ -265,8 +265,17 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
     }
 
     @Test
-    public void switchingToSmallClock_makesBigClockDisappear() {
-        mKeyguardClockSwitch.switchToClock(SMALL);
+    public void switchingToBigClockNoAnimation_makesSmallClockDisappear() {
+        mKeyguardClockSwitch.switchToClock(LARGE, /* animate */ false);
+
+        assertThat(mLargeClockFrame.getAlpha()).isEqualTo(1);
+        assertThat(mLargeClockFrame.getVisibility()).isEqualTo(VISIBLE);
+        assertThat(mClockFrame.getAlpha()).isEqualTo(0);
+    }
+
+    @Test
+    public void switchingToSmallClockWithAnimation_makesBigClockDisappear() {
+        mKeyguardClockSwitch.switchToClock(SMALL, /* animate */ true);
 
         mKeyguardClockSwitch.mClockInAnim.end();
         mKeyguardClockSwitch.mClockOutAnim.end();
@@ -279,8 +288,19 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
     }
 
     @Test
+    public void switchingToSmallClockNoAnimation_makesBigClockDisappear() {
+        mKeyguardClockSwitch.switchToClock(SMALL, false);
+
+        assertThat(mClockFrame.getAlpha()).isEqualTo(1);
+        assertThat(mClockFrame.getVisibility()).isEqualTo(VISIBLE);
+        // only big clock is removed at switch
+        assertThat(mLargeClockFrame.getParent()).isNull();
+        assertThat(mLargeClockFrame.getAlpha()).isEqualTo(0);
+    }
+
+    @Test
     public void switchingToBigClock_returnsTrueOnlyWhenItWasNotVisibleBefore() {
-        assertThat(mKeyguardClockSwitch.switchToClock(LARGE)).isTrue();
-        assertThat(mKeyguardClockSwitch.switchToClock(LARGE)).isFalse();
+        assertThat(mKeyguardClockSwitch.switchToClock(LARGE, /* animate */ true)).isTrue();
+        assertThat(mKeyguardClockSwitch.switchToClock(LARGE, /* animate */ true)).isFalse();
     }
 }

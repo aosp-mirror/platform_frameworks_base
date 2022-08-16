@@ -11,33 +11,6 @@ android_library {
 
     name: "SettingsLib",
 
-    defaults: [
-        "SettingsLibDependenciesWithoutWifiTracker",
-    ],
-
-    // TODO(b/149540986): revert this change.
-    static_libs: [
-        // All other dependent components should be put in
-        // "SettingsLibDependenciesWithoutWifiTracker".
-        "WifiTrackerLib",
-    ],
-
-    // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
-    // LOCAL_SHARED_JAVA_LIBRARIES := androidx.lifecycle_lifecycle-common
-
-    resource_dirs: ["res"],
-
-    srcs: [
-        "src/**/*.java",
-        "src/**/*.kt",
-    ],
-
-    min_sdk_version: "29",
-
-}
-
-java_defaults {
-    name: "SettingsLibDependenciesWithoutWifiTracker",
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.legacy_legacy-support-v4",
@@ -46,8 +19,10 @@ java_defaults {
         "androidx.appcompat_appcompat",
         "androidx.lifecycle_lifecycle-runtime",
         "androidx.mediarouter_mediarouter-nodeps",
+        "com.google.android.material_material",
         "iconloader",
 
+        "WifiTrackerLibRes",
         "SettingsLibHelpUtils",
         "SettingsLibRestrictedLockUtils",
         "SettingsLibActionBarShadow",
@@ -63,6 +38,7 @@ java_defaults {
         "SettingsLibProgressBar",
         "SettingsLibAdaptiveIcon",
         "SettingsLibRadioButtonPreference",
+        "SettingsLibSelectorWithWidgetPreference",
         "SettingsLibDisplayDensityUtils",
         "SettingsLibUtils",
         "SettingsLibEmergencyNumber",
@@ -73,9 +49,23 @@ java_defaults {
         "SettingsLibCollapsingToolbarBaseActivity",
         "SettingsLibTwoTargetPreference",
         "SettingsLibSettingsTransition",
-        "SettingsLibActivityEmbedding",
+        "SettingsLibButtonPreference",
+        "setupdesign",
         "zxing-core-1.7",
     ],
+
+    // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
+    // LOCAL_SHARED_JAVA_LIBRARIES := androidx.lifecycle_lifecycle-common
+
+    resource_dirs: ["res"],
+
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
+
+    min_sdk_version: "29",
+
 }
 
 // NOTE: Keep this module in sync with ./common.mk

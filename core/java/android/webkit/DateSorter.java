@@ -18,11 +18,14 @@ package android.webkit;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.PluralsMessageFormatter;
 
 import com.android.icu.text.DateSorterBridge;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Sorts dates into the following groups:
@@ -73,9 +76,12 @@ public class DateSorter {
         mLabels[0] = dateSorterBridge.getToday();
         mLabels[1] = dateSorterBridge.getYesterday();
 
-        int resId = com.android.internal.R.plurals.last_num_days;
-        String format = resources.getQuantityString(resId, NUM_DAYS_AGO);
-        mLabels[2] = String.format(format, NUM_DAYS_AGO);
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("count", NUM_DAYS_AGO);
+        mLabels[2] = PluralsMessageFormatter.format(
+                resources,
+                arguments,
+                com.android.internal.R.string.last_num_days);
 
         mLabels[3] = context.getString(com.android.internal.R.string.last_month);
         mLabels[4] = context.getString(com.android.internal.R.string.older);

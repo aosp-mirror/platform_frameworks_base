@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"तपाईं यो एप अनइन्स्टल गर्न चाहनुहुन्छ?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"तपाईं "<b>"सबै"</b>" प्रयोगकर्ताका लागि यो एप अनइन्स्टल गर्न चाहनुहुन्छ? डिभाइसका "<b>"सबै"</b>" प्रयोगकर्ताहरूबाट उक्त एप र यसको डेटा हटाइने छ।"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"तपाईं प्रयोगकर्ता <xliff:g id="USERNAME">%1$s</xliff:g> का लागि यो एप अनइन्स्टल गर्न चाहनुहुन्छ?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"तपाईं आफ्नो कार्य प्रोफाइलबाट यो एप अनइन्स्टल गर्न चाहनुहुन्छ?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"यस एपलाई फ्याक्ट्रीको संस्करणले बदल्ने हो? सबै डेटा हटाइने छ।"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"यस एपलाई फ्याक्ट्रीको संस्करणले बदल्ने हो? सबै डेटा हटाइने छ। यसले यस डिभाइसका कार्य प्रोफाइल भएका लगायत सबै प्रयोगकर्ताहरूमा असर पार्छ।"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> एपको डेटा राख्नुहोस्।"</string>

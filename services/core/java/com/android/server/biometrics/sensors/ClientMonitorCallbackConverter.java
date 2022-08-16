@@ -123,7 +123,8 @@ public class ClientMonitorCallbackConverter {
         }
     }
 
-    void onRemoved(BiometricAuthenticator.Identifier identifier, int remaining)
+    /** Called when a user has been removed. */
+    public void onRemoved(BiometricAuthenticator.Identifier identifier, int remaining)
             throws RemoteException {
         if (mFaceServiceReceiver != null) {
             mFaceServiceReceiver.onRemoved((Face) identifier, remaining);

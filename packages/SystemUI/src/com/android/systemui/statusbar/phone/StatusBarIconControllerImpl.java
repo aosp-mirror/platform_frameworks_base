@@ -27,7 +27,6 @@ import android.util.Log;
 import android.view.ViewGroup;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
@@ -44,7 +43,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController.Configurati
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -74,17 +72,19 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
             Context context,
             CommandQueue commandQueue,
             DemoModeController demoModeController,
+            ConfigurationController configurationController,
+            TunerService tunerService,
             DumpManager dumpManager) {
         super(context.getResources().getStringArray(
                 com.android.internal.R.array.config_statusBarIcons));
-        Dependency.get(ConfigurationController.class).addCallback(this);
+        configurationController.addCallback(this);
 
         mContext = context;
 
         loadDimens();
 
         commandQueue.addCallback(this);
-        Dependency.get(TunerService.class).addTunable(this, ICON_HIDE_LIST);
+        tunerService.addTunable(this, ICON_HIDE_LIST);
         demoModeController.addCallback(this);
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
@@ -251,7 +251,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     /**
      * Accept a list of CallIndicatorIconStates, and show the call strength icons.
-     * @param slot StatusBar slot for the call strength icons
+     * @param slot statusbar slot for the call strength icons
      * @param states All of the no Calling & SMS icon states
      */
     @Override
@@ -278,7 +278,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     /**
      * Accept a list of CallIndicatorIconStates, and show the no calling icons.
-     * @param slot StatusBar slot for the no calling icons
+     * @param slot statusbar slot for the no calling icons
      * @param states All of the no Calling & SMS icon states
      */
     @Override
@@ -424,7 +424,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     /** */
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG + " state:");
         for (IconManager manager : mIconGroups) {
             if (manager.shouldLog()) {

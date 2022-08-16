@@ -648,7 +648,7 @@ public final class AdbDebuggingManagerTest {
         long time = mFakeTicker.currentTimeMillis();
         for (String key : testKeys) {
             long connectionTime = adbKeyStore.getLastConnectionTime(key);
-            if (Math.abs(connectionTime - connectionTime) > epsilon) {
+            if (Math.abs(time - connectionTime) > epsilon) {
                 fail("The connection time for a previously untracked key, " + connectionTime
                         + ", is beyond the current time of " + time);
             }

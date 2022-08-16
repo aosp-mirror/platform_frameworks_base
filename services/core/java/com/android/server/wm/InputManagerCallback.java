@@ -24,11 +24,15 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.ON_POINTER_DOWN_OUTSIDE_FOCUS;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.graphics.PointF;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.Slog;
+import android.view.Display;
 import android.view.InputApplicationHandle;
 import android.view.KeyEvent;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 
@@ -36,6 +40,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.input.InputManagerService;
 
 import java.io.PrintWriter;
+import java.util.OptionalInt;
 
 final class InputManagerCallback implements InputManagerService.WindowManagerCallbacks {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "InputManagerCallback" : TAG_WM;
@@ -95,23 +100,14 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     }
 
     @Override
-    public void notifyGestureMonitorUnresponsive(int pid, @NonNull String reason) {
-        mService.mAnrController.notifyGestureMonitorUnresponsive(pid, reason);
+    public void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull OptionalInt pid,
+            @NonNull String reason) {
+        mService.mAnrController.notifyWindowUnresponsive(token, pid, reason);
     }
 
     @Override
-    public void notifyWindowUnresponsive(@NonNull IBinder token, String reason) {
-        mService.mAnrController.notifyWindowUnresponsive(token, reason);
-    }
-
-    @Override
-    public void notifyGestureMonitorResponsive(int pid) {
-        mService.mAnrController.notifyGestureMonitorResponsive(pid);
-    }
-
-    @Override
-    public void notifyWindowResponsive(@NonNull IBinder token) {
-        mService.mAnrController.notifyWindowResponsive(token);
+    public void notifyWindowResponsive(@NonNull IBinder token, @NonNull OptionalInt pid) {
+        mService.mAnrController.notifyWindowResponsive(token, pid);
     }
 
     /** Notifies that the input device configuration has changed. */
@@ -199,6 +195,9 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
             int firstExternalDisplayId = DEFAULT_DISPLAY;
             for (int i = mService.mRoot.mChildren.size() - 1; i >= 0; --i) {
                 final DisplayContent displayContent = mService.mRoot.mChildren.get(i);
+                if (displayContent.getDisplayInfo().state == Display.STATE_OFF) {
+                    continue;
+                }
                 // Heuristic solution here. Currently when "Freeform windows" developer option is
                 // enabled we automatically put secondary displays in freeform mode and emulating
                 // "desktop mode". It also makes sense to show the pointer on the same display.
@@ -218,6 +217,11 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     }
 
     @Override
+    public PointF getCursorPosition() {
+        return mService.getLatestMousePosition();
+    }
+
+    @Override
     public void onPointerDownOutsideFocus(IBinder touchedToken) {
         mService.mH.obtainMessage(ON_POINTER_DOWN_OUTSIDE_FOCUS, touchedToken).sendToTarget();
     }
@@ -232,6 +236,54 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     public void notifyDropWindow(IBinder token, float x, float y) {
         mService.mH.sendMessage(PooledLambda.obtainMessage(
                 mService.mDragDropController::reportDropWindow, token, x, y));
+    }
+
+    @Override
+    public SurfaceControl getParentSurfaceForPointers(int displayId) {
+        synchronized (mService.mGlobalLock) {
+            final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
+            if (dc == null) {
+                Slog.e(TAG, "Failed to get parent surface for pointers on display " + displayId
+                        + " - DisplayContent not found.");
+                return null;
+            }
+            return dc.getOverlayLayer();
+        }
+    }
+
+    @Override
+    @Nullable
+    public SurfaceControl createSurfaceForGestureMonitor(String name, int displayId) {
+        synchronized (mService.mGlobalLock) {
+            final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
+            if (dc == null) {
+                Slog.e(TAG, "Failed to create a gesture monitor on display: " + displayId
+                        + " - DisplayContent not found.");
+                return null;
+            }
+            return mService.makeSurfaceBuilder(dc.getSession())
+                    .setContainerLayer()
+                    .setName(name)
+                    .setCallsite("createSurfaceForGestureMonitor")
+                    .setParent(dc.getOverlayLayer())
+                    .build();
+        }
+    }
+
+    @Override
+    public void notifyPointerDisplayIdChanged(int displayId, float x, float y) {
+        synchronized (mService.mGlobalLock) {
+            mService.setMousePointerDisplayId(displayId);
+            if (displayId == Display.INVALID_DISPLAY) return;
+
+            final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
+            if (dc == null) {
+                Slog.wtf(TAG, "The mouse pointer was moved to display " + displayId
+                        + " that does not have a valid DisplayContent.");
+                return;
+            }
+            mService.restorePointerIconLocked(dc, x, y);
+        }
     }
 
     /** Waits until the built-in input devices have been configured. */

@@ -28,8 +28,8 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.helpers.ImeStateInitializeHelper
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -71,18 +71,21 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LaunchAppShowImeOnStartTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.config.startRotation)
+    private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
+    private val initializeApp = ImeStateInitializeHelper(instrumentation)
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
             setup {
                 eachRun {
-                    this.setRotation(testSpec.config.startRotation)
+                    initializeApp.launchViaIntent()
+                    this.setRotation(testSpec.startRotation)
                 }
             }
             teardown {
                 eachRun {
+                    initializeApp.exit()
                     testApp.exit()
                 }
             }
@@ -141,7 +144,7 @@ class LaunchAppShowImeOnStartTest(private val testSpec: FlickerTestParameter) {
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    repetitions = 5,
+                    repetitions = 3,
                     supportedRotations = listOf(Surface.ROTATION_0),
                     supportedNavigationModes = listOf(
                         WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,

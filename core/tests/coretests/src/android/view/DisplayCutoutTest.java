@@ -19,6 +19,10 @@ package android.view;
 import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.DisplayCutout.extractBoundsFromList;
 import static android.view.DisplayCutout.fromSpec;
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_180;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
@@ -497,6 +501,74 @@ public class DisplayCutoutTest {
                 new ParcelableWrapper(mCutoutNumbers));
     }
 
+    @Test
+    public void testGetRotatedBounds_top_rot0() {
+        int displayW = 500, displayH = 1000;
+        DisplayCutout expected = new DisplayCutout(Insets.of(20, 100, 20, 0),
+                ZERO_RECT, new Rect(50, 0, 75, 100), ZERO_RECT, ZERO_RECT,
+                Insets.of(20, 0, 20, 0));
+        DisplayCutout cutout = new DisplayCutout(Insets.of(20, 100, 20, 0),
+                ZERO_RECT, new Rect(50, 0, 75, 100), ZERO_RECT, ZERO_RECT,
+                Insets.of(20, 0, 20, 0));
+        DisplayCutout rotated = cutout.getRotated(displayW, displayH, ROTATION_0, ROTATION_0);
+        assertEquals(expected, rotated);
+    }
+
+    @Test
+    public void testGetRotatedBounds_top_rot90() {
+        int displayW = 500, displayH = 1000;
+        DisplayCutout expected = new DisplayCutout(Insets.of(100, 20, 0, 20),
+                new Rect(0, displayW - 75, 100, displayW - 50), ZERO_RECT, ZERO_RECT, ZERO_RECT,
+                Insets.of(0, 20, 0, 20), createParserInfo(ROTATION_90));
+        DisplayCutout cutout = new DisplayCutout(Insets.of(20, 100, 20, 0),
+                ZERO_RECT, new Rect(50, 0, 75, 100), ZERO_RECT, ZERO_RECT,
+                Insets.of(20, 0, 20, 0));
+        DisplayCutout rotated = cutout.getRotated(displayW, displayH, ROTATION_0, ROTATION_90);
+        assertEquals(expected, rotated);
+    }
+
+    @Test
+    public void testGetRotatedBounds_top_rot180() {
+        int displayW = 500, displayH = 1000;
+        DisplayCutout expected = new DisplayCutout(Insets.of(20, 0, 20, 100),
+                ZERO_RECT, ZERO_RECT, ZERO_RECT,
+                new Rect(displayW - 75, displayH - 100, displayW - 50, displayH - 0),
+                Insets.of(20, 0, 20, 0), createParserInfo(ROTATION_180));
+        DisplayCutout cutout = new DisplayCutout(Insets.of(20, 100, 20, 0),
+                ZERO_RECT, new Rect(50, 0, 75, 100), ZERO_RECT, ZERO_RECT,
+                Insets.of(20, 0, 20, 0));
+        DisplayCutout rotated = cutout.getRotated(displayW, displayH, ROTATION_0, ROTATION_180);
+        assertEquals(expected, rotated);
+    }
+
+    @Test
+    public void testGetRotatedBounds_top_rot270() {
+        int displayW = 500, displayH = 1000;
+        DisplayCutout expected = new DisplayCutout(Insets.of(0, 20, 100, 20),
+                ZERO_RECT, ZERO_RECT, new Rect(displayH - 100, 50, displayH - 0, 75), ZERO_RECT,
+                Insets.of(0, 20, 0, 20), createParserInfo(ROTATION_270));
+        DisplayCutout cutout = new DisplayCutout(Insets.of(20, 100, 20, 0),
+                ZERO_RECT, new Rect(50, 0, 75, 100), ZERO_RECT, ZERO_RECT,
+                Insets.of(20, 0, 20, 0));
+        DisplayCutout rotated = cutout.getRotated(displayW, displayH, ROTATION_0, ROTATION_270);
+        assertEquals(expected, rotated);
+    }
+
+    @Test
+    public void testGetRotatedBounds_top_rot90to180() {
+        int displayW = 500, displayH = 1000;
+        DisplayCutout expected = new DisplayCutout(Insets.of(20, 0, 20, 100),
+                ZERO_RECT, ZERO_RECT, ZERO_RECT,
+                new Rect(displayW - 75, displayH - 100, displayW - 50, displayH - 0),
+                Insets.of(20, 0, 20, 0), createParserInfo(ROTATION_180));
+        DisplayCutout cutout = new DisplayCutout(Insets.of(100, 20, 0, 20),
+                new Rect(0, displayW - 75, 100, displayW - 50), ZERO_RECT, ZERO_RECT, ZERO_RECT,
+                Insets.of(0, 20, 0, 20));
+        // starting from 90, so the start displayW/H are swapped:
+        DisplayCutout rotated = cutout.getRotated(displayH, displayW, ROTATION_90, ROTATION_180);
+        assertEquals(expected, rotated);
+    }
+
     private static DisplayCutout createCutoutTop() {
         return createCutoutWithInsets(0, 100, 0, 0);
     }
@@ -532,5 +604,13 @@ public class DisplayCutoutTest {
                 ZERO_RECT,
                 ZERO_RECT,
                 waterfallInsets);
+    }
+
+    private static DisplayCutout.CutoutPathParserInfo createParserInfo(
+            @Surface.Rotation int rotation) {
+        return new DisplayCutout.CutoutPathParserInfo(
+                0 /* displayWidth */, 0 /* displayHeight */, 0 /* displayWidth */,
+                0 /* displayHeight */, 0f /* density */, "" /* cutoutSpec */,
+                rotation, 0f /* scale */, 0f /* displaySizeRatio */);
     }
 }

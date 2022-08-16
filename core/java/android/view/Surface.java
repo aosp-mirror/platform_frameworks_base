@@ -341,10 +341,12 @@ public class Surface implements Parcelable {
      */
     @UnsupportedAppUsage
     public void destroy() {
-        if (mNativeObject != 0) {
-            nativeDestroy(mNativeObject);
+        synchronized (mLock) {
+            if (mNativeObject != 0) {
+                nativeDestroy(mNativeObject);
+            }
+            release();
         }
-        release();
     }
 
     /**
@@ -755,7 +757,7 @@ public class Surface implements Parcelable {
     private void setNativeObjectLocked(long ptr) {
         if (mNativeObject != ptr) {
             if (mNativeObject == 0 && ptr != 0) {
-                mCloseGuard.open("release");
+                mCloseGuard.open("Surface.release");
             } else if (mNativeObject != 0 && ptr == 0) {
                 mCloseGuard.close();
             }

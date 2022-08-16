@@ -21,6 +21,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -33,6 +34,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -49,20 +51,21 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.external.CustomTileStatePersister;
+import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServiceKey;
+import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.settings.FakeSettings;
@@ -74,7 +77,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -109,7 +111,7 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private QSTile.State mMockState;
     @Mock
-    private StatusBar mStatusBar;
+    private CentralSurfaces mCentralSurfaces;
     @Mock
     private QSLogger mQSLogger;
     @Mock
@@ -122,7 +124,13 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private CustomTileStatePersister mCustomTileStatePersister;
     @Mock
-    private FeatureFlags mFeatureFlags;
+    private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
+    @Mock
+    private TileServiceRequestController mTileServiceRequestController;
+    @Mock
+    private TileLifecycleManager.Factory mTileLifecycleManagerFactory;
+    @Mock
+    private TileLifecycleManager mTileLifecycleManager;
 
     private Handler mHandler;
     private TestableLooper mLooper;
@@ -133,16 +141,20 @@ public class QSTileHostTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mLooper = TestableLooper.get(this);
         mHandler = new Handler(mLooper.getLooper());
+        when(mTileServiceRequestControllerBuilder.create(any()))
+                .thenReturn(mTileServiceRequestController);
+        when(mTileLifecycleManagerFactory.create(any(Intent.class), any(UserHandle.class)))
+                .thenReturn(mTileLifecycleManager);
 
         mSecureSettings = new FakeSettings();
         mSecureSettings.putStringForUser(
                 QSTileHost.TILES_SETTING, "", "", false, mUserTracker.getUserId(), false);
         mQSTileHost = new TestQSTileHost(mContext, mIconController, mDefaultFactory, mHandler,
                 mLooper.getLooper(), mPluginManager, mTunerService, mAutoTiles, mDumpManager,
-                mBroadcastDispatcher, mStatusBar, mQSLogger, mUiEventLogger, mUserTracker,
-                mSecureSettings, mCustomTileStatePersister, mFeatureFlags);
+                mBroadcastDispatcher, mCentralSurfaces, mQSLogger, mUiEventLogger, mUserTracker,
+                mSecureSettings, mCustomTileStatePersister, mTileServiceRequestControllerBuilder,
+                mTileLifecycleManagerFactory);
         setUpTileFactory();
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(false);
     }
 
     private void setUpTileFactory() {
@@ -170,13 +182,13 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testLoadTileSpecs_emptySetting() {
-        List<String> tiles = QSTileHost.loadTileSpecs(mContext, "", mFeatureFlags);
+        List<String> tiles = QSTileHost.loadTileSpecs(mContext, "");
         assertFalse(tiles.isEmpty());
     }
 
     @Test
     public void testLoadTileSpecs_nullSetting() {
-        List<String> tiles = QSTileHost.loadTileSpecs(mContext, null, mFeatureFlags);
+        List<String> tiles = QSTileHost.loadTileSpecs(mContext, null);
         assertFalse(tiles.isEmpty());
     }
 
@@ -191,7 +203,6 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testRemoveWifiAndCellularWithoutInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "wifi, spec1, cell, spec2");
 
         assertEquals("internet", mQSTileHost.mTileSpecs.get(0));
@@ -201,7 +212,6 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testRemoveWifiAndCellularWithInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "wifi, spec1, cell, spec2, internet");
 
         assertEquals("spec1", mQSTileHost.mTileSpecs.get(0));
@@ -211,7 +221,6 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testRemoveWifiWithoutInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1, wifi, spec2");
 
         assertEquals("spec1", mQSTileHost.mTileSpecs.get(0));
@@ -221,7 +230,6 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testRemoveCellWithInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1, spec2, cell, internet");
 
         assertEquals("spec1", mQSTileHost.mTileSpecs.get(0));
@@ -231,7 +239,6 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testNoWifiNoCellularNoInternet() {
-        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(true);
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1,spec2");
 
         assertEquals("spec1", mQSTileHost.mTileSpecs.get(0));
@@ -254,7 +261,7 @@ public class QSTileHostTest extends SysuiTestCase {
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1,spec2");
         StringWriter w = new StringWriter();
         PrintWriter pw = new PrintWriter(w);
-        mQSTileHost.dump(mock(FileDescriptor.class), pw, new String[]{});
+        mQSTileHost.dump(pw, new String[]{});
         String output = "QSTileHost:\n"
                 + TestTile1.class.getSimpleName() + ":\n"
                 + "    " + MOCK_STATE_STRING + "\n"
@@ -371,7 +378,7 @@ public class QSTileHostTest extends SysuiTestCase {
 
     @Test
     public void testLoadTileSpec_repeated() {
-        List<String> specs = QSTileHost.loadTileSpecs(mContext, "spec1,spec1,spec2", mFeatureFlags);
+        List<String> specs = QSTileHost.loadTileSpecs(mContext, "spec1,spec1,spec2");
 
         assertEquals(2, specs.size());
         assertEquals("spec1", specs.get(0));
@@ -382,7 +389,7 @@ public class QSTileHostTest extends SysuiTestCase {
     public void testLoadTileSpec_repeatedInDefault() {
         mContext.getOrCreateTestableResources()
                 .addOverride(R.string.quick_settings_tiles_default, "spec1,spec1");
-        List<String> specs = QSTileHost.loadTileSpecs(mContext, "default", mFeatureFlags);
+        List<String> specs = QSTileHost.loadTileSpecs(mContext, "default");
 
         // Remove spurious tiles, like dbg:mem
         specs.removeIf(spec -> !"spec1".equals(spec));
@@ -393,7 +400,7 @@ public class QSTileHostTest extends SysuiTestCase {
     public void testLoadTileSpec_repeatedDefaultAndSetting() {
         mContext.getOrCreateTestableResources()
                 .addOverride(R.string.quick_settings_tiles_default, "spec1");
-        List<String> specs = QSTileHost.loadTileSpecs(mContext, "default,spec1", mFeatureFlags);
+        List<String> specs = QSTileHost.loadTileSpecs(mContext, "default,spec1");
 
         // Remove spurious tiles, like dbg:mem
         specs.removeIf(spec -> !"spec1".equals(spec));
@@ -429,14 +436,16 @@ public class QSTileHostTest extends SysuiTestCase {
                 QSFactory defaultFactory, Handler mainHandler, Looper bgLooper,
                 PluginManager pluginManager, TunerService tunerService,
                 Provider<AutoTileManager> autoTiles, DumpManager dumpManager,
-                BroadcastDispatcher broadcastDispatcher, StatusBar statusBar, QSLogger qsLogger,
-                UiEventLogger uiEventLogger, UserTracker userTracker,
+                BroadcastDispatcher broadcastDispatcher, CentralSurfaces centralSurfaces,
+                QSLogger qsLogger, UiEventLogger uiEventLogger, UserTracker userTracker,
                 SecureSettings secureSettings, CustomTileStatePersister customTileStatePersister,
-                FeatureFlags featureFlags) {
+                TileServiceRequestController.Builder tileServiceRequestControllerBuilder,
+                TileLifecycleManager.Factory tileLifecycleManagerFactory) {
             super(context, iconController, defaultFactory, mainHandler, bgLooper, pluginManager,
                     tunerService, autoTiles, dumpManager, broadcastDispatcher,
-                    Optional.of(statusBar), qsLogger, uiEventLogger, userTracker, secureSettings,
-                    customTileStatePersister, featureFlags);
+                    Optional.of(centralSurfaces), qsLogger, uiEventLogger, userTracker,
+                    secureSettings, customTileStatePersister, tileServiceRequestControllerBuilder,
+                    tileLifecycleManagerFactory);
         }
 
         @Override
@@ -469,7 +478,7 @@ public class QSTileHostTest extends SysuiTestCase {
                     mock(MetricsLogger.class),
                     mock(StatusBarStateController.class),
                     mock(ActivityStarter.class),
-                    mQSLogger
+                    QSTileHostTest.this.mQSLogger
             );
         }
 

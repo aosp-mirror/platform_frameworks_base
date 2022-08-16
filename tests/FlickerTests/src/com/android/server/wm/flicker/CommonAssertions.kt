@@ -102,34 +102,74 @@ fun FlickerTestParameter.statusBarLayerIsVisible() {
     }
 }
 
-fun FlickerTestParameter.navBarLayerRotatesAndScales() {
+/**
+ * Asserts that the [FlickerComponentName.NAV_BAR] layer is at the correct position at the start
+ * of the SF trace
+ */
+fun FlickerTestParameter.navBarLayerPositionStart() {
     assertLayersStart {
         val display = this.entry.displays.minByOrNull { it.id }
-            ?: throw RuntimeException("There is no display!")
-        this.visibleRegion(FlickerComponentName.NAV_BAR)
-                .coversExactly(WindowUtils.getNavigationBarPosition(display))
-    }
-    assertLayersEnd {
-        val display = this.entry.displays.minByOrNull { it.id }
-            ?: throw RuntimeException("There is no display!")
+                ?: throw RuntimeException("There is no display!")
         this.visibleRegion(FlickerComponentName.NAV_BAR)
                 .coversExactly(WindowUtils.getNavigationBarPosition(display))
     }
 }
 
-fun FlickerTestParameter.statusBarLayerRotatesScales() {
+/**
+ * Asserts that the [FlickerComponentName.NAV_BAR] layer is at the correct position at the end
+ * of the SF trace
+ */
+fun FlickerTestParameter.navBarLayerPositionEnd() {
+    assertLayersEnd {
+        val display = this.entry.displays.minByOrNull { it.id }
+                ?: throw RuntimeException("There is no display!")
+        this.visibleRegion(FlickerComponentName.NAV_BAR)
+                .coversExactly(WindowUtils.getNavigationBarPosition(display))
+    }
+}
+
+/**
+ * Asserts that the [FlickerComponentName.NAV_BAR] layer is at the correct position at the start
+ * and end of the SF trace
+ */
+fun FlickerTestParameter.navBarLayerRotatesAndScales() {
+    navBarLayerPositionStart()
+    navBarLayerPositionEnd()
+}
+
+/**
+ * Asserts that the [FlickerComponentName.STATUS_BAR] layer is at the correct position at the start
+ * of the SF trace
+ */
+fun FlickerTestParameter.statusBarLayerPositionStart() {
     assertLayersStart {
         val display = this.entry.displays.minByOrNull { it.id }
             ?: throw RuntimeException("There is no display!")
         this.visibleRegion(FlickerComponentName.STATUS_BAR)
             .coversExactly(WindowUtils.getStatusBarPosition(display))
     }
+}
+
+/**
+ * Asserts that the [FlickerComponentName.STATUS_BAR] layer is at the correct position at the end
+ * of the SF trace
+ */
+fun FlickerTestParameter.statusBarLayerPositionEnd() {
     assertLayersEnd {
         val display = this.entry.displays.minByOrNull { it.id }
             ?: throw RuntimeException("There is no display!")
         this.visibleRegion(FlickerComponentName.STATUS_BAR)
             .coversExactly(WindowUtils.getStatusBarPosition(display))
     }
+}
+
+/**
+ * Asserts that the [FlickerComponentName.STATUS_BAR] layer is at the correct position at the start
+ * and end of the SF trace
+ */
+fun FlickerTestParameter.statusBarLayerRotatesScales() {
+    statusBarLayerPositionStart()
+    statusBarLayerPositionEnd()
 }
 
 /**
@@ -141,20 +181,36 @@ fun FlickerTestParameter.statusBarLayerRotatesScales() {
  *
  * @param originalLayer Layer that should be visible at the start
  * @param newLayer Layer that should be visible at the end
+ * @param ignoreEntriesWithRotationLayer If entries with a visible rotation layer should be ignored
+ *      when checking the transition. If true we will not fail the assertion if a rotation layer is
+ *      visible to fill the gap between the [originalLayer] being visible and the [newLayer] being
+ *      visible.
  * @param ignoreSnapshot If the snapshot layer should be ignored during the transition
  *     (useful mostly for app launch)
+ * @param ignoreSplashscreen If the splashscreen layer should be ignored during the transition.
+ *      If true then we will allow for a splashscreen to be shown before the layer is shown,
+ *      otherwise we won't and the layer must appear immediately.
  */
 fun FlickerTestParameter.replacesLayer(
     originalLayer: FlickerComponentName,
     newLayer: FlickerComponentName,
-    ignoreSnapshot: Boolean = false
+    ignoreEntriesWithRotationLayer: Boolean = false,
+    ignoreSnapshot: Boolean = false,
+    ignoreSplashscreen: Boolean = true
 ) {
     assertLayers {
         val assertion = this.isVisible(originalLayer)
-        if (ignoreSnapshot) {
-            assertion.then()
-                    .isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
+
+        if (ignoreEntriesWithRotationLayer) {
+            assertion.then().isVisible(FlickerComponentName.ROTATION, isOptional = true)
         }
+        if (ignoreSnapshot) {
+            assertion.then().isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
+        }
+        if (ignoreSplashscreen) {
+            assertion.then().isSplashScreenVisibleFor(newLayer, isOptional = true)
+        }
+
         assertion.then().isVisible(newLayer)
     }
 

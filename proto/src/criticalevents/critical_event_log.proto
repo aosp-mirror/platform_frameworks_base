@@ -1,0 +1,152 @@
+/*
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.server.criticalevents;
+
+option java_multiple_files = true;
+
+// Output proto containing recent critical events for inclusion in logs such as ANR files.
+// Do not change the field names since this data is dumped to ANR files in textproto format.
+message CriticalEventLogProto {
+  // Timestamp when the log snapshot was generated.
+  // Required.
+  optional int64 timestamp_ms = 1;
+
+  // Max age of events that are included in this proto.
+  // Required.
+  optional int32 window_ms = 2;
+
+  // Max number of events in the log.
+  // Note: if the number of events is equal to the capacity then it is likely the actual time range
+  // covered by the log is shorter than window_ms.
+  // Required.
+  optional int32 capacity = 3;
+
+  // Recent critical events.
+  repeated CriticalEventProto events = 4;
+}
+
+// On-disk storage of events.
+message CriticalEventLogStorageProto {
+  repeated CriticalEventProto events = 1;
+}
+
+// A "critical" event such as an ANR or watchdog.
+// Do not change the field names since this data is dumped to ANR files in textproto format.
+message CriticalEventProto {
+  // Timestamp of the event.
+  // Required.
+  optional int64 timestamp_ms = 1;
+
+  // Required.
+  oneof event {
+    Watchdog watchdog = 2;
+    HalfWatchdog half_watchdog = 3;
+    AppNotResponding anr = 4;
+    JavaCrash java_crash = 5;
+    NativeCrash native_crash = 6;
+  }
+
+  message Watchdog {
+    // The watchdog subject.
+    // Required.
+    optional string subject = 1;
+
+    // Unique identifier of the watchdog.
+    // Can be used to join with other data for this watchdog such as stack dumps & perfetto traces.
+    // Generated in {@link com.android.server.Watchdog#run}.
+    // Required.
+    optional string uuid = 2;
+  }
+
+  message HalfWatchdog {
+    // The half-watchdog subject.
+    // Required.
+    optional string subject = 1;
+  }
+
+  message AppNotResponding {
+    // The ANR subject.
+    // Optional, may be redacted for privacy.
+    optional string subject = 1;
+
+    // Name of the ANRing process.
+    // Optional, may be redacted for privacy.
+    optional string process = 2;
+
+    // PID of the ANRing process.
+    // Required.
+    optional int32 pid = 3;
+
+    // UID of the ANRing process.
+    // Required.
+    optional int32 uid = 4;
+
+    // Category of the ANRing process (DATA_APP, SYSTEM_APP, etc).
+    // Required.
+    optional ProcessClass process_class = 5;
+  }
+
+  message JavaCrash {
+    // The crash exception class.
+    // Optional, may be redacted for privacy.
+    optional string exception_class = 1;
+
+    // Name of the crashed process.
+    // Optional, may be redacted for privacy.
+    optional string process = 2;
+
+    // PID of the crashed process.
+    // Required.
+    optional int32 pid = 3;
+
+    // UID of the crashed process.
+    // Required.
+    optional int32 uid = 4;
+
+    // Category of the crashed process (DATA_APP, SYSTEM_APP, etc).
+    // Required.
+    optional ProcessClass process_class = 5;
+  }
+
+  message NativeCrash {
+    // Name of the crashed process.
+    // Optional, may be redacted for privacy.
+    optional string process = 1;
+
+    // PID of the crashed process.
+    // Required.
+    optional int32 pid = 2;
+
+    // UID of the crashed process.
+    // Required.
+    optional int32 uid = 3;
+
+    // Category of the crashed process (DATA_APP, SYSTEM_APP, etc).
+    // Required.
+    optional ProcessClass process_class = 4;
+  }
+
+
+  // Mirrors definition & values in {@link android.server.ServerProtoEnums}.
+  enum ProcessClass {
+    PROCESS_CLASS_UNKNOWN = 0;
+    DATA_APP = 1;
+    SYSTEM_APP = 2;
+    SYSTEM_SERVER = 3;
+  }
+}

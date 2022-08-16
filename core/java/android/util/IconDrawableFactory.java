@@ -15,7 +15,12 @@
  */
 package android.util;
 
+import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
+import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON_BADGE;
+import static android.app.admin.DevicePolicyResources.UNDEFINED;
+
 import android.annotation.UserIdInt;
+import android.app.admin.DevicePolicyManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -37,6 +42,7 @@ public class IconDrawableFactory {
     protected final Context mContext;
     protected final PackageManager mPm;
     protected final UserManager mUm;
+    protected final DevicePolicyManager mDpm;
     protected final LauncherIcons mLauncherIcons;
     protected final boolean mEmbedShadow;
 
@@ -44,6 +50,7 @@ public class IconDrawableFactory {
         mContext = context;
         mPm = context.getPackageManager();
         mUm = context.getSystemService(UserManager.class);
+        mDpm = context.getSystemService(DevicePolicyManager.class);
         mLauncherIcons = new LauncherIcons(context);
         mEmbedShadow = embedShadow;
     }
@@ -73,16 +80,30 @@ public class IconDrawableFactory {
         if (appInfo.isInstantApp()) {
             int badgeColor = Resources.getSystem().getColor(
                     com.android.internal.R.color.instant_app_badge, null);
+            Drawable badge = mContext.getDrawable(
+                    com.android.internal.R.drawable.ic_instant_icon_badge_bolt);
             icon = mLauncherIcons.getBadgedDrawable(icon,
-                    com.android.internal.R.drawable.ic_instant_icon_badge_bolt,
+                    badge,
                     badgeColor);
         }
         if (mUm.hasBadge(userId)) {
-            icon = mLauncherIcons.getBadgedDrawable(icon,
-                    mUm.getUserIconBadgeResId(userId),
-                    mUm.getUserBadgeColor(userId));
+
+            Drawable badge = mDpm.getResources().getDrawable(
+                    getUpdatableUserIconBadgeId(userId),
+                    SOLID_COLORED,
+                    () -> getDefaultUserIconBadge(userId));
+
+            icon = mLauncherIcons.getBadgedDrawable(icon, badge, mUm.getUserBadgeColor(userId));
         }
         return icon;
+    }
+
+    private String getUpdatableUserIconBadgeId(int userId) {
+        return mUm.isManagedProfile(userId) ? WORK_PROFILE_ICON_BADGE : UNDEFINED;
+    }
+
+    private Drawable getDefaultUserIconBadge(int userId) {
+        return mContext.getResources().getDrawable(mUm.getUserIconBadgeResId(userId));
     }
 
     /**

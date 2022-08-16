@@ -64,53 +64,42 @@ public class DisplayFrames {
             PrivacyIndicatorBounds indicatorBounds) {
         mDisplayId = displayId;
         mInsetsState = insetsState;
-        onDisplayInfoUpdated(info, displayCutout, roundedCorners, indicatorBounds);
+        update(info, displayCutout, roundedCorners, indicatorBounds);
     }
 
     /**
-     * Update {@link DisplayFrames} when {@link DisplayInfo} is updated.
+     * This is called when {@link DisplayInfo} or {@link PrivacyIndicatorBounds} is updated.
      *
      * @param info the updated {@link DisplayInfo}.
      * @param displayCutout the updated {@link DisplayCutout}.
      * @param roundedCorners the updated {@link RoundedCorners}.
-     * @return {@code true} if the insets state has been changed; {@code false} otherwise.
+     * @param indicatorBounds the updated {@link PrivacyIndicatorBounds}.
+     * @return {@code true} if anything has been changed; {@code false} otherwise.
      */
-    public boolean onDisplayInfoUpdated(DisplayInfo info, @NonNull WmDisplayCutout displayCutout,
+    public boolean update(DisplayInfo info, @NonNull WmDisplayCutout displayCutout,
             @NonNull RoundedCorners roundedCorners,
             @NonNull PrivacyIndicatorBounds indicatorBounds) {
-        mRotation = info.rotation;
-
         final InsetsState state = mInsetsState;
         final Rect safe = mDisplayCutoutSafe;
         final DisplayCutout cutout = displayCutout.getDisplayCutout();
         if (mDisplayWidth == info.logicalWidth && mDisplayHeight == info.logicalHeight
-                 && state.getDisplayCutout().equals(cutout)
+                && mRotation == info.rotation
+                && state.getDisplayCutout().equals(cutout)
                 && state.getRoundedCorners().equals(roundedCorners)
                 && state.getPrivacyIndicatorBounds().equals(indicatorBounds)) {
             return false;
         }
         mDisplayWidth = info.logicalWidth;
         mDisplayHeight = info.logicalHeight;
+        mRotation = info.rotation;
         final Rect unrestricted = mUnrestricted;
         unrestricted.set(0, 0, mDisplayWidth, mDisplayHeight);
-        safe.set(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
         state.setDisplayFrame(unrestricted);
         state.setDisplayCutout(cutout);
         state.setRoundedCorners(roundedCorners);
         state.setPrivacyIndicatorBounds(indicatorBounds);
+        state.getDisplayCutoutSafe(safe);
         if (!cutout.isEmpty()) {
-            if (cutout.getSafeInsetLeft() > 0) {
-                safe.left = unrestricted.left + cutout.getSafeInsetLeft();
-            }
-            if (cutout.getSafeInsetTop() > 0) {
-                safe.top = unrestricted.top + cutout.getSafeInsetTop();
-            }
-            if (cutout.getSafeInsetRight() > 0) {
-                safe.right = unrestricted.right - cutout.getSafeInsetRight();
-            }
-            if (cutout.getSafeInsetBottom() > 0) {
-                safe.bottom = unrestricted.bottom - cutout.getSafeInsetBottom();
-            }
             state.getSource(ITYPE_LEFT_DISPLAY_CUTOUT).setFrame(
                     unrestricted.left, unrestricted.top, safe.left, unrestricted.bottom);
             state.getSource(ITYPE_TOP_DISPLAY_CUTOUT).setFrame(

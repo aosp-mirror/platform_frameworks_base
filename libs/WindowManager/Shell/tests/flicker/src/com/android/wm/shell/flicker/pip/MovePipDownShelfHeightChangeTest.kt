@@ -17,14 +17,16 @@
 package com.android.wm.shell.flicker.pip
 
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.traces.RegionSubject
+import com.android.server.wm.flicker.traces.region.RegionSubject
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -53,13 +55,13 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
-class MovePipDownShelfHeightChangeTest(
+open class MovePipDownShelfHeightChangeTest(
     testSpec: FlickerTestParameter
 ) : MovePipShelfHeightTransition(testSpec) {
     /**
      * Defines the transition used to run the test
      */
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition(eachRun = false) {
             teardown {
                 eachRun {
@@ -78,6 +80,11 @@ class MovePipDownShelfHeightChangeTest(
         current.isHigherOrEqual(previous.region)
     }
 
+    /** {@inheritDoc}  */
+    @FlakyTest(bugId = 206753786)
+    @Test
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+
     companion object {
         /**
          * Creates the test configurations.
@@ -89,7 +96,7 @@ class MovePipDownShelfHeightChangeTest(
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                    supportedRotations = listOf(Surface.ROTATION_0), repetitions = 5)
+                    supportedRotations = listOf(Surface.ROTATION_0), repetitions = 3)
         }
     }
 }

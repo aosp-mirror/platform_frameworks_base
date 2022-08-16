@@ -64,7 +64,7 @@ public final class TranslationSpec implements Parcelable {
     }
 
     static ULocale unparcelLocale(Parcel in) {
-        return (ULocale) in.readSerializable();
+        return (ULocale) in.readSerializable(android.icu.util.ULocale.class.getClassLoader(), android.icu.util.ULocale.class);
     }
 
     /**

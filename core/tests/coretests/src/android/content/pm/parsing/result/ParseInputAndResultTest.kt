@@ -18,6 +18,7 @@ package android.content.pm.parsing.result
 
 import android.content.pm.PackageManager
 import android.os.Build
+import android.platform.test.annotations.Presubmit
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Assume.assumeFalse
@@ -34,6 +35,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import java.io.IOException
 
+@Presubmit
 class ParseInputAndResultTest {
 
     companion object {

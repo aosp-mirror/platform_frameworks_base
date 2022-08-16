@@ -112,7 +112,7 @@ public class GpsMeasurementsEvent implements Parcelable {
         public GpsMeasurementsEvent createFromParcel(Parcel in) {
             ClassLoader classLoader = getClass().getClassLoader();
 
-            GpsClock clock = in.readParcelable(classLoader);
+            GpsClock clock = in.readParcelable(classLoader, android.location.GpsClock.class);
 
             int measurementsLength = in.readInt();
             GpsMeasurement[] measurementsArray = new GpsMeasurement[measurementsLength];

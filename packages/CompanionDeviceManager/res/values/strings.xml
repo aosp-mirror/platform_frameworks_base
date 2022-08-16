@@ -19,25 +19,104 @@
     <!-- Title of the CompanionDeviceManager application. [CHAR LIMIT=50] -->
     <string name="app_label">Companion Device Manager</string>
 
-    <!-- Title of the device selection dialog. -->
-    <string name="chooser_title">Choose a <xliff:g id="profile_name" example="watch">%1$s</xliff:g> to be managed by &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%2$s</xliff:g>&lt;/strong&gt;</string>
+    <!-- Title of the device association confirmation dialog. -->
+    <string name="confirmation_title">Allow &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to access your &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;</string>
 
-    <!-- The generic placeholder for a device type when nothing specific is known about it [CHAR LIMIT=30] -->
-    <string name="profile_name_generic">device</string>
+    <!-- ================= DEVICE_PROFILE_WATCH and null profile ================= -->
 
     <!-- The name of the "watch" device type [CHAR LIMIT=30] -->
     <string name="profile_name_watch">watch</string>
 
-    <!-- Title of the device association confirmation dialog. -->
-    <string name="confirmation_title">Allow &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to manage your &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;</string>
+    <!-- Title of the device selection dialog. -->
+    <string name="chooser_title">Choose a <xliff:g id="profile_name" example="watch">%1$s</xliff:g> to be managed by &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%2$s</xliff:g>&lt;/strong&gt;</string>
 
-    <!-- Text of the device profile permissions explanation in the association dialog. -->
-    <string name="profile_summary">This app is needed to manage your <xliff:g id="profile_name" example="watch">%1$s</xliff:g>. <xliff:g id="privileges_discplaimer" example="Android Wear will get access to your Notifications, Calendar and Contacts.">%2$s</xliff:g></string>
+    <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_watch">This app is needed to manage your <xliff:g id="device_name" example="My Watch">%1$s</xliff:g>. <xliff:g id="app_name" example="Android Wear">%2$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts, Calendar, Call logs and Nearby devices permissions.</string>
+
+    <!-- ================= DEVICE_PROFILE_APP_STREAMING ================= -->
+
+    <!-- Apps permission will be granted of APP_STREAMING profile [CHAR LIMIT=30] -->
+    <string name="permission_apps">Apps</string>
+
+    <!-- Description of apps permission of APP_STREAMING profile [CHAR LIMIT=NONE] -->
+    <string name="permission_apps_summary">Stream your phone\u2019s apps</string>
+
+    <!-- Confirmation for associating an application with a companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
+    <string name="title_app_streaming">Allow &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to access this information from your phone</string>
+
+    <!-- Title of the helper dialog for APP_STREAMING profile [CHAR LIMIT=30]. -->
+    <string name="helper_title_app_streaming">Cross-device services</string>
+
+    <!-- Description of the helper dialog for APP_STREAMING profile. [CHAR LIMIT=NONE] -->
+    <string name="helper_summary_app_streaming"><xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="device_type" example="Chromebook">%2$s</xliff:g> to access your phone\u2019s photos, media, and notifications</string>
+
+    <!-- ================= DEVICE_PROFILE_AUTOMOTIVE_PROJECTION ================= -->
+
+    <!-- Confirmation for associating an application with a companion device of AUTOMOTIVE_PROJECTION profile (type) [CHAR LIMIT=NONE] -->
+    <string name="title_automotive_projection"></string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of AUTOMOTIVE_PROJECTION profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_automotive_projection"></string>
+
+    <!-- ================= DEVICE_PROFILE_COMPUTER ================= -->
+
+    <!-- Confirmation for associating an application with a companion device of COMPUTER profile (type) [CHAR LIMIT=NONE] -->
+    <string name="title_computer">Allow &lt;strong&gt;<xliff:g id="app_name" example="GMS">%1$s</xliff:g>&lt;/strong&gt; to access this information from your phone</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of COMPUTER profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_computer"></string>
+
+    <!-- Notification permission will be granted of COMPUTER profile [CHAR LIMIT=30] -->
+    <string name="permission_notification">Notifications</string>
+
+    <!-- Description of notification permission of COMPUTER profile [CHAR LIMIT=NONE] -->
+    <string name="permission_notification_summary">Can read all notifications, including information like contacts, messages, and photos</string>
+
+    <!-- Storage permission will be granted of COMPUTER profile [CHAR LIMIT=30] -->
+    <string name="permission_storage">Photos and media</string>
+
+    <!-- Description of storage permission of COMPUTER profile [CHAR LIMIT=NONE] -->
+    <string name="permission_storage_summary"></string>
+
+    <!-- Title of the helper dialog for COMPUTER profile [CHAR LIMIT=30]. -->
+    <string name="helper_title_computer">Google Play services</string>
+
+    <!-- Description of the helper dialog for COMPUTER profile. [CHAR LIMIT=NONE] -->
+    <string name="helper_summary_computer"> <xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="device_type" example="Chromebook">%2$s</xliff:g> to stream apps between your devices</string>
+
+    <!-- ================= null profile ================= -->
+
+    <!-- A noun for a companion device with unspecified profile (type) [CHAR LIMIT=30] -->
+    <string name="profile_name_generic">device</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of unspecified profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_generic"></string>
+
+    <!-- ================= Buttons ================= -->
 
     <!-- Positive button for the device-app association consent dialog [CHAR LIMIT=30] -->
     <string name="consent_yes">Allow</string>
 
     <!-- Negative button for the device-app association consent dialog [CHAR LIMIT=30] -->
     <string name="consent_no">Don\u2019t allow</string>
+
+    <!-- Back button for the helper consent dialog [CHAR LIMIT=30] -->
+    <string name="consent_back">Back</string>
+
+    <!-- ================== System data transfer ==================== -->
+    <!-- Title of the permission sync confirmation dialog. [CHAR LIMIT=60] -->
+    <string name="permission_sync_confirmation_title">Transfer app permissions to your
+        watch</string>
+
+    <!-- Text of the permission sync explanation in the confirmation dialog. [CHAR LIMIT=400] -->
+    <string name="permission_sync_summary">To make it easier to set up your watch,
+        apps installed on your watch during setup will use the same permissions as your phone.\n\n
+        These permissions may include access to your watch\u2019s microphone and location.</string>
+
+    <!--Description for vendor icon [CHAR LIMIT=30]-->
+    <string name="vendor_icon_description">App Icon</string>
+
+    <!--Description for information icon [CHAR LIMIT=30]-->
+    <string name="vendor_header_button_description">More Information Button</string>
 
 </resources>

@@ -25,7 +25,7 @@
         android:id="@+id/expanded_qs_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="4dp"
+        android:elevation="@dimen/qs_panel_elevation"
         android:importantForAccessibility="no"
         android:scrollbars="none"
         android:clipChildren="false"
@@ -48,8 +48,12 @@
     <include layout="@layout/quick_status_bar_expanded_header" />
 
     <include
-        android:id="@+id/qs_detail"
-        layout="@layout/qs_detail" />
+        layout="@layout/footer_actions"
+        android:id="@+id/qs_footer_actions"
+        android:layout_height="@dimen/footer_actions_height"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        />
 
     <include
         android:id="@+id/qs_customize"

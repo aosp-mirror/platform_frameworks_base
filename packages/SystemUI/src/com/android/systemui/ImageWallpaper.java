@@ -126,6 +126,7 @@ public class ImageWallpaper extends WallpaperService {
             mRenderer = getRendererInstance();
             setFixedSizeAllowed(true);
             updateSurfaceSize();
+            setShowForAllUsers(true);
 
             mRenderer.setOnBitmapChanged(b -> {
                 mLocalColorsToAdd.addAll(mColorAreas);

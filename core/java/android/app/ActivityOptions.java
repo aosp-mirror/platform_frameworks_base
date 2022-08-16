@@ -47,6 +47,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.transition.TransitionManager;
 import android.util.Pair;
@@ -70,7 +71,7 @@ import java.util.ArrayList;
  * {@link android.content.Context#startActivity(android.content.Intent, android.os.Bundle)
  * Context.startActivity(Intent, Bundle)} and related methods.
  */
-public class ActivityOptions {
+public class ActivityOptions extends ComponentOptions {
     private static final String TAG = "ActivityOptions";
 
     /**
@@ -127,6 +128,12 @@ public class ActivityOptions {
     public static final String KEY_ANIM_IN_PLACE_RES_ID = "android:activity.animInPlaceRes";
 
     /**
+     * Custom background color for animation.
+     * @hide
+     */
+    public static final String KEY_ANIM_BACKGROUND_COLOR = "android:activity.backgroundColor";
+
+    /**
      * Bitmap for thumbnail animation.
      * @hide
      */
@@ -167,6 +174,13 @@ public class ActivityOptions {
      * @hide
      */
     public static final String KEY_SPLASH_SCREEN_THEME = "android.activity.splashScreenTheme";
+
+    /**
+     * Indicates that this activity launch is eligible to show a legacy permission prompt
+     * @hide
+     */
+    public static final String KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE =
+            "android:activity.legacyPermissionPromptEligible";
 
     /**
      * Callback for when the last frame of the animation is played.
@@ -346,12 +360,23 @@ public class ActivityOptions {
     private static final String KEY_LAUNCHED_FROM_BUBBLE =
             "android.activity.launchTypeBubble";
 
-    /** See {@link #setSplashscreenStyle(int)}. */
+    /** See {@link #setSplashScreenStyle(int)}. */
     private static final String KEY_SPLASH_SCREEN_STYLE =
             "android.activity.splashScreenStyle";
 
     /** See {@link #setTransientLaunch()}. */
     private static final String KEY_TRANSIENT_LAUNCH = "android.activity.transientLaunch";
+
+    /** see {@link #makeLaunchIntoPip(PictureInPictureParams)}. */
+    private static final String KEY_LAUNCH_INTO_PIP_PARAMS =
+            "android.activity.launchIntoPipParams";
+
+    /** See {@link #setDismissKeyguardIfInsecure()}. */
+    private static final String KEY_DISMISS_KEYGUARD_IF_INSECURE =
+            "android.activity.dismissKeyguardIfInsecure";
+
+    private static final String KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE =
+            "android.activity.ignorePendingIntentCreatorForegroundState";
 
     /**
      * @see #setLaunchCookie
@@ -389,6 +414,8 @@ public class ActivityOptions {
     public static final int ANIM_OPEN_CROSS_PROFILE_APPS = 12;
     /** @hide */
     public static final int ANIM_REMOTE_ANIMATION = 13;
+    /** @hide */
+    public static final int ANIM_FROM_STYLE = 14;
 
     private String mPackageName;
     private Rect mLaunchBounds;
@@ -396,6 +423,7 @@ public class ActivityOptions {
     private int mCustomEnterResId;
     private int mCustomExitResId;
     private int mCustomInPlaceResId;
+    private int mCustomBackgroundColor;
     private Bitmap mThumbnail;
     private int mStartX;
     private int mStartY;
@@ -442,9 +470,13 @@ public class ActivityOptions {
     private String mSplashScreenThemeResName;
     @SplashScreen.SplashScreenStyle
     private int mSplashScreenStyle = SplashScreen.SPLASH_SCREEN_STYLE_UNDEFINED;
+    private boolean mIsEligibleForLegacyPermissionPrompt;
     private boolean mRemoveWithTaskOrganizer;
     private boolean mLaunchedFromBubble;
     private boolean mTransientLaunch;
+    private PictureInPictureParams mLaunchIntoPipParams;
+    private boolean mDismissKeyguardIfInsecure;
+    private boolean mIgnorePendingIntentCreatorForegroundState;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -461,7 +493,27 @@ public class ActivityOptions {
      */
     public static ActivityOptions makeCustomAnimation(Context context,
             int enterResId, int exitResId) {
-        return makeCustomAnimation(context, enterResId, exitResId, null, null, null);
+        return makeCustomAnimation(context, enterResId, exitResId, 0, null, null);
+    }
+
+    /**
+     * Create an ActivityOptions specifying a custom animation to run when
+     * the activity is displayed.
+     *
+     * @param context Who is defining this.  This is the application that the
+     * animation resources will be loaded from.
+     * @param enterResId A resource ID of the animation resource to use for
+     * the incoming activity.  Use 0 for no animation.
+     * @param exitResId A resource ID of the animation resource to use for
+     * the outgoing activity.  Use 0 for no animation.
+     * @param backgroundColor The background color to use for the background during the animation if
+     * the animation requires a background. Set to 0 to not override the default color.
+     * @return Returns a new ActivityOptions object that you can use to
+     * supply these options as the options Bundle when starting an activity.
+     */
+    public static @NonNull ActivityOptions makeCustomAnimation(@NonNull Context context,
+            int enterResId, int exitResId, int backgroundColor) {
+        return makeCustomAnimation(context, enterResId, exitResId, backgroundColor, null, null);
     }
 
     /**
@@ -485,12 +537,14 @@ public class ActivityOptions {
      */
     @UnsupportedAppUsage
     public static ActivityOptions makeCustomAnimation(Context context,
-            int enterResId, int exitResId, Handler handler, OnAnimationStartedListener listener) {
+            int enterResId, int exitResId, int backgroundColor, Handler handler,
+            OnAnimationStartedListener listener) {
         ActivityOptions opts = new ActivityOptions();
         opts.mPackageName = context.getPackageName();
         opts.mAnimationType = ANIM_CUSTOM;
         opts.mCustomEnterResId = enterResId;
         opts.mCustomExitResId = exitResId;
+        opts.mCustomBackgroundColor = backgroundColor;
         opts.setOnAnimationStartedListener(handler, listener);
         return opts;
     }
@@ -518,11 +572,11 @@ public class ActivityOptions {
      */
     @TestApi
     public static @NonNull ActivityOptions makeCustomAnimation(@NonNull Context context,
-            int enterResId, int exitResId, @Nullable Handler handler,
+            int enterResId, int exitResId, int backgroundColor, @Nullable Handler handler,
             @Nullable OnAnimationStartedListener startedListener,
             @Nullable OnAnimationFinishedListener finishedListener) {
-        ActivityOptions opts = makeCustomAnimation(context, enterResId, exitResId, handler,
-                startedListener);
+        ActivityOptions opts = makeCustomAnimation(context, enterResId, exitResId, backgroundColor,
+                handler, startedListener);
         opts.setOnAnimationFinishedListener(handler, finishedListener);
         return opts;
     }
@@ -555,8 +609,8 @@ public class ActivityOptions {
             int enterResId, int exitResId, @Nullable Handler handler,
             @Nullable OnAnimationStartedListener startedListener,
             @Nullable OnAnimationFinishedListener finishedListener) {
-        ActivityOptions opts = makeCustomAnimation(context, enterResId, exitResId, handler,
-                startedListener, finishedListener);
+        ActivityOptions opts = makeCustomAnimation(context, enterResId, exitResId, 0,
+                handler, startedListener, finishedListener);
         opts.mOverrideTaskTransition = true;
         return opts;
     }
@@ -591,9 +645,10 @@ public class ActivityOptions {
             mAnimationStartedListener = new IRemoteCallback.Stub() {
                 @Override
                 public void sendResult(Bundle data) throws RemoteException {
+                    final long elapsedRealtime = SystemClock.elapsedRealtime();
                     handler.post(new Runnable() {
                         @Override public void run() {
-                            listener.onAnimationStarted();
+                            listener.onAnimationStarted(elapsedRealtime);
                         }
                     });
                 }
@@ -602,13 +657,15 @@ public class ActivityOptions {
     }
 
     /**
-     * Callback for use with {@link ActivityOptions#makeThumbnailScaleUpAnimation}
-     * to find out when the given animation has started running.
+     * Callback for finding out when the given animation has started running.
      * @hide
      */
     @TestApi
     public interface OnAnimationStartedListener {
-        void onAnimationStarted();
+        /**
+         * @param elapsedRealTime {@link SystemClock#elapsedRealTime} when animation started.
+         */
+        void onAnimationStarted(long elapsedRealTime);
     }
 
     private void setOnAnimationFinishedListener(final Handler handler,
@@ -617,10 +674,11 @@ public class ActivityOptions {
             mAnimationFinishedListener = new IRemoteCallback.Stub() {
                 @Override
                 public void sendResult(Bundle data) throws RemoteException {
+                    final long elapsedRealtime = SystemClock.elapsedRealtime();
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            listener.onAnimationFinished();
+                            listener.onAnimationFinished(elapsedRealtime);
                         }
                     });
                 }
@@ -629,13 +687,15 @@ public class ActivityOptions {
     }
 
     /**
-     * Callback for use with {@link ActivityOptions#makeThumbnailAspectScaleDownAnimation}
-     * to find out when the given animation has drawn its last frame.
+     * Callback for finding out when the given animation has drawn its last frame.
      * @hide
      */
     @TestApi
     public interface OnAnimationFinishedListener {
-        void onAnimationFinished();
+        /**
+         * @param elapsedRealTime {@link SystemClock#elapsedRealTime} when animation finished.
+         */
+        void onAnimationFinished(long elapsedRealTime);
     }
 
     /**
@@ -1085,23 +1145,40 @@ public class ActivityOptions {
         return opts;
     }
 
+    /**
+     * Creates an {@link ActivityOptions} instance that launch into picture-in-picture.
+     * This is normally used by a Host activity to start another activity that will directly enter
+     * picture-in-picture upon its creation.
+     * @param pictureInPictureParams {@link PictureInPictureParams} for launching the Activity to
+     *                               picture-in-picture mode.
+     */
+    @NonNull
+    public static ActivityOptions makeLaunchIntoPip(
+            @NonNull PictureInPictureParams pictureInPictureParams) {
+        final ActivityOptions opts = new ActivityOptions();
+        opts.mLaunchIntoPipParams = new PictureInPictureParams.Builder(pictureInPictureParams)
+                .setIsLaunchIntoPip(true)
+                .build();
+        opts.mLaunchBounds = new Rect(pictureInPictureParams.getSourceRectHint());
+        return opts;
+    }
+
     /** @hide */
     public boolean getLaunchTaskBehind() {
         return mAnimationType == ANIM_LAUNCH_TASK_BEHIND;
     }
 
     private ActivityOptions() {
+        super();
     }
 
     /** @hide */
     public ActivityOptions(Bundle opts) {
-        // If the remote side sent us bad parcelables, they won't get the
-        // results they want, which is their loss.
-        opts.setDefusable(true);
+        super(opts);
 
         mPackageName = opts.getString(KEY_PACKAGE_NAME);
         try {
-            mUsageTimeReport = opts.getParcelable(KEY_USAGE_TIME_REPORT);
+            mUsageTimeReport = opts.getParcelable(KEY_USAGE_TIME_REPORT, PendingIntent.class);
         } catch (RuntimeException e) {
             Slog.w(TAG, e);
         }
@@ -1111,6 +1188,7 @@ public class ActivityOptions {
             case ANIM_CUSTOM:
                 mCustomEnterResId = opts.getInt(KEY_ANIM_ENTER_RES_ID, 0);
                 mCustomExitResId = opts.getInt(KEY_ANIM_EXIT_RES_ID, 0);
+                mCustomBackgroundColor = opts.getInt(KEY_ANIM_BACKGROUND_COLOR, 0);
                 mAnimationStartedListener = IRemoteCallback.Stub.asInterface(
                         opts.getBinder(KEY_ANIM_START_LISTENER));
                 break;
@@ -1201,6 +1279,12 @@ public class ActivityOptions {
         mLaunchedFromBubble = opts.getBoolean(KEY_LAUNCHED_FROM_BUBBLE);
         mTransientLaunch = opts.getBoolean(KEY_TRANSIENT_LAUNCH);
         mSplashScreenStyle = opts.getInt(KEY_SPLASH_SCREEN_STYLE);
+        mLaunchIntoPipParams = opts.getParcelable(KEY_LAUNCH_INTO_PIP_PARAMS);
+        mIsEligibleForLegacyPermissionPrompt =
+                opts.getBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE);
+        mDismissKeyguardIfInsecure = opts.getBoolean(KEY_DISMISS_KEYGUARD_IF_INSECURE);
+        mIgnorePendingIntentCreatorForegroundState = opts.getBoolean(
+                KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE);
     }
 
     /**
@@ -1252,6 +1336,11 @@ public class ActivityOptions {
     /** @hide */
     public int getCustomInPlaceResId() {
         return mCustomInPlaceResId;
+    }
+
+    /** @hide */
+    public int getCustomBackgroundColor() {
+        return mCustomBackgroundColor;
     }
 
     /**
@@ -1396,20 +1485,44 @@ public class ActivityOptions {
     }
 
     /**
-     * Sets the preferred splash screen style.
-     * @hide
+     * Gets the style can be used for cold-launching an activity.
+     * @see #setSplashScreenStyle(int)
      */
-    public void setSplashscreenStyle(@SplashScreen.SplashScreenStyle int style) {
-        mSplashScreenStyle = style;
+    public @SplashScreen.SplashScreenStyle int getSplashScreenStyle() {
+        return mSplashScreenStyle;
     }
 
     /**
-     * Gets the preferred splash screen style from caller
+     * Sets the preferred splash screen style of the opening activities. This only applies if the
+     * Activity or Process is not yet created.
+     * @param style Can be either {@link SplashScreen#SPLASH_SCREEN_STYLE_ICON} or
+     *              {@link SplashScreen#SPLASH_SCREEN_STYLE_SOLID_COLOR}
+     */
+    @NonNull
+    public ActivityOptions setSplashScreenStyle(@SplashScreen.SplashScreenStyle int style) {
+        if (style == SplashScreen.SPLASH_SCREEN_STYLE_ICON
+                || style == SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR) {
+            mSplashScreenStyle = style;
+        }
+        return this;
+    }
+
+    /**
+     * Whether the activity is eligible to show a legacy permission prompt
      * @hide
      */
-    @SplashScreen.SplashScreenStyle
-    public int getSplashScreenStyle() {
-        return mSplashScreenStyle;
+    @TestApi
+    public boolean isEligibleForLegacyPermissionPrompt() {
+        return mIsEligibleForLegacyPermissionPrompt;
+    }
+
+    /**
+     * Sets whether the activity is eligible to show a legacy permission prompt
+     * @hide
+     */
+    @TestApi
+    public void setEligibleForLegacyPermissionPrompt(boolean eligible) {
+        mIsEligibleForLegacyPermissionPrompt = eligible;
     }
 
     /**
@@ -1534,6 +1647,23 @@ public class ActivityOptions {
     @TestApi
     public void setLaunchWindowingMode(int windowingMode) {
         mLaunchWindowingMode = windowingMode;
+    }
+
+    /**
+     * @return {@link PictureInPictureParams} used to launch into PiP mode.
+     * @hide
+     */
+    public PictureInPictureParams getLaunchIntoPipParams() {
+        return mLaunchIntoPipParams;
+    }
+
+    /**
+     * @return {@code true} if this instance is used to launch into PiP mode.
+     * @hide
+     */
+    public boolean isLaunchIntoPip() {
+        return mLaunchIntoPipParams != null
+                && mLaunchIntoPipParams.isLaunchIntoPip();
     }
 
     /** @hide */
@@ -1768,6 +1898,44 @@ public class ActivityOptions {
     }
 
     /**
+     * Sets whether the insecure keyguard should go away when this activity launches. In case the
+     * keyguard is secure, this option will be ignored.
+     *
+     * @see Activity#setShowWhenLocked(boolean)
+     * @see android.R.attr#showWhenLocked
+     * @hide
+     */
+    public void setDismissKeyguardIfInsecure() {
+        mDismissKeyguardIfInsecure = true;
+    }
+
+    /**
+     * @see #setDismissKeyguardIfInsecure()
+     * @return whether the insecure keyguard should go away when the activity launches.
+     * @hide
+     */
+    public boolean getDismissKeyguardIfInsecure() {
+        return mDismissKeyguardIfInsecure;
+    }
+
+    /**
+     * Sets background activity launch logic won't use pending intent creator foreground state.
+     * @hide
+     */
+    public void setIgnorePendingIntentCreatorForegroundState(boolean state) {
+        mIgnorePendingIntentCreatorForegroundState = state;
+    }
+
+    /**
+     * @return whether background activity launch logic should use pending intent creator
+     * foreground state.
+     * @hide
+     */
+    public boolean getIgnorePendingIntentCreatorForegroundState() {
+        return mIgnorePendingIntentCreatorForegroundState;
+    }
+
+    /**
      * Update the current values in this ActivityOptions from those supplied
      * in <var>otherOptions</var>.  Any values
      * defined in <var>otherOptions</var> replace those in the base options.
@@ -1788,6 +1956,7 @@ public class ActivityOptions {
             case ANIM_CUSTOM:
                 mCustomEnterResId = otherOptions.mCustomEnterResId;
                 mCustomExitResId = otherOptions.mCustomExitResId;
+                mCustomBackgroundColor = otherOptions.mCustomBackgroundColor;
                 mThumbnail = null;
                 if (mAnimationStartedListener != null) {
                     try {
@@ -1846,6 +2015,8 @@ public class ActivityOptions {
         mAnimationFinishedListener = otherOptions.mAnimationFinishedListener;
         mSpecsFuture = otherOptions.mSpecsFuture;
         mRemoteAnimationAdapter = otherOptions.mRemoteAnimationAdapter;
+        mLaunchIntoPipParams = otherOptions.mLaunchIntoPipParams;
+        mIsEligibleForLegacyPermissionPrompt = otherOptions.mIsEligibleForLegacyPermissionPrompt;
     }
 
     /**
@@ -1856,8 +2027,9 @@ public class ActivityOptions {
      * object; you must not modify it, but can supply it to the startActivity
      * methods that take an options Bundle.
      */
+    @Override
     public Bundle toBundle() {
-        Bundle b = new Bundle();
+        Bundle b = super.toBundle();
         if (mPackageName != null) {
             b.putString(KEY_PACKAGE_NAME, mPackageName);
         }
@@ -1874,6 +2046,7 @@ public class ActivityOptions {
             case ANIM_CUSTOM:
                 b.putInt(KEY_ANIM_ENTER_RES_ID, mCustomEnterResId);
                 b.putInt(KEY_ANIM_EXIT_RES_ID, mCustomExitResId);
+                b.putInt(KEY_ANIM_BACKGROUND_COLOR, mCustomBackgroundColor);
                 b.putBinder(KEY_ANIM_START_LISTENER, mAnimationStartedListener
                         != null ? mAnimationStartedListener.asBinder() : null);
                 break;
@@ -2018,6 +2191,20 @@ public class ActivityOptions {
         }
         if (mSplashScreenStyle != 0) {
             b.putInt(KEY_SPLASH_SCREEN_STYLE, mSplashScreenStyle);
+        }
+        if (mLaunchIntoPipParams != null) {
+            b.putParcelable(KEY_LAUNCH_INTO_PIP_PARAMS, mLaunchIntoPipParams);
+        }
+        if (mIsEligibleForLegacyPermissionPrompt) {
+            b.putBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE,
+                    mIsEligibleForLegacyPermissionPrompt);
+        }
+        if (mDismissKeyguardIfInsecure) {
+            b.putBoolean(KEY_DISMISS_KEYGUARD_IF_INSECURE, mDismissKeyguardIfInsecure);
+        }
+        if (mIgnorePendingIntentCreatorForegroundState) {
+            b.putBoolean(KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE,
+                    mIgnorePendingIntentCreatorForegroundState);
         }
         return b;
     }

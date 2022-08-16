@@ -118,13 +118,13 @@ public final class Outline {
     /**
      * Returns whether the outline can be used to clip a View.
      * <p>
-     * Currently, only Outlines that can be represented as a rectangle, circle,
-     * or round rect support clipping.
+     * As of API 33, all Outline shapes support clipping. Prior to API 33, only Outlines that
+     * could be represented as a rectangle, circle, or round rect supported clipping.
      *
      * @see android.view.View#setClipToOutline(boolean)
      */
     public boolean canClip() {
-        return mMode != MODE_PATH;
+        return true;
     }
 
     /**
@@ -311,7 +311,10 @@ public final class Outline {
     }
 
     /**
-     * Offsets the Outline by (dx,dy)
+     * Offsets the Outline by (dx,dy). Offsetting is cumulative, so additional calls to
+     * offset() will add to previous offset values. Offset only applies to the current
+     * geometry (setRect(), setPath(), etc.); setting new geometry resets any existing
+     * offset.
      */
     public void offset(int dx, int dy) {
         if (mMode == MODE_ROUND_RECT) {

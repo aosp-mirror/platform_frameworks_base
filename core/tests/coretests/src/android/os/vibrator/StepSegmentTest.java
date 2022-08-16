@@ -38,13 +38,13 @@ public class StepSegmentTest {
 
     @Test
     public void testCreation() {
-        StepSegment step = new StepSegment(/* amplitude= */ 1f, /* frequency= */ -1f,
+        StepSegment step = new StepSegment(/* amplitude= */ 1f, /* frequencyHz= */ 1f,
                 /* duration= */ 100);
 
         assertEquals(100, step.getDuration());
         assertTrue(step.hasNonZeroAmplitude());
         assertEquals(1f, step.getAmplitude());
-        assertEquals(-1f, step.getFrequency());
+        assertEquals(1f, step.getFrequencyHz());
     }
 
     @Test
@@ -58,14 +58,22 @@ public class StepSegmentTest {
 
     @Test
     public void testValidate() {
-        new StepSegment(/* amplitude= */ 0f, /* frequency= */ -1f, /* duration= */ 100).validate();
+        new StepSegment(/* amplitude= */ 0f, /* frequencyHz= */ 10f, /* duration= */ 10).validate();
+        // Zero frequency is still used internally for unset frequency.
+        new StepSegment(0, 0, 0).validate();
 
         assertThrows(IllegalArgumentException.class,
                 () -> new StepSegment(/* amplitude= */ -2, 1f, 10).validate());
         assertThrows(IllegalArgumentException.class,
                 () -> new StepSegment(/* amplitude= */ 2, 1f, 10).validate());
         assertThrows(IllegalArgumentException.class,
+                () -> new StepSegment(1, /* frequencyHz*/ -1f, 10).validate());
+        assertThrows(IllegalArgumentException.class,
                 () -> new StepSegment(2, 1f, /* duration= */ -1).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new StepSegment(/* amplitude= */ Float.NaN, 1f, 10).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new StepSegment(1, /* frequencyHz*/ Float.NaN, 10).validate());
     }
 
     @Test
@@ -140,5 +148,17 @@ public class StepSegmentTest {
                 TOLERANCE);
         assertEquals(VibrationEffect.DEFAULT_AMPLITUDE, initial.scale(1.5f).getAmplitude(),
                 TOLERANCE);
+    }
+
+    @Test
+    public void testDuration() {
+        assertEquals(5, new StepSegment(0, 0, 5).getDuration());
+    }
+
+    @Test
+    public void testIsHapticFeedbackCandidate_returnsTrue() {
+        // A single step segment duration is not checked here, but contributes to the effect known
+        // duration checked in VibrationEffect implementations.
+        assertTrue(new StepSegment(0, 0, 5_000).isHapticFeedbackCandidate());
     }
 }

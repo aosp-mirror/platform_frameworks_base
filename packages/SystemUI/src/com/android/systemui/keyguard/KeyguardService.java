@@ -102,7 +102,7 @@ public class KeyguardService extends Service {
             "persist.wm.enable_remote_keyguard_animation";
 
     private static final int sEnableRemoteKeyguardAnimation =
-            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 1);
+            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 2);
 
     /**
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
@@ -220,7 +220,6 @@ public class KeyguardService extends Service {
             public void mergeAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t, IBinder mergeTarget,
                     IRemoteTransitionFinishedCallback finishCallback) {
-
             }
         };
     }
@@ -233,10 +232,13 @@ public class KeyguardService extends Service {
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
         mShellTransitions = shellTransitions;
+    }
 
-        if (shellTransitions != null && Transitions.ENABLE_SHELL_TRANSITIONS) {
-            // Nothing here. Initialization for this happens in onCreate.
-        } else {
+    @Override
+    public void onCreate() {
+        ((SystemUIApplication) getApplication()).startServicesIfNeeded();
+
+        if (mShellTransitions == null || !Transitions.ENABLE_SHELL_TRANSITIONS) {
             RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
             if (sEnableRemoteKeyguardGoingAwayAnimation) {
                 final RemoteAnimationAdapter exitAnimationAdapter =
@@ -248,22 +250,19 @@ public class KeyguardService extends Service {
             }
             if (sEnableRemoteKeyguardOccludeAnimation) {
                 final RemoteAnimationAdapter occludeAnimationAdapter =
-                        new RemoteAnimationAdapter(mOccludeAnimationRunner, 0, 0);
+                        new RemoteAnimationAdapter(
+                                mKeyguardViewMediator.getOccludeAnimationRunner(), 0, 0);
                 definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_OCCLUDE,
                         occludeAnimationAdapter);
+
+                final RemoteAnimationAdapter unoccludeAnimationAdapter =
+                        new RemoteAnimationAdapter(
+                                mKeyguardViewMediator.getUnoccludeAnimationRunner(), 0, 0);
                 definition.addRemoteAnimation(TRANSIT_OLD_KEYGUARD_UNOCCLUDE,
-                        occludeAnimationAdapter);
+                        unoccludeAnimationAdapter);
             }
             ActivityTaskManager.getInstance().registerRemoteAnimationsForDisplay(
                     DEFAULT_DISPLAY, definition);
-        }
-    }
-
-    @Override
-    public void onCreate() {
-        ((SystemUIApplication) getApplication()).startServicesIfNeeded();
-
-        if (mShellTransitions == null || !Transitions.ENABLE_SHELL_TRANSITIONS) {
             return;
         }
         if (sEnableRemoteKeyguardGoingAwayAnimation) {
@@ -349,35 +348,8 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void onAnimationCancelled() {
+        public void onAnimationCancelled(boolean isKeyguardOccluded) {
             mKeyguardViewMediator.cancelKeyguardExitAnimation();
-        }
-    };
-
-    private final IRemoteAnimationRunner.Stub mOccludeAnimationRunner =
-            new IRemoteAnimationRunner.Stub() {
-        @Override // Binder interface
-        public void onAnimationStart(@WindowManager.TransitionOldType int transit,
-                       RemoteAnimationTarget[] apps,
-                       RemoteAnimationTarget[] wallpapers,
-                        RemoteAnimationTarget[] nonApps,
-                        IRemoteAnimationFinishedCallback finishedCallback) {
-            Slog.d(TAG, "mOccludeAnimationRunner.onAnimationStart: transit=" + transit);
-            try {
-                if (transit == TRANSIT_OLD_KEYGUARD_OCCLUDE) {
-                    mBinder.setOccluded(true /* isOccluded */, true /* animate */);
-                } else if (transit == TRANSIT_OLD_KEYGUARD_UNOCCLUDE) {
-                    mBinder.setOccluded(false /* isOccluded */, false /* animate */);
-                }
-                // TODO(bc-unlock): Implement (un)occlude animation.
-                finishedCallback.onAnimationFinished();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "RemoteException");
-            }
-        }
-
-        @Override // Binder interface
-        public void onAnimationCancelled() {
         }
     };
 
@@ -433,6 +405,8 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void setOccluded(boolean isOccluded, boolean animate) {
+            Log.d(TAG, "setOccluded(" + isOccluded + ")");
+
             Trace.beginSection("KeyguardService.mBinder#setOccluded");
             checkPermission();
             mKeyguardViewMediator.setOccluded(isOccluded, animate);
@@ -500,8 +474,8 @@ public class KeyguardService extends Service {
         public void onScreenTurningOn(IKeyguardDrawnCallback callback) {
             Trace.beginSection("KeyguardService.mBinder#onScreenTurningOn");
             checkPermission();
-            mKeyguardViewMediator.onScreenTurningOn(callback);
-            mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_ON);
+            mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_ON,
+                    callback);
             Trace.endSection();
         }
 
@@ -509,7 +483,6 @@ public class KeyguardService extends Service {
         public void onScreenTurnedOn() {
             Trace.beginSection("KeyguardService.mBinder#onScreenTurnedOn");
             checkPermission();
-            mKeyguardViewMediator.onScreenTurnedOn();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_ON);
             Trace.endSection();
         }
@@ -582,6 +555,18 @@ public class KeyguardService extends Service {
         public void onShortPowerPressedGoHome() {
             checkPermission();
             mKeyguardViewMediator.onShortPowerPressedGoHome();
+        }
+
+        @Override
+        public void dismissKeyguardToLaunch(Intent intentToLaunch) {
+            checkPermission();
+            mKeyguardViewMediator.dismissKeyguardToLaunch(intentToLaunch);
+        }
+
+        @Override
+        public void onSystemKeyPressed(int keycode) {
+            checkPermission();
+            mKeyguardViewMediator.onSystemKeyPressed(keycode);
         }
     };
 }

@@ -194,7 +194,7 @@ public class SubscriptionManager {
         }
 
         @Override
-        protected T recompute(Void aVoid) {
+        public T recompute(Void aVoid) {
             T result = mDefaultValue;
 
             try {
@@ -228,7 +228,7 @@ public class SubscriptionManager {
         }
 
         @Override
-        protected T recompute(Integer query) {
+        public T recompute(Integer query) {
             T result = mDefaultValue;
 
             try {
@@ -1039,11 +1039,82 @@ public class SubscriptionManager {
     public static final String UICC_APPLICATIONS_ENABLED = SimInfo.COLUMN_UICC_APPLICATIONS_ENABLED;
 
     /**
-     * Indicate which network type is allowed. By default it's enabled.
+     * Indicate which network type is allowed.
      * @hide
      */
     public static final String ALLOWED_NETWORK_TYPES =
             SimInfo.COLUMN_ALLOWED_NETWORK_TYPES_FOR_REASONS;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"USAGE_SETTING_"},
+        value = {
+            USAGE_SETTING_UNKNOWN,
+            USAGE_SETTING_DEFAULT,
+            USAGE_SETTING_VOICE_CENTRIC,
+            USAGE_SETTING_DATA_CENTRIC})
+    public @interface UsageSetting {}
+
+    /**
+     * The usage setting is unknown.
+     *
+     * This will be the usage setting returned on devices that do not support querying the
+     * or setting the usage setting.
+     *
+     * It may also be provided by a carrier that wishes to provide a value to avoid making any
+     * settings changes.
+     */
+    public static final int USAGE_SETTING_UNKNOWN = -1;
+
+    /**
+     * Subscription uses the default setting.
+     *
+     * The value is based upon device capability and the other properties of the subscription.
+     *
+     * Most subscriptions will default to voice-centric when in a phone.
+     *
+     * An opportunistic subscription will default to data-centric.
+     *
+     * {@see SubscriptionInfo#isOpportunistic}
+     */
+    public static final int USAGE_SETTING_DEFAULT = 0;
+
+    /**
+     * This subscription is forced to voice-centric mode
+     *
+     * <p>Refer to voice-centric mode in 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
+     * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
+     * Annex A.
+     *
+     * <p>Devices that support {@link PackageManager#FEATURE_TELEPHONY_CALLING} and support usage
+     * setting configuration must support setting this value via
+     * {@link CarrierConfigManager#KEY_CELLULAR_USAGE_SETTING_INT}.
+     */
+    public static final int USAGE_SETTING_VOICE_CENTRIC = 1;
+
+    /**
+     * This subscription is forced to data-centric mode
+     *
+     * <p>Refer to data-centric mode in 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
+     * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
+     * Annex A.
+     *
+     * <p>Devices that support {@link PackageManager#FEATURE_TELEPHONY_DATA} and support usage
+     * setting configuration must support setting this value via.
+     * {@link CarrierConfigManager#KEY_CELLULAR_USAGE_SETTING_INT}.
+     */
+    public static final int USAGE_SETTING_DATA_CENTRIC = 2;
+
+    /**
+     * Indicate the preferred usage setting for the subscription.
+     *
+     * 0 - Default - If the value has not been explicitly set, it will be "default"
+     * 1 - Voice-centric
+     * 2 - Data-centric
+     *
+     * @hide
+     */
+    public static final String USAGE_SETTING = SimInfo.COLUMN_USAGE_SETTING;
 
     /**
      * Broadcast Action: The user has changed one of the default subs related to
@@ -2704,6 +2775,8 @@ public class SubscriptionManager {
                 overrideConfig.mnc = Configuration.MNC_ZERO;
                 cacheKey = null;
             }
+        } else {
+            cacheKey = null;
         }
 
         if (useRootLocale) {
@@ -3149,6 +3222,11 @@ public class SubscriptionManager {
      *
      *  @param subId sub id
      *  @param callbackIntent pending intent that will be sent after operation is done.
+     *
+     *  to-be-deprecated this API is a duplicate of {@link EuiccManager#switchToSubscription(int,
+     *  PendingIntent)} and does not support Multiple Enabled Profile(MEP). Apps should use
+     *  {@link EuiccManager#switchToSubscription(int, PendingIntent)} or
+     *  {@link EuiccManager#switchToSubscription(int, int, PendingIntent)} instead.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subId, @NonNull PendingIntent callbackIntent) {
@@ -4003,4 +4081,33 @@ public class SubscriptionManager {
             throw ex.rethrowAsRuntimeException();
         }
     }
+
+    /**
+     * Set the preferred usage setting.
+     *
+     * The cellular usage setting is a switch which controls the mode of operation for the cellular
+     * radio to either require or not require voice service. It is not managed via Android’s
+     * Settings.
+     *
+     * @param subscriptionId the subId of the subscription.
+     * @param usageSetting the requested usage setting.
+     *
+     * @throws IllegalStateException if a specific mode or setting the mode is not supported on a
+     * particular device.
+     *
+     * <p>Requires {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * or that the calling app has CarrierPrivileges for the given subscription.
+     *
+     * Note: This method will not allow the setting of USAGE_SETTING_UNKNOWN.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    void setUsageSetting(int subscriptionId, @UsageSetting int usageSetting) {
+        if (VDBG) logd("[setUsageSetting]+ setting:" + usageSetting + " subId:" + subscriptionId);
+        setSubscriptionPropertyHelper(subscriptionId, "setUsageSetting",
+                (iSub)-> iSub.setUsageSetting(
+                        usageSetting, subscriptionId, mContext.getOpPackageName()));
+    }
 }
+

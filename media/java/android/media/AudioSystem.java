@@ -26,10 +26,13 @@ import android.bluetooth.BluetoothLeAudioCodecConfig;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.audio.common.AidlConversion;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioProductStrategy;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.Vibrator;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -45,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 
 /* IF YOU CHANGE ANY OF THE CONSTANTS IN THIS FILE, DO NOT FORGET
  * TO UPDATE THE CORRESPONDING NATIVE GLUE AND AudioManager.java.
@@ -200,7 +204,11 @@ public class AudioSystem
     /** @hide */
     public static final int MODE_CALL_SCREENING     = 4;
     /** @hide */
-    public static final int NUM_MODES               = 5;
+    public static final int MODE_CALL_REDIRECT     = 5;
+    /** @hide */
+    public static final int MODE_COMMUNICATION_REDIRECT  = 6;
+    /** @hide */
+    public static final int NUM_MODES               = 7;
 
     /** @hide */
     public static String modeToString(int mode) {
@@ -212,6 +220,8 @@ public class AudioSystem
             case MODE_NORMAL: return "MODE_NORMAL";
             case MODE_RINGTONE: return "MODE_RINGTONE";
             case MODE_CALL_SCREENING: return "MODE_CALL_SCREENING";
+            case MODE_CALL_REDIRECT: return "MODE_CALL_REDIRECT";
+            case MODE_COMMUNICATION_REDIRECT: return "MODE_COMMUNICATION_REDIRECT";
             default: return "unknown mode (" + mode + ")";
         }
     }
@@ -816,6 +826,40 @@ public class AudioSystem
             return;
         }
         cb.onRoutingUpdated();
+    }
+
+    /**
+     * @hide
+     * Handles requests from the audio policy manager to (re-)initialize the volume ranges
+     */
+    public interface VolumeRangeInitRequestCallback {
+        /**
+         * Callback to notify volume ranges need to be initialized
+         */
+        void onVolumeRangeInitializationRequested();
+    }
+
+    @GuardedBy("AudioSystem.class")
+    private static VolumeRangeInitRequestCallback sVolRangeInitReqCallback;
+
+    /** @hide */
+    public static void setVolumeRangeInitRequestCallback(VolumeRangeInitRequestCallback cb) {
+        synchronized (AudioSystem.class) {
+            sVolRangeInitReqCallback = cb;
+            native_register_vol_range_init_req_callback();
+        }
+    }
+
+    private static void volRangeInitReqCallbackFromNative() {
+        final VolumeRangeInitRequestCallback cb;
+        synchronized (AudioSystem.class) {
+            cb = sVolRangeInitReqCallback;
+        }
+        if (cb == null) {
+            Log.e(TAG, "APM requested volume range initialization, but no callback found");
+            return;
+        }
+        cb.onVolumeRangeInitializationRequested();
     }
 
     /*
@@ -1549,9 +1593,24 @@ public class AudioSystem
      *     {@link #AUDIO_STATUS_ERROR} or {@link #AUDIO_STATUS_SERVER_DIED}
      */
     @UnsupportedAppUsage
-    public static native int setDeviceConnectionState(int device, int state,
-                                                      String device_address, String device_name,
-                                                      int codecFormat);
+    public static int setDeviceConnectionState(AudioDeviceAttributes attributes, int state,
+            int codecFormat) {
+        android.media.audio.common.AudioPort port =
+                AidlConversion.api2aidl_AudioDeviceAttributes_AudioPort(attributes);
+        Parcel parcel = Parcel.obtain();
+        port.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        try {
+            return setDeviceConnectionState(state, parcel, codecFormat);
+        } finally {
+            parcel.recycle();
+        }
+    }
+    /**
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public static native int setDeviceConnectionState(int state, Parcel parcel, int codecFormat);
     /** @hide */
     @UnsupportedAppUsage
     public static native int getDeviceConnectionState(int device, String device_address);
@@ -1632,9 +1691,63 @@ public class AudioSystem
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static native boolean getMasterMute();
-    /** @hide */
+    /** @hide
+     * Only used (unsupported) for legacy apps.
+     * @deprecated on {@link android.os.Build.VERSION_CODES#T} as new devices
+     *             will have multi-bit device types.
+     *             Use {@link AudioManager#getDevicesForAttributes(AudioAttributes)} instead.
+     */
     @UnsupportedAppUsage
-    public static native int getDevicesForStream(int stream);
+    @Deprecated
+    public static int getDevicesForStream(int stream) {
+        final AudioAttributes attr =
+                AudioProductStrategy.getAudioAttributesForStrategyWithLegacyStreamType(stream);
+        return getDeviceMaskFromSet(generateAudioDeviceTypesSet(
+                getDevicesForAttributes(attr, true /* forVolume */)));
+    }
+
+    /** @hide
+     * Conversion from a device set to a bit mask.
+     *
+     * Legacy compatibility method (use a device list instead of a bit mask).
+     * Conversion to bit mask skips multi-bit (S and later) internal device types
+     * (e.g. AudioSystem.DEVICE_OUT* or AudioManager.DEVICE_OUT*) for legacy
+     * compatibility reasons.  Legacy apps will not understand these new device types
+     * and it will raise false matches with old device types.
+     */
+    public static int getDeviceMaskFromSet(@NonNull Set<Integer> deviceSet) {
+        int deviceMask = DEVICE_NONE; // zero.
+        int deviceInChecksum = DEVICE_BIT_IN;
+        for (Integer device : deviceSet) {
+            if ((device & (device - 1) & ~DEVICE_BIT_IN) != 0) {
+                Log.v(TAG, "getDeviceMaskFromSet skipping multi-bit device value " + device);
+                continue;
+            }
+            deviceMask |= device;
+            deviceInChecksum &= device;
+        }
+        // Validate that deviceSet is either ALL input devices or ALL output devices.
+        // We check that the "OR" of all the DEVICE_BIT_INs == the "AND" of all DEVICE_BIT_INs.
+        if (!deviceSet.isEmpty() && deviceInChecksum != (deviceMask & DEVICE_BIT_IN)) {
+            Log.e(TAG, "getDeviceMaskFromSet: Invalid set: " + deviceSetToString(deviceSet));
+        }
+        return deviceMask;
+    }
+
+    /** @hide */
+    @NonNull
+    public static String deviceSetToString(@NonNull Set<Integer> devices) {
+        int n = 0;
+        StringBuilder sb = new StringBuilder();
+        for (Integer device : devices) {
+            if (n++ > 0) {
+                sb.append(", ");
+            }
+            sb.append(AudioSystem.getDeviceName(device));
+            sb.append("(" + Integer.toHexString(device) + ")");
+        }
+        return sb.toString();
+    }
 
     /**
      * @hide
@@ -1645,13 +1758,14 @@ public class AudioSystem
      *   otherwise (typically one device, except for duplicated paths).
      */
     public static @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
-            @NonNull AudioAttributes attributes) {
+            @NonNull AudioAttributes attributes, boolean forVolume) {
         Objects.requireNonNull(attributes);
         final AudioDeviceAttributes[] devices = new AudioDeviceAttributes[MAX_DEVICE_ROUTING];
-        final int res = getDevicesForAttributes(attributes, devices);
+        final int res = getDevicesForAttributes(attributes, devices, forVolume);
         final ArrayList<AudioDeviceAttributes> routeDevices = new ArrayList<>();
         if (res != SUCCESS) {
-            Log.e(TAG, "error " + res + " in getDevicesForAttributes for " + attributes);
+            Log.e(TAG, "error " + res + " in getDevicesForAttributes attributes: " + attributes
+                    + " forVolume: " + forVolume);
             return routeDevices;
         }
 
@@ -1670,7 +1784,8 @@ public class AudioSystem
     private static final int MAX_DEVICE_ROUTING = 4;
 
     private static native int getDevicesForAttributes(@NonNull AudioAttributes aa,
-                                                      @NonNull AudioDeviceAttributes[] devices);
+                                                      @NonNull AudioDeviceAttributes[] devices,
+                                                      boolean forVolume);
 
     /** @hide returns true if master mono is enabled. */
     public static native boolean getMasterMono();
@@ -1731,6 +1846,8 @@ public class AudioSystem
     private static native final void native_register_recording_callback();
     // declare this instance as having a routing update callback handler
     private static native void native_register_routing_callback();
+    // declare this instance as having a volume range init request handler
+    private static native void native_register_vol_range_init_req_callback();
 
     // must be kept in sync with value in include/system/audio.h
     /** @hide */ public static final int AUDIO_HW_SYNC_INVALID = 0;
@@ -1775,12 +1892,33 @@ public class AudioSystem
 
     /**
      * @hide
+     * Direct playback modes supported by audio HAL implementation.
+     */
+    public static final int DIRECT_NOT_SUPPORTED = 0;
+    public static final int DIRECT_OFFLOAD_SUPPORTED = 1;
+    public static final int DIRECT_OFFLOAD_GAPLESS_SUPPORTED = 3;
+    public static final int DIRECT_BITSTREAM_SUPPORTED = 4;
+
+    /**
+     * @hide
      * Compressed audio offload decoding modes supported by audio HAL implementation.
      * Keep in sync with system/media/include/media/audio.h.
      */
-    public static final int OFFLOAD_NOT_SUPPORTED = 0;
-    public static final int OFFLOAD_SUPPORTED = 1;
+    public static final int OFFLOAD_NOT_SUPPORTED = DIRECT_NOT_SUPPORTED;
+    public static final int OFFLOAD_SUPPORTED = DIRECT_OFFLOAD_SUPPORTED;
     public static final int OFFLOAD_GAPLESS_SUPPORTED = 2;
+
+    /**
+     * @hide
+     * Returns how direct playback of an audio format is currently available on the device.
+     * @param format the audio format (codec, sample rate, channels) being checked.
+     * @param attributes the {@link AudioAttributes} to be used for playback
+     * @return the direct playback mode available with given format and attributes. Any combination
+     *         of {@link #DIRECT_NOT_SUPPORTED}, {@link #DIRECT_OFFLOAD_SUPPORTED},
+     *         {@link #DIRECT_OFFLOAD_GAPLESS_SUPPORTED} and {@link #DIRECT_BITSTREAM_SUPPORTED}.
+     */
+    public static native int getDirectPlaybackSupport(
+            @NonNull AudioFormat format, @NonNull AudioAttributes attributes);
 
     static int getOffloadSupport(@NonNull AudioFormat format, @NonNull AudioAttributes attr) {
         return native_get_offload_support(format.getEncoding(), format.getSampleRate(),
@@ -1812,16 +1950,15 @@ public class AudioSystem
 
     /**
      * @hide
-     * Communicate UID of active assistant to audio policy service.
+     * Communicate UIDs of the active assistant to audio policy service.
      */
-    public static native int setAssistantUid(int uid);
+    public static native int setActiveAssistantServicesUids(int[] uids);
 
     /**
-     * Communicate UID of the current {@link android.service.voice.HotwordDetectionService} to audio
-     * policy service.
      * @hide
+     * Communicate UIDs of assistant to audio policy service.
      */
-    public static native int setHotwordDetectionServiceUid(int uid);
+    public static native int setAssistantServicesUids(int[] uids);
 
     /**
      * @hide
@@ -1841,6 +1978,12 @@ public class AudioSystem
      * @see AudioManager#isHapticPlaybackSupported()
      */
     public static native boolean isHapticPlaybackSupported();
+
+    /**
+     * @hide
+     * @see AudioManager#isUltrasoundSupported()
+     */
+    public static native boolean isUltrasoundSupported();
 
     /**
      * @hide
@@ -1922,7 +2065,7 @@ public class AudioSystem
             types[i] = devices.get(i).getInternalType();
             if (types[i] == AudioSystem.DEVICE_NONE) {
                 types[i] = AudioDeviceInfo.convertDeviceTypeToInternalInputDevice(
-                        devices.get(i).getType());
+                        devices.get(i).getType(), devices.get(i).getAddress());
             }
             addresses[i] = devices.get(i).getAddress();
         }
@@ -2088,6 +2231,15 @@ public class AudioSystem
                                               AudioFormat format,
                                               AudioDeviceAttributes[] devices);
 
+    /**
+     * @hide
+     * @param attributes audio attributes describing the playback use case
+     * @param audioProfilesList the list of AudioProfiles that can be played as direct output
+     * @return {@link #SUCCESS} if the list of AudioProfiles was successfully created (can be empty)
+     */
+    public static native int getDirectProfilesForAttributes(@NonNull AudioAttributes attributes,
+            @NonNull ArrayList<AudioProfile> audioProfilesList);
+
     // Items shared with audio service
 
     /**
@@ -2146,7 +2298,8 @@ public class AudioSystem
     };
 
     /** @hide */
-    public static String streamToString(int stream) {
+    @TestApi
+    public static @NonNull String streamToString(int stream) {
         if (stream >= 0 && stream < STREAM_NAMES.length) return STREAM_NAMES[stream];
         if (stream == AudioManager.USE_DEFAULT_STREAM_TYPE) return "USE_DEFAULT_STREAM_TYPE";
         return "UNKNOWN_STREAM_" + stream;
@@ -2191,18 +2344,15 @@ public class AudioSystem
 
     /**
      * @hide
-     * Return a set of audio device types from a bit mask audio device type, which may
+     * Return a set of audio device types from a list of audio device attributes, which may
      * represent multiple audio device types.
-     * FIXME: Remove this when getting ride of bit mask usage of audio device types.
      */
-    public static Set<Integer> generateAudioDeviceTypesSet(int types) {
-        Set<Integer> deviceTypes = new HashSet<>();
-        Set<Integer> allDeviceTypes =
-                (types & DEVICE_BIT_IN) == 0 ? DEVICE_OUT_ALL_SET : DEVICE_IN_ALL_SET;
-        for (int deviceType : allDeviceTypes) {
-            if ((types & deviceType) == deviceType) {
-                deviceTypes.add(deviceType);
-            }
+    @NonNull
+    public static Set<Integer> generateAudioDeviceTypesSet(
+            @NonNull List<AudioDeviceAttributes> deviceList) {
+        Set<Integer> deviceTypes = new TreeSet<>();
+        for (AudioDeviceAttributes device : deviceList) {
+            deviceTypes.add(device.getInternalType());
         }
         return deviceTypes;
     }
@@ -2213,7 +2363,7 @@ public class AudioSystem
      */
     public static Set<Integer> intersectionAudioDeviceTypes(
             @NonNull Set<Integer> a, @NonNull Set<Integer> b) {
-        Set<Integer> intersection = new HashSet<>(a);
+        Set<Integer> intersection = new TreeSet<>(a);
         intersection.retainAll(b);
         return intersection;
     }

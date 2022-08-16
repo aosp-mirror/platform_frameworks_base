@@ -16,9 +16,12 @@
 
 package android.media;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
@@ -221,19 +224,19 @@ import java.util.concurrent.locks.ReentrantLock;
   </thead>
   <tbody>
    <tr>
-    <td>{@code "crop-left"}</td>
+    <td>{@link MediaFormat#KEY_CROP_LEFT}</td>
     <td>Integer</td>
     <td>The left-coordinate (x) of the crop rectangle</td>
    </tr><tr>
-    <td>{@code "crop-top"}</td>
+    <td>{@link MediaFormat#KEY_CROP_TOP}</td>
     <td>Integer</td>
     <td>The top-coordinate (y) of the crop rectangle</td>
    </tr><tr>
-    <td>{@code "crop-right"}</td>
+    <td>{@link MediaFormat#KEY_CROP_RIGHT}</td>
     <td>Integer</td>
     <td>The right-coordinate (x) <strong>MINUS 1</strong> of the crop rectangle</td>
    </tr><tr>
-    <td>{@code "crop-bottom"}</td>
+    <td>{@link MediaFormat#KEY_CROP_BOTTOM}</td>
     <td>Integer</td>
     <td>The bottom-coordinate (y) <strong>MINUS 1</strong> of the crop rectangle</td>
    </tr><tr>
@@ -249,12 +252,16 @@ import java.util.concurrent.locks.ReentrantLock;
  <pre class=prettyprint>
  MediaFormat format = decoder.getOutputFormat(&hellip;);
  int width = format.getInteger(MediaFormat.KEY_WIDTH);
- if (format.containsKey("crop-left") && format.containsKey("crop-right")) {
-     width = format.getInteger("crop-right") + 1 - format.getInteger("crop-left");
+ if (format.containsKey(MediaFormat.KEY_CROP_LEFT)
+         && format.containsKey(MediaFormat.KEY_CROP_RIGHT)) {
+     width = format.getInteger(MediaFormat.KEY_CROP_RIGHT) + 1
+                 - format.getInteger(MediaFormat.KEY_CROP_LEFT);
  }
  int height = format.getInteger(MediaFormat.KEY_HEIGHT);
- if (format.containsKey("crop-top") && format.containsKey("crop-bottom")) {
-     height = format.getInteger("crop-bottom") + 1 - format.getInteger("crop-top");
+ if (format.containsKey(MediaFormat.KEY_CROP_TOP)
+         && format.containsKey(MediaFormat.KEY_CROP_BOTTOM)) {
+     height = format.getInteger(MediaFormat.KEY_CROP_BOTTOM) + 1
+                  - format.getInteger(MediaFormat.KEY_CROP_TOP);
  }
  </pre>
  <p class=note>
@@ -285,8 +292,11 @@ import java.util.concurrent.locks.ReentrantLock;
  most of its life. When you queue an input buffer with the {@linkplain #BUFFER_FLAG_END_OF_STREAM
  end-of-stream marker}, the codec transitions to the End-of-Stream sub-state. In this state the
  codec no longer accepts further input buffers, but still generates output buffers until the
- end-of-stream is reached on the output. You can move back to the Flushed sub-state at any time
- while in the Executing state using {@link #flush}.
+ end-of-stream is reached on the output. For decoders, you can move back to the Flushed sub-state
+ at any time while in the Executing state using {@link #flush}.
+ <p class=note>
+ <strong>Note:</strong> Going back to Flushed state is only supported for decoders, and may not
+ work for encoders (the behavior is undefined).
  <p>
  Call {@link #stop} to return the codec to the Uninitialized state, whereupon it may be configured
  again. When you are done using a codec, you must release it by calling {@link #release}.
@@ -1727,7 +1737,6 @@ final public class MediaCodec {
     private static final int CB_ERROR = 3;
     private static final int CB_OUTPUT_FORMAT_CHANGE = 4;
 
-
     private class EventHandler extends Handler {
         private MediaCodec mCodec;
 
@@ -1936,12 +1945,41 @@ final public class MediaCodec {
     @NonNull
     public static MediaCodec createByCodecName(@NonNull String name)
             throws IOException {
-        return new MediaCodec(
-                name, false /* nameIsType */, false /* unused */);
+        return new MediaCodec(name, false /* nameIsType */, false /* encoder */);
     }
 
-    private MediaCodec(
-            @NonNull String name, boolean nameIsType, boolean encoder) {
+    /**
+     * This is the same as createByCodecName, but allows for instantiating a codec on behalf of a
+     * client process. This is used for system apps or system services that create MediaCodecs on
+     * behalf of other processes and will reclaim resources as necessary from processes with lower
+     * priority than the client process, rather than processes with lower priority than the system
+     * app or system service. Likely to be used with information obtained from
+     * {@link android.media.MediaCodecList}.
+     * @param name
+     * @param clientPid
+     * @param clientUid
+     * @throws IOException if the codec cannot be created.
+     * @throws IllegalArgumentException if name is not valid.
+     * @throws NullPointerException if name is null.
+     * @throws SecurityException if the MEDIA_RESOURCE_OVERRIDE_PID permission is not granted.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MEDIA_RESOURCE_OVERRIDE_PID)
+    public static MediaCodec createByCodecNameForClient(@NonNull String name, int clientPid,
+            int clientUid) throws IOException {
+        return new MediaCodec(name, false /* nameIsType */, false /* encoder */, clientPid,
+                clientUid);
+    }
+
+    private MediaCodec(@NonNull String name, boolean nameIsType, boolean encoder) {
+        this(name, nameIsType, encoder, -1 /* pid */, -1 /* uid */);
+    }
+
+    private MediaCodec(@NonNull String name, boolean nameIsType, boolean encoder, int pid,
+            int uid) {
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
             mEventHandler = new EventHandler(this, looper);
@@ -1959,7 +1997,7 @@ final public class MediaCodec {
         // save name used at creation
         mNameAtCreation = nameIsType ? null : name;
 
-        native_setup(name, nameIsType, encoder);
+        native_setup(name, nameIsType, encoder, pid, uid);
     }
 
     private String mNameAtCreation;
@@ -5041,7 +5079,7 @@ final public class MediaCodec {
     private static native final void native_init();
 
     private native final void native_setup(
-            @NonNull String name, boolean nameIsType, boolean encoder);
+            @NonNull String name, boolean nameIsType, boolean encoder, int pid, int uid);
 
     private native final void native_finalize();
 

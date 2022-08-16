@@ -15,10 +15,8 @@
  */
 package com.android.internal.app;
 
-import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.annotation.StringRes;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyEventLogger;
 import android.content.ContentResolver;
@@ -27,13 +25,13 @@ import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.AsyncTask;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.R;
@@ -289,7 +287,10 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
      * <p>Returns {@code true} if rebuild has completed.
      */
     boolean rebuildActiveTab(boolean doPostProcessing) {
-        return rebuildTab(getActiveListAdapter(), doPostProcessing);
+        Trace.beginSection("MultiProfilePagerAdapter#rebuildActiveTab");
+        boolean result = rebuildTab(getActiveListAdapter(), doPostProcessing);
+        Trace.endSection();
+        return result;
     }
 
     /**
@@ -297,10 +298,14 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
      * <p>Returns {@code true} if rebuild has completed.
      */
     boolean rebuildInactiveTab(boolean doPostProcessing) {
+        Trace.beginSection("MultiProfilePagerAdapter#rebuildInactiveTab");
         if (getItemCount() == 1) {
+            Trace.endSection();
             return false;
         }
-        return rebuildTab(getInactiveListAdapter(), doPostProcessing);
+        boolean result = rebuildTab(getInactiveListAdapter(), doPostProcessing);
+        Trace.endSection();
+        return result;
     }
 
     private int userHandleToPageIndex(UserHandle userHandle) {
@@ -346,30 +351,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
     protected abstract void showNoWorkToPersonalIntentsEmptyState(
             ResolverListAdapter activeListAdapter);
-
-    /**
-     * Updates padding and visibilities as a result of an orientation change.
-     * <p>They are not updated automatically, because the view is cached when created.
-     * <p>When overridden, make sure to always call the super method.
-     */
-    void updateAfterConfigChange() {
-        for (int i = 0; i < getItemCount(); i++) {
-            ViewGroup emptyStateView = getItem(i).getEmptyStateView();
-            ImageView icon = emptyStateView.findViewById(R.id.resolver_empty_state_icon);
-            updateIconVisibility(icon, emptyStateView);
-        }
-    }
-
-    private void updateIconVisibility(ImageView icon, ViewGroup emptyStateView) {
-        if (isSpinnerShowing(emptyStateView)) {
-            icon.setVisibility(View.INVISIBLE);
-        } else if (mWorkProfileUserHandle != null
-                && !getContext().getResources().getBoolean(R.bool.resolver_landscape_phone)) {
-            icon.setVisibility(View.VISIBLE);
-        } else {
-            icon.setVisibility(View.GONE);
-        }
-    }
 
     /**
      * The empty state screens are shown according to their priority:
@@ -461,14 +442,13 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         }
     }
 
-    protected void showEmptyState(ResolverListAdapter activeListAdapter,
-            @DrawableRes int iconRes, @StringRes int titleRes, @StringRes int subtitleRes) {
-        showEmptyState(activeListAdapter, iconRes, titleRes, subtitleRes, /* buttonOnClick */ null);
+    protected void showEmptyState(ResolverListAdapter activeListAdapter, String title,
+            String subtitle) {
+        showEmptyState(activeListAdapter, title, subtitle, /* buttonOnClick */ null);
     }
 
     protected void showEmptyState(ResolverListAdapter activeListAdapter,
-            @DrawableRes int iconRes, @StringRes int titleRes, @StringRes int subtitleRes,
-            View.OnClickListener buttonOnClick) {
+            String title, String subtitle, View.OnClickListener buttonOnClick) {
         ProfileDescriptor descriptor = getItem(
                 userHandleToPageIndex(activeListAdapter.getUserHandle()));
         descriptor.rootView.findViewById(R.id.resolver_list).setVisibility(View.GONE);
@@ -479,24 +459,20 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         View container = emptyStateView.findViewById(R.id.resolver_empty_state_container);
         setupContainerPadding(container);
 
-        TextView title = emptyStateView.findViewById(R.id.resolver_empty_state_title);
-        title.setText(titleRes);
+        TextView titleView = emptyStateView.findViewById(R.id.resolver_empty_state_title);
+        titleView.setText(title);
 
-        TextView subtitle = emptyStateView.findViewById(R.id.resolver_empty_state_subtitle);
-        if (subtitleRes != 0) {
-            subtitle.setVisibility(View.VISIBLE);
-            subtitle.setText(subtitleRes);
+        TextView subtitleView = emptyStateView.findViewById(R.id.resolver_empty_state_subtitle);
+        if (subtitle != null) {
+            subtitleView.setVisibility(View.VISIBLE);
+            subtitleView.setText(subtitle);
         } else {
-            subtitle.setVisibility(View.GONE);
+            subtitleView.setVisibility(View.GONE);
         }
 
         Button button = emptyStateView.findViewById(R.id.resolver_empty_state_button);
         button.setVisibility(buttonOnClick != null ? View.VISIBLE : View.GONE);
         button.setOnClickListener(buttonOnClick);
-
-        ImageView icon = emptyStateView.findViewById(R.id.resolver_empty_state_icon);
-        icon.setImageResource(iconRes);
-        updateIconVisibility(icon, emptyStateView);
 
         activeListAdapter.markTabLoaded();
     }
@@ -524,7 +500,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     }
 
     private void showSpinner(View emptyStateView) {
-        emptyStateView.findViewById(R.id.resolver_empty_state_icon).setVisibility(View.INVISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_title).setVisibility(View.INVISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_button).setVisibility(View.INVISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_progress).setVisibility(View.VISIBLE);
@@ -532,7 +507,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     }
 
     private void resetViewVisibilitiesForWorkProfileEmptyState(View emptyStateView) {
-        emptyStateView.findViewById(R.id.resolver_empty_state_icon).setVisibility(View.VISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_title).setVisibility(View.VISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_subtitle).setVisibility(View.VISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_button).setVisibility(View.INVISIBLE);
@@ -541,7 +515,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     }
 
     private void resetViewVisibilitiesForConsumerUserEmptyState(View emptyStateView) {
-        emptyStateView.findViewById(R.id.resolver_empty_state_icon).setVisibility(View.GONE);
         emptyStateView.findViewById(R.id.resolver_empty_state_title).setVisibility(View.GONE);
         emptyStateView.findViewById(R.id.resolver_empty_state_subtitle).setVisibility(View.GONE);
         emptyStateView.findViewById(R.id.resolver_empty_state_button).setVisibility(View.GONE);

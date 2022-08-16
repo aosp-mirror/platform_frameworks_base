@@ -20,7 +20,6 @@
 #include <string>
 
 #include "ResourceValues.h"
-#include "util/Maybe.h"
 
 namespace aapt {
 namespace xml {
@@ -53,7 +52,7 @@ struct ExtractedPackage {
 //
 // Special case: if namespaceUri is http://schemas.android.com/apk/res-auto, returns an empty
 // package name.
-Maybe<ExtractedPackage> ExtractPackageFromNamespace(const std::string& namespace_uri);
+std::optional<ExtractedPackage> ExtractPackageFromNamespace(const std::string& namespace_uri);
 
 // Returns an XML Android namespace for the given package of the form:
 //   http://schemas.android.com/apk/res/<package>
@@ -69,7 +68,7 @@ struct IPackageDeclStack {
   virtual ~IPackageDeclStack() = default;
 
   // Returns an ExtractedPackage struct if the alias given corresponds with a package declaration.
-  virtual Maybe<ExtractedPackage> TransformPackageAlias(
+  virtual std::optional<ExtractedPackage> TransformPackageAlias(
       const android::StringPiece& alias) const = 0;
 };
 

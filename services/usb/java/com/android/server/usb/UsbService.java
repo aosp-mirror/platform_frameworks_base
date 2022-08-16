@@ -63,6 +63,8 @@ import com.android.server.FgThread;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -319,6 +321,7 @@ public class UsbService extends IUsbManager.Stub {
     public ParcelFileDescriptor openAccessory(UsbAccessory accessory) {
         if (mDeviceManager != null) {
             int uid = Binder.getCallingUid();
+            int pid = Binder.getCallingPid();
             int user = UserHandle.getUserId(uid);
 
             final long ident = clearCallingIdentity();
@@ -326,7 +329,7 @@ public class UsbService extends IUsbManager.Stub {
                 synchronized (mLock) {
                     if (mUserManager.isSameProfileGroup(user, mCurrentUserId)) {
                         return mDeviceManager.openAccessory(accessory, getPermissionsForUser(user),
-                                uid);
+                                pid, uid);
                     } else {
                         Slog.w(TAG, "Cannot open " + accessory + " for user " + user
                                 + " as user is not active.");
@@ -503,11 +506,12 @@ public class UsbService extends IUsbManager.Stub {
     @Override
     public boolean hasAccessoryPermission(UsbAccessory accessory) {
         final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
         final int userId = UserHandle.getUserId(uid);
 
         final long token = Binder.clearCallingIdentity();
         try {
-            return getPermissionsForUser(userId).hasPermission(accessory, uid);
+            return getPermissionsForUser(userId).hasPermission(accessory, pid, uid);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -531,11 +535,12 @@ public class UsbService extends IUsbManager.Stub {
     public void requestAccessoryPermission(
             UsbAccessory accessory, String packageName, PendingIntent pi) {
         final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
         final int userId = UserHandle.getUserId(uid);
 
         final long token = Binder.clearCallingIdentity();
         try {
-            getPermissionsForUser(userId).requestPermission(accessory, packageName, pi, uid);
+            getPermissionsForUser(userId).requestPermission(accessory, packageName, pi, pid, uid);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -680,6 +685,32 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public void resetUsbPort(String portId, int operationId,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(portId, "resetUsbPort: portId must not be null. opId:"
+                + operationId);
+        Objects.requireNonNull(callback, "resetUsbPort: callback must not be null. opId:"
+                + operationId);
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long ident = Binder.clearCallingIdentity();
+
+        try {
+            if (mPortManager != null) {
+                mPortManager.resetUsbPort(portId, operationId, callback, null);
+            } else {
+                try {
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "resetUsbPort: Failed to call onOperationComplete", e);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public List<ParcelableUsbPort> getPorts() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
@@ -727,6 +758,28 @@ public class UsbService extends IUsbManager.Stub {
         try {
             if (mPortManager != null) {
                 mPortManager.setPortRoles(portId, powerRole, dataRole, null);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void enableLimitPowerTransfer(String portId, boolean limit, int operationId,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(portId, "portId must not be null. opID:" + operationId);
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (mPortManager != null) {
+                mPortManager.enableLimitPowerTransfer(portId, limit, operationId, callback, null);
+            } else {
+                try {
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "enableLimitPowerTransfer: Failed to call onOperationComplete", e);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -792,6 +845,32 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public void enableUsbDataWhileDocked(String portId, int operationId,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(portId, "enableUsbDataWhileDocked: portId must not be null. opId:"
+                + operationId);
+        Objects.requireNonNull(callback,
+                "enableUsbDataWhileDocked: callback must not be null. opId:"
+                + operationId);
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        final long ident = Binder.clearCallingIdentity();
+        boolean wait;
+        try {
+            if (mPortManager != null) {
+                mPortManager.enableUsbDataWhileDocked(portId, operationId, callback, null);
+            } else {
+                try {
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "enableUsbData: Failed to call onOperationComplete", e);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public void setUsbDeviceConnectionHandler(ComponentName usbDeviceConnectionHandler) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         synchronized (mLock) {
@@ -806,6 +885,7 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;

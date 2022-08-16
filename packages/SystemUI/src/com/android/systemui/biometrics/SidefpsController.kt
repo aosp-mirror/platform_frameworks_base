@@ -26,12 +26,16 @@ import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
+import android.hardware.biometrics.SensorLocationInternal
 import android.hardware.display.DisplayManager
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.hardware.fingerprint.ISidefpsController
 import android.os.Handler
 import android.util.Log
+import android.util.RotationUtils
+import android.view.View.AccessibilityDelegate
+import android.view.accessibility.AccessibilityEvent
 import android.view.Display
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -113,6 +117,8 @@ class SidefpsController @Inject constructor(
                 orientationListener.enable()
             }
         }
+    @VisibleForTesting
+    internal var overlayOffsets: SensorLocationInternal = SensorLocationInternal.DEFAULT
 
     private val overlayViewParams = WindowManager.LayoutParams(
         WindowManager.LayoutParams.WRAP_CONTENT,
@@ -137,7 +143,7 @@ class SidefpsController @Inject constructor(
 
             private fun doShow() = mainExecutor.execute {
                 if (overlayView == null) {
-                    overlayView = createOverlayForDisplay()
+                    createOverlayForDisplay()
                 } else {
                     Log.v(TAG, "overlay already shown")
                 }
@@ -150,67 +156,97 @@ class SidefpsController @Inject constructor(
 
     private fun onOrientationChanged() {
         if (overlayView != null) {
-            overlayView = createOverlayForDisplay()
+            createOverlayForDisplay()
         }
     }
 
-    private fun createOverlayForDisplay(): View {
+    private fun createOverlayForDisplay() {
         val view = layoutInflater.inflate(R.layout.sidefps_view, null, false)
+        overlayView = view
         val display = context.display!!
-
-        val lottie = view.findViewById(R.id.sidefps_animation) as LottieAnimationView
-        lottie.setAnimation(display.asSideFpsAnimation())
-        view.rotation = display.asSideFpsAnimationRotation()
-
-        updateOverlayParams(display, lottie.composition?.bounds ?: Rect())
-        lottie.addLottieOnCompositionLoadedListener {
-            if (overlayView == view) {
-                updateOverlayParams(display, it.bounds)
-                windowManager.updateViewLayout(overlayView, overlayViewParams)
-            }
-        }
-        lottie.addOverlayDynamicColor(context)
-
-        return view
-    }
-
-    private fun updateOverlayParams(display: Display, bounds: Rect) {
-        val isPortrait = display.isPortrait()
-        val size = windowManager.maximumWindowMetrics.bounds
-        val displayWidth = if (isPortrait) size.width() else size.height()
-        val displayHeight = if (isPortrait) size.height() else size.width()
         val offsets = sensorProps.getLocation(display.uniqueId).let { location ->
             if (location == null) {
                 Log.w(TAG, "No location specified for display: ${display.uniqueId}")
             }
             location ?: sensorProps.location
         }
+        overlayOffsets = offsets
 
-        // ignore sensorLocationX and sensorRadius since it's assumed to be on the side
-        // of the device and centered at sensorLocationY
-        val (x, y) = when (display.rotation) {
-            Surface.ROTATION_90 ->
-                Pair(offsets.sensorLocationY, 0)
-            Surface.ROTATION_270 ->
-                Pair(displayHeight - offsets.sensorLocationY - bounds.width(), displayWidth)
-            Surface.ROTATION_180 ->
-                Pair(0, displayHeight - offsets.sensorLocationY - bounds.height())
-            else ->
-                Pair(displayWidth, offsets.sensorLocationY)
+        val lottie = view.findViewById(R.id.sidefps_animation) as LottieAnimationView
+        view.rotation = display.asSideFpsAnimationRotation(offsets.isYAligned())
+        lottie.setAnimation(display.asSideFpsAnimation(offsets.isYAligned()))
+        lottie.addLottieOnCompositionLoadedListener {
+            // Check that view is not stale, and that overlayView has not been hidden/removed
+            if (overlayView != null && overlayView == view) {
+                updateOverlayParams(display, it.bounds)
+            }
         }
-        overlayViewParams.x = x
-        overlayViewParams.y = y
+        lottie.addOverlayDynamicColor(context)
+
+        /**
+         * Intercepts TYPE_WINDOW_STATE_CHANGED accessibility event, preventing Talkback from
+         * speaking @string/accessibility_fingerprint_label twice when sensor location indicator
+         * is in focus
+         */
+        view.setAccessibilityDelegate(object : AccessibilityDelegate() {
+            override fun dispatchPopulateAccessibilityEvent(
+                host: View,
+                event: AccessibilityEvent
+            ): Boolean {
+                return if (event.getEventType() === AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                    true
+                } else {
+                    super.dispatchPopulateAccessibilityEvent(host, event)
+                }
+            }
+        })
+    }
+
+    @VisibleForTesting
+    internal fun updateOverlayParams(display: Display, bounds: Rect) {
+        val isNaturalOrientation = display.isNaturalOrientation()
+        val size = windowManager.maximumWindowMetrics.bounds
+        val displayWidth = if (isNaturalOrientation) size.width() else size.height()
+        val displayHeight = if (isNaturalOrientation) size.height() else size.width()
+        val boundsWidth = if (isNaturalOrientation) bounds.width() else bounds.height()
+        val boundsHeight = if (isNaturalOrientation) bounds.height() else bounds.width()
+        val sensorBounds = if (overlayOffsets.isYAligned()) {
+            Rect(
+                displayWidth - boundsWidth,
+                overlayOffsets.sensorLocationY,
+                displayWidth,
+                overlayOffsets.sensorLocationY + boundsHeight
+            )
+        } else {
+            Rect(
+                overlayOffsets.sensorLocationX,
+                0,
+                overlayOffsets.sensorLocationX + boundsWidth,
+                boundsHeight
+            )
+        }
+
+        RotationUtils.rotateBounds(
+            sensorBounds,
+            Rect(0, 0, displayWidth, displayHeight),
+            display.rotation
+        )
+
+        overlayViewParams.x = sensorBounds.left
+        overlayViewParams.y = sensorBounds.top
+        windowManager.updateViewLayout(overlayView, overlayViewParams)
     }
 
     private fun updateOverlayVisibility(view: View) {
         if (view != overlayView) {
             return
         }
-
         // hide after a few seconds if the sensor is oriented down and there are
         // large overlapping system bars
-        if ((context.display?.rotation == Surface.ROTATION_270) &&
-            windowManager.currentWindowMetrics.windowInsets.hasBigNavigationBar()) {
+        val rotation = context.display?.rotation
+        if (windowManager.currentWindowMetrics.windowInsets.hasBigNavigationBar() &&
+            ((rotation == Surface.ROTATION_270 && overlayOffsets.isYAligned()) ||
+                    (rotation == Surface.ROTATION_180 && !overlayOffsets.isYAligned()))) {
             overlayHideAnimator = view.animate()
                 .alpha(0f)
                 .setStartDelay(3_000)
@@ -245,19 +281,22 @@ private fun ActivityTaskManager.topClass(): String =
     getTasks(1).firstOrNull()?.topActivity?.className ?: ""
 
 @RawRes
-private fun Display.asSideFpsAnimation(): Int = when (rotation) {
-    Surface.ROTATION_0 -> R.raw.sfps_pulse
-    Surface.ROTATION_180 -> R.raw.sfps_pulse
-    else -> R.raw.sfps_pulse_landscape
+private fun Display.asSideFpsAnimation(yAligned: Boolean): Int = when (rotation) {
+    Surface.ROTATION_0 -> if (yAligned) R.raw.sfps_pulse else R.raw.sfps_pulse_landscape
+    Surface.ROTATION_180 -> if (yAligned) R.raw.sfps_pulse else R.raw.sfps_pulse_landscape
+    else -> if (yAligned) R.raw.sfps_pulse_landscape else R.raw.sfps_pulse
 }
 
-private fun Display.asSideFpsAnimationRotation(): Float = when (rotation) {
+private fun Display.asSideFpsAnimationRotation(yAligned: Boolean): Float = when (rotation) {
+    Surface.ROTATION_90 -> if (yAligned) 0f else 180f
     Surface.ROTATION_180 -> 180f
-    Surface.ROTATION_270 -> 180f
+    Surface.ROTATION_270 -> if (yAligned) 180f else 0f
     else -> 0f
 }
 
-private fun Display.isPortrait(): Boolean =
+private fun SensorLocationInternal.isYAligned(): Boolean = sensorLocationY != 0
+
+private fun Display.isNaturalOrientation(): Boolean =
     rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180
 
 private fun WindowInsets.hasBigNavigationBar(): Boolean =

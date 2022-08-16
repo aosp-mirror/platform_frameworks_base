@@ -158,9 +158,23 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // display.
         if (launchMode == WINDOWING_MODE_UNDEFINED
                 && canInheritWindowingModeFromSource(display, source)) {
-            launchMode = source.getWindowingMode();
+            // The source's windowing mode may be different from its task, e.g. activity is set
+            // to fullscreen and its task is pinned windowing mode when the activity is entering
+            // pip.
+            launchMode = source.getTask().getWindowingMode();
             if (DEBUG) {
                 appendLog("inherit-from-source="
+                        + WindowConfiguration.windowingModeToString(launchMode));
+            }
+        }
+        // If the launch windowing mode is still undefined, inherit from the target task if the
+        // task is already on the right display area (otherwise, the task may be on a different
+        // display area that has incompatible windowing mode).
+        if (launchMode == WINDOWING_MODE_UNDEFINED
+                && task != null && task.getTaskDisplayArea() == suggestedDisplayArea) {
+            launchMode = task.getWindowingMode();
+            if (DEBUG) {
+                appendLog("inherit-from-task="
                         + WindowConfiguration.windowingModeToString(launchMode));
             }
         }

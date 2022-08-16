@@ -42,6 +42,22 @@ interface AnimationAdapter {
     boolean getShowWallpaper();
 
     /**
+     * @return Whether we should show a background behind the animating windows.
+     * @see Animation#getShowBackdrop()
+     */
+    default boolean getShowBackground() {
+        return false;
+    }
+
+    /**
+     * @return The background color to use during an animation if getShowBackground returns true.
+     * @see Animation#getBackdropColor()
+     */
+    default int getBackgroundColor() {
+        return 0;
+    }
+
+    /**
      * Requests to start the animation.
      *
      * @param animationLeash The surface to run the animation on. See {@link SurfaceAnimator} for an

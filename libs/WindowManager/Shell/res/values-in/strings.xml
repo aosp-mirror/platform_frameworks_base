@@ -73,4 +73,12 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Kelola"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Balon ditutup."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Ketuk untuk memulai ulang aplikasi ini dan membuka layar penuh."</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Masalah kamera?\nKetuk untuk memperbaiki"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Tidak dapat diperbaiki?\nKetuk untuk mengembalikan"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Tidak ada masalah kamera? Ketuk untuk menutup."</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Beberapa aplikasi berfungsi paling baik dalam mode potret"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Coba salah satu opsi berikut untuk mengoptimalkan area layar Anda"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Putar perangkat untuk tampilan layar penuh"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Ketuk dua kali di samping aplikasi untuk mengubah posisinya"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"Oke"</string>
 </resources>

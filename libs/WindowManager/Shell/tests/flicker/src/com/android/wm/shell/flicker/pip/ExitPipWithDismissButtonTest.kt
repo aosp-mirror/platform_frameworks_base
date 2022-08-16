@@ -16,7 +16,9 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -24,6 +26,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -52,13 +55,31 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
 class ExitPipWithDismissButtonTest(testSpec: FlickerTestParameter) : ExitPipTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this, it)
+            super.transition(this)
             transitions {
                 pipApp.closePipWindow(wmHelper)
             }
         }
+
+    /** {@inheritDoc}  */
+    @FlakyTest(bugId = 206753786)
+    @Test
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+
+    /**
+     * Checks that the focus changes between the pip menu window and the launcher when clicking the
+     * dismiss button on pip menu to close the pip window.
+     */
+    @Presubmit
+    @Test
+    fun focusDoesNotChange() {
+        testSpec.assertEventLog {
+            this.focusChanges("PipMenuView", "NexusLauncherActivity")
+        }
+    }
 
     companion object {
         /**
@@ -72,7 +93,7 @@ class ExitPipWithDismissButtonTest(testSpec: FlickerTestParameter) : ExitPipTran
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                            repetitions = 5)
+                            repetitions = 3)
         }
     }
 }

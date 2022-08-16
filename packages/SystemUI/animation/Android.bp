@@ -39,5 +39,5 @@ android_library {
     ],
 
     manifest: "AndroidManifest.xml",
-
+    kotlincflags: ["-Xjvm-default=all"],
 }

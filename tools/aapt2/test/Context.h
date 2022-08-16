@@ -95,8 +95,8 @@ class Context : public IAaptContext {
   friend class ContextBuilder;
 
   PackageType package_type_ = PackageType::kApp;
-  Maybe<std::string> compilation_package_;
-  Maybe<uint8_t> package_id_;
+  std::optional<std::string> compilation_package_;
+  std::optional<uint8_t> package_id_;
   StdErrDiagnostics diagnostics_;
   NameMangler name_mangler_;
   SymbolTable symbols_;
