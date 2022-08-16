@@ -18,7 +18,6 @@ package com.android.systemui.media.taptotransfer.common
 
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
-import com.android.systemui.log.dagger.MediaTttSenderLogBuffer
 
 /**
  * A logger for media tap-to-transfer events.
@@ -27,7 +26,7 @@ import com.android.systemui.log.dagger.MediaTttSenderLogBuffer
  */
 class MediaTttLogger(
     private val deviceTypeTag: String,
-    @MediaTttSenderLogBuffer private val buffer: LogBuffer
+    private val buffer: LogBuffer
 ){
     /** Logs a change in the chip state for the given [mediaRouteId]. */
     fun logStateChange(stateName: String, mediaRouteId: String) {
