@@ -488,15 +488,15 @@
 
     <!-- Default speech rate choices -->
     <string-array name="tts_rate_entries">
-        <item>Very slow</item>
-        <item>Slow</item>
-        <item>Normal</item>
-        <item>Fast</item>
-        <item>Faster</item>
-        <item>Very fast</item>
-        <item>Rapid</item>
-        <item>Very rapid</item>
-        <item>Fastest</item>
+        <item>60%</item>
+        <item>80%</item>
+        <item>100%</item>
+        <item>150%</item>
+        <item>200%</item>
+        <item>250%</item>
+        <item>300%</item>
+        <item>350%</item>
+        <item>400%</item>
     </string-array>
     <!-- Do not translate. -->
     <string-array name="tts_rate_values">
