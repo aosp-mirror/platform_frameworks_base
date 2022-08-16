@@ -24,6 +24,7 @@ import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -46,6 +47,7 @@ public class ModeSwitchesControllerTest extends SysuiTestCase {
     private FakeSwitchSupplier mSupplier;
     private MagnificationModeSwitch mModeSwitch;
     private ModeSwitchesController mModeSwitchesController;
+    private View mSpyView;
     @Mock
     private MagnificationModeSwitch.SwitchListener mListener;
 
@@ -57,6 +59,7 @@ public class ModeSwitchesControllerTest extends SysuiTestCase {
         mModeSwitchesController = new ModeSwitchesController(mSupplier);
         mModeSwitchesController.setSwitchListenerDelegate(mListener);
         mModeSwitch = Mockito.spy(new MagnificationModeSwitch(mContext, mModeSwitchesController));
+        mSpyView = Mockito.spy(new View(mContext));
     }
 
     @After
@@ -94,12 +97,12 @@ public class ModeSwitchesControllerTest extends SysuiTestCase {
     @Test
     public void testOnSwitchClick_showWindowModeButton_invokeListener() {
         mModeSwitchesController.showButton(Display.DEFAULT_DISPLAY,
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
 
-        mModeSwitch.onSingleTap();
+        mModeSwitch.onSingleTap(mSpyView);
 
         verify(mListener).onSwitch(mContext.getDisplayId(),
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
     }
 
     private class FakeSwitchSupplier extends DisplayIdIndexSupplier<MagnificationModeSwitch> {
