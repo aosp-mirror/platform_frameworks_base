@@ -147,8 +147,6 @@ import android.net.NetworkWatchlistManager;
 import android.net.PacProxyManager;
 import android.net.TetheringManager;
 import android.net.VpnManager;
-import android.net.lowpan.ILowpanManager;
-import android.net.lowpan.LowpanManager;
 import android.net.vcn.IVcnManagementService;
 import android.net.vcn.VcnManager;
 import android.net.wifi.WifiFrameworkInitializer;
@@ -777,15 +775,6 @@ public final class SystemServiceRegistry {
                 IWallpaperManager service = IWallpaperManager.Stub.asInterface(b);
                 return new WallpaperManager(service, ctx.getOuterContext(),
                         ctx.mMainThread.getHandler());
-            }});
-
-        registerService(Context.LOWPAN_SERVICE, LowpanManager.class,
-                new CachedServiceFetcher<LowpanManager>() {
-            @Override
-            public LowpanManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.LOWPAN_SERVICE);
-                ILowpanManager service = ILowpanManager.Stub.asInterface(b);
-                return new LowpanManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.WIFI_NL80211_SERVICE, WifiNl80211Manager.class,
