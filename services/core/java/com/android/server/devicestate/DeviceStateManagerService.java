@@ -617,7 +617,8 @@ public final class DeviceStateManagerService extends SystemService {
                         + " is not supported.");
             }
 
-            OverrideRequest request = new OverrideRequest(token, callingPid, state, flags);
+            OverrideRequest request = new OverrideRequest(token, callingPid, state, flags,
+                    OverrideRequest.OVERRIDE_REQUEST_TYPE_EMULATED_STATE);
             mOverrideRequestController.addRequest(request);
         }
     }
