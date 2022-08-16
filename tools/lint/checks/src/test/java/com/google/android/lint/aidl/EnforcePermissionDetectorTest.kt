@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.lint
+package com.google.android.lint.aidl
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
 import com.android.tools.lint.checks.infrastructure.TestFile

@@ -30,13 +30,13 @@ import com.android.tools.lint.detector.api.interprocedural.CallGraphResult
 import com.android.tools.lint.detector.api.interprocedural.searchForPaths
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiMethod
+import java.util.LinkedList
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UParameter
 import org.jetbrains.uast.USimpleNameReferenceExpression
 import org.jetbrains.uast.visitor.AbstractUastVisitor
-import java.util.LinkedList
 
 /**
  * A lint checker to detect potential package visibility issues for system's APIs. APIs working
@@ -362,14 +362,18 @@ class PackageVisibilityDetector : Detector(), SourceCodeScanner {
             name: String,
             matchArgument: Boolean = true,
             checkCaller: Boolean = false
-        ): this(clazz, name) {
+        ) : this(clazz, name) {
             this.matchArgument = matchArgument
             this.checkCaller = checkCaller
         }
 
         constructor(
             method: PsiMethod
-        ): this(method.containingClass?.qualifiedName ?: "", method.name)
+        ) : this(method.containingClass?.qualifiedName ?: "", method.name)
+
+        constructor(
+            method: com.google.android.lint.model.Method
+        ) : this(method.clazz, method.name)
     }
 
     /**
@@ -380,7 +384,7 @@ class PackageVisibilityDetector : Detector(), SourceCodeScanner {
         val typeName: String,
         val parameterName: String
     ) {
-        constructor(uParameter: UParameter): this(
+        constructor(uParameter: UParameter) : this(
             uParameter.type.canonicalText,
             uParameter.name.lowercase()
         )
@@ -405,19 +409,13 @@ class PackageVisibilityDetector : Detector(), SourceCodeScanner {
         // A valid call path list needs to contain a start node and a sink node
         private const val VALID_CALL_PATH_NODES_SIZE = 2
 
-        private const val CLASS_STUB = "Stub"
         private const val CLASS_STRING = "java.lang.String"
         private const val CLASS_PACKAGE_MANAGER = "android.content.pm.PackageManager"
         private const val CLASS_IPACKAGE_MANAGER = "android.content.pm.IPackageManager"
         private const val CLASS_APPOPS_MANAGER = "android.app.AppOpsManager"
-        private const val CLASS_CONTEXT = "android.content.Context"
         private const val CLASS_BINDER = "android.os.Binder"
         private const val CLASS_PACKAGE_MANAGER_INTERNAL =
             "android.content.pm.PackageManagerInternal"
-        private const val CLASS_ACTIVITY_MANAGER_SERVICE =
-            "com.android.server.am.ActivityManagerService"
-        private const val CLASS_ACTIVITY_MANAGER_INTERNAL =
-            "android.app.ActivityManagerInternal"
 
         // Patterns of package name parameter
         private val PACKAGE_NAME_PATTERNS = setOf(
@@ -455,16 +453,9 @@ class PackageVisibilityDetector : Detector(), SourceCodeScanner {
         )
 
         // Enforce permission APIs
-        private val ENFORCE_PERMISSION_METHODS = listOf(
-            Method(CLASS_CONTEXT, "checkPermission"),
-            Method(CLASS_CONTEXT, "checkCallingPermission"),
-            Method(CLASS_CONTEXT, "checkCallingOrSelfPermission"),
-            Method(CLASS_CONTEXT, "enforcePermission"),
-            Method(CLASS_CONTEXT, "enforceCallingPermission"),
-            Method(CLASS_CONTEXT, "enforceCallingOrSelfPermission"),
-            Method(CLASS_ACTIVITY_MANAGER_SERVICE, "checkPermission"),
-            Method(CLASS_ACTIVITY_MANAGER_INTERNAL, "enforceCallingPermission")
-        )
+        private val ENFORCE_PERMISSION_METHODS =
+                com.google.android.lint.ENFORCE_PERMISSION_METHODS
+                        .map(PackageVisibilityDetector::Method)
 
         private val BYPASS_STUBS = listOf(
             "android.content.pm.IPackageDataObserver.Stub",
