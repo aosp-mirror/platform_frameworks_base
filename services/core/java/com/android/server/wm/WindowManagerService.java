@@ -8215,6 +8215,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final String requestWindowName;
             final String imeControlTargetName;
             final String imeLayerTargetName;
+            final String imeSurfaceParentName;
             synchronized (mGlobalLock) {
                 final WindowState focusedWin = mWindowMap.get(focusedToken);
                 focusedWindowName = focusedWin != null ? focusedWin.getName() : "null";
@@ -8231,15 +8232,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     final InsetsControlTarget target = dc.getImeTarget(IME_TARGET_LAYERING);
                     imeLayerTargetName = target != null ? target.getWindow().getName() : "null";
+                    final SurfaceControl imeParent = dc.mInputMethodSurfaceParent;
+                    imeSurfaceParentName = imeParent != null ? imeParent.toString() : "null";
                     if (show) {
                         dc.onShowImeRequested();
                     }
                 } else {
-                    imeControlTargetName = imeLayerTargetName = "no-display";
+                    imeControlTargetName = imeLayerTargetName = imeSurfaceParentName = "no-display";
                 }
             }
             return new ImeTargetInfo(focusedWindowName, requestWindowName, imeControlTargetName,
-                    imeLayerTargetName);
+                    imeLayerTargetName, imeSurfaceParentName);
         }
 
         @Override
