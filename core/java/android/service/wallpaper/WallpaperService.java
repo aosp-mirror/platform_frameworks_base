@@ -1153,8 +1153,8 @@ public abstract class WallpaperService extends Service {
                         mLayout.surfaceInsets.set(0, 0, 0, 0);
                     }
                     final int relayoutResult = mSession.relayout(mWindow, mLayout, mWidth, mHeight,
-                            View.VISIBLE, 0, mWinFrames, mMergedConfiguration, mSurfaceControl,
-                            mInsetsState, mTempControls, mSyncSeqIdBundle);
+                            View.VISIBLE, 0, 0, 0, mWinFrames, mMergedConfiguration,
+                            mSurfaceControl, mInsetsState, mTempControls, mSyncSeqIdBundle);
 
                     final int transformHint = SurfaceControl.rotationToBufferTransform(
                             (mDisplayInstallOrientation + mDisplay.getRotation()) % 4);
